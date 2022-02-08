@@ -121,7 +121,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     Promos public promos;
 
     uint256 public constant BIT_FEATURE_TRANSFER_BLOCKED = 1;
-    
+
     uint256 public constant NUMBERPARAMETER_FEATURE_BITS = uint256(keccak256("FEATURE_BITS"));
 
     mapping(uint256 => uint256) public numberParameters;
@@ -133,14 +133,14 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     event NewWeapon(uint256 indexed weapon, address indexed minter);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
     event ReforgedWithDust(address indexed owner, uint256 indexed reforged, uint8 lowDust, uint8 fourDust, uint8 fiveDust, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
-    
+
     modifier restricted() {
         _restricted();
         _;
     }
 
     function _restricted() internal view {
-        needRole(hasRole(GAME_ADMIN, msg.sender));
+        require(hasRole(GAME_ADMIN, msg.sender), "NR");
     }
 
     modifier minterOnly() {
@@ -149,11 +149,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function _minterOnly() internal view {
-        needRole(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender));
-    }
-
-    function needRole(bool statement) internal pure {
-        require(statement, "NR");
+        require(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender), "NR");
     }
 
     modifier noFreshLookup(uint256 id) {
@@ -269,9 +265,9 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 properties,
         uint16 stat1, uint16 stat2, uint16 stat3,
         uint256 cosmeticSeed
-    ) public minterOnly returns(uint256) {
+    ) public minterOnly returns(uint256 tokenID) {
 
-        uint256 tokenID = tokens.length;
+        tokenID = tokens.length;
 
         if(block.number != lastMintedBlock)
             firstMintedOfLastBlock = tokenID;
@@ -283,7 +279,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         durabilityTimestamp[tokenID] = uint64(now.sub(getDurabilityMaxWait()));
 
         emit NewWeapon(tokenID, minter);
-        return tokenID;
     }
 
     function performMintWeaponDetailed(address minter,
@@ -315,7 +310,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         }
         WeaponCosmetics storage wc = cosmetics[tokenID];
         wc.seed = cosmeticSeed;
-        
+
         tokens[tokenID].level = level;
         durabilityTimestamp[tokenID] = uint64(now); // avoid chain jumping abuse
         WeaponBurnPoints storage wbp = burnPoints[tokenID];
@@ -515,6 +510,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         burnDust[playerAddress] = burnDustValue;
     }
 
+    function decrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) public restricted {
+        _decrementDustSupplies(playerAddress, amountLB, amount4B, amount5B);
+    }
+
     function _decrementDustSupplies(address playerAddress, uint32 amountLB, uint32 amount4B, uint32 amount5B) internal {
         uint32[] memory supplies = getDustSupplies(playerAddress);
         require(supplies[0] >= amountLB && supplies[1] >= amount4B && supplies[2] >= amount5B);
@@ -579,6 +578,18 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
+    function burnWithoutDust(uint256[] memory burnIDs) public restricted {
+        for(uint256 i = 0; i < burnIDs.length; i++) {
+            _burnWithoutDust(burnIDs[i]);
+        }
+    }
+
+    function _burnWithoutDust(uint256 burnID) internal {
+        address burnOwner = ownerOf(burnID);
+        _burn(burnID);
+        emit Burned(burnOwner, burnID);
+    }
+
     function reforge(uint256 reforgeID, uint256 burnID) public restricted {
         uint8[] memory values = _calculateBurnValues(burnID);
 
@@ -621,13 +632,13 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         WeaponBurnPoints storage wbp = burnPoints[reforgeID];
 
         if(amountLB > 0) {
-            require(wbp.lowStarBurnPoints < 100, "LB capped");
+            require(wbp.lowStarBurnPoints < 100);
         }
         if(amount4B > 0) {
-            require(wbp.fourStarBurnPoints < 25, "4B capped");
+            require(wbp.fourStarBurnPoints < 25);
         }
         if(amount5B > 0) {
-            require(wbp.fiveStarBurnPoints < 10, "5B capped");
+            require(wbp.fiveStarBurnPoints < 10);
         }
 
         wbp.lowStarBurnPoints += amountLB;
@@ -694,7 +705,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
         require((durabilityPoints >= amount
         || (allowNegativeDurability && durabilityPoints > 0)) // we allow going into negative, but not starting negative
-            ,"Low durability!");
+        );
 
         uint64 drainTime = uint64(amount * secondsPerDurability);
         if(durabilityPoints >= maxDurability) { // if durability full, we reset timestamp and drain from that
@@ -764,16 +775,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         }
     }
 
-    function _isFeatureEnabled(uint256 bit) private view returns (bool) {
-        return (numberParameters[NUMBERPARAMETER_FEATURE_BITS] & bit) == bit;
-    }
-
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(nftVars[tokenId][NFTVAR_BUSY] == 0);
         // Always allow minting and burning.
         if(from != address(0) && to != address(0)) {
             // But other transfers require the feature to be enabled.
-            require(_isFeatureEnabled(BIT_FEATURE_TRANSFER_BLOCKED) == false);
+            require((numberParameters[NUMBERPARAMETER_FEATURE_BITS] & BIT_FEATURE_TRANSFER_BLOCKED) == BIT_FEATURE_TRANSFER_BLOCKED == false);
 
             if(promos.getBit(from, 4)) { // bad actors, they can transfer to market but nowhere else
                 require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to));
