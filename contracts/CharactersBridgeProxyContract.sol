@@ -25,8 +25,6 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
     uint8 public constant UINT_NFT_VAR_SEED3DCOSMETIC = 4;
     uint8 public constant UINT_NFT_VAR_BONUSPOWER = 5;
 
-    uint8 public constant STRING_NFT_VAR_XP = 0;
-
 
     modifier restricted() {
         _restricted();
