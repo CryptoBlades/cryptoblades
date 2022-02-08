@@ -71,13 +71,14 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     enum RewardType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE, SOUL}
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
+    uint256 public nextQuestID;
+
     mapping(uint256 => uint256[]) public questTemplates;
     mapping(uint256 => Quest) public quests;
     mapping(uint256 => uint256) public characterQuest;
     mapping(uint256 => uint256[4]) public tierChances;
     mapping(uint256 => uint256) public vars;
-
-    uint256 public nextQuestID;
+    mapping(uint256 => uint256) public lastFreeSkipUsage;
 
     event QuestAssigned(uint256 indexed questID, uint256 indexed characterID);
     event QuestProgressed(uint256 indexed questID, uint256 indexed characterID);
@@ -198,7 +199,12 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function skipQuest(uint256 characterID) public assertQuestsEnabled returns (uint256) {
-        characters.getFightDataAndDrainStamina(msg.sender, characterID, uint8(vars[VAR_SKIP_QUEST_STAMINA_COST]), false, 0);
+        if(hasFreeSkip(characterID)) {
+            lastFreeSkipUsage[characterID] = now;
+        } else {
+            characters.getFightDataAndDrainStamina(msg.sender, characterID, uint8(vars[VAR_SKIP_QUEST_STAMINA_COST]), false, 0);
+        }
+
         return assignNewQuest(characterID);
     }
 
@@ -376,6 +382,14 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function canSkipQuest(uint256 characterID) public view returns (bool) {
         return characters.getStaminaPoints(characterID) >= vars[VAR_SKIP_QUEST_STAMINA_COST];
+    }
+
+    function hasFreeSkip(uint256 characterID) public view returns (bool) {
+        return now / 1 days > lastFreeSkipUsage[characterID] / 1 days;
+    }
+
+    function nextFreeSkip() public view returns (uint256) {
+        return now + 1 days - now % 1 days;
     }
 
     // ADMIN

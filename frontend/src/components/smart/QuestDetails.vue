@@ -55,9 +55,10 @@
         <b-button v-if="questCanBeCompleted" variant="primary" class="flex-1" @click="complete">
           {{ $t('quests.complete') }}
         </b-button>
-        <b-button v-else variant="primary" class="flex-1" @click="skip" :disabled="!canSkip || isStaminaCostLoading">
-          {{ $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
-          <hint v-if="!canSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
+        <b-button v-else variant="primary" class="flex-1" @click="skip"
+                  :disabled="(!freeSkip && !canSkip) || isStaminaCostLoading">
+          {{ freeSkip ? $t('quests.freeSkip') : $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
+          <hint v-if="!freeSkip && !canSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
         </b-button>
       </div>
       <div v-else-if="isQuestTemplate && !isQuestActionLoading" class="d-flex">
@@ -98,6 +99,8 @@ import {NftIdType} from '@/components/smart/NftList.vue';
 interface StoreMappedActions {
   canSkipQuest(payload: { characterID: string | number }): Promise<boolean>;
 
+  hasFreeSkip(payload: { characterID: string | number }): Promise<boolean>;
+
   getSkipQuestStaminaCost(): Promise<number>;
 
   skipQuest(payload: { characterID: string | number }): Promise<void>;
@@ -109,6 +112,7 @@ interface StoreMappedActions {
 
 interface Data {
   canSkip: boolean;
+  freeSkip: boolean;
   skipQuestStaminaCost: number;
   questRewards: NftIdType[];
   isQuestActionLoading: boolean;
@@ -146,6 +150,7 @@ export default Vue.extend({
   data() {
     return {
       canSkip: false,
+      freeSkip: false,
       skipQuestStaminaCost: 0,
       questRewards: [] as NftIdType[],
       isQuestActionLoading: false,
@@ -166,7 +171,14 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['skipQuest', 'canSkipQuest', 'getSkipQuestStaminaCost', 'completeQuest', 'deleteQuest']) as StoreMappedActions,
+    ...mapActions([
+      'skipQuest',
+      'canSkipQuest',
+      'hasFreeSkip',
+      'getSkipQuestStaminaCost',
+      'completeQuest',
+      'deleteQuest',
+    ]) as StoreMappedActions,
 
     async skip() {
       try {
@@ -181,6 +193,7 @@ export default Vue.extend({
 
     async refreshSkipQuestData() {
       this.canSkip = await this.canSkipQuest({characterID: this.characterId});
+      this.freeSkip = await this.hasFreeSkip({characterID: this.characterId});
       try {
         this.isStaminaCostLoading = true;
         this.skipQuestStaminaCost = await this.getSkipQuestStaminaCost();
@@ -231,7 +244,7 @@ export default Vue.extend({
     if (!this.isQuestTemplate && !this.isDisplayOnly) {
       await this.refreshSkipQuestData();
     }
-  }
+  },
 
 });
 </script>

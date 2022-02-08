@@ -3535,6 +3535,20 @@ export function createStore(web3: Web3) {
         return await SimpleQuests.methods.canSkipQuest(characterID).call(defaultCallOptions(state));
       },
 
+      async hasFreeSkip({state}, {characterID}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.hasFreeSkip(characterID).call(defaultCallOptions(state));
+      },
+
+      async nextFreeSkip({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.nextFreeSkip().call(defaultCallOptions(state));
+      },
+
       async skipQuest({ state, dispatch }, {characterID}) {
         const { SimpleQuests } = state.contracts();
         if(!SimpleQuests || !state.defaultAccount) return;
