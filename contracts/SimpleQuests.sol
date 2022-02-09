@@ -84,6 +84,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     event QuestProgressed(uint256 indexed questID, uint256 indexed characterID);
     event QuestComplete(uint256 indexed questID, uint256 indexed characterID);
     event QuestRewarded(uint256 indexed questID, uint256 indexed characterID, uint256[] rewards);
+    event QuestSkipped(uint256 indexed questID, uint256 indexed characterID);
 
     function initialize(Characters _characters, Weapons _weapons, Junk _junk, RaidTrinket _trinket, Shields _shields, BurningManager _burningManager, SafeRandoms _safeRandoms) public initializer {
         __AccessControl_init_unchained();
@@ -198,13 +199,13 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return tierQuestTemplates[index];
     }
 
-    function skipQuest(uint256 characterID) public assertQuestsEnabled returns (uint256) {
+    function skipQuest(uint256 characterID) public assertQuestsEnabled assertOnQuest(characterID, true) returns (uint256) {
         if(hasFreeSkip(characterID)) {
             lastFreeSkipUsage[characterID] = now;
         } else {
             characters.getFightDataAndDrainStamina(msg.sender, characterID, uint8(vars[VAR_SKIP_QUEST_STAMINA_COST]), false, 0);
         }
-
+        emit QuestSkipped(characterQuest[characterID], characterID);
         return assignNewQuest(characterID);
     }
 
