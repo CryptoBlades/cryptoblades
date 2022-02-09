@@ -532,8 +532,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             , // race
         ) = characters.get(id);
 
-        // Future: Change getPowerAtLevel() to a library function.
-        duelist.basePower = characters.getPowerAtLevel(duelist.level);
+        duelist.basePower = Common.getPowerAtLevel(duelist.level);
     }
 
     /// @dev performs a list of duels
