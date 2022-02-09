@@ -118,7 +118,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     uint256 public duelOffsetCost;
     address payable public pvpBotAddress;
-    uint8 public boostChancePercentage;
+    int128 public boostChancePercentage;
     uint256 public boostRankingPointsMultiplier;
     
     event DuelFinished(
@@ -250,7 +250,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         prizePercentages.push(30);
         prizePercentages.push(10);
         duelOffsetCost = 0.005 ether;
-        boostChancePercentage = 1;
+        boostChancePercentage = ABDKMath64x64.divu(100, 100); // 1;
         boostRankingPointsMultiplier = 2;
     }
 
@@ -567,11 +567,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
                 uint256 randomNumber = RandomUtil.randomSeededMinMax(
                     0,
-                    100,
+                    10000,
                     seed
                 );
 
-                boosted = randomNumber < boostChancePercentage;
+                boosted = randomNumber < uint256(boostChancePercentage.mul(100));
             }
 
             if (boosted) {
@@ -1190,8 +1190,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         pvpBotAddress = botAddress;
     }
 
-    function setBoostChancePercentage(uint8 chance) external restricted {
-        boostChancePercentage = chance;
+    function setBoostChancePercentage(uint256 chance) external restricted {
+        boostChancePercentage = ABDKMath64x64.divu(chance, 100);
     }
 
     function setBoostRankingPointsMultiplier(uint256 multiplier) external restricted {

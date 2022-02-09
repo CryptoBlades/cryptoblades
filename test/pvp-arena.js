@@ -1626,7 +1626,7 @@ contract("PvpArena", (accounts) => {
       let duelTx;
 
       beforeEach(async () => {
-        await pvpArena.setBoostChancePercentage(100, { from: accounts [0] });
+        await pvpArena.setBoostChancePercentage(10000, { from: accounts [0] });
       });
 
       describe("happy path", () => {
