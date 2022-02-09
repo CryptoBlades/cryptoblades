@@ -2120,7 +2120,7 @@
     },
     "links": {},
     "address": "0x929059Fef67b88CE2F4127e59B50bEA123981998",
-    "transactionHash": "0xf42af6bdd9ddfe318f96d064e1d777d53383ad99df8050318d10bdfdc4848530"
+    "transactionHash": "0x52c9ea976038f5819a60c6e0ceea535161753325a8959fc5dfd81d2e41900c19"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2402,7 +2402,7 @@
     },
     "links": {},
     "address": "0x070b1A95898B927A900A1F9F42b114154648E51A",
-    "transactionHash": "0x989c9f0d9264cbd9c508bb7bfcad4163a9ceb85ffdd03b3cd95e9fae08bc1b6c"
+    "transactionHash": "0xf3743d4e4fa229eb19bd83211e1c86234fdef92ef246207ae29b2082b1208062"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},

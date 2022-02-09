@@ -1852,7 +1852,7 @@
     },
     "links": {},
     "address": "0xc6f252c2CdD4087e30608A35c022ce490B58179b",
-    "transactionHash": "0x1ab4ea486ec65edd0e319f3f006fbbf4ab145fe3d064450170d25b4dd91cda7e"
+    "transactionHash": "0x9f7cfe4d0497fad738e1b88e8bf129cda4809d4394e29bd81ecb53d9e92355fd"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {},
@@ -2052,7 +2052,7 @@
     },
     "links": {},
     "address": "0x39Bea96e13453Ed52A734B6ACEeD4c41F57B2271",
-    "transactionHash": "0x2086c3dd3869aba5e075cb9a2f9f14e25df0bc243adaefb1d5ca4c9aa94d634a"
+    "transactionHash": "0x9b134ede4566cef4ba5099b3b48f84ffddc80fc6df3de44c8d73e823b0cd70d3"
   },
   "build/contracts/Garrison.json": {
     "events": {
