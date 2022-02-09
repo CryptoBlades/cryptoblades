@@ -11,12 +11,8 @@
   },
   "ClaimRewardsBar": {
     "rewards": "Nagrody",
-    "earlyWithdrawTax": "Podatek Przedwczesnej Wypłaty",
-    "taxReduce": "Podatek zmniejsza się o 1% na dzień.",
     "readyToClaim": "Nagrody gotowe do zebrania!",
     "timeSince": "Czas od ostatniego wypłacenia: n/a",
-    "withdrawalInfoText1": "Możesz wypłacić maksymalnie 10% kwoty w ciągu 1 SKILL lub 2 dni walk dziennie (cokolwiek jest większe). Pozostała kwota do roszczenia dzisiaj:",
-    "withdrawalInfoText2": "You can withdraw 1 day worth of fights per day. Remaining claimable amount today: ",
     "clickDetails": "Kliknij żeby zebrać i zobaczyć szczegóły",
     "claim": "Zbierz",
     "claimRewards": "Zbierz Nagrody",
@@ -51,9 +47,9 @@
     "enemyRolled": "Przeciwnik wyrzucił:"
   },
   "nftIcon": {
-    "weaponTooltip": "Bronie (2-5*)",
-    "junkTooltip": "Śmieci (1-5*)",
-    "trinketTooltip": "Trinket (1-5*)",
+    "weaponTooltip": "Bronie ({stars}*)",
+    "junkTooltip": "Śmieci ({stars}*)",
+    "trinketTooltip": "Trinket ({stars}*)",
     "secretTooltip": "Sekret (??)",
     "lesserDust": "Mniejszy Pył",
     "greaterDust": "Większy Pył",
