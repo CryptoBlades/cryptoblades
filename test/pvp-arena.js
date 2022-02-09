@@ -1253,6 +1253,10 @@ contract("PvpArena", (accounts) => {
 
   describe("#performDuels", async () => {
     describe("happy path", () => {
+      beforeEach(async () => {
+        await pvpArena.setBoostChancePercentage(0, { from: accounts[0] });
+      })
+
       describe("attacker wins", () => {
         let character1ID;
         let character2ID;
@@ -1614,97 +1618,249 @@ contract("PvpArena", (accounts) => {
         });
       });
     });
+    describe("boosts", () => {
+      let character1ID;
+      let character2ID;
+      let weapon1ID;
+      let weapon2ID;
+      let duelTx;
 
-    describe("#reRollOpponent", () => {
-      it("should fail if character is not dueling", async () => {
-        const character1ID = await createCharacterInPvpTier(accounts[1], 2);
-        await createCharacterInPvpTier(accounts[2], 2);
+      beforeEach(async () => {
+        await pvpArena.setBoostChancePercentage(100, { from: accounts [0] });
+      });
 
-        await expectRevert(
-          pvpArena.reRollOpponent(character1ID, {
+      describe("happy path", () => {
+        beforeEach(async () => {  
+          weapon1ID = await helpers.createWeapon(
+            accounts[1],
+            "199",
+            helpers.elements.fire,
+            {
+              weapons,
+            }
+          );
+          weapon2ID = await helpers.createWeapon(
+            accounts[2],
+            "100",
+            helpers.elements.water,
+            {
+              weapons,
+            }
+          );
+            
+          character1ID = await createCharacterInPvpTier(
+            accounts[1],
+            2,
+            "222",
+            weapon1ID
+          );
+          character2ID = await createCharacterInPvpTier(
+            accounts[2],
+            2,
+            "222",
+            weapon2ID
+          );
+
+          await characters.setTrait(character1ID, helpers.elements.fire, {
+            from: accounts[0],
+          });
+          await characters.setTrait(character2ID, helpers.elements.water, {
+            from: accounts[0],
+          });
+
+          await pvpArena.findOpponent(character1ID, {
             from: accounts[1],
-          }),
-          "Not in match"
-        );
+          });
+          
+          await pvpArena.prepareDuel(character1ID, {
+            from: accounts[1],
+            value: await pvpArena.duelOffsetCost()
+          });
+          
+          let duelQueue = await pvpArena.getDuelQueue();
+
+          const { tx } = await pvpArena.performDuels(duelQueue, {
+            from: accounts[0],
+          });
+
+          duelTx = tx
+        });
+
+        it("makes inferior character win and assigns more ranking points", async () => {  
+          const duelEvent = await expectEvent.inTransaction(
+            duelTx,
+            pvpArena,
+            "DuelFinished"
+          );
+
+          expect(duelEvent.args.attackerWon).to.equal(true);
+          // stars difference = 4
+          expect((await pvpArena.rankingPointsByCharacter(character1ID)).toString()).to.equal(
+            `${((await pvpArena.winningPoints())*(await pvpArena.boostRankingPointsMultiplier())*4)}`
+          )
+        });
       });
 
-      it("should transfer skill from the sender to the contract", async () => {
-        const character1ID = await createCharacterInPvpTier(accounts[1], 2);
-        await createCharacterInPvpTier(accounts[2], 2);
-        await createCharacterInPvpTier(accounts[3], 2);
+      describe("unhappy path", () => {
+        it("doesn't boost if weapons have the same amount of stars", async () => {
+          weapon1ID = await helpers.createWeapon(
+            accounts[1],
+            "199",
+            helpers.elements.fire,
+            {
+              weapons,
+            }
+          );
+          weapon2ID = await helpers.createWeapon(
+            accounts[2],
+            "199",
+            helpers.elements.water,
+            {
+              weapons,
+            }
+          );
+            
+          character1ID = await createCharacterInPvpTier(
+            accounts[1],
+            2,
+            "222",
+            weapon1ID
+          );
+          character2ID = await createCharacterInPvpTier(
+            accounts[2],
+            2,
+            "222",
+            weapon2ID
+          );
 
-        await time.increase(await pvpArena.decisionSeconds());
+          // We force this impossible situation so character 2 always wins.
+          await helpers.levelUpTo(character2ID, 80, { characters });
 
-        await pvpArena.findOpponent(character1ID, {
+          await characters.setTrait(character1ID, helpers.elements.fire, {
+            from: accounts[0],
+          });
+          await characters.setTrait(character2ID, helpers.elements.water, {
+            from: accounts[0],
+          });
+
+          await pvpArena.findOpponent(character1ID, {
+            from: accounts[1],
+          });
+          
+          await pvpArena.prepareDuel(character1ID, {
+            from: accounts[1],
+            value: await pvpArena.duelOffsetCost()
+          });
+          
+          let duelQueue = await pvpArena.getDuelQueue();
+          
+          const { tx } = await pvpArena.performDuels(duelQueue, {
+            from: accounts[0],
+          });
+
+          duelTx = tx;
+  
+          const duelEvent = await expectEvent.inTransaction(
+            duelTx,
+            pvpArena,
+            "DuelFinished"
+          );
+
+          expect(duelEvent.args.attackerWon).to.equal(false);
+        })
+      });
+    });
+  });
+  
+  describe("#reRollOpponent", () => {
+    it("should fail if character is not dueling", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      await createCharacterInPvpTier(accounts[2], 2);
+
+      await expectRevert(
+        pvpArena.reRollOpponent(character1ID, {
           from: accounts[1],
-        });
+        }),
+        "Not in match"
+      );
+    });
 
-        const previousBalance = await skillToken.balanceOf(accounts[1]);
+    it("should transfer skill from the sender to the contract", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      await createCharacterInPvpTier(accounts[2], 2);
+      await createCharacterInPvpTier(accounts[3], 2);
 
-        await pvpArena.reRollOpponent(character1ID, {
-          from: accounts[1],
-        });
+      await time.increase(await pvpArena.decisionSeconds());
 
-        const newBalance = await skillToken.balanceOf(accounts[1]);
-
-        const duelCost = await pvpArena.getDuelCost(character1ID);
-
-        const reRollPenalty = duelCost.div(toBN(4));
-
-        expect(newBalance.toString()).to.equal(
-          previousBalance.sub(reRollPenalty).toString()
-        );
+      await pvpArena.findOpponent(character1ID, {
+        from: accounts[1],
       });
 
-      it("can reroll the same opponent", async () => {
-        const character1ID = await createCharacterInPvpTier(accounts[1], 2);
-        const character2ID = await createCharacterInPvpTier(accounts[2], 2);
+      const previousBalance = await skillToken.balanceOf(accounts[1]);
 
-        await pvpArena.findOpponent(character1ID, {
-          from: accounts[1],
-        });
-
-        expect((await pvpArena.matchByFinder(character1ID)).defenderID.toString()).to.equal(character2ID);
-
-        await pvpArena.reRollOpponent(character1ID, {
-          from: accounts[1],
-        });
-
-        expect((await pvpArena.matchByFinder(character1ID)).defenderID.toString()).to.equal(character2ID);
+      await pvpArena.reRollOpponent(character1ID, {
+        from: accounts[1],
       });
 
-      it("should assign a new opponent", async () => {
-        const character1ID = await createCharacterInPvpTier(accounts[1], 2);
-        await createCharacterInPvpTier(accounts[2], 2);
-        await createCharacterInPvpTier(accounts[3], 2);
+      const newBalance = await skillToken.balanceOf(accounts[1]);
 
-        await pvpArena.findOpponent(character1ID, {
-          from: accounts[1],
-        });
+      const duelCost = await pvpArena.getDuelCost(character1ID);
 
-        const opponentID = (await pvpArena.matchByFinder(character1ID)).defenderID.toString();
+      const reRollPenalty = duelCost.div(toBN(4));
 
-        let characterToMatchAfterReRoll;
-        let accountToWithdrawFrom;
+      expect(newBalance.toString()).to.equal(
+        previousBalance.sub(reRollPenalty).toString()
+      );
+    });
 
-        if (opponentID === "1") {
-          characterToMatchAfterReRoll = "2"
-          accountToWithdrawFrom = accounts[2];
-        } else {
-          characterToMatchAfterReRoll = "1"
-          accountToWithdrawFrom = accounts[3];
-        }
+    it("can reroll the same opponent", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      const character2ID = await createCharacterInPvpTier(accounts[2], 2);
 
-        await time.increase(await pvpArena.decisionSeconds());
-
-        await pvpArena.withdrawFromArena(opponentID, { from: accountToWithdrawFrom });
-
-        await pvpArena.reRollOpponent(character1ID, {
-          from: accounts[1],
-        });
-
-        expect((await pvpArena.matchByFinder(character1ID)).defenderID.toString()).to.equal(characterToMatchAfterReRoll);
+      await pvpArena.findOpponent(character1ID, {
+        from: accounts[1],
       });
+
+      expect((await pvpArena.matchByFinder(character1ID)).defenderID.toString()).to.equal(character2ID);
+
+      await pvpArena.reRollOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      expect((await pvpArena.matchByFinder(character1ID)).defenderID.toString()).to.equal(character2ID);
+    });
+
+    it("should assign a new opponent", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      await createCharacterInPvpTier(accounts[2], 2);
+      await createCharacterInPvpTier(accounts[3], 2);
+
+      await pvpArena.findOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      const opponentID = (await pvpArena.matchByFinder(character1ID)).defenderID.toString();
+
+      let characterToMatchAfterReRoll;
+      let accountToWithdrawFrom;
+
+      if (opponentID === "1") {
+        characterToMatchAfterReRoll = "2"
+        accountToWithdrawFrom = accounts[2];
+      } else {
+        characterToMatchAfterReRoll = "1"
+        accountToWithdrawFrom = accounts[3];
+      }
+
+      await time.increase(await pvpArena.decisionSeconds());
+
+      await pvpArena.withdrawFromArena(opponentID, { from: accountToWithdrawFrom });
+
+      await pvpArena.reRollOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      expect((await pvpArena.matchByFinder(character1ID)).defenderID.toString()).to.equal(characterToMatchAfterReRoll);
     });
   });
 

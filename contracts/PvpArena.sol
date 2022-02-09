@@ -118,6 +118,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     uint256 public duelOffsetCost;
     address payable public pvpBotAddress;
+    uint8 public boostChancePercentage;
+    uint256 public boostRankingPointsMultiplier;
     
     event DuelFinished(
         uint256 indexed attacker,
@@ -248,6 +250,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         prizePercentages.push(30);
         prizePercentages.push(10);
         duelOffsetCost = 0.005 ether;
+        boostChancePercentage = 1;
+        boostRankingPointsMultiplier = 2;
     }
 
     /// @dev enter the arena with a character, a weapon and optionally a shield
@@ -548,47 +552,73 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             duel.tier = getArenaTierForLevel(duel.attacker.level);
             duel.cost = getDuelCostByTier(duel.tier);
 
-            duel.attacker.roll = _getCharacterPowerRoll(duel.attacker, duel.defender.trait);
+            uint8 attackerWeaponStars = weapons.getStars(fighterByCharacter[duel.attacker.ID].weaponID);
+            uint8 defenderWeaponStars = weapons.getStars(fighterByCharacter[duel.defender.ID].weaponID);
+
             duel.defender.roll = _getCharacterPowerRoll(duel.defender, duel.attacker.trait);
 
-            // Reduce defender roll if attacker has a shield
-            if (fighterByCharacter[duel.attacker.ID].useShield) {
-                uint24 attackerShieldDefense = 3;
+            bool boosted;
 
-                uint8 attackerShieldTrait = shields.getTrait(
-                    fighterByCharacter[duel.attacker.ID].shieldID
+            if (defenderWeaponStars > attackerWeaponStars) {
+                uint256 seed = randoms.getRandomSeedUsingHash(
+                    characters.ownerOf(duel.attacker.ID),
+                    blockhash(block.number - 1)
                 );
 
-                if (
-                    Common.isTraitEffectiveAgainst(attackerShieldTrait, duel.defender.trait)
-                ) {
-                    attackerShieldDefense = 10;
-                }
-
-                duel.defender.roll = uint24(
-                    (duel.defender.roll.mul(uint24(100).sub(attackerShieldDefense)))
-                        .div(100)
+                uint256 randomNumber = RandomUtil.randomSeededMinMax(
+                    0,
+                    100,
+                    seed
                 );
+
+                boosted = randomNumber < boostChancePercentage;
             }
 
-            // Reduce attacker roll if defender has a shield
-            if (fighterByCharacter[duel.defender.ID].useShield) {
-                uint24 defenderShieldDefense = 3;
+            if (boosted) {
+                // We change the roll so boosted attacker always wins
+                duel.attacker.roll = uint24(duel.defender.roll.add(1));
+            } else {
+                duel.attacker.roll = _getCharacterPowerRoll(duel.attacker, duel.defender.trait);
 
-                uint8 defenderShieldTrait = shields.getTrait(
-                    fighterByCharacter[duel.defender.ID].shieldID
-                );
+                // Reduce defender roll if attacker has a shield
+                if (fighterByCharacter[duel.attacker.ID].useShield) {
+                    uint24 attackerShieldDefense = 3;
 
-                if (
-                    Common.isTraitEffectiveAgainst(defenderShieldTrait, duel.attacker.trait)
-                ) {
-                    defenderShieldDefense = 10;
+                    uint8 attackerShieldTrait = shields.getTrait(
+                        fighterByCharacter[duel.attacker.ID].shieldID
+                    );
+
+                    if (
+                        Common.isTraitEffectiveAgainst(attackerShieldTrait, duel.defender.trait)
+                    ) {
+                        attackerShieldDefense = 10;
+                    }
+
+                    duel.defender.roll = uint24(
+                        (duel.defender.roll.mul(uint24(100).sub(attackerShieldDefense)))
+                            .div(100)
+                    );
                 }
 
-                duel.attacker.roll = uint24(
-                    (duel.attacker.roll.mul(uint24(100).sub(defenderShieldDefense)))
-                        .div(100)
-                );
+                // Reduce attacker roll if defender has a shield
+                if (fighterByCharacter[duel.defender.ID].useShield) {
+                    uint24 defenderShieldDefense = 3;
+
+                    uint8 defenderShieldTrait = shields.getTrait(
+                        fighterByCharacter[duel.defender.ID].shieldID
+                    );
+
+                    if (
+                        Common.isTraitEffectiveAgainst(defenderShieldTrait, duel.attacker.trait)
+                    ) {
+                        defenderShieldDefense = 10;
+                    }
+
+                    duel.attacker.roll = uint24(
+                        (duel.attacker.roll.mul(uint24(100).sub(defenderShieldDefense)))
+                            .div(100)
+                    );
+                }
             }
 
             duel.attackerWon = (duel.attacker.roll >= duel.defender.roll);
@@ -655,9 +685,16 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             _matchableCharactersByTier[duel.tier].add(winnerID);
 
             // Add ranking points to the winner
-            rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
-                winnerID
-            ].add(winningPoints);
+            if (boosted) {
+                uint8 difference = defenderWeaponStars - attackerWeaponStars;
+                rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
+                    winnerID
+                ].add(winningPoints.mul(boostRankingPointsMultiplier).mul(difference));
+            } else {
+                rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
+                    winnerID
+                ].add(winningPoints);
+            }
             // Check if the loser's current raking points are 'losingPoints' or less and set them to 0 if that's the case, else subtract the ranking points
             if (rankingPointsByCharacter[loserID] <= losingPoints) {
                 rankingPointsByCharacter[loserID] = 0;
@@ -1151,6 +1188,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     function setPvpBotAddress(address payable botAddress) external restricted {
         pvpBotAddress = botAddress;
+    }
+
+    function setBoostChancePercentage(uint8 chance) external restricted {
+        boostChancePercentage = chance;
+    }
+
+    function setBoostRankingPointsMultiplier(uint256 multiplier) external restricted {
+        boostRankingPointsMultiplier = multiplier;
     }
 
     // Note: The following are debugging functions. Remove later.
