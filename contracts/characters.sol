@@ -17,6 +17,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
+    // Copied from promos.sol, to avoid paying 5k gas to query a constant.
+    uint256 private constant BIT_FIRST_CHARACTER = 1;
+
     function initialize () public initializer {
         __ERC721_init("CryptoBlades character", "CBC");
         __AccessControl_init_unchained();
@@ -467,9 +470,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(nftVars[tokenId][NFTVAR_BUSY] == 0);
-
-        promos.setBit(from, promos.BIT_FIRST_CHARACTER());
-        promos.setBit(to, promos.BIT_FIRST_CHARACTER());
+        address[] memory users = new address[](2);
+        users[0] = from;
+        users[1] = to;
+        promos.setBits(users, BIT_FIRST_CHARACTER);
     }
 
     function safeTransferFrom(address from, address to, uint256 tokenId) override public {
