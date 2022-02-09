@@ -1852,7 +1852,7 @@
     },
     "links": {},
     "address": "0xc6f252c2CdD4087e30608A35c022ce490B58179b",
-    "transactionHash": "0x05804a328dd8c8e5be07c08565761bab72415f26083f134c5abc358347163351"
+    "transactionHash": "0x1ab4ea486ec65edd0e319f3f006fbbf4ab145fe3d064450170d25b4dd91cda7e"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {},
@@ -2052,7 +2052,7 @@
     },
     "links": {},
     "address": "0x39Bea96e13453Ed52A734B6ACEeD4c41F57B2271",
-    "transactionHash": "0xe589e54ea167b1e7f248da0efa824c99e093fccdd14d46cd648314e2b14fbc1c"
+    "transactionHash": "0x2086c3dd3869aba5e075cb9a2f9f14e25df0bc243adaefb1d5ca4c9aa94d634a"
   },
   "build/contracts/Garrison.json": {
     "events": {
@@ -3487,7 +3487,7 @@
     },
     "links": {},
     "address": "0x8ADB6c9f7FAdB959a9847fd9Bd0ED503446942Ca",
-    "transactionHash": "0x72a1c092093577ee6f980e0d4b8366280e43043649f2c0aa618073e2e55eaab0"
+    "transactionHash": "0x25ce8861e0ba8ccb7ac451a58bf21bed3b5fe1308a54eb241011b6fcefc59600"
   },
   "build/contracts/Raid1.json": {
     "events": {},
@@ -4378,7 +4378,7 @@
     "events": {},
     "links": {},
     "address": "0x812Fa2f7d89e5d837450702bd51120920dccaA99",
-    "transactionHash": "0x9ca0972b2de42638ad131996f885a6bbef4bcc750d2df8369cdd49987ae6bda3"
+    "transactionHash": "0x88a3a35adcd95257a3de8adee7e31cd7ac954ea8c107783a028fbcd16b902626"
   },
   "build/contracts/WaxBridge.json": {
     "events": {
@@ -5178,6 +5178,6 @@
     },
     "links": {},
     "address": "0x7E091b0a220356B157131c831258A9C98aC8031A",
-    "transactionHash": "0x562ab4cda9fb046e22377fdd4e888be8f3022b82d1624e916224796fe3685544"
+    "transactionHash": "0xa62ff454e62eab489f4dba73ebff385ff7a79ede9906855a49acf311e9511e2c"
   }
 }
