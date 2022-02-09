@@ -14,7 +14,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     using ABDKMath64x64 for uint16;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
-    bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     function initialize () public initializer {
@@ -119,10 +118,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     mapping(address => uint256) burnDust; // user address : burned item dust counts
 
     Promos public promos;
-
-    uint256 public constant BIT_FEATURE_TRANSFER_BLOCKED = 1;
-
-    uint256 public constant NUMBERPARAMETER_FEATURE_BITS = uint256(keccak256("FEATURE_BITS"));
 
     mapping(uint256 => uint256) public numberParameters;
 
@@ -767,24 +762,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         nftVars[weaponID][nftVar] = value;
     }
 
-    function setFeatureEnabled(uint256 bit, bool enabled) public restricted {
-        if (enabled) {
-            numberParameters[NUMBERPARAMETER_FEATURE_BITS] |= bit;
-        } else {
-            numberParameters[NUMBERPARAMETER_FEATURE_BITS] &= ~bit;
-        }
-    }
-
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
-        require(nftVars[tokenId][NFTVAR_BUSY] == 0);
-        // Always allow minting and burning.
-        if(from != address(0) && to != address(0)) {
-            // But other transfers require the feature to be enabled.
-            require((numberParameters[NUMBERPARAMETER_FEATURE_BITS] & BIT_FEATURE_TRANSFER_BLOCKED) == BIT_FEATURE_TRANSFER_BLOCKED == false);
-
-            if(promos.getBit(from, 4)) { // bad actors, they can transfer to market but nowhere else
-                require(hasRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, to));
-            }
-        }
+        // if we could afford to set exploiter weapons busy, the promos check becomes redundant, saving ~4.2k gas
+        if(from != address(0))
+            require(nftVars[tokenId][NFTVAR_BUSY] == 0 && (to == address(0) || promos.getBit(from, 4) == false));
     }
+
 }

@@ -14,7 +14,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     bytes32 public constant NO_OWNED_LIMIT = keccak256("NO_OWNED_LIMIT");
-    bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
