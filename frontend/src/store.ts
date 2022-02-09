@@ -2863,11 +2863,11 @@ export function createStore(web3: Web3) {
         return await Weapons.methods.mintGiveawayWeapon(to, stars, chosenElement).send({from: state.defaultAccount});
       },
 
-      async giveawaySoul({state}, {user, soulAmount}) {
+      async giveAwaySoul({state}, {user, soulAmount}) {
         const {BurningManager} = state.contracts();
         if(!state.defaultAccount || !BurningManager) return;
 
-        return await BurningManager.methods.giveawaySoul(user, soulAmount).send({from: state.defaultAccount});
+        return await BurningManager.methods.giveAwaySoul(user, soulAmount).send({from: state.defaultAccount});
       },
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {

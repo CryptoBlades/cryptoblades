@@ -248,7 +248,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         } else if (quest.rewardType == RewardType.EXPERIENCE) {
             characters.gainXp(characterID, uint16(quest.rewardAmount));
         } else if (quest.rewardType == RewardType.SOUL) {
-            burningManager.giveawaySoul(msg.sender, quest.rewardAmount);
+            burningManager.giveAwaySoul(msg.sender, quest.rewardAmount);
         }
         else {
             revert("Unknown reward type");
