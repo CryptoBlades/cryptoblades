@@ -3703,7 +3703,7 @@ export function createStore(web3: Web3) {
       },
 
       async userHasMinterAccess({state}, {contract}) {
-        if (!contract || !state.defaultAccount) return;
+        if (!contract || !contract.methods.MINTER_ROLE || !state.defaultAccount) return;
 
         const minterRole = await contract.methods.MINTER_ROLE().call(defaultCallOptions(state));
 

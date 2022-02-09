@@ -66,10 +66,7 @@ export default Vue.extend({
     ...mapActions(['userHasAdminAccess', 'userHasMinterAccess']) as StoreMappedActions,
 
     async fetchData() {
-      this.hasTabAccess = await this.userHasAdminAccess({contract: this.contract});
-      if (!this.hasTabAccess && this.contract.methods.MINTER_ROLE) {
-        this.hasTabAccess = await this.userHasMinterAccess({contract: this.contract});
-      }
+      this.hasTabAccess = await this.userHasAdminAccess({contract: this.contract}) || await this.userHasMinterAccess({contract: this.contract});
     },
   },
 
