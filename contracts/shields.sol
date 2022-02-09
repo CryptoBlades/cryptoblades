@@ -79,7 +79,8 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     uint256 public constant NFTVAR_SHIELD_TYPE = 2; // 0 = normal, 1 = founders, 2 = legendary defender
 
     event NewShield(uint256 indexed shield, address indexed minter);
-    
+    event Burned(uint256 indexed shield, address indexed burner);
+
     modifier restricted() {
         _restricted();
         _;
@@ -131,12 +132,14 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokens;
     }
 
-    function mintForPurchase(address buyer) external restricted {
-        require(totalSupply() < 25000, "Out of stock"); // temporary restriction
-        mint(buyer, uint256(keccak256(abi.encodePacked(buyer, blockhash(block.number - 1)))));
+    function getCosmeticsSeed(uint256 id) public view noFreshLookup(id)
+        returns (uint256) {
+
+        ShieldCosmetics memory sc = cosmetics[id];
+        return sc.seed;
     }
 
-    function mint(address minter, uint256 seed) public restricted returns(uint256) {
+    function mint(address minter, uint256 shieldType, uint256 seed) public restricted returns(uint256) {
         uint256 stars;
         uint256 roll = seed % 100;
         // will need revision, possibly manual configuration if we support more than 5 stars
@@ -156,14 +159,27 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             stars = 0; // 1* at 44%
         }
 
-        return mintShieldWithStars(minter, stars, seed);
+        return mintShieldWithStars(minter, stars, shieldType, seed);
     }
 
-    function mintShieldWithStars(address minter, uint256 stars, uint256 seed) public restricted returns(uint256) {
+    function burn(uint256 tokenID) public restricted {
+        address burner = ownerOf(tokenID);
+        _burn(tokenID);
+        emit Burned(tokenID, burner);
+    }
+
+    function burn(uint256[] memory tokenIDs) public restricted {
+        for(uint i = 0; i < tokenIDs.length; i++) {
+            burn(tokenIDs[i]);
+        }
+    }
+
+    function mintShieldWithStars(address minter, uint256 stars, uint256 shieldType, uint256 seed) public restricted returns(uint256) {
         require(stars < 8, "Stars parameter too high! (max 7)");
         (uint16 stat1, uint16 stat2, uint16 stat3) = getStatRolls(stars, seed);
 
         return performMintShield(minter,
+            shieldType,
             getRandomProperties(stars, seed),
             stat1,
             stat2,
@@ -172,13 +188,23 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
+    function mintShieldsWithStars(address minter, uint256 stars, uint256 shieldType, uint32 amount, uint256 seed) public restricted returns(uint256[] memory tokenIDs) {
+        require(stars < 8, "Stars parameter too high! (max 7)");
+        tokenIDs = new uint256[](amount);
+        for(uint i = 0; i < amount; i++) {
+            tokenIDs[i] = mintShieldWithStars(minter, stars, shieldType, seed);
+            seed = RandomUtil.combineSeeds(seed,i);
+        }
+    }
+
     function performMintShield(address minter,
+        uint256 shieldType,
         uint16 properties,
         uint16 stat1, uint16 stat2, uint16 stat3,
         uint256 cosmeticSeed
-    ) public restricted returns(uint256) {
+    ) public restricted returns(uint256 tokenID) {
 
-        uint256 tokenID = tokens.length;
+        tokenID = tokens.length;
 
         if(block.number != lastMintedBlock)
             firstMintedOfLastBlock = tokenID;
@@ -188,8 +214,40 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         cosmetics.push(ShieldCosmetics(0, cosmeticSeed));
         _mint(minter, tokenID);
         durabilityTimestamp[tokenID] = uint64(now.sub(getDurabilityMaxWait()));
+        nftVars[tokenID][NFTVAR_SHIELD_TYPE] = shieldType;
 
         emit NewShield(tokenID, minter);
+    }
+
+    function performMintShieldDetailed(address minter,
+        uint256 metaData,
+        uint256 cosmeticSeed, uint256 tokenID
+    ) public restricted returns(uint256) {
+
+        // uint256(uint256(0)) | uint256(stat3) << 16| (uint256(stat2) << 32) | (uint256(stat1) << 48) | (uint256(properties) << 64) | (uint256(appliedCosmetic) << 80);
+
+        uint16 stat3 = uint16((metaData >> 16) & 0xFFFF);
+        uint16 stat2 = uint16((metaData >> 32) & 0xFFFF);
+        uint16 stat1 = uint16((metaData >> 48) & 0xFFFF);
+        uint16 properties = uint16((metaData >> 64) & 0xFFFF);
+        //cosmetics >> 80
+        uint8 shieldType = uint8(metaData & 0xFF);
+
+        if(tokenID == 0){
+            tokenID = performMintShield(minter, shieldType, properties, stat1, stat2, stat3, 0);
+        }
+        else {
+            Shield storage sh = tokens[tokenID];
+            sh.properties = properties;
+            sh.stat1 = stat1;
+            sh.stat2 = stat2;
+            sh.stat3 = stat3;
+        }
+        ShieldCosmetics storage sc = cosmetics[tokenID];
+        sc.seed = cosmeticSeed;
+
+        durabilityTimestamp[tokenID] = uint64(now); // avoid chain jumping abuse
+
         return tokenID;
     }
 
@@ -259,6 +317,14 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function getStars(uint256 id) public view noFreshLookup(id) returns (uint8) {
         return getStarsFromProperties(getProperties(id));
+    }
+
+    function getStars(uint256[] memory ids) public view returns (uint8[] memory) {
+        uint8[] memory stars = new uint8[](ids.length);
+        for(uint256 i = 0; i < ids.length; i++) {
+            stars[i] = getStars(ids[i]);
+        }
+        return stars;
     }
 
     function getStarsFromProperties(uint16 properties) public pure returns (uint8) {

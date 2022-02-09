@@ -13,6 +13,7 @@ import "./characters.sol";
 import "./Promos.sol";
 import "./weapons.sol";
 import "./util.sol";
+import "./common.sol";
 import "./Blacksmith.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
@@ -292,7 +293,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         // dirty variable reuse to avoid stack limits
         target = grabTarget(
-            getPlayerPower(basePowerLevel, weaponMultTarget, weaponBonusPower),
+            Common.getPlayerPower(basePowerLevel, weaponMultTarget, weaponBonusPower),
             timestamp,
             target,
             now / 1 hours
@@ -300,7 +301,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         performFight(
             char,
             wep,
-            getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
+            Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
             uint24(charTrait | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
             uint24(target & 0xFFFFFF),
             fightMultiplier
@@ -380,24 +381,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return uint24(RandomUtil.plusMinus10PercentSeeded(monsterPower, seed));
     }
 
-    function getPlayerPower(
-        uint24 basePower,
-        int128 weaponMultiplier,
-        uint24 bonusPower
-    ) public pure returns(uint24) {
-        return uint24(weaponMultiplier.mulu(basePower).add(bonusPower));
-    }
-
     function getPlayerTraitBonusAgainst(uint24 traitsCWE) public view returns (int128) {
         int128 traitBonus = oneFrac;
         uint8 characterTrait = uint8(traitsCWE & 0xFF);
         if(characterTrait == (traitsCWE >> 8) & 0xFF/*wepTrait*/) {
             traitBonus = traitBonus.add(fightTraitBonus);
         }
-        if(isTraitEffectiveAgainst(characterTrait, uint8(traitsCWE >> 16)/*enemy*/)) {
+        if(Common.isTraitEffectiveAgainst(characterTrait, uint8(traitsCWE >> 16)/*enemy*/)) {
             traitBonus = traitBonus.add(fightTraitBonus);
         }
-        else if(isTraitEffectiveAgainst(uint8(traitsCWE >> 16)/*enemy*/, characterTrait)) {
+        else if(Common.isTraitEffectiveAgainst(uint8(traitsCWE >> 16)/*enemy*/, characterTrait)) {
             traitBonus = traitBonus.sub(fightTraitBonus);
         }
         return traitBonus;
@@ -410,7 +403,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             ) = weapons.getFightData(wep, characters.getTrait(char));
 
         return getTargetsInternal(
-            getPlayerPower(uint24(characters.getTotalPower(char)), weaponMultTarget, weaponBonusPower),
+            Common.getPlayerPower(uint24(characters.getTotalPower(char)), weaponMultTarget, weaponBonusPower),
             characters.getStaminaTimestamp(char),
             now / 1 hours
         );
@@ -457,10 +450,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             RandomUtil.plusMinus10PercentSeeded(playerPower, enemySeed) // power
             | (uint32(enemySeed % 4) << 24) // trait
         );
-    }
-
-    function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
-        return (((attacker + 1) % 4) == defender); // Thanks to Tourist
     }
 
     function mintCharacter() public onlyNonContract oncePerBlock(msg.sender) {
@@ -537,9 +526,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _mintWeaponNLogic(uint32 num, uint8 chosenElement) internal {
         require(num > 0 && num <= 10);
-        for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))), chosenElement);
-        }
+        weapons.mintN(msg.sender, num, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
     function _mintWeaponLogic(uint8 chosenElement) internal {
@@ -814,6 +801,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function deductAfterPartnerClaim(uint256 amount, address player) external restricted {
         tokenRewards[player] = tokenRewards[player].sub(amount);
+        vars[VAR_UNCLAIMED_SKILL] -= amount;
         _trackIncome(amount);
     }
 
@@ -1036,12 +1024,23 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         characters.gainXpAll(chars, xps);
     }
 
+    function resetXp(uint256[] memory chars) public restricted {
+        for(uint256 i = 0; i < chars.length; i++) {
+            xpRewards[chars[i]] = 0;
+        }
+    }
+
     function getTokenRewards() public view returns (uint256) {
         return tokenRewards[msg.sender];
     }
 
-    function getXpRewards(uint256 char) public view returns (uint256) {
-        return xpRewards[char];
+    function getXpRewards(uint256[] memory chars) public view returns (uint256[] memory) {
+        uint charsAmount = chars.length;
+        uint256[] memory xps = new uint256[](charsAmount);
+        for(uint i = 0; i < chars.length; i++) {
+            xps[i] = xpRewards[chars[i]];
+        }
+        return xps;
     }
 
     function getTokenRewardsFor(address wallet) public view returns (uint256) {

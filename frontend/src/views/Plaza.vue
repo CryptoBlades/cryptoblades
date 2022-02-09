@@ -52,8 +52,8 @@
             class="ml-3"
             @click="showBurnConfirmation"
             v-tooltip="$t('plaza.burnSelected')"
-            :disabled="burnCharacterIds.length === 0 || powerLimitExceeded || (burnOption === 1 && !targetCharacterId) || !canBurn()">
-            {{$t('plaza.burn')}}: {{burnCharacterIds.length}} {{$t('characters')}}<br>
+            :disabled="burnCharacterIds.length === 0 || powerLimitExceeded || (burnOption === 1 && !targetCharacterId) || !canBurn() || isBurnInProgress">
+            {{isBurnInProgress ? `${$t('plaza.burning')}` : `${$t('plaza.burn')}: ${this.burnCharacterIds.length} ${$t('characters')}`}}<br>
             ({{burnCost }} SKILL)
           </b-button>
           <b-button
@@ -62,8 +62,8 @@
             class="ml-3"
             @click="showUpgradeConfirmation"
             v-tooltip="$t('plaza.upgradeSelected')"
-            :disabled="soulAmount.toString() === '0' || !targetCharacterId || powerLimitExceeded">
-            {{$t('plaza.upgrade')}} {{$t('character')}}<br>
+            :disabled="soulAmount.toString() === '0' || !targetCharacterId || powerLimitExceeded || isUpgradeInProgress">
+            {{isUpgradeInProgress ? `${$t('plaza.upgrading')}` : `${$t('plaza.upgrade')} ${$t('character')}`}}<br>
             ({{soulAmount}} {{$t('plaza.soul')}})
           </b-button>
           <b-button
@@ -104,10 +104,19 @@
                 <div class="boxed soul-box">
                   <h2>{{soulAmount}}/{{soulBalance}}</h2>
                 </div>
-                <div class="field">
-                  <div class="value left">0</div>
-                  <input v-model="soulAmount" type="range" min="0" :max="soulBalance" value="0" steps="1">
-                  <div class="value right">{{ soulBalance }}</div>
+                <div class="d-flex flex-column justify-content-center mt-5">
+                  <div class="field">
+                    <div class="value left">0</div>
+                    <input v-model="soulAmount" type="range" min="0" :max="soulBalance" value="0" steps="1">
+                    <div class="value right">{{ soulBalance }}</div>
+                  </div>
+                  <b-button
+                    class="mt-4 mb-1"
+                    variant="primary"
+                    @click="setMaxSoulAmount"
+                    :disabled="!targetCharacterId">
+                    {{$t('blacksmith.useMaxSoulAmount')}}
+                  </b-button>
                 </div>
               </div>
             </div>
@@ -122,7 +131,7 @@
               <div v-if="burnOption === 0 && !isUpgrading" class="d-flex flex-column mt-3 align-items-center">
                 <div class="soul-image" />
                 <h2>Soul</h2>
-                <h2>{{soulBalance}} (+{{burnPower/10}})</h2>
+                <h2>{{soulBalance}} (+{{Math.floor(burnPower/10)}})</h2>
               </div>
               <div v-if="burnOption === 1 || isUpgrading" :class="targetCharacterId ? 'd-flex flex-column align-items-center' : ''">
                 <b-button
@@ -198,12 +207,20 @@
                 <h1>{{$t('characters')}} ({{ ownedGarrisonCharacterIds.length }})</h1>
                 <div class="d-flex justify-content-flex-end ml-auto">
                   <b-button
+                    v-if="canClaimGarrisonXp"
+                    :disabled="isClaimingXp"
+                    variant="primary"
+                    class="ml-3 gtag-link-others"
+                    @click="onClaimGarrisonXp">
+                    {{isClaimingXp ? `${$t('plaza.claiming')}` : $t('plaza.claimXp')}}
+                  </b-button>
+                  <b-button
                     v-if="burningEnabled"
                     :disabled="!haveCharacters"
                     variant="primary"
                     class="ml-3 gtag-link-others"
                     @click="toggleSoulCreation"
-                    v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+                    v-tooltip="$t('plaza.recruitNew')">
                     {{$t('plaza.burn')}} / {{$t('plaza.upgrade')}}
                   </b-button>
                   <b-button
@@ -287,11 +304,15 @@ interface Data {
   isUpgrading: boolean;
   soulAmount: number;
   remainingPowerLimit: number;
+  burnPowerMultiplier: number;
+  isClaimingXp: boolean;
+  isBurnInProgress: boolean;
+  isUpgradeInProgress: boolean;
 }
 
 export default Vue.extend({
   computed: {
-    ...mapState(['characters', 'ownedGarrisonCharacterIds', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance']),
+    ...mapState(['characters', 'ownedGarrisonCharacterIds', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance', 'skillRewards', 'xpRewards']),
     ...mapGetters([
       'contracts',
       'ownCharacters',
@@ -340,6 +361,7 @@ export default Vue.extend({
             power += this.getCharacterPower(x.id);
           }
         });
+        power = Math.floor(power * this.burnPowerMultiplier);
       }
       else {
         power = this.soulAmount * 10;
@@ -354,11 +376,14 @@ export default Vue.extend({
 
     burningEnabled(): boolean {
       return featureFlagBurningManager;
-    }
+    },
+
+    canClaimGarrisonXp(): boolean {
+      return this.ownedGarrisonCharacterIds.filter((id: string|number) => +this.xpRewards[id] > 0).length > 0;
+    },
   },
 
   async created() {
-    console.log(this.getExchangeUrl, this.getExchangeTransakUrl());
     const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
     const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
     this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
@@ -378,14 +403,18 @@ export default Vue.extend({
       burnCost: 0,
       isUpgrading: false,
       soulAmount: 0,
-      remainingPowerLimit: 0
+      remainingPowerLimit: 0,
+      burnPowerMultiplier: 1,
+      isClaimingXp: false,
+      isBurnInProgress: false,
+      isUpgradeInProgress: false
     } as Data;
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
-      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter']),
+      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'claimGarrisonXp', 'fetchBurnPowerMultiplier']),
     ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
@@ -400,12 +429,12 @@ export default Vue.extend({
     },
     canRecruit() {
       const cost = toBN(this.recruitCost);
-      const balance = toBN(this.skillBalance);
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     canBurn() {
       const cost = toBN(this.burnCost);
-      const balance = toBN(+fromWeiEther(this.skillBalance));
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     checkStorage() {
@@ -415,6 +444,7 @@ export default Vue.extend({
       this.soulCreationActive = !this.soulCreationActive;
       this.soulBalance = await this.fetchSoulBalance();
       await this.updateBurnCost();
+      this.burnPowerMultiplier = +fromWeiEther(await this.fetchBurnPowerMultiplier());
       if(this.soulCreationActive) {
         this.remainingCharactersIds = this.ownCharacters.map((x: { id: string; }) => x.id.toString()).concat(this.ownedGarrisonCharacterIds as string[]);
       }
@@ -467,14 +497,20 @@ export default Vue.extend({
     },
     async onBurnConfirm() {
       if(this.burnCharacterIds.length === 0) return;
-      if(this.burnOption === 0) {
-        // burning into soul
-        await this.burnCharactersIntoSoul(this.burnCharacterIds);
+      this.isBurnInProgress = true;
+      try {
+        if(this.burnOption === 0) {
+          // burning into soul
+          await this.burnCharactersIntoSoul(this.burnCharacterIds);
+        }
+        else {
+          // burning into character
+          await this.burnCharactersIntoCharacter({ burnIds: this.burnCharacterIds, targetId: this.targetCharacterId });
+          this.updatedRemainingPowerLimit();
+        }
       }
-      else {
-        // burning into character
-        await this.burnCharactersIntoCharacter({ burnIds: this.burnCharacterIds, targetId: this.targetCharacterId });
-        this.updatedRemainingPowerLimit();
+      finally {
+        this.isBurnInProgress = false;
       }
       this.soulBalance = await this.fetchSoulBalance();
       this.burnCharacterIds = [];
@@ -482,10 +518,28 @@ export default Vue.extend({
     },
     async onUpgradeConfirm() {
       if(!this.targetCharacterId || this.soulAmount === 0) return;
-      await this.upgradeCharacterWithSoul({ charId: this.targetCharacterId, soulAmount: this.soulAmount });
+      this.isUpgradeInProgress = true;
+      try {
+        await this.upgradeCharacterWithSoul({ charId: this.targetCharacterId, soulAmount: this.soulAmount });
+      }
+      finally {
+        this.isUpgradeInProgress = false;
+      }
       this.updatedRemainingPowerLimit();
       this.soulBalance = await this.fetchSoulBalance();
       this.soulAmount = 0;
+    },
+    async onClaimGarrisonXp() {
+      this.isClaimingXp = true;
+      try {
+        await this.claimGarrisonXp(this.ownedGarrisonCharacterIds.filter((id: string|number) => +this.xpRewards[id] > 0));
+      }
+      finally {
+        this.isClaimingXp = true;
+      }
+    },
+    setMaxSoulAmount() {
+      this.soulAmount = this.remainingPowerLimit > this.soulBalance * 10 ? this.soulBalance : this.remainingPowerLimit / 10;
     }
   },
 

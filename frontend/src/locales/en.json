@@ -8,18 +8,17 @@
     "market": "Market",
     "stake": "Stake",
     "pvp": "PvP",
+    "quests": "Quests",
     "treasury": "Treasury",
     "merchandise": "Merchandise",
+    "admin": "Admin",
     "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
   },
   "ClaimRewardsBar": {
+    "noProjects": "No projects found",
     "rewards": "Rewards",
-    "earlyWithdrawTax": "Early Withdraw Tax",
-    "taxReduce": "Tax is being reduced by 1% per day.",
     "readyToClaim": "Rewards ready to claim!",
     "timeSince": "Time since last withdraw: n/a",
-    "withdrawalInfoText1": "You can withdraw max 10% of amount over 1 SKILL or 2 days worth of fights per day (whatever is greater). Remaining claimable amount today: ",
-    "withdrawalInfoText2": "You can withdraw 1 day worth of fights per day. Remaining claimable amount today: ",
     "clickDetails": "Click to claim and see the details",
     "claim": "Claim",
     "claimRewards": "Claim Rewards",
@@ -57,13 +56,15 @@
     "enemyRolled": "Enemy rolled:"
   },
   "nftIcon": {
-    "weaponTooltip": "Weapons (2-5*)",
-    "junkTooltip": "Junk (1-5*)",
-    "trinketTooltip": "Trinket (1-5*)",
+    "weaponTooltip": "Weapons ({stars}*)",
+    "junkTooltip": "Junk ({stars}*)",
+    "trinketTooltip": "Trinket ({stars}*)",
+    "shieldTooltip": "Shield ({stars}*)",
     "secretTooltip": "Secret (??)",
     "lesserDust": "Lesser Dust",
     "greaterDust": "Greater Dust",
     "powerfulDust": "Powerful Dust",
+    "soul": "Soul",
     "land": "Tier {tier} Land",
     "supplyLeft": "Supply left:",
     "id": "ID",
@@ -114,7 +115,12 @@
     "upgradeConfirm": "Are you sure you want to upgrade this character using",
     "characterToUpgrade": "Character to upgrade",
     "selectSoulAmount": "Select amount of Soul you want to use to upgrade selected character!",
-    "busyInArena": "Character is currently busy in Arena!"
+    "busyInArena": "Character is currently busy in Arena!",
+    "claimXp": "Claim XP",
+    "noXpToClaim": "No XP to claim",
+    "upgrading": "Upgrading...",
+    "burning": "Burning...",
+    "claiming": "Claiming..."
   },
   "bridge": {
     "bridgeForYourNfts": "Bridge for your NFTs",
@@ -124,6 +130,7 @@
     "inventory": "Inventory",
     "showWeapons": "Show Weapons",
     "showCharacters": "Show Characters",
+    "showShields" : "Show Shields",
     "moveNftToStorage": "Move NFT to Storage",
     "loading": "Loading...",
     "warning": "Warning",
@@ -140,6 +147,7 @@
     "toChain": "To Chain",
     "noWeaponsStored": "No Weapons stored!",
     "noCharactersStored": "No Characters stored!",
+    "noShieldsStored" : "No Shields Stored!",
     "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!",
     "incomingNfts": "Incoming NFTs",
     "noIncomingNfts": "No incoming NFTs!",
@@ -150,6 +158,10 @@
     "withdrawWeapon": "Withdraw Weapon",
     "selectCharacterToWithdraw": "Select a character to withdraw",
     "selectYourCharacter": "Select your Character",
+    "selectYourShieldToWithdraw": "Select shield to withdraw",
+    "selectYourShield" : "Select your Shield",
+    "shieldId" : "Shield ID",
+    "withdrawShield": "Withdraw Shield",
     "characterId": "Character ID",
     "withdrawCharacter": "Withdraw Character"
   },
@@ -208,6 +220,7 @@
     "bonusPower": "Bonus power:"
   },
   "blacksmith": {
+    "loading": "Loading...",
     "noWeapons": "You do not currently have any weapons <br> You can forge one by clicking the button below.",
     "forgeSwordFor": "Forge sword for",
     "renameWeapon": "Rename Weapon",
@@ -274,7 +287,8 @@
     },
     "couldNotForge": "Could not forge sword: Insuffucient funds or transaction was denied.",
     "couldNotReforge": "Could not reforge sword: Insufficient funds, Dust, or transaction was denied.",
-    "couldNotBurn": "Could not burn sword: Insufficient funds or transaction was denied."
+    "couldNotBurn": "Could not burn sword: Insufficient funds or transaction was denied.",
+    "useMaxSoulAmount": "Use max"
   },
   "dustBalanceDisplay": {
     "availableDust": "Available Dust",
@@ -567,6 +581,152 @@
       "totalPrice": "Total price"
     }
   },
+  "quests": {
+    "rarityType": {
+      "COMMON": "Common",
+      "UNCOMMON": "Uncommon",
+      "RARE": "Rare",
+      "EPIC": "Epic",
+      "LEGENDARY": "Legendary"
+    },
+    "dustRarityType": {
+      "LESSER": "Lesser",
+      "GREATER": "Greater",
+      "POWERFUL": "Powerful"
+    },
+    "requirementType": {
+      "NONE": "None",
+      "WEAPON": "Weapon",
+      "JUNK": "Junk",
+      "DUST": "Dust",
+      "TRINKET": "Trinket",
+      "SHIELD": "Shield",
+      "STAMINA": "Stamina",
+      "SOUL": "Soul",
+      "RAID": "Raid"
+    },
+    "rewardType": {
+      "NONE": "None",
+      "WEAPON": "Weapon",
+      "JUNK": "Junk",
+      "TRINKET": "Trinket",
+      "SHIELD": "Shield",
+      "DUST": "Dust",
+      "EXPERIENCE": "Experience",
+      "SOUL": "Soul"
+    },
+    "level": "Level {level}",
+    "questsTitle": "Quests",
+    "quest": "Quest",
+    "skip": "Skip ({staminaCost} stamina)",
+    "freeSkip": "Skip (FREE)",
+    "nextFreeSkipsResetIn": "Next free skips reset in {time}",
+    "cannotSkipTooltip": "Not enough stamina to skip this quest",
+    "complete": "Complete",
+    "questComplete": "Quest complete",
+    "submit": "Submit",
+    "reputation": "Reputation",
+    "do": "Do",
+    "requestQuest": "Request quest",
+    "turnIn": "Turn in",
+    "howMuchToTurnIn": "How much to turn in?",
+    "setRequiredAmount": "Set required amount",
+    "createNewQuest": "Create new quest",
+    "updateUsePromoQuestTemplates": "Update use promo quest templates",
+    "togglePromoQuestsUsage": "Toggle promo quests usage",
+    "usePromoQuestTemplates": "Use promo quest templates",
+    "createNewPromoQuest": "Create new promo quest",
+    "promoQuests": "Promo quests",
+    "questTemplates": "Quest templates",
+    "promoQuestTemplates": "Promo quest templates",
+    "addNewQuest": "Add new quest",
+    "addNewPromoQuest": "Add new promo quest",
+    "addNewTurnOnPromoQuestsUsage": "Are you sure that you want to turn ON promo quests usage?",
+    "addNewTurnOffPromoQuestsUsage": "Are you sure that you want to turn OFF promo quests usage",
+    "areYouSureAddQuest": "Are you sure you want to add this quest?",
+    "areYouSureAddPromoQuest": "Are you sure you want to add this promo quest?",
+    "deleteQuest": "Delete quest",
+    "tierChances": "Tier chances",
+    "questTier": "Quest tier",
+    "templatesTier": "Templates tier",
+    "noQuestTemplatesInSelectedTier": "No quest templates in selected tier",
+    "requirement": "Requirement",
+    "reward": "Reward",
+    "pleaseSelectQuestTier": "Please select quest tier",
+    "pleaseSelectRequirementType": "Please select requirement type",
+    "pleaseSelectRequirementRarity": "Please select requirement rarity",
+    "pleaseSelectRewardType": "Please select reward type",
+    "pleaseSelectRewardRarity": "Please select reward rarity",
+    "reputationLevel": "Reputation level {level}",
+    "updateReputationLevelRequirements": "Update reputation level requirements",
+    "updateRequirements": "Update requirements",
+    "staminaCost": "Stamina cost",
+    "updateSkipQuestStaminaCost": "Update skip quest stamina cost",
+    "updateStaminaCost": "Update stamina cost",
+    "updateForLevel": "Update for level {level}",
+    "youNeedToHaveAtLeastOneCharacter": "You need to have at least one character to do Quests",
+    "loading": "Loading..."
+  },
+  "admin": {
+    "tabs": {
+      "quests": "Quests",
+      "cbkLand": "CBK Land",
+      "weapons": "Weapons",
+      "burningManager": "Burning Manager"
+    },
+    "cbkLand": {
+      "minter": "Minter",
+      "tier": "Tier",
+      "chunkId": "Chunk ID",
+      "reseller": "Reseller",
+      "quantityOptional": "Quantity (optional)",
+      "mintLand": "Mint land",
+      "mintLands": "Mint lands",
+      "identifiers": "Identifiers",
+      "updateChunkIdentifier": "Update chunk identifier",
+      "updateChunkId": "Update chunk ID",
+      "updateChunkIds": "Update chunk IDs"
+    },
+    "weapons": {
+      "incrementDecrementDustSupplies": "Increment/decrement dust supplies",
+      "incrementDustSupplies": "Increment dust supplies",
+      "decrementDustSupplies": "Decrement dust supplies",
+      "playerAddress": "Player address",
+      "amountLB": "Amount (LB)",
+      "amount4B": "Amount (4B)",
+      "amount5B": "Amount (5B)",
+      "mintGiveawayWeapon": "Mint giveaway weapon",
+      "pleaseSelectStars": "Please select stars",
+      "pleaseSelectElement": "Please select element",
+      "mintWeapon": "Mint weapon",
+      "rarities": {
+        "COMMON": "1 star",
+        "UNCOMMON": "2 stars",
+        "RARE": "3 stars",
+        "EPIC": "4 stars ",
+        "LEGENDARY": "5 stars"
+      },
+      "elements" : {
+        "RANDOM": "Random",
+        "FIRE": "Fire",
+        "WATER": "Water",
+        "LIGHTNING": "Lightning",
+        "EARTH": "Earth"
+      }
+    },
+    "burningManager": {
+      "playerAddress": "Player address",
+      "mintGiveawaySoul": "Mint giveaway soul",
+      "soulAmount": "Soul amount",
+      "mintSoul": "Mint soul"
+    },
+    "doNotHaveAccessTooltip": "You do not have admin access on this contract.",
+    "grantRole": "Grant role",
+    "revokeRole": "Revoke role",
+    "grantGameAdminRole": "Grant game admin role",
+    "revokeGameAdminRole": "Revoke game admin role",
+    "pasteInValidWalletAddress": "Paste in valid wallet address"
+  },
   "stake": {
     "unknownStakeType": "Unknown stake type, please try again.",
     "rewardsAvailable": "Rewards are available!",
@@ -602,8 +762,10 @@
       "rewardsDuration": "Distribution",
       "warning": "Warning",
       "select": "Select",
-      "rewardsAvailableTooltip":"Rewards available",
-      "rewardsUnavailableTooltip":"Rewards depleted",
+      "rewardsAvailableTooltip":"You can earn rewards in this stake pool.",
+      "rewardsDepletedTooltip":"Rewards depleted.",
+      "rewardsAvailableEarnedTooltip":"You have rewards ready to claim in this stake pool and you can still earn more.",
+      "rewardsDepletedEarnedTooltip":"Rewards depleted but you can claim your reward.",
       "deprecatedTooltip": "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."
     },
     "tier": "Tier",
@@ -807,20 +969,46 @@
         "connecting": "Connecting to MetaMask...",
         "success": "Success: MetaMask connected.",
         "error": "Error: MetaMask could not get permissions.",
-        "welcome": "Welcome to CryptoBlades. Here is how you can get started."
+        "welcome": "Get started With CryptoBlades"
       },
       "message": {
+        "BSC":{
+          "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .0015 BNB for gas. You will also need a litle bit of BNB for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
+          "inst1": "1. Buying BNB with fiat: <a target=_blank href=https://youtu.be/6-sUDUE2RPA> Watch Video </a> or <a target=_blank href={link1}> Buy with Transak</a>",
+          "inst2": "2. Once you have BNB, go to ApeSwap to obtain SKILL tokens: <a target=_blank href={link1}> Trade SKILL/BNB </a>",
+          "inst3": "3. Follow this tutorial to swap BNB for SKILL: <a target=_blank href=https://youtu.be/_zitrvJ7Hl4> Watch Video </a>",
+          "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
+        },
+        "HECO":{
+          "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .0007 HT for gas. You will also need a litle bit of HT for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
+          "inst1": "1. Swap BNB to HT <a target=_blank href=https://bridge.butterswap.me> here </a> (min. $30USD worth of BNB)",
+          "inst2": "2. Once you have HT, go to <a target=_blank href=https://swap.butterswap.me/swap> ButterSwap </a> to swap HT for SKILL tokens",
+          "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
+          "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
+        },
+        "OEC":{
+          "instructions": "Get started in no time! To recruit your first character, you need {recruitCost} SKILL and .000032 OKT for gas. You will also need a little bit of OKT for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
+          "inst1": "1. Getting OKT to your wallet:<a target=_blank href=https://www.youtube.com/watch?v=eMXUYGl7XYg> Watch Video </a>",
+          "inst2": "2. If you have OKT but just need SKILL: <a target=_blank href=https://app.jswap.finance/#/swap?outputCurrency=0xcC137b0713E0DC63b1fA136272014F2A54Dd7aCB> go to JSwap </a>",
+          "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
+          "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
+        },
+        "POLYGON":{
+          "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .01 MATIC for gas. You will also need a litle bit of MATIC for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
+          "inst1": "1. Trade SKILL between chains: <a target=_blank href=https://bridge.poly.network/token/SKILL> here </a>",
+          "inst2": "2. SWAP SKILL to MATIC: <a target=_blank href=https://app.apeswap.finance/swap> here <a>",
+          "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
+          "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
+        },
+        "AVAX":{
+          "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .001 AVAX for gas. You will also need a litle bit of AVAX for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
+          "inst1": "1. Trade SKILL between chains: <a target=_blank href=https://bridge.poly.network/token/SKILL> here </a>",
+          "inst2": "2. SWAP SKILL to AVAX: <a target=_blank href=https://app.pangolin.exchange/#/swap> here <a>",
+          "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
+          "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
+        },
         "hideWalletWarning": "You have hidden the wallet warning and it would now be displayed. If you are trying to play, please disable the option and follow the instructions, otherwise close and ignore.",
-        "instructions": "Get started in less than 10 minutes! To recruit your first character you need {recruitCost} SKILL and .001 BNB for gas. You will also need .0015 BNB to do your first few battles, but don't worry, you earn the battle fees back in SKILL rewards immediately!",
-        "inst1": "Buying BNB with fiat:",
-        "inst2": "Once you have BNB, go to ApeSwap to obtain SKILL tokens:",
-        "inst3": "Follow this tutorial to swap BNB for SKILL:",
-        "inst4": "That's it! Now you can create your first character:",
-        "watchVideo": "Watch Video",
-        "watchGettingStartedVideo": "Watch 'Getting Started' Video",
-        "or": "or",
-        "buyWithTransak": "Buy with Transak",
-        "questionDiscord": "If you have any questions, please join our Discord:",
+        "happyEarning": "Happy Earning!",
         "newCharacter": "New character",
         "inGarrison:": "appeared in Garrison"
       }
