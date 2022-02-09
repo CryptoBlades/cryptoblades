@@ -5,6 +5,7 @@
       <Hint v-if="!hasTabAccess" :text="$t('admin.doNotHaveAccessTooltip')"/>
     </template>
     <AdminMaker v-if="contract" :contract="contract"/>
+    <AdminRevoker v-if="contract" :contract="contract"/>
     <component :is="component" :contract="contract"/>
   </b-tab>
 </template>
@@ -20,6 +21,7 @@ import Hint from '@/components/Hint.vue';
 import CBKLandAdmin from '@/components/smart/CBKLandAdmin.vue';
 import WeaponsAdmin from '@/components/smart/WeaponsAdmin.vue';
 import BurningManagerAdmin from '@/components/smart/BurningManagerAdmin.vue';
+import AdminRevoker from '@/components/smart/AdminRevoker.vue';
 
 interface StoreMappedActions {
   userHasAdminAccess(payload: { contract: Contract<any> }): Promise<boolean>;
@@ -31,7 +33,7 @@ interface Data {
 }
 
 export default Vue.extend({
-  components: {Hint, AdminMaker, QuestsAdmin, CBKLandAdmin, WeaponsAdmin, BurningManagerAdmin},
+  components: {Hint, AdminMaker, AdminRevoker, QuestsAdmin, CBKLandAdmin, WeaponsAdmin, BurningManagerAdmin},
   props: {
     title: {
       type: String as PropType<string>,

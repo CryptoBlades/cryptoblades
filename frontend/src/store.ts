@@ -3683,6 +3683,14 @@ export function createStore(web3: Web3) {
         await contract.methods.grantRole(gameAdminRole, walletAddress).send(defaultCallOptions(state));
       },
 
+      async revokeGameAdminRole({state}, {walletAddress, contract}) {
+        if (!contract || !state.defaultAccount || !Web3.utils.isAddress(walletAddress)) return;
+
+        const gameAdminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+
+        await contract.methods.revokeRole(gameAdminRole, walletAddress).send(defaultCallOptions(state));
+      },
+
       async userHasAdminAccess({state}, {contract}) {
         if (!contract || !state.defaultAccount) return;
 

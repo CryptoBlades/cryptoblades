@@ -722,7 +722,9 @@
     },
     "doNotHaveAccessTooltip": "You do not have admin access on this contract.",
     "grantRole": "Grant role",
+    "revokeRole": "Revoke role",
     "grantGameAdminRole": "Grant game admin role",
+    "revokeGameAdminRole": "Revoke game admin role",
     "pasteInValidWalletAddress": "Paste in valid wallet address"
   },
   "stake": {
