@@ -1,92 +1,94 @@
 <template>
-  <div>
-    <span v-if="nextFreeSkipTime">{{ $t('quests.nextFreeSkipsResetIn', {time: nextFreeSkipTime}) }}</span>
-    <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container">
-      <div v-for="character in characters" :key="character.id" class="d-flex quest-row">
-        <div class="character"
-             :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(character.id) : undefined]">
-          <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
-            <slot name="above" :character="character"></slot>
-          </div>
-          <slot name="sold" :character="character"></slot>
-          <div class="art">
-            <div class="animation"/>
-            <CharacterArt
-              :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(character.id) : undefined]"
-              :character="character" :hideIdContainer="true" :hideXpBar="true"/>
-          </div>
-          <div
-            v-if="character.quest && character.quest.reputation !== undefined && reputationLevelRequirements"
-            class="xp">
+  <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container">
+    <b-progress class="w-100" :max="maxWeeklyCompletions" :value="currentWeeklyCompletions" variant="primary"/>
+    <div class="d-flex flex-column w-100">
+      <span v-if="nextFreeSkipTime">{{ $t('quests.nextFreeSkipsResetIn', {time: nextFreeSkipTime}) }}</span>
+      <span v-if="nextWeekResetTime">{{ $t('quests.nextWeekResetIn', {time: nextWeekResetTime}) }}</span>
+    </div>
+    <div v-for="character in characters" :key="character.id" class="d-flex quest-row">
+      <div class="character"
+           :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(character.id) : undefined]">
+        <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
+          <slot name="above" :character="character"></slot>
+        </div>
+        <slot name="sold" :character="character"></slot>
+        <div class="art">
+          <div class="animation"/>
+          <CharacterArt
+            :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(character.id) : undefined]"
+            :character="character" :hideIdContainer="true" :hideXpBar="true"/>
+        </div>
+        <div
+          v-if="character.quest && character.quest.reputation !== undefined && reputationLevelRequirements"
+          class="xp">
           <span>{{ $t('quests.reputationLevel', {level: getReputationLevel(character.quest.reputation)}) }} <b-icon-question-circle
             class="pointer"
             @click="showReputationInfoModal"/></span>
-            <strong v-if="getReputationLevel(character.quest.reputation) !== 5"
-                    class="outline xp-text">{{ character.quest.reputation || 0 }} /
-              {{ getReputationBreakpoint(character.quest.reputation) }}</strong>
-            <b-progress v-if="getReputationLevel(character.quest.reputation) !== 5" class="reputation-progress"
-                        :max="getReputationBreakpoint(character.quest.reputation)" :value="character.quest.reputation"
-                        variant="primary"/>
-          </div>
-        </div>
-        <QuestDetails v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
-                      :characterId="character.id"/>
-        <div v-else-if="isRequestQuestLoading" class="request-quest">
-          <b-button variant="primary" disabled>
-            <i class="fas fa-spinner fa-spin"/>
-            {{ $t('quests.loading') }}
-          </b-button>
-        </div>
-        <div v-else class="request-quest">
-          <b-button variant="primary" @click="request(character.id)">
-            {{ $t('quests.requestQuest') }}
-          </b-button>
+          <strong v-if="getReputationLevel(character.quest.reputation) !== 5"
+                  class="outline xp-text">{{ character.quest.reputation || 0 }} /
+            {{ getReputationBreakpoint(character.quest.reputation) }}</strong>
+          <b-progress v-if="getReputationLevel(character.quest.reputation) !== 5" class="reputation-progress"
+                      :max="getReputationBreakpoint(character.quest.reputation)" :value="character.quest.reputation"
+                      variant="primary"/>
         </div>
       </div>
-      <QuestSubmissionModal/>
-      <b-modal v-model="showReputationModal" ok-only class="centered-modal" :title="$t('quests.reputation')">
-        <div v-if="!isReputationInfoLoading" class="d-flex flex-column gap-3">
-          <div class="d-flex justify-content-between">
-            <span class="invisible">{{ $t('quests.rarityType.COMMON') }}</span>
-            <div>{{ $t('quests.rarityType.COMMON') }}</div>
-            <div>{{ $t('quests.rarityType.UNCOMMON') }}</div>
-            <div>{{ $t('quests.rarityType.RARE') }}</div>
-            <div>{{ $t('quests.rarityType.EPIC') }}</div>
-            <div>{{ $t('quests.rarityType.LEGENDARY') }}</div>
+      <QuestDetails v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
+                    :characterId="character.id" :isLimitReached="currentWeeklyCompletions >= maxWeeklyCompletions"/>
+      <div v-else-if="isRequestQuestLoading" class="request-quest">
+        <b-button variant="primary" disabled>
+          <i class="fas fa-spinner fa-spin"/>
+          {{ $t('quests.loading') }}
+        </b-button>
+      </div>
+      <div v-else class="request-quest">
+        <b-button variant="primary" @click="request(character.id)">
+          {{ $t('quests.requestQuest') }}
+        </b-button>
+      </div>
+    </div>
+    <QuestSubmissionModal/>
+    <b-modal v-model="showReputationModal" ok-only class="centered-modal" :title="$t('quests.reputation')">
+      <div v-if="!isReputationInfoLoading" class="d-flex flex-column gap-3">
+        <div class="d-flex justify-content-between">
+          <span class="invisible">{{ $t('quests.rarityType.COMMON') }}</span>
+          <div>{{ $t('quests.rarityType.COMMON') }}</div>
+          <div>{{ $t('quests.rarityType.UNCOMMON') }}</div>
+          <div>{{ $t('quests.rarityType.RARE') }}</div>
+          <div>{{ $t('quests.rarityType.EPIC') }}</div>
+          <div>{{ $t('quests.rarityType.LEGENDARY') }}</div>
+        </div>
+        <div v-for="(tierChance, index) in tierChances" class="d-flex justify-content-between align-items-center"
+             :key="index">
+          <span class="text-nowrap">{{ $t('quests.level', {level: index + 1}) }}</span>
+          <div>
+            <span>{{ tierChance.common }}%</span>
           </div>
-          <div v-for="(tierChance, index) in tierChances" class="d-flex justify-content-between align-items-center"
-               :key="index">
-            <span class="text-nowrap">{{ $t('quests.level', {level: index + 1}) }}</span>
-            <div>
-              <span>{{ tierChance.common }}%</span>
-            </div>
-            <div>
-              <span>{{ tierChance.uncommon }}%</span>
-            </div>
-            <div>
-              <span>{{ tierChance.rare }}%</span>
-            </div>
-            <div>
-              <span>{{ tierChance.epic }}%</span>
-            </div>
-            <div>
-              <span>{{ tierChance.legendary }}%</span>
-            </div>
+          <div>
+            <span>{{ tierChance.uncommon }}%</span>
+          </div>
+          <div>
+            <span>{{ tierChance.rare }}%</span>
+          </div>
+          <div>
+            <span>{{ tierChance.epic }}%</span>
+          </div>
+          <div>
+            <span>{{ tierChance.legendary }}%</span>
           </div>
         </div>
-        <span v-else>
+      </div>
+      <span v-else>
         <i class="fas fa-spinner fa-spin"/>
         {{ $t('quests.loading') }}
       </span>
-      </b-modal>
-    </div>
-    <div v-else-if="isLoading">
-      <i class="fas fa-spinner fa-spin"/>
-      {{ $t('quests.loading') }}
-    </div>
-    <div v-else class="m-4 font-weight-bold">
-      {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}
-    </div>
+    </b-modal>
+  </div>
+  <div v-else-if="isLoading">
+    <i class="fas fa-spinner fa-spin"/>
+    {{ $t('quests.loading') }}
+  </div>
+  <div v-else class="m-4 font-weight-bold">
+    {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}
   </div>
 </template>
 
@@ -158,6 +160,12 @@ interface StoreMappedActions {
   getQuestTierChances(payload: { tier: number }): Promise<TierChances>;
 
   nextFreeSkip(): Promise<string>;
+
+  nextWeeklyQuestCompletionLimitReset(): Promise<string>;
+
+  getWeeklyCompletionsLimit(): Promise<number>;
+
+  getWeeklyCompletions(): Promise<number>;
 }
 
 interface StoreMappedGetters {
@@ -173,7 +181,11 @@ interface Data {
   tierChances: TierChances[];
   showReputationModal: boolean;
   nextFreeSkipTime: string;
+  nextWeekResetTime: string;
   freeSkipCheckInterval?: ReturnType<typeof setInterval>;
+  nextWeekResetCheckInterval?: ReturnType<typeof setInterval>;
+  maxWeeklyCompletions: number;
+  currentWeeklyCompletions: number;
 }
 
 export default Vue.extend({
@@ -196,6 +208,9 @@ export default Vue.extend({
       tierChances: [] as TierChances[],
       showReputationModal: false,
       nextFreeSkipTime: '',
+      nextWeekResetTime: '',
+      maxWeeklyCompletions: 0,
+      currentWeeklyCompletions: 0,
     } as Data;
   },
 
@@ -212,6 +227,9 @@ export default Vue.extend({
       'getReputationLevelRequirements',
       'getQuestTierChances',
       'nextFreeSkip',
+      'nextWeeklyQuestCompletionLimitReset',
+      'getWeeklyCompletionsLimit',
+      'getWeeklyCompletions',
     ]) as StoreMappedActions,
 
     getReputationLevel(reputation: number) {
@@ -257,7 +275,10 @@ export default Vue.extend({
     async refreshQuestData() {
       try {
         this.isLoading = true;
+        this.currentWeeklyCompletions = await this.getWeeklyCompletions();
+        this.maxWeeklyCompletions = await this.getWeeklyCompletionsLimit();
         await this.getNextFreeSkipTime();
+        await this.getNextWeekResetTime();
         this.reputationLevelRequirements = await this.getReputationLevelRequirements();
         this.characters = await Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {
           character.quest = await this.getCharacterQuestData({characterId: character.id});
@@ -281,6 +302,21 @@ export default Vue.extend({
         this.isReputationInfoLoading = false;
       }
     },
+
+    async getNextWeekResetTime() {
+      const nextWeekResetTimestamp = await this.nextWeeklyQuestCompletionLimitReset();
+      if (this.nextWeekResetCheckInterval) {
+        clearInterval(this.nextWeekResetCheckInterval);
+      }
+      this.nextWeekResetCheckInterval = setInterval(() => {
+        const {total, days, hours, minutes, seconds} = this.getTimeRemaining(nextWeekResetTimestamp);
+        this.nextWeekResetTime = `${days}:${hours}:${minutes}:${seconds}`;
+        if (total <= 0 && this.nextWeekResetCheckInterval) {
+          clearInterval(this.nextWeekResetCheckInterval);
+        }
+      }, 1000);
+    },
+
     async getNextFreeSkipTime() {
       const nextFreeSkipTimestamp = await this.nextFreeSkip();
       if (this.freeSkipCheckInterval) {
@@ -300,6 +336,7 @@ export default Vue.extend({
       let seconds: string | number = Math.floor((total / 1000) % 60);
       let minutes: string | number = Math.floor((total / 1000 / 60) % 60);
       let hours: string | number = Math.floor((total / (1000 * 60 * 60)) % 24);
+      let days: string | number = Math.ceil((total / (1000 * 60 * 60 * 24)));
       if (seconds < 10) {
         seconds = String(seconds).padStart(2, '0');
       }
@@ -309,9 +346,13 @@ export default Vue.extend({
       if (hours < 10) {
         hours = String(hours).padStart(2, '0');
       }
+      if (days < 10) {
+        days = String(days).padStart(2, '0');
+      }
 
       return {
         total,
+        days,
         hours,
         minutes,
         seconds

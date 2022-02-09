@@ -3608,6 +3608,29 @@ export function createStore(web3: Web3) {
         return await SimpleQuests.methods.nextFreeSkip().call(defaultCallOptions(state));
       },
 
+      async nextWeeklyQuestCompletionLimitReset({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.nextWeeklyQuestCompletionLimitReset().call(defaultCallOptions(state));
+      },
+
+      async getWeeklyCompletionsLimit({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_WEEKLY_COMPLETIONS_LIMIT = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_LIMIT().call(defaultCallOptions(state));
+
+        return await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_LIMIT).call(defaultCallOptions(state));
+      },
+
+      async getWeeklyCompletions({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.weeklyCompletions(state.defaultAccount).call(defaultCallOptions(state));
+      },
+
       async skipQuest({ state, dispatch }, {characterID}) {
         const { SimpleQuests } = state.contracts();
         if(!SimpleQuests || !state.defaultAccount) return;

@@ -52,8 +52,9 @@
                   class="flex-1" @click="submit">
           {{ $t('quests.submit') }}
         </b-button>
-        <b-button v-if="questCanBeCompleted" variant="primary" class="flex-1" @click="complete">
+        <b-button v-if="questCanBeCompleted" :disabled="isLimitReached" variant="primary" class="flex-1" @click="complete">
           {{ $t('quests.complete') }}
+          <hint v-if="isLimitReached" class="hint" :text="$t('quests.cannotCompleteTooltip')"/>
         </b-button>
         <b-button v-else variant="primary" class="flex-1" @click="skip"
                   :disabled="(!freeSkip && !canSkip) || isStaminaCostLoading">
@@ -144,7 +145,11 @@ export default Vue.extend({
     },
     characterId: {
       type: Number,
-    }
+    },
+    isLimitReached: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data() {

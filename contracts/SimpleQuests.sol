@@ -51,6 +51,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     uint8 public constant VAR_REPUTATION_LEVEL_4 = 22;
     uint8 public constant VAR_REPUTATION_LEVEL_5 = 23;
     uint8 public constant VAR_SKIP_QUEST_STAMINA_COST = 30;
+    uint8 public constant VAR_WEEKLY_COMPLETIONS_LIMIT = 31;
     uint256 internal constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
     uint256 internal constant NFTVAR_SIMPLEQUEST_TYPE = 102;
     uint256 internal constant NFTVAR_REPUTATION = 103;
@@ -79,6 +80,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256[4]) public tierChances;
     mapping(uint256 => uint256) public vars;
     mapping(uint256 => uint256) public lastFreeSkipUsage;
+    mapping(address => uint256) public firstWeeklyQuestCompletion;
+    mapping(address => uint256) public weeklyCompletions;
 
     event QuestAssigned(uint256 indexed questID, uint256 indexed characterID);
     event QuestProgressed(uint256 indexed questID, uint256 indexed characterID);
@@ -212,13 +215,24 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function completeQuest(uint256 characterID) public assertQuestsEnabled assertOnQuest(characterID, true) returns (uint256[] memory questRewards) {
         uint256[] memory questData = getCharacterQuestData(characterID);
         require(questData[0] >= quests[characterQuest[characterID]].requirementAmount, "Not completed");
+        if(isNewQuestsWeek(msg.sender)) {
+            firstWeeklyQuestCompletion[msg.sender] = now;
+            weeklyCompletions[msg.sender] = 0;
+        } else {
+            require(isUnderWeeklyQuestCompletionLimit(msg.sender), "Too many weekly completions");
+        }
         uint256 questID = characterQuest[characterID];
         uint256 currentReputation = questData[2];
         questRewards = rewardQuest(questID, characterID);
         emit QuestRewarded(questID, characterID, questRewards);
         characters.setNftVar(characterID, NFTVAR_REPUTATION, currentReputation + quests[questID].reputationAmount);
         emit QuestComplete(questID, characterID);
+        weeklyCompletions[msg.sender] += 1;
         assignNewQuest(characterID);
+    }
+
+    function isNewQuestsWeek(address user) internal view returns (bool) {
+        return now > firstWeeklyQuestCompletion[user] + 1 weeks;
     }
 
     function generateRewardQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) public {
@@ -387,6 +401,14 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function hasFreeSkip(uint256 characterID) public view returns (bool) {
         return now / 1 days > lastFreeSkipUsage[characterID] / 1 days;
+    }
+
+    function isUnderWeeklyQuestCompletionLimit(address user) public view returns (bool) {
+        return weeklyCompletions[user] < vars[VAR_WEEKLY_COMPLETIONS_LIMIT];
+    }
+
+    function nextWeeklyQuestCompletionLimitReset() public view returns (uint256) {
+        return now + 1 weeks - now % 1 weeks;
     }
 
     function nextFreeSkip() public view returns (uint256) {
