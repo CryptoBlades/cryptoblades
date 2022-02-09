@@ -3683,6 +3683,14 @@ export function createStore(web3: Web3) {
         await contract.methods.grantRole(gameAdminRole, walletAddress).send(defaultCallOptions(state));
       },
 
+      async revokeGameAdminRole({state}, {walletAddress, contract}) {
+        if (!contract || !state.defaultAccount || !Web3.utils.isAddress(walletAddress)) return;
+
+        const gameAdminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+
+        await contract.methods.revokeRole(gameAdminRole, walletAddress).send(defaultCallOptions(state));
+      },
+
       async userHasAdminAccess({state}, {contract}) {
         if (!contract || !state.defaultAccount) return;
 
@@ -3690,7 +3698,18 @@ export function createStore(web3: Web3) {
 
         const hasRole =  await contract.methods.hasRole(adminRole, state.defaultAccount).call(defaultCallOptions(state));
 
-        console.log(contract, hasRole);
+        console.log('Admin role: ',contract, hasRole);
+        return hasRole;
+      },
+
+      async userHasMinterAccess({state}, {contract}) {
+        if (!contract || !contract.methods.MINTER_ROLE || !state.defaultAccount) return;
+
+        const minterRole = await contract.methods.MINTER_ROLE().call(defaultCallOptions(state));
+
+        const hasRole =  await contract.methods.hasRole(minterRole, state.defaultAccount).call(defaultCallOptions(state));
+
+        console.log('Minter role: ', contract, hasRole);
         return hasRole;
       },
 
@@ -3708,6 +3727,24 @@ export function createStore(web3: Web3) {
           CBKLand.methods.hasRole(cbkLandAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
           Weapons.methods.hasRole(weaponsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
           BurningManager.methods.hasRole(burningManagerAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+        ];
+
+        for (const promise of promises) {
+          if (await promise) return true;
+        }
+        return false;
+      },
+
+      async userHasAnyMinterAccess({state}) {
+        const {Weapons, Characters} = state.contracts();
+        if (!Weapons || !Characters || !state.defaultAccount) return;
+
+        const weaponsMinerRole = await Weapons.methods.MINTER_ROLE().call(defaultCallOptions(state));
+        const charactersMinerRole = await Characters.methods.MINTER_ROLE().call(defaultCallOptions(state));
+
+        const promises: Promise<boolean>[] = [
+          Weapons.methods.hasRole(weaponsMinerRole, state.defaultAccount).call(defaultCallOptions(state)),
+          Characters.methods.hasRole(charactersMinerRole, state.defaultAccount).call(defaultCallOptions(state)),
         ];
 
         for (const promise of promises) {

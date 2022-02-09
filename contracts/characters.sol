@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Promos.sol";
 import "./util.sol";
 import "./Garrison.sol";
+import "./common.sol";
+
 contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using SafeMath for uint16;
@@ -14,9 +16,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     bytes32 public constant NO_OWNED_LIMIT = keccak256("NO_OWNED_LIMIT");
-    bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
+    // Copied from promos.sol, to avoid paying 5k gas to query a constant.
+    uint256 private constant BIT_FIRST_CHARACTER = 1;
 
     function initialize () public initializer {
         __ERC721_init("CryptoBlades character", "CBC");
@@ -319,18 +323,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getPowerAtLevel(uint8 level) public pure returns (uint24) {
-        // does not use fixed points since the numbers are simple
-        // the breakpoints every 10 levels are floored as expected
-        // level starts at 0 (visually 1)
-        // 1000 at lvl 1
-        // 9000 at lvl 51 (~3months)
-        // 22440 at lvl 105 (~3 years)
-        // 92300 at lvl 255 (heat death of the universe)
-        return uint24(
-            uint256(1000)
-                .add(level.mul(10))
-                .mul(level.div(10).add(1))
-        );
+        return Common.getPowerAtLevel(level);
     }
 
     function getTrait(uint256 id) public view noFreshLookup(id) returns (uint8) {
@@ -421,7 +414,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
         }
         // bitwise magic to avoid stacking limitations later on
-        return uint96(char.trait | (uint24(getTotalPower(id)) << 8) | (preTimestamp << 32));
+        return uint96(char.trait | (getTotalPower(id) << 8) | (preTimestamp << 32));
     }
 
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {
@@ -468,9 +461,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(nftVars[tokenId][NFTVAR_BUSY] == 0);
-
-        promos.setBit(from, promos.BIT_FIRST_CHARACTER());
-        promos.setBit(to, promos.BIT_FIRST_CHARACTER());
+        address[] memory users = new address[](2);
+        users[0] = from;
+        users[1] = to;
+        promos.setBits(users, BIT_FIRST_CHARACTER);
     }
 
     function safeTransferFrom(address from, address to, uint256 tokenId) override public {

@@ -111,10 +111,10 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['userHasAnyAdminAccess']),
+    ...mapActions(['userHasAnyAdminAccess', 'userHasAnyMinterAccess']),
 
     async fetchData() {
-      this.hasAdminAccess = await this.userHasAnyAdminAccess();
+      this.hasAdminAccess = await this.userHasAnyAdminAccess() || await this.userHasAnyMinterAccess();
     },
   },
 
