@@ -29,6 +29,7 @@
         :currentRankedSeason="currentRankedSeason"
         :secondsBeforeNextSeason="secondsBeforeNextSeason"
         @enterMatchMaking="handleEnterMatchMaking"
+        @leaveArena="leaveArena"
       />
       <!-- Should use router -->
       <pvp-arena-matchmaking

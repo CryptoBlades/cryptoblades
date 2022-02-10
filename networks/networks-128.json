@@ -2512,11 +2512,30 @@
         ],
         "name": "Transfer",
         "type": "event"
+      },
+      "0xe861e0b12c283de7ca3f4d68d33f3bfc6fc01e4896cddf05e52b8f2a1e548e24": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "burner",
+            "type": "address"
+          }
+        ],
+        "name": "Burned",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xd8dfa2e42e04720f8b9a01ed8D1DE8A085E2fEa1",
-    "transactionHash": "0xb69fcd6b42d71f9b5970743a1f8203310a06a391d2e7a6bd54bb651316721b87"
+    "transactionHash": "0xb829878ffb5c1a976a900b7e31bfe9f99b425c8cb28bfc1f32c3acc60e3e54c0"
   },
   "build/contracts/KeyLootbox.json": {
     "events": {
@@ -2691,7 +2710,8 @@
       }
     },
     "links": {},
-    "address": "0x3ddf03Fd4a1c3B169e0BF80A6D652613B1C2d021"
+    "address": "0x3ddf03Fd4a1c3B169e0BF80A6D652613B1C2d021",
+    "transactionHash": "0xa015b9422b7a121325b23e6dd82b64a4bfb8a1102eed685e88d5e0a07b85da83"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
@@ -3519,11 +3539,30 @@
         ],
         "name": "Transfer",
         "type": "event"
+      },
+      "0xe861e0b12c283de7ca3f4d68d33f3bfc6fc01e4896cddf05e52b8f2a1e548e24": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "burner",
+            "type": "address"
+          }
+        ],
+        "name": "Burned",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0x79Dc4a4aDde7513253A0F6D3244277a59ab3578b",
-    "transactionHash": "0x74a811f3900abe9c5d42b4271586f9c6d414b543b4a25a2dbe883ecb700e63b4"
+    "transactionHash": "0x82edfd04f72879f77ce13956a227eca611f04ce04755fa0ef2a60708dcac58f3"
   },
   "build/contracts/SafeRandoms.json": {
     "events": {
