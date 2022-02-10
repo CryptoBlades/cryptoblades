@@ -2120,7 +2120,7 @@
     },
     "links": {},
     "address": "0x929059Fef67b88CE2F4127e59B50bEA123981998",
-    "transactionHash": "0xf42af6bdd9ddfe318f96d064e1d777d53383ad99df8050318d10bdfdc4848530"
+    "transactionHash": "0x52c9ea976038f5819a60c6e0ceea535161753325a8959fc5dfd81d2e41900c19"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2402,7 +2402,7 @@
     },
     "links": {},
     "address": "0x070b1A95898B927A900A1F9F42b114154648E51A",
-    "transactionHash": "0x989c9f0d9264cbd9c508bb7bfcad4163a9ceb85ffdd03b3cd95e9fae08bc1b6c"
+    "transactionHash": "0xf3743d4e4fa229eb19bd83211e1c86234fdef92ef246207ae29b2082b1208062"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},
@@ -2681,11 +2681,30 @@
         ],
         "name": "Transfer",
         "type": "event"
+      },
+      "0xe861e0b12c283de7ca3f4d68d33f3bfc6fc01e4896cddf05e52b8f2a1e548e24": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "burner",
+            "type": "address"
+          }
+        ],
+        "name": "Burned",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xa75203D757Bb4cAF4cc008d8B16b36B2EE74c77e",
-    "transactionHash": "0x79eb9c0b1bfd1bde813c7896986a855af28178227f4c91da61ac00b137dde2a5"
+    "transactionHash": "0x379ce2e2cebe0a8860555238c964877896b6f8461b86d3e934ff1a7c06c814d3"
   },
   "build/contracts/KeyLootbox.json": {
     "events": {
@@ -2861,7 +2880,7 @@
     },
     "links": {},
     "address": "0x49621e881B5f87dBd6A02f4581fE067BCC0f847D",
-    "transactionHash": "0x365f26bc75dd487bc7e6d2e70d1004275e251eaaae6b4747c7e3ec313eac2be0"
+    "transactionHash": "0xfb2b113b12f4c8de39c7e3a98cbef31a44ef01411f091fae97adbe75a81b3dfe"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {
@@ -4798,11 +4817,30 @@
         ],
         "name": "Transfer",
         "type": "event"
+      },
+      "0xe861e0b12c283de7ca3f4d68d33f3bfc6fc01e4896cddf05e52b8f2a1e548e24": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "burner",
+            "type": "address"
+          }
+        ],
+        "name": "Burned",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xA397649d96Af0d0055c7057de5f879F74D577377",
-    "transactionHash": "0x091a0d48e69b1e6cf767f58812a7482227ddae81cec5930ef5fee19ca779dba3"
+    "transactionHash": "0xef4a71f91ef6cbf437f0f76b010b299fd518bec120828016dab2b8a075163b65"
   },
   "build/contracts/SafeRandoms.json": {
     "events": {
