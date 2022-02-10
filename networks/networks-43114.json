@@ -2696,11 +2696,30 @@
         ],
         "name": "Transfer",
         "type": "event"
+      },
+      "0xe861e0b12c283de7ca3f4d68d33f3bfc6fc01e4896cddf05e52b8f2a1e548e24": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "burner",
+            "type": "address"
+          }
+        ],
+        "name": "Burned",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xb5c02943971A263011DA86B274846E720F95ABdc",
-    "transactionHash": "0xcdabc6adcea927f5b4190672956bc421a2d9830e9610fc7242eeeeb5db2ed612"
+    "transactionHash": "0x7329c4e40eac74d226234b03351a648e4b1bb08980baf93a8881e34001cf9096"
   },
   "build/contracts/KeyLootbox.json": {
     "events": {
@@ -2876,7 +2895,7 @@
     },
     "links": {},
     "address": "0xB3e8b0139f7E073440E797eCC088e1E0F5c3dfd9",
-    "transactionHash": "0x4cef4b6110f158aa8e467c759f6b426bb3ba3096d34ab893215268377c9d1ecc"
+    "transactionHash": "0x1984ad2f08a094a24f3f949da24c88eb0eb90bfe8362868b5d7594f66330e4d1"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
@@ -3704,11 +3723,30 @@
         ],
         "name": "Transfer",
         "type": "event"
+      },
+      "0xe861e0b12c283de7ca3f4d68d33f3bfc6fc01e4896cddf05e52b8f2a1e548e24": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "burner",
+            "type": "address"
+          }
+        ],
+        "name": "Burned",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0x0422064947CFC8eE368167e7258765026129A052",
-    "transactionHash": "0xc1b534ff0c23864164fb49aa063ac976a5e5b3bc1d22f3c8a75368a793edfd54"
+    "transactionHash": "0xd9c4ec8f68223bab2a4ed763a4d17dfc806f446dea9fe0b1fa913fe54bcb9872"
   },
   "build/contracts/SafeRandoms.json": {
     "events": {

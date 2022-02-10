@@ -3497,7 +3497,7 @@
     },
     "links": {},
     "address": "0x5E5E90DD354eA323Ea7acCb7E734E4e68365d465",
-    "transactionHash": "0xd975a38a128d2ddafec4006483f1787f3b76e52e5cca8fb406099a19314b15dc"
+    "transactionHash": "0xcd6f9637c2177c082868021f913fd5c0e046bb46ecd5979919ef131d7b6cdc4e"
   },
   "build/contracts/KingStakingRewardsUpgradeable180.json": {
     "events": {
@@ -5087,7 +5087,7 @@
     },
     "links": {},
     "address": "0x9C898eD506CddD8542A619dbc94A3fF94C3aF10D",
-    "transactionHash": "0x4bcc563228ac4e2a57bd8f8bbf90de0d1974e99e67a93686c362805561bf98f1"
+    "transactionHash": "0x6aeaca8cae95d0ba2939137ff765f828058ad087341438b1550d107a9e592813"
   },
   "build/contracts/SafeRandoms.json": {
     "events": {
