@@ -3710,20 +3710,20 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async grantGameAdminRole({state}, {walletAddress, contract}) {
+      async grantRole({state}, {walletAddress, contract, roleMethod}) {
         if (!contract || !state.defaultAccount || !Web3.utils.isAddress(walletAddress)) return;
 
-        const gameAdminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const role = await roleMethod().call(defaultCallOptions(state));
 
-        await contract.methods.grantRole(gameAdminRole, walletAddress).send(defaultCallOptions(state));
+        await contract.methods.grantRole(role, walletAddress).send(defaultCallOptions(state));
       },
 
-      async revokeGameAdminRole({state}, {walletAddress, contract}) {
+      async revokeRole({state}, {walletAddress, contract, roleMethod}) {
         if (!contract || !state.defaultAccount || !Web3.utils.isAddress(walletAddress)) return;
 
-        const gameAdminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const role = await roleMethod().call(defaultCallOptions(state));
 
-        await contract.methods.revokeRole(gameAdminRole, walletAddress).send(defaultCallOptions(state));
+        await contract.methods.revokeRole(role, walletAddress).send(defaultCallOptions(state));
       },
 
       async userHasAdminAccess({state}, {contract}) {
