@@ -284,7 +284,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 require(weapons.getStars(tokenID) == uint256(quest.requirementRarity), "Wrong weapon rarity");
             }
             weapons.burnWithoutDust(tokenIds);
-            incrementQuestProgress(characterID, questID, tokenIds.length);
         } else if (quest.requirementType == RequirementType.JUNK) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -292,7 +291,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 require(junk.tokenStars(tokenID) == uint256(quest.requirementRarity), "Wrong junk rarity");
             }
             junk.burn(tokenIds);
-            incrementQuestProgress(characterID, questID, tokenIds.length);
         } else if (quest.requirementType == RequirementType.TRINKET) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -300,7 +298,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 require(trinket.tokenStars(tokenID) == uint256(quest.requirementRarity), "Wrong trinket rarity");
             }
             trinket.burn(tokenIds);
-            incrementQuestProgress(characterID, questID, tokenIds.length);
         } else if (quest.requirementType == RequirementType.SHIELD) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
@@ -308,10 +305,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 require(shields.getStars(tokenID) == uint256(quest.requirementRarity), "Wrong shield rarity");
             }
             shields.burn(tokenIds);
-            incrementQuestProgress(characterID, questID, tokenIds.length);
         } else {
             revert("Unknown requirement type");
         }
+        incrementQuestProgress(characterID, questID, tokenIds.length);
     }
 
     function submitProgressAmount(uint256 characterID, uint8 amount) public assertQuestsEnabled assertOnQuest(characterID, true) {
@@ -319,18 +316,16 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         Quest memory quest = quests[questID];
         if (quest.requirementType == RequirementType.STAMINA) {
             characters.getFightDataAndDrainStamina(msg.sender, characterID, amount, false, 0);
-            incrementQuestProgress(characterID, questID, amount);
         } else if (quest.requirementType == RequirementType.DUST) {
             uint32[] memory decrementDustSupplies = new uint32[](3);
             decrementDustSupplies[uint256(quest.requirementRarity)] = amount;
             weapons.decrementDustSupplies(msg.sender, decrementDustSupplies[0], decrementDustSupplies[1], decrementDustSupplies[2]);
-            incrementQuestProgress(characterID, questID, amount);
         } else if (quest.requirementType == RequirementType.SOUL) {
             burningManager.burnSoul(msg.sender, amount);
-            incrementQuestProgress(characterID, questID, amount);
         } else {
             revert("Unknown requirement type");
         }
+        incrementQuestProgress(characterID, questID, amount);
     }
 
     function incrementQuestProgress(uint256 characterID, uint256 questID, uint256 progress) private {
