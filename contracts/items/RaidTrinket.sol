@@ -26,6 +26,8 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
     mapping(uint256 => uint8) public tokenStars;
     mapping(uint256 => uint256) public tokenEffect;
 
+    uint256 public nextTokenID;
+
     event Minted(uint256 indexed id, address indexed minter);
     event Burned(uint256 indexed id, address indexed burner);
 
@@ -61,7 +63,7 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
     }
 
     function mint(address minter, uint8 mintStars, uint256 seed) public restricted returns(uint256 tokenID) {
-        tokenID = totalSupply();
+        tokenID = nextTokenID++;
         uint256 mintEffect = (seed / 100) % 5;
         tokenStars[tokenID] = mintStars;
         tokenEffect[tokenID] = mintEffect;
@@ -93,4 +95,7 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
         require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
     }
 
+    function setNextTokenID(uint to) public restricted {
+        nextTokenID = to;
+    }
 }
