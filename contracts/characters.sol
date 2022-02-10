@@ -224,7 +224,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         emit NewCharacter(tokenID, receiver);
     }
 
-    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID, uint24 bonusPower) minterOnly public returns (uint256) {
+    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID, uint24 bonusPower, uint16 reputation) minterOnly public returns (uint256) {
         uint64 staminaTimestamp = uint64(now); // 0 on purpose to avoid chain jumping abuse
 
         if(tokenID == 0){
@@ -259,6 +259,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         }
 
         nftVars[tokenID][NFTVAR_BONUS_POWER] = bonusPower;
+        nftVars[tokenID][NFTVAR_REPUTATION] = reputation;
 
         return tokenID;
     }
