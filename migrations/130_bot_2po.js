@@ -60,4 +60,8 @@ module.exports = async function (deployer, network) {
 	
 	await characterCosmetics.grantRole(characterCosmeticsGM, characterProxy.address);
 	await characterRenameTagConsumables.grantRole(characterRenameTagConsumablesGM, characterProxy.address);
+	
+	
+	// Still need to call setChainSupportedForNFT manually
+	// Ex: await storage.setChainSupportedForNFT(weapons.address, [56, 128], true); => enables weapons for those two chain
 };

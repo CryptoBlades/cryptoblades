@@ -19,7 +19,7 @@ contract WeaponBridgeProxyContract is Initializable, AccessControlUpgradeable, I
     bool enabled;
 
     uint8 public constant UINT_NFT_VAR_META = 0;
-    uint8 public constant UINT_NFT_VAR_SEED = 1;
+    uint8 public constant UINT_NFT_VAR_SEED3DCOSMETIC = 1;
 
     modifier restricted() {
         _restricted();
@@ -42,7 +42,7 @@ contract WeaponBridgeProxyContract is Initializable, AccessControlUpgradeable, I
     }
 
  
-    function collectData(uint256 tokenId) external view override returns (uint256[] memory uintVars, bool[] memory boolVars, address[] memory addressVars,  string memory stringVar) {
+    function collectData(uint256 tokenId) external view override returns (uint256[] memory uintVars, string memory stringVar) {
         
         (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,,,,, uint24 _burnPoints,) = weapons.get(tokenId);
         uint32 appliedCosmetic = weaponCosmetics.getWeaponCosmetic(tokenId);
@@ -51,12 +51,9 @@ contract WeaponBridgeProxyContract is Initializable, AccessControlUpgradeable, I
 
         uintVars = new uint256[](2);
         uintVars[UINT_NFT_VAR_META] = _packWeaponsData(appliedCosmetic, _properties, _stat1, _stat2, _stat3, _level, uint8(_burnPoints & 0xFF), uint8((_burnPoints >> 8) & 0xFF), uint8((_burnPoints >> 16) & 0xFF));
-        uintVars[UINT_NFT_VAR_SEED] = seed3dCosmetics;
+        uintVars[UINT_NFT_VAR_SEED3DCOSMETIC] = seed3dCosmetics;
 
         stringVar = rename;
-
-        boolVars = new bool[](0);
-        addressVars = new address[](0);
     }
 
     function isEnabled() external view override returns (bool) {
@@ -67,11 +64,13 @@ contract WeaponBridgeProxyContract is Initializable, AccessControlUpgradeable, I
         enabled = _enabled;
     }
 
-    function mintOrUpdate(uint256 tokenId, uint256[] calldata uintVars, bool[] calldata boolVars, address[] calldata addressVars,  string calldata stringVar) external restricted override returns (uint256) {
+    function mintOrUpdate(uint256 tokenId, uint256[] calldata uintVars, string calldata stringVar) external restricted override returns (uint256) {
+        require(enabled, "not enabled");
+
         uint32 appliedCosmetic = uint32((uintVars[UINT_NFT_VAR_META] >> 96) & 0xFFFFFFFF);
 
          tokenId = 
-            weapons.performMintWeaponDetailed(nftStorageAddress, uintVars[UINT_NFT_VAR_META], uintVars[UINT_NFT_VAR_SEED], tokenId);
+            weapons.performMintWeaponDetailed(nftStorageAddress, uintVars[UINT_NFT_VAR_META], uintVars[UINT_NFT_VAR_SEED3DCOSMETIC], tokenId);
 
         if(appliedCosmetic > 0) {
             weaponCosmetics.setWeaponCosmetic(tokenId, appliedCosmetic);
