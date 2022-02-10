@@ -3471,6 +3471,15 @@ export function createStore(web3: Web3) {
         return await SimpleQuests.methods.setTierChances(tier, [uncommon, rare, epic, legendary]).send(defaultCallOptions(state));
       },
 
+      async setSkipQuestStaminaCost({state}, {staminaCost}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_SKIP_QUEST_STAMINA_COST = await SimpleQuests.methods.VAR_SKIP_QUEST_STAMINA_COST().call(defaultCallOptions(state));
+
+        return await SimpleQuests.methods.setVar(VAR_SKIP_QUEST_STAMINA_COST, staminaCost).send(defaultCallOptions(state));
+      },
+
       async getSkipQuestStaminaCost({state}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
@@ -3480,13 +3489,22 @@ export function createStore(web3: Web3) {
         return await SimpleQuests.methods.vars(VAR_SKIP_QUEST_STAMINA_COST).call(defaultCallOptions(state));
       },
 
-      async setSkipQuestStaminaCost({state}, {staminaCost}) {
+      async getWeeklyCompletionsLimit({state}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        const VAR_SKIP_QUEST_STAMINA_COST = await SimpleQuests.methods.VAR_SKIP_QUEST_STAMINA_COST().call(defaultCallOptions(state));
+        const VAR_WEEKLY_COMPLETIONS_LIMIT = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_LIMIT().call(defaultCallOptions(state));
 
-        return await SimpleQuests.methods.setVar(VAR_SKIP_QUEST_STAMINA_COST, staminaCost).send(defaultCallOptions(state));
+        return await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_LIMIT).call(defaultCallOptions(state));
+      },
+
+      async setWeeklyCompletionsLimit({state}, {newLimit}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_WEEKLY_COMPLETIONS_LIMIT = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_LIMIT().call(defaultCallOptions(state));
+
+        return await SimpleQuests.methods.setVar(VAR_WEEKLY_COMPLETIONS_LIMIT, newLimit).send(defaultCallOptions(state));
       },
 
       async getReputationLevelRequirements({state}) {
@@ -3617,15 +3635,6 @@ export function createStore(web3: Web3) {
         if (!SimpleQuests || !state.defaultAccount) return;
 
         return await SimpleQuests.methods.nextWeeklyQuestCompletionLimitReset().call(defaultCallOptions(state));
-      },
-
-      async getWeeklyCompletionsLimit({state}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
-
-        const VAR_WEEKLY_COMPLETIONS_LIMIT = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_LIMIT().call(defaultCallOptions(state));
-
-        return await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_LIMIT).call(defaultCallOptions(state));
       },
 
       async getWeeklyCompletions({state}) {

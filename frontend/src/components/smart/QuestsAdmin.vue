@@ -139,6 +139,17 @@
       </b-button>
     </b-form>
     <b-form class="d-flex flex-column gap-3">
+      <h2 class="pt-3">{{ $t('quests.updateWeeklyQuestsCompletionsLimit') }}</h2>
+      <div class="requirements-grid-container gap-3">
+        <label class="m-0 align-self-center">{{ $t('quests.weeklyCompletionsLimit') }}</label>
+        <b-form-input type="number" number :min="0" v-model="weeklyCompletionsLimit"/>
+      </div>
+      <b-button variant="primary" @click="updateWeeklyCompletionsLimit"
+                :disabled="isLoading || showTemplateConfirmationModal || showPromoToggleConfirmationModal">
+        {{ $t('quests.updateWeeklyCompletionsLimit') }}
+      </b-button>
+    </b-form>
+    <b-form class="d-flex flex-column gap-3">
       <h2 class="pt-3">{{ $t('quests.updateUsePromoQuestTemplates') }}</h2>
       <div class="requirements-grid-container gap-3">
         <label class="m-0 align-self-center">{{ $t('quests.usePromoQuestTemplates') }}</label>
@@ -247,6 +258,10 @@ interface StoreMappedActions {
 
   getSkipQuestStaminaCost(): Promise<number>;
 
+  setWeeklyCompletionsLimit(payload: { newLimit: number }): Promise<void>;
+
+  getWeeklyCompletionsLimit(): Promise<number>;
+
   getQuestTierChances(payload: { tier: number }): Promise<TierChances>;
 
   setQuestTierChances(payload: { tier: number, tierChances: TierChances }): Promise<void>;
@@ -268,6 +283,7 @@ interface Data {
   showPromoToggleConfirmationModal: boolean;
   reputationLevelRequirements?: ReputationLevelRequirements;
   staminaCost: number;
+  weeklyCompletionsLimit: number;
   tierChances: TierChances[];
   usePromoQuests: boolean;
 }
@@ -297,6 +313,7 @@ export default Vue.extend({
       showPromoToggleConfirmationModal: false,
       reputationLevelRequirements: undefined,
       staminaCost: 0,
+      weeklyCompletionsLimit: 0,
       tierChances: [] as TierChances[],
       usePromoQuests: false,
       RequirementType,
@@ -314,6 +331,8 @@ export default Vue.extend({
       'setReputationLevelRequirements',
       'setSkipQuestStaminaCost',
       'getSkipQuestStaminaCost',
+      'getWeeklyCompletionsLimit',
+      'setWeeklyCompletionsLimit',
       'getQuestTierChances',
       'setQuestTierChances',
       'isUsingPromoQuests',
@@ -365,6 +384,16 @@ export default Vue.extend({
         this.isLoading = true;
         await this.setSkipQuestStaminaCost({staminaCost: this.staminaCost});
         this.staminaCost = await this.getSkipQuestStaminaCost();
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async updateWeeklyCompletionsLimit() {
+      try {
+        this.isLoading = true;
+        await this.setWeeklyCompletionsLimit({newLimit: this.weeklyCompletionsLimit});
+        this.weeklyCompletionsLimit = await this.getWeeklyCompletionsLimit();
       } finally {
         this.isLoading = false;
       }
@@ -444,6 +473,7 @@ export default Vue.extend({
       this.refreshQuestTemplates();
       this.reputationLevelRequirements = await this.getReputationLevelRequirements();
       this.staminaCost = await this.getSkipQuestStaminaCost();
+      this.weeklyCompletionsLimit = await this.getWeeklyCompletionsLimit();
       this.usePromoQuests = await this.isUsingPromoQuests();
       await this.refreshTierChances();
     } finally {
