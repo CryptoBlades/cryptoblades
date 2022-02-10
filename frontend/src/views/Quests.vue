@@ -33,7 +33,7 @@
         </div>
       </div>
       <QuestDetails v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
-                    :characterId="character.id" :isLimitReached="currentWeeklyCompletions >= maxWeeklyCompletions"/>
+                    :characterId="character.id"/>
       <div v-else-if="isRequestQuestLoading" class="request-quest">
         <b-button variant="primary" disabled>
           <i class="fas fa-spinner fa-spin"/>
@@ -336,7 +336,7 @@ export default Vue.extend({
       let seconds: string | number = Math.floor((total / 1000) % 60);
       let minutes: string | number = Math.floor((total / 1000 / 60) % 60);
       let hours: string | number = Math.floor((total / (1000 * 60 * 60)) % 24);
-      let days: string | number = Math.ceil((total / (1000 * 60 * 60 * 24)));
+      let days: string | number = Math.floor((total / (1000 * 60 * 60 * 24)));
       if (seconds < 10) {
         seconds = String(seconds).padStart(2, '0');
       }

@@ -203,7 +203,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function skipQuest(uint256 characterID) public assertQuestsEnabled assertOnQuest(characterID, true) returns (uint256) {
-        if(hasFreeSkip(characterID)) {
+        if (hasFreeSkip(characterID)) {
             lastFreeSkipUsage[characterID] = now;
         } else {
             characters.getFightDataAndDrainStamina(msg.sender, characterID, uint8(vars[VAR_SKIP_QUEST_STAMINA_COST]), false, 0);
@@ -215,11 +215,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function completeQuest(uint256 characterID) public assertQuestsEnabled assertOnQuest(characterID, true) returns (uint256[] memory questRewards) {
         uint256[] memory questData = getCharacterQuestData(characterID);
         require(questData[0] >= quests[characterQuest[characterID]].requirementAmount, "Not completed");
-        if(isNewQuestsWeek(msg.sender)) {
+        if (isNewQuestsWeek(msg.sender)) {
             firstWeeklyQuestCompletion[msg.sender] = now;
             weeklyCompletions[msg.sender] = 0;
-        } else {
-            require(isUnderWeeklyQuestCompletionLimit(msg.sender), "Too many weekly completions");
         }
         uint256 questID = characterQuest[characterID];
         uint256 currentReputation = questData[2];
@@ -244,8 +242,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         Quest memory quest = quests[questID];
         if (quest.rewardType == RewardType.WEAPON) {
             uint256[] memory tokenIDs = new uint256[](quest.rewardAmount);
+            address owner = characters.ownerOf(characterID);
             for (uint8 i = 0; i < quest.rewardAmount; i++) {
-                tokenIDs[i] = weapons.mintWeaponWithStars(characters.ownerOf(characterID), uint256(quest.rewardRarity), seed, 100);
+                tokenIDs[i] = weapons.mintWeaponWithStars(owner, uint256(quest.rewardRarity), seed, 100);
                 seed = RandomUtil.combineSeeds(seed, i);
             }
             return tokenIDs;
@@ -390,16 +389,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         quest.reputationAmount);
     }
 
-    function canSkipQuest(uint256 characterID) public view returns (bool) {
-        return characters.getStaminaPoints(characterID) >= vars[VAR_SKIP_QUEST_STAMINA_COST];
-    }
-
     function hasFreeSkip(uint256 characterID) public view returns (bool) {
         return now / 1 days > lastFreeSkipUsage[characterID] / 1 days;
-    }
-
-    function isUnderWeeklyQuestCompletionLimit(address user) public view returns (bool) {
-        return weeklyCompletions[user] < vars[VAR_WEEKLY_COMPLETIONS_LIMIT];
     }
 
     function nextWeeklyQuestCompletionLimitReset() public view returns (uint256) {

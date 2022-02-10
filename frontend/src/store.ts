@@ -3587,11 +3587,15 @@ export function createStore(web3: Web3) {
         }
       },
 
-      async canSkipQuest({state}, {characterID}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
+      async hasStaminaToSkipQuest({state}, {characterID}) {
+        const {SimpleQuests, Characters} = state.contracts();
+        if (!SimpleQuests || !Characters || !state.defaultAccount) return;
 
-        return await SimpleQuests.methods.canSkipQuest(characterID).call(defaultCallOptions(state));
+        const VAR_SKIP_QUEST_STAMINA_COST = await SimpleQuests.methods.VAR_SKIP_QUEST_STAMINA_COST().call(defaultCallOptions(state));
+        const staminaPoints = +await Characters.methods.getStaminaPoints(characterID).call(defaultCallOptions(state));
+        const staminaCost = +await SimpleQuests.methods.vars(VAR_SKIP_QUEST_STAMINA_COST).call(defaultCallOptions(state));
+
+        return staminaPoints >= staminaCost;
       },
 
       async hasFreeSkip({state}, {characterID}) {
@@ -3692,7 +3696,6 @@ export function createStore(web3: Web3) {
 
         await SimpleQuests.methods.submitProgressAmount(characterID, amount).send(defaultCallOptions(state));
         await Promise.all([
-          dispatch('updateDustBalance'),
           dispatch('fetchCharacterStamina', characterID),
           dispatch('fetchSoulBalance', characterID),
         ]);
