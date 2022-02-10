@@ -79,6 +79,7 @@ module.exports = {
           providerOrUrl: process.env.BINANCE_MAINNET_RPC_URL || 'https://bsc-dataseed.binance.org/'
         }
       )),
+      gasPrice: 5000000000,
       network_id: 0x38,
       confirmations: 10,
       timeoutBlocks: 200,
@@ -164,7 +165,7 @@ module.exports = {
           providerOrUrl: process.env.POLYGON_MAINNET_RPC_URL || 'https://polygon-rpc.com/'
         }
       )),
-      gasPrice: 30000000000,
+      gasPrice: 50000000000,
       network_id: 137,
       confirmations: 10,
       timeoutBlocks: 200,
@@ -194,7 +195,7 @@ module.exports = {
       )),
       network_id: 43114, // 1 or * for deployment, 43114 for verification (for truffle-plugin-verify to pick up snowtracer api key)
       gas: 7000000,
-      gasPrice: 27000000000,
+      gasPrice: 31000000000,
       confirmations: 10,
       timeoutBlocks: 200,
       skipDryRun: true

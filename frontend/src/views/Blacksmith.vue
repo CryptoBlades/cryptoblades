@@ -130,9 +130,9 @@
                     </div>
                   </template>
                   <div class="text-center">
-                    <b-spinner v-if="spin" type="grow" :label="$t('loading')"></b-spinner>
-                    <b-spinner v-if="spin" type="grow" :label="$t('loading')"></b-spinner>
-                    <b-spinner v-if="spin" type="grow" :label="$t('loading')"></b-spinner>
+                    <b-spinner v-if="spin" type="grow" :label="$t('blacksmith.loading')"></b-spinner>
+                    <b-spinner v-if="spin" type="grow" :label="$t('blacksmith.loading')"></b-spinner>
+                    <b-spinner v-if="spin" type="grow" :label="$t('blacksmith.loading')"></b-spinner>
                   </div>
                   <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true"/>
                   <template #modal-footer></template>
@@ -757,7 +757,7 @@ export default Vue.extend({
         this.newForged.push(x);
       });
 
-      this.newForged.splice(0, this.ownedWeaponIds.length - offset + 1);
+      this.newForged.splice(0, this.ownedWeaponIds.length - offset);
 
 
       // eslint-disable-next-line no-constant-condition
