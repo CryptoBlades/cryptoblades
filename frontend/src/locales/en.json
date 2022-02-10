@@ -5,7 +5,7 @@
     "blacksmith": "Blacksmith",
     "combat": "Combat",
     "raid": "Raid",
-    "market": "Market",
+    "bazaar": "Bazaar",
     "stake": "Stake",
     "pvp": "PvP",
     "quests": "Quests",
@@ -722,7 +722,9 @@
     },
     "doNotHaveAccessTooltip": "You do not have admin access on this contract.",
     "grantRole": "Grant role",
+    "revokeRole": "Revoke role",
     "grantGameAdminRole": "Grant game admin role",
+    "revokeGameAdminRole": "Revoke game admin role",
     "pasteInValidWalletAddress": "Paste in valid wallet address"
   },
   "stake": {
@@ -949,7 +951,17 @@
     "attackerPower": "Your Power:",
     "opponentPower": "Opponent Power:",
     "mmr": "Mmr",
-    "tier": "Tier"
+    "tier": "Tier",
+    "currentlyInDuel": "This character is currently in a duel!",
+    "genericError": "There has been an error. Try again.",
+    "charNotInArena": "The character is not in the arena",
+    "duelInProcess": "Duel already in process",
+    "noEnemyFound": "No opponent has been found. Try again.",
+    "alreadyInMatch": "An opponent has already been requested.",
+    "noEnemyInTier": "No opponents available in this tier.",
+    "charDueling": "The character is already in a duel queue.",
+    "notInMatch": "The character is not in a match. Try again.",
+    "decisionTimeExpired": "Decision time expired."
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",

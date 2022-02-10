@@ -13,6 +13,8 @@ import AdminTab from '@/components/smart/AdminTab.vue';
 
 interface StoreMappedActions {
   userHasAnyAdminAccess(): Promise<boolean>;
+
+  userHasAnyMinterAccess(): Promise<boolean>;
 }
 
 interface Tab {
@@ -42,10 +44,10 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['userHasAnyAdminAccess']) as StoreMappedActions,
+    ...mapActions(['userHasAnyAdminAccess', 'userHasAnyMinterAccess']) as StoreMappedActions,
 
     async fetchData() {
-      this.hasAccessToAnyTab = await this.userHasAnyAdminAccess();
+      this.hasAccessToAnyTab = await this.userHasAnyAdminAccess() || await this.userHasAnyMinterAccess();
     },
   },
 

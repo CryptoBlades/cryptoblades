@@ -25,11 +25,11 @@
       </li>
     </router-link>
 
-    <router-link v-if="!stakeOnly && market" :to="{ name: 'market' }" exact class="nav-link">
+    <a v-if="!stakeOnly && market" href="https://bazaar.market/" exact class="nav-link">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.market") }}</span>
+        <span class="gtag-link-others">{{ $t("viewLink.bazaar") }}</span>
       </li>
-    </router-link>
+    </a>
 
     <router-link :to="{ name: 'select-stake-type' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
@@ -111,10 +111,10 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['userHasAnyAdminAccess']),
+    ...mapActions(['userHasAnyAdminAccess', 'userHasAnyMinterAccess']),
 
     async fetchData() {
-      this.hasAdminAccess = await this.userHasAnyAdminAccess();
+      this.hasAdminAccess = await this.userHasAnyAdminAccess() || await this.userHasAnyMinterAccess();
     },
   },
 

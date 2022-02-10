@@ -1,9 +1,9 @@
 <template>
   <div class="d-flex flex-column align-items-start gap-2 p-1">
-    <h2 class="m-0">{{ $t('admin.grantGameAdminRole') }}</h2>
+    <h2 class="m-0">{{ $t('admin.revokeGameAdminRole') }}</h2>
     <b-form-input v-model="walletAddress" :placeholder="$t('admin.pasteInValidWalletAddress')"/>
     <b-button variant="primary" @click="onSubmit" :disabled="!isValidWeb3Address(walletAddress) || isLoading">
-      {{ $t('admin.grantRole') }}
+      {{ $t('admin.revokeRole') }}
     </b-button>
   </div>
 </template>
@@ -16,7 +16,7 @@ import {PropType} from 'vue/types/options';
 import {isValidWeb3Address} from '@/utils/common';
 
 interface StoreMappedActions {
-  grantGameAdminRole(payload: { walletAddress: string, contract: Contract<any> }): Promise<void>;
+  revokeGameAdminRole(payload: { walletAddress: string, contract: Contract<any> }): Promise<void>;
 }
 
 interface Data {
@@ -41,11 +41,11 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['grantGameAdminRole']) as StoreMappedActions,
+    ...mapActions(['revokeGameAdminRole']) as StoreMappedActions,
     async onSubmit() {
       try {
         this.isLoading = true;
-        await this.grantGameAdminRole({walletAddress: this.walletAddress, contract: this.contract});
+        await this.revokeGameAdminRole({walletAddress: this.walletAddress, contract: this.contract});
       } catch (e) {
         console.error(e);
       } finally {
