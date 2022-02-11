@@ -29,9 +29,9 @@ module.exports = async function (deployer, network) {
 	let characterProxy = await deployProxy(CharactersBridgeProxyContract, [storage.address, characters.address, characterCosmetics.address, characterRenameTagConsumables.address], { deployer });
 	let shieldProxy = await deployProxy(ShieldBridgeProxyContract, [storage.address, shields.address], { deployer });
 	
-	await storage.SetProxyContract(weapons.address, weaponProxy.address, true);
-	await storage.SetProxyContract(characters.address, characterProxy.address, true);
-	await storage.SetProxyContract(shields.address, shieldProxy.address, true);
+	await storage.setProxyContract(weapons.address, weaponProxy.address, true);
+	await storage.setProxyContract(characters.address, characterProxy.address, true);
+	await storage.setProxyContract(shields.address, shieldProxy.address, true);
 	
 	let weaponsGM = await weapons.MINTER_ROLE(); // Not typo; intended
 	let charactersGM = await characters.MINTER_ROLE(); // Not typo; intended

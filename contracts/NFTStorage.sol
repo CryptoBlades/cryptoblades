@@ -289,6 +289,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     modifier bridgeSupported(IERC721 _tokenAddress, uint256 _id, uint256 targetChain) {
         require(_id != 0, "BNS1"); // avoid sanity issues with mappings; just dont support 0
         require(nftAllowedChains[address(_tokenAddress)].contains(targetChain), "BNS2"); // We support bridging from this chain to that chain
+        require(IBridgeProxy(nftProxyContract[address(_tokenAddress)]).isEnabled(), "BNS3");
         _;
     }
     
@@ -317,7 +318,14 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     function getNumberOfStoragedItems(
         IERC721 _tokenAddress
     ) public view returns (uint256) {
-        return storedItems[msg.sender][address(_tokenAddress)].length();
+        return getNumberOfStoragedItems(_tokenAddress, msg.sender);
+    }
+
+    function getNumberOfStoragedItems(
+        IERC721 _tokenAddress,
+        address playerAddress
+    ) public view returns (uint256) {
+        return storedItems[playerAddress][address(_tokenAddress)].length();
     }
 
     // Get stored items of player for NFT
@@ -325,10 +333,18 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         IERC721 _tokenAddress
     ) public view  returns (uint256[] memory tokens) {
 
-        uint256 amount = getNumberOfStoragedItems(_tokenAddress);
+        return getStorageItemIds(_tokenAddress, msg.sender);
+    }
+
+    function getStorageItemIds(
+        IERC721 _tokenAddress,
+        address playerAddress
+    ) public view  returns (uint256[] memory tokens) {
+
+        uint256 amount = getNumberOfStoragedItems(_tokenAddress, playerAddress);
         tokens = new uint256[](amount);
 
-        EnumerableSet.UintSet storage storedTokens = storedItems[msg.sender][address(_tokenAddress)];
+        EnumerableSet.UintSet storage storedTokens = storedItems[playerAddress][address(_tokenAddress)];
 
         for (uint256 i = 0; i < storedTokens.length(); i++) {
             uint256 id = storedTokens.at(i);
@@ -593,6 +609,10 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     function getNFTChainId(address nftAddress, uint256 nftId) public view returns (string memory chainId) {
         chainId = nftChainIds[nftAddress][nftId];
+    }
+
+    function getNFTFromChainId(string calldata chainid, address nftAddress) external view returns (uint256 tokenId) {
+        tokenId = nftChainIdsToMintId[nftAddress][chainid];
     }
 
     function setNFTChainId(address nftAddress, uint256 nftId, string calldata chainId, bool forced) external gameAdminRestricted {
