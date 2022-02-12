@@ -734,6 +734,10 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         allStoredItems[nftAddress].add(tokenId);
         storedItemsOwners[nftAddress][tokenId] = owner;
         storedItems[owner][nftAddress].add(tokenId);
+
+        if(transferOuts[transferOutOfNFTs[nftAddress][tokenId]].status == TRANSFER_OUT_STATUS_DONE) {
+            transferOuts[transferOutOfNFTs[nftAddress][tokenId]].status = TRANSFER_OUT_STATUS_RESTORED;
+        }
     }
 
     function setProxyContract(address nft, address proxy, bool forced) external restricted {
