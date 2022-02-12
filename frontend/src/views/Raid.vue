@@ -799,15 +799,16 @@ hr.divider {
   height: 100%;
   max-height: 413px;
   max-width: 370px;
+  object-fit: contain;
 }
 .boss-box {
   border: 0.5px solid #242423;
   border-radius: 5px;
   padding: 10px 20px;
   background: #ccc;
-  background-image: url(https://www.cryptoblades.io/images/background/video-bg.png);
+  background: url('../assets/background/video-bg.png');
   background-repeat: no-repeat;
-   background-position: center;
+  background-position: center;
 }
 .title {
   font-weight: bold;
