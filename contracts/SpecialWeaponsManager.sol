@@ -6,7 +6,7 @@ import "./weapons.sol";
 import "./SafeRandoms.sol";
 import "./util.sol";
 
-contract BurningManager is Initializable, AccessControlUpgradeable {
+contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");

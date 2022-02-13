@@ -100,10 +100,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     uint public fourStarBurnPowerPerPoint; // 30
     uint public fiveStarBurnPowerPerPoint; // 60
 
-    int128 public oneFrac; // 1.0
-    int128 public powerMultPerPointBasic; // 0.25%
-    int128 public powerMultPerPointPWR; // 0.2575% (+3%)
-    int128 public powerMultPerPointMatching; // 0.2675% (+7%)
+    int128 internal oneFrac; // 1.0
+    int128 internal powerMultPerPointBasic; // 0.25%
+    int128 internal powerMultPerPointPWR; // 0.2575% (+3%)
+    int128 internal powerMultPerPointMatching; // 0.2675% (+7%)
 
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     mapping(uint256 => uint256) public lastTransferTimestamp;
@@ -120,7 +120,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     Promos public promos;
 
-    uint256 public constant BIT_FEATURE_TRANSFER_BLOCKED = 1;
+    uint256 internal constant BIT_FEATURE_TRANSFER_BLOCKED = 1;
     
     uint256 public constant NUMBERPARAMETER_FEATURE_BITS = uint256(keccak256("FEATURE_BITS"));
 
@@ -345,7 +345,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokenID;
     }
 
-    function getRandomProperties(uint256 stars, uint256 seed, uint8 chosenElement) public pure returns (uint16) {
+    function getRandomProperties(uint256 stars, uint256 seed, uint8 chosenElement) internal pure returns (uint16) {
         uint256 trait;
         if (chosenElement == 100) {
             trait = ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) & 0x3) << 3);
@@ -376,15 +376,15 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return (stat1, stat2, stat3);
     }
 
-    function getRandomStat(uint16 minRoll, uint16 maxRoll, uint256 seed, uint256 seed2) public pure returns (uint16) {
+    function getRandomStat(uint16 minRoll, uint16 maxRoll, uint256 seed, uint256 seed2) internal pure returns (uint16) {
         return uint16(RandomUtil.randomSeededMinMax(minRoll, maxRoll,RandomUtil.combineSeeds(seed, seed2)));
     }
 
-    function getRandomCosmetic(uint256 seed, uint256 seed2, uint8 limit) public pure returns (uint8) {
+    function getRandomCosmetic(uint256 seed, uint256 seed2, uint8 limit) internal pure returns (uint8) {
         return uint8(RandomUtil.randomSeededMinMax(0, limit, RandomUtil.combineSeeds(seed, seed2)));
     }
 
-    function getStatMinRoll(uint256 stars) public pure returns (uint16) {
+    function getStatMinRoll(uint256 stars) internal pure returns (uint16) {
         // 1 star
         if (stars == 0) return 4;
         // 2 star
@@ -397,7 +397,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return 268;
     }
 
-    function getStatMaxRoll(uint256 stars) public pure returns (uint16) {
+    function getStatMaxRoll(uint256 stars) internal pure returns (uint16) {
         // 3+ star
         if (stars > 1) return 400;
         // 2 star
@@ -406,7 +406,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return 200;
     }
 
-    function getStatCount(uint256 stars) public pure returns (uint8) {
+    function getStatCount(uint256 stars) internal pure returns (uint8) {
         // 1-2 star
         if (stars < 3) return 1;
         // 3+ star
@@ -421,7 +421,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getStarsFromProperties(getProperties(id));
     }
 
-    function getStarsFromProperties(uint16 properties) public pure returns (uint8) {
+    function getStarsFromProperties(uint16 properties) internal pure returns (uint8) {
         return uint8(properties & 0x7); // first two bits for stars
     }
 
@@ -429,7 +429,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getTraitFromProperties(getProperties(id));
     }
 
-    function getTraitFromProperties(uint16 properties) public pure returns (uint8) {
+    function getTraitFromProperties(uint16 properties) internal pure returns (uint8) {
         return uint8((properties >> 3) & 0x3); // two bits after star bits (3)
     }
 
@@ -437,19 +437,19 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getStatPatternFromProperties(getProperties(id));
     }
 
-    function getStatPatternFromProperties(uint16 properties) public pure returns (uint8) {
+    function getStatPatternFromProperties(uint16 properties) internal pure returns (uint8) {
         return uint8((properties >> 5) & 0x7F); // 7 bits after star(3) and trait(2) bits
     }
 
-    function getStat1Trait(uint8 statPattern) public pure returns (uint8) {
+    function getStat1Trait(uint8 statPattern) internal pure returns (uint8) {
         return uint8(uint256(statPattern) % 5); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
-    function getStat2Trait(uint8 statPattern) public pure returns (uint8) {
+    function getStat2Trait(uint8 statPattern) internal pure returns (uint8) {
         return uint8(SafeMath.div(statPattern, 5) % 5); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
-    function getStat3Trait(uint8 statPattern) public pure returns (uint8) {
+    function getStat3Trait(uint8 statPattern) internal pure returns (uint8) {
         return uint8(SafeMath.div(statPattern, 25) % 5); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
@@ -762,7 +762,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getDurabilityPoints(id) >= maxDurability;
     }
 
-    function getDurabilityMaxWait() public pure returns (uint64) {
+    function getDurabilityMaxWait() internal pure returns (uint64) {
         return uint64(maxDurability * secondsPerDurability);
     }
 
