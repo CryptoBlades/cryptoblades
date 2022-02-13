@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Promos.sol";
 import "./util.sol";
 import "./Garrison.sol";
+import "./common.sol";
+
 contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using SafeMath for uint16;
@@ -14,9 +16,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     bytes32 public constant NO_OWNED_LIMIT = keccak256("NO_OWNED_LIMIT");
-    bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
+    // Copied from promos.sol, to avoid paying 5k gas to query a constant.
+    uint256 private constant BIT_FIRST_CHARACTER = 1;
 
     function initialize () public initializer {
         __ERC721_init("CryptoBlades character", "CBC");
@@ -120,7 +124,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     mapping(uint256 => uint256) public raidsDone;
     mapping(uint256 => uint256) public raidsWon;
 
-    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;//KEYS: NFTID, VARID
+    uint256 public constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
+    uint256 public constant NFTVAR_SIMPLEQUEST_TYPE = 102;
+    uint256 public constant NFTVAR_REPUTATION = 103;
+
+    uint256 public constant SIMPLEQUEST_TYPE_RAID = 6;
+
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars; // nftID, fieldID, value
     uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
 
     Garrison public garrison;
@@ -214,7 +224,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         emit NewCharacter(tokenID, receiver);
     }
 
-    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID) minterOnly public returns (uint256) {
+    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID, uint24 bonusPower, uint16 reputation) minterOnly public returns (uint256) {
         uint64 staminaTimestamp = uint64(now); // 0 on purpose to avoid chain jumping abuse
 
         if(tokenID == 0){
@@ -247,6 +257,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             CharacterCosmetics storage cc = cosmetics[tokenID];
             cc.seed = seed;
         }
+
+        nftVars[tokenID][NFTVAR_BONUS_POWER] = bonusPower;
+        nftVars[tokenID][NFTVAR_REPUTATION] = reputation;
 
         return tokenID;
     }
@@ -310,18 +323,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getPowerAtLevel(uint8 level) public pure returns (uint24) {
-        // does not use fixed points since the numbers are simple
-        // the breakpoints every 10 levels are floored as expected
-        // level starts at 0 (visually 1)
-        // 1000 at lvl 1
-        // 9000 at lvl 51 (~3months)
-        // 22440 at lvl 105 (~3 years)
-        // 92300 at lvl 255 (heat death of the universe)
-        return uint24(
-            uint256(1000)
-                .add(level.mul(10))
-                .mul(level.div(10).add(1))
-        );
+        return Common.getPowerAtLevel(level);
     }
 
     function getTrait(uint256 id) public view noFreshLookup(id) returns (uint8) {
@@ -412,7 +414,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
         }
         // bitwise magic to avoid stacking limitations later on
-        return uint96(char.trait | (uint24(getTotalPower(id)) << 8) | (preTimestamp << 32));
+        return uint96(char.trait | (getTotalPower(id) << 8) | (preTimestamp << 32));
     }
 
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {
@@ -421,6 +423,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         require(nftVars[id][NFTVAR_BUSY] == 0); // raids do not apply busy flag for now
         //nftVars[id][NFTVAR_BUSY] = 0;
         _gainXp(id, xp);
+        if (getNftVar(id, NFTVAR_SIMPLEQUEST_TYPE) == SIMPLEQUEST_TYPE_RAID) {
+            uint currentProgress = getNftVar(id, NFTVAR_SIMPLEQUEST_PROGRESS);
+            setNftVar(id, NFTVAR_SIMPLEQUEST_PROGRESS, ++currentProgress);
+        }
     }
 
     function getCharactersOwnedBy(address wallet) public view returns(uint256[] memory chars) {
@@ -442,11 +448,23 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
                 chars[--ready] = owned[i];
     }
 
+    function setNFTVars(uint256 id, uint256[] memory fields, uint256[] memory values) public restricted {
+        for(uint i = 0; i < fields.length; i++)
+            nftVars[id][fields[i]] = values[i];
+    }
+
+    function getNFTVars(uint256 id, uint256[] memory fields) public view returns(uint256[] memory values) {
+        values = new uint256[](fields.length);
+        for(uint i = 0; i < fields.length; i++)
+            values[i] = nftVars[id][fields[i]];
+    }
+
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(nftVars[tokenId][NFTVAR_BUSY] == 0);
-
-        promos.setBit(from, promos.BIT_FIRST_CHARACTER());
-        promos.setBit(to, promos.BIT_FIRST_CHARACTER());
+        address[] memory users = new address[](2);
+        users[0] = from;
+        users[1] = to;
+        promos.setBits(users, BIT_FIRST_CHARACTER);
     }
 
     function safeTransferFrom(address from, address to, uint256 tokenId) override public {

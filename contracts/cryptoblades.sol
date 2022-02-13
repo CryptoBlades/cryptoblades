@@ -520,9 +520,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _mintWeaponNLogic(uint32 num, uint8 chosenElement) internal {
         require(num > 0 && num <= 10);
-        for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))), chosenElement);
-        }
+        weapons.mintN(msg.sender, num, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
     function _mintWeaponLogic(uint8 chosenElement) internal {
@@ -719,6 +717,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function deductAfterPartnerClaim(uint256 amount, address player) external restricted {
         tokenRewards[player] = tokenRewards[player].sub(amount);
+        vars[VAR_UNCLAIMED_SKILL] -= amount;
         _trackIncome(amount);
     }
 

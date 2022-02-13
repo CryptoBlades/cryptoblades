@@ -11,13 +11,15 @@ import Leaderboard from './views/Leaderboard.vue';
 import Portal from './views/Portal.vue';
 import Options from './views/Options.vue';
 import PvP from './views/PvP.vue';
+import Quests from './views/Quests.vue';
+import Admin from '@/views/Admin.vue';
 import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
 
-import {market, merchandise, portal, pvp, raid, stakeOnly} from './feature-flags';
+import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from './feature-flags';
 import Merchandise from '@/components/smart/Merchandise.vue';
-import {currentChainSupportsMerchandise, currentChainSupportsPvP} from '@/utils/common';
+import {currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 export default function createRouter() {
   if (stakeOnly) {
@@ -43,6 +45,7 @@ export default function createRouter() {
       {path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true},
       {path: '/bridge', name: 'bridge', component: Bridge},
       {path: '/treasury', name: 'treasury', component: Treasury},
+      {path: '/admin', name: 'admin', component: Admin},
     ]
   });
 
@@ -56,6 +59,17 @@ export default function createRouter() {
 
   if (portal) {
     router.addRoute({path: '/portal', name: 'portal', component: Portal});
+  }
+
+  if (quests) {
+    const questsRoute = {
+      path: '/quests', name: 'quests', component: Quests,
+      beforeEnter: (to: any, from: any, next: any) => {
+        if (to.name === 'quests' && !currentChainSupportsQuests()) next(from);
+        else next();
+      }
+    };
+    router.addRoute(questsRoute);
   }
 
   if (pvp) {
