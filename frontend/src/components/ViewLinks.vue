@@ -25,11 +25,17 @@
       </li>
     </router-link>
 
-    <a v-if="!stakeOnly && market" href="https://bazaar.market/" exact class="nav-link">
+    <a v-if="!stakeOnly && market && !isDevelopmentEnvironment" href="https://bazaar.market/" class="nav-link" target="_blank">
+      <li class="nav-item nav-top-links">
+        <span class="gtag-link-others">{{ $t("viewLink.bazaar") }} <b-icon-box-arrow-up-right scale="0.7"/></span>
+      </li>
+    </a>
+
+    <router-link v-else-if="!stakeOnly && market && isDevelopmentEnvironment" :to="{ name: 'market' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
         <span class="gtag-link-others">{{ $t("viewLink.bazaar") }}</span>
       </li>
-    </a>
+    </router-link>
 
     <router-link :to="{ name: 'select-stake-type' }" exact class="nav-link">
       <li class="nav-item nav-top-links">
@@ -107,7 +113,10 @@ export default Vue.extend({
     },
     supportsQuests() {
       return this.getCurrentChainSupportsQuests;
-    }
+    },
+    isDevelopmentEnvironment() {
+      return process.env.NODE_ENV === 'development';
+    },
   },
 
   methods: {
