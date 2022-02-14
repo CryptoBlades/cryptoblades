@@ -81,7 +81,4 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.gap-3 {
-  gap: 1rem;
-}
 </style>

@@ -216,7 +216,7 @@
         <h4 class="text-center">
           {{ promoQuestTemplates ? $t('quests.areYouSureAddPromoQuest') : $t('quests.areYouSureAddQuest') }}
         </h4>
-        <QuestDetails :quest="questTemplate" :isDisplayOnly="true"/>
+        <QuestTemplate :quest="questTemplate" isDisplayOnly/>
       </div>
     </b-modal>
     <b-modal v-model="showPromoToggleConfirmationModal" @ok.prevent="togglePromoQuests" :ok-disabled="isLoading"
@@ -243,7 +243,7 @@ import {
   TierChances
 } from '@/views/Quests.vue';
 import QuestTemplatesDisplay from '@/components/smart/QuestTemplatesDisplay.vue';
-import QuestDetails from '@/components/smart/QuestDetails.vue';
+import QuestTemplate from './QuestTemplate.vue';
 
 interface StoreMappedActions {
   addQuestTemplate(payload: { questTemplate: Quest }): Promise<void>;
@@ -290,7 +290,7 @@ interface Data {
 
 export default Vue.extend({
 
-  components: {QuestTemplatesDisplay, QuestDetails},
+  components: {QuestTemplatesDisplay, QuestTemplate},
 
   data() {
     return {
@@ -485,10 +485,6 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.gap-3 {
-  gap: 1rem;
-}
-
 .requirements-grid-container,
 .grid-container {
   display: grid;

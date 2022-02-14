@@ -1,11 +1,13 @@
 <template>
-  <b-modal v-if="quest" class="centered-modal" v-model="showModal" button-size="lg" no-close-on-backdrop scrollable
-           :title="$t('quests.turnIn')" size="xl" @close="resetTokens" @cancel="resetTokens"
+  <b-modal v-if="quest" class="centered-modal" :visible="showModal" button-size="lg" no-close-on-backdrop scrollable
+           :title="$t('quests.turnIn')" size="xl" @close.prevent="resetTokens"
+           @cancel.prevent="resetTokens"
            :ok-title="$t('quests.submit')" :busy="isLoading"
            :ok-disabled="isSubmitDisabled()"
            @ok.prevent="quest.requirementType === RequirementType.DUST
            || quest.requirementType === RequirementType.STAMINA
-           || quest.requirementType === RequirementType.SOUL ? submitAmount() : submit()">
+           || quest.requirementType === RequirementType.SOUL ?
+            submitAmount() : submit()">
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
                    showGivenWeaponIds @chooseweapon="addBurnToken"
@@ -42,9 +44,10 @@ import WeaponGrid from '@/components/smart/WeaponGrid.vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import NftList, {NftIdType} from '@/components/smart/NftList.vue';
 import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
-import Events from '@/events';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 import NftIcon from '@/components/NftIcon.vue';
+import {PropType} from 'vue/types/options';
+import {Nft} from '../../interfaces/Nft';
 
 interface StoreMappedActions {
   submitProgress(payload: { characterID: string | number, tokenIds: (string | number)[] }): Promise<void>;
@@ -58,7 +61,6 @@ interface Data {
   quest?: Quest;
   characterId: number | string;
   questProgress: number;
-  showModal: boolean;
   ownedTokens: string[];
   tokensToBurn: (string | number)[];
   ownedNftIdTypes: NftIdType[];
@@ -72,12 +74,22 @@ interface Data {
 export default Vue.extend({
   components: {WeaponGrid, NftList, DustBalanceDisplay, NftIcon},
 
+  props: {
+    showModal: {
+      type: Boolean,
+      default: false,
+    },
+    character: {
+      type: Object as PropType<Nft>,
+      required: true,
+    },
+  },
+
   data() {
     return {
       quest: undefined,
       characterId: '',
       questProgress: 0,
-      showModal: false,
       ownedTokens: [],
       tokensToBurn: [],
       ownedNftIdTypes: [],
@@ -160,8 +172,6 @@ export default Vue.extend({
         await this.submitProgress({characterID: this.characterId, tokenIds: this.tokensToBurn});
       } finally {
         this.resetTokens();
-        Events.$emit('refresh-quest-data');
-        this.showModal = false;
         this.isLoading = false;
       }
     },
@@ -173,13 +183,12 @@ export default Vue.extend({
         await this.submitProgressAmount({characterID: this.characterId, amount: this.amountToBurn});
       } finally {
         this.resetTokens();
-        Events.$emit('refresh-quest-data');
-        this.showModal = false;
         this.isLoading = false;
       }
     },
 
     resetTokens() {
+      this.$emit('close-submission-modal');
       this.ownedTokens = [];
       this.ownedNftIdTypes = [];
       this.tokensToBurn = [];
@@ -201,13 +210,13 @@ export default Vue.extend({
     }
   },
 
-  mounted() {
-    Events.$on('quest-submission-modal', async (quest: Quest, characterId: string | number, questProgress: number) => {
-      if (quest) {
-        this.quest = quest;
-        this.characterId = characterId;
-        this.questProgress = questProgress;
-        this.showModal = true;
+  watch: {
+    async showModal(newVal: boolean) {
+      if (newVal) {
+        this.quest = this.character.quest;
+        if(!this.quest) return;
+        this.characterId = this.character.id;
+        this.questProgress = this.quest.progress;
         if (this.quest.requirementType === RequirementType.WEAPON) {
           this.ownedTokens = this.ownedWeaponIds;
         } else if (this.quest.requirementType === RequirementType.JUNK) {
@@ -222,11 +231,8 @@ export default Vue.extend({
         } else if (this.quest.requirementType === RequirementType.SOUL) {
           this.soulBalance = await this.fetchSoulBalance();
         }
-      } else {
-        this.showModal = false;
-        this.resetTokens();
       }
-    });
+    }
   }
 });
 </script>

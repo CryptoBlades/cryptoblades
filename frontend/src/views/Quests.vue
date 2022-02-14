@@ -1,87 +1,27 @@
 <template>
-  <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container">
-    <b-progress class="w-100" :max="maxWeeklyCompletions" :value="currentWeeklyCompletions" variant="primary"/>
-    <div class="d-flex flex-column w-100">
-      <span v-if="nextFreeSkipTime">{{ $t('quests.nextFreeSkipsResetIn', {time: nextFreeSkipTime}) }}</span>
-      <span v-if="nextWeekResetTime">{{ $t('quests.nextWeekResetIn', {time: nextWeekResetTime}) }}</span>
-    </div>
-    <div v-for="character in characters" :key="character.id" class="d-flex quest-row">
-      <div class="character"
-           :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(character.id) : undefined]">
-        <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
-          <slot name="above" :character="character"></slot>
+  <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container gap-4 p-5">
+    <div class="d-flex justify-content-between w-100">
+      <span class="quests-title">{{ $t('quests.quest') }}</span>
+      <div class="d-flex flex-column gap-2">
+        <div class="d-flex justify-content-between gap-4">
+          <span class="text-uppercase weekly-progress">{{ $t('quests.weeklyProgress') }}</span>
+          <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon" alt=""/> {{
+              $t('quests.resetsIn', {time: nextWeekResetTime})
+            }}</span>
         </div>
-        <slot name="sold" :character="character"></slot>
-        <div class="art">
-          <div class="animation"/>
-          <CharacterArt
-            :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(character.id) : undefined]"
-            :character="character" :hideIdContainer="true" :hideXpBar="true"/>
+        <div class="quest-progress w-100">
+          <div class="quest-progress-bar" role="progressbar"
+               :style="`width: calc(${currentWeeklyCompletions/maxWeeklyCompletions*100}% - 8px);`"
+               :aria-valuenow="currentWeeklyCompletions"
+               aria-valuemin="0" :aria-valuemax="maxWeeklyCompletions">
+          </div>
+          <!--          <span class="quest-progress-value">{{ `${currentWeeklyCompletions} / ${maxWeeklyCompletions}` }}</span>-->
         </div>
-        <div
-          v-if="character.quest && character.quest.reputation !== undefined && reputationLevelRequirements"
-          class="xp">
-          <span>{{ $t('quests.reputationLevel', {level: getReputationLevel(character.quest.reputation)}) }} <b-icon-question-circle
-            class="pointer"
-            @click="showReputationInfoModal"/></span>
-          <strong v-if="getReputationLevel(character.quest.reputation) !== 5"
-                  class="outline xp-text">{{ character.quest.reputation || 0 }} /
-            {{ getReputationBreakpoint(character.quest.reputation) }}</strong>
-          <b-progress v-if="getReputationLevel(character.quest.reputation) !== 5" class="reputation-progress"
-                      :max="getReputationBreakpoint(character.quest.reputation)" :value="character.quest.reputation"
-                      variant="primary"/>
-        </div>
-      </div>
-      <QuestDetails v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
-                    :characterId="character.id"/>
-      <div v-else-if="isRequestQuestLoading" class="request-quest">
-        <b-button variant="primary" disabled>
-          <i class="fas fa-spinner fa-spin"/>
-          {{ $t('quests.loading') }}
-        </b-button>
-      </div>
-      <div v-else class="request-quest">
-        <b-button variant="primary" @click="request(character.id)">
-          {{ $t('quests.requestQuest') }}
-        </b-button>
       </div>
     </div>
-    <QuestSubmissionModal/>
-    <b-modal v-model="showReputationModal" ok-only class="centered-modal" :title="$t('quests.reputation')">
-      <div v-if="!isReputationInfoLoading" class="d-flex flex-column gap-3">
-        <div class="d-flex justify-content-between">
-          <span class="invisible">{{ $t('quests.rarityType.COMMON') }}</span>
-          <div>{{ $t('quests.rarityType.COMMON') }}</div>
-          <div>{{ $t('quests.rarityType.UNCOMMON') }}</div>
-          <div>{{ $t('quests.rarityType.RARE') }}</div>
-          <div>{{ $t('quests.rarityType.EPIC') }}</div>
-          <div>{{ $t('quests.rarityType.LEGENDARY') }}</div>
-        </div>
-        <div v-for="(tierChance, index) in tierChances" class="d-flex justify-content-between align-items-center"
-             :key="index">
-          <span class="text-nowrap">{{ $t('quests.level', {level: index + 1}) }}</span>
-          <div>
-            <span>{{ tierChance.common }}%</span>
-          </div>
-          <div>
-            <span>{{ tierChance.uncommon }}%</span>
-          </div>
-          <div>
-            <span>{{ tierChance.rare }}%</span>
-          </div>
-          <div>
-            <span>{{ tierChance.epic }}%</span>
-          </div>
-          <div>
-            <span>{{ tierChance.legendary }}%</span>
-          </div>
-        </div>
-      </div>
-      <span v-else>
-        <i class="fas fa-spinner fa-spin"/>
-        {{ $t('quests.loading') }}
-      </span>
-    </b-modal>
+    <div v-for="character in characters" :key="character.id" class="d-flex w-100">
+      <QuestRow :characterId="character.id" :reputationLevelRequirements="reputationLevelRequirements"/>
+    </div>
   </div>
   <div v-else-if="isLoading">
     <i class="fas fa-spinner fa-spin"/>
@@ -97,10 +37,10 @@ import Vue from 'vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import {Nft} from '@/interfaces/Nft';
 import {Accessors} from 'vue/types/options';
-import QuestDetails from '@/components/smart/QuestDetails.vue';
-import CharacterArt from '@/components/CharacterArt.vue';
-import QuestSubmissionModal from '@/components/smart/QuestSubmissionModal.vue';
+import QuestRow from '@/components/smart/QuestRow.vue';
+import hourglass from '@/assets/hourglass.png';
 import Events from '@/events';
+import {getTimeRemaining} from '@/utils/common';
 
 export interface Quest {
   progress: number;
@@ -133,6 +73,10 @@ export enum DustRarity {
   LESSER, GREATER, POWERFUL
 }
 
+export enum ReputationTier {
+  PEASANT, TRADESMAN, NOBLE, KNIGHT, KING
+}
+
 export interface ReputationLevelRequirements {
   level2: number;
   level3: number;
@@ -153,13 +97,7 @@ interface StoreMappedActions {
 
   getCharacterQuestData(payload: { characterId: string | number }): Promise<Quest>;
 
-  requestQuest(payload: { characterID: string | number }): Promise<void>;
-
   getReputationLevelRequirements(): Promise<ReputationLevelRequirements>;
-
-  getQuestTierChances(payload: { tier: number }): Promise<TierChances>;
-
-  nextFreeSkip(): Promise<string>;
 
   nextWeeklyQuestCompletionLimitReset(): Promise<string>;
 
@@ -176,20 +114,14 @@ interface Data {
   characters: Nft[];
   reputationLevelRequirements?: ReputationLevelRequirements;
   isLoading: boolean;
-  isRequestQuestLoading: boolean;
-  isReputationInfoLoading: boolean;
-  tierChances: TierChances[];
-  showReputationModal: boolean;
-  nextFreeSkipTime: string;
   nextWeekResetTime: string;
-  freeSkipCheckInterval?: ReturnType<typeof setInterval>;
   nextWeekResetCheckInterval?: ReturnType<typeof setInterval>;
   maxWeeklyCompletions: number;
   currentWeeklyCompletions: number;
 }
 
 export default Vue.extend({
-  components: {QuestSubmissionModal, CharacterArt, QuestDetails},
+  components: {QuestRow},
 
   props: {
     showCosmetics: {
@@ -203,14 +135,10 @@ export default Vue.extend({
       characters: [] as Nft[],
       reputationLevelRequirements: undefined,
       isLoading: false,
-      isRequestQuestLoading: false,
-      isReputationInfoLoading: false,
-      tierChances: [] as TierChances[],
-      showReputationModal: false,
-      nextFreeSkipTime: '',
       nextWeekResetTime: '',
       maxWeeklyCompletions: 0,
       currentWeeklyCompletions: 0,
+      hourglass,
     } as Data;
   },
 
@@ -223,61 +151,17 @@ export default Vue.extend({
     ...mapActions([
       'fetchCharacters',
       'getCharacterQuestData',
-      'requestQuest',
       'getReputationLevelRequirements',
-      'getQuestTierChances',
-      'nextFreeSkip',
       'nextWeeklyQuestCompletionLimitReset',
       'getWeeklyCompletionsLimit',
       'getWeeklyCompletions',
     ]) as StoreMappedActions,
-
-    getReputationLevel(reputation: number) {
-      if (!this.reputationLevelRequirements) return;
-      if (reputation < this.reputationLevelRequirements.level2) {
-        return 1;
-      } else if (reputation < this.reputationLevelRequirements.level3) {
-        return 2;
-      } else if (reputation < this.reputationLevelRequirements.level4) {
-        return 3;
-      } else if (reputation < this.reputationLevelRequirements.level5) {
-        return 4;
-      } else {
-        return 5;
-      }
-    },
-
-    getReputationBreakpoint(reputation: number) {
-      if (!this.reputationLevelRequirements) return;
-      if (reputation < this.reputationLevelRequirements.level2) {
-        return this.reputationLevelRequirements.level2;
-      } else if (reputation < this.reputationLevelRequirements.level3) {
-        return this.reputationLevelRequirements.level3;
-      } else if (reputation < this.reputationLevelRequirements.level4) {
-        return this.reputationLevelRequirements.level4;
-      } else if (reputation < this.reputationLevelRequirements.level5) {
-        return this.reputationLevelRequirements.level5;
-      } else {
-        return 0;
-      }
-    },
-
-    async request(characterId: string | number) {
-      try {
-        this.isRequestQuestLoading = true;
-        await this.requestQuest({characterID: characterId});
-        await this.refreshQuestData();
-      } finally {
-        this.isRequestQuestLoading = false;
-      }
-    },
 
     async refreshQuestData() {
       try {
         this.isLoading = true;
         this.currentWeeklyCompletions = await this.getWeeklyCompletions();
         this.maxWeeklyCompletions = await this.getWeeklyCompletionsLimit();
-        await this.getNextFreeSkipTime();
         await this.getNextWeekResetTime();
         this.reputationLevelRequirements = await this.getReputationLevelRequirements();
         this.characters = await Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {
@@ -289,74 +173,18 @@ export default Vue.extend({
       }
     },
 
-    async showReputationInfoModal() {
-      try {
-        this.showReputationModal = true;
-        this.isReputationInfoLoading = true;
-        this.tierChances[0] = await this.getQuestTierChances({tier: 0});
-        this.tierChances[1] = await this.getQuestTierChances({tier: 1});
-        this.tierChances[2] = await this.getQuestTierChances({tier: 2});
-        this.tierChances[3] = await this.getQuestTierChances({tier: 3});
-        this.tierChances[4] = await this.getQuestTierChances({tier: 4});
-      } finally {
-        this.isReputationInfoLoading = false;
-      }
-    },
-
     async getNextWeekResetTime() {
       const nextWeekResetTimestamp = await this.nextWeeklyQuestCompletionLimitReset();
       if (this.nextWeekResetCheckInterval) {
         clearInterval(this.nextWeekResetCheckInterval);
       }
       this.nextWeekResetCheckInterval = setInterval(() => {
-        const {total, days, hours, minutes, seconds} = this.getTimeRemaining(nextWeekResetTimestamp);
-        this.nextWeekResetTime = `${days}:${hours}:${minutes}:${seconds}`;
+        const {total, days, hours, minutes, seconds} = getTimeRemaining(nextWeekResetTimestamp);
+        this.nextWeekResetTime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
         if (total <= 0 && this.nextWeekResetCheckInterval) {
           clearInterval(this.nextWeekResetCheckInterval);
         }
       }, 1000);
-    },
-
-    async getNextFreeSkipTime() {
-      const nextFreeSkipTimestamp = await this.nextFreeSkip();
-      if (this.freeSkipCheckInterval) {
-        clearInterval(this.freeSkipCheckInterval);
-      }
-      this.freeSkipCheckInterval = setInterval(() => {
-        const {total, hours, minutes, seconds} = this.getTimeRemaining(nextFreeSkipTimestamp);
-        this.nextFreeSkipTime = `${hours}:${minutes}:${seconds}`;
-        if (total <= 0 && this.freeSkipCheckInterval) {
-          clearInterval(this.freeSkipCheckInterval);
-        }
-      }, 1000);
-    },
-
-    getTimeRemaining(end: string) {
-      const total = new Date(+end * 1000).getTime() - new Date().getTime();
-      let seconds: string | number = Math.floor((total / 1000) % 60);
-      let minutes: string | number = Math.floor((total / 1000 / 60) % 60);
-      let hours: string | number = Math.floor((total / (1000 * 60 * 60)) % 24);
-      let days: string | number = Math.floor((total / (1000 * 60 * 60 * 24)));
-      if (seconds < 10) {
-        seconds = String(seconds).padStart(2, '0');
-      }
-      if (minutes < 10) {
-        minutes = String(minutes).padStart(2, '0');
-      }
-      if (hours < 10) {
-        hours = String(hours).padStart(2, '0');
-      }
-      if (days < 10) {
-        days = String(days).padStart(2, '0');
-      }
-
-      return {
-        total,
-        days,
-        hours,
-        minutes,
-        seconds
-      };
     },
   },
 
@@ -368,8 +196,8 @@ export default Vue.extend({
   },
 
   beforeDestroy() {
-    if (this.freeSkipCheckInterval) {
-      clearInterval(this.freeSkipCheckInterval);
+    if (this.nextWeekResetCheckInterval) {
+      clearInterval(this.nextWeekResetCheckInterval);
     }
   },
 
@@ -385,86 +213,50 @@ export default Vue.extend({
 <style scoped lang="scss">
 @import '../styles/character-cosmetics.css';
 
-.character {
-  position: relative;
-  width: 14em;
-  height: 25em;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 115%;
-  background-color: #2e2e30cc;
-  background-image: url('../assets/cardCharacterFrame.png');
-  border: 1px solid #a28d54;
-  border-radius: 15px;
-  padding: 0.5rem;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-}
-
-.character .art {
-  width: 100%;
-  min-height: 0;
-  height: 18rem;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-}
-
-.character img {
-  object-fit: contain;
-}
-
-.above-wrapper {
-  position: absolute;
-  top: 270px;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
-}
-
-.reputation-progress {
-  width: 75%;
-}
-
-.xp {
-  position: absolute;
-  bottom: 30px;
-  width: 100%;
-  display: flex;
-  right: 0;
-  flex-direction: column;
-  align-items: center;
-}
-
-.xp-text {
-  position: absolute;
-  bottom: -12%;
-}
-
-.quest-row,
 .quests-container {
-  gap: 1rem;
+  background: transparent url("../../src/assets/questsBackground.png") 0 0 no-repeat padding-box;
 }
 
-.request-quest {
+.quests-title {
+  font: normal normal bold 30px/38px Trajan;
+  color: #DABE75;
+}
+
+.next-reset {
+  font: normal normal normal 15px/17px Arial;
+  color: #B4B0A7;
+}
+
+.hourglass-icon {
+  height: 17px;
+}
+
+.weekly-progress {
+  font: normal normal bold 16px/20px Trajan;
+  color: #DABE75;
+}
+
+.quest-progress {
+  height: 19px;
+  background: #070707;
+  border: 1px solid #403A2C;
   display: flex;
-  justify-content: center;
   align-items: center;
-  border: 1px solid;
-  border-radius: 5px;
-  width: 25rem;
-  height: auto;
+  position: relative;
 }
 
-.white-space {
-  white-space: break-spaces;
+.quest-progress .quest-progress-bar {
+  background: #DABE75;
+  height: 11px;
+  margin: 4px;
 }
 
-@media (max-width: 576px) {
+.quest-progress-value {
+  text-align: center;
+  font: normal normal normal 10px/11px Arial;
+  color: #FFFFFF;
+  position: absolute;
+  width: 100%;
+  font-weight: bold;
 }
 </style>

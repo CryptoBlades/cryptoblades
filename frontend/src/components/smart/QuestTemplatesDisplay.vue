@@ -25,9 +25,10 @@
         <i class="fas fa-spinner fa-spin"/>
         {{ $t('quests.loading') }}
       </h3>
-      <h3 v-else-if="questTemplates.length === 0 && templatesTier !== undefined"> {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
+      <h3 v-else-if="questTemplates.length === 0 && templatesTier !== undefined">
+        {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
       <QuestDetails v-else v-for="(questTemplate, index) in questTemplates" :key="index" :quest="questTemplate"
-                    :isQuestTemplate="true" :questIndex="index" :refreshQuestTemplates="refreshQuestTemplates"/>
+                    :questIndex="index" :refreshQuestTemplates="refreshQuestTemplates"/>
     </div>
   </div>
 </template>
@@ -36,7 +37,7 @@
 import Vue from 'vue';
 import {mapActions} from 'vuex';
 import {Quest, Rarity} from '@/views/Quests.vue';
-import QuestDetails from '@/components/smart/QuestDetails.vue';
+import QuestDetails from './QuestTemplate.vue';
 
 interface StoreMappedActions {
   getQuestTemplates(payload: { tier: number }): Promise<Quest[]>;
@@ -95,7 +96,4 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.gap-3 {
-  gap: 1rem;
-}
 </style>

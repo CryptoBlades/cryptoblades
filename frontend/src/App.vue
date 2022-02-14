@@ -351,7 +351,7 @@ export default {
       throw e;
     }
 
-    this.pollCharactersStaminaIntervalId = setInterval(async () => {
+    this.pollCharacterStaminaIntervalId = setInterval(async () => {
       this.ownCharacters.forEach(async (c) => {
         await this.updateCharacterStamina(c.id);
       });
