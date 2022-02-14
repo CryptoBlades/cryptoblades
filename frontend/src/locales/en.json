@@ -616,6 +616,7 @@
       "SOUL": "Soul"
     },
     "questComponentIconTooltip": {
+      "NONE": "None",
       "WEAPON": "Weapon",
       "JUNK": "Junk",
       "TRINKET": "Trinket",
