@@ -2,7 +2,14 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, {isUndefined, values} from 'lodash';
-import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, gasUsedToBnb, toBN} from './utils/common';
+import {
+  bnMinimum,
+  currentChainSupportsMerchandise,
+  currentChainSupportsPvP,
+  currentChainSupportsQuests,
+  gasUsedToBnb,
+  toBN
+} from './utils/common';
 
 import {getConfigValue, setUpContracts} from './contracts';
 
@@ -35,15 +42,20 @@ import {
 import {getCharacterNameFromSeed} from './character-name';
 import {approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd} from './contract-call-utils';
 
-import {raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly, burningManager as featureFlagBurningManager} from './feature-flags';
+import {
+  burningManager as featureFlagBurningManager,
+  raid as featureFlagRaid,
+  stakeOnly as featureFlagStakeOnly
+} from './feature-flags';
 import {IERC20, IERC721, INftStakingRewards, IStakingRewards} from '../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
-import {Nft} from './interfaces/Nft';
+import {Nft, TransferedNft, NftTransfer} from './interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances} from '@/views/Quests.vue';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -136,6 +148,7 @@ export function createStore(web3: Web3) {
       cartEntries: [],
       currentChainSupportsMerchandise: false,
       currentChainSupportsPvP: false,
+      currentChainSupportsQuests: false,
 
       characters: {},
       garrisonCharacters: {},
@@ -448,6 +461,10 @@ export function createStore(web3: Web3) {
 
       getCurrentChainSupportsPvP(state) {
         return state.currentChainSupportsPvP;
+      },
+
+      getCurrentChainSupportsQuests(state) {
+        return state.currentChainSupportsQuests;
       },
 
       ownWeapons(state, getters) {
@@ -765,6 +782,10 @@ export function createStore(web3: Web3) {
 
       updateCurrentChainSupportsPvP(state: IState) {
         state.currentChainSupportsPvP = currentChainSupportsPvP();
+      },
+
+      updateCurrentChainSupportsQuests(state: IState) {
+        state.currentChainSupportsQuests = currentChainSupportsQuests();
       },
 
       updateCharacter(state: IState, { characterId, character }) {
@@ -1205,6 +1226,7 @@ export function createStore(web3: Web3) {
                   dispatch('fetchSkillBalance'),
                   dispatch('fetchFightRewardSkill'),
                   dispatch('fetchFightRewardXp'),
+                  dispatch('fetchGarrisonCharactersXp'),
                   dispatch('fetchDustBalance')
                 ]);
               })
@@ -1400,6 +1422,7 @@ export function createStore(web3: Web3) {
           dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
           dispatch('fetchFightRewardSkill'),
           dispatch('fetchFightRewardXp'),
+          dispatch('fetchGarrisonCharactersXp'),
           dispatch('fetchFightGasOffset'),
           dispatch('fetchFightBaseline'),
         ]);
@@ -2257,7 +2280,6 @@ export function createStore(web3: Web3) {
           StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
           StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
         ]);
-
         const stakeData: { stakeType: StakeType | NftStakeType } & IStakeState = {
           stakeType,
           ownBalance,
@@ -2788,6 +2810,65 @@ export function createStore(web3: Web3) {
         return landIdsWithTier;
       },
 
+      async mintCBKLand({state}, {minter, tier, chunkId, reseller}) {
+        const {CBKLand} = state.contracts();
+
+        if (!CBKLand || !state.defaultAccount) return;
+
+        return await CBKLand.methods.mint(minter, tier, chunkId, reseller).send({from: state.defaultAccount});
+      },
+
+      async massMintCBKLand({state}, {minter, tier, chunkId, reseller, quantity}) {
+        const {CBKLand} = state.contracts();
+
+        if (!CBKLand || !state.defaultAccount) return;
+
+        return await CBKLand.methods.massMint(minter, tier, chunkId, reseller, quantity).send({from: state.defaultAccount});
+      },
+
+      async updateChunkId({state}, {id, chunkId}) {
+        const {CBKLand} = state.contracts();
+
+        if (!CBKLand || !state.defaultAccount) return;
+
+        return await CBKLand.methods.updateChunkId(id, chunkId).send({from: state.defaultAccount});
+      },
+
+      async updateChunkIds({state}, {ids, chunkId}) {
+        const {CBKLand} = state.contracts();
+
+        if (!CBKLand || !state.defaultAccount) return;
+
+        return await CBKLand.methods.updateChunkId(ids, chunkId).send({from: state.defaultAccount});
+      },
+
+      async incrementDustSupplies({state}, {playerAddress, amountLB, amount4B, amount5B}) {
+        const {Weapons} = state.contracts();
+        if(!state.defaultAccount || !Weapons) return;
+
+        return await Weapons.methods.incrementDustSupplies(playerAddress, amountLB, amount4B, amount5B).send({from: state.defaultAccount});
+      },
+
+      async decrementDustSupplies({state}, {playerAddress, amountLB, amount4B, amount5B}) {
+        const {Weapons} = state.contracts();
+        if(!state.defaultAccount || !Weapons) return;
+
+        return await Weapons.methods.decrementDustSupplies(playerAddress, amountLB, amount4B, amount5B).send({from: state.defaultAccount});
+      },
+
+      async mintGiveawayWeapon({state}, {to, stars, chosenElement}) {
+        const {Weapons} = state.contracts();
+        if(!state.defaultAccount || !Weapons) return;
+
+        return await Weapons.methods.mintGiveawayWeapon(to, stars, chosenElement).send({from: state.defaultAccount});
+      },
+
+      async giveawaySoul({state}, {user, soulAmount}) {
+        const {BurningManager} = state.contracts();
+        if(!state.defaultAccount || !BurningManager) return;
+
+        return await BurningManager.methods.giveawaySoul(user, soulAmount).send({from: state.defaultAccount});
+      },
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();
@@ -3202,18 +3283,38 @@ export function createStore(web3: Web3) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
 
-        const xpCharaIdPairs = await Promise.all(
-          state.ownedCharacterIds.map(async charaId => {
-            const xp = await CryptoBlades.methods
-              .getXpRewards(charaId)
-              .call(defaultCallOptions(state));
+        const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds.map(x => x.toString())).call(defaultCallOptions(state));
 
-            return [charaId, xp];
-          })
-        );
+        const xpCharaIdPairs = state.ownedCharacterIds.map((charaId, i) => {
+          return [charaId, xps[i]];
+        });
 
         commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
         return xpCharaIdPairs;
+      },
+
+      async fetchGarrisonCharactersXp({ state, commit }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades) return;
+
+        const xps = await CryptoBlades.methods.getXpRewards(state.ownedGarrisonCharacterIds.map(x => x.toString())).call(defaultCallOptions(state));
+
+        const xpCharaIdPairs = state.ownedGarrisonCharacterIds.map((charaId, i) => {
+          return [charaId, xps[i]];
+        });
+
+        commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
+      },
+
+      async claimGarrisonXp({ state, dispatch }, characterIds) {
+        const { Garrison } = state.contracts();
+        if(!Garrison) return;
+        await Garrison.methods.claimAllXp(characterIds).send({ from: state.defaultAccount });
+
+        await Promise.all([
+          dispatch('fetchGarrisonCharacters', state.ownedGarrisonCharacterIds),
+          dispatch('fetchGarrisonCharactersXp')
+        ]);
       },
 
       async purchaseShield({ state, dispatch }) {
@@ -3267,6 +3368,389 @@ export function createStore(web3: Web3) {
           });
 
         dispatch('fetchSkillBalance');
+      },
+
+      async getQuestTemplates({state}, {tier}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const questTemplates: Quest[] = [];
+
+        const questTemplatesIds = await SimpleQuests.methods.getQuestTemplates(tier).call(defaultCallOptions(state));
+
+        if(questTemplatesIds.length === 0) return questTemplates;
+
+        for (const questID of questTemplatesIds) {
+          const questTemplateRaw = await SimpleQuests.methods.getQuestData(+questID).call(defaultCallOptions(state));
+          questTemplates.push({
+            id: +questTemplateRaw[0],
+            tier: +questTemplateRaw[1],
+            requirementType: +questTemplateRaw[2],
+            requirementRarity: +questTemplateRaw[3],
+            requirementAmount: +questTemplateRaw[4],
+            rewardType: +questTemplateRaw[5],
+            rewardRarity: +questTemplateRaw[6],
+            rewardAmount: +questTemplateRaw[7],
+            reputationAmount: +questTemplateRaw[8]
+          } as Quest);
+        }
+
+        return questTemplates;
+      },
+
+      async addQuestTemplate({state}, {questTemplate}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.addNewQuestTemplate(questTemplate.tier,
+          questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount,
+          questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount,
+          questTemplate.reputationAmount).send(defaultCallOptions(state));
+      },
+
+      async addPromoQuestTemplate({state}, {questTemplate}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.addNewPromoQuestTemplate(questTemplate.tier,
+          questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount,
+          questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount,
+          questTemplate.reputationAmount).send(defaultCallOptions(state));
+      },
+
+      async deleteQuest({state}, {tier, index}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.deleteQuestTemplate(tier, index).send(defaultCallOptions(state));
+      },
+
+      async getCharacterQuestData({ state }, {characterId}) {
+        const { SimpleQuests } = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        const questDataRaw = await SimpleQuests.methods.getCharacterQuestDataDetails(characterId).call(defaultCallOptions(state));
+        return {
+          progress: +questDataRaw[0][0],
+          type: +questDataRaw[0][1] as RequirementType,
+          reputation: +questDataRaw[0][2],
+          id: +questDataRaw[1],
+          tier: +questDataRaw[2] as Rarity,
+          requirementType: +questDataRaw[3] as RequirementType,
+          requirementRarity: +questDataRaw[4] as Rarity,
+          requirementAmount: +questDataRaw[5],
+          rewardType: +questDataRaw[6] as RewardType,
+          rewardRarity: +questDataRaw[7] as Rarity,
+          rewardAmount: +questDataRaw[8],
+          reputationAmount: +questDataRaw[9],
+        };
+      },
+
+      async getQuestTierChances({state}, {tier}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const tierChancesRaw = await SimpleQuests.methods.getTierChances(tier).call(defaultCallOptions(state));
+        const legendary = 100 - +tierChancesRaw[3];
+        const epic = 100 - +tierChancesRaw[2] - legendary;
+        const rare = 100 - +tierChancesRaw[1] - epic - legendary;
+        const uncommon = 100 - +tierChancesRaw[0] - rare - epic - legendary;
+        const common = 100 - uncommon - rare - epic - legendary;
+        return {common, uncommon, rare, epic, legendary} as TierChances;
+      },
+
+      async setQuestTierChances({state}, {tier, tierChances}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const uncommon = String(100 - tierChances.uncommon - tierChances.rare - tierChances.epic - tierChances.legendary);
+        const rare = String(100 - tierChances.rare - tierChances.epic - tierChances.legendary);
+        const epic = String(100 - tierChances.epic - tierChances.legendary);
+        const legendary = String(100 - tierChances.legendary);
+
+        return await SimpleQuests.methods.setTierChances(tier, [uncommon, rare, epic, legendary]).send(defaultCallOptions(state));
+      },
+
+      async getSkipQuestStaminaCost({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_SKIP_QUEST_STAMINA_COST = await SimpleQuests.methods.VAR_SKIP_QUEST_STAMINA_COST().call(defaultCallOptions(state));
+
+        return await SimpleQuests.methods.vars(VAR_SKIP_QUEST_STAMINA_COST).call(defaultCallOptions(state));
+      },
+
+      async setSkipQuestStaminaCost({state}, {staminaCost}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_SKIP_QUEST_STAMINA_COST = await SimpleQuests.methods.VAR_SKIP_QUEST_STAMINA_COST().call(defaultCallOptions(state));
+
+        return await SimpleQuests.methods.setVar(VAR_SKIP_QUEST_STAMINA_COST, staminaCost).send(defaultCallOptions(state));
+      },
+
+      async getReputationLevelRequirements({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_REPUTATION_LEVEL_2 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_2().call(defaultCallOptions(state));
+        const VAR_REPUTATION_LEVEL_3 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_3().call(defaultCallOptions(state));
+        const VAR_REPUTATION_LEVEL_4 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_4().call(defaultCallOptions(state));
+        const VAR_REPUTATION_LEVEL_5 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_5().call(defaultCallOptions(state));
+
+        const requirementsRaw = await SimpleQuests.methods.getVars([
+          VAR_REPUTATION_LEVEL_2,
+          VAR_REPUTATION_LEVEL_3,
+          VAR_REPUTATION_LEVEL_4,
+          VAR_REPUTATION_LEVEL_5,
+        ]).call(defaultCallOptions(state));
+        return {
+          level2: +requirementsRaw[0],
+          level3: +requirementsRaw[1],
+          level4: +requirementsRaw[2],
+          level5: +requirementsRaw[3]
+        } as ReputationLevelRequirements;
+      },
+
+      async setReputationLevelRequirements({state}, {requirements}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_REPUTATION_LEVEL_2 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_2().call(defaultCallOptions(state));
+        const VAR_REPUTATION_LEVEL_3 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_3().call(defaultCallOptions(state));
+        const VAR_REPUTATION_LEVEL_4 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_4().call(defaultCallOptions(state));
+        const VAR_REPUTATION_LEVEL_5 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_5().call(defaultCallOptions(state));
+
+        return await SimpleQuests.methods.setVars([
+          VAR_REPUTATION_LEVEL_2,
+          VAR_REPUTATION_LEVEL_3,
+          VAR_REPUTATION_LEVEL_4,
+          VAR_REPUTATION_LEVEL_5,
+        ], requirements).send(defaultCallOptions(state));
+      },
+
+      async isUsingPromoQuests({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_COMMON_TIER = await SimpleQuests.methods.VAR_COMMON_TIER().call(defaultCallOptions(state));
+        const VAR_UNCOMMON_TIER = await SimpleQuests.methods.VAR_UNCOMMON_TIER().call(defaultCallOptions(state));
+        const VAR_RARE_TIER = await SimpleQuests.methods.VAR_RARE_TIER().call(defaultCallOptions(state));
+        const VAR_EPIC_TIER = await SimpleQuests.methods.VAR_EPIC_TIER().call(defaultCallOptions(state));
+        const VAR_LEGENDARY_TIER = await SimpleQuests.methods.VAR_LEGENDARY_TIER().call(defaultCallOptions(state));
+
+        const tiersRaw = await SimpleQuests.methods.getVars([
+          VAR_COMMON_TIER,
+          VAR_UNCOMMON_TIER,
+          VAR_RARE_TIER,
+          VAR_EPIC_TIER,
+          VAR_LEGENDARY_TIER,
+        ]).call(defaultCallOptions(state));
+
+        return !(+tiersRaw[0] === 0 && +tiersRaw[1] === 1 && +tiersRaw[2] === 2 && +tiersRaw[3] === 3 && +tiersRaw[4] === 4);
+      },
+
+      async toggleUsePromoQuests({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_COMMON_TIER = await SimpleQuests.methods.VAR_COMMON_TIER().call(defaultCallOptions(state));
+        const VAR_UNCOMMON_TIER = await SimpleQuests.methods.VAR_UNCOMMON_TIER().call(defaultCallOptions(state));
+        const VAR_RARE_TIER = await SimpleQuests.methods.VAR_RARE_TIER().call(defaultCallOptions(state));
+        const VAR_EPIC_TIER = await SimpleQuests.methods.VAR_EPIC_TIER().call(defaultCallOptions(state));
+        const VAR_LEGENDARY_TIER = await SimpleQuests.methods.VAR_LEGENDARY_TIER().call(defaultCallOptions(state));
+
+        const tiersRaw = await SimpleQuests.methods.getVars([
+          VAR_COMMON_TIER,
+          VAR_UNCOMMON_TIER,
+          VAR_RARE_TIER,
+          VAR_EPIC_TIER,
+          VAR_LEGENDARY_TIER,
+        ]).call(defaultCallOptions(state));
+
+        if(+tiersRaw[0] === 0 && +tiersRaw[1] === 1 && +tiersRaw[2] === 2 && +tiersRaw[3] === 3 && +tiersRaw[4] === 4) {
+          return await SimpleQuests.methods.setVars([
+            VAR_COMMON_TIER,
+            VAR_UNCOMMON_TIER,
+            VAR_RARE_TIER,
+            VAR_EPIC_TIER,
+            VAR_LEGENDARY_TIER,
+          ], ['10', '11', '12', '13', '14']).send(defaultCallOptions(state));
+        } else {
+          return await SimpleQuests.methods.setVars([
+            VAR_COMMON_TIER,
+            VAR_UNCOMMON_TIER,
+            VAR_RARE_TIER,
+            VAR_EPIC_TIER,
+            VAR_LEGENDARY_TIER,
+          ], ['0', '1', '2', '3', '4']).send(defaultCallOptions(state));
+        }
+      },
+
+      async canSkipQuest({state}, {characterID}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.canSkipQuest(characterID).call(defaultCallOptions(state));
+      },
+
+      async hasFreeSkip({state}, {characterID}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.hasFreeSkip(characterID).call(defaultCallOptions(state));
+      },
+
+      async nextFreeSkip({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.nextFreeSkip().call(defaultCallOptions(state));
+      },
+
+      async skipQuest({ state, dispatch }, {characterID}) {
+        const { SimpleQuests } = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        await SimpleQuests.methods.skipQuest(characterID).send(defaultCallOptions(state));
+        await dispatch('fetchCharacterStamina', characterID);
+      },
+
+      async completeQuest({state, dispatch}, {characterID}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        if (!await SimpleQuests.methods.hasRandomQuestRewardSeedRequested(characterID).call(defaultCallOptions(state))) {
+          await SimpleQuests.methods.generateRewardQuestSeed(characterID).send(defaultCallOptions(state));
+        }
+        const result = await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(state));
+
+        const questRewards = result.events.QuestRewarded.returnValues.rewards;
+        await Promise.all([
+          dispatch('fetchCharacter', {characterId: characterID}),
+          dispatch('updateWeaponIds'),
+          dispatch('updateShieldIds'),
+          dispatch('updateTrinketIds'),
+          dispatch('updateJunkIds'),
+          dispatch('updateKeyLootboxIds'),
+        ]);
+        return questRewards;
+      },
+
+      async requestQuest({ state }, {characterID}) {
+        const { SimpleQuests } = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        if (!await SimpleQuests.methods.hasRandomQuestSeedRequested(characterID).call(defaultCallOptions(state))) {
+          await SimpleQuests.methods.generateRequestQuestSeed(characterID).send(defaultCallOptions(state));
+        }
+
+        return await SimpleQuests.methods.requestQuest(characterID).send(defaultCallOptions(state));
+      },
+
+      async submitProgress({state, dispatch}, {characterID, tokenIds}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        await SimpleQuests.methods.submitProgress(characterID, tokenIds).send(defaultCallOptions(state));
+
+        await Promise.all([
+          dispatch('updateWeaponIds'),
+          dispatch('updateShieldIds'),
+          dispatch('updateTrinketIds'),
+          dispatch('updateJunkIds'),
+          dispatch('updateKeyLootboxIds'),
+        ]);
+      },
+
+      async submitProgressAmount({state, dispatch}, {characterID, amount}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        await SimpleQuests.methods.submitProgressAmount(characterID, amount).send(defaultCallOptions(state));
+        await Promise.all([
+          dispatch('updateDustBalance'),
+          dispatch('fetchCharacterStamina', characterID),
+          dispatch('fetchSoulBalance', characterID),
+        ]);
+      },
+
+      async grantGameAdminRole({state}, {walletAddress, contract}) {
+        if (!contract || !state.defaultAccount || !Web3.utils.isAddress(walletAddress)) return;
+
+        const gameAdminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+
+        await contract.methods.grantRole(gameAdminRole, walletAddress).send(defaultCallOptions(state));
+      },
+
+      async revokeGameAdminRole({state}, {walletAddress, contract}) {
+        if (!contract || !state.defaultAccount || !Web3.utils.isAddress(walletAddress)) return;
+
+        const gameAdminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+
+        await contract.methods.revokeRole(gameAdminRole, walletAddress).send(defaultCallOptions(state));
+      },
+
+      async userHasAdminAccess({state}, {contract}) {
+        if (!contract || !state.defaultAccount) return;
+
+        const adminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+
+        const hasRole =  await contract.methods.hasRole(adminRole, state.defaultAccount).call(defaultCallOptions(state));
+
+        console.log('Admin role: ',contract, hasRole);
+        return hasRole;
+      },
+
+      async userHasMinterAccess({state}, {contract}) {
+        if (!contract || !contract.methods.MINTER_ROLE || !state.defaultAccount) return;
+
+        const minterRole = await contract.methods.MINTER_ROLE().call(defaultCallOptions(state));
+
+        const hasRole =  await contract.methods.hasRole(minterRole, state.defaultAccount).call(defaultCallOptions(state));
+
+        console.log('Minter role: ', contract, hasRole);
+        return hasRole;
+      },
+
+      async userHasAnyAdminAccess({state}) {
+        const {SimpleQuests, CBKLand, Weapons, BurningManager} = state.contracts();
+        if (!BurningManager || !Weapons || !SimpleQuests || !CBKLand || !state.defaultAccount) return;
+
+        const simpleQuestsAdminRole = await SimpleQuests.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const cbkLandAdminRole = await CBKLand.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const weaponsAdminRole = await Weapons.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const burningManagerAdminRole = await BurningManager.methods.GAME_ADMIN().call(defaultCallOptions(state));
+
+        const promises: Promise<boolean>[] = [
+          SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          CBKLand.methods.hasRole(cbkLandAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          Weapons.methods.hasRole(weaponsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          BurningManager.methods.hasRole(burningManagerAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+        ];
+
+        for (const promise of promises) {
+          if (await promise) return true;
+        }
+        return false;
+      },
+
+      async userHasAnyMinterAccess({state}) {
+        const {Weapons, Characters} = state.contracts();
+        if (!Weapons || !Characters || !state.defaultAccount) return;
+
+        const weaponsMinerRole = await Weapons.methods.MINTER_ROLE().call(defaultCallOptions(state));
+        const charactersMinerRole = await Characters.methods.MINTER_ROLE().call(defaultCallOptions(state));
+
+        const promises: Promise<boolean>[] = [
+          Weapons.methods.hasRole(weaponsMinerRole, state.defaultAccount).call(defaultCallOptions(state)),
+          Characters.methods.hasRole(charactersMinerRole, state.defaultAccount).call(defaultCallOptions(state)),
+        ];
+
+        for (const promise of promises) {
+          if (await promise) return true;
+        }
+        return false;
       },
 
       async canUserAfford({ state }, {payingAmount}) {
@@ -3962,6 +4446,7 @@ export function createStore(web3: Web3) {
 
         const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
         if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+
         const NFTContract: Contract<IERC721> =
           nftContractAddr === Weapons.options.address
             ? Weapons : nftContractAddr === Characters.options.address
@@ -3980,7 +4465,8 @@ export function createStore(web3: Web3) {
           await dispatch('updateWeaponIds');
         else if(nftContractAddr === Characters.options.address)
           await dispatch('updateCharacterIds');
-
+        else if (nftContractAddr === Shields.options.address)
+          await dispatch('updateShieldIds');
         return res;
       },
       async getStorageItemIds({ state }, { nftContractAddr }: { nftContractAddr: string}) {
@@ -4003,9 +4489,9 @@ export function createStore(web3: Web3) {
 
         return res;
       },
-      async withdrawFromStorage({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
-        const { NFTStorage, Weapons, Characters } = state.contracts();
-        if(!NFTStorage || !Weapons || !Characters || !state.defaultAccount) return;
+      async withdrawFromStorage({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: number}) {
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
 
         await NFTStorage.methods
           .withdrawFromStorage(nftContractAddr, tokenId)
@@ -4017,17 +4503,17 @@ export function createStore(web3: Web3) {
           await dispatch('updateWeaponIds');
         else if(nftContractAddr === Characters.options.address)
           await dispatch('updateCharacterIds');
+        else if (nftContractAddr === Shields.options.address)
+          await dispatch('updateShieldIds');
 
       },
       async bridgeItem({ state, dispatch }, { nftContractAddr, tokenId, targetChain, bridgeFee }:
-      { nftContractAddr: string, tokenId: string, targetChain: string, bridgeFee: string }) {
+      { nftContractAddr: string, tokenId: number, targetChain: string, bridgeFee: string }) {
         const { NFTStorage, CryptoBlades, SkillToken } = state.contracts();
         if (!NFTStorage || !CryptoBlades || !SkillToken || !state.defaultAccount) return;
-
         await SkillToken.methods
           .approve(CryptoBlades.options.address, bridgeFee)
           .send(defaultCallOptions(state));
-
         await NFTStorage.methods
           .bridgeItem(nftContractAddr, tokenId, targetChain)
           .send({
@@ -4035,7 +4521,7 @@ export function createStore(web3: Web3) {
           });
         dispatch('fetchSkillBalance');
       },
-      async getNFTChainId({state}, {nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+      async getNFTChainId({state}, {nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: number}) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage) return;
         const chainId = await NFTStorage.methods
@@ -4054,12 +4540,20 @@ export function createStore(web3: Web3) {
       async getBridgeTransfer({state}, {transferId}: { transferId: string}) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage) return;
-        const response = await NFTStorage.methods
+        const nft = await NFTStorage.methods
           .getBridgeTransfer(transferId)
           .call(defaultCallOptions(state));
-        return response;
+        return {
+          owner: nft[0],
+          nftAddress: nft[1],
+          nftId: +nft[2],
+          requestBlock: +nft[3],
+          lastUpdateBlock: +nft[4],
+          chainId: +nft[5],
+          status: +nft[6],
+        }as NftTransfer;
       },
-      async withdrawFromBridge({ state }, {tokenId}: {tokenId: string}) {
+      async withdrawFromBridge({ state }, {tokenId}: {tokenId: number}) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage || !state.defaultAccount) return;
         await NFTStorage.methods
@@ -4080,18 +4574,25 @@ export function createStore(web3: Web3) {
       async getReceivedNFTs({ state }) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage || !state.defaultAccount) return;
-        const res = await NFTStorage.methods
+        const nftIds = await NFTStorage.methods
           .getReceivedNFTs()
           .call(defaultCallOptions(state));
-        return res;
+        return nftIds.map(Number) as number[];
       },
-      async getReceivedNFT({ state }, {tokenId}: {tokenId: string}) {
+      async getReceivedNFT({ state }, {tokenId}: {tokenId: number}) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage || !state.defaultAccount) return;
-        const res = await NFTStorage.methods
+        const nft: string[] = await NFTStorage.methods
           .getReceivedNFT(tokenId)
           .call(defaultCallOptions(state));
-        return res;
+        return {
+          owner: nft[0],
+          nftType: +nft[1],
+          sourceChain: +nft[2],
+          sourceId: +nft[3],
+          status: +nft[4],
+          transferInsMeta: nft[5],
+        } as TransferedNft;
       },
       async chainEnabled({ state }, { chainId }: { chainId: string }) {
         const { NFTStorage } = state.contracts();
@@ -4334,7 +4835,6 @@ export function createStore(web3: Web3) {
       async getIsCharacterInArena({ state, commit }, characterId) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
-
         const isCharacterInArena = await PvpArena.methods.isCharacterInArena(characterId).call({ from: state.defaultAccount });
         commit('updateCharacterInArena', { characterId, isCharacterInArena });
 
@@ -4506,7 +5006,10 @@ export function createStore(web3: Web3) {
         });
 
         await BurningManager.methods.burnCharactersIntoCharacter(burnIds, targetId).send({ from: state.defaultAccount });
-        await dispatch('updateCharacterIds');
+        await Promise.all([
+          dispatch('updateCharacterIds'),
+          dispatch('fetchSkillBalance')
+        ]);
       },
 
       async burnCharactersIntoSoul({ state, dispatch }, burnIds) {
@@ -4519,10 +5022,13 @@ export function createStore(web3: Web3) {
         });
 
         await BurningManager.methods.burnCharactersIntoSoul(burnIds).send({ from: state.defaultAccount });
-        await dispatch('updateCharacterIds');
+        await Promise.all([
+          dispatch('updateCharacterIds'),
+          dispatch('fetchSkillBalance')
+        ]);
       },
 
-      async purchaseBurnCharacter({ state }, {charId, maxPrice}) {
+      async purchaseBurnCharacter({ state, dispatch }, {charId, maxPrice}) {
         const { NFTMarket, BurningManager, SkillToken, CryptoBlades } = state.contracts();
         if(!CryptoBlades || !BurningManager || !SkillToken || !NFTMarket || !state.defaultAccount) return;
 
@@ -4540,6 +5046,10 @@ export function createStore(web3: Web3) {
           price
         } = res.events.PurchasedListing.returnValues;
 
+        await Promise.all([
+          dispatch('fetchSkillBalance')
+        ]);
+
         return { seller, nftID, price } as { seller: string, nftID: string, price: string };
       },
 
@@ -4556,6 +5066,13 @@ export function createStore(web3: Web3) {
         if(!BurningManager || !state.defaultAccount) return;
 
         return await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
+      },
+
+      async fetchBurnPowerMultiplier({ state }) {
+        const { BurningManager } = state.contracts();
+        if(!BurningManager || !state.defaultAccount) return;
+
+        return await BurningManager.methods.vars(2).call(defaultCallOptions(state));
       }
     },
   });

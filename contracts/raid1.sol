@@ -10,6 +10,8 @@ import "./util.sol";
 import "./items/RaidTrinket.sol";
 import "./items/KeyLootbox.sol";
 import "./items/Junk.sol";
+import "./common.sol";
+
 
 contract Raid1 is Initializable, AccessControlUpgradeable {
 
@@ -27,7 +29,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
-    
+
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     uint8 public constant STATUS_UNSTARTED = 0;
@@ -93,7 +95,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         uint8 outcome,
         uint256 bossRoll,
         uint256 playerRoll);
-    
+
     // reward specific events for analytics
     event RewardClaimed(uint256 indexed raidIndex, address indexed user, uint256 characterCount);
     event RewardedXpBonus(uint256 indexed raidIndex, address indexed user, uint256 indexed charID, uint16 amount);
@@ -106,7 +108,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     event RewardedKeyBox(uint256 indexed raidIndex, address indexed user, uint256 indexed tokenID);
 
     function initialize(address gameContract) public initializer {
-        
+
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(GAME_ADMIN, msg.sender);
@@ -194,9 +196,9 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             uint24 weaponBonusPower,
             /*uint8 weaponTrait*/) = weapons.getFightDataAndDrainDurability(msg.sender,
                 weaponID, charTrait, uint8(durabilityCost), true, 0); // no busy flag for raids for now
-        
+
         uint24 power = getPlayerFinalPower(
-            getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
+            Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
             charTrait,
             raidBossTrait[raidIndex]
         );
@@ -249,14 +251,13 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             // since we pay out exactly one trinket per raid, we might as well do it here
             Raider memory trinketWinner = raidParticipants[raidIndex][seed % raidParticipants[raidIndex].length];
             uint8 trinketStars = getTrinketStarsFromSeed(seed);
-            uint256 trinketEffect = (seed / 100) % 5;
             uint tokenID =
                 RaidTrinket(links[LINK_TRINKET]).mint(
-                    trinketWinner.owner, trinketStars, trinketEffect
+                    trinketWinner.owner, trinketStars, seed
                 );
+            uint256 trinketEffect = (seed / 100) % 5;
             emit RewardedTrinket(raidIndex, trinketWinner.owner, trinketStars, trinketEffect, tokenID);
         }
-
         emit RaidCompleted(raidIndex, outcome, bossPower, roll);
         raidIndex++;
     }
@@ -288,20 +289,8 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         timestamp = uint64((playerData >> 32) & 0xFFFFFFFFFFFFFFFF);
     }
 
-    function getPlayerPower(
-        uint24 basePower,
-        int128 weaponMultiplier,
-        uint24 bonusPower
-    ) public pure returns(uint24) {
-        return uint24(weaponMultiplier.mulu(basePower) + bonusPower);
-    }
-
-    function isTraitEffectiveAgainst(uint8 attacker, uint8 defender) public pure returns (bool) {
-        return (((attacker + 1) % 4) == defender); // Thanks to Tourist
-    }
-
     function getPlayerFinalPower(uint24 playerPower, uint8 charTrait, uint8 bossTrait) public pure returns(uint24) {
-        if(isTraitEffectiveAgainst(charTrait, bossTrait))
+        if(Common.isTraitEffectiveAgainst(charTrait, bossTrait))
             return uint24(ABDKMath64x64.divu(1075,1000).mulu(uint256(playerPower)));
         return playerPower;
     }
@@ -555,7 +544,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
         return chars;
     }
-    
+
     function getParticipatingWeapons() public view returns(uint256[] memory) {
         uint256[] memory indices = raidParticipantIndices[raidIndex][msg.sender];
         uint256[] memory weps = new uint256[](indices.length);
@@ -577,7 +566,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
         return totalAccountPower;
     }
-    
+
     function canJoinRaid(uint256 characterID, uint256 weaponID) public view returns(bool) {
         return isRaidStarted()
             && haveEnoughEnergy(characterID, weaponID)

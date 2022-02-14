@@ -710,10 +710,6 @@ contract NFTMarket is
         }
     }
 
-    function checkUserBanned(address user) public view returns (bool) {
-        return isUserBanned[user];
-    }
-
     function unlistItem(IERC721 _tokenAddress, uint256 _id) external restricted {
         delete listings[address(_tokenAddress)][_id];
         listedTokenIDs[address(_tokenAddress)].remove(_id);
