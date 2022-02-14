@@ -1,6 +1,6 @@
 <template>
-  <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container gap-4 p-5">
-    <div class="d-flex justify-content-between w-100">
+  <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container gap-4">
+    <div class="d-flex justify-content-between w-100 weekly-progress-container">
       <span class="quests-title">{{ $t('quests.quest') }}</span>
       <div class="d-flex flex-column gap-2">
         <div class="d-flex justify-content-between gap-4">
@@ -215,6 +215,7 @@ export default Vue.extend({
 
 .quests-container {
   background: transparent url("../../src/assets/questsBackground.png") 0 0 no-repeat padding-box;
+  padding: 3rem;
 }
 
 .quests-title {
@@ -258,5 +259,16 @@ export default Vue.extend({
   position: absolute;
   width: 100%;
   font-weight: bold;
+}
+
+@media (max-width: 576px) {
+  .quests-container {
+    padding: 1rem;
+  }
+
+  .weekly-progress-container {
+    flex-direction: column;
+    gap: 2rem;
+  }
 }
 </style>

@@ -96,4 +96,10 @@ export default Vue.extend({
   border-radius: 10px;
   align-items: center;
 }
+
+@media (max-width: 576px) {
+  .quest-row {
+    flex-direction: column;
+  }
+}
 </style>

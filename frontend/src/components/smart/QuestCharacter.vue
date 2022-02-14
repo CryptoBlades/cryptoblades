@@ -220,4 +220,11 @@ export default Vue.extend({
   width: 100%;
   font-weight: bold;
 }
+
+@media (max-width: 576px) {
+  .quest-character-display {
+    flex-direction: column;
+    border: none;
+  }
+}
 </style>
