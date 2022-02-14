@@ -27,7 +27,7 @@
       </h3>
       <h3 v-else-if="questTemplates.length === 0 && templatesTier !== undefined">
         {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
-      <QuestDetails v-else v-for="(questTemplate, index) in questTemplates" :key="index" :quest="questTemplate"
+      <QuestTemplate v-else v-for="(questTemplate, index) in questTemplates" :key="index" :quest="questTemplate"
                     :questIndex="index" :refreshQuestTemplates="refreshQuestTemplates"/>
     </div>
   </div>
@@ -37,7 +37,7 @@
 import Vue from 'vue';
 import {mapActions} from 'vuex';
 import {Quest, Rarity} from '@/views/Quests.vue';
-import QuestDetails from './QuestTemplate.vue';
+import QuestTemplate from './QuestTemplate.vue';
 
 interface StoreMappedActions {
   getQuestTemplates(payload: { tier: number }): Promise<Quest[]>;
@@ -53,7 +53,7 @@ interface Data {
 
 export default Vue.extend({
 
-  components: {QuestDetails},
+  components: {QuestTemplate},
 
   data() {
     return {
