@@ -1,27 +1,27 @@
 <template>
   <b-navbar-nav>
-    <li class="play-to-earn">
+    <li class="play-to-earn top-nav-links">
       <Button mainText="Play-to-earn" route="play-to-earn" :class="{ active : isActive('play-to-earn')}"/>
     </li>
-    <li class="character" :class="{ active : isActive('character')}">
+    <li class="character top-nav-links" :class="{ active : isActive('character')}">
       <router-link to="/character/1" exact class="nav-link">
         <div class="icon" v-html="$appIcon.NavIcon.Character"></div>
         <div>Character</div>
       </router-link>
     </li>
-    <li class="blacksmith" :class="{ active : isActive('forge') || isActive('salvage')}">
+    <li class="blacksmith top-nav-links" :class="{ active : isActive('forge') || isActive('salvage')}">
       <router-link :to="{ name: 'forge' }" exact class="nav-link">
         <div class="icon" v-html="$appIcon.NavIcon.Blacksmith"></div>
         <div>Blacksmith</div>
       </router-link>
     </li>
-    <li class="marketplace" :class="{ active : isActive('marketplace')}">
+    <li class="marketplace top-nav-links" :class="{ active : isActive('marketplace')}">
       <router-link :to="{ name: 'marketplace' }" exact class="nav-link">
         <div class="icon" v-html="$appIcon.NavIcon.Marketplace"></div>
         <div>Marketplace</div>
       </router-link>
     </li>
-    <li class="leaderboard" :class="{ active : isActive('leaderboard')}">
+    <li class="leaderboard top-nav-links" :class="{ active : isActive('leaderboard')}">
       <router-link :to="{ name: 'leaderboard' }" exact class="nav-link leaderboard">
         <div class="icon" v-html="$appIcon.NavIcon.Leaderboard"></div>
         <div>Leaderboard</div>
@@ -92,5 +92,15 @@ li .nav-link .icon {
   border: 1px solid #EDCD90;
   display: block;
   padding: 20px;
+}
+
+@media (max-width: 1366px) {
+  .top-nav-links > a {
+    font-size: 0.7rem;
+  }
+  .play-to-earn > div {
+    text-align: center;
+    width: 176px;
+  }
 }
 </style>

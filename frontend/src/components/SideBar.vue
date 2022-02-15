@@ -1,5 +1,5 @@
 <template>
-  <aside>
+  <aside class="aside-sidebar">
     <b-navbar-nav v-if="!isBlackSmith">
       <li class="character" :class="{ active: characterID === '1' }">
         <router-link to="/character/1" exact class="nav-link">
@@ -225,5 +225,11 @@ aside {
 }
 .sponsor-info .sponsor-name a {
   color: #7F8693;
+}
+
+@media (max-width: 1366px) {
+  .aside-sidebar {
+    width :368px;
+  }
 }
 </style>

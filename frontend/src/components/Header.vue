@@ -25,7 +25,6 @@ export default {
 header {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
   background: #000E29;
   border-bottom: 1px solid #404857;
 }

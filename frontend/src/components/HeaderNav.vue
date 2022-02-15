@@ -104,4 +104,19 @@ export default {
   margin-right: 5px;
   text-decoration: none;
 }
+
+@media (max-width: 1366px) {
+  .header-nav {
+    display: flex;
+    justify-content: space-between;
+    flex-grow: 1;
+    align-items: center;
+    padding: 25px 27px 25px 60px;
+  }
+
+  header .branding  {
+    padding: 30px;
+    width: 100%;
+  }
+}
 </style>
