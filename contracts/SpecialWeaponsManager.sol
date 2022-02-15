@@ -23,18 +23,16 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         uint256 endTime;
     }
 
-    mapping(address => mapping(uint256 => uint256)) public userVars;
-    uint256 public constant USERVAR_GENERAL_SHARD_SUPPLY = 1;
     mapping(address => mapping(uint256 => uint256)) public userEventShardSupply;
     mapping(uint256 => uint256) public vars;
     uint256 public constant VAR_SHARD_COST_LOW = 1;
     uint256 public constant VAR_SHARD_COST_MEDIUM = 2;
     uint256 public constant VAR_SHARD_COST_HIGH = 3;
-    uint256 public constant VAR_GENERAL_SHARD_COST_MULTIPLIER = 5;
-    uint256 private eventCount;
+    uint256 public constant VAR_CONVERT_RATIO_DENOMINATOR = 5;
+    uint256 public eventCount;
 
     mapping(uint256 => EventInfo) public eventInfo;
-    mapping(address => uint256) public specialWeaponsBits;
+    mapping(address => mapping(uint256 => bool)) public userForgedAtEvent;
     mapping(address => mapping(uint256 => uint256)) public userOrderOptionForEvent;
 
 
@@ -63,14 +61,16 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender), "NGA");
     }
 
-    // BITS
+    // VARS
 
-    function setBit(address user, uint256 bit) internal {
-        specialWeaponsBits[user] |= bit;
+    function setVar(uint256 varField, uint256 value) external restricted {
+        vars[varField] = value;
     }
 
-    function getBit(address user, uint256 bit) internal view returns (bool) {
-        return (specialWeaponsBits[user] & bit) == bit;
+    function setVars(uint256[] calldata varFields, uint256[] calldata values) external restricted {
+        for(uint i = 0; i < varFields.length; i++) {
+            vars[varFields[i]] = values[i];
+        }
     }
 
     // VIEWS
@@ -79,11 +79,12 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         seed = uint(keccak256(abi.encodePacked(SPECIAL_WEAPON_SEED, uint(1), eventId)));
     }
 
-    function getActiveEventIds() public view returns(uint256[] memory) {
+    function getActiveEventsIds() public view returns(uint256[] memory) {
         uint256[] memory activeEventIds = new uint256[](getActiveEventsCount());
-        for(uint i = 1; i < eventCount; i++) {
+        uint256 arrayIterator = 0;
+        for(uint i = 1; i <= eventCount; i++) {
             if(eventInfo[i].endTime > block.timestamp) {
-                activeEventIds[i] = i;
+                activeEventIds[arrayIterator++] = i;
             }
         }
 
@@ -91,11 +92,28 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     }
 
     function getActiveEventsCount() public view returns(uint256 activeEventsCount) {
-        for(uint i = 1; i < eventCount; i++) {
-            if(eventInfo[i].endTime > block.timestamp) {
+        for(uint i = 0; i <= eventCount; i++) {
+            if(getIsEventActive(i)) {
                 activeEventsCount++;
             }
         }
+    }
+
+    function getIsEventActive(uint256 eventId) public view returns(bool) {
+        return eventInfo[eventId].endTime > block.timestamp;
+    }
+
+    function getEventInfo(uint256 eventId) public view returns(string memory, uint8, uint256) {
+        EventInfo memory info = eventInfo[eventId];
+        return (info.name, info.weaponElement, info.endTime);
+    }
+
+    function getUserSpecialShardsSupply(address user, uint256 eventId) public view returns(uint256) {
+        return userEventShardSupply[user][eventId];
+    }
+
+    function getUserGeneralShardsSupply(address user) public view returns(uint256) {
+        return userEventShardSupply[user][0];
     }
 
     // FUNCTIONS
@@ -110,18 +128,27 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
 
     function orderSpecialWeapon(uint256 eventId, uint256 orderOption) public {
         require(orderOption >= 1 && orderOption <= 3, "Invalid option");
-        //require(userVars[msg.sender][USERVAR_SHARD_SUPPLY] >= vars[orderOption], "Not enough shards");
         require(userEventShardSupply[msg.sender][eventId] >= vars[orderOption], "Not enough shards");
-        require(!getBit(msg.sender, eventId), "Limit 1");
+        require(userOrderOptionForEvent[msg.sender][eventId] == 0, "Limit 1");
+        require(getIsEventActive(eventId), "Event inactive");
         userEventShardSupply[msg.sender][eventId] -= vars[orderOption];
-        setBit(msg.sender, eventId);
+        userOrderOptionForEvent[msg.sender][eventId] = orderOption;
+        safeRandoms.requestSingleSeed(msg.sender, getSeed(eventId));
+    }
+
+    function orderSpecialWeaponWithGeneralShards(uint256 eventId, uint256 orderOption) public {
+        require(orderOption >= 1 && orderOption <= 3, "Invalid option");
+        require(userEventShardSupply[msg.sender][0] >= vars[orderOption].mul(vars[VAR_CONVERT_RATIO_DENOMINATOR]), "Not enough shards");
+        require(userOrderOptionForEvent[msg.sender][eventId] == 0, "Limit 1");
+        require(getIsEventActive(eventId), "Event inactive");
+        userEventShardSupply[msg.sender][0] -= vars[orderOption].mul(vars[VAR_CONVERT_RATIO_DENOMINATOR]);
         userOrderOptionForEvent[msg.sender][eventId] = orderOption;
         safeRandoms.requestSingleSeed(msg.sender, getSeed(eventId));
     }
 
     function forgeSpecialWeapon(uint256 eventId) public {
-        require(getBit(msg.sender, eventId) && userOrderOptionForEvent[msg.sender][eventId] > 0, 'Nothing to forge');
-        userOrderOptionForEvent[msg.sender][eventId] = 0;
+        require(userOrderOptionForEvent[msg.sender][eventId] > 0, 'Nothing to forge');
+        require(!userForgedAtEvent[msg.sender][eventId], 'Already forged');
         mintSpecial(
             msg.sender,
             eventId,
@@ -129,14 +156,16 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
             userOrderOptionForEvent[msg.sender][eventId],
             eventInfo[eventId].weaponElement
         );
+        userForgedAtEvent[msg.sender][eventId] = true;
     }
 
     function addShards(address user, uint256 eventId, uint256 shardsAmount) external restricted {
-        if(getActiveEventIds().length > 0) {
+        if(getActiveEventsCount() > 0 && eventId != 0) {
+            require(getIsEventActive(eventId), "Event inactive");
             userEventShardSupply[user][eventId] += shardsAmount;
         }
         else {
-            userVars[user][USERVAR_GENERAL_SHARD_SUPPLY] += shardsAmount.div(3);
+            userEventShardSupply[user][0] += shardsAmount;
         }
     }
 
@@ -173,19 +202,16 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         return weapons.mintSpecialWeapon(minter, eventId, stars, seed, element);
     }
 
-    function convertEventToGeneralShards(uint256 eventId, uint256 amount) external {
-        require(userEventShardSupply[msg.sender][eventId] > amount, 'Not enough shards');
-        userEventShardSupply[msg.sender][eventId] -= amount;
-        uint256 convertedAmount = amount.div(3);
-        convertedAmount += amount > convertedAmount.mul(3) ? 1 : 0;
-        userVars[msg.sender][USERVAR_GENERAL_SHARD_SUPPLY] += convertedAmount;
+    function convertShards(uint256 eventIdFrom, uint256 eventIdTo, uint256 amount) external {
+        require(userEventShardSupply[msg.sender][eventIdFrom] > amount, 'Not enough shards');
+        require(eventIdTo != 0 && !getIsEventActive(eventIdTo), 'Target event inactive');
+        userEventShardSupply[msg.sender][eventIdFrom] -= amount;
+        uint256 convertedAmount = amount.div(vars[VAR_CONVERT_RATIO_DENOMINATOR]);
+        convertedAmount += amount % vars[VAR_CONVERT_RATIO_DENOMINATOR] > 0 ? 1 : 0;
+        userEventShardSupply[msg.sender][eventIdTo] += convertedAmount;
     }
 
-    function convertGeneralToEventShards(uint256 eventId, uint256 amount) external {
-        require(userVars[msg.sender][USERVAR_GENERAL_SHARD_SUPPLY] > amount, 'Not enough shards');
-        userVars[msg.sender][USERVAR_GENERAL_SHARD_SUPPLY] -= amount;
-        uint256 convertedAmount = amount.div(3);
-        convertedAmount += amount > convertedAmount.mul(3) ? 1 : 0;
-        userEventShardSupply[msg.sender][eventId] += convertedAmount;
+    function updateEventEndTime(uint256 eventId, uint256 endTime) external restricted {
+        eventInfo[eventId].endTime = endTime;
     }
 }

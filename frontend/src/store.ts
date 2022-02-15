@@ -231,6 +231,12 @@ export function createStore(web3: Web3) {
       payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1',
       defaultSlippage: '0',
 
+      activeSpecialWeaponEventsIds: [],
+      inactiveSpecialWeaponEventsIds: [],
+      specialWeaponEvents: {},
+      specialWeaponEventId: localStorage.getItem('specialWeaponEventId') || '0',
+      shardsSupply: {},
+
       itemPrices: {
         itemWeaponRenamePrice: '',
         itemCharacterRenamePrice: '',
@@ -668,6 +674,10 @@ export function createStore(web3: Web3) {
 
       updateDustBalance(state: IState, { dustBalance }) {
         state.ownedDust = dustBalance;
+      },
+
+      updateShardsSupply(state: IState, { eventId, shardsSupply }) {
+        Vue.set(state.shardsSupply, eventId, shardsSupply);
       },
 
       updateSkillRewards(state: IState, { skillRewards }: { skillRewards: string }) {
@@ -1113,6 +1123,31 @@ export function createStore(web3: Web3) {
           break;
         }
         }
+      },
+
+      updateSpecialWeaponEventsInfo(state: IState, {eventId, eventInfo}) {
+        Vue.set(state.specialWeaponEvents, eventId, eventInfo);
+      },
+
+      updateActiveSpecialWeaponEventsIds(state: IState, eventsIds) {
+        Vue.set(state, 'activeSpecialWeaponEventsIds', eventsIds);
+        if(!eventsIds.find((id: { toString: () => string; }) => id.toString() === state.specialWeaponEventId)) {
+          state.specialWeaponEventId = '0';
+        }
+      },
+
+      updateInactiveSpecialWeaponEventsIds(state: IState, eventsIds) {
+        Vue.set(state, 'inactiveSpecialWeaponEventsIds', eventsIds);
+      },
+
+      updateSpecialWeaponEventId(state: IState, newSpecialWeaponEventId) {
+        localStorage.setItem('specialWeaponEventId', newSpecialWeaponEventId);
+        state.specialWeaponEventId = newSpecialWeaponEventId;
+      },
+
+      updateForgingStatus(state: IState, { eventId, ordered, forged }) {
+        Vue.set(state.specialWeaponEvents[eventId], 'ordered', ordered);
+        Vue.set(state.specialWeaponEvents[eventId], 'forged', forged);
       }
     },
 
@@ -1131,6 +1166,8 @@ export function createStore(web3: Web3) {
         await dispatch('setupWeaponDurabilities');
         await dispatch('setupWeaponRenames');
         await dispatch('setupWeaponCosmetics');
+
+        await dispatch('fetchSpecialWeaponEvents');
       },
 
       async pollAccountsAndNetwork({ state, dispatch, commit }) {
@@ -1245,7 +1282,7 @@ export function createStore(web3: Web3) {
 
               await Promise.all([
                 dispatch('fetchWeapon', weaponId),
-                dispatch('fetchSkillBalance')
+                dispatch('fetchSkillBalance'),
               ]);
             })
           );
@@ -1367,7 +1404,7 @@ export function createStore(web3: Web3) {
       },
 
       async fetchUserDetails({ dispatch }) {
-        const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails'), dispatch('fetchDustBalance')];
+        const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails'), dispatch('fetchDustBalance'), dispatch('fetchShardsSupply')];
 
         if (!featureFlagStakeOnly) {
           promises.push(dispatch('fetchUserGameDetails'));
@@ -1522,6 +1559,20 @@ export function createStore(web3: Web3) {
             commit('updateDustBalance', { dustBalance });
           })(),
         ]);
+      },
+
+      async fetchShardsSupply({ state, commit }) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        const generalShardsSupply = await SpecialWeaponsManager.methods.getUserGeneralShardsSupply(state.defaultAccount).call(defaultCallOptions(state));
+        commit('updateShardsSupply', { eventId: 0, shardsSupply: +generalShardsSupply });
+
+        const eventCount = +await SpecialWeaponsManager.methods.eventCount().call(defaultCallOptions(state));
+        for(let i = 1; i <= eventCount; i++) {
+          const eventShardsSupply = await SpecialWeaponsManager.methods.getUserSpecialShardsSupply(state.defaultAccount, i).call(defaultCallOptions(state));
+          commit('updateShardsSupply', { eventId: i, shardsSupply: +eventShardsSupply });
+        }
       },
 
       async fetchSoulBalance({ state }) {
@@ -1863,14 +1914,15 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement }: { num: any, useStakedSkillOnly?: boolean, chosenElement: any }) {
+      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement, eventId = 0 }:
+      { num: any, useStakedSkillOnly?: boolean, chosenElement: any, eventId: any }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
         const chosenElementFee = chosenElement === 100 ? 1 : 2;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
-            .mintWeaponNUsingStakedSkill(num, chosenElement)
+            .mintWeaponNUsingStakedSkill(num, chosenElement, eventId)
             .send({ from: state.defaultAccount, gas: '5000000' });
         }
         else {
@@ -1885,25 +1937,27 @@ export function createStore(web3: Web3) {
             { feeMultiplier: num * 4 * chosenElementFee, allowInGameOnlyFunds: true }
           );
 
-          await CryptoBlades.methods.mintWeaponN(num, chosenElement).send({ from: state.defaultAccount, gas: '5000000' });
+          await CryptoBlades.methods.mintWeaponN(num, chosenElement, eventId).send({ from: state.defaultAccount, gas: '5000000' });
         }
 
         await Promise.all([
           dispatch('fetchSkillBalance'),
           dispatch('fetchFightRewardSkill'),
           dispatch('updateWeaponIds'),
-          dispatch('setupWeaponDurabilities')
+          dispatch('setupWeaponDurabilities'),
+          dispatch('fetchShardsSupply')
         ]);
       },
 
-      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement }: { useStakedSkillOnly?: boolean, chosenElement: any }) {
+      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement, eventId = 0 }:
+      { useStakedSkillOnly?: boolean, chosenElement: any, eventId: any }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
         const chosenElementFee = chosenElement === 100 ? 1 : 2;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
-            .mintWeaponUsingStakedSkill(chosenElement)
+            .mintWeaponUsingStakedSkill(chosenElement, eventId)
             .send({ from: state.defaultAccount });
         }
         else {
@@ -1918,14 +1972,15 @@ export function createStore(web3: Web3) {
             { feeMultiplier: chosenElementFee, allowInGameOnlyFunds: true }
           );
 
-          await CryptoBlades.methods.mintWeapon(chosenElement).send({ from: state.defaultAccount });
+          await CryptoBlades.methods.mintWeapon(chosenElement, eventId).send({ from: state.defaultAccount });
         }
 
         await Promise.all([
           dispatch('fetchSkillBalance'),
           dispatch('fetchFightRewardSkill'),
           dispatch('updateWeaponIds'),
-          dispatch('setupWeaponDurabilities')
+          dispatch('setupWeaponDurabilities'),
+          dispatch('fetchShardsSupply')
         ]);
       },
 
@@ -1935,11 +1990,11 @@ export function createStore(web3: Web3) {
           burnWeaponId: any, reforgeWeaponId: any, useStakedSkillOnly?: boolean
         }
       ) {
-        const { CryptoBlades, SkillToken } = state.contracts();
-        if(!CryptoBlades || !state.defaultAccount) return;
+        const { CryptoBlades, SkillToken, BurningManager } = state.contracts();
+        if(!CryptoBlades || !BurningManager || !state.defaultAccount) return;
 
         if(useStakedSkillOnly) {
-          await CryptoBlades.methods
+          await BurningManager.methods
             .reforgeWeaponUsingStakedSkill(
               reforgeWeaponId,
               burnWeaponId
@@ -1949,17 +2004,18 @@ export function createStore(web3: Web3) {
             });
         }
         else {
-          await approveFee(
+          await approveFeeFromAnyContract(
             CryptoBlades,
+            BurningManager,
             SkillToken,
             state.defaultAccount,
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponFee()
+            burningManagerMethods => burningManagerMethods.reforgeWeaponFee()
           );
 
-          await CryptoBlades.methods
+          await BurningManager.methods
             .reforgeWeapon(
               reforgeWeaponId,
               burnWeaponId
@@ -1984,11 +2040,11 @@ export function createStore(web3: Web3) {
           useStakedSkillOnly?: boolean
         }
       ) {
-        const { CryptoBlades, SkillToken } = state.contracts();
-        if(!CryptoBlades || !state.defaultAccount) return;
+        const { CryptoBlades, SkillToken, BurningManager } = state.contracts();
+        if(!CryptoBlades || !BurningManager || !state.defaultAccount) return;
 
         if(useStakedSkillOnly) {
-          await CryptoBlades.methods
+          await BurningManager.methods
             .reforgeWeaponWithDustUsingStakedSkill(
               reforgeWeaponId,
               lesserDust,
@@ -2000,17 +2056,18 @@ export function createStore(web3: Web3) {
             });
         }
         else {
-          await approveFee(
+          await approveFeeFromAnyContract(
             CryptoBlades,
+            BurningManager,
             SkillToken,
             state.defaultAccount,
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.reforgeWeaponWithDustFee()
+            burningManagerMethods => burningManagerMethods.reforgeWeaponWithDustFee()
           );
 
-          await CryptoBlades.methods
+          await BurningManager.methods
             .reforgeWeaponWithDust(
               reforgeWeaponId,
               lesserDust,
@@ -2032,32 +2089,33 @@ export function createStore(web3: Web3) {
       },
 
       async burnWeapon({ state, dispatch }, { burnWeaponId, useStakedSkillOnly }: { burnWeaponId: any, useStakedSkillOnly?: boolean }) {
-        const { CryptoBlades, SkillToken } = state.contracts();
-        if(!CryptoBlades || !state.defaultAccount) return;
+        const { CryptoBlades, SkillToken, BurningManager } = state.contracts();
+        if(!CryptoBlades || !BurningManager || !state.defaultAccount) return;
 
         if(useStakedSkillOnly) {
-          await CryptoBlades.methods
-            .burnWeaponUsingStakedSkill(
-              burnWeaponId
+          await BurningManager.methods
+            .burnWeaponsUsingStakedSkill(
+              [burnWeaponId]
             )
             .send({
               from: state.defaultAccount,
             });
         }
         else {
-          await approveFee(
+          await approveFeeFromAnyContract(
             CryptoBlades,
+            BurningManager,
             SkillToken,
             state.defaultAccount,
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee()
+            burningManagerMethods => burningManagerMethods.burnWeaponFee()
           );
 
-          await CryptoBlades.methods
-            .burnWeapon(
-              burnWeaponId
+          await BurningManager.methods
+            .burnWeapons(
+              [burnWeaponId]
             )
             .send({
               from: state.defaultAccount,
@@ -2074,11 +2132,11 @@ export function createStore(web3: Web3) {
       },
 
       async massBurnWeapons({ state, dispatch }, { burnWeaponIds, useStakedSkillOnly }: { burnWeaponIds: any[], useStakedSkillOnly?: boolean }) {
-        const { CryptoBlades, SkillToken } = state.contracts();
-        if(!CryptoBlades || !state.defaultAccount) return;
+        const { CryptoBlades, SkillToken, BurningManager } = state.contracts();
+        if(!CryptoBlades || !BurningManager || !state.defaultAccount) return;
 
         if(useStakedSkillOnly) {
-          await CryptoBlades.methods
+          await BurningManager.methods
             .burnWeaponsUsingStakedSkill(
               burnWeaponIds
             )
@@ -2087,18 +2145,19 @@ export function createStore(web3: Web3) {
             });
         }
         else {
-          await approveFee(
+          await approveFeeFromAnyContract(
             CryptoBlades,
+            BurningManager,
             SkillToken,
             state.defaultAccount,
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.burnWeaponFee(),
+            burningManagerMethods => burningManagerMethods.burnWeaponFee(),
             { feeMultiplier: burnWeaponIds.length }
           );
 
-          await CryptoBlades.methods
+          await BurningManager.methods
             .burnWeapons(
               burnWeaponIds
             )
@@ -5073,6 +5132,100 @@ export function createStore(web3: Web3) {
         if(!BurningManager || !state.defaultAccount) return;
 
         return await BurningManager.methods.vars(2).call(defaultCallOptions(state));
+      },
+
+      async fetchSpecialWeaponEvents({ state, dispatch, commit }) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        const activeSpecialWeaponEventsIds = await SpecialWeaponsManager.methods.getActiveEventsIds().call(defaultCallOptions(state));
+        commit('updateActiveSpecialWeaponEventsIds', activeSpecialWeaponEventsIds);
+
+        const eventCount = await SpecialWeaponsManager.methods.eventCount().call(defaultCallOptions(state));
+        const inactiveSpecialWeaponEventsIds = Array.from({length: +eventCount}, (_, i) =>
+          (i + 1).toString()).filter(id => !activeSpecialWeaponEventsIds.includes(id));
+        commit('updateInactiveSpecialWeaponEventsIds', inactiveSpecialWeaponEventsIds);
+
+        await dispatch('fetchSpecialWeaponEventsInfo', activeSpecialWeaponEventsIds.concat(inactiveSpecialWeaponEventsIds));
+        await dispatch('fetchShardsSupply');
+      },
+
+      async fetchSpecialWeaponEventsInfo({ state, commit }, eventsIds) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        eventsIds.forEach(async (eventId: string) => {
+          const eventInfoRaw = await SpecialWeaponsManager.methods.getEventInfo(eventId).call(defaultCallOptions(state));
+          const ordered = +await SpecialWeaponsManager.methods.userOrderOptionForEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state)) > 0;
+          const forged = await SpecialWeaponsManager.methods.userForgedAtEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state));
+          const eventInfo = {
+            name: eventInfoRaw[0],
+            weaponElement: eventInfoRaw[1],
+            endTime: eventInfoRaw[2],
+            ordered,
+            forged
+          };
+
+          commit('updateSpecialWeaponEventsInfo', { eventId, eventInfo });
+        });
+      },
+
+      async fetchForgeCosts({ state }) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        const costLow = await SpecialWeaponsManager.methods.vars(1).call(defaultCallOptions(state));
+        const costMedium = await SpecialWeaponsManager.methods.vars(2).call(defaultCallOptions(state));
+        const costHigh = await SpecialWeaponsManager.methods.vars(3).call(defaultCallOptions(state));
+
+        return [+costLow, +costMedium, +costHigh];
+      },
+
+      async convertShards({ state, dispatch }, { eventFromId, eventToId, amount }) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods.convertShards(eventFromId, eventToId, amount).send({ from: state.defaultAccount });
+
+        await dispatch('fetchShardsSupply');
+      },
+
+      async fetchShardsConvertDenominator({ state }) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        return +await SpecialWeaponsManager.methods.vars(5).call(defaultCallOptions(state));
+      },
+
+      async orderSpecialWeapon({ state, dispatch }, { eventId, orderOption }) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods.orderSpecialWeapon(eventId, orderOption).send({ from: state.defaultAccount });
+
+        await Promise.all([
+          dispatch('fetchForgingStatus', eventId),
+          dispatch('fetchShardsSupply')
+        ]);
+      },
+
+      async forgeSpecialWeapon({ state, dispatch }, eventId) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods.forgeSpecialWeapon(eventId).send({ from: state.defaultAccount });
+
+        await dispatch('fetchForgingStatus', eventId);
+      },
+
+      async fetchForgingStatus({ state, commit }, eventId) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        const ordered = +await SpecialWeaponsManager.methods.userOrderOptionForEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state)) > 0;
+        const forged = await SpecialWeaponsManager.methods.userForgedAtEvent(state.defaultAccount, eventId).call(defaultCallOptions(state));
+
+        commit('updateForgingStatus', { eventId, ordered, forged });
       }
     },
   });

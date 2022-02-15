@@ -15,6 +15,7 @@ import "./weapons.sol";
 import "./util.sol";
 import "./common.sol";
 import "./Blacksmith.sol";
+import "./SpecialWeaponsManager.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -126,6 +127,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         rewardsClaimTaxDuration = 15 days;
     }
 
+    function migrateTo_e1fe97c(SpecialWeaponsManager _swm) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+
+        specialWeaponsManager = _swm;
+    }
+
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     uint characterLimit;
     // config vars
@@ -201,6 +208,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     mapping(uint256 => uint256) public vars;
     mapping(address => mapping(uint256 => uint256)) public userVars;
+
+    SpecialWeaponsManager public specialWeaponsManager;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -475,23 +484,23 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function mintWeaponN(uint32 num, uint8 chosenElement)
+    function mintWeaponN(uint32 num, uint8 chosenElement, uint256 eventId)
         external
         onlyNonContract
         oncePerBlock(msg.sender)
     {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * num * chosenElementFee));
-        _mintWeaponNLogic(num, chosenElement);
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * num * chosenElementFee));
+        _mintWeaponNLogic(num, chosenElement, eventId);
     }
 
-    function mintWeapon(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
+    function mintWeapon(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * chosenElementFee));
-        _mintWeaponLogic(chosenElement);
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * chosenElementFee));
+        _mintWeaponLogic(chosenElement, eventId);
     }
 
-    function mintWeaponNUsingStakedSkill(uint32 num, uint8 chosenElement)
+    function mintWeaponNUsingStakedSkill(uint32 num, uint8 chosenElement, uint256 eventId)
         external
         onlyNonContract
         oncePerBlock(msg.sender)
@@ -504,10 +513,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
         payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
 
-        _mintWeaponNLogic(num, chosenElement);
+        _mintWeaponNLogic(num, chosenElement, eventId);
     }
 
-    function mintWeaponUsingStakedSkill(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
+    function mintWeaponUsingStakedSkill(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
             mintWeaponFee
@@ -515,16 +524,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
         payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
 
-        _mintWeaponLogic(chosenElement);
+        _mintWeaponLogic(chosenElement, eventId);
     }
 
-    function _mintWeaponNLogic(uint32 num, uint8 chosenElement) internal {
+    function _mintWeaponNLogic(uint32 num, uint8 chosenElement, uint256 eventId) internal {
         require(num > 0 && num <= 10);
+        specialWeaponsManager.addShards(msg.sender, eventId, num);
         weapons.mintN(msg.sender, num, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
-    function _mintWeaponLogic(uint8 chosenElement) internal {
+    function _mintWeaponLogic(uint8 chosenElement, uint256 eventId) internal {
         //uint256 seed = randoms.getRandomSeed(msg.sender);
+        specialWeaponsManager.addShards(msg.sender, eventId, 1);
         weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
@@ -641,7 +652,17 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
     }
 
-    function payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) public restricted
+    function payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) external restricted 
+        returns (
+            uint256 _fromInGameOnlyFunds,
+            uint256 _fromTokenRewards,
+            uint256 _fromUserWallet,
+            uint256 _fromStaked
+        ) {
+        return _payContractConvertedSupportingStaked(playerAddress, convertedAmount);
+    }
+
+    function _payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) internal
         returns (
             uint256 _fromInGameOnlyFunds,
             uint256 _fromTokenRewards,

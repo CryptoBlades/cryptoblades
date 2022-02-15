@@ -37,6 +37,17 @@
                 <b-button
                         variant="primary"
                         class="ml-3"
+                        @click="onClickSpecialForge()"
+                        :disabled="disableForge"
+                        v-tooltip="$t('blacksmith.specialForgeTooltip')">
+                  <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
+                  <span v-if="!disableForge" class="gtag-link-others">
+                    {{$t('blacksmith.specialForge')}}
+                  </span>
+                </b-button>
+                <b-button
+                        variant="primary"
+                        class="ml-3"
                         @click="onClickForge(0)"
                         :disabled="disableForge"
                         v-tooltip="$t('blacksmith.forgeNew')">
@@ -94,6 +105,17 @@
                     <div id="earth-border" v-on:click="setChosenElement($event, 1)"> </div>
                     <div id="lightning-border" v-on:click="setChosenElement($event, 2)"> </div>
                     <div id="water-border" v-on:click="setChosenElement($event, 3)"> </div>
+                  </div>
+                  <div class="row justify-content-md-center select-elements-container align-items-baseline mt-4">
+                    <h5>{{$t('blacksmith.pickSpecialEvent')}}:</h5>
+                    <h6 class="mt-2">{{$t('blacksmith.specialEvent')}}:</h6>
+                    <b-form-select class="w-50 ml-1" size="sm" v-model="selectedSpecialWeaponEventId"
+                      :value="selectedSpecialWeaponEventId" @change="updateSpecialWeaponEventId($event)">
+                      <b-form-select-option :key="0" :value="0">{{$t('blacksmith.specialEventNone')}}</b-form-select-option>
+                      <b-form-select-option v-for="id in activeSpecialWeaponEventsIds" :key="id" :value="id">
+                        {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
+                      </b-form-select-option>
+                    </b-form-select>
                   </div>
                   <div class="row justify-content-md-center margin-top">
                     <b-button
@@ -428,6 +450,7 @@
         {{ $t('blacksmith.reforgeBonus.1star')}}
       </div>
     </b-modal>
+    <SpecialWeaponForgeModal />
   </div>
 </template>
 
@@ -436,7 +459,7 @@ import BN from 'bignumber.js';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
 import Vue from 'vue';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import { BModal } from 'bootstrap-vue';
 import NftList from '@/components/smart/NftList.vue';
@@ -445,8 +468,11 @@ import { Accessors } from 'vue/types/options';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
 import i18n from '@/i18n';
+import Events from '../events';
+import SpecialWeaponForgeModal from '@/components/smart/SpecialWeaponForgeModal.vue';
 
-type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards'>;
+type StoreMappedState = Pick<IState, 'defaultAccount' | 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards' |
+'specialWeaponEvents' | 'activeSpecialWeaponEventsIds' | 'specialWeaponEventId'>;
 
 interface StoreMappedGetters {
   contracts: Contracts;
@@ -489,6 +515,7 @@ interface Data {
   targetSkin: string;
   haveWeaponCosmetic1: number;
   haveWeaponCosmetic2: number;
+  selectedSpecialWeaponEventId: number;
 }
 
 export default Vue.extend({
@@ -526,12 +553,14 @@ export default Vue.extend({
       forgeCostBN: new BN(0),
       targetSkin: '',
       haveWeaponCosmetic1: 0,
-      haveWeaponCosmetic2: 0
+      haveWeaponCosmetic2: 0,
+      selectedSpecialWeaponEventId: 0
     } as Data;
   },
 
   computed: {
-    ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds','skillBalance', 'inGameOnlyFunds', 'skillRewards']) as Accessors<StoreMappedState>),
+    ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds','skillBalance', 'inGameOnlyFunds', 'skillRewards',
+      'activeSpecialWeaponEventsIds', 'specialWeaponEvents', 'specialWeaponEventId']) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
       'getPowerfulDust', 'getGreaterDust', 'getLesserDust',
@@ -567,7 +596,9 @@ export default Vue.extend({
   },
 
   async created() {
-    if(!this.contracts.CryptoBlades) return;
+    await this.fetchSpecialWeaponEvents();
+    this.selectedSpecialWeaponEventId = +this.specialWeaponEventId;
+    if(!this.contracts.CryptoBlades || !this.contracts.BurningManager) return;
     const forgeCost = await this.contracts.CryptoBlades.methods.mintWeaponFee().call({ from: this.defaultAccount });
     const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
     this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
@@ -580,28 +611,34 @@ export default Vue.extend({
     if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8).multipliedBy(10))).isLessThan(0)){
       this.disableX10ForgeWithStaked = true;
     }
-    const reforgeCost = await this.contracts.CryptoBlades.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
-    const skillReforgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(reforgeCost).call({ from: this.defaultAccount });
+    const reforgeCost = await this.contracts.BurningManager.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
+    const skillReforgeCost = await this.contracts.BurningManager.methods.usdToSkill(reforgeCost).call({ from: this.defaultAccount });
     this.reforgeCost = new BN(skillReforgeCost).div(new BN(10).pow(18)).toFixed(4);
 
-    const reforgeDustCost = await this.contracts.CryptoBlades.methods.reforgeWeaponWithDustFee().call({ from: this.defaultAccount });
-    const skillDustReforgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(reforgeDustCost).call({ from: this.defaultAccount });
+    const reforgeDustCost = await this.contracts.BurningManager.methods.reforgeWeaponWithDustFee().call({ from: this.defaultAccount });
+    const skillDustReforgeCost = await this.contracts.BurningManager.methods.usdToSkill(reforgeDustCost).call({ from: this.defaultAccount });
     this.dustReforgeCost = new BN(skillDustReforgeCost).div(new BN(10).pow(18)).toFixed(4);
 
-    const burnCost = await this.contracts.CryptoBlades.methods.burnWeaponFee().call({ from: this.defaultAccount });
-    const skillBurnCost = await this.contracts.CryptoBlades.methods.usdToSkill(burnCost).call({ from: this.defaultAccount });
+    const burnCost = await this.contracts.BurningManager.methods.burnWeaponFee().call({ from: this.defaultAccount });
+    const skillBurnCost = await this.contracts.BurningManager.methods.usdToSkill(burnCost).call({ from: this.defaultAccount });
     this.burnCost = new BN(skillBurnCost).div(new BN(10).pow(18)).toFixed(4);
   },
 
   methods: {
     ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN',
-      'burnWeapon', 'reforgeWeaponWithDust', 'massBurnWeapons']),
+      'burnWeapon', 'reforgeWeaponWithDust', 'massBurnWeapons', 'fetchSpecialWeaponEvents']),
+    ...mapMutations(['updateSpecialWeaponEventId']),
 
     toggleCheckbox() {
       this.useStakedForForge = !this.useStakedForForge;
       if (this.useStakedForForge) localStorage.setItem('useStakedForForge', 'true');
       else localStorage.setItem('useStakedForForge', 'false');
     },
+
+    onClickSpecialForge() {
+      Events.$emit('show-special-forge-modal');
+    },
+
     async onForgeWeapon() {
       if(this.disableForge) return;
 
@@ -616,7 +653,11 @@ export default Vue.extend({
       }, 30000);
 
       try {
-        await this.mintWeapon({ useStakedSkillOnly: this.useStakedForForge, chosenElement: this.selectedElement || 100 });
+        await this.mintWeapon({
+          useStakedSkillOnly: this.useStakedForForge,
+          chosenElement: this.selectedElement || 100,
+          eventId: this.selectedSpecialWeaponEventId
+        });
 
       } catch (e) {
         console.error(e);
@@ -643,7 +684,12 @@ export default Vue.extend({
       }, 30000);
 
       try {
-        await await this.mintWeaponN({ num: forgeMultiplier, useStakedSkillOnly: this.useStakedForForge, chosenElement: this.selectedElement });
+        await await this.mintWeaponN({
+          num: forgeMultiplier,
+          useStakedSkillOnly: this.useStakedForForge,
+          chosenElement: this.selectedElement,
+          eventId: this.selectedSpecialWeaponEventId
+        });
 
       } catch (e) {
         console.error(e);
@@ -671,6 +717,7 @@ export default Vue.extend({
     },
 
     onClickForge(i: number) {
+      this.selectedSpecialWeaponEventId = +this.specialWeaponEventId;
       this.clickedForgeButton = i;
       this.chosenElementFee = null;
       (this.$refs['forge-element-selector-modal']as BModal).show();
@@ -812,6 +859,7 @@ export default Vue.extend({
     WeaponIcon,
     BModal,
     NftList,
+    SpecialWeaponForgeModal
   },
 });
 </script>
