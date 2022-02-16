@@ -58,6 +58,8 @@ export interface Quest {
   rewardAmount: number;
   rewardExternalAddress?: string;
   reputationAmount: number;
+  deadline?: number;
+  supply?: number;
 }
 
 export enum RequirementType {

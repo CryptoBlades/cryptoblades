@@ -41,6 +41,10 @@
       </div>
       <QuestReward :quest="quest"/>
     </div>
+    <div v-if="deadline && supply" class="d-flex flex-column align-items-center">
+      <span>{{ $t('quests.supplyLeft', {supply}) }}</span>
+      <span>{{ $t('quests.deadline', {deadline: new Date(deadline * 1000).toLocaleString()}) }}</span>
+    </div>
     <div v-if="!isDisplayOnly">
       <div v-if="!isQuestActionLoading" class="d-flex">
         <b-button variant="primary" class="flex-1" @click="deleteQuestTemplate">
@@ -91,6 +95,12 @@ export default Vue.extend({
     refreshQuestTemplates: {
       type: Function,
     },
+    deadline: {
+      type: Number,
+    },
+    supply: {
+      type: Number,
+    },
   },
 
   data() {
@@ -118,7 +128,6 @@ export default Vue.extend({
       }
     },
   },
-
 });
 </script>
 

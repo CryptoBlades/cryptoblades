@@ -104,6 +104,16 @@
         <div class="d-flex align-items-center gap-3">
           <b-form-input v-model="questTemplate.reputationAmount" type="number" number :min="0"/>
         </div>
+        <label class="m-0 align-self-center">{{ $t('quests.limitedOptional') }}</label>
+        <div class="d-flex align-items-center gap-3 mt-2">
+          <b-form-input v-model="supply" type="number" number :placeholder="$t('quests.supplyOptional')" :min="0"/>
+          <i id="unix-timestamp-hint" class="far fa-question-circle hint"/>
+          <b-tooltip target="unix-timestamp-hint">
+            {{ $t('quests.unixTimestampHint') }} <a href="https://www.unixtimestamp.com/" target="_blank">https://www.unixtimestamp.com/</a>
+          </b-tooltip>
+          <b-form-input v-model="timestamp" type="number" number :placeholder="$t('quests.timestampOptional')"
+                        :min="0"/>
+        </div>
       </div>
       <b-button variant="primary" @click="showConfirmationModal"
                 :disabled="addNewQuestDisabled()">
@@ -216,7 +226,7 @@
         <h4 class="text-center">
           {{ promoQuestTemplates ? $t('quests.areYouSureAddPromoQuest') : $t('quests.areYouSureAddQuest') }}
         </h4>
-        <QuestTemplate :quest="questTemplate" isDisplayOnly/>
+        <QuestTemplate :quest="questTemplate" :deadline="timestamp" :supply="supply" isDisplayOnly/>
       </div>
     </b-modal>
     <b-modal v-model="showPromoToggleConfirmationModal" @ok.prevent="togglePromoQuests" :ok-disabled="isLoading"
@@ -286,6 +296,8 @@ interface Data {
   weeklyCompletionsLimit: number;
   tierChances: TierChances[];
   usePromoQuests: boolean;
+  supply?: number;
+  timestamp?: number;
 }
 
 export default Vue.extend({
@@ -316,6 +328,8 @@ export default Vue.extend({
       weeklyCompletionsLimit: 0,
       tierChances: [] as TierChances[],
       usePromoQuests: false,
+      supply: undefined,
+      timestamp: undefined,
       RequirementType,
       RewardType,
       Rarity,
@@ -353,7 +367,12 @@ export default Vue.extend({
     async onSubmit() {
       try {
         this.isLoading = true;
-        await this.addQuestTemplate({questTemplate: this.questTemplate, isPromo: this.promoQuestTemplates, supply: 0, deadline: 0});
+        await this.addQuestTemplate({
+          questTemplate: this.questTemplate,
+          isPromo: this.promoQuestTemplates,
+          supply: this.supply ? this.supply : 0,
+          deadline: this.timestamp ? this.timestamp : 0,
+        });
         this.refreshQuestTemplates();
       } finally {
         this.isLoading = false;
@@ -431,7 +450,10 @@ export default Vue.extend({
         || (this.questTemplate.rewardRarity === undefined
           && this.questTemplate.rewardType !== RewardType.EXPERIENCE && this.questTemplate.rewardType !== RewardType.SOUL)
         || !this.questTemplate.rewardAmount
-        || !this.questTemplate.reputationAmount || this.showTemplateConfirmationModal || this.isLoading;
+        || !this.questTemplate.reputationAmount
+        || (this.timestamp && !this.supply)
+        || (this.supply && !this.timestamp)
+        || this.showTemplateConfirmationModal || this.isLoading;
     },
 
     updateRequirementsDisabled() {

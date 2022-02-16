@@ -28,7 +28,8 @@
       <h3 v-else-if="questTemplates.length === 0 && templatesTier !== undefined">
         {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
       <QuestTemplate v-else v-for="(questTemplate, index) in questTemplates" :key="index" :quest="questTemplate"
-                    :questIndex="index" :refreshQuestTemplates="refreshQuestTemplates"/>
+                     :questIndex="index" :refreshQuestTemplates="refreshQuestTemplates"
+                     :deadline="questTemplate.deadline" :supply="questTemplate.supply"/>
     </div>
   </div>
 </template>
@@ -41,6 +42,10 @@ import QuestTemplate from './QuestTemplate.vue';
 
 interface StoreMappedActions {
   getQuestTemplates(payload: { tier: number }): Promise<Quest[]>;
+
+  getQuestDeadline(payload: { questID: number }): Promise<number>;
+
+  getQuestSupply(payload: { questID: number }): Promise<number>;
 }
 
 interface Data {
@@ -67,7 +72,11 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['getQuestTemplates']) as StoreMappedActions,
+    ...mapActions([
+      'getQuestTemplates',
+      'getQuestDeadline',
+      'getQuestSupply',
+    ]) as StoreMappedActions,
 
     async refreshQuestTemplates() {
       if (this.templatesTier === undefined) return;
@@ -78,6 +87,11 @@ export default Vue.extend({
           this.questTemplates = await this.getQuestTemplates({tier: promoTier});
         } else {
           this.questTemplates = await this.getQuestTemplates({tier: this.templatesTier});
+        }
+        for (const quest of this.questTemplates) {
+          quest.deadline = +await this.getQuestDeadline({questID: quest.id});
+          quest.supply = +await this.getQuestSupply({questID: quest.id});
+          console.log(quest);
         }
       } finally {
         this.isLoading = false;

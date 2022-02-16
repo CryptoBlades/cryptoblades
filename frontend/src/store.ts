@@ -3359,6 +3359,20 @@ export function createStore(web3: Web3) {
         dispatch('fetchSkillBalance');
       },
 
+      async getQuestDeadline({state}, {questID}){
+        const {SimpleQuests} = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.questDeadlines(questID).call(defaultCallOptions(state));
+      },
+
+      async getQuestSupply({state}, {questID}){
+        const {SimpleQuests} = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.questSupplies(questID).call(defaultCallOptions(state));
+      },
+
       async getQuestTemplates({state}, {tier}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
