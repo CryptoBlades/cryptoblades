@@ -62,6 +62,7 @@ export default Vue.extend({
   methods: {
     ...mapActions(['getCharacterQuestData']) as StoreMappedActions,
     async onRefreshQuestData() {
+      this.$emit('refresh-quest-data');
       await this.refreshQuestData();
     },
 

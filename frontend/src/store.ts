@@ -3381,17 +3381,17 @@ export function createStore(web3: Web3) {
         if(questTemplatesIds.length === 0) return questTemplates;
 
         for (const questID of questTemplatesIds) {
-          const questTemplateRaw = await SimpleQuests.methods.getQuestData(+questID).call(defaultCallOptions(state));
+          const questTemplateRaw = await SimpleQuests.methods.quests(+questID).call(defaultCallOptions(state));
           questTemplates.push({
-            id: +questTemplateRaw[0],
-            tier: +questTemplateRaw[1],
-            requirementType: +questTemplateRaw[2],
-            requirementRarity: +questTemplateRaw[3],
-            requirementAmount: +questTemplateRaw[4],
-            rewardType: +questTemplateRaw[5],
-            rewardRarity: +questTemplateRaw[6],
-            rewardAmount: +questTemplateRaw[7],
-            reputationAmount: +questTemplateRaw[8]
+            id: +questTemplateRaw.id,
+            tier: +questTemplateRaw.tier,
+            requirementType: +questTemplateRaw.requirementType,
+            requirementRarity: +questTemplateRaw.requirementRarity,
+            requirementAmount: +questTemplateRaw.requirementAmount,
+            rewardType: +questTemplateRaw.rewardType,
+            rewardRarity: +questTemplateRaw.rewardRarity,
+            rewardAmount: +questTemplateRaw.rewardAmount,
+            reputationAmount: +questTemplateRaw.reputationAmount,
           } as Quest);
         }
 
@@ -3402,9 +3402,13 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
+        console.log(questTemplate);
+
+        const emptyAccount = '0x0000000000000000000000000000000000000000';
+
         return await SimpleQuests.methods.addNewQuestTemplate(questTemplate.tier,
-          questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount,
-          questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount,
+          questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount, emptyAccount,
+          questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount, emptyAccount,
           questTemplate.reputationAmount).send(defaultCallOptions(state));
       },
 
@@ -3413,8 +3417,8 @@ export function createStore(web3: Web3) {
         if (!SimpleQuests || !state.defaultAccount) return;
 
         return await SimpleQuests.methods.addNewPromoQuestTemplate(questTemplate.tier,
-          questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount,
-          questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount,
+          questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount, web3.eth.accounts[0],
+          questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount, web3.eth.accounts[0],
           questTemplate.reputationAmount).send(defaultCallOptions(state));
       },
 
@@ -3429,21 +3433,32 @@ export function createStore(web3: Web3) {
         const { SimpleQuests } = state.contracts();
         if(!SimpleQuests || !state.defaultAccount) return;
 
-        const questDataRaw = await SimpleQuests.methods.getCharacterQuestDataDetails(characterId).call(defaultCallOptions(state));
+        const questId = await SimpleQuests.methods.characterQuest(characterId).call(defaultCallOptions(state));
+
+        console.log(questId);
+
+        const quest = await SimpleQuests.methods.quests(questId).call(defaultCallOptions(state));
+
+        console.log(quest);
+
+        const charQuestDataRaw = await SimpleQuests.methods.getCharacterQuestData(characterId).call(defaultCallOptions(state));
+
+        console.log(charQuestDataRaw);
+
         return {
-          progress: +questDataRaw[0][0],
-          type: +questDataRaw[0][1] as RequirementType,
-          reputation: +questDataRaw[0][2],
-          id: +questDataRaw[1],
-          tier: +questDataRaw[2] as Rarity,
-          requirementType: +questDataRaw[3] as RequirementType,
-          requirementRarity: +questDataRaw[4] as Rarity,
-          requirementAmount: +questDataRaw[5],
-          rewardType: +questDataRaw[6] as RewardType,
-          rewardRarity: +questDataRaw[7] as Rarity,
-          rewardAmount: +questDataRaw[8],
-          reputationAmount: +questDataRaw[9],
-        };
+          progress: +charQuestDataRaw[0],
+          type: +charQuestDataRaw[1] as RequirementType,
+          reputation: +charQuestDataRaw[2],
+          id: +quest.id,
+          tier: +quest.tier as Rarity,
+          requirementType: +quest.requirementType as RequirementType,
+          requirementRarity: +quest.requirementRarity as Rarity,
+          requirementAmount: +quest.requirementAmount,
+          rewardType: +quest.rewardType as RewardType,
+          rewardRarity: +quest.rewardRarity as Rarity,
+          rewardAmount: +quest.rewardAmount,
+          reputationAmount: +quest.reputationAmount,
+        } as Quest;
       },
 
       async getQuestTierChances({state}, {tier}) {

@@ -59,17 +59,22 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     struct Quest {
         uint256 id;
         Rarity tier;
-        RequirementType requirementType;
-        Rarity requirementRarity;
+        ItemType requirementType;
+        uint256 requirementRarity;
         uint256 requirementAmount;
-        RewardType rewardType;
-        Rarity rewardRarity;
+        address requirementExternalAddress;
+        ItemType rewardType;
+        uint256 rewardRarity;
         uint256 rewardAmount;
+        address rewardExternalAddress;
         uint256 reputationAmount;
     }
 
-    enum RequirementType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, SOUL, RAID}
-    enum RewardType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE, SOUL}
+    enum RequirementType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, SOUL, RAID, EXTERNAL, EXTERNAL_HOLD}
+    enum RewardType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE, SOUL, EXTERNAL}
+
+    enum ItemType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, SOUL, RAID, EXPERIENCE, EXTERNAL, EXTERNAL_HOLD}
+
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
     uint256 public nextQuestID;
@@ -240,28 +245,28 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function rewardQuest(uint256 questID, uint256 characterID) private returns (uint256[] memory) {
         uint256 seed = safeRandoms.popSingleSeed(address(this), RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID), true, false);
         Quest memory quest = quests[questID];
-        if (quest.rewardType == RewardType.WEAPON) {
+        if (quest.rewardType == ItemType.WEAPON) {
             uint256[] memory tokenIDs = new uint256[](quest.rewardAmount);
             address owner = characters.ownerOf(characterID);
             for (uint8 i = 0; i < quest.rewardAmount; i++) {
-                tokenIDs[i] = weapons.mintWeaponWithStars(owner, uint256(quest.rewardRarity), seed, 100);
+                tokenIDs[i] = weapons.mintWeaponWithStars(owner, quest.rewardRarity, seed, 100);
                 seed = RandomUtil.combineSeeds(seed, i);
             }
             return tokenIDs;
-        } else if (quest.rewardType == RewardType.JUNK) {
+        } else if (quest.rewardType == ItemType.JUNK) {
             return junk.mintN(msg.sender, uint8(quest.rewardRarity), uint32(quest.rewardAmount));
-        } else if (quest.rewardType == RewardType.TRINKET) {
+        } else if (quest.rewardType == ItemType.TRINKET) {
             return trinket.mintN(msg.sender, uint8(quest.rewardRarity), uint32(quest.rewardAmount), seed);
-        } else if (quest.rewardType == RewardType.SHIELD) {
+        } else if (quest.rewardType == ItemType.SHIELD) {
             //0 is NORMAL SHIELD TYPE
             return shields.mintShieldsWithStars(msg.sender, uint8(quest.rewardRarity), 0, uint32(quest.rewardAmount), seed);
-        } else if (quest.rewardType == RewardType.DUST) {
+        } else if (quest.rewardType == ItemType.DUST) {
             uint32[] memory incrementDustSupplies = new uint32[](3);
             incrementDustSupplies[uint256(quest.rewardRarity)] = uint32(quest.rewardAmount);
             weapons.incrementDustSupplies(msg.sender, incrementDustSupplies[0], incrementDustSupplies[1], incrementDustSupplies[2]);
-        } else if (quest.rewardType == RewardType.EXPERIENCE) {
+        } else if (quest.rewardType == ItemType.EXPERIENCE) {
             characters.gainXp(characterID, uint16(quest.rewardAmount));
-        } else if (quest.rewardType == RewardType.SOUL) {
+        } else if (quest.rewardType == ItemType.SOUL) {
             burningManager.giveAwaySoul(msg.sender, quest.rewardAmount);
         }
         else {
@@ -276,32 +281,32 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         require(tokenIds.length != 0, "No tokenIds");
         uint256 questID = characterQuest[characterID];
         Quest memory quest = quests[questID];
-        if (quest.requirementType == RequirementType.WEAPON) {
+        if (quest.requirementType == ItemType.WEAPON) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(weapons.ownerOf(tokenID) == msg.sender, "Not weapon owner");
-                require(weapons.getStars(tokenID) == uint256(quest.requirementRarity), "Wrong weapon rarity");
+                require(weapons.getStars(tokenID) == quest.requirementRarity, "Wrong weapon rarity");
             }
             weapons.burnWithoutDust(tokenIds);
-        } else if (quest.requirementType == RequirementType.JUNK) {
+        } else if (quest.requirementType == ItemType.JUNK) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(junk.ownerOf(tokenID) == msg.sender, "Not junk owner");
-                require(junk.tokenStars(tokenID) == uint256(quest.requirementRarity), "Wrong junk rarity");
+                require(junk.tokenStars(tokenID) == quest.requirementRarity, "Wrong junk rarity");
             }
             junk.burn(tokenIds);
-        } else if (quest.requirementType == RequirementType.TRINKET) {
+        } else if (quest.requirementType == ItemType.TRINKET) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(trinket.ownerOf(tokenID) == msg.sender, "Not trinket owner");
-                require(trinket.tokenStars(tokenID) == uint256(quest.requirementRarity), "Wrong trinket rarity");
+                require(trinket.tokenStars(tokenID) == quest.requirementRarity, "Wrong trinket rarity");
             }
             trinket.burn(tokenIds);
-        } else if (quest.requirementType == RequirementType.SHIELD) {
+        } else if (quest.requirementType == ItemType.SHIELD) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(shields.ownerOf(tokenID) == msg.sender, "Not shield owner");
-                require(shields.getStars(tokenID) == uint256(quest.requirementRarity), "Wrong shield rarity");
+                require(shields.getStars(tokenID) == quest.requirementRarity, "Wrong shield rarity");
             }
             shields.burn(tokenIds);
         } else {
@@ -313,13 +318,13 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function submitProgressAmount(uint256 characterID, uint8 amount) public assertQuestsEnabled assertOnQuest(characterID, true) {
         uint256 questID = characterQuest[characterID];
         Quest memory quest = quests[questID];
-        if (quest.requirementType == RequirementType.STAMINA) {
+        if (quest.requirementType == ItemType.STAMINA) {
             characters.getFightDataAndDrainStamina(msg.sender, characterID, amount, false, 0);
-        } else if (quest.requirementType == RequirementType.DUST) {
+        } else if (quest.requirementType == ItemType.DUST) {
             uint32[] memory decrementDustSupplies = new uint32[](3);
-            decrementDustSupplies[uint256(quest.requirementRarity)] = amount;
+            decrementDustSupplies[quest.requirementRarity] = amount;
             weapons.decrementDustSupplies(msg.sender, decrementDustSupplies[0], decrementDustSupplies[1], decrementDustSupplies[2]);
-        } else if (quest.requirementType == RequirementType.SOUL) {
+        } else if (quest.requirementType == ItemType.SOUL) {
             burningManager.burnSoul(msg.sender, amount);
         } else {
             revert("Unknown requirement type");
@@ -359,34 +364,12 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return questTemplates[tier];
     }
 
-    function getQuestData(uint256 questID) public view returns (uint256, Rarity, RequirementType, Rarity, uint256, RewardType, Rarity, uint256, uint256) {
-        Quest memory quest = quests[questID];
-        return (quest.id, quest.tier, quest.requirementType, quest.requirementRarity, quest.requirementAmount,
-        quest.rewardType, quest.rewardRarity, quest.rewardAmount, quest.reputationAmount);
-    }
-
     function getCharacterQuestData(uint256 characterID) public view returns (uint256[] memory) {
         uint256[] memory questDataKeys = new uint256[](3);
         questDataKeys[0] = NFTVAR_SIMPLEQUEST_PROGRESS;
         questDataKeys[1] = NFTVAR_SIMPLEQUEST_TYPE;
         questDataKeys[2] = NFTVAR_REPUTATION;
         return characters.getNFTVars(characterID, questDataKeys);
-    }
-
-    function getCharacterQuestDataDetails(uint256 characterID) public view returns (uint256[] memory, uint256, Rarity,
-        RequirementType, Rarity, uint256,
-        RewardType, Rarity, uint256, uint256) {
-        if (characterQuest[characterID] == 0) {
-            return (getCharacterQuestData(characterID), 0, Rarity.COMMON,
-            RequirementType.NONE, Rarity.COMMON, 0,
-            RewardType.NONE, Rarity.COMMON, 0, 0);
-        }
-        Quest memory quest = quests[characterQuest[characterID]];
-        return (getCharacterQuestData(characterID),
-        quest.id, quest.tier,
-        quest.requirementType, quest.requirementRarity, quest.requirementAmount,
-        quest.rewardType, quest.rewardRarity, quest.rewardAmount,
-        quest.reputationAmount);
     }
 
     function hasFreeSkip(uint256 characterID) public view returns (bool) {
@@ -417,24 +400,37 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         tierChances[tier] = chances;
     }
 
-    function addNewQuestTemplate(Rarity tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,
-        RewardType rewardType, Rarity rewardRarity, uint256 rewardAmount, uint256 reputationAmount) public restricted {
-        uint256 questID = addNewQuest(tier, requirementType, requirementRarity, requirementAmount, rewardType, rewardRarity, rewardAmount, reputationAmount);
+    function addNewQuestTemplate(Rarity tier,
+        ItemType requirementType, uint256 requirementRarity, uint256 requirementAmount, address requirementExternalAddress,
+        ItemType rewardType, uint256 rewardRarity, uint256 rewardAmount, address rewardExternalAddress,
+        uint256 reputationAmount) public restricted {
+        uint256 questID = addNewQuest(tier,
+            requirementType, requirementRarity, requirementAmount, requirementExternalAddress,
+            rewardType, rewardRarity, rewardAmount, rewardExternalAddress,
+            reputationAmount);
         questTemplates[uint8(tier)].push(questID);
     }
 
-    function addNewPromoQuestTemplate(Rarity tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,
-        RewardType rewardType, Rarity rewardRarity, uint256 rewardAmount, uint256 reputationAmount) public restricted {
-        uint256 questID = addNewQuest(tier, requirementType, requirementRarity, requirementAmount, rewardType, rewardRarity, rewardAmount, reputationAmount);
+    function addNewPromoQuestTemplate(Rarity tier,
+        ItemType requirementType, uint256 requirementRarity, uint256 requirementAmount, address requirementExternalAddress,
+        ItemType rewardType, uint256 rewardRarity, uint256 rewardAmount, address rewardExternalAddress,
+        uint256 reputationAmount) public restricted {
+        uint256 questID = addNewQuest(tier,
+            requirementType, requirementRarity, requirementAmount, requirementExternalAddress,
+            rewardType, rewardRarity, rewardAmount, rewardExternalAddress,
+            reputationAmount);
         questTemplates[uint8(tier) + 10].push(questID);
     }
 
-    function addNewQuest(Rarity tier, RequirementType requirementType, Rarity requirementRarity, uint256 requirementAmount,
-        RewardType rewardType, Rarity rewardRarity, uint256 rewardAmount, uint256 reputationAmount) internal returns (uint256 questID) {
+    function addNewQuest(Rarity tier,
+        ItemType requirementType, uint256 requirementRarity, uint256 requirementAmount, address requirementExternalAddress,
+        ItemType rewardType, uint256 rewardRarity, uint256 rewardAmount, address rewardExternalAddress,
+        uint256 reputationAmount) internal returns (uint256 questID) {
         questID = nextQuestID++;
         quests[questID] = Quest(questID, tier,
-            requirementType, requirementRarity, requirementAmount,
-            rewardType, rewardRarity, rewardAmount, reputationAmount);
+            requirementType, requirementRarity, requirementAmount, requirementExternalAddress,
+            rewardType, rewardRarity, rewardAmount, rewardExternalAddress,
+            reputationAmount);
     }
 
     function deleteQuestTemplate(uint8 tier, uint32 index) public restricted {

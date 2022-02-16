@@ -17,7 +17,7 @@
       {{ freeSkip ? $t('quests.freeSkip') : $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
       <Hint v-if="!freeSkip && !hasStaminaToSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
     </b-button>
-    <span v-if="nextFreeSkipTime && character.quest.id !== 0 && !questCanBeCompleted">{{
+    <span v-if="nextFreeSkipTime && character.quest.id !== 0 && !questCanBeCompleted" class="text-center">{{
         $t('quests.freeSkipResetsIn', {time: nextFreeSkipTime})
       }}</span>
     <QuestSubmissionModal :showModal="showSubmissionModal" :character="character"

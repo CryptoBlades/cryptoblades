@@ -20,7 +20,8 @@
       </div>
     </div>
     <div v-for="character in characters" :key="character.id" class="d-flex w-100">
-      <QuestRow :characterId="character.id" :reputationLevelRequirements="reputationLevelRequirements"/>
+      <QuestRow :characterId="character.id" :reputationLevelRequirements="reputationLevelRequirements"
+                @refresh-quest-data="onRefreshQuestData"/>
     </div>
   </div>
   <div v-else-if="isLoading">
@@ -39,7 +40,6 @@ import {Nft} from '@/interfaces/Nft';
 import {Accessors} from 'vue/types/options';
 import QuestRow from '@/components/smart/QuestRow.vue';
 import hourglass from '@/assets/hourglass.png';
-import Events from '@/events';
 import {getTimeRemaining} from '@/utils/common';
 
 export interface Quest {
@@ -51,18 +51,36 @@ export interface Quest {
   requirementType?: RequirementType;
   requirementRarity?: Rarity;
   requirementAmount: number;
+  requirementExternalAddress?: string;
   rewardType?: RewardType;
   rewardRarity?: Rarity;
   rewardAmount: number;
+  rewardExternalAddress?: string;
   reputationAmount: number;
 }
 
 export enum RequirementType {
-  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, SOUL, RAID
+  NONE,
+  WEAPON,
+  JUNK,
+  DUST,
+  TRINKET,
+  SHIELD,
+  STAMINA,
+  SOUL,
+  RAID,
 }
 
+// NOTE: Numbers should represent ItemType in SimpleQuests.sol
 export enum RewardType {
-  NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE, SOUL
+  NONE,
+  WEAPON,
+  JUNK,
+  DUST,
+  TRINKET,
+  SHIELD,
+  EXPERIENCE = 9,
+  SOUL = 7,
 }
 
 export enum Rarity {
@@ -186,13 +204,14 @@ export default Vue.extend({
         }
       }, 1000);
     },
+
+    async onRefreshQuestData() {
+      await this.refreshQuestData();
+    },
   },
 
   async mounted() {
     await this.refreshQuestData();
-    Events.$on('refresh-quest-data', async () => {
-      await this.refreshQuestData();
-    });
   },
 
   beforeDestroy() {
