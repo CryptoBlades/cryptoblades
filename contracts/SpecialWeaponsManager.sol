@@ -23,6 +23,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         uint256 endTime;
     }
 
+    // id 0 = general shards supply
     mapping(address => mapping(uint256 => uint256)) public userEventShardSupply;
     mapping(uint256 => uint256) public vars;
     uint256 public constant VAR_SHARD_COST_LOW = 1;

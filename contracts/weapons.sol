@@ -184,9 +184,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function get(uint256 id) public view noFreshLookup(id)
         returns (
             uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,
-            uint8 _blade, uint8 _crossguard, uint8 _grip, uint8 _pommel,
+            uint32 _cosmetics,
             uint24 _burnPoints, // burn points.. got stack limits so i put them together
-            uint24 _bonusPower // bonus power
+            uint24 _bonusPower, // bonus power
+            uint24 _weaponType // weapon type for special weapons
     ) {
         return _get(id);
     }
@@ -194,12 +195,18 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function _get(uint256 id) internal view
         returns (
             uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,
-            uint8 _blade, uint8 _crossguard, uint8 _grip, uint8 _pommel,
+            uint32 _cosmetics, // cosmetics put together to avoid stack too deep errors
             uint24 _burnPoints, // burn points.. got stack limits so i put them together
-            uint24 _bonusPower // bonus power
+            uint24 _bonusPower, // bonus power
+            uint24 _weaponType // weapon type for special weapons
     ) {
         (_properties, _stat1, _stat2, _stat3, _level) = getStats(id);
-        (_blade, _crossguard, _grip, _pommel) = getCosmetics(id);
+
+        // scope to avoid stack too deep errors
+        {
+        (uint8 _blade, uint8 _crossguard, uint8 _grip, uint8 _pommel) = getCosmetics(id);
+        _cosmetics = uint32(_blade) | (uint32(_crossguard) << 8) | (uint32(_grip) << 16) | (uint32(_pommel) << 24);
+        }
 
         WeaponBurnPoints memory wbp = burnPoints[id];
         _burnPoints =
@@ -208,6 +215,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             (uint24(wbp.fiveStarBurnPoints) << 16);
 
         _bonusPower = getBonusPower(id);
+        _weaponType = getWeaponType(id);
     }
 
     function mintN(address minter, uint32 amount, uint256 seed, uint8 chosenElement) public restricted {
@@ -664,6 +672,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             wbp.fourStarBurnPoints = 25;
         if(wbp.fiveStarBurnPoints > 10)
             wbp.fiveStarBurnPoints = 10;
+    }
+
+    function getWeaponType(uint256 id) public view noFreshLookup(id) returns(uint24) {
+        return uint24(nftVars[id][NFTVAR_WEAPON_TYPE]);
     }
 
     function getBonusPower(uint256 id) public view noFreshLookup(id) returns (uint24) {

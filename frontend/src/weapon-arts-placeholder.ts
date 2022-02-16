@@ -7,13 +7,20 @@ import img5 from './assets/placeholder/sword-placeholder-4.png';
 import img6 from './assets/placeholder/sword-placeholder-5.png';
 import img7 from './assets/placeholder/sword-placeholder-6.png';
 
+import specialImg1 from './assets/special-weapons/pluto-alliance.png';
+
 import { IWeapon } from './interfaces';
 
 const allImages = [img1, img2, img3, img4, img5, img6, img7];
+const specialImage = [specialImg1];
 
 export function getWeaponArt(weapon: IWeapon) {
   if (!weapon) {
     return null;
+  }
+
+  if(weapon.weaponType > 0) {
+    return specialImage[weapon.weaponType - 1];
   }
 
   return allImages[weapon.id % allImages.length];
