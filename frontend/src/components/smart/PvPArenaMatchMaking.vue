@@ -630,42 +630,40 @@ export default {
 span, p, li, button {
   font-family: 'Roboto';
 }
-
 .infoPopover {
   display: flex;
+  margin: 0 auto;
+  margin-bottom: 2rem;
   align-items: center;
   vertical-align: middle;
   place-content: center;
   font-size: .85rem;
-  margin: 0 auto;
-  margin-bottom: 2rem;
   &:hover {
     cursor: pointer;
     text-shadow: none;
   }
   span {
-
     font-family: 'Trajan';
   }
   .icon {
-    margin-left: 0.25rem;
     display: flex;
+    height: 1.25rem;
+    width: 1.25rem;
+    margin-left: 0.25rem;
     align-items: center;
     vertical-align: middle;
     place-content: center;
     border-radius: 9999px;
     background: #cec198;
-    height: 1.25rem;
-    width: 1.25rem;
     color: black;
     font-weight: 700;
   }
 }
 .popoverWrapper, .permanent {
-  border: 1px solid #cec198;
-  background-color: #141414;
   padding: 1rem 1rem 0.5rem 1rem;
+  border: 1px solid #cec198;
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  background-color: #141414;
   .popoverTitle {
     font-family: 'Trajan';
     color: #cec198;
@@ -678,7 +676,6 @@ span, p, li, button {
   p {
     color: #b4b0a7;
     font-size: .8rem;
-    list-style-type: none;
   }
   p:last-of-type {
     margin-bottom: .5rem;
