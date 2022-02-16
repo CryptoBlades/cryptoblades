@@ -8,6 +8,7 @@
           <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon" alt=""/> {{
               $t('quests.resetsIn', {time: nextWeekResetTime})
             }}</span>
+          <!--          TODO: Remember to add tooltip that you HAVE TO claim reward before weekly reset-->
         </div>
         <div class="quest-progress w-100">
           <div class="quest-progress-bar" role="progressbar"

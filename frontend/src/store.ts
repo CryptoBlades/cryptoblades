@@ -2,14 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, {isUndefined, values} from 'lodash';
-import {
-  bnMinimum,
-  currentChainSupportsMerchandise,
-  currentChainSupportsPvP,
-  currentChainSupportsQuests,
-  gasUsedToBnb,
-  toBN
-} from './utils/common';
+import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests, gasUsedToBnb, toBN} from './utils/common';
 
 import {getConfigValue, setUpContracts} from './contracts';
 
@@ -42,14 +35,10 @@ import {
 import {getCharacterNameFromSeed} from './character-name';
 import {approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd} from './contract-call-utils';
 
-import {
-  burningManager as featureFlagBurningManager,
-  raid as featureFlagRaid,
-  stakeOnly as featureFlagStakeOnly
-} from './feature-flags';
+import {burningManager as featureFlagBurningManager, raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly} from './feature-flags';
 import {IERC20, IERC721, INftStakingRewards, IStakingRewards} from '../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
-import {Nft, TransferedNft, NftTransfer} from './interfaces/Nft';
+import {Nft, NftTransfer, TransferedNft} from './interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
 import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
@@ -3398,28 +3387,30 @@ export function createStore(web3: Web3) {
         return questTemplates;
       },
 
-      async addQuestTemplate({state}, {questTemplate}) {
+      async addQuestTemplate({state}, {questTemplate, isPromo, supply, deadline}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
-
-        console.log(questTemplate);
 
         const emptyAccount = '0x0000000000000000000000000000000000000000';
 
+        if (!questTemplate.requirementExternalAddress) {
+          questTemplate.requirementExternalAddress = emptyAccount;
+        }
+
+        if (!questTemplate.rewardExternalAddress) {
+          questTemplate.rewardExternalAddress = emptyAccount;
+        }
+
+        if (isPromo) {
+          questTemplate.tier += 10;
+        }
+
+        console.log(questTemplate);
+
         return await SimpleQuests.methods.addNewQuestTemplate(questTemplate.tier,
-          questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount, emptyAccount,
-          questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount, emptyAccount,
-          questTemplate.reputationAmount).send(defaultCallOptions(state));
-      },
-
-      async addPromoQuestTemplate({state}, {questTemplate}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
-
-        return await SimpleQuests.methods.addNewPromoQuestTemplate(questTemplate.tier,
-          questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount, web3.eth.accounts[0],
-          questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount, web3.eth.accounts[0],
-          questTemplate.reputationAmount).send(defaultCallOptions(state));
+          questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount, questTemplate.requirementExternalAddress,
+          questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount, questTemplate.rewardExternalAddress,
+          questTemplate.reputationAmount, supply, deadline).send(defaultCallOptions(state));
       },
 
       async deleteQuest({state}, {tier, index}) {
@@ -3656,7 +3647,7 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        return await SimpleQuests.methods.weeklyCompletions(state.defaultAccount).call(defaultCallOptions(state));
+        return await SimpleQuests.methods.getWeeklyCompletions(state.defaultAccount).call(defaultCallOptions(state));
       },
 
       async skipQuest({ state, dispatch }, {characterID}) {

@@ -246,7 +246,7 @@ import QuestTemplatesDisplay from '@/components/smart/QuestTemplatesDisplay.vue'
 import QuestTemplate from './QuestTemplate.vue';
 
 interface StoreMappedActions {
-  addQuestTemplate(payload: { questTemplate: Quest }): Promise<void>;
+  addQuestTemplate(payload: { questTemplate: Quest, isPromo: boolean, supply: number, deadline: number }): Promise<void>;
 
   addPromoQuestTemplate(payload: { questTemplate: Quest }): Promise<void>;
 
@@ -326,7 +326,6 @@ export default Vue.extend({
   methods: {
     ...mapActions([
       'addQuestTemplate',
-      'addPromoQuestTemplate',
       'getReputationLevelRequirements',
       'setReputationLevelRequirements',
       'setSkipQuestStaminaCost',
@@ -354,11 +353,7 @@ export default Vue.extend({
     async onSubmit() {
       try {
         this.isLoading = true;
-        if (this.promoQuestTemplates) {
-          await this.addPromoQuestTemplate({questTemplate: this.questTemplate});
-        } else {
-          await this.addQuestTemplate({questTemplate: this.questTemplate});
-        }
+        await this.addQuestTemplate({questTemplate: this.questTemplate, isPromo: this.promoQuestTemplates, supply: 0, deadline: 0});
         this.refreshQuestTemplates();
       } finally {
         this.isLoading = false;

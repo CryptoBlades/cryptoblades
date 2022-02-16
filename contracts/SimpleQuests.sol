@@ -70,23 +70,22 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256 reputationAmount;
     }
 
-    enum RequirementType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, SOUL, RAID, EXTERNAL, EXTERNAL_HOLD}
-    enum RewardType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, EXPERIENCE, SOUL, EXTERNAL}
-
     enum ItemType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, SOUL, RAID, EXPERIENCE, EXTERNAL, EXTERNAL_HOLD}
-
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
     uint256 public nextQuestID;
 
     mapping(uint256 => uint256[]) public questTemplates;
     mapping(uint256 => Quest) public quests;
+    mapping(uint256 => uint256) public questSupplies;
+    mapping(uint256 => uint256) public questDeadlines;
+    mapping(uint256 => uint256) public limitedQuestIndexes;
     mapping(uint256 => uint256) public characterQuest;
     mapping(uint256 => uint256[4]) public tierChances;
     mapping(uint256 => uint256) public vars;
     mapping(uint256 => uint256) public lastFreeSkipUsage;
-    mapping(address => uint256) public firstWeeklyQuestCompletion;
-    mapping(address => uint256) public weeklyCompletions;
+    //TODO: Probably add weeklyRewardClaimed (address => mapping(uint256 => bool))
+    mapping(address => mapping(uint256 => uint256)) public weeklyCompletions; //user to week to completions
 
     event QuestAssigned(uint256 indexed questID, uint256 indexed characterID);
     event QuestProgressed(uint256 indexed questID, uint256 indexed characterID);
@@ -173,21 +172,30 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256[4] memory chances = tierChances[reputationTier];
         uint256 tierRoll = RandomUtil.randomSeededMinMax(1, 100, seed);
         seed = RandomUtil.combineSeeds(seed, 1);
-        uint256 questID;
+
+        uint256 tier;
         if (tierRoll > chances[3]) {
-            questID = generateNewQuest(vars[VAR_LEGENDARY_TIER], seed);
+            tier = vars[VAR_LEGENDARY_TIER];
         }
         else if (tierRoll > chances[2]) {
-            questID = generateNewQuest(vars[VAR_EPIC_TIER], seed);
+            tier = vars[VAR_EPIC_TIER];
         }
         else if (tierRoll > chances[1]) {
-            questID = generateNewQuest(vars[VAR_RARE_TIER], seed);
+            tier = vars[VAR_RARE_TIER];
         }
         else if (tierRoll > chances[0]) {
-            questID = generateNewQuest(vars[VAR_UNCOMMON_TIER], seed);
+            tier = vars[VAR_UNCOMMON_TIER];
         }
         else {
-            questID = generateNewQuest(vars[VAR_COMMON_TIER], seed);
+            tier = vars[VAR_COMMON_TIER];
+        }
+        uint256 questID = generateNewQuest(tier, seed);
+        if (questSupplies[questID] > 0) {
+            questSupplies[questID] = --questSupplies[questID];
+            if (questSupplies[questID] == 0) {
+                deleteQuestTemplate(tier, limitedQuestIndexes[questID]);
+                // TODO: If external reward unlock the nfts
+            }
         }
         characterQuest[characterID] = questID;
         uint256[] memory fields = new uint256[](2);
@@ -220,22 +228,15 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function completeQuest(uint256 characterID) public assertQuestsEnabled assertOnQuest(characterID, true) returns (uint256[] memory questRewards) {
         uint256[] memory questData = getCharacterQuestData(characterID);
         require(questData[0] >= quests[characterQuest[characterID]].requirementAmount, "Not completed");
-        if (isNewQuestsWeek(msg.sender)) {
-            firstWeeklyQuestCompletion[msg.sender] = now;
-            weeklyCompletions[msg.sender] = 0;
-        }
         uint256 questID = characterQuest[characterID];
+        require(questDeadlines[questID] == 0 || questDeadlines[questID] >= now, "Quest deadline has passed");
         uint256 currentReputation = questData[2];
         questRewards = rewardQuest(questID, characterID);
         emit QuestRewarded(questID, characterID, questRewards);
         characters.setNftVar(characterID, NFTVAR_REPUTATION, currentReputation + quests[questID].reputationAmount);
         emit QuestComplete(questID, characterID);
-        weeklyCompletions[msg.sender] += 1;
+        weeklyCompletions[msg.sender][now % 1 weeks] += 1;
         assignNewQuest(characterID);
-    }
-
-    function isNewQuestsWeek(address user) internal view returns (bool) {
-        return now > firstWeeklyQuestCompletion[user] + 1 weeks;
     }
 
     function generateRewardQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) public {
@@ -384,6 +385,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return now + 1 days - now % 1 days;
     }
 
+    function getWeeklyCompletions(address user) public view returns (uint256) {
+        return weeklyCompletions[user][now % 1 weeks];
+    }
+
     // ADMIN
 
     function setVar(uint256 varField, uint256 value) external restricted {
@@ -400,40 +405,26 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         tierChances[tier] = chances;
     }
 
-    function addNewQuestTemplate(Rarity tier,
+    function addNewQuestTemplate(uint8 tier,
         ItemType requirementType, uint256 requirementRarity, uint256 requirementAmount, address requirementExternalAddress,
         ItemType rewardType, uint256 rewardRarity, uint256 rewardAmount, address rewardExternalAddress,
-        uint256 reputationAmount) public restricted {
-        uint256 questID = addNewQuest(tier,
+        uint256 reputationAmount, uint256 supply, uint256 deadline) public restricted {
+        uint256 questID = nextQuestID++;
+        quests[questID] = Quest(questID, Rarity(tier % 10),
             requirementType, requirementRarity, requirementAmount, requirementExternalAddress,
             rewardType, rewardRarity, rewardAmount, rewardExternalAddress,
             reputationAmount);
-        questTemplates[uint8(tier)].push(questID);
+        questTemplates[tier].push(questID);
+        if (supply > 0) {
+            require(deadline > 0, "Missing deadline");
+            questSupplies[questID] = supply;
+            questDeadlines[questID] = deadline;
+            limitedQuestIndexes[questID] = questTemplates[tier].length - 1;
+            // TODO: If external reward lock the nfts for the deadline
+        }
     }
 
-    function addNewPromoQuestTemplate(Rarity tier,
-        ItemType requirementType, uint256 requirementRarity, uint256 requirementAmount, address requirementExternalAddress,
-        ItemType rewardType, uint256 rewardRarity, uint256 rewardAmount, address rewardExternalAddress,
-        uint256 reputationAmount) public restricted {
-        uint256 questID = addNewQuest(tier,
-            requirementType, requirementRarity, requirementAmount, requirementExternalAddress,
-            rewardType, rewardRarity, rewardAmount, rewardExternalAddress,
-            reputationAmount);
-        questTemplates[uint8(tier) + 10].push(questID);
-    }
-
-    function addNewQuest(Rarity tier,
-        ItemType requirementType, uint256 requirementRarity, uint256 requirementAmount, address requirementExternalAddress,
-        ItemType rewardType, uint256 rewardRarity, uint256 rewardAmount, address rewardExternalAddress,
-        uint256 reputationAmount) internal returns (uint256 questID) {
-        questID = nextQuestID++;
-        quests[questID] = Quest(questID, tier,
-            requirementType, requirementRarity, requirementAmount, requirementExternalAddress,
-            rewardType, rewardRarity, rewardAmount, rewardExternalAddress,
-            reputationAmount);
-    }
-
-    function deleteQuestTemplate(uint8 tier, uint32 index) public restricted {
+    function deleteQuestTemplate(uint256 tier, uint256 index) public restricted {
         require(index < questTemplates[tier].length, "Index out of bounds");
         questTemplates[tier][index] = questTemplates[tier][questTemplates[tier].length - 1];
         questTemplates[tier].pop();
