@@ -1141,14 +1141,18 @@ export function createStore(web3: Web3) {
       },
 
       updateSpecialWeaponEventId(state: IState, newSpecialWeaponEventId) {
-        localStorage.setItem('specialWeaponEventId', newSpecialWeaponEventId);
-        state.specialWeaponEventId = newSpecialWeaponEventId;
+        localStorage.setItem('specialWeaponEventId', newSpecialWeaponEventId.toString());
+        state.specialWeaponEventId = newSpecialWeaponEventId.toString();
       },
 
       updateForgingStatus(state: IState, { eventId, ordered, forged }) {
         Vue.set(state.specialWeaponEvents[eventId], 'ordered', ordered);
         Vue.set(state.specialWeaponEvents[eventId], 'forged', forged);
-      }
+      },
+
+      updateEventTotalOrderedCount(state: IState, { eventId, orderedCount }) {
+        Vue.set(state.specialWeaponEvents[eventId], 'orderedCount', orderedCount);
+      },
     },
 
     actions: {
@@ -5162,6 +5166,8 @@ export function createStore(web3: Web3) {
             name: eventInfoRaw[0],
             weaponElement: eventInfoRaw[1],
             endTime: eventInfoRaw[2],
+            supply: eventInfoRaw[3],
+            orderedCount: eventInfoRaw[4],
             ordered,
             forged
           };
@@ -5215,7 +5221,10 @@ export function createStore(web3: Web3) {
 
         await SpecialWeaponsManager.methods.forgeSpecialWeapon(eventId).send({ from: state.defaultAccount });
 
-        await dispatch('fetchForgingStatus', eventId);
+        await Promise.all([
+          dispatch('updateWeaponIds'),
+          dispatch('fetchForgingStatus', eventId),
+        ]);
       },
 
       async fetchForgingStatus({ state, commit }, eventId) {
@@ -5226,6 +5235,15 @@ export function createStore(web3: Web3) {
         const forged = await SpecialWeaponsManager.methods.userForgedAtEvent(state.defaultAccount, eventId).call(defaultCallOptions(state));
 
         commit('updateForgingStatus', { eventId, ordered, forged });
+      },
+
+      async fetchEventTotalOrderedCount({ state, commit }, eventId) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        const orderedCount = await SpecialWeaponsManager.methods.getTotalOrderedCount(eventId).call(defaultCallOptions(state));
+
+        commit('updateEventTotalOrderedCount', { eventId, orderedCount });
       }
     },
   });

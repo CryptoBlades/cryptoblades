@@ -6,7 +6,7 @@
             <h5 class="mb-0">{{$t('blacksmith.specialEvent')}}:</h5>
             <b-form-select :disabled="!activeSpecialWeaponEventsIds.length" class="w-50 ml-1" size="sm"
               v-model="selectedSpecialWeaponEventId" :value="selectedSpecialWeaponEventId" @change="updateSpecialWeaponEventId($event)">
-              <b-form-select-option v-for="id in activeSpecialWeaponEventsIds" :key="id" :value="id">
+              <b-form-select-option v-for="id in activeSpecialWeaponEventsIds" :key="+id" :value="+id">
                 {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
               </b-form-select-option>
             </b-form-select>
@@ -17,7 +17,7 @@
               <div class="d-flex flex-column justify-items-center w-50 mb-3">
                 <img :src="eventWeaponImgPath" class="weapon-img"/>
                 <div class="d-flex mt-3 align-items-center">
-                  <h5 class="mb-0">Available elements:</h5>
+                  <h5 class="mb-0">{{$t('blacksmith.availableElements')}}</h5>
                   <h5 v-if="availableElement === 100 || availableElement === 0" class="fire-icon ml-2 mb-0" />
                   <h5 v-if="availableElement === 100 || availableElement === 1" class="earth-icon mb-0" />
                   <h5 v-if="availableElement === 100 || availableElement === 2" class="lightning-icon mb-0" />
@@ -33,10 +33,17 @@
                 </div>
               </div>
             </div>
+            <div class="d-flex flex-column align-items-center justify-self-start" v-if="specialWeaponsSupply && !isForging">
+              <div class="w-100 mt-1 progress w-90 justify-items-center">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                  :style="[{'width': progressBarWidth, 'background-color': '#9e8a57'}]"/>
+              </div>
+              <h5 class="mb-0">{{$t('blacksmith.totalWeaponsForged')}} {{orderedCount}}/{{specialWeaponsSupply}}</h5>
+            </div>
             <div class="d-flex mt-3 info-div justify-content-center" v-if="isForging">
               <img :src="forgingGifSrc" />
             </div>
-            <div v-if="!eventWeaponOrdered && !eventWeaponForged">
+            <div class="top-border-forge mt-3" v-if="!isEventWeaponOrdered && !isEventWeaponForged && hasSupplyLeft">
               <div class="d-flex mt-3 align-items-center">
                 <h5 class="mb-0">{{$t('blacksmith.forgeOption')}}:</h5>
                 <b-form-select v-if="forgeCosts && forgeCosts.length > 0" :disabled="!activeSpecialWeaponEventsIds.length" class="w-50 ml-1" size="sm"
@@ -60,8 +67,11 @@
                 </b-button>
               </div>
             </div>
-            <div class="d-flex flex-column align-items-center mt-3" v-if="eventWeaponOrdered && !eventWeaponForged">
-              <h5>{{$t('blacksmith.specialWeaponOrdered')}}</h5>
+            <div class="d-flex top-border-forge mt-3 justify-content-center" v-if="!isEventWeaponOrdered && !isEventWeaponForged && !hasSupplyLeft">
+              <h5 class="mt-3">{{$t('blacksmith.soldOut')}}</h5>
+            </div>
+            <div class="d-flex flex-column align-items-center mt-3 top-border-forge" v-if="isEventWeaponOrdered && !isForging && !isEventWeaponForged">
+              <h5 class="mt-2">{{$t('blacksmith.specialWeaponOrdered')}}</h5>
               <b-button
                       variant="primary"
                       @click="onClaimSpecialWeapon()"
@@ -74,8 +84,11 @@
                 </span>
               </b-button>
             </div>
-            <div class="d-flex justify-content-center mt-3" v-if="eventWeaponForged">
-              <h5>{{$t('blacksmith.specialWeaponClaimed')}}</h5>
+            <div class="d-flex flex-column align-items-center mt-3 top-border-forge" v-if="isEventWeaponForged && !isClaiming">
+              <h5 class="mt-2">{{$t('blacksmith.specialWeaponClaimed')}}</h5>
+              <div class="weapon-icon-wrapper mt-2">
+                <weapon-icon v-if="forgedWeapon" :weapon="forgedWeapon" />
+              </div>
             </div>
           </div>
         </b-tab>
@@ -102,7 +115,7 @@
               </b-row>
             </div>
           </div>
-          <div class="mt-3 top-border">
+          <div class="mt-3 top-border-shards">
             <h4 class="mt-2">Convert</h4>
             <div class="d-flex align-items-center">
               <h5 class="mb-0">{{$t('blacksmith.from')}}:</h5>
@@ -159,21 +172,26 @@
 <script lang="ts">
 import Vue from 'vue';
 import weaponEvents from '../../../special-weapons.json';
-import { mapActions, mapMutations, mapState } from 'vuex';
-import { IState } from '@/interfaces';
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
+import { IState, IWeapon } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
 import Events from '../../events';
 import { secondsToDDHHMMSS } from '@/utils/date-time';
 import eventShard from '../../assets/special-weapons/eventShard.png';
 import generalShard from '../../assets/special-weapons/generalShard.png';
 import forgingGif from '../../assets/special-weapons/forging.gif';
+import WeaponIcon from '../WeaponIcon.vue';
 
 interface SpecialWeaponEventInfo {
   eventsDetails: Record<string, Record<string, any>>;
 }
 
 type StoreMappedState = Pick<IState,'activeSpecialWeaponEventsIds' | 'inactiveSpecialWeaponEventsIds' |
-'specialWeaponEvents' | 'specialWeaponEventId' | 'shardsSupply'>;
+'specialWeaponEvents' | 'specialWeaponEventId' | 'shardsSupply' | 'ownedWeaponIds'>;
+
+interface StoreMappedGetters {
+  weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
+}
 
 interface StoreMappedActions {
   fetchSpecialWeaponEvents(): Promise<void>;
@@ -182,6 +200,7 @@ interface StoreMappedActions {
   convertShards({ eventFromId, eventToId, amount }: { eventFromId: number, eventToId: number, amount: number }): Promise<void>;
   orderSpecialWeapon({ eventId, orderOption}: { eventId: number, orderOption: number}): Promise<void>;
   forgeSpecialWeapon(eventId: number): Promise<void>;
+  fetchEventTotalOrderedCount(eventId: number): Promise<void>;
 }
 
 interface StoreMappedMutations {
@@ -196,6 +215,7 @@ interface Data {
   forgeCosts: number[];
   endsIn: number;
   updateEndTime: ReturnType<typeof setInterval> | null;
+  orderedCountInterval: ReturnType<typeof setInterval> | null;
   convertAmount: number;
   selectedConvertFromId: number;
   selectedConvertToId: number;
@@ -215,6 +235,7 @@ export default Vue.extend({
       forgeCosts: [],
       endsIn: 0,
       updateEndTime: null,
+      orderedCountInterval: null,
       convertAmount: 0,
       selectedConvertFromId: -1,
       selectedConvertToId: -1,
@@ -225,14 +246,20 @@ export default Vue.extend({
     } as Data;
   },
 
+  components: {
+    WeaponIcon
+  },
+
   computed: {
     ...(mapState([
       'activeSpecialWeaponEventsIds',
       'inactiveSpecialWeaponEventsIds',
       'specialWeaponEvents',
       'specialWeaponEventId',
-      'shardsSupply'
+      'shardsSupply',
+      'ownedWeaponIds'
     ]) as Accessors<StoreMappedState>),
+    ...(mapGetters(['weaponsWithIds']) as Accessors<StoreMappedGetters>),
 
     eventDetails(): string {
       if(!this.specialWeaponEvents[this.selectedSpecialWeaponEventId]) return '';
@@ -260,7 +287,14 @@ export default Vue.extend({
     },
 
     canForge(): boolean {
-      return !!this.selectedSpecialWeaponEventId && this.shardsSupply[this.selectedSpecialWeaponEventId] >= this.forgeCost && this.endsIn > 0;
+      return !!this.selectedSpecialWeaponEventId &&
+        this.shardsSupply[this.selectedSpecialWeaponEventId] >= this.forgeCost &&
+        this.endsIn > 0;
+    },
+
+    hasSupplyLeft(): boolean {
+      if(!+this.specialWeaponEvents[this.selectedSpecialWeaponEventId].supply) return true;
+      return +this.specialWeaponEvents[this.selectedSpecialWeaponEventId].orderedCount< +this.specialWeaponEvents[this.selectedSpecialWeaponEventId].supply;
     },
 
     canConvert(): boolean {
@@ -284,14 +318,13 @@ export default Vue.extend({
       return +this.specialWeaponEvents[this.selectedSpecialWeaponEventId].weaponElement;
     },
 
-    eventWeaponOrdered(): boolean {
+    isEventWeaponOrdered(): boolean {
       if(!this.specialWeaponEvents[this.selectedSpecialWeaponEventId]) return false;
       return this.specialWeaponEvents[this.selectedSpecialWeaponEventId].ordered;
     },
 
-    eventWeaponForged(): boolean {
+    isEventWeaponForged(): boolean {
       if(!this.specialWeaponEvents[this.selectedSpecialWeaponEventId]) return false;
-      console.log(this.specialWeaponEvents[this.selectedSpecialWeaponEventId]);
       return this.specialWeaponEvents[this.selectedSpecialWeaponEventId].forged;
     },
 
@@ -314,7 +347,31 @@ export default Vue.extend({
     convertOutputAmount(): number {
       if(!this.shardsCostDenominator) return 0;
       return Math.ceil(this.convertAmount / this.shardsCostDenominator);
-    }
+    },
+
+    forgedWeapon(): IWeapon | undefined {
+      return this.weaponsWithIds(this.ownedWeaponIds).find(w => {
+        return w.weaponType === this.selectedSpecialWeaponEventId;
+      });
+    },
+
+    orderedCount(): number {
+      if(!this.specialWeaponEvents[this.selectedSpecialWeaponEventId]) return 0;
+      return +this.specialWeaponEvents[this.selectedSpecialWeaponEventId].orderedCount;
+    },
+
+    specialWeaponsSupply(): number {
+      if(!this.specialWeaponEvents[this.selectedSpecialWeaponEventId]) return 0;
+      return +this.specialWeaponEvents[this.selectedSpecialWeaponEventId].supply;
+    },
+
+    progressBarWidth(): string {
+      if(!this.specialWeaponEvents[this.selectedSpecialWeaponEventId]) return '0%';
+      return `${Math.round((
+        +this.specialWeaponEvents[this.selectedSpecialWeaponEventId].orderedCount /
+        +this.specialWeaponEvents[this.selectedSpecialWeaponEventId].supply) * 100
+      )}%`;
+    },
   },
 
   watch: {
@@ -327,7 +384,7 @@ export default Vue.extend({
 
   methods: {
     ...mapActions(['fetchSpecialWeaponEvents', 'fetchForgeCosts', 'convertShards', 'fetchShardsConvertDenominator',
-      'orderSpecialWeapon', 'forgeSpecialWeapon']) as StoreMappedActions,
+      'orderSpecialWeapon', 'forgeSpecialWeapon', 'fetchEventTotalOrderedCount']) as StoreMappedActions,
     ...mapMutations(['updateSpecialWeaponEventId']) as StoreMappedMutations,
 
     imgPath(img: string): string {
@@ -385,6 +442,11 @@ export default Vue.extend({
         this.endsIn--;
       }
     }, 1000);
+    this.orderedCountInterval = setInterval(async () => {
+      if(this.selectedSpecialWeaponEventId) {
+        await this.fetchEventTotalOrderedCount(this.selectedSpecialWeaponEventId);
+      }
+    }, 3000);
     Events.$on('show-special-forge-modal', async () => {
       this.showModal = true;
       await this.fetchSpecialWeaponEvents();
@@ -403,6 +465,9 @@ export default Vue.extend({
     if(this.updateEndTime) {
       clearInterval(this.updateEndTime);
     }
+    if(this.orderedCountInterval) {
+      clearInterval(this.orderedCountInterval);
+    }
   }
 });
 </script>
@@ -415,8 +480,10 @@ export default Vue.extend({
 }
 .info-div {
   padding: 2px;
-  border-bottom: 1px solid #9e8a57;
   justify-content: space-evenly;
+}
+.top-border-forge {
+  border-top: 1px solid #9e8a57;
 }
 .shard-icon {
   width: 0.6em;
@@ -437,7 +504,16 @@ export default Vue.extend({
 .bottom-border {
   border-bottom: 2px solid #9e8a5780;
 }
-.top-border {
+.top-border-shards {
   border-top: 2px solid #9e8a5780;
+}
+.weapon-icon-wrapper {
+  width: 12em;
+  height: 12em;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  cursor: pointer;
+  position: relative;
+  overflow: visible;
 }
 </style>

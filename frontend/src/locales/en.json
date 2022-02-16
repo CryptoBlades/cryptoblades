@@ -310,7 +310,10 @@
     "generalShards": "General Shards",
     "specialWeaponOrdered": "Your special weapon is ready!",
     "specialWeaponClaimed": "You've successfully forged your special weapon for this event.",
-    "claim": "Claim"
+    "claim": "Claim",
+    "availableElements": "Available elements:",
+    "totalWeaponsForged": "Total weapons forged:",
+    "soldOut": "Weapons sold out!"
   },
   "dustBalanceDisplay": {
     "availableDust": "Available Dust",

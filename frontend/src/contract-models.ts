@@ -129,10 +129,10 @@ export function weaponFromContract(id: string | number, data: string[]): IWeapon
   const stat3 = data[3];
   const level = +data[4];
   const cosmetics = +data[5];
-  const blade = cosmetics & 0xff;
-  const crossguard = (cosmetics >> 8) & 0xff;
-  const grip = (cosmetics >> 16) & 0xff;
-  const pommel = (cosmetics >> 24) & 0xff;
+  const blade = (cosmetics & 0xff).toString();
+  const crossguard = ((cosmetics >> 8) & 0xff).toString();
+  const grip = ((cosmetics >> 16) & 0xff).toString();
+  const pommel = ((cosmetics >> 24) & 0xff).toString();
   const burnPoints = +data[6];
   const bonusPower = +data[7];
   const weaponType = +data[8];

@@ -75,6 +75,8 @@ export interface ISpecialWeaponEvent {
   name: string;
   weaponElement: string;
   endTime: string;
+  supply: string;
+  orderedCount: string;
   ordered: boolean;
   forged: boolean;
 }
