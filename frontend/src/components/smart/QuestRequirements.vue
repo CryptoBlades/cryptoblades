@@ -1,7 +1,7 @@
 <template>
   <div class="quest-requirement-display gap-3">
     <span class="quest-title">{{ $t('quests.quest') }}</span>
-    <div class="d-flex align-items-center gap-3">
+    <div class="d-flex align-items-center gap-3" :key="quest.id">
       <QuestComponentIcon :quest="quest" isRequirement/>
       <div class="d-flex flex-column"><span class="requirement-text">{{
           quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.submit')

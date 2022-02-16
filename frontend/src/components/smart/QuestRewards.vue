@@ -1,7 +1,7 @@
 <template>
   <div class="quest-reward-display gap-3">
     <span class="reward-title">{{ $t('quests.reward') }}:</span>
-    <div class="d-flex align-items-center gap-2">
+    <div class="d-flex align-items-center gap-2" :key="quest.id">
       <QuestComponentIcon :quest="quest" isReward/>
       <QuestComponentIcon :quest="quest" isReputation/>
     </div>
