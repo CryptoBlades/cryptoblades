@@ -25,9 +25,9 @@
       </li>
     </router-link>
 
-    <a v-if="!stakeOnly && market" href="https://bazaar.market/" exact class="nav-link">
+    <a v-if="!stakeOnly && market" href="https://bazaar.market/" class="nav-link" target="_blank">
       <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.bazaar") }}</span>
+        <span class="gtag-link-others">{{ $t("viewLink.bazaar") }} <b-icon-box-arrow-up-right scale="0.7"/></span>
       </li>
     </a>
 
@@ -107,7 +107,7 @@ export default Vue.extend({
     },
     supportsQuests() {
       return this.getCurrentChainSupportsQuests;
-    }
+    },
   },
 
   methods: {

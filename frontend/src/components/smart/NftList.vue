@@ -349,7 +349,6 @@ interface Data {
   showFavoriteNfts: boolean;
   landSaleAllowed: boolean;
   canPurchaseLand: boolean;
-  canPurchaseShield: boolean;
   purchase: Land | undefined;
   selectedTier: number;
   selectedCurrency: number;
@@ -439,7 +438,6 @@ interface StoreMappedActions {
   claimPlayerReservedLand(payload: {reservationId: number, chunkId: number, tier: number}): Promise<void>;
   getOwnedLands(): Promise<{ 0: string, 1: string, 2: string, 3: string, 4: string }[]>;
   getTakenT3Chunks(): Promise<number[]>;
-  isShieldPurchased(): Promise<boolean>;
 }
 
 export default Vue.extend({
@@ -547,7 +545,6 @@ export default Vue.extend({
       showFavoriteNfts: true,
       landSaleAllowed: false,
       canPurchaseLand: false,
-      canPurchaseShield: true,
       purchase: undefined,
       selectedTier: 0,
       selectedCurrency: 0,
@@ -758,7 +755,7 @@ export default Vue.extend({
       'purchaseWeaponCosmetic', 'purchaseCharacterCosmetic', 'getAllZonesPopulation', 'checkIfChunkAvailable',
       'getZoneChunkPopulation', 'getChunkPopulation', 'purchaseT1CBKLand', 'purchaseT2CBKLand', 'purchaseT3CBKLand', 'getCBKLandPrice',
       'getPurchase', 'getReservedChunksIds', 'getAvailableLand', 'fetchIsLandSaleAllowed', 'getPlayerReservedLand',
-      'getChunksOfReservation', 'claimPlayerReservedLand', 'getOwnedLands', 'getTakenT3Chunks', 'isShieldPurchased',
+      'getChunksOfReservation', 'claimPlayerReservedLand', 'getOwnedLands', 'getTakenT3Chunks',
     ]) as StoreMappedActions),
     ...mapMutations(['setCurrentNft']),
 
@@ -841,10 +838,6 @@ export default Vue.extend({
         this.purchase = purchase;
         this.canPurchaseLand = purchase.tier === '0';
       }
-    },
-
-    async checkIfCanPurchaseShield() {
-      this.canPurchaseShield = !await this.isShieldPurchased();
     },
 
     isFavorite(type: string, id: number): boolean {
@@ -1077,8 +1070,8 @@ export default Vue.extend({
     },
 
     buyButtonDisabled(type: string) {
-      if(type === 'shield') {
-        return !this.canPurchaseShield;
+      if (type === 'shield') {
+        return false;
       }
       if((type === 't1land' || type === 't2land' || type === 't3land' ) && !this.canPurchaseLand){
         return true;
@@ -1095,7 +1088,6 @@ export default Vue.extend({
     async buyItem(item: nftItem) {
       if(item.type === 'shield'){
         await this.purchaseShield();
-        await this.checkIfCanPurchaseShield();
       }
 
       if(item.type === 'CharacterRenameTag'){
@@ -1217,8 +1209,6 @@ export default Vue.extend({
 
     await this.fetchReservations();
     this.checkPlayerReservedLandInterval = setInterval(await this.fetchReservations, 3000);
-
-    await this.checkIfCanPurchaseShield();
   },
 
   beforeDestroy() {
