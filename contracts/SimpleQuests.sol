@@ -143,7 +143,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     // FUNCTIONS
 
     function generateRequestQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) public {
-        safeRandoms.requestSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_RANDOM_QUEST, characterID));
+        safeRandoms.requestSingleSeed(address(this), RandomUtil.combineSeeds(SEED_RANDOM_QUEST, characterID));
     }
 
     function requestQuest(uint256 characterID) public assertQuestsEnabled assertOnQuest(characterID, false) returns (uint256) {
@@ -151,7 +151,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function assignNewQuest(uint256 characterID) private returns (uint256) {
-        uint256 seed = safeRandoms.popSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_RANDOM_QUEST, characterID), true, true);
+        uint256 seed = safeRandoms.popSingleSeed(address(this), RandomUtil.combineSeeds(SEED_RANDOM_QUEST, characterID), true, true);
         uint256 currentReputation = characters.getNftVar(characterID, NFTVAR_REPUTATION);
         uint256 reputationTier;
         if (currentReputation > vars[VAR_REPUTATION_LEVEL_5]) {
@@ -234,11 +234,11 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function generateRewardQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) public {
-        safeRandoms.requestSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID));
+        safeRandoms.requestSingleSeed(address(this), RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID));
     }
 
     function rewardQuest(uint256 questID, uint256 characterID) private returns (uint256[] memory) {
-        uint256 seed = safeRandoms.popSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID), true, false);
+        uint256 seed = safeRandoms.popSingleSeed(address(this), RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID), true, false);
         Quest memory quest = quests[questID];
         if (quest.rewardType == RewardType.WEAPON) {
             uint256[] memory tokenIDs = new uint256[](quest.rewardAmount);
@@ -336,11 +336,11 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     // VIEWS
 
     function hasRandomQuestSeedRequested(uint256 characterID) public view returns (bool) {
-        return safeRandoms.hasSingleSeedRequest(msg.sender, RandomUtil.combineSeeds(SEED_RANDOM_QUEST, characterID));
+        return safeRandoms.hasSingleSeedRequest(address(this), RandomUtil.combineSeeds(SEED_RANDOM_QUEST, characterID));
     }
 
     function hasRandomQuestRewardSeedRequested(uint256 characterID) public view returns (bool) {
-        return safeRandoms.hasSingleSeedRequest(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID));
+        return safeRandoms.hasSingleSeedRequest(address(this), RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID));
     }
 
     function getVars(uint256[] calldata varFields) external view returns (uint256[] memory) {
