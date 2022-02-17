@@ -763,10 +763,14 @@
       "storeERC721Tokens": "Store ERC721 tokens",
       "pasteInValidERC20Address": "Paste in valid ERC20 address",
       "storeERC20Tokens": "Store ERC20 tokens",
-      "storeInPartnerVault": "Store in partner vault"
+      "storeInPartnerVault": "Store in partner vault",
+      "checkERC721Balance": "Check ERC721 balance",
+      "checkERC20Balance": "Check ERC20 balance"
     },
     "identifiers": "Identifiers",
     "amount": "Amount",
+    "symbol": "Symbol",
+    "total": "Total",
     "doNotHaveAccessTooltip": "You do not have admin access on this contract.",
     "grantRole": "Grant role",
     "revokeRole": "Revoke role",

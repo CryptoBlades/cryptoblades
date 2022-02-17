@@ -41,7 +41,8 @@ import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
 import {Nft, NftTransfer, TransferedNft} from './interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
-import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
+import {abi as ierc20Abi} from '../../build/contracts/IERC20.json';
+import {abi as erc20Abi} from '../../build/contracts/ERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances} from '@/views/Quests.vue';
@@ -2593,7 +2594,7 @@ export function createStore(web3: Web3) {
             .getCurrency(currency)
             .call(defaultCallOptions(state));
 
-          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+          await new web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
             .approve(Blacksmith.options.address, price)
             .send({
               from: state.defaultAccount
@@ -2622,7 +2623,7 @@ export function createStore(web3: Web3) {
             .getCurrency(currency)
             .call(defaultCallOptions(state));
 
-          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+          await new web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
             .approve(Blacksmith.options.address, price)
             .send({
               from: state.defaultAccount
@@ -2650,7 +2651,7 @@ export function createStore(web3: Web3) {
             .getCurrency(currency)
             .call(defaultCallOptions(state));
 
-          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+          await new web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
             .approve(Blacksmith.options.address, price)
             .send({
               from: state.defaultAccount
@@ -3388,14 +3389,38 @@ export function createStore(web3: Web3) {
 
         console.log('storeCurrencyToPartnerVault', currencyAddress, amount);
 
-        const tokenContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<IERC20>;
-        await tokenContract.methods.approve(PartnerVault.options.address, amount).send({
+        const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<IERC20>;
+        console.log(currencyContract.options.address);
+        await currencyContract.methods.approve(PartnerVault.options.address, amount).send({
           from: state.defaultAccount
         });
 
         return await PartnerVault.methods.storeCurrency(currencyAddress, amount).send({
           from: state.defaultAccount
         });
+      },
+
+      async getNftsInPartnerVault({state}, {tokenAddress}){
+        const {PartnerVault} = state.contracts();
+        if(!PartnerVault || !state.defaultAccount) return;
+
+        return await PartnerVault.methods.getNftsInVault(tokenAddress).call(defaultCallOptions(state));
+      },
+
+      async getCurrencyBalanceInPartnerVault({state}, {currencyAddress}){
+        const {PartnerVault} = state.contracts();
+        if(!PartnerVault || !state.defaultAccount) return;
+
+        const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress);
+        console.log('getCurrencyBalanceInPartnerVault', currencyContract);
+        console.log('getCurrencyBalanceInPartnerVault', PartnerVault.options.address);
+        console.log(currencyContract.options.address);
+        const currencyBalance = await currencyContract.methods.balanceOf(PartnerVault.options.address).call(defaultCallOptions(state));
+        console.log('getCurrencyBalanceInPartnerVault', currencyBalance);
+        const currencySymbol = await currencyContract.methods.symbol().call(defaultCallOptions(state));
+        console.log('getCurrencyBalanceInPartnerVault', currencySymbol);
+
+        return [currencyBalance, currencySymbol];
       },
 
       async getQuestDeadline({state}, {questID}){

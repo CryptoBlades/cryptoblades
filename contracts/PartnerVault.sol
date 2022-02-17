@@ -86,7 +86,8 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
     //    }
 
     // VIEWS
-    function getNftCount(address tokenAddress) public view returns (uint256) {
-        return nfts[tokenAddress].length;
+
+    function getNftsInVault(address tokenAddress) public view returns (uint256[] memory) {
+        return nfts[tokenAddress];
     }
 }
