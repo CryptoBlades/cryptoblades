@@ -5,7 +5,8 @@
     <QuestRequirements v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
                        :progress="character.quest.progress"/>
     <QuestRewards v-if="character.quest && character.quest.id !== 0" :quest="character.quest"/>
-    <QuestActions :character="character" :quest="character.quest" @refresh-quest-data="onRefreshQuestData"/>
+    <QuestActions :character="character" :quest="character.quest" :key="character.quest.id"
+                  @refresh-quest-data="onRefreshQuestData"/>
   </div>
 </template>
 

@@ -41,9 +41,10 @@
       </div>
       <QuestReward :quest="quest"/>
     </div>
-    <div v-if="deadline && supply" class="d-flex flex-column align-items-center">
+    <div v-if="deadline && deadlineTime !== undefined" class="d-flex flex-column align-items-center">
       <span>{{ $t('quests.supplyLeft', {supply}) }}</span>
-      <span>{{ $t('quests.deadline', {deadline: new Date(deadline * 1000).toLocaleString()}) }}</span>
+      <span v-if="deadlineTime">{{ $t('quests.deadline', {deadline: deadlineTime}) }}</span>
+      <span v-else class="text-danger">{{ $t('quests.deadlineExpired') }}</span>
     </div>
     <div v-if="!isDisplayOnly">
       <div v-if="!isQuestActionLoading" class="d-flex">
@@ -68,6 +69,7 @@ import {PropType} from 'vue/types/options';
 import {Quest, Rarity, RequirementType} from '@/views/Quests.vue';
 import NftIcon from '@/components/NftIcon.vue';
 import QuestReward from '@/components/smart/QuestReward.vue';
+import {getTimeRemaining} from '../../utils/common';
 
 interface StoreMappedActions {
   deleteQuest(payload: { tier: number, index: number }): Promise<void>;
@@ -105,6 +107,8 @@ export default Vue.extend({
 
   data() {
     return {
+      deadlineCheckInterval: undefined,
+      deadlineTime: undefined,
       isQuestActionLoading: false,
       RequirementType,
       Rarity,
@@ -115,6 +119,20 @@ export default Vue.extend({
     ...mapActions([
       'deleteQuest',
     ]) as StoreMappedActions,
+
+    async getDeadlineTime() {
+      if (this.deadlineCheckInterval) {
+        clearInterval(this.deadlineCheckInterval);
+      }
+      this.deadlineCheckInterval = setInterval(() => {
+        const {total, days, hours, minutes, seconds} = getTimeRemaining(this.deadline.toString());
+        this.deadlineTime = `${days !== '00' ? `${days}d ` : ''} ${hours !== '00' ? `${hours}h ` : ''} ${minutes}m ${seconds}s`;
+        if (total <= 0 && this.deadlineCheckInterval) {
+          clearInterval(this.deadlineCheckInterval);
+          this.deadlineTime = '';
+        }
+      }, 1000);
+    },
 
     async deleteQuestTemplate() {
       if (this.quest.tier !== undefined) {
@@ -127,6 +145,18 @@ export default Vue.extend({
         }
       }
     },
+  },
+
+  mounted() {
+    if (this.deadline) {
+      this.getDeadlineTime();
+    }
+  },
+
+  beforeDestroy() {
+    if (this.deadlineCheckInterval) {
+      clearInterval(this.deadlineCheckInterval);
+    }
   },
 });
 </script>
