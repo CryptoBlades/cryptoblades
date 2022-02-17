@@ -72,6 +72,11 @@ export default Vue.extend({
       contract: this.contracts.BurningManager,
       component: 'BurningManagerAdmin',
     });
+    this.tabs.push({
+      title: 'partnerVault',
+      contract: this.contracts.PartnerVault,
+      component: 'PartnerVaultAdmin',
+    });
     await this.fetchData();
   },
 

@@ -17,7 +17,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import {isValidWeb3Address} from '@/utils/common';
+import {isValidWeb3Address} from '../../../utils/common';
 
 interface StoreMappedActions {
   giveAwaySoul(payload: { user: string, soulAmount: number }): Promise<void>;

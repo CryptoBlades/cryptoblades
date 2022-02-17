@@ -251,9 +251,9 @@ import {
   RequirementType,
   RewardType,
   TierChances
-} from '@/views/Quests.vue';
-import QuestTemplatesDisplay from '@/components/smart/QuestTemplatesDisplay.vue';
-import QuestTemplate from './QuestTemplate.vue';
+} from '../../../views/Quests.vue';
+import QuestTemplatesDisplay from '../QuestTemplatesDisplay.vue';
+import QuestTemplate from '../QuestTemplate.vue';
 
 interface StoreMappedActions {
   addQuestTemplate(payload: { questTemplate: Quest, isPromo: boolean, supply: number, deadline: number }): Promise<void>;

@@ -45,6 +45,7 @@ import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances} from '@/views/Quests.vue';
+import {abi as erc721Abi} from '../../build/contracts/IERC721.json';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -3346,6 +3347,55 @@ export function createStore(web3: Web3) {
           });
 
         dispatch('fetchSkillBalance');
+      },
+
+      async storeNftsToPartnerVault({state}, {tokenAddress, tokenIds}) {
+        const {PartnerVault} = state.contracts();
+        if(!PartnerVault || !state.defaultAccount) return;
+
+        console.log('storeNftsToPartnerVault', tokenAddress, tokenIds);
+
+        const tokenContract = new web3.eth.Contract(erc721Abi as any[], tokenAddress) as Contract<IERC721>;
+
+        console.log(tokenContract);
+
+        console.log('isApprovedForAll', state.defaultAccount, PartnerVault.options.address);
+        const isApprovedForAll = await tokenContract.methods.isApprovedForAll(state.defaultAccount, PartnerVault.options.address)
+          .call(defaultCallOptions(state));
+        console.log('isApprovedForAll', isApprovedForAll);
+
+        if(tokenIds.length === 1 && !isApprovedForAll) {
+          console.log('Approving token for Partner Vault');
+          await tokenContract.methods.approve(PartnerVault.options.address, tokenIds[0]).send({
+            from: state.defaultAccount
+          });
+        } else if (!isApprovedForAll) {
+          console.log('Approving all tokens for Partner Vault');
+          await tokenContract.methods.setApprovalForAll(PartnerVault.options.address, true).send({
+            from: state.defaultAccount
+          });
+        }
+
+        console.log('Storing NFTs to Partner Vault');
+        return await PartnerVault.methods.storeNfts(tokenAddress, tokenIds).send({
+          from: state.defaultAccount
+        });
+      },
+
+      async storeCurrencyToPartnerVault({state}, {currencyAddress, amount}) {
+        const {PartnerVault} = state.contracts();
+        if(!PartnerVault || !state.defaultAccount) return;
+
+        console.log('storeCurrencyToPartnerVault', currencyAddress, amount);
+
+        const tokenContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<IERC20>;
+        await tokenContract.methods.approve(PartnerVault.options.address, amount).send({
+          from: state.defaultAccount
+        });
+
+        return await PartnerVault.methods.storeCurrency(currencyAddress, amount).send({
+          from: state.defaultAccount
+        });
       },
 
       async getQuestDeadline({state}, {questID}){

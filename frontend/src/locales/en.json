@@ -710,7 +710,8 @@
       "quests": "Quests",
       "cbkLand": "CBK Land",
       "weapons": "Weapons",
-      "burningManager": "Burning Manager"
+      "burningManager": "Burning Manager",
+      "partnerVault": "Partner Vault"
     },
     "cbkLand": {
       "minter": "Minter",
@@ -720,7 +721,6 @@
       "quantityOptional": "Quantity (optional)",
       "mintLand": "Mint land",
       "mintLands": "Mint lands",
-      "identifiers": "Identifiers",
       "updateChunkIdentifier": "Update chunk identifier",
       "updateChunkId": "Update chunk ID",
       "updateChunkIds": "Update chunk IDs"
@@ -758,6 +758,15 @@
       "soulAmount": "Soul amount",
       "mintSoul": "Mint soul"
     },
+    "partnerVault": {
+      "pasteInValidERC721Address": "Paste in valid ERC721 address",
+      "storeERC721Tokens": "Store ERC721 tokens",
+      "pasteInValidERC20Address": "Paste in valid ERC20 address",
+      "storeERC20Tokens": "Store ERC20 tokens",
+      "storeInPartnerVault": "Store in partner vault"
+    },
+    "identifiers": "Identifiers",
+    "amount": "Amount",
     "doNotHaveAccessTooltip": "You do not have admin access on this contract.",
     "grantRole": "Grant role",
     "revokeRole": "Revoke role",

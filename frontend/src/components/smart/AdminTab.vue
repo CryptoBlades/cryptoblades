@@ -20,11 +20,12 @@ import {mapActions, mapState} from 'vuex';
 import {Contract} from '@/interfaces';
 import {PropType} from 'vue/types/options';
 import RoleGranter from '@/components/smart/RoleGranter.vue';
-import QuestsAdmin from '@/components/smart/QuestsAdmin.vue';
+import QuestsAdmin from './AdminTabs/QuestsAdmin.vue';
 import Hint from '@/components/Hint.vue';
-import CBKLandAdmin from '@/components/smart/CBKLandAdmin.vue';
-import WeaponsAdmin from '@/components/smart/WeaponsAdmin.vue';
-import BurningManagerAdmin from '@/components/smart/BurningManagerAdmin.vue';
+import CBKLandAdmin from './AdminTabs/CBKLandAdmin.vue';
+import WeaponsAdmin from './AdminTabs/WeaponsAdmin.vue';
+import BurningManagerAdmin from './AdminTabs/BurningManagerAdmin.vue';
+import PartnerVaultAdmin from './AdminTabs/PartnerVaultAdmin.vue';
 import RoleRevoker from '@/components/smart/RoleRevoker.vue';
 
 interface StoreMappedActions {
@@ -39,7 +40,7 @@ interface Data {
 }
 
 export default Vue.extend({
-  components: {Hint, RoleGranter, RoleRevoker, QuestsAdmin, CBKLandAdmin, WeaponsAdmin, BurningManagerAdmin},
+  components: {Hint, RoleGranter, RoleRevoker, QuestsAdmin, CBKLandAdmin, WeaponsAdmin, BurningManagerAdmin, PartnerVaultAdmin},
   props: {
     title: {
       type: String as PropType<string>,
