@@ -222,7 +222,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
 
     function convertShards(uint256 eventIdFrom, uint256 eventIdTo, uint256 amount) external {
         require(userEventShardSupply[msg.sender][eventIdFrom] >= amount, 'Not enough shards');
-        require(eventIdTo == 0 && getIsEventActive(eventIdTo), 'Target event inactive');
+        require(eventIdTo == 0 || getIsEventActive(eventIdTo), 'Target event inactive');
         userEventShardSupply[msg.sender][eventIdFrom] -= amount;
         uint256 convertedAmount = amount.div(vars[VAR_CONVERT_RATIO_DENOMINATOR]);
         convertedAmount += amount % vars[VAR_CONVERT_RATIO_DENOMINATOR] > 0 ? 1 : 0;
