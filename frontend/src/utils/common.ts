@@ -86,7 +86,7 @@ export const copyNftUrl = (id: number | string, type?: string): void => {
   document.body.removeChild(dummy);
 };
 
-export const addTokenToMetamask = async (address: string, symbol: string): Promise<void> => {
+export const addTokenToMetamask = async (address: string, symbol: string, decimals: number = 18): Promise<void> => {
   try {
     await (web3.currentProvider as any).request({
       method: 'wallet_watchAsset',
@@ -95,7 +95,7 @@ export const addTokenToMetamask = async (address: string, symbol: string): Promi
         options: {
           address,
           symbol,
-          decimals: 18
+          decimals
         },
       },
     });
