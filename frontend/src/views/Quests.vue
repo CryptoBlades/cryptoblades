@@ -73,6 +73,7 @@ export enum RequirementType {
   SOUL,
   RAID,
   EXTERNAL = 10,
+  EXTERNAL_HOLD = 11,
 }
 
 // NOTE: Numbers should represent ItemType in SimpleQuests.sol

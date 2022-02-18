@@ -72,7 +72,7 @@ import QuestReward from '@/components/smart/QuestReward.vue';
 import {getTimeRemaining} from '../../utils/common';
 
 interface StoreMappedActions {
-  deleteQuest(payload: { tier: number, index: number }): Promise<void>;
+  deleteQuest(payload: { tier: number, questID: number }): Promise<void>;
 }
 
 interface Data {
@@ -138,7 +138,7 @@ export default Vue.extend({
       if (this.quest.tier !== undefined) {
         try {
           this.isQuestActionLoading = true;
-          await this.deleteQuest({tier: this.quest.tier, index: this.questIndex});
+          await this.deleteQuest({tier: this.quest.tier, questID: this.quest.id});
           this.refreshQuestTemplates();
         } finally {
           this.isQuestActionLoading = false;

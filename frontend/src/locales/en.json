@@ -603,7 +603,9 @@
       "SHIELD": "Shield",
       "STAMINA": "Stamina",
       "SOUL": "Soul",
-      "RAID": "Raid"
+      "RAID": "Raid",
+      "EXTERNAL": "External",
+      "EXTERNAL_HOLD": "External Hold"
     },
     "rewardType": {
       "NONE": "None",
@@ -613,7 +615,8 @@
       "SHIELD": "Shield",
       "DUST": "Dust",
       "EXPERIENCE": "Experience",
-      "SOUL": "Soul"
+      "SOUL": "Soul",
+      "EXTERNAL": "External"
     },
     "questComponentIconTooltip": {
       "NONE": "None",
@@ -693,6 +696,7 @@
     "pleaseSelectRequirementRarity": "Please select requirement rarity",
     "pleaseSelectRewardType": "Please select reward type",
     "pleaseSelectRewardRarity": "Please select reward rarity",
+    "ERC20/ERC721Address": "ERC20/ERC721 address",
     "reputationLevel": "Reputation level {level}",
     "updateReputationLevelRequirements": "Update reputation level requirements",
     "updateRequirements": "Update requirements",

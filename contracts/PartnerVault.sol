@@ -17,9 +17,7 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     mapping(address => uint256[]) public nfts;
-    mapping(address => uint256) public lockedNfts;
     mapping(address => uint256) public currencies;
-    mapping(address => uint256) public lockedCurrencies;
 
     function initialize() public initializer {
         __AccessControl_init_unchained();
@@ -44,7 +42,6 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
     function onERC721Received(address, address, uint256 _id, bytes calldata) external override returns (bytes4) {
         return IERC721ReceiverUpgradeable.onERC721Received.selector;
     }
-
 
     // FUNCTIONS
 
@@ -76,32 +73,9 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
                 seed = RandomUtil.combineSeeds(seed, i);
             }
         }
-        unlockReward(tokenAddress, amount);
     }
 
-    function lockReward(address tokenAddress, uint256 amount) external restricted {
-        require(amount > 0, "Invalid amount");
-        require(amount <= (nfts[tokenAddress].length - lockedNfts[tokenAddress])
-            || amount <= currencies[tokenAddress].sub(lockedCurrencies[tokenAddress]), "Not enough NFTs or currency");
-        if (amount <= currencies[tokenAddress].sub(lockedCurrencies[tokenAddress])) {
-            lockedCurrencies[tokenAddress] = lockedCurrencies[tokenAddress].add(amount);
-        } else {
-            lockedNfts[tokenAddress] = lockedNfts[tokenAddress].add(amount);
-        }
-    }
-
-    function unlockReward(address tokenAddress, uint256 amount) public restricted {
-        require(amount > 0, "Invalid amount");
-        require(amount <= lockedNfts[tokenAddress]
-            || amount <= lockedCurrencies[tokenAddress], "Not enough locked NFTs or currency");
-        if (amount <= lockedCurrencies[tokenAddress]) {
-            lockedCurrencies[tokenAddress] = lockedCurrencies[tokenAddress].sub(amount);
-        } else {
-            lockedNfts[tokenAddress] = lockedNfts[tokenAddress].sub(amount);
-        }
-    }
-
-    function deleteNft(IERC721 tokenAddress, uint256 index) internal restricted {
+    function deleteNft(IERC721 tokenAddress, uint256 index) internal {
         require(index < nfts[address(tokenAddress)].length, "Index out of bounds");
         nfts[address(tokenAddress)][index] = nfts[address(tokenAddress)][nfts[address(tokenAddress)].length - 1];
         nfts[address(tokenAddress)].pop();

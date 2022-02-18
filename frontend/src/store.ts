@@ -3410,9 +3410,7 @@ export function createStore(web3: Web3) {
         if(!PartnerVault || !state.defaultAccount) return;
 
         const nftsInVault = await PartnerVault.methods.getNftsInVault(tokenAddress).call(defaultCallOptions(state));
-        const lockedNfts = await PartnerVault.methods.lockedNfts(tokenAddress).call(defaultCallOptions(state));
         console.log(nftsInVault);
-        console.log(lockedNfts);
 
         return nftsInVault;
       },
@@ -3429,9 +3427,6 @@ export function createStore(web3: Web3) {
         console.log('getCurrencyBalanceInPartnerVault', currencyBalance);
         const currencySymbol = await currencyContract.methods.symbol().call(defaultCallOptions(state));
         console.log('getCurrencyBalanceInPartnerVault', currencySymbol);
-
-        const lockedCurrencies = await PartnerVault.methods.lockedCurrencies(currencyAddress).call(defaultCallOptions(state));
-        console.log('lockedCurrencies', lockedCurrencies);
 
         return [currencyBalance, currencySymbol];
       },
@@ -3457,6 +3452,8 @@ export function createStore(web3: Web3) {
         const questTemplates: Quest[] = [];
 
         const questTemplatesIds = await SimpleQuests.methods.getQuestTemplates(tier).call(defaultCallOptions(state));
+
+        console.log('getQuestTemplates', questTemplatesIds);
 
         if(questTemplatesIds.length === 0) return questTemplates;
 
@@ -3492,6 +3489,36 @@ export function createStore(web3: Web3) {
           questTemplate.rewardExternalAddress = emptyAccount;
         }
 
+        let requirementAmount = questTemplate.requirementAmount;
+
+        if(questTemplate.requirementType === RequirementType.EXTERNAL){
+          const contract = new web3.eth.Contract(erc20Abi as any[], questTemplate.requirementExternalAddress);
+          console.log(contract);
+          try {
+            const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(state));
+            console.log('currencyDecimals req', currencyDecimals);
+            requirementAmount = web3.utils.toBN(requirementAmount * 10 ** currencyDecimals);
+            console.log('requirementAmount after', requirementAmount);
+          } catch (e) {
+            console.log('Contract does not support decimals');
+          }
+        }
+
+        let rewardAmount = questTemplate.rewardAmount;
+
+        if(questTemplate.rewardType === RewardType.EXTERNAL){
+          const contract = new web3.eth.Contract(erc20Abi as any[], questTemplate.rewardExternalAddress);
+          console.log(contract);
+          try {
+            const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(state));
+            console.log('currencyDecimals rew', currencyDecimals);
+            rewardAmount = web3.utils.toBN(rewardAmount * 10 ** currencyDecimals);
+            console.log('rewardAmount after', rewardAmount);
+          } catch (e) {
+            console.log('Contract does not support decimals');
+          }
+        }
+
         if (isPromo) {
           questTemplate.tier += 10;
         }
@@ -3499,16 +3526,16 @@ export function createStore(web3: Web3) {
         console.log(questTemplate);
 
         return await SimpleQuests.methods.addNewQuestTemplate(questTemplate.tier,
-          questTemplate.requirementType, questTemplate.requirementRarity, questTemplate.requirementAmount, questTemplate.requirementExternalAddress,
-          questTemplate.rewardType, questTemplate.rewardRarity, questTemplate.rewardAmount, questTemplate.rewardExternalAddress,
+          questTemplate.requirementType, questTemplate.requirementRarity, requirementAmount, questTemplate.requirementExternalAddress,
+          questTemplate.rewardType, questTemplate.rewardRarity, rewardAmount, questTemplate.rewardExternalAddress,
           questTemplate.reputationAmount, supply, deadline).send(defaultCallOptions(state));
       },
 
-      async deleteQuest({state}, {tier, index}) {
+      async deleteQuest({state}, {tier, questID}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        return await SimpleQuests.methods.deleteQuestTemplate(tier, index).send(defaultCallOptions(state));
+        return await SimpleQuests.methods.deleteQuestTemplate(tier, questID).send(defaultCallOptions(state));
       },
 
       async getCharacterQuestData({ state }, {characterId}) {
@@ -3526,6 +3553,28 @@ export function createStore(web3: Web3) {
         const charQuestDataRaw = await SimpleQuests.methods.getCharacterQuestData(characterId).call(defaultCallOptions(state));
 
         console.log(charQuestDataRaw);
+        const emptyAccount = '0x0000000000000000000000000000000000000000';
+        if(quest.requirementExternalAddress !== emptyAccount
+          && +quest.requirementType as RequirementType === RequirementType.EXTERNAL) {
+          const currencyContract = new web3.eth.Contract(erc20Abi as any[], quest.requirementExternalAddress);
+          try{
+            const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+            quest.requirementAmount = new BigNumber(quest.requirementAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+          } catch (e) {
+            console.log('Contract does not support decimals');
+          }
+        }
+
+        if(quest.rewardExternalAddress !== emptyAccount
+          && +quest.rewardType as RewardType === RewardType.EXTERNAL) {
+          const currencyContract = new web3.eth.Contract(erc20Abi as any[], quest.rewardExternalAddress);
+          try{
+            const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+            quest.rewardAmount = new BigNumber(quest.rewardAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+          } catch (e) {
+            console.log('Contract does not support decimals');
+          }
+        }
 
         return {
           progress: +charQuestDataRaw[0],

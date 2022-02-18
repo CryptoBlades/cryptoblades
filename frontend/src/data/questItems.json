@@ -1,7 +1,13 @@
 {
   "questItems": {
-    "0x98A1708686a65d8ad886fA8db9d3c8CfEA1B7a46": {
+    "0xfC7278a67F28e031b59bDf44A5dE8b40fbaC52Ec": {
       "name": "Cool NFT",
+      "details": "Something something",
+      "image": "https://memezila.com/wp-content/Tip-How-to-keep-brownies-fresh-Eat-them-all-in-one-sitting-meme-5952.png",
+      "website": "https://somesite.com/"
+    },
+    "0x98A1708686a65d8ad886fA8db9d3c8CfEA1B7a46": {
+      "name": "WHAT THE ",
       "details": "Something something",
       "image": "https://memezila.com/wp-content/Tip-How-to-keep-brownies-fresh-Eat-them-all-in-one-sitting-meme-5952.png",
       "website": "https://somesite.com/"

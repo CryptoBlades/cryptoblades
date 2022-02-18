@@ -12,7 +12,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest, Rarity, RequirementType, RewardType, QuestItemType} from '@/views/Quests.vue';
+import {Quest, QuestItemType, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import lesserDust from '@/assets/dusts/lesserDust.png';
 import greaterDust from '@/assets/dusts/greaterDust.png';
 import powerfulDust from '@/assets/dusts/powerfulDust.png';
@@ -75,17 +75,36 @@ export default Vue.extend({
     } as Data;
   },
 
+  methods: {
+    typeSupportsStars(): boolean {
+      return this.type === QuestItemType.WEAPON
+        || this.type === QuestItemType.JUNK
+        || this.type === QuestItemType.TRINKET
+        || this.type === QuestItemType.SHIELD;
+    },
+
+    fetchExternalInfo() {
+      if (this.isReward) {
+        this.icon = (questItemsInfo as QuestItemsInfo).questItems[this.quest.rewardExternalAddress].image;
+        this.tooltip = (questItemsInfo as QuestItemsInfo).questItems[this.quest.rewardExternalAddress].name;
+      } else if (this.isRequirement) {
+        this.icon = (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].image;
+        this.tooltip = (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].name;
+      }
+    },
+  },
+
   mounted() {
     if (this.isReward) {
       this.amount = this.quest.rewardAmount;
-      if(this.quest.rewardRarity !== undefined && this.quest.rewardType !== undefined){
+      if (this.quest.rewardRarity !== undefined && this.quest.rewardType !== undefined) {
         this.rarity = this.quest.rewardRarity;
         this.type = this.quest.rewardType;
         this.tooltip = this.$t(`quests.questComponentIconTooltip.${RewardType[this.type]}`);
       }
     } else if (this.isRequirement) {
       this.amount = this.quest.requirementAmount;
-      if(this.quest.requirementRarity !== undefined && this.quest.requirementType !== undefined){
+      if (this.quest.requirementRarity !== undefined && this.quest.requirementType !== undefined) {
         this.rarity = this.quest.requirementRarity;
         this.type = this.quest.requirementType;
         this.tooltip = this.$t(`quests.questComponentIconTooltip.${RequirementType[this.type]}`);
@@ -95,7 +114,9 @@ export default Vue.extend({
       this.icon = reputation;
       this.tooltip = this.$t('quests.questComponentIconTooltip.REPUTATION');
     }
-    this.stars = Array(this.rarity + 1).fill('★').join('');
+    if (this.typeSupportsStars()) {
+      this.stars = Array(this.rarity + 1).fill('★').join('');
+    }
     if (this.type === QuestItemType.WEAPON) {
       this.icon = sword;
     } else if (this.type === QuestItemType.JUNK) {
@@ -120,12 +141,8 @@ export default Vue.extend({
       this.icon = soul;
     } else if (this.type === RequirementType.RAID) {
       this.icon = raid;
-    } else if (this.isReward && this.type === RewardType.EXTERNAL) {
-      this.icon = (questItemsInfo as QuestItemsInfo).questItems[this.quest.rewardExternalAddress].image;
-      this.tooltip = (questItemsInfo as QuestItemsInfo).questItems[this.quest.rewardExternalAddress].name;
-    } else if (this.isRequirement && this.type === RequirementType.EXTERNAL) {
-      this.icon = (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].image;
-      this.tooltip = (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].name;
+    } else if (this.type === QuestItemType.EXTERNAL) {
+      this.fetchExternalInfo();
     }
   },
 

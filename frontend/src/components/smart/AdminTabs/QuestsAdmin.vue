@@ -33,6 +33,10 @@
               {{ $t(`quests.requirementType.${RequirementType[requirementType]}`) }}
             </b-form-select-option>
           </b-form-select>
+          <b-form-input v-model="questTemplate.requirementExternalAddress"
+                        v-if="questTemplate.requirementType === RequirementType.EXTERNAL
+                        || questTemplate.requirementType === RequirementType.EXTERNAL_HOLD"
+                        :placeholder="$t('quests.ERC20/ERC721Address')"/>
           <b-form-select v-if="questTemplate.requirementType === RequirementType.DUST" class="mt-2 mb-2"
                          v-model="questTemplate.requirementRarity"
                          :disabled="questTemplate.requirementType === undefined">
@@ -45,7 +49,10 @@
           </b-form-select>
           <b-form-select
             v-else-if="questTemplate.requirementType !== RequirementType.RAID
-            && questTemplate.requirementType !== RequirementType.STAMINA && questTemplate.requirementType !== RequirementType.SOUL"
+            && questTemplate.requirementType !== RequirementType.STAMINA
+            && questTemplate.requirementType !== RequirementType.SOUL
+            && questTemplate.requirementType !== RequirementType.EXTERNAL
+            && questTemplate.requirementType !== RequirementType.EXTERNAL_HOLD"
             class="mt-2 mb-2"
             v-model="questTemplate.requirementRarity"
             :disabled="questTemplate.requirementType === undefined">
@@ -56,12 +63,7 @@
               {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-input v-model="questTemplate.requirementAmount" :min="0"
-                        :disabled="questTemplate.requirementRarity === undefined
-                        && questTemplate.requirementType !== RequirementType.RAID
-                        && questTemplate.requirementType !== RequirementType.STAMINA
-                        && questTemplate.requirementType !== RequirementType.SOUL"
-                        type="number" number/>
+          <b-form-input v-model="questTemplate.requirementAmount" :min="0" type="number" number/>
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reward') }}</label>
         <div class="d-flex align-items-center gap-3">
@@ -73,6 +75,9 @@
               {{ $t(`quests.rewardType.${RewardType[rewardType]}`) }}
             </b-form-select-option>
           </b-form-select>
+          <b-form-input v-model="questTemplate.rewardExternalAddress"
+                        v-if="questTemplate.rewardType === RewardType.EXTERNAL"
+                        :placeholder="$t('quests.ERC20/ERC721Address')"/>
           <b-form-select v-if="questTemplate.rewardType === RewardType.DUST" class="mt-2 mb-2"
                          v-model="questTemplate.rewardRarity"
                          :disabled="questTemplate.rewardType === undefined">
@@ -84,7 +89,9 @@
             </b-form-select-option>
           </b-form-select>
           <b-form-select
-            v-else-if="questTemplate.rewardType !== RewardType.EXPERIENCE && questTemplate.rewardType !== RewardType.SOUL"
+            v-else-if="questTemplate.rewardType !== RewardType.EXPERIENCE
+            && questTemplate.rewardType !== RewardType.SOUL
+            && questTemplate.rewardType !== RewardType.EXTERNAL"
             class="mt-2 mb-2"
             v-model="questTemplate.rewardRarity"
             :disabled="questTemplate.rewardType === undefined">
@@ -95,10 +102,7 @@
               {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
-          <b-form-input v-model="questTemplate.rewardAmount"
-                        :disabled="questTemplate.rewardRarity === undefined
-                        && questTemplate.rewardType !== RewardType.EXPERIENCE && questTemplate.rewardType !== RewardType.SOUL"
-                        type="number" number :min="0"/>
+          <b-form-input v-model="questTemplate.rewardAmount" type="number" number :min="0"/>
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reputation') }}</label>
         <div class="d-flex align-items-center gap-3">
@@ -254,6 +258,7 @@ import {
 } from '../../../views/Quests.vue';
 import QuestTemplatesDisplay from '../QuestTemplatesDisplay.vue';
 import QuestTemplate from '../QuestTemplate.vue';
+import {isValidWeb3Address} from '../../../utils/common';
 
 interface StoreMappedActions {
   addQuestTemplate(payload: { questTemplate: Quest, isPromo: boolean, supply: number, deadline: number }): Promise<void>;
@@ -317,8 +322,14 @@ export default Vue.extend({
       rarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
       dustRarities: [DustRarity.LESSER, DustRarity.GREATER, DustRarity.POWERFUL],
       requirementTypes: [RequirementType.WEAPON, RequirementType.JUNK,
-        RequirementType.DUST, RequirementType.TRINKET, RequirementType.SHIELD, RequirementType.STAMINA, RequirementType.SOUL, RequirementType.RAID],
-      rewardTypes: [RewardType.WEAPON, RewardType.JUNK, RewardType.DUST, RewardType.TRINKET, RewardType.SHIELD, RewardType.EXPERIENCE, RewardType.SOUL],
+        RequirementType.DUST, RequirementType.TRINKET,
+        RequirementType.SHIELD, RequirementType.STAMINA,
+        RequirementType.SOUL, RequirementType.RAID,
+        RequirementType.EXTERNAL, RequirementType.EXTERNAL_HOLD],
+      rewardTypes: [RewardType.WEAPON, RewardType.JUNK,
+        RewardType.DUST, RewardType.TRINKET,
+        RewardType.SHIELD, RewardType.EXPERIENCE,
+        RewardType.SOUL, RewardType.EXTERNAL],
       promoQuestTemplates: false,
       isLoading: false,
       showTemplateConfirmationModal: false,
@@ -355,11 +366,19 @@ export default Vue.extend({
     showConfirmationModal() {
       if (this.questTemplate.requirementType === RequirementType.RAID
         || this.questTemplate.requirementType === RequirementType.STAMINA
-        || this.questTemplate.requirementType === RequirementType.SOUL) {
+        || this.questTemplate.requirementType === RequirementType.SOUL
+        || this.questTemplate.requirementType === RequirementType.EXTERNAL
+        || this.questTemplate.requirementType === RequirementType.EXTERNAL_HOLD) {
         this.questTemplate.requirementRarity = Rarity.COMMON;
       }
-      if (this.questTemplate.rewardType === RewardType.EXPERIENCE || this.questTemplate.rewardType === RewardType.SOUL) {
+      if (this.questTemplate.rewardType === RewardType.EXPERIENCE
+        || this.questTemplate.rewardType === RewardType.SOUL
+        || this.questTemplate.rewardType === RewardType.EXTERNAL) {
         this.questTemplate.rewardRarity = Rarity.COMMON;
+      }
+      if (!this.questTemplate.deadline && !this.questTemplate.supply) {
+        this.questTemplate.deadline = 0;
+        this.questTemplate.supply = 0;
       }
       this.showTemplateConfirmationModal = true;
     },
@@ -444,15 +463,24 @@ export default Vue.extend({
         || (this.questTemplate.requirementRarity === undefined
           && this.questTemplate.requirementType !== RequirementType.RAID
           && this.questTemplate.requirementType !== RequirementType.STAMINA
-          && this.questTemplate.requirementType !== RequirementType.SOUL)
+          && this.questTemplate.requirementType !== RequirementType.SOUL
+          && this.questTemplate.requirementType !== RequirementType.EXTERNAL
+          && this.questTemplate.requirementType !== RequirementType.EXTERNAL_HOLD)
         || !this.questTemplate.requirementAmount
         || this.questTemplate.rewardType === undefined
         || (this.questTemplate.rewardRarity === undefined
-          && this.questTemplate.rewardType !== RewardType.EXPERIENCE && this.questTemplate.rewardType !== RewardType.SOUL)
+          && this.questTemplate.rewardType !== RewardType.EXPERIENCE
+          && this.questTemplate.rewardType !== RewardType.SOUL
+          && this.questTemplate.rewardType !== RewardType.EXTERNAL)
         || !this.questTemplate.rewardAmount
         || !this.questTemplate.reputationAmount
         || (this.timestamp && !this.supply)
         || (this.supply && !this.timestamp)
+        || ((this.questTemplate.requirementType === RequirementType.EXTERNAL
+            || this.questTemplate.requirementType === RequirementType.EXTERNAL_HOLD)
+          && !isValidWeb3Address(this.questTemplate.requirementExternalAddress))
+        || (this.questTemplate.rewardType === RewardType.EXTERNAL
+          && !isValidWeb3Address(this.questTemplate.rewardExternalAddress))
         || this.showTemplateConfirmationModal || this.isLoading;
     },
 

@@ -81,7 +81,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Quest) public quests;
     mapping(uint256 => uint256) public questSupplies;
     mapping(uint256 => uint256) public questDeadlines;
-    mapping(uint256 => uint256) public limitedQuestIndexes;
+    mapping(uint256 => uint256) public questIndexes;
     mapping(uint256 => uint256) public characterQuest;
     mapping(uint256 => uint256[4]) public tierChances;
     mapping(uint256 => uint256) public vars;
@@ -196,7 +196,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         if (questSupplies[questID] > 0) {
             questSupplies[questID] = --questSupplies[questID];
             if (questSupplies[questID] == 0) {
-                deleteQuestTemplate(tier, limitedQuestIndexes[questID]);
+                deleteQuestTemplate(tier, questID);
             }
         }
         characterQuest[characterID] = questID;
@@ -419,29 +419,19 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             rewardType, rewardRarity, rewardAmount, rewardExternalAddress,
             reputationAmount);
         questTemplates[tier].push(questID);
+        questIndexes[questID] = questTemplates[tier].length - 1;
         if (supply > 0) {
             require(deadline > 0, "Missing deadline");
             questSupplies[questID] = supply;
             questDeadlines[questID] = deadline;
-            limitedQuestIndexes[questID] = questTemplates[tier].length - 1;
-            if (rewardType == ItemType.EXTERNAL) {
-                partnerVault.lockReward(rewardExternalAddress, rewardAmount * supply);
-            }
-            // TODO: If external reward lock the nfts for the deadline
-            // OR just free them on quest deletion (use the remaining supply as a counter)
-            // TODO: Also amount should be * decimals (do it in store)
         }
     }
 
-    function deleteQuestTemplate(uint256 tier, uint256 index) public restricted {
-        require(index < questTemplates[tier].length, "Index out of bounds");
-        uint256 questID = questTemplates[tier][index];
-        questTemplates[tier][index] = questTemplates[tier][questTemplates[tier].length - 1];
-        Quest memory quest = quests[questID];
+    function deleteQuestTemplate(uint256 tier, uint256 questID) public restricted {
+        uint256 questIndex = questIndexes[questID];
+        uint256 lastQuestId = questTemplates[tier][questTemplates[tier].length - 1];
+        questTemplates[tier][questIndex] = lastQuestId;
+        questIndexes[lastQuestId] = questIndex;
         questTemplates[tier].pop();
-        uint256 supplyLeft = questSupplies[questID];
-        if (quest.rewardType == ItemType.EXTERNAL && supplyLeft > 0) {
-            partnerVault.unlockReward(quest.rewardExternalAddress, quest.rewardAmount * supplyLeft);
-        }
     }
 }
