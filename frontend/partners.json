@@ -56,7 +56,8 @@
     "Age of Tanks": {
       "logo": "ageoftanks.png",
       "details": "The First Military Strategic Metaverse where gamers build & command their fleet of tanks to storm the battlefields in their quest to conquer Earth Zero!",
-      "website": "https://linktr.ee/AgeofTanksNFT"
+      "website": "https://linktr.ee/AgeofTanksNFT",
+      "decimals": "6"
     },
     "Cake Monster": {
       "logo": "cakemonster.png",
