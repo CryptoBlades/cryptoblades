@@ -16,7 +16,7 @@ module.exports = async function (deployer, network, accounts) {
 	else if (network === 'polygontestnet' || network === 'polygonmainnet') {
 		await storage.setLocalChainPrefix('POLYGON');
 	}
-	else if (network === 'avaxtestnet' || network === 'avaxtestnet-fork' || network === 'auroratestnet' || network === 'avaxmainnet') {
+	else if (network === 'avaxtestnet' || network === 'avaxtestnet-fork' || network === 'auroratestnet' || network === 'avaxmainnet' || network === 'auroramainnet') {
 		await storage.setLocalChainPrefix('AVAX');
 	}
 	else {

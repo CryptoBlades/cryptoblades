@@ -75,6 +75,8 @@
     "postdeploy-polygonmainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 137\" \"verify-contracts -- --network polygonmainnet\"",
     "deploy-avaxmainnet-warning-be-careful-this-is-prod": "truffle migrate --network avaxmainnet",
     "postdeploy-avaxmainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 43114\" \"verify-contracts -- --network avaxmainnet\"",
+    "deploy-auroramainnet-warning-be-careful-this-is-prod": "truffle migrate --network auroramainnet",
+    "postdeploy-auroramainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 1313161554 \" \"verify-contracts -- --network auroramainnet\"",
     "deploy-mainnet-dry-run": "truffle migrate --network bscmainnet --dry-run",
     "backup-networks": "node scripts/manage-networks.js backup",
     "backup-networks-to-file": "node scripts/manage-networks.js backupToFile",
