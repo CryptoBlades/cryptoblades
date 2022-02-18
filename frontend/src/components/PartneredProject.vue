@@ -131,10 +131,6 @@ export default Vue.extend({
       return this.imgPath(fileName);
     },
 
-    partnerDecimals(): string {
-      return (partnersInfo as PartnersInfo).partners[this.name].decimals;
-    },
-
     moneyPerUnclaimed(): string {
       return toBN(this.tokenPrice).div(toBN(10).pow(18)).div(+this.skillToPartnerRatio).times(+this.multiplier).toFixed(2);
     }
@@ -173,12 +169,7 @@ export default Vue.extend({
     },
 
     async addTokenToMetamask() {
-      if(!this.partnerDecimals) {
-        await addTokenToMetamask(this.tokenAddress, this.tokenSymbol);
-      }
-      else {
-        await addTokenToMetamask(this.tokenAddress, this.tokenSymbol, +this.partnerDetails);
-      }
+      await addTokenToMetamask(this.tokenAddress, this.tokenSymbol);
     },
 
     openPartnerWebsite() {

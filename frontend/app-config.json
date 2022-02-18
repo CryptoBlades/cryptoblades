@@ -253,7 +253,7 @@
 
           "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "",
 
-          "chainId": "0x4E454152",
+          "chainId": "0x4e454153",
           "currencyName": "Aurora ETH",
           "currencyNetwork": "Aurora",
           "currencySymbol": "aETH",
