@@ -42,7 +42,7 @@
           "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "0xC2C3F4548fc5D81cD8867D52fE414BF365cba8D1",
           "VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS": "0x1EaD99a7f794439fD018F332D2dC7Bf10Ef5d293",
 
-          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "",
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "0xae11C5B5f29A6a25e955F0CB8ddCc416f522AF5C",
 
           "chainId": "0x61",
           "currencyName": "Binance Coin",
@@ -219,6 +219,46 @@
           "blockExplorerUrls": ["https://testnet.snowtrace.io/"],
           "exchangeUrl": "",
           "fightGas": "0.006"
+        },
+        "AURORA": {
+          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS": "snoui.wam",
+          "VUE_APP_NETWORK_ID":"1313161555",
+          "VUE_APP_EXPECTED_NETWORK_ID":"1313161555",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"Aurora TestNet",
+
+          "VUE_APP_STAKE_TYPES_AVAILABLE":"",
+          "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS": "",
+          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS": "0x9eF6F2A9c1D69A2504AA67D34213cb5880f61F13",
+          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"0x9eF6F2A9c1D69A2504AA67D34213cb5880f61F13",
+          "VUE_APP_LP_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"0x506E44A19E34723A65853C27ebD2ff630Bf9B654",
+          "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+
+          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0xfe120E57849CE88A4ECaFae9b865F1B6839BEbe8",
+          "VUE_APP_RAID_CONTRACT_ADDRESS":"0xd8A5FFc7e41EEd079b9984e7b3011Ef98DF806d9",
+          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0xA446c69Da0FEc2dB47E659677a21A3E09B72dcbF",
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xbfEda50595A2bFCaB29048B227832ec63d446920",
+          "VUE_APP_PVP_CONTRACT_ADDRESS": "0x5CCd6B4977736AcB3396b91B4786Df3BE01a6952",
+          "VUE_APP_BURNING_MANAGER_CONTRACT_ADDRESS": "0xeC8A94061C493Beeb1D5F314E8dcF299a05257Eb",
+
+          "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "0x8A105264DF69A8Ae76922d421e58A9804677D57B",
+          "VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS": "0x1DE7043442F8E6AA97d76Bf95e665692B51E0B64",
+
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "",
+
+          "chainId": "0x4E454152",
+          "currencyName": "Aurora ETH",
+          "currencyNetwork": "Aurora",
+          "currencySymbol": "aETH",
+          "currencyTransak": "aETH",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://testnet.aurora.dev"],
+          "blockExplorerUrls": ["https://testnet.aurorascan.dev/"],
+          "exchangeUrl": "",
+          "fightGas": "0"
         }
       }
     },
@@ -443,6 +483,48 @@
           "rpcUrls": ["https://api.avax.network/ext/bc/C/rpc"],
           "blockExplorerUrls": ["https://snowtrace.io/"],
           "exchangeUrl": "https://app.pangolin.exchange/#/swap?inputCurrency=0x483416eb3afa601b9c6385f63cec0c82b6abf1fb&outputCurrency=0xc7198437980c041c805a1edcba50c1ce5db95118",
+          "fightGas": "0.006"
+        },
+        "AURORA": {
+          "VUE_APP_WAX_BRIDGE_WAX_WALLET_ADDRESS":"snoui.wam",
+          "VUE_APP_NETWORK_ID":"1313161554",
+          "VUE_APP_EXPECTED_NETWORK_ID":"1313161554",
+          "VUE_APP_EXPECTED_NETWORK_NAME":"Aurora Mainnet",
+
+          "VUE_APP_STAKE_TYPES_AVAILABLE":"",
+          "VUE_APP_STAKE_TYPE_FOR_UNCLAIMED_REWARDS":"",
+          "VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS":"0xE723111a6Ac865EB6E2d62e87432bdC6e2c4a86E",
+          "VUE_APP_SKILL2_TOKEN_CONTRACT_ADDRESS":"0xE723111a6Ac865EB6E2d62e87432bdC6e2c4a86E",
+          "VUE_APP_LP_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_2_TOKEN_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          "VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS":"0x07f8aA038CD6a3B5FDC6ed58F608Eb33d98b299e",
+          "VUE_APP_LP_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+          "VUE_APP_LP_2_STAKING_REWARDS_CONTRACT_ADDRESS":"",
+
+          "VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS":"0x3F715995647fe44Db45411bb9e81b7A1aD5A8387",
+          "VUE_APP_RAID_CONTRACT_ADDRESS":"0x6CFDF6237C2A857f42Ff948b9117B0FA990bD42C",
+          "VUE_APP_MARKET_CONTRACT_ADDRESS":"0x99a7f36493B7ae8DC55F5F96A22cDBc27d049c55",
+          "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xA3728bA14A0aCa306C6F51bd34aaC45880913aA1",
+          "VUE_APP_STORAGE_CONTRACT_ADDRESS":"0x688483368f2Fd2DF4dD8a072E029957CC5287d81",
+          "VUE_APP_TREASURY_CONTRACT_ADDRESS": "0x483416eB3aFA601B9C6385f63CeC0C82B6aBf1fb",
+          "VUE_APP_PVP_CONTRACT_ADDRESS": "",
+          "VUE_APP_BURNING_MANAGER_CONTRACT_ADDRESS": "0x213d4a30E99978615E120a0fE60cB334a4043805",
+
+          "VUE_APP_MERCHANDISE_CONTRACT_ADDRESS": "0x93487d7902C560d6ae3e4191D9E6269bCdfD307a",
+          "VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS": "",
+
+          "VUE_APP_MULTICALL_CONTRACT_ADDRESS": "",
+
+          "chainId": "0x4e454152",
+          "currencyName": "Aurora ETH",
+          "currencyNetwork": "Aurora",
+          "currencySymbol": "aETH",
+          "currencyTransak": "aETH",
+          "currencyDecimals": "18",
+          "rpcUrls": ["https://mainnet.aurora.dev"],
+          "blockExplorerUrls": ["https://aurorascan.dev/"],
+          "exchangeUrl": "",
           "fightGas": "0.006"
         }
       }
