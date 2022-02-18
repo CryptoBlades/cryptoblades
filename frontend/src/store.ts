@@ -36,7 +36,7 @@ import {getCharacterNameFromSeed} from './character-name';
 import {approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd} from './contract-call-utils';
 
 import {burningManager as featureFlagBurningManager, raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly} from './feature-flags';
-import {IERC20, IERC721, INftStakingRewards, IStakingRewards} from '../../build/abi-interfaces';
+import {ERC20, IERC20, IERC721, INftStakingRewards, IStakingRewards} from '../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
 import {Nft, NftTransfer, TransferedNft} from './interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
@@ -47,6 +47,7 @@ import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances} from '@/views/Quests.vue';
 import {abi as erc721Abi} from '../../build/contracts/IERC721.json';
+import BigNumber from 'bignumber.js';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -3385,17 +3386,21 @@ export function createStore(web3: Web3) {
 
       async storeCurrencyToPartnerVault({state}, {currencyAddress, amount}) {
         const {PartnerVault} = state.contracts();
-        if(!PartnerVault || !state.defaultAccount) return;
+        if (!PartnerVault || !state.defaultAccount) return;
 
         console.log('storeCurrencyToPartnerVault', currencyAddress, amount);
 
-        const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<IERC20>;
+        const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
         console.log(currencyContract.options.address);
-        await currencyContract.methods.approve(PartnerVault.options.address, amount).send({
+        const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+        console.log('decimals', currencyDecimals);
+        const amountTimesDecimals = web3.utils.toBN(amount * 10 ** currencyDecimals);
+        console.log('amountTimesDecimals', amountTimesDecimals);
+        await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals).send({
           from: state.defaultAccount
         });
 
-        return await PartnerVault.methods.storeCurrency(currencyAddress, amount).send({
+        return await PartnerVault.methods.storeCurrency(currencyAddress, amountTimesDecimals).send({
           from: state.defaultAccount
         });
       },
@@ -3404,21 +3409,29 @@ export function createStore(web3: Web3) {
         const {PartnerVault} = state.contracts();
         if(!PartnerVault || !state.defaultAccount) return;
 
-        return await PartnerVault.methods.getNftsInVault(tokenAddress).call(defaultCallOptions(state));
+        const nftsInVault = await PartnerVault.methods.getNftsInVault(tokenAddress).call(defaultCallOptions(state));
+        const lockedNfts = await PartnerVault.methods.lockedNfts(tokenAddress).call(defaultCallOptions(state));
+        console.log(nftsInVault);
+        console.log(lockedNfts);
+
+        return nftsInVault;
       },
 
       async getCurrencyBalanceInPartnerVault({state}, {currencyAddress}){
         const {PartnerVault} = state.contracts();
         if(!PartnerVault || !state.defaultAccount) return;
 
-        const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress);
-        console.log('getCurrencyBalanceInPartnerVault', currencyContract);
-        console.log('getCurrencyBalanceInPartnerVault', PartnerVault.options.address);
-        console.log(currencyContract.options.address);
-        const currencyBalance = await currencyContract.methods.balanceOf(PartnerVault.options.address).call(defaultCallOptions(state));
+        const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
+        let currencyBalance = await currencyContract.methods.balanceOf(PartnerVault.options.address).call(defaultCallOptions(state));
+        const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+        console.log('before', currencyBalance);
+        currencyBalance = new BigNumber(currencyBalance).div(new BigNumber(10 ** currencyDecimals)).toFixed();
         console.log('getCurrencyBalanceInPartnerVault', currencyBalance);
         const currencySymbol = await currencyContract.methods.symbol().call(defaultCallOptions(state));
         console.log('getCurrencyBalanceInPartnerVault', currencySymbol);
+
+        const lockedCurrencies = await PartnerVault.methods.lockedCurrencies(currencyAddress).call(defaultCallOptions(state));
+        console.log('lockedCurrencies', lockedCurrencies);
 
         return [currencyBalance, currencySymbol];
       },
@@ -3523,9 +3536,11 @@ export function createStore(web3: Web3) {
           requirementType: +quest.requirementType as RequirementType,
           requirementRarity: +quest.requirementRarity as Rarity,
           requirementAmount: +quest.requirementAmount,
+          requirementExternalAddress: quest.requirementExternalAddress,
           rewardType: +quest.rewardType as RewardType,
           rewardRarity: +quest.rewardRarity as Rarity,
           rewardAmount: +quest.rewardAmount,
+          rewardExternalAddress: quest.rewardExternalAddress,
           reputationAmount: +quest.reputationAmount,
         } as Quest;
       },

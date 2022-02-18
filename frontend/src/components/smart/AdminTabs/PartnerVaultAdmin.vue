@@ -11,7 +11,7 @@
     <h2 class="mt-3">{{ $t('admin.partnerVault.storeERC20Tokens') }}</h2>
     <div class="d-flex align-items-center gap-3">
       <b-form-input v-model="currency.address" :placeholder="$t('admin.partnerVault.pasteInValidERC20Address')"/>
-      <b-form-input v-model="currency.amount" :placeholder="$t('admin.amount')" type="number" number min="1"/>
+      <b-form-input v-model="currency.amount" :placeholder="$t('admin.amount')" type="number" number min="0"/>
       <b-button @click="storeCurrency()" :disabled="storeCurrencyButtonDisabled()" variant="primary"
                 class="text-nowrap">
         {{ $t('admin.partnerVault.storeInPartnerVault') }}
@@ -183,6 +183,7 @@ export default Vue.extend({
         const result = await this.getNftsInPartnerVault({
           tokenAddress: this.nftBalance.address
         });
+        console.log(result);
         this.nftBalance.ids = result.join(', ');
         this.nftBalance.total = result.length;
       } finally {

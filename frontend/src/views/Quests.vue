@@ -72,6 +72,7 @@ export enum RequirementType {
   STAMINA,
   SOUL,
   RAID,
+  EXTERNAL = 10,
 }
 
 // NOTE: Numbers should represent ItemType in SimpleQuests.sol
@@ -84,7 +85,10 @@ export enum RewardType {
   SHIELD,
   EXPERIENCE = 9,
   SOUL = 7,
+  EXTERNAL = 10,
 }
+
+export const QuestItemType = {...RequirementType, ...RewardType};
 
 export enum Rarity {
   COMMON, UNCOMMON, RARE, EPIC, LEGENDARY

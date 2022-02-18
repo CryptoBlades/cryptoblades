@@ -12,6 +12,7 @@ import "./items/Junk.sol";
 import "./items/RaidTrinket.sol";
 import "./SafeRandoms.sol";
 import "./BurningManager.sol";
+import "./PartnerVault.sol";
 
 contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
@@ -39,6 +40,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     Shields public shields;
     BurningManager public burningManager;
     SafeRandoms public safeRandoms;
+    PartnerVault public partnerVault;
 
     uint8 public constant VAR_COMMON_TIER = 0;
     uint8 public constant VAR_UNCOMMON_TIER = 1;
@@ -93,7 +95,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     event QuestRewarded(uint256 indexed questID, uint256 indexed characterID, uint256[] rewards);
     event QuestSkipped(uint256 indexed questID, uint256 indexed characterID);
 
-    function initialize(Characters _characters, Weapons _weapons, Junk _junk, RaidTrinket _trinket, Shields _shields, BurningManager _burningManager, SafeRandoms _safeRandoms) public initializer {
+    function initialize(Characters _characters, Weapons _weapons, Junk _junk, RaidTrinket _trinket, Shields _shields, BurningManager _burningManager, SafeRandoms _safeRandoms, PartnerVault _partnerVault) public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(GAME_ADMIN, msg.sender);
@@ -105,6 +107,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         shields = _shields;
         burningManager = _burningManager;
         safeRandoms = _safeRandoms;
+        partnerVault = _partnerVault;
         nextQuestID = 1;
     }
 
@@ -194,7 +197,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             questSupplies[questID] = --questSupplies[questID];
             if (questSupplies[questID] == 0) {
                 deleteQuestTemplate(tier, limitedQuestIndexes[questID]);
-                // TODO: If external reward unlock the nfts
             }
         }
         characterQuest[characterID] = questID;
@@ -269,6 +271,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             characters.gainXp(characterID, uint16(quest.rewardAmount));
         } else if (quest.rewardType == ItemType.SOUL) {
             burningManager.giveAwaySoul(msg.sender, quest.rewardAmount);
+        } else if (quest.rewardType == ItemType.EXTERNAL) {
+            partnerVault.transferReward(quest.rewardExternalAddress, msg.sender, quest.rewardAmount, seed);
         }
         else {
             revert("Unknown reward type");
@@ -420,13 +424,24 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             questSupplies[questID] = supply;
             questDeadlines[questID] = deadline;
             limitedQuestIndexes[questID] = questTemplates[tier].length - 1;
+            if (rewardType == ItemType.EXTERNAL) {
+                partnerVault.lockReward(rewardExternalAddress, rewardAmount * supply);
+            }
             // TODO: If external reward lock the nfts for the deadline
+            // OR just free them on quest deletion (use the remaining supply as a counter)
+            // TODO: Also amount should be * decimals (do it in store)
         }
     }
 
     function deleteQuestTemplate(uint256 tier, uint256 index) public restricted {
         require(index < questTemplates[tier].length, "Index out of bounds");
+        uint256 questID = questTemplates[tier][index];
         questTemplates[tier][index] = questTemplates[tier][questTemplates[tier].length - 1];
+        Quest memory quest = quests[questID];
         questTemplates[tier].pop();
+        uint256 supplyLeft = questSupplies[questID];
+        if (quest.rewardType == ItemType.EXTERNAL && supplyLeft > 0) {
+            partnerVault.unlockReward(quest.rewardExternalAddress, quest.rewardAmount * supplyLeft);
+        }
     }
 }

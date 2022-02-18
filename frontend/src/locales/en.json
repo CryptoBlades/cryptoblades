@@ -625,7 +625,8 @@
       "EXPERIENCE": "Experience",
       "SOUL": "Soul",
       "RAID": "Raid",
-      "REPUTATION": "Reputation"
+      "REPUTATION": "Reputation",
+      "EXTERNAL": "External"
     },
     "reputationTier": {
       "PEASANT": "Peasant",

@@ -10,14 +10,16 @@ import "./util.sol";
 
 contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721ReceiverUpgradeable {
     using ABDKMath64x64 for int128;
-    using ABDKMath64x64 for uint256;
+    using SafeMath for uint256;
 
     bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     mapping(address => uint256[]) public nfts;
+    mapping(address => uint256) public lockedNfts;
     mapping(address => uint256) public currencies;
+    mapping(address => uint256) public lockedCurrencies;
 
     function initialize() public initializer {
         __AccessControl_init_unchained();
@@ -46,8 +48,6 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
 
     // FUNCTIONS
 
-    //what about approval? is the check if owner necessary here?
-    //maybe a general function for both actions? idk
     function storeNfts(IERC721 tokenAddress, uint256[] memory tokenIds) public restricted isValidERC721(tokenAddress) {
         for (uint8 i = 0; i < tokenIds.length; i++) {
             tokenAddress.safeTransferFrom(msg.sender, address(this), tokenIds[i]);
@@ -55,35 +55,62 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
         }
     }
 
-    function transferNfts(address tokenAddress, address to, uint256 amount) public restricted {
-        require(amount < nfts[tokenAddress].length, "Not enough NFTs");
-        IERC721 nft = IERC721(tokenAddress);
-        for (uint8 i = 0; i < amount; i++) {
-            uint256 tokenId = nfts[tokenAddress][nfts[tokenAddress].length - 1];
-            nft.safeTransferFrom(address(this), to, tokenId);
-            nfts[tokenAddress].pop();
+    function storeCurrency(IERC20 tokenAddress, uint256 amount) public restricted {
+        tokenAddress.transferFrom(msg.sender, address(this), amount);
+        currencies[address(tokenAddress)] = currencies[address(tokenAddress)].add(amount);
+    }
+
+    function transferReward(address tokenAddress, address to, uint256 amount, uint256 seed) external restricted {
+        require(amount <= nfts[tokenAddress].length || amount <= currencies[tokenAddress], "Not enough NFTs or currency");
+        if (amount < currencies[tokenAddress]) {
+            IERC20 currency = IERC20(tokenAddress);
+            currency.transfer(to, amount);
+            currencies[tokenAddress] = currencies[tokenAddress].sub(amount);
+        } else {
+            IERC721 nft = IERC721(tokenAddress);
+            for (uint8 i = 0; i < amount; i++) {
+                uint256 index = RandomUtil.randomSeededMinMax(0, nfts[tokenAddress].length - 1, seed);
+                uint256 tokenId = nfts[tokenAddress][index];
+                nft.safeTransferFrom(address(this), to, tokenId);
+                deleteNft(nft, index);
+                seed = RandomUtil.combineSeeds(seed, i);
+            }
+        }
+        unlockReward(tokenAddress, amount);
+    }
+
+    function lockReward(address tokenAddress, uint256 amount) external restricted {
+        require(amount > 0, "Invalid amount");
+        require(amount <= (nfts[tokenAddress].length - lockedNfts[tokenAddress])
+            || amount <= currencies[tokenAddress].sub(lockedCurrencies[tokenAddress]), "Not enough NFTs or currency");
+        if (amount <= currencies[tokenAddress].sub(lockedCurrencies[tokenAddress])) {
+            lockedCurrencies[tokenAddress] = lockedCurrencies[tokenAddress].add(amount);
+        } else {
+            lockedNfts[tokenAddress] = lockedNfts[tokenAddress].add(amount);
         }
     }
 
-    function isNftOwner(address tokenAddress, address user, uint256 tokenId) public view returns (bool) {
-        IERC721 nft = IERC721(tokenAddress);
-        return nft.ownerOf(tokenId) == user;
+    function unlockReward(address tokenAddress, uint256 amount) public restricted {
+        require(amount > 0, "Invalid amount");
+        require(amount <= lockedNfts[tokenAddress]
+            || amount <= lockedCurrencies[tokenAddress], "Not enough locked NFTs or currency");
+        if (amount <= lockedCurrencies[tokenAddress]) {
+            lockedCurrencies[tokenAddress] = lockedCurrencies[tokenAddress].sub(amount);
+        } else {
+            lockedNfts[tokenAddress] = lockedNfts[tokenAddress].sub(amount);
+        }
     }
 
-    function storeCurrency(IERC20 tokenAddress, uint256 amount) public restricted {
-        tokenAddress.transferFrom(msg.sender, address(this), amount);
-        currencies[address(tokenAddress)] += amount;
+    function deleteNft(IERC721 tokenAddress, uint256 index) internal restricted {
+        require(index < nfts[address(tokenAddress)].length, "Index out of bounds");
+        nfts[address(tokenAddress)][index] = nfts[address(tokenAddress)][nfts[address(tokenAddress)].length - 1];
+        nfts[address(tokenAddress)].pop();
     }
 
-    //            require(index < questTemplates[tier].length, "Index out of bounds");
-    //        questTemplates[tier][index] = questTemplates[tier][questTemplates[tier].length - 1];
-    //        questTemplates[tier].pop();
+    function isNftOwner(IERC721 tokenAddress, address user, uint256 tokenId) public view returns (bool) {
+        return tokenAddress.ownerOf(tokenId) == user;
+    }
 
-    //    //what about approval? is the check if owner necessary here?
-    //    function storeERC20(address tokenAddress, uint256 amount) public restricted {
-    //        IERC20 token = IERC20(tokenAddress);
-    //        token.safeTransfer(this, amount);
-    //    }
 
     // VIEWS
 
