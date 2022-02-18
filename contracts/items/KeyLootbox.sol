@@ -12,6 +12,8 @@ contract KeyLootbox is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     Promos public promos;
+
+    uint256 public nextTokenID;
     
     event Minted(uint256 indexed id, address indexed minter);
 
@@ -31,7 +33,7 @@ contract KeyLootbox is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function mint(address minter) public restricted returns(uint256) {
 
-        uint256 tokenID = totalSupply();
+        uint256 tokenID = nextTokenID++;
         _mint(minter, tokenID);
         emit Minted(tokenID, minter);
         return tokenID;
@@ -53,4 +55,7 @@ contract KeyLootbox is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokens;
     }
 
+    function setNextTokenID(uint to) public restricted {
+        nextTokenID = to;
+    }
 }

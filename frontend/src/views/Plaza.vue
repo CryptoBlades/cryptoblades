@@ -429,7 +429,7 @@ export default Vue.extend({
     },
     canRecruit() {
       const cost = toBN(this.recruitCost);
-      const balance = toBN(this.skillBalance);
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     canBurn() {
@@ -539,7 +539,7 @@ export default Vue.extend({
       }
     },
     setMaxSoulAmount() {
-      this.soulAmount = this.remainingPowerLimit > this.soulBalance ? this.soulBalance : this.remainingPowerLimit;
+      this.soulAmount = this.remainingPowerLimit > this.soulBalance * 10 ? this.soulBalance : this.remainingPowerLimit / 10;
     }
   },
 

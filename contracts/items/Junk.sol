@@ -24,6 +24,8 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     mapping(uint256 => uint8) public tokenStars;
 
+    uint256 public nextTokenID;
+
     event Minted(uint256 indexed id, address indexed minter);
     event Burned(uint256 indexed id, address indexed burner);
 
@@ -58,7 +60,7 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function mint(address minter, uint8 mintStars) public restricted returns(uint256 tokenID) {
-        tokenID = totalSupply();
+        tokenID = nextTokenID++;
         tokenStars[tokenID] = mintStars;
         _mint(minter, tokenID);
         emit Minted(tokenID, minter);
@@ -87,4 +89,7 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
     }
 
+    function setNextTokenID(uint to) public restricted {
+        nextTokenID = to;
+    }
 }

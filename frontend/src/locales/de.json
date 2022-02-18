@@ -6,17 +6,13 @@
     "combat": "Kämpfen",
     "raid": "Raid",
     "pvp": "PvP",
-    "market": "Markt",
+    "bazaar": "Markt",
     "stake": "Stake"
   },
   "ClaimRewardsBar": {
     "rewards": "Belohnungen",
-    "earlyWithdrawTax": "Abhebe-Steuer",
-    "taxReduce": "Die Steuer verringert sich um 1% am Tag",
     "readyToClaim": "Belohnungen können abgeholt werden!",
-    "timeSince": "Letzte Abhebung: n/a",
-    "withdrawalInfoText1": "Du kannst maximal 10% abheben, wenn du über 1 SKILL hast oder die Menge SKILL, die du nach 2 Tagen kämpfen bekommen würdest. Je nachdem was größer ist. Mögliche Abhebung heute: ",
-    "withdrawalInfoText2": "Du kannst so viel SKILL abheben, wie du in einem Tag durch Kämpfe bekommst. Mögliche Abhebung heute:"
+    "timeSince": "Letzte Abhebung: n/a"
   },
   "CharacterDisplay": {
     "loading": "Lade...",
