@@ -1,8 +1,10 @@
 <template>
   <div class="main-nav-div">
-    <b-navbar class="main-nav" toggleable="sm" type="dark" variant="dark">
+    <b-navbar class="main-nav" toggleable="sm">
       <b-navbar-brand href="#" class="nav-logo">
-        <img src="../assets/logo_Text_Source.png" class="logo d-inline-block align-top" alt="Logo">
+        <div class="new-game-ui-logo">
+          <img src="../assets/new-ui/cb-logo.png" class="logo d-inline-block align-top" alt="Logo">
+        </div>
       </b-navbar-brand>
 
       <b-navbar-toggle target="navbar-toggle-collapse">
@@ -18,7 +20,7 @@
 
       <skill-balance-display class="ml-auto d-none d-sm-flex" />
 
-      <claim-rewards-bar :isBar="false" v-if="!canShowRewardsBar" />
+      <!-- <claim-rewards-bar :isBar="false" v-if="!canShowRewardsBar" /> -->
 
       <options class="d-none d-sm-flex"/>
 
@@ -30,7 +32,6 @@
     </b-navbar>
     <claim-rewards-bar v-if="canShowRewardsBar" />
     <div class="container_row">
-      <img src="../assets/divider4.png" class="expander-divider">
       <b-button class="expander-button" @click="toggleCharacterView" v-if="ownCharacters.length > 0">
         <b-icon-arrows-expand class="expand-collapse-icon" v-if="!getIsCharacterViewExpanded" />
         <b-icon-arrows-collapse class="expand-collapse-icon" v-if="getIsCharacterViewExpanded" aria-hidden="true" />
@@ -103,6 +104,10 @@ a.router-link-active {
   text-decoration: none !important;
 }
 
+ .main-nav > .navbar-brand {
+    align-self: center;
+    padding-bottom: 0px !important;
+  }
 .dropdown-menu {
   background: rgb(20,20,20);
   background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
@@ -155,13 +160,30 @@ a.router-link-active {
 
 <style scoped>
 .logo {
-  max-width: 230px;
-  padding-top: 7px;
+  max-width: 280px;
+}
+
+
+
+.main-nav {
+  padding: 0px;
+  background-color: #000e29;
+}
+
+@media (min-width: 1024px) {
+  .new-game-ui-logo {
+    height: 100px;
+    width: 400px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    border-right: 2px solid #404857;
+  }
 }
 
 .navbar {
-  background: rgb(20,20,20);
-  background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
+  background: #000e29;
+  border-bottom: 2px solid #404857;
 }
 .main-nav > .view-links {
   flex : 2.3;

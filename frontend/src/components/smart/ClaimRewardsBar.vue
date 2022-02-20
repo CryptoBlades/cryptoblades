@@ -1,6 +1,7 @@
 <template>
   <div class="body main-font">
-    <b-navbar v-if="isBar">
+
+    <b-navbar v-if="isBar" class="claim-xp-bar">
       <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
       variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="$t('ClaimRewardsBar.readyToClaim')"/>
 
@@ -8,7 +9,7 @@
 
       <b-nav-item
         class="ml-3 bar"
-        @click="claimSkill(ClaimStage.Summary)"><!-- moved gtag-link below b-nav-item -->
+        @click="claimSkill(ClaimStage.Summary)">
         <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
           <strong>SKILL</strong> {{ formattedSkillReward }}
         </span>
@@ -423,8 +424,11 @@ export default Vue.extend({
 <style scoped>
 
 .navbar {
-  background: rgb(20,20,20);
-  background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
+  background-color: #000e29;
+}
+
+.claim-xp-bar {
+  height: 55px;
 }
 
 .nav-item.bar {

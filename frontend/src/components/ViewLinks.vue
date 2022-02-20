@@ -1,77 +1,51 @@
 <template>
   <b-navbar-nav>
+    <!-- <li class="play-to-earn top-nav-links">
+      <P2EButton mainText="Play-to-earn" route="play-to-earn" />
+    </li> -->
 
-    <router-link v-if="!stakeOnly" :to="{ name: 'plaza' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.plaza") }}</span>
-      </li>
-    </router-link>
+    <li class="character top-nav-links" >
+      <router-link v-if="!stakeOnly" :to="{ name: 'plaza' }" exact class="nav-link">
+        <div class="icon"> <img src="../assets/new-ui/char-icon@2x.png" class="new-ui-links-icon"></div>
+        <div class="link-text">Character</div>
+      </router-link>
+    </li>
 
-    <router-link v-if="!stakeOnly" :to="{ name: 'blacksmith' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.blacksmith") }}</span>
-      </li>
-    </router-link>
+   <li v-if="!stakeOnly" >
+      <router-link :to="{ name: 'blacksmith' }" exact class="nav-link">
+        <div class="icon"><img src="../assets/new-ui/3553090_hammer_icon@2x.png" class="new-ui-links-icon"></div>
+        <div class="link-text">Blacksmith</div>
+      </router-link>
+    </li>
 
-    <router-link v-if="!stakeOnly" :to="{ name: 'combat' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.combat") }}</span>
-      </li>
-    </router-link>
+    <li v-if="!stakeOnly" >
+      <router-link :to="{ name: 'combat' }" exact class="nav-link">
+        <div class="icon"><img src="../assets/new-ui/goblin-head-svgrepo-com@2x.png" class="new-ui-links-icon"></div>
+        <div class="link-text">Combat</div>
+      </router-link>
+    </li>
 
-    <router-link v-if="!stakeOnly && raid" :to="{ name: 'raid' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.raid") }}</span>
-      </li>
-    </router-link>
+    <li v-if="pvp" >
+      <router-link :to="{ name: 'pvp' }" exact class="nav-link">
+        <div class="icon"><img src="../assets/new-ui/_x31_30_x2C__sword_x2C__fencing_x2C__sports_x2C__weapon-1@2x.png" class="new-ui-links-icon"></div>
+        <div class="link-text">Arena </div>
+      </router-link>
+    </li>
 
-    <a v-if="!stakeOnly && market" href="https://bazaar.market/" class="nav-link" target="_blank">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.bazaar") }} <b-icon-box-arrow-up-right scale="0.7"/></span>
-      </li>
-    </a>
+   <li v-if="!stakeOnly && raid" >
+      <router-link :to="{ name: 'raid' }" exact class="nav-link">
+        <div class="icon"><img src="../assets/new-ui/noun-dragon-head-2602075@2x.png" class="new-ui-links-icon"></div>
+        <div  class="link-text">Raid </div>
+      </router-link>
+    </li>
 
-    <router-link :to="{ name: 'select-stake-type' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.stake") }}</span>
-      </li>
-    </router-link>
+    <li  v-if="!stakeOnly && market"  class="marketplace top-nav-links">
+      <a href="https://bazaar.market/"  class="nav-link" target="_blank">
+        <div class="icon"> <img src="../assets/new-ui/balance@2x.png" class="new-ui-links-icon"> </div>
+        <div  class="link-text">Marketplace</div>
+      </a>
+    </li>
 
-    <router-link v-if="pvp" :to="{ name: 'pvp' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" :class="supportsPvP ? '' : 'disabled'">{{ $t("viewLink.pvp") }} <hint
-          v-if="!supportsPvP" class="hint"
-          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
-      </li>
-    </router-link>
-
-    <router-link v-if="quests" :to="{ name: 'quests' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" :class="supportsQuests ? '' : 'disabled'">{{ $t("viewLink.quests") }} <hint
-          v-if="!supportsQuests" class="hint"
-          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
-      </li>
-    </router-link>
-
-    <router-link :to="{ name: 'treasury' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.treasury") }}</span>
-      </li>
-    </router-link>
-
-    <router-link v-if="merchandise" :to="{ name: 'merchandise' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" :class="supportsMerchandise ? '' : 'disabled'">{{ $t("viewLink.merchandise") }} <hint
-          v-if="!supportsMerchandise" class="hint"
-          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
-      </li>
-    </router-link>
-
-    <router-link v-if="hasAdminAccess" :to="{ name: 'admin' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.admin") }}</span>
-      </li>
-    </router-link>
 
   </b-navbar-nav>
 </template>
@@ -80,7 +54,8 @@
 import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
-import Hint from '@/components/Hint';
+// import Hint from '@/components/Hint';
+// import P2EButton from '@/components/P2EButton';
 
 export default Vue.extend({
   data() {
@@ -123,7 +98,8 @@ export default Vue.extend({
   },
 
   components: {
-    Hint,
+    // Hint,
+    // P2EButton
   },
 
   watch: {
@@ -147,8 +123,64 @@ a {
   padding: 0 5px 0 5px;
 }
 
+.new-ui-links-icon {
+  height:25px;
+}
+
+.link-text {
+  font-weight: bolder;
+}
+
 .disabled {
   cursor: not-allowed;
   color: gray !important;
+}
+
+.navbar-nav {
+  display: flex;
+}
+li {
+  display: inline-block;
+  padding-right: 38px;
+}
+
+li:last-child {
+  padding-right: 0;
+}
+
+li .nav-link {
+  font-size: 18px;
+  text-transform: uppercase;
+  font-weight: 500;
+  text-align: center;
+}
+
+li.active a,
+.router-link-exact-active {
+  color: #EDCD90;
+}
+
+li .nav-link .icon {
+  margin-bottom: 5px;
+}
+
+.play-to-earn {
+  display: flex;
+  align-items: center;
+}
+.play-to-earn a {
+  border: 1px solid #EDCD90;
+  display: block;
+  padding: 20px;
+}
+
+@media (max-width: 1366px) {
+  .top-nav-links > a {
+    font-size: 0.7rem;
+  }
+  .play-to-earn > div {
+    text-align: center;
+    width: 176px;
+  }
 }
 </style>

@@ -415,6 +415,9 @@ export default {
 </script>
 
 <style>
+
+ul, li {list-style-type: none;}
+
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
   font-weight: 600;
   text-align: center;
@@ -426,7 +429,7 @@ hr.hr-divider {
 }
 body {
   margin: 0;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
+  background: #000e29;
 }
 
 .no-margin {
@@ -678,7 +681,7 @@ div.bg-success {
 .content {
   padding: 0 1em;
   height: auto;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
+  background: #000e29;
   margin: auto;
 }
 
