@@ -182,7 +182,7 @@ a.router-link-active {
 }
 
 .navbar {
-  background: #000e29;
+  background: rgb(20,20,20);
   border-bottom: 2px solid #404857;
 }
 .main-nav > .view-links {

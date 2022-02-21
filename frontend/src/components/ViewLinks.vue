@@ -39,10 +39,10 @@
       </router-link>
     </li>
 
-    <li  v-if="!stakeOnly && market"  class="marketplace top-nav-links">
+    <li  v-if="!stakeOnly && market" >
       <a href="https://bazaar.market/"  class="nav-link" target="_blank">
         <div class="icon"> <img src="../assets/new-ui/balance@2x.png" class="new-ui-links-icon"> </div>
-        <div  class="link-text">Marketplace</div>
+        <div  class="link-text">Bazaar</div>
       </a>
     </li>
 
@@ -141,7 +141,7 @@ a {
 }
 li {
   display: inline-block;
-  padding-right: 38px;
+  width: 110px;
 }
 
 li:last-child {

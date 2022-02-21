@@ -14,17 +14,24 @@
       </div>
     </b-modal>
       <!-- <i class="fa fa-plus gtag-link-others" tagname="buy_skill"></i> -->
-      <img src="../../assets/addButton.png" class="add-button gtag-link-others"  tagname="buy_skill">
+      <img src="../../assets/new-ui/skill-token.png" class="add-button gtag-link-others"  tagname="buy_skill">
     </div>
 
     <div class="balance-container">
-      <strong class="mr-2 balance-text">{{$t('skillBalanceDisplay.totalBalance')}}</strong>
-      <span class="balance"
-        v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
-        @mouseover="hover = !isMobile() || true"
-        @mouseleave="hover = !isMobile()"
-      >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/>
-      </span>
+        <p>$SKILL </p>
+        <b class="mr-2" v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
+          @mouseover="hover = !isMobile() || true"
+          @mouseleave="hover = !isMobile()"
+        >{{ formattedTotalSkillBalance }}</b>
+        <!-- <span class="balance"
+          v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
+          @mouseover="hover = !isMobile() || true"
+          @mouseleave="hover = !isMobile()"
+        >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/>
+        </span> -->
+         <div class="deposit-withdraw">
+         Deposit | Withdraw
+        </div>
     </div>
 
     <div class="bnb-withdraw-container mx-3" v-if="hasBnbAvailableToWithdraw">
@@ -75,7 +82,7 @@ export default Vue.extend({
     formattedTotalSkillBalance(): string {
       const skillBalance = fromWeiEther(Bignumber.sum(toBN(this.skillBalance), toBN(this.inGameOnlyFunds), toBN(this.skillRewards)));
 
-      return `${toBN(skillBalance).toFixed(4)} SKILL`;
+      return `${toBN(skillBalance).toFixed(4)}`;
     },
 
     formattedSkillBalance(): string {
@@ -183,8 +190,12 @@ export default Vue.extend({
 .balance-container {
   margin-right: 5px;
   color: #b3b0a7;
+  line-height: 0.2;
+  text-align: right;
 }
-
+.deposit-withdraw {
+  margin-top: 10px;
+}
 .balance-text {
   color : #BFA765;
 }

@@ -424,7 +424,7 @@ export default Vue.extend({
 <style scoped>
 
 .navbar {
-  background-color: #000e29;
+  background: rgb(20,20,20);
 }
 
 .claim-xp-bar {
