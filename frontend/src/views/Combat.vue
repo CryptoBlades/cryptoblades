@@ -745,7 +745,7 @@ h1 {
   display: block;
   text-align: center;
 }
-##expectedSkillHint{
+#expectedSkillHint{
   margin:0;
   font-size: 1em;
 }
