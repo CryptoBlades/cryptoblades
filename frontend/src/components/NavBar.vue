@@ -167,7 +167,6 @@ a.router-link-active {
 
 .main-nav {
   padding: 0px;
-  background-color: #000e29;
 }
 
 @media (min-width: 1024px) {

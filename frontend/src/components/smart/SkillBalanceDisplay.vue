@@ -1,6 +1,6 @@
 <template>
   <div class="skill-balance-display">
-    <div size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
+    <div size="sm" class="my-2 my-sm-0 mr-3 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
       <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
       <div class="buy-skill-modal">
         <div class="buy-skill-modal-child">
@@ -19,10 +19,10 @@
 
     <div class="balance-container">
         <p>$SKILL </p>
-        <b class="mr-2" v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
+        <b v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
           @mouseover="hover = !isMobile() || true"
           @mouseleave="hover = !isMobile()"
-        >{{ formattedTotalSkillBalance }}</b>
+        >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/></b>
         <!-- <span class="balance"
           v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
           @mouseover="hover = !isMobile() || true"
@@ -30,7 +30,7 @@
         >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/>
         </span> -->
          <div class="deposit-withdraw">
-         Deposit | Withdraw
+         <span @click="showModal">Deposit</span> | <span @click="claimSkill(ClaimStage.Summary)"> Withdraw </span>
         </div>
     </div>
 
@@ -185,6 +185,11 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   font-size: 1.1rem;
+      border-left: 1px solid #424A59;
+    height: 105px;
+    border-right: 1px solid #424A59;
+    padding-left : 15px;
+    padding-right: 15px;
 }
 
 .balance-container {
@@ -194,14 +199,25 @@ export default Vue.extend({
   text-align: right;
 }
 .deposit-withdraw {
-  margin-top: 10px;
+  margin-top: 25px;
+}
+
+.deposit-withdraw > span {
+  color: #EDCD90;
+  cursor: pointer;
 }
 .balance-text {
   color : #BFA765;
 }
 .add-button {
-  width : 30px;
+  width: 35px;
   height: 100%;
+  position: relative;
+  top: -15px;
+  right: -15px;
+}
+.skill-tooltip {
+  width: 0px;
 }
 .add-button:hover {
   cursor: pointer;

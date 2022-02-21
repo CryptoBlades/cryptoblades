@@ -3,7 +3,7 @@
     <b-navbar-nav>
       <b-nav-item-dropdown right>
         <template #button-content>
-          <i class="fa fa-bars"></i>
+          <i class="fa fa-bars menu-burger"></i>
         </template>
         <b-dropdown-group>
 
@@ -238,5 +238,8 @@ export default Vue.extend({
   margin-left: -3px;
   height: 20px;
   filter: invert(75%) sepia(8%) saturate(243%) hue-rotate(8deg) brightness(96%) contrast(81%);
+}
+.menu-burger {
+  font-size: 35px;
 }
 </style>
