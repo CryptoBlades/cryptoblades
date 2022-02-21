@@ -105,7 +105,7 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
       feeInSkill = await cryptoBladesContract.methods
         .getSkillNeededFromUserWallet(from, feeInSkill.toString(), allowInGameOnlyFunds)
         .call(callOptsWithFrom)
-        .then(n => new BigNumber(n));
+        .then((n: BigNumber.Value) => new BigNumber(n));
     }
     catch(err) {
       const paidByRewardPool = feeInSkill.lte(skillRewardsAvailable);
@@ -116,14 +116,14 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
     }
   }
 
-    return await approveFeeFromAnyContractSimple(
-      feeContract,
-      skillToken,
-      from,
-      callOpts,
-      approveOpts,
-      feeInSkill
-    );
+  return await approveFeeFromAnyContractSimple(
+    feeContract,
+    skillToken,
+    from,
+    callOpts,
+    approveOpts,
+    feeInSkill
+  );
 }
 
 export async function approveFee(
