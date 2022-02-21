@@ -33,7 +33,8 @@ export default Vue.extend({
   },
   methods: {
     checkStorage() {
-      this.showAds = localStorage.getItem('show-ads') === 'true';
+      if (process.env.NODE_ENV === 'development') this.showAds = false;
+      else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
   },
   async mounted() {

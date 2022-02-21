@@ -5,6 +5,8 @@ import config from '../../app-config.json';
 import {router} from '@/main';
 import {getConfigValue, Networks} from '@/contracts';
 import {networks as pvpNetworks} from '../../../build/contracts/PvpArena.json';
+import {networks as simpleQuestsNetworks} from '../../../build/contracts/SimpleQuests.json';
+import {abi as erc20Abi} from '../../../build/contracts/ERC20.json';
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
 BigNumber.config({ EXPONENTIAL_AT: 100 });
@@ -87,6 +89,8 @@ export const copyNftUrl = (id: number | string, type?: string): void => {
 
 export const addTokenToMetamask = async (address: string, symbol: string): Promise<void> => {
   try {
+    const contract = new web3.eth.Contract(erc20Abi as any[], address);
+    const decimals = await contract.methods.decimals().call();
     await (web3.currentProvider as any).request({
       method: 'wallet_watchAsset',
       params: {
@@ -94,13 +98,17 @@ export const addTokenToMetamask = async (address: string, symbol: string): Promi
         options: {
           address,
           symbol,
-          decimals: 18
+          decimals
         },
       },
     });
   } catch (error) {
     console.error(error);
   }
+};
+
+export const isValidWeb3Address = (walletAddress: string) => {
+  return Web3.utils.isAddress(walletAddress);
 };
 
 export const currentChainSupportsMerchandise = () => {
@@ -114,7 +122,14 @@ export const currentChainSupportsMerchandise = () => {
 
 export const currentChainSupportsPvP = () => {
   const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
-  const pvpContractAddr = process.env.VUE_APP_PVP_CONTRACT_ADDRESS ||
+  const contractAddress = process.env.VUE_APP_PVP_CONTRACT_ADDRESS ||
     getConfigValue('VUE_APP_PVP_CONTRACT_ADDRESS') || (pvpNetworks as Networks)[networkId]?.address;
-  return !!pvpContractAddr;
+  return !!contractAddress;
+};
+
+export const currentChainSupportsQuests = () => {
+  const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
+  const contractAddress = process.env.VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS ||
+    getConfigValue('VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS') || (simpleQuestsNetworks as Networks)[networkId]?.address;
+  return !!contractAddress;
 };

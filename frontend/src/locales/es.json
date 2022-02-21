@@ -12,11 +12,8 @@
   "ClaimRewardsBar": {
     "rewards": "Rewards",
     "earlyWithdrawTax": "Early Withdraw Tax",
-    "taxReduce": "Tax is being reduced by 1% per day.",
     "readyToClaim": "Rewards ready to claim!",
-    "timeSince": "Time since last withdraw: n/a",
-    "withdrawalInfoText1": "You can withdraw max 10% of amount over 1 SKILL or 2 days worth of fights per day (whatever is greater). Remaining claimable amount today: ",
-    "withdrawalInfoText2": "You can withdraw 1 day worth of fights per day. Remaining claimable amount today: "
+    "timeSince": "Time since last withdraw: n/a"
   },
   "CharacterDisplay": {
     "loading": "Loading...",
@@ -43,9 +40,9 @@
     "enemyRolled": "Enemy rolled:"
   },
   "nftIcon": {
-    "weaponTooltip": "Weapons (2-5*)",
-    "junkTooltip": "Junk (1-5*)",
-    "trinketTooltip": "Trinket (1-5*)",
+    "weaponTooltip": "Weapons ({stars}*)",
+    "junkTooltip": "Junk ({stars}*)",
+    "trinketTooltip": "Trinket ({stars}*)",
     "secretTooltip": "Secret (??)",
     "lesserDust": "Lesser Dust",
     "greaterDust": "Greater Dust",

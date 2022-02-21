@@ -304,10 +304,10 @@ export default {
       this.shieldElementFilter = '';
     },
     handleErrorMessage(value, errorMessage, returnedMessage) {
-      if(value.includes(`reverted with reason string '${errorMessage}'`)) {
+      if (value.includes(`reverted with reason string '${errorMessage}'`)) {
         return this.$dialog.notify.error(returnedMessage);
       }
-      return 'There has been an error. Try again.';
+      return this.$dialog.notify.error(i18n.t('pvp.genericError'));
     },
     handleWeaponClick(weaponId, weapon) {
       this.selectedWeaponId = weaponId;

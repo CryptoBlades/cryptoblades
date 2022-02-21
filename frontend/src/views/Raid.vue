@@ -205,22 +205,22 @@
 <script lang="ts">
 
 import Vue from 'vue';
-import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
+import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import CharacterList from '../components/smart/CharacterList.vue';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import BigButton from '../components/BigButton.vue';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import Hint from '../components/Hint.vue';
 import NftIcon from '@/components/NftIcon.vue';
-import NftList, { NftIdType } from '@/components/smart/NftList.vue';
+import NftList, {NftIdType} from '@/components/smart/NftList.vue';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
-import { GetTotalMultiplierForTrait, IWeapon } from '@/interfaces/Weapon';
-import { IRaidState, IState } from '@/interfaces';
-import { getBossArt } from '@/raid-boss-art-placeholder';
-import { traitNumberToName } from '@/contract-models';
-import { fromWeiEther } from '@/utils/common';
-import { staminaToHours } from '@/utils/date-time';
-import { RaidRewards, Weapon, Junk, Keybox, DustLb, Dust4b, Dust5b, BonusXp } from '@/interfaces/RaidRewards';
+import {GetTotalMultiplierForTrait, IWeapon} from '@/interfaces/Weapon';
+import {IRaidState, IState} from '@/interfaces';
+import {getBossArt} from '@/raid-boss-art-placeholder';
+import {traitNumberToName} from '@/contract-models';
+import {fromWeiEther} from '@/utils/common';
+import {staminaToHours} from '@/utils/date-time';
+import {BonusXp, Dust4b, Dust5b, DustLb, Junk, Keybox, RaidRewards, Weapon} from '@/interfaces/RaidRewards';
 import i18n from '@/i18n';
 
 interface RaidMappedActions {
@@ -248,43 +248,47 @@ interface RaidMappedGetters {
 let interval: number;
 
 const dragonNames = [
-  // 'Fudbringer',
-  // 'HODL Lord',
-  // 'Skill Eater',
-  // 'Chain Congester',
-  // 'Swap Guardian',
-  // 'Blade Hoarder',
-  // 'Centralizer',
-  // 'Exchange Tormentor',
-  // 'Eater of Stakes',
+  'Fudbringer',
+  'HODL Lord',
+  'Skill Eater',
+  'Chain Congester',
+  'Swap Guardian',
+  'Blade Hoarder',
+  'Centralizer',
+  'Exchange Tormentor',
+  'Eater of Stakes',
+
   // 'M13',
   // 'Ste1n',
   // 'Moneth',
   // 'Skulpin',
   // 'Plitszkin',
-  'KokMhei',
-  'kocuZe',
-  'Jestinsane',
-  'Krypton',
-  'Richard Melics',
+
+  // 'KokMhei',
+  // 'kocuZe',
+  // 'Jestinsane',
+  // 'Krypton',
+  // 'Richard Melics',
 ];
 
 const bossImages = [
-  // '../assets/raid-bosses/CB_Hellborn Brute.gif',
-  // '../assets/raid-bosses/CB_Hellborn Executioner.gif',
-  // '../assets/raid-bosses/CB_Hellborn Marauder.gif',
-  // '../assets/raid-bosses/CB_Hellborn Overlord.gif',
-  // '../assets/raid-bosses/CB_Hellborn Shaman.gif',
+  '../assets/raid-bosses/CB_Hellborn Brute.gif',
+  '../assets/raid-bosses/CB_Hellborn Executioner.gif',
+  '../assets/raid-bosses/CB_Hellborn Marauder.gif',
+  '../assets/raid-bosses/CB_Hellborn Overlord.gif',
+  '../assets/raid-bosses/CB_Hellborn Shaman.gif',
+
   // '../assets/raid-bosses/CB_Hellborn M13.gif',
   // '../assets/raid-bosses/CB_Hellborn Ste1n.gif',
   // '../assets/raid-bosses/CB_Hellborn Moneth.gif',
   // '../assets/raid-bosses/CB_Hellborn Skulpin.gif',
   // '../assets/raid-bosses/CB_Hellborn Plitszkin.gif',
-  '../assets/raid-bosses/KokMhei.gif',
-  '../assets/raid-bosses/KocuZe.gif',
-  '../assets/raid-bosses/Jestinsane.gif',
-  '../assets/raid-bosses/Krypton.gif',
-  '../assets/raid-bosses/Melics.gif',
+
+  // '../assets/raid-bosses/KokMhei.gif',
+  // '../assets/raid-bosses/KocuZe.gif',
+  // '../assets/raid-bosses/Jestinsane.gif',
+  // '../assets/raid-bosses/Krypton.gif',
+  // '../assets/raid-bosses/Melics.gif',
 ];
 
 export default Vue.extend({
@@ -795,15 +799,16 @@ hr.divider {
   height: 100%;
   max-height: 413px;
   max-width: 370px;
+  object-fit: contain;
 }
 .boss-box {
   border: 0.5px solid #242423;
   border-radius: 5px;
   padding: 10px 20px;
   background: #ccc;
-  background-image: url(https://www.cryptoblades.io/images/background/video-bg.png);
+  background: url('../assets/background/video-bg.png');
   background-repeat: no-repeat;
-   background-position: center;
+  background-position: center;
 }
 .title {
   font-weight: bold;
