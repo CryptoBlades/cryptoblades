@@ -89,7 +89,11 @@ export enum RewardType {
   EXTERNAL = 10,
 }
 
-export const QuestItemType = {...RequirementType, ...RewardType};
+enum CommonType {
+  REPUTATION = 99,
+}
+
+export const QuestItemType = {...RequirementType, ...RewardType, ...CommonType};
 
 export enum Rarity {
   COMMON, UNCOMMON, RARE, EPIC, LEGENDARY

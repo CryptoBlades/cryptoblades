@@ -2,8 +2,9 @@
   <div class="quest-reward-display gap-3">
     <span class="reward-title">{{ $t('quests.reward') }}:</span>
     <div class="d-flex align-items-center gap-2" :key="quest.id">
-      <QuestComponentIcon :quest="quest" isReward/>
-      <QuestComponentIcon :quest="quest" isReputation/>
+      <QuestComponentIcon :questItemType="quest.rewardType" :amount="quest.rewardAmount"
+                          :rarity="quest.rewardRarity" :externalAddress="quest.rewardExternalAddress"/>
+      <QuestComponentIcon :questItemType="QuestItemType.REPUTATION" :amount="quest.reputationAmount"/>
     </div>
   </div>
 </template>
@@ -11,7 +12,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest, Rarity, RewardType} from '@/views/Quests.vue';
+import {Quest, QuestItemType} from '@/views/Quests.vue';
 import QuestComponentIcon from './QuestComponentIcon.vue';
 
 export default Vue.extend({
@@ -25,8 +26,7 @@ export default Vue.extend({
 
   data() {
     return {
-      RewardType,
-      Rarity,
+      QuestItemType,
     };
   },
 });

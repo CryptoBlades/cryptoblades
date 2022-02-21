@@ -618,18 +618,20 @@
       "SOUL": "Soul",
       "EXTERNAL": "External"
     },
-    "questComponentIconTooltip": {
+    "questItemType": {
       "NONE": "None",
       "WEAPON": "Weapon",
       "JUNK": "Junk",
+      "DUST": "Dust",
       "TRINKET": "Trinket",
       "SHIELD": "Shield",
-      "DUST": "Dust",
-      "EXPERIENCE": "Experience",
+      "STAMINA": "Stamina",
       "SOUL": "Soul",
       "RAID": "Raid",
-      "REPUTATION": "Reputation",
-      "EXTERNAL": "External"
+      "EXTERNAL": "External",
+      "EXTERNAL_HOLD": "External Hold",
+      "EXPERIENCE": "Experience",
+      "REPUTATION": "Reputation"
     },
     "reputationTier": {
       "PEASANT": "Peasant",
