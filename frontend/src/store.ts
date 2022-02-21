@@ -2192,11 +2192,6 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades) return;
         return await CryptoBlades.methods.vars(5).call(defaultCallOptions(state));
       },
-      async fetchAllowanceTimestamp({ state }) {
-        const { CryptoBlades } = state.contracts();
-        if(!CryptoBlades) return;
-        return await CryptoBlades.methods.vars(6).call(defaultCallOptions(state));
-      },
       async fetchHourlyAllowance({ state }) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
