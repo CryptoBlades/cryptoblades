@@ -3643,7 +3643,9 @@ export function createStore(web3: Web3) {
 
         const VAR_WEEKLY_COMPLETIONS_LIMIT = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_LIMIT().call(defaultCallOptions(state));
 
-        return await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_LIMIT).call(defaultCallOptions(state));
+        const weeklyLimit = await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_LIMIT).call(defaultCallOptions(state));
+        console.log('Weekly limit', weeklyLimit);
+        return weeklyLimit;
       },
 
       async setWeeklyCompletionsLimit({state}, {newLimit}) {
@@ -3653,6 +3655,58 @@ export function createStore(web3: Web3) {
         const VAR_WEEKLY_COMPLETIONS_LIMIT = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_LIMIT().call(defaultCallOptions(state));
 
         return await SimpleQuests.methods.setVar(VAR_WEEKLY_COMPLETIONS_LIMIT, newLimit).send(defaultCallOptions(state));
+      },
+
+      async addWeeklyReward({state}, {weeklyReward}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const emptyAccount = '0x0000000000000000000000000000000000000000';
+        if (weeklyReward.rewardExternalAddress === '') {
+          weeklyReward.rewardExternalAddress = emptyAccount;
+        }
+
+        return await SimpleQuests.methods.addReward(weeklyReward.rewardType,
+          weeklyReward.rewardRarity, weeklyReward.rewardAmount,
+          weeklyReward.rewardExternalAddress, weeklyReward.reputationAmount)
+          .send(defaultCallOptions(state));
+      },
+
+      async setWeeklyReward({state}, {rewardID, timestamp}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.setWeeklyReward(rewardID, timestamp).send(defaultCallOptions(state));
+      },
+
+      async claimWeeklyReward({state, dispatch}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const currentWeek = Math.floor(Date.now() / 1000 / 604800);
+        console.log('Current week', currentWeek);
+
+        const rewardID = await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+
+        if(rewardID === 0) {
+          console.log('Weekly reward not set');
+          return;
+        }
+
+        if (!await SimpleQuests.methods.hasRandomWeeklyRewardSeedRequested(rewardID).call(defaultCallOptions(state))) {
+          await SimpleQuests.methods.generateRewardWeeklySeed(rewardID).send(defaultCallOptions(state));
+        }
+        const result = await SimpleQuests.methods.claimWeeklyReward().send(defaultCallOptions(state));
+
+        const questRewards = result.events.WeeklyRewardClaimed.returnValues.rewards;
+        await Promise.all([
+          dispatch('updateWeaponIds'),
+          dispatch('updateShieldIds'),
+          dispatch('updateTrinketIds'),
+          dispatch('updateJunkIds'),
+          dispatch('updateKeyLootboxIds'),
+        ]);
+        return questRewards;
       },
 
       async getReputationLevelRequirements({state}) {
@@ -3789,7 +3843,10 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        return await SimpleQuests.methods.getWeeklyCompletions(state.defaultAccount).call(defaultCallOptions(state));
+        const weeklyCompletions = await SimpleQuests.methods.getWeeklyCompletions(state.defaultAccount).call(defaultCallOptions(state));
+        console.log('Weekly completions: ', weeklyCompletions);
+
+        return weeklyCompletions;
       },
 
       async skipQuest({ state, dispatch }, {characterID}) {

@@ -125,6 +125,72 @@
       </b-button>
     </b-form>
     <QuestTemplatesDisplay :promoQuestTemplates="promoQuestTemplates"/>
+    <h2>{{ $t('quests.createNewWeeklyReward') }}</h2>
+    <b-form class="d-flex flex-column gap-3">
+      <div class="grid-container">
+        <label class="m-0 align-self-center">{{ $t('quests.reward') }}</label>
+        <div class="d-flex align-items-center gap-3">
+          <b-form-select class="mt-2 mb-2" v-model="weeklyReward.rewardType">
+            <b-form-select-option :value="undefined" disabled>
+              {{ $t('quests.pleaseSelectRewardType') }}
+            </b-form-select-option>
+            <b-form-select-option v-for="rewardType in weeklyRewardTypes" :key="rewardType" :value="rewardType">
+              {{ $t(`quests.rewardType.${RewardType[rewardType]}`) }}
+            </b-form-select-option>
+          </b-form-select>
+          <b-form-input v-model="weeklyReward.rewardExternalAddress"
+                        v-if="weeklyReward.rewardType === RewardType.EXTERNAL"
+                        :placeholder="$t('quests.ERC20/ERC721Address')"/>
+          <b-form-select v-if="weeklyReward.rewardType === RewardType.DUST" class="mt-2 mb-2"
+                         v-model="weeklyReward.rewardRarity"
+                         :disabled="weeklyReward.rewardType === undefined">
+            <b-form-select-option :value="undefined" disabled>
+              {{ $t('quests.pleaseSelectRewardRarity') }}
+            </b-form-select-option>
+            <b-form-select-option v-for="rarity in dustRarities" :key="rarity" :value="rarity">
+              {{ $t(`quests.dustRarityType.${DustRarity[rarity]}`) }}
+            </b-form-select-option>
+          </b-form-select>
+          <b-form-select
+            v-else-if="weeklyReward.rewardType !== RewardType.EXPERIENCE
+            && weeklyReward.rewardType !== RewardType.SOUL
+            && weeklyReward.rewardType !== RewardType.EXTERNAL"
+            class="mt-2 mb-2"
+            v-model="weeklyReward.rewardRarity"
+            :disabled="weeklyReward.rewardType === undefined">
+            <b-form-select-option :value="undefined" disabled>
+              {{ $t('quests.pleaseSelectRewardRarity') }}
+            </b-form-select-option>
+            <b-form-select-option v-for="rarity in rarities" :key="rarity" :value="rarity">
+              {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
+            </b-form-select-option>
+          </b-form-select>
+          <b-form-input v-model="weeklyReward.rewardAmount" type="number" number :min="0"/>
+        </div>
+        <label class="m-0 align-self-center">{{ $t('quests.reputation') }}</label>
+        <div class="d-flex align-items-center gap-3">
+          <b-form-input v-model="weeklyReward.reputationAmount" type="number" number :min="0"/>
+        </div>
+      </div>
+      <b-button variant="primary" @click="addReward"
+                :disabled="addNewWeeklyRewardDisabled()">
+        {{ $t('quests.addNewWeeklyReward') }}
+      </b-button>
+    </b-form>
+    <h2 class="mt-2">{{ $t('quests.setWeeklyReward') }}</h2>
+    <b-form class="d-flex flex-column gap-3">
+      <div class="d-flex align-items-center gap-3 mt-2">
+        <b-form-input v-model="rewardID" type="number" number :placeholder="$t('quests.rewardID')" :min="0"/>
+        <i id="unix-timestamp-hint2" class="far fa-question-circle hint"/>
+        <b-tooltip target="unix-timestamp-hint2">
+          {{ $t('quests.unixTimestampHint') }} <a href="https://www.unixtimestamp.com/" target="_blank">https://www.unixtimestamp.com/</a>
+        </b-tooltip>
+        <b-form-input v-model="week" type="number" number :placeholder="$t('quests.timestamp')" :min="0"/>
+      </div>
+      <b-button variant="primary" @click="setReward">
+        {{ $t('quests.setWeeklyReward') }}
+      </b-button>
+    </b-form>
     <b-form v-if="reputationLevelRequirements" class="d-flex flex-column gap-3">
       <h2 class="pt-3">{{ $t('quests.updateReputationLevelRequirements') }}</h2>
       <div class="requirements-grid-container gap-3">
@@ -250,6 +316,7 @@ import {mapActions} from 'vuex';
 import {
   DustRarity,
   Quest,
+  QuestItemType,
   Rarity,
   ReputationLevelRequirements,
   RequirementType,
@@ -284,14 +351,29 @@ interface StoreMappedActions {
   isUsingPromoQuests(): Promise<boolean>;
 
   toggleUsePromoQuests(): Promise<void>;
+
+  addWeeklyReward(payload: { weeklyReward: WeeklyReward }): Promise<void>;
+
+  setWeeklyReward(payload: { rewardID: number, timestamp: number }): Promise<void>;
+}
+
+interface WeeklyReward {
+  rewardType?: QuestItemType;
+  rewardRarity?: Rarity;
+  rewardAmount?: number;
+  rewardExternalAddress: string;
+  reputationAmount?: number;
+  timestamp?: number;
 }
 
 interface Data {
   questTemplate: Quest;
+  weeklyReward: WeeklyReward;
   rarities: Rarity[];
   dustRarities: DustRarity[];
   requirementTypes: RequirementType[];
   rewardTypes: RewardType[];
+  weeklyRewardTypes: RewardType[];
   promoQuestTemplates: boolean;
   isLoading: boolean;
   showTemplateConfirmationModal: boolean;
@@ -319,6 +401,15 @@ export default Vue.extend({
         rewardAmount: 0,
         reputationAmount: 0,
       },
+      weeklyReward: {
+        rewardType: undefined,
+        rewardRarity: undefined,
+        rewardAmount: 0,
+        rewardExternalAddress: '',
+        reputationAmount: 0,
+      },
+      week: undefined,
+      rewardID: undefined,
       rarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
       dustRarities: [DustRarity.LESSER, DustRarity.GREATER, DustRarity.POWERFUL],
       requirementTypes: [RequirementType.WEAPON, RequirementType.JUNK,
@@ -330,6 +421,10 @@ export default Vue.extend({
         RewardType.DUST, RewardType.TRINKET,
         RewardType.SHIELD, RewardType.EXPERIENCE,
         RewardType.SOUL, RewardType.EXTERNAL],
+      weeklyRewardTypes: [RewardType.WEAPON, RewardType.JUNK,
+        RewardType.DUST, RewardType.TRINKET,
+        RewardType.SHIELD, RewardType.SOUL,
+        RewardType.EXTERNAL],
       promoQuestTemplates: false,
       isLoading: false,
       showTemplateConfirmationModal: false,
@@ -361,6 +456,8 @@ export default Vue.extend({
       'setQuestTierChances',
       'isUsingPromoQuests',
       'toggleUsePromoQuests',
+      'addWeeklyReward',
+      'setWeeklyReward',
     ]) as StoreMappedActions,
 
     showConfirmationModal() {
@@ -381,6 +478,33 @@ export default Vue.extend({
         this.questTemplate.supply = 0;
       }
       this.showTemplateConfirmationModal = true;
+    },
+
+    async addReward() {
+      if (this.weeklyReward.rewardType === RewardType.SOUL
+        || this.weeklyReward.rewardType === RewardType.EXTERNAL) {
+        this.weeklyReward.rewardRarity = Rarity.COMMON;
+      }
+      try {
+        this.isLoading = true;
+        await this.addWeeklyReward({
+          weeklyReward: this.weeklyReward,
+        });
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async setReward() {
+      try {
+        this.isLoading = true;
+        await this.setWeeklyReward({
+          rewardID: this.rewardID,
+          timestamp: this.week,
+        });
+      } finally {
+        this.isLoading = false;
+      }
     },
 
     async onSubmit() {
@@ -481,6 +605,18 @@ export default Vue.extend({
           && !isValidWeb3Address(this.questTemplate.requirementExternalAddress))
         || (this.questTemplate.rewardType === RewardType.EXTERNAL
           && !isValidWeb3Address(this.questTemplate.rewardExternalAddress))
+        || this.showTemplateConfirmationModal || this.isLoading;
+    },
+
+    addNewWeeklyRewardDisabled() {
+      return this.weeklyReward.rewardType === undefined
+        || (this.weeklyReward.rewardRarity === undefined
+          && this.weeklyReward.rewardType !== RewardType.EXPERIENCE
+          && this.weeklyReward.rewardType !== RewardType.SOUL
+          && this.weeklyReward.rewardType !== RewardType.EXTERNAL)
+        || !this.weeklyReward.rewardAmount
+        || (this.weeklyReward.rewardType === RewardType.EXTERNAL
+          && !isValidWeb3Address(this.weeklyReward.rewardExternalAddress))
         || this.showTemplateConfirmationModal || this.isLoading;
     },
 
