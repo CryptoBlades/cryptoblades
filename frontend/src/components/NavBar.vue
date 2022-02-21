@@ -32,6 +32,7 @@
     </b-navbar>
     <claim-rewards-bar v-if="canShowRewardsBar" />
     <div class="container_row">
+      <img src="../assets/divider4.png" class="expander-divider">
       <b-button class="expander-button" @click="toggleCharacterView" v-if="ownCharacters.length > 0">
         <b-icon-arrows-expand class="expand-collapse-icon" v-if="!getIsCharacterViewExpanded" />
         <b-icon-arrows-collapse class="expand-collapse-icon" v-if="getIsCharacterViewExpanded" aria-hidden="true" />
