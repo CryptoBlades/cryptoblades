@@ -5,6 +5,7 @@ import "./Promos.sol";
 import "./weapons.sol";
 import "./SafeRandoms.sol";
 import "./util.sol";
+import "./staking/StakingRewardsUpgradeable.sol";
 
 contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
@@ -32,11 +33,15 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_SHARD_COST_MEDIUM = 2;
     uint256 public constant VAR_SHARD_COST_HIGH = 3;
     uint256 public constant VAR_CONVERT_RATIO_DENOMINATOR = 5;
+    uint256 public constant VAR_DAILY_SHARDS_PER_SKILL_STAKED = 6;
     uint256 public eventCount;
 
     mapping(uint256 => EventInfo) public eventInfo;
     mapping(address => mapping(uint256 => bool)) public userForgedAtEvent;
     mapping(address => mapping(uint256 => uint256)) public userOrderOptionForEvent;
+    mapping(address => uint256) userStakedSkill;
+    mapping(address => uint256) userStakedSkillUpdatedTimestamp;
+    mapping(address => uint256) userSkillStakingShardsRewards;
 
 
     function initialize(Promos _promos, Weapons _weapons, SafeRandoms _safeRandoms)
@@ -127,6 +132,16 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         return userEventShardSupply[user][0];
     }
 
+    function getUserShardsRewards(address user) public view returns(uint256) {
+        return userSkillStakingShardsRewards[user]
+            .add(userStakedSkill[user]
+                .mul(vars[VAR_DAILY_SHARDS_PER_SKILL_STAKED])
+                .mul(block.timestamp - userStakedSkillUpdatedTimestamp[user])
+                .div(60 * 60 * 24)
+                .div(1e18)
+            );
+    }
+
     // FUNCTIONS
 
     // supply 0 = unlimited
@@ -138,6 +153,17 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
             supply,
             0
         );
+    }
+
+    function updateStakingReward(address user, uint256 stakingAmount) external restricted {
+        userSkillStakingShardsRewards[user] = getUserShardsRewards(user);
+        userStakedSkill[user] = stakingAmount;
+        userStakedSkillUpdatedTimestamp[user] = block.timestamp;
+    }
+
+    function claimShardRewards() external {
+        userEventShardSupply[msg.sender][0] += userSkillStakingShardsRewards[msg.sender].div(1e18);
+        userSkillStakingShardsRewards[msg.sender] -= userSkillStakingShardsRewards[msg.sender].div(1e18).mul(1e18);
     }
 
     function orderSpecialWeapon(uint256 eventId, uint256 orderOption) public {
@@ -152,17 +178,17 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         safeRandoms.requestSingleSeed(msg.sender, getSeed(eventId));
     }
 
-    function orderSpecialWeaponWithGeneralShards(uint256 eventId, uint256 orderOption) public {
-        require(getIsEventActive(eventId), "Event inactive");
-        require(userOrderOptionForEvent[msg.sender][eventId] == 0, "Limit 1");
-        require(userEventShardSupply[msg.sender][eventId] >= vars[orderOption], "Not enough shards");
-        require(orderOption >= 1 && orderOption <= 3, "Invalid option");
-        require(hasRemainingSupply(eventId), "Sold out");
-        userEventShardSupply[msg.sender][0] -= vars[orderOption].mul(vars[VAR_CONVERT_RATIO_DENOMINATOR]);
-        userOrderOptionForEvent[msg.sender][eventId] = orderOption;
-        eventInfo[eventId].orderedCount++;
-        safeRandoms.requestSingleSeed(msg.sender, getSeed(eventId));
-    }
+    // function orderSpecialWeaponWithGeneralShards(uint256 eventId, uint256 orderOption) public {
+    //     require(getIsEventActive(eventId), "Event inactive");
+    //     require(userOrderOptionForEvent[msg.sender][eventId] == 0, "Limit 1");
+    //     require(userEventShardSupply[msg.sender][eventId] >= vars[orderOption], "Not enough shards");
+    //     require(orderOption >= 1 && orderOption <= 3, "Invalid option");
+    //     require(hasRemainingSupply(eventId), "Sold out");
+    //     userEventShardSupply[msg.sender][0] -= vars[orderOption].mul(vars[VAR_CONVERT_RATIO_DENOMINATOR]);
+    //     userOrderOptionForEvent[msg.sender][eventId] = orderOption;
+    //     eventInfo[eventId].orderedCount++;
+    //     safeRandoms.requestSingleSeed(msg.sender, getSeed(eventId));
+    // }
 
     function forgeSpecialWeapon(uint256 eventId) public {
         require(userOrderOptionForEvent[msg.sender][eventId] > 0, 'Nothing to forge');

@@ -6,8 +6,12 @@ const SpecialWeaponsManager = artifacts.require("SpecialWeaponsManager");
 const CryptoBlades = artifacts.require("CryptoBlades");
 const BurningManager = artifacts.require("BurningManager");
 const BasicPriceOracle = artifacts.require("BasicPriceOracle");
+const PvpArena = artifacts.require("PvpArena");
+const SkillStakingRewardsUpgradeable = artifacts.require("SkillStakingRewardsUpgradeable");
+const SkillStakingRewardsUpgradeable90 = artifacts.require("SkillStakingRewardsUpgradeable90");
+const SkillStakingRewardsUpgradeable180 = artifacts.require("SkillStakingRewardsUpgradeable180");
 
-module.exports = async function (deployer) {
+module.exports = async function (deployer, accounts, network) {
   let weapons = await upgradeProxy(Weapons.address, Weapons, { deployer });
   let promos = await upgradeProxy(Promos.address, Promos, { deployer });
   let safeRandoms = await SafeRandoms.deployed();
@@ -33,5 +37,12 @@ module.exports = async function (deployer) {
   let safe_randoms_GAME_ADMIN = await safeRandoms.GAME_ADMIN();
   await safeRandoms.grantRole(safe_randoms_GAME_ADMIN, specialWeaponsManager.address);
 
-  await specialWeaponsManager.setVars([1, 2, 3, 5], ['7', '15', '20', '3']);
+  await specialWeaponsManager.setVars([1, 2, 3, 5, 6], ['7', '15', '20', '3', '100000000000000000']);
+
+  await upgradeProxy(PvpArena.address, PvpArena, { deployer });
+ 
+  let skillStakingRewardsUpgradeable = await upgradeProxy(SkillStakingRewardsUpgradeable.address, SkillStakingRewardsUpgradeable, { deployer });
+  await skillStakingRewardsUpgradeable.migrateTo_e1fe97c(specialWeaponsManager.address);
+  await upgradeProxy(SkillStakingRewardsUpgradeable90.address, SkillStakingRewardsUpgradeable90, { deployer });
+  await upgradeProxy(SkillStakingRewardsUpgradeable180.address, SkillStakingRewardsUpgradeable180, { deployer });
 };

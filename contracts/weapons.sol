@@ -126,7 +126,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     uint256 public constant NFTVAR_WEAPON_TYPE = 2; // x = 0: normal, x > 0: special for partner id x
 
     event Burned(address indexed owner, uint256 indexed burned);
-    event NewWeapon(uint256 indexed weapon, address indexed minter);
+    event NewWeapon(uint256 indexed weapon, address indexed minter, uint24 weaponType);
     event Reforged(address indexed owner, uint256 indexed reforged, uint256 indexed burned, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
     event ReforgedWithDust(address indexed owner, uint256 indexed reforged, uint8 lowDust, uint8 fourDust, uint8 fiveDust, uint8 lowPoints, uint8 fourPoints, uint8 fivePoints);
 
@@ -299,7 +299,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         durabilityTimestamp[tokenID] = uint64(now.sub(getDurabilityMaxWait()));
         nftVars[tokenID][NFTVAR_WEAPON_TYPE] = weaponType;
 
-        emit NewWeapon(tokenID, minter);
+        emit NewWeapon(tokenID, minter, uint24(weaponType));
     }
 
     function performMintWeaponDetailed(address minter,
