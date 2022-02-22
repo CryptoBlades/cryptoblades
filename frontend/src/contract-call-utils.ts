@@ -38,6 +38,30 @@ export async function getFeeInSkillFromUsd(
 
 type WithOptionalFrom<T extends { from: unknown }> = Omit<T, 'from'> & Partial<Pick<T, 'from'>>;
 
+export async function approveFeeFromAnyContractSimple<T extends Contract<unknown>>(
+  feeContract: T,
+  skillToken: Contracts['SkillToken'],
+  from: NonNullable<Web3JsCallOptions['from']>,
+  callOpts: WithOptionalFrom<Web3JsCallOptions>,
+  approveOpts: WithOptionalFrom<Web3JsSendOptions>,
+  feeInSkill: BigNumber
+) {
+  const callOptsWithFrom: Web3JsCallOptions = { from, ...callOpts };
+  const approveOptsWithFrom: Web3JsSendOptions = { from, ...approveOpts };
+
+  const allowance = await skillToken.methods
+    .allowance(from, feeContract.options.address)
+    .call(callOptsWithFrom);
+
+  if (feeInSkill.lte(allowance)) {
+    return null;
+  }
+
+  return await skillToken.methods
+    .approve(feeContract.options.address, feeInSkill.toString())
+    .send(approveOptsWithFrom);
+}
+
 export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
   cryptoBladesContract: CryptoBladesAlias,
   feeContract: T,
@@ -52,7 +76,6 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
   fnReturnsSkill: boolean = false,
 ) {
   const callOptsWithFrom: Web3JsCallOptions = { from, ...callOpts };
-  const approveOptsWithFrom: Web3JsSendOptions = { from, ...approveOpts };
 
   if(allowInGameOnlyFunds === undefined) {
     allowInGameOnlyFunds = true;
@@ -82,7 +105,7 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
       feeInSkill = await cryptoBladesContract.methods
         .getSkillNeededFromUserWallet(from, feeInSkill.toString(), allowInGameOnlyFunds)
         .call(callOptsWithFrom)
-        .then(n => new BigNumber(n));
+        .then((n: BigNumber.Value) => new BigNumber(n));
     }
     catch(err) {
       const paidByRewardPool = feeInSkill.lte(skillRewardsAvailable);
@@ -93,17 +116,14 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
     }
   }
 
-  const allowance = await skillToken.methods
-    .allowance(from, feeContract !== cryptoBladesContract ? feeContract.options.address : cryptoBladesContract.options.address)
-    .call(callOptsWithFrom);
-
-  if(feeInSkill.lte(allowance)) {
-    return null;
-  }
-
-  return await skillToken.methods
-    .approve(feeContract !== cryptoBladesContract ? feeContract.options.address : cryptoBladesContract.options.address, feeInSkill.toString())
-    .send(approveOptsWithFrom);
+  return await approveFeeFromAnyContractSimple(
+    feeContract,
+    skillToken,
+    from,
+    callOpts,
+    approveOpts,
+    feeInSkill
+  );
 }
 
 export async function approveFee(

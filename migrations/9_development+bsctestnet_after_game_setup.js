@@ -3,7 +3,7 @@ const CryptoBlades = artifacts.require("CryptoBlades");
 const BasicPriceOracle = artifacts.require("BasicPriceOracle");
 
 module.exports = async function (deployer, network) {
-  if (network === 'development' || network === 'development-fork' || network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'hecotestnet' || network === 'okextestnet' || network === 'polygontestnet' || network === 'avaxtestnet' || network === 'avaxtestnet-fork') {
+  if (network === 'development' || network === 'development-fork' || network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'hecotestnet' || network === 'okextestnet' || network === 'polygontestnet' || network === 'avaxtestnet' || network === 'avaxtestnet-fork' || network === 'auroratestnet') {
     const token = await SkillToken.deployed();
     const game = await CryptoBlades.deployed();
     await token.transferFrom(token.address, game.address, web3.utils.toWei('0.5', 'mether')); // megaether

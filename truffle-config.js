@@ -200,6 +200,34 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true
     },
+    auroratestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.AURORA_TESTNET_PRIVATE_KEY,
+        process.env.AURORA_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.AURORA_TESTNET_RPC_URL || 'https://testnet.aurora.dev'
+        }
+      )),
+      network_id: 0x4e454153,
+      gas: 8000000,
+      gasPrice: 0,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    auroramainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.AURORA_MAINNET_PRIVATE_KEY,
+        process.env.AURORA_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.AURORA_MAINNET_RPC_URL || 'wss://mainnet.aurora.dev'
+        }
+      )),
+      network_id: 0x4e454152,
+      gas: 8000000,
+      gasPrice: 0,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
