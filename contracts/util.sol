@@ -30,9 +30,11 @@ library RandomUtil {
     }
 
     function plusMinus30PercentSeeded(uint256 num, uint256 seed) internal pure returns (uint256) {
-        uint256 thirtyPercent = num.div(30);
+        // avoid decimal loss
+        uint256 thirtyPercent = num.mul(30).div(100);
         return num.sub(thirtyPercent).add(randomSeededMinMax(0, thirtyPercent.mul(2), seed));
     }
+    
     function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
         if (_i == 0) {
             return "0";
