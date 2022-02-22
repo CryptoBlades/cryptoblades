@@ -1,6 +1,88 @@
 <template>
   <div class="body main-font">
-    <b-navbar-nav>
+    <img src="../assets/new-ui/6351903_burger_list_menu_navigation_icon@2x.png" class="burger-icon" @click="openMenu"/>
+    <div class="menu-open">
+      <div @click="closeMenu" class="x-button">X Close</div>
+      <div></div>
+      <div class="ads"></div>
+      <div class="menu-icons">
+        <div class="row-icons">
+            <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>Character</p>
+          </div>
+
+          <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>Blacksmith</p>
+          </div>
+
+          <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>Combat</p>
+          </div>
+
+          <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>Arena</p>
+          </div>
+        </div>
+
+        <div class="row-icons">
+            <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>Raid</p>
+          </div>
+
+          <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>Quest</p>
+          </div>
+
+          <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>Bazaar</p>
+          </div>
+
+          <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>Stake</p>
+          </div>
+        </div>
+
+        <div class="row-icons">
+            <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>Treasury</p>
+          </div>
+
+          <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>Leaderboard</p>
+          </div>
+
+          <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>NFT Bridge</p>
+          </div>
+
+          <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>Wiki</p>
+          </div>
+        </div>
+
+         <div class="row-icons">
+            <div class="menu-icon">
+            <img src="../assets/new-ui/char-icon@2x.png">
+            <p>Settings</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- <b-navbar-nav>
+      <div>
       <b-nav-item-dropdown right>
         <template #button-content>
           <i class="fa fa-bars menu-burger"></i>
@@ -41,7 +123,8 @@
         </b-dropdown-item>
         </b-dropdown-group>
       </b-nav-item-dropdown>
-    </b-navbar-nav>
+       </div>
+    </b-navbar-nav> -->
 
     <b-modal class="centered-modal" ref="need-gas-modal" :title="$t('needGasModal.title')"
       @ok="claimSkill(ClaimStage.Stake)" :ok-title="$t('needGasModal.okTitle')"
@@ -184,6 +267,14 @@ export default Vue.extend({
       Events.$emit('setting:useGraphics', { value: this.showGraphics });
     },
 
+    openMenu() {
+      console.log('open menu');
+    },
+
+    closeMenu() {
+      console.log('close menu');
+    },
+
     toggleRewards() {
       this.hideRewards = !this.hideRewards;
       if (this.hideRewards) localStorage.setItem('hideRewards', 'true');
@@ -241,5 +332,73 @@ export default Vue.extend({
 }
 .menu-burger {
   font-size: 35px;
+}
+
+.burger-icon {
+  width: 35px;
+  margin: 25px;
+}
+.burger-icon:hover {
+  cursor: pointer;
+}
+
+.menu-open {
+    height: 100%;
+    width: 100%;
+    top: 0;
+    position: fixed;
+    z-index: 999999;
+    background: rgb(3, 75, 3);
+    left: 0;
+    padding: 40px;
+}
+
+.x-button {
+  float: right;
+  color : white;
+  font-size: 20px;
+}
+
+.ads {
+  float: left;
+  width: 60%;
+  background: black;
+  height: 100%;
+  margin-top: 30px;
+}
+.menu-icons {
+  float : right;
+  width: 40%;
+  background: rgb(65, 30, 30);
+  height: 100%;
+  padding-top: 15px;
+  display: inline;
+}
+
+.menu-icon {
+  width: 95px;
+  height: 95px;
+  background: #1A253B 0% 0% no-repeat padding-box;
+  border: 1px solid #344362;
+  border-radius: 5px;
+  opacity: 1;
+  text-align: center;
+  padding-top:20px;
+  color : white;
+}
+.menu-icon > img {
+  height : 30px;
+}
+.row-icons {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 120px;
+}
+
+.row-icons:last-child {
+  justify-content: flex-start;
+  display: flex;
+  margin-left: 6.5%;
 }
 </style>

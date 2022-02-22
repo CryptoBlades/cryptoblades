@@ -183,6 +183,7 @@ a.router-link-active {
 
 .navbar {
   background: linear-gradient(45deg,#141414,#242720);
+  background-color: #343a40 !important;
   border-bottom: 2px solid #404857;
 }
 .main-nav > .view-links {

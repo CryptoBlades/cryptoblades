@@ -210,7 +210,7 @@ export default Vue.extend({
   color : #BFA765;
 }
 .add-button {
-  width: 35px;
+  width: 45px;
   height: 100%;
   position: relative;
   top: -15px;
