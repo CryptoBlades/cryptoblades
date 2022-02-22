@@ -118,8 +118,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     uint256 public duelOffsetCost;
     address payable public pvpBotAddress;
-
-    uint256 private _shieldFactor;
     
     event DuelFinished(
         uint256 indexed attacker,
@@ -250,7 +248,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         prizePercentages.push(30);
         prizePercentages.push(10);
         duelOffsetCost = 0.005 ether;
-        _shieldFactor = 100;
     }
 
     /// @dev enter the arena with a character, a weapon and optionally a shield
@@ -568,8 +565,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                     attackerShieldDefense = 10;
                 }
 
-                attackerShieldDefense = uint24(attackerShieldDefense.mul(_shieldFactor).div(100));
-
                 duel.defender.roll = uint24(
                     (duel.defender.roll.mul(uint24(100).sub(attackerShieldDefense)))
                         .div(100)
@@ -589,8 +584,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 ) {
                     defenderShieldDefense = 10;
                 }
-
-                defenderShieldDefense = uint24(defenderShieldDefense.mul(_shieldFactor).div(100));
 
                 duel.attacker.roll = uint24(
                     (duel.attacker.roll.mul(uint24(100).sub(defenderShieldDefense)))
@@ -1016,7 +1009,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         int128 bonusShieldStats;
         if (fighter.useShield) {
-            bonusShieldStats = int128(int128(_shieldFactor).mulu(uint256(_getShieldStats(character.ID))).div(100));
+            bonusShieldStats = _getShieldStats(character.ID);
         }
 
         (
@@ -1158,10 +1151,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     function setPvpBotAddress(address payable botAddress) external restricted {
         pvpBotAddress = botAddress;
-    }
-
-    function setShieldFactor(uint256 factor) external restricted {
-        _shieldFactor = factor;
     }
 
     // Note: The following are debugging functions. Remove later.
