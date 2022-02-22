@@ -24,7 +24,7 @@ library Common {
         uint256 basePower,
         int128 weaponMultiplier,
         uint24 bonusPower
-    ) internal view returns (uint24) {
+    ) internal pure returns (uint24) {
         // we divide total power by 100 and add the base of 10000
        return uint24 (weaponMultiplier.mulu(basePower).add(bonusPower).div(100).add(1000));  
     }
