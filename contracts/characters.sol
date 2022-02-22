@@ -161,7 +161,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function _minterOnly() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender), 'no accs');
+        require(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender), 'no access');
     }
 
     function _noFreshLookup(uint256 id) internal view {
@@ -280,7 +280,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
                 burnIds[i]
             );
         }
-        require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Pwr limit");
+        require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
         nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.mul(burnPowerMultiplier).div(1e18).add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
     }
 
@@ -302,7 +302,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount) external restricted {
         uint256 burnPower = soulAmount.mul(10);
-        require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "P limit");
+        require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
         nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
     }
 
@@ -403,7 +403,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         Character storage char = tokens[id];
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
         require((staminaPoints > 0 && allowNegativeStamina) // we allow going into negative, but not starting negative
-            || staminaPoints >= amount, "No stamina");
+            || staminaPoints >= amount, "Not enough stamina!");
 
         uint64 drainTime = uint64(amount * secondsPerStamina);
         uint64 preTimestamp = char.staminaTimestamp;

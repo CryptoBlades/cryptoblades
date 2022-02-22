@@ -25,12 +25,9 @@ library Common {
         int128 weaponMultiplier,
         uint24 bonusPower
     ) internal view returns (uint24) {
-        // we divide power by 100 and add the base of 10000
+        // we divide total power by 100 and add the base of 10000
        return uint24 (weaponMultiplier.mulu(basePower).add(bonusPower).div(100).add(1000));  
     }
-
-// dividir uno por 10 , uno por 7 y el otro , cada vez q esti dividiendo estay usnado
-// todo lo q es multiplicacion, multiplicar primero despues divide  multiplixar por lo que despues vay a dividr
     function getPowerAtLevel(uint8 level) internal pure returns (uint24) {
         // does not use fixed points since the numbers are simple
         // the breakpoints every 10 levels are floored as expected
