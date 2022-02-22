@@ -2,7 +2,7 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
-import "hardhat/console.sol";
+
 library Common {
     using ABDKMath64x64 for int128;
     using SafeMath for uint256;
