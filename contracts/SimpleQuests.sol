@@ -108,6 +108,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     event QuestRewarded(uint256 indexed questID, uint256 indexed characterID, uint256[] rewards);
     event QuestSkipped(uint256 indexed questID, uint256 indexed characterID);
     event WeeklyRewardClaimed(address user, uint256 indexed rewardID, uint256[] rewards);
+    event RewardAdded(uint256 indexed rewardID);
+    event WeeklyRewardSet(uint256 indexed rewardID, uint256 indexed week);
 
     function initialize(Characters _characters, Weapons _weapons, Junk _junk, RaidTrinket _trinket, Shields _shields, BurningManager _burningManager, SafeRandoms _safeRandoms, PartnerVault _partnerVault) public initializer {
         __AccessControl_init_unchained();
@@ -445,16 +447,21 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         }
     }
 
+    // TODO: Not sure how to manage created rewards and setting the week. Maybe it should be a single function that takes in info and timestamp?
     function addReward(ItemType rewardType, uint256 rewardRarity, uint256 rewardAmount, address rewardExternalAddress, uint256 reputationAmount) public restricted {
         uint256 rewardID = nextRewardID++;
         rewards[rewardID] = Reward(rewardID, rewardType, rewardRarity, rewardAmount, rewardExternalAddress, reputationAmount);
+        emit RewardAdded(rewardID);
     }
 
     function setWeeklyReward(uint256 id, uint256 timestamp) public restricted{
         require(timestamp > 0, "Missing timestamp");
-        weeklyRewards[timestamp / 1 weeks] = id;
+        uint256 week = timestamp / 1 weeks;
+        weeklyRewards[week] = id;
+        emit WeeklyRewardSet(id, week);
     }
 
+    // TODO: What should be the identifier here?
     function generateRewardWeeklySeed(uint256 rewardID) assertQuestsEnabled public {
         safeRandoms.requestSingleSeed(address(this), RandomUtil.combineSeeds(SEED_REWARD_WEEKLY, rewardID));
     }

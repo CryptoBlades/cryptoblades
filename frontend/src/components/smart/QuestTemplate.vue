@@ -39,7 +39,8 @@
               v-else-if="quest.requirementType === RequirementType.SOUL" :isDefault="true" :nft="{ type: 'soul' }"/>
         </div>
       </div>
-      <QuestReward :quest="quest"/>
+      <QuestReward :type="quest.rewardType" :rarity="quest.rewardRarity" :rewards="questRewards"
+                   :amount="quest.rewardAmount" :reputationAmount="quest.reputationAmount"/>
     </div>
     <div v-if="deadline && deadlineTime !== undefined" class="d-flex flex-column align-items-center">
       <span>{{ $t('quests.supplyLeft', {supply}) }}</span>

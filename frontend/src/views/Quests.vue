@@ -3,27 +3,48 @@
     <div class="d-flex justify-content-between w-100 weekly-progress-container">
       <span class="quests-title">{{ $t('quests.quest') }}</span>
       <div class="d-flex flex-column gap-2">
-        <div class="d-flex justify-content-between gap-4">
-          <span class="text-uppercase weekly-progress">{{ $t('quests.weeklyProgress') }}</span>
-          <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon" alt=""/> {{
-              $t('quests.resetsIn', {time: nextWeekResetTime})
-            }}</span>
-          <!--          TODO: Remember to add tooltip that you HAVE TO claim reward before weekly reset-->
-        </div>
-        <div class="quest-progress w-100">
-          <div class="quest-progress-bar" role="progressbar"
-               :style="`width: calc(${currentWeeklyCompletions/maxWeeklyCompletions*100}% - 8px);`"
-               :aria-valuenow="currentWeeklyCompletions"
-               aria-valuemin="0" :aria-valuemax="maxWeeklyCompletions">
+        <div class="d-flex align-items-center gap-2">
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex justify-content-between gap-4">
+              <span class="text-uppercase weekly-progress">{{ $t('quests.weeklyProgress') }}</span>
+              <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon" alt=""/> {{
+                  $t('quests.resetsIn', {time: nextWeekResetTime})
+                }}</span>
+            </div>
+            <div class="quest-progress w-100">
+              <div class="quest-progress-bar" role="progressbar"
+                   :style="`width: calc(${currentWeeklyCompletions/maxWeeklyCompletions*100}% - 8px);`"
+                   :aria-valuenow="currentWeeklyCompletions"
+                   aria-valuemin="0" :aria-valuemax="maxWeeklyCompletions">
+              </div>
+              <span class="quest-progress-value">{{ `${currentWeeklyCompletions} / ${maxWeeklyCompletions}` }}</span>
+            </div>
           </div>
-          <!--          <span class="quest-progress-value">{{ `${currentWeeklyCompletions} / ${maxWeeklyCompletions}` }}</span>-->
+          <div v-if="weeklyReward.id" class="d-flex justify-content-center gap-2">
+            <QuestComponentIcon :questItemType="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
+                                :amount="weeklyReward.rewardAmount"/>
+            <QuestComponentIcon v-if="weeklyReward.reputationAmount !== 0" :questItemType="QuestItemType.REPUTATION"
+                                :amount="weeklyReward.reputationAmount"/>
+          </div>
         </div>
+        <b-button :disabled="isLoading || !canClaimWeeklyReward" variant="primary" @click="claimWeekly">
+          {{ $t('quests.claimWeeklyReward') }}
+          <Hint v-if="!canClaimWeeklyReward" class="hint" :text="$t('quests.cannotClaimWeeklyTooltip')"/>
+        </b-button>
       </div>
     </div>
     <div v-for="character in characters" :key="character.id" class="d-flex w-100">
       <QuestRow :characterId="character.id" :reputationLevelRequirements="reputationLevelRequirements"
                 @refresh-quest-data="onRefreshQuestData"/>
     </div>
+    <b-modal v-model="showWeeklyClaimedModal" ok-only class="centered-modal" :title="$t('quests.weeklyReward')">
+      <div v-if="isLoading">
+        <i class="fas fa-spinner fa-spin"/>
+        {{ $t('quests.loading') }}
+      </div>
+      <QuestReward v-else :type="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity" :rewards="weeklyRewards"
+                   :amount="weeklyReward.rewardAmount" :reputationAmount="weeklyReward.reputationAmount"/>
+    </b-modal>
   </div>
   <div v-else-if="isLoading">
     <i class="fas fa-spinner fa-spin"/>
@@ -40,8 +61,21 @@ import {mapActions, mapGetters, mapState} from 'vuex';
 import {Nft} from '@/interfaces/Nft';
 import {Accessors} from 'vue/types/options';
 import QuestRow from '@/components/smart/QuestRow.vue';
+import QuestComponentIcon from '@/components/smart/QuestComponentIcon.vue';
+import QuestReward from '@/components/smart/QuestReward.vue';
+import Hint from '@/components/Hint.vue';
 import hourglass from '@/assets/hourglass.png';
 import {getTimeRemaining} from '@/utils/common';
+import {NftIdType} from '@/components/smart/NftList.vue';
+
+export interface WeeklyReward {
+  id: number;
+  rewardType: RewardType;
+  rewardRarity: Rarity;
+  rewardAmount: number;
+  rewardExternalAddress?: string;
+  reputationAmount: number;
+}
 
 export interface Quest {
   progress: number;
@@ -134,6 +168,12 @@ interface StoreMappedActions {
   getWeeklyCompletionsLimit(): Promise<number>;
 
   getWeeklyCompletions(): Promise<number>;
+
+  getWeeklyReward(payload: { timestamp: number }): Promise<WeeklyReward>;
+
+  hasClaimedWeeklyReward(): Promise<boolean>;
+
+  claimWeeklyReward(): Promise<void>;
 }
 
 interface StoreMappedGetters {
@@ -141,8 +181,12 @@ interface StoreMappedGetters {
 }
 
 interface Data {
+  weeklyReward?: WeeklyReward;
   characters: Nft[];
   reputationLevelRequirements?: ReputationLevelRequirements;
+  weeklyClaimed: boolean;
+  showWeeklyClaimedModal: boolean;
+  weeklyRewards: NftIdType[];
   isLoading: boolean;
   nextWeekResetTime: string;
   nextWeekResetCheckInterval?: ReturnType<typeof setInterval>;
@@ -151,7 +195,7 @@ interface Data {
 }
 
 export default Vue.extend({
-  components: {QuestRow},
+  components: {QuestRow, QuestComponentIcon, QuestReward, Hint},
 
   props: {
     showCosmetics: {
@@ -162,19 +206,28 @@ export default Vue.extend({
 
   data() {
     return {
-      characters: [] as Nft[],
+      weeklyReward: undefined,
+      characters: [],
       reputationLevelRequirements: undefined,
+      weeklyRewards: [],
+      weeklyClaimed: true,
+      showWeeklyClaimedModal: false,
       isLoading: false,
       nextWeekResetTime: '',
       maxWeeklyCompletions: 0,
       currentWeeklyCompletions: 0,
       hourglass,
+      QuestItemType,
     } as Data;
   },
 
   computed: {
     ...mapState(['ownedCharacterIds']),
     ...mapGetters(['charactersWithIds', 'getCharacterCosmetic']) as Accessors<StoreMappedGetters>,
+
+    canClaimWeeklyReward(): boolean {
+      return this.weeklyReward && !this.weeklyClaimed && this.currentWeeklyCompletions >= this.maxWeeklyCompletions;
+    },
   },
 
   methods: {
@@ -185,13 +238,42 @@ export default Vue.extend({
       'nextWeeklyQuestCompletionLimitReset',
       'getWeeklyCompletionsLimit',
       'getWeeklyCompletions',
+      'getWeeklyReward',
+      'hasClaimedWeeklyReward',
+      'claimWeeklyReward',
     ]) as StoreMappedActions,
+
+    async claimWeekly() {
+      if (!this.canClaimWeeklyReward) {
+        return;
+      }
+
+      try {
+        this.isLoading = true;
+        const rewards = await this.claimWeeklyReward();
+        const rewardType = this.weeklyReward.rewardType;
+        if (!rewardType || rewardType === RewardType.EXPERIENCE || rewardType === RewardType.DUST || rewardType === RewardType.SOUL) {
+          this.showQuestCompleteModal = true;
+          return;
+        } else {
+          this.weeklyRewards = rewards.map((reward: number) => {
+            return {type: QuestItemType[rewardType].toLowerCase(), id: reward} as NftIdType;
+          });
+          this.weeklyClaimed = true;
+          this.showWeeklyClaimedModal = true;
+        }
+      } finally {
+        this.isLoading = false;
+      }
+    },
 
     async refreshQuestData() {
       try {
         this.isLoading = true;
         this.currentWeeklyCompletions = await this.getWeeklyCompletions();
         this.maxWeeklyCompletions = await this.getWeeklyCompletionsLimit();
+        this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});
+        this.weeklyClaimed = await this.hasClaimedWeeklyReward();
         await this.getNextWeekResetTime();
         this.reputationLevelRequirements = await this.getReputationLevelRequirements();
         this.characters = await Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {

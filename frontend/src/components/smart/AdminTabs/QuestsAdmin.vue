@@ -176,6 +176,7 @@
                 :disabled="addNewWeeklyRewardDisabled()">
         {{ $t('quests.addNewWeeklyReward') }}
       </b-button>
+      <span v-if="addedWeeklyRewardId">{{ $t('quests.addedWeeklyRewardID') }}: {{ addedWeeklyRewardId }}</span>
     </b-form>
     <h2 class="mt-2">{{ $t('quests.setWeeklyReward') }}</h2>
     <b-form class="d-flex flex-column gap-3">
@@ -352,7 +353,7 @@ interface StoreMappedActions {
 
   toggleUsePromoQuests(): Promise<void>;
 
-  addWeeklyReward(payload: { weeklyReward: WeeklyReward }): Promise<void>;
+  addWeeklyReward(payload: { weeklyReward: WeeklyReward }): Promise<number>;
 
   setWeeklyReward(payload: { rewardID: number, timestamp: number }): Promise<void>;
 }
@@ -408,6 +409,7 @@ export default Vue.extend({
         rewardExternalAddress: '',
         reputationAmount: 0,
       },
+      addedWeeklyRewardId: undefined,
       week: undefined,
       rewardID: undefined,
       rarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
@@ -487,7 +489,7 @@ export default Vue.extend({
       }
       try {
         this.isLoading = true;
-        await this.addWeeklyReward({
+        this.addedWeeklyRewardId = await this.addWeeklyReward({
           weeklyReward: this.weeklyReward,
         });
       } finally {

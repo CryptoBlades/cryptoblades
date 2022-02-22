@@ -38,8 +38,8 @@
         <i class="fas fa-spinner fa-spin"/>
         {{ $t('quests.loading') }}
       </div>
-      <QuestReward v-else-if="questRewards.length !== 0" :quest="quest" :questRewards="questRewards"/>
-      <QuestReward v-else :quest="quest"/>
+      <QuestReward v-else :type="quest.rewardType" :rarity="quest.rewardRarity" :rewards="questRewards"
+                   :amount="quest.rewardAmount" :reputationAmount="quest.reputationAmount"/>
     </b-modal>
   </div>
 </template>
@@ -53,7 +53,7 @@ import Hint from '@/components/Hint.vue';
 import QuestSubmissionModal from '@/components/smart/QuestSubmissionModal.vue';
 import QuestReward from '@/components/smart/QuestReward.vue';
 import {mapActions} from 'vuex';
-import {NftIdType} from './NftList.vue';
+import {NftIdType} from '@/components/smart/NftList.vue';
 import {getTimeRemaining} from '@/utils/common';
 
 interface Data {
