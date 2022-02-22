@@ -1034,7 +1034,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         uint24 playerFightPower = Common.getPlayerPower(character.basePower, (weaponMultFight.add(bonusShieldStats)), weaponBonusPower);
 
-        uint256 playerPower = RandomUtil.plusMinus10PercentSeeded(
+        uint256 playerPower = RandomUtil.plusMinus30PercentSeeded(
             playerFightPower,
             seed
         );
