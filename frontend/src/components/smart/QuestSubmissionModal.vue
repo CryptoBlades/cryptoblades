@@ -38,8 +38,8 @@
         </b-button>
       </div>
       <div v-else class="d-flex align-items-center flex-column">
-        <h2>SOMETHING SOMETHING</h2>
-        <b-form-input v-model="externalsToBurn" :placeholder="$t('admin.identifiers')"/>
+        <h2>{{ $t('quests.whatIdsToTurnIn') }}</h2>
+        <b-form-input v-model="externalsToBurn" class="w-50" :placeholder="$t('admin.identifiers')"/>
       </div>
     </div>
     <div v-else class="d-flex">

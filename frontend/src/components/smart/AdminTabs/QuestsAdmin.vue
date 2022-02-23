@@ -418,7 +418,7 @@ export default Vue.extend({
         RequirementType.DUST, RequirementType.TRINKET,
         RequirementType.SHIELD, RequirementType.STAMINA,
         RequirementType.SOUL, RequirementType.RAID,
-        RequirementType.EXTERNAL, RequirementType.EXTERNAL_HOLD],
+        RequirementType.EXTERNAL],
       rewardTypes: [RewardType.WEAPON, RewardType.JUNK,
         RewardType.DUST, RewardType.TRINKET,
         RewardType.SHIELD, RewardType.EXPERIENCE,

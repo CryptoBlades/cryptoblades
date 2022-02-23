@@ -6,12 +6,18 @@
                           :rarity="quest.requirementRarity" :externalAddress="quest.requirementExternalAddress"/>
       <div class="d-flex flex-column"><span class="requirement-text">{{
           quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.submit')
-        }} {{ quest.requirementAmount }}x <span
-          v-if="quest.requirementType !== RequirementType.RAID
-          && quest.requirementType !== RequirementType.STAMINA
-          && quest.requirementType !== RequirementType.SOUL">{{
+        }} {{ quest.requirementAmount }}<span
+          v-if="questItemTypeSupportsTimesValue(quest.requirementType) && !isCurrency">x</span> <span
+          v-if="questItemTypeSupportsStars(quest.requirementType)">{{
             Array(quest.requirementRarity + 1).fill('★').join('')
-          }}</span> {{ $t(`quests.requirementType.${RequirementType[quest.requirementType]}`) }}</span>
+          }} </span>{{ requirementName }} <i
+          v-if="quest.requirementType === RequirementType.EXTERNAL || quest.requirementType === RequirementType.EXTERNAL_HOLD"
+          :id="`external-hint-${quest.id}-${characterId}`" class="far fa-question-circle hint"/></span>
+        <b-tooltip
+          v-if="quest.requirementType === RequirementType.EXTERNAL || quest.requirementType === RequirementType.EXTERNAL_HOLD"
+          :target="`external-hint-${quest.id}-${characterId}`">
+          {{ externalTooltip }} <a :href="externalWebsite" target="_blank">{{ externalWebsite }}</a>
+        </b-tooltip>
         <span class="progress-text">{{ $t(`quests.progress`) }}: {{ `${progress} / ${quest.requirementAmount}` }}</span>
         <span class="rarity-label text-capitalize" :style="setRarityColor(Rarity[quest.tier])">
           {{ $t(`quests.rarityType.${Rarity[quest.tier]}`) }}</span>
@@ -23,8 +29,15 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
+import {Quest, QuestItemsInfo, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import QuestComponentIcon from './QuestComponentIcon.vue';
+import {questItemTypeSupportsStars, questItemTypeSupportsTimesValue} from '../../utils/common';
+import {mapActions} from 'vuex';
+import questItemsInfo from '@/data/questItems.json';
+
+interface StoreMappedActions {
+  isExternalCurrency(payload: { currencyAddress: string }): Promise<boolean>;
+}
 
 export default Vue.extend({
   components: {QuestComponentIcon},
@@ -33,6 +46,9 @@ export default Vue.extend({
       type: Object as PropType<Quest>,
       required: true,
     },
+    characterId: {
+      type: Number as PropType<number | string>,
+    },
     progress: {
       type: Number,
     },
@@ -40,13 +56,36 @@ export default Vue.extend({
 
   data() {
     return {
+      isCurrency: false,
       RequirementType,
       RewardType,
       Rarity,
+      questItemTypeSupportsTimesValue,
+      questItemTypeSupportsStars,
     };
   },
 
+  computed: {
+    requirementName(): boolean {
+      if (this.quest.requirementType === RequirementType.EXTERNAL || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
+        return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].name;
+      } else {
+        return this.$t(`quests.requirementType.${RequirementType[this.quest.requirementType]}`);
+      }
+    },
+    externalTooltip(): string {
+      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].description;
+    },
+    externalWebsite(): string {
+      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].website;
+    },
+  },
+
   methods: {
+    ...mapActions([
+      'isExternalCurrency',
+    ]) as StoreMappedActions,
+
     setRarityColor(rarity: Rarity) {
       switch (rarity) {
       case Rarity.LEGENDARY: {
@@ -69,6 +108,10 @@ export default Vue.extend({
       }
       }
     }
+  },
+
+  async mounted() {
+    this.isCurrency = await this.isExternalCurrency({currencyAddress: this.quest.requirementExternalAddress});
   }
 
 

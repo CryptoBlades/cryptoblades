@@ -3,14 +3,14 @@
     <img class="reward-icon" :src="icon" v-b-tooltip="tooltip" alt=""/>
     <span v-if="questItemType === QuestItemType.REPUTATION" class="reward-amount">+{{ amount }} Rep</span>
     <span v-else-if="questItemType === QuestItemType.EXPERIENCE" class="reward-amount">+{{ amount }} Exp</span>
-    <span v-else class="reward-amount">x{{ amount }} {{ stars }}</span>
+    <span v-else class="reward-amount"><span>x</span>{{ amount }} {{ stars }}</span>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {DustRarity, QuestItemType, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
+import {DustRarity, QuestItemsInfo, QuestItemType, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import lesserDust from '@/assets/dusts/lesserDust.png';
 import greaterDust from '@/assets/dusts/greaterDust.png';
 import powerfulDust from '@/assets/dusts/powerfulDust.png';
@@ -26,12 +26,10 @@ import experience from '@/assets/experience.png';
 import shield from '@/assets/shield2.png';
 import trinket from '@/assets/trinkets/trinket1.png';
 import questItemsInfo from '@/data/questItems.json';
-
-interface QuestItemsInfo {
-  questItems: Record<string, Record<string, any>>;
-}
+import {questItemTypeSupportsStars} from '../../utils/common';
 
 interface Data {
+  images: any;
   amount: number;
   rarity: Rarity;
   type: RequirementType | RewardType;
@@ -60,6 +58,7 @@ export default Vue.extend({
 
   data() {
     return {
+      images: require.context('../../assets/partners/', false, /\.png$/),
       stars: '',
       icon: undefined,
       tooltip: '',
@@ -68,13 +67,9 @@ export default Vue.extend({
   },
 
   methods: {
-    typeSupportsStars(): boolean {
-      return this.questItemType === QuestItemType.WEAPON
-        || this.questItemType === QuestItemType.JUNK
-        || this.questItemType === QuestItemType.TRINKET
-        || this.questItemType === QuestItemType.SHIELD;
+    imgPath(img: string): string {
+      return this.images('./' + img);
     },
-
     getTooltip() {
       if (this.questItemType === QuestItemType.DUST) {
         this.tooltip = this.$t(`quests.dustRarityType.${DustRarity[this.rarity]}`)
@@ -115,12 +110,15 @@ export default Vue.extend({
     } else if (this.questItemType === RequirementType.RAID) {
       this.icon = raid;
     } else if (this.questItemType === QuestItemType.EXTERNAL || this.questItemType === QuestItemType.EXTERNAL_HOLD) {
-      this.icon = (questItemsInfo as QuestItemsInfo).questItems[this.externalAddress].image;
+      console.log(this.externalAddress);
+      const fileName = (questItemsInfo as QuestItemsInfo).questItems[this.externalAddress].image;
+      this.icon = this.imgPath(fileName);
     }
-    if (this.typeSupportsStars()) {
+    if (questItemTypeSupportsStars(this.type)) {
       this.stars = Array(this.rarity + 1).fill('★').join('');
     }
     this.getTooltip();
+    console.log(this.questItemType);
   },
 
 });

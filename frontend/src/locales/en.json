@@ -693,6 +693,7 @@
     "requestQuest": "Request quest",
     "turnIn": "Turn in",
     "howMuchToTurnIn": "How much to turn in?",
+    "whatIdsToTurnIn": "What IDs to turn in?",
     "setRequiredAmount": "Set required amount",
     "createNewQuest": "Create new quest",
     "createNewWeeklyReward": "Create new weekly reward",

@@ -23,7 +23,7 @@
           </div>
           <div class="d-flex justify-content-center gap-2">
             <QuestComponentIcon :questItemType="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
-                                :amount="weeklyReward.rewardAmount"/>
+                                :amount="weeklyReward.rewardAmount" :externalAddress="weeklyReward.rewardExternalAddress"/>
             <QuestComponentIcon v-if="weeklyReward.reputationAmount !== 0" :questItemType="QuestItemType.REPUTATION"
                                 :amount="weeklyReward.reputationAmount"/>
           </div>
@@ -155,6 +155,10 @@ export interface TierChances {
   rare: number;
   epic: number;
   legendary: number;
+}
+
+export interface QuestItemsInfo {
+  questItems: Record<string, Record<string, any>>;
 }
 
 interface StoreMappedActions {

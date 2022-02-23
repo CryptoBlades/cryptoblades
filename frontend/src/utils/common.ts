@@ -7,18 +7,20 @@ import {getConfigValue, Networks} from '@/contracts';
 import {networks as pvpNetworks} from '../../../build/contracts/PvpArena.json';
 import {networks as simpleQuestsNetworks} from '../../../build/contracts/SimpleQuests.json';
 import {networks as partnerVaultNetworks} from '../../../build/contracts/PartnerVault.json';
+import {QuestItemType} from '@/views/Quests.vue';
 
-BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
-BigNumber.config({ EXPONENTIAL_AT: 100 });
+BigNumber.config({ROUNDING_MODE: BigNumber.ROUND_DOWN});
+BigNumber.config({EXPONENTIAL_AT: 100});
 
 const web3 = new Web3(Web3.givenProvider || process.env.VUE_APP_WEB3_FALLBACK_PROVIDER);
 
-export function addChainToRouter(chain: string){
+export function addChainToRouter(chain: string) {
   router.replace(
     {
-      query: Object.assign({ ...router.currentRoute.query }, { chain }),
+      query: Object.assign({...router.currentRoute.query}, {chain}),
     },
-    () => {}
+    () => {
+    }
   );
 }
 
@@ -36,8 +38,8 @@ interface Chain {
   const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
   const chains = (config as Config).environments[env].chains;
 
-  for (const [chainName, values] of Object.entries(chains)){
-    if(+values.VUE_APP_NETWORK_ID === chainId){
+  for (const [chainName, values] of Object.entries(chains)) {
+    if (+values.VUE_APP_NETWORK_ID === chainId) {
       localStorage.setItem('currentChain', chainName);
       addChainToRouter(chainName);
     }
@@ -56,7 +58,7 @@ export const getCurrentGasPrices = async () => {
   };
 };
 
-export const toBN = (value: string|number): BigNumber => {
+export const toBN = (value: string | number): BigNumber => {
   const valueString = typeof value === 'string' ? value : String(value);
 
   return new BigNumber(valueString);
@@ -66,7 +68,7 @@ export const bnMinimum = (...values: string[]): BigNumber => {
   return BigNumber.minimum(...values);
 };
 
-export const fromWeiEther = (value: string|BigNumber): string => {
+export const fromWeiEther = (value: string | BigNumber): string => {
   return new BigNumber(value).div('1000000000000000000').toFixed();
 };
 
@@ -165,4 +167,18 @@ export const getTimeRemaining = (end: string) => {
     minutes,
     seconds
   };
+};
+
+export const questItemTypeSupportsStars = (questItemType: QuestItemType): boolean => {
+  return questItemType === QuestItemType.WEAPON
+    || questItemType === QuestItemType.JUNK
+    || questItemType === QuestItemType.TRINKET
+    || questItemType === QuestItemType.SHIELD;
+};
+
+export const questItemTypeSupportsTimesValue = (questItemType: QuestItemType): boolean => {
+  return questItemType !== QuestItemType.STAMINA
+    && questItemType !== QuestItemType.EXPERIENCE
+    && questItemType !== QuestItemType.SOUL
+    && questItemType !== QuestItemType.DUST;
 };
