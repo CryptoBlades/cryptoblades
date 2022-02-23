@@ -31,7 +31,7 @@ import Vue from 'vue';
 import {PropType} from 'vue/types/options';
 import {Quest, QuestItemsInfo, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import QuestComponentIcon from './QuestComponentIcon.vue';
-import {questItemTypeSupportsStars, questItemTypeSupportsTimesValue} from '../../utils/common';
+import {questItemTypeSupportsStars, questItemTypeSupportsTimesValue} from '@/utils/common';
 import {mapActions} from 'vuex';
 import questItemsInfo from '@/data/questItems.json';
 import i18n from '@/i18n';
