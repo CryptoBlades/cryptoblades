@@ -8,6 +8,7 @@ import {networks as pvpNetworks} from '../../../build/contracts/PvpArena.json';
 import {networks as simpleQuestsNetworks} from '../../../build/contracts/SimpleQuests.json';
 import {networks as partnerVaultNetworks} from '../../../build/contracts/PartnerVault.json';
 import {QuestItemType} from '@/views/Quests.vue';
+import {abi as erc20Abi} from '../../../build/contracts/ERC20.json';
 
 BigNumber.config({ROUNDING_MODE: BigNumber.ROUND_DOWN});
 BigNumber.config({EXPONENTIAL_AT: 100});
@@ -91,6 +92,8 @@ export const copyNftUrl = (id: number | string, type?: string): void => {
 
 export const addTokenToMetamask = async (address: string, symbol: string): Promise<void> => {
   try {
+    const contract = new web3.eth.Contract(erc20Abi as any[], address);
+    const decimals = await contract.methods.decimals().call();
     await (web3.currentProvider as any).request({
       method: 'wallet_watchAsset',
       params: {
@@ -98,7 +101,7 @@ export const addTokenToMetamask = async (address: string, symbol: string): Promi
         options: {
           address,
           symbol,
-          decimals: 18
+          decimals
         },
       },
     });
