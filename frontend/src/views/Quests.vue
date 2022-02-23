@@ -2,7 +2,7 @@
   <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container gap-4">
     <div class="d-flex justify-content-between w-100 weekly-progress-container">
       <span class="quests-title">{{ $t('quests.quest') }}</span>
-      <div class="d-flex flex-column gap-2">
+      <div v-if="weeklyReward.id" class="d-flex flex-column gap-2">
         <div class="d-flex align-items-center gap-2">
           <div class="d-flex flex-column gap-2">
             <div class="d-flex justify-content-between gap-4">
@@ -17,17 +17,18 @@
                    :aria-valuenow="currentWeeklyCompletions"
                    aria-valuemin="0" :aria-valuemax="maxWeeklyCompletions">
               </div>
-              <span class="quest-progress-value">{{ `${currentWeeklyCompletions} / ${maxWeeklyCompletions}` }}</span>
+              <span v-if="currentWeeklyCompletions <= maxWeeklyCompletions"
+                    class="quest-progress-value">{{ `${currentWeeklyCompletions} / ${maxWeeklyCompletions}` }}</span>
             </div>
           </div>
-          <div v-if="weeklyReward.id" class="d-flex justify-content-center gap-2">
+          <div class="d-flex justify-content-center gap-2">
             <QuestComponentIcon :questItemType="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
                                 :amount="weeklyReward.rewardAmount"/>
             <QuestComponentIcon v-if="weeklyReward.reputationAmount !== 0" :questItemType="QuestItemType.REPUTATION"
                                 :amount="weeklyReward.reputationAmount"/>
           </div>
         </div>
-        <b-button :disabled="isLoading || !canClaimWeeklyReward" variant="primary" @click="claimWeekly">
+        <b-button v-if="!weeklyClaimed" :disabled="isLoading || !canClaimWeeklyReward" variant="primary" @click="claimWeekly">
           {{ $t('quests.claimWeeklyReward') }}
           <Hint v-if="!canClaimWeeklyReward" class="hint" :text="$t('quests.cannotClaimWeeklyTooltip')"/>
         </b-button>
@@ -226,7 +227,11 @@ export default Vue.extend({
     ...mapGetters(['charactersWithIds', 'getCharacterCosmetic']) as Accessors<StoreMappedGetters>,
 
     canClaimWeeklyReward(): boolean {
-      return this.weeklyReward && !this.weeklyClaimed && this.currentWeeklyCompletions >= this.maxWeeklyCompletions;
+      return this.weeklyReward && !this.weeklyClaimed && this.weeklyGoalReached;
+    },
+
+    weeklyGoalReached(): boolean {
+      return this.currentWeeklyCompletions >= this.maxWeeklyCompletions;
     },
   },
 

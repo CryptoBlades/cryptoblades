@@ -653,7 +653,7 @@
     "weeklyProgress": "Weekly progress",
     "claimWeeklyReward": "Claim weekly reward",
     "weeklyReward": "Weekly reward",
-    "cannotClaimWeeklyTooltip": "Reward already claimed or goal not reached",
+    "cannotClaimWeeklyTooltip": "Weekly goal not reached",
     "progress": "Progress",
     "resetsIn": "Resets in {time}",
     "cannotSkipTooltip": "Not enough stamina to skip this quest",
