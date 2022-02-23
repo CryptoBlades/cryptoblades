@@ -24,7 +24,7 @@
                             :rarities="[quest.requirementRarity]"/>
       <nft-icon v-else-if="quest.requirementType === RequirementType.SOUL" :isDefault="true" :nft="{ type: 'soul' }"/>
       <h2>{{ $t('quests.howMuchToTurnIn') }}</h2>
-      <b-form-input type="number" number v-model="amountToBurn" class="w-50" :min="0" :max="maxAmount()"/>
+      <b-form-input type="number" number v-model="amountToBurn" class="w-50" :min="0" :max="maxAmount"/>
       <b-button class="m-3" variant="primary" @click="setRequiredAmount">{{ $t('quests.setRequiredAmount') }}</b-button>
     </div>
     <div v-else class="d-flex">
@@ -108,16 +108,8 @@ export default Vue.extend({
   computed: {
     ...mapState(['ownedWeaponIds', 'ownedTrinketIds', 'ownedJunkIds', 'ownedShieldIds']),
     ...mapGetters(['getPowerfulDust', 'getGreaterDust', 'getLesserDust', 'getCharacterStamina']),
-  },
 
-  methods: {
-    ...mapActions(['submitProgress', 'submitProgressAmount', 'fetchSoulBalance']) as StoreMappedActions,
-
-    upperFirstChar(text: string) {
-      return text[0].toUpperCase() + text.slice(1).toLowerCase();
-    },
-
-    maxAmount() {
+    maxAmount(): number {
       if (!this.quest) return 0;
       if (this.quest.requirementType === RequirementType.DUST) {
         if (this.quest.requirementRarity === Rarity.COMMON) {
@@ -131,8 +123,15 @@ export default Vue.extend({
         return this.getCharacterStamina(this.characterId);
       } else if (this.quest.requirementType === RequirementType.SOUL) {
         return this.soulBalance;
-      }
+      } else return 0;
+    },
+  },
 
+  methods: {
+    ...mapActions(['submitProgress', 'submitProgressAmount', 'fetchSoulBalance']) as StoreMappedActions,
+
+    upperFirstChar(text: string) {
+      return text[0].toUpperCase() + text.slice(1).toLowerCase();
     },
 
     setRequiredAmount() {
@@ -214,7 +213,7 @@ export default Vue.extend({
     async showModal(newVal: boolean) {
       if (newVal) {
         this.quest = this.character.quest;
-        if(!this.quest) return;
+        if (!this.quest) return;
         this.characterId = this.character.id;
         this.questProgress = this.quest.progress;
         if (this.quest.requirementType === RequirementType.WEAPON) {

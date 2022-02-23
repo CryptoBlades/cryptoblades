@@ -297,7 +297,22 @@
     "greaterPower": "30 power per point",
     "greater": "Greater",
     "powerfulPower": "75 power per point",
-    "powerful": "Powerful"
+    "powerful": "Powerful",
+    "dustShortName": {
+      "LESSER": "LB",
+      "GREATER": "4B",
+      "POWERFUL": "5B"
+    },
+    "dustName": {
+      "LESSER": "Lesser",
+      "GREATER": "Greater",
+      "POWERFUL": "Powerful"
+    },
+    "dustPower": {
+      "LESSER": "15 power per point",
+      "GREATER": "30 power per point",
+      "POWERFUL": "75 power per point"
+    }
   },
   "combat": {
     "error": "Error:",

@@ -1,9 +1,10 @@
 <template>
   <div class="reward-icon-container">
-    <img class="reward-icon" :src="icon" v-b-tooltip="$t(`quests.questItemType.${QuestItemType[this.questItemType]}`)"
+    <img class="reward-icon" :src="icon" v-b-tooltip="questItemType === QuestItemType.DUST ? getDustTooltip()
+    : $t(`quests.questItemType.${QuestItemType[this.questItemType]}`)"
          alt=""/>
-    <span v-if="questItemType=== QuestItemType.REPUTATION" class="reward-amount">+{{ amount }} Rep</span>
-    <span v-else-if="questItemType === QuestItemType.EXPERIENCE">+{{ amount }} Exp</span>
+    <span v-if="questItemType === QuestItemType.REPUTATION" class="reward-amount">+{{ amount }} Rep</span>
+    <span v-else-if="questItemType === QuestItemType.EXPERIENCE" class="reward-amount">+{{ amount }} Exp</span>
     <span v-else class="reward-amount">x{{ amount }} {{ stars }}</span>
   </div>
 </template>
@@ -11,7 +12,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {QuestItemType, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
+import {DustRarity, QuestItemType, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import lesserDust from '@/assets/dusts/lesserDust.png';
 import greaterDust from '@/assets/dusts/greaterDust.png';
 import powerfulDust from '@/assets/dusts/powerfulDust.png';
@@ -73,6 +74,11 @@ export default Vue.extend({
         || this.questItemType === QuestItemType.JUNK
         || this.questItemType === QuestItemType.TRINKET
         || this.questItemType === QuestItemType.SHIELD;
+    },
+
+    getDustTooltip(): string {
+      return this.$t(`quests.dustRarityType.${DustRarity[this.rarity]}`)
+        + ' ' + this.$t(`quests.questItemType.${QuestItemType[this.questItemType]}`);
     },
   },
 
