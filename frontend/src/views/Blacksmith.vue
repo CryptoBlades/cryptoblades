@@ -106,12 +106,11 @@
                     <div id="lightning-border" v-on:click="setChosenElement($event, 2)"> </div>
                     <div id="water-border" v-on:click="setChosenElement($event, 3)"> </div>
                   </div>
-                  <div class="row justify-content-md-center select-elements-container align-items-baseline mt-4">
+                  <div v-if="activeSpecialWeaponEventsIds.length > 0" class="row justify-content-md-center select-elements-container align-items-baseline mt-4">
                     <h5>{{$t('blacksmith.pickSpecialEvent')}}:</h5>
                     <h6 class="mt-2">{{$t('blacksmith.specialEvent')}}:</h6>
                     <b-form-select class="w-50 ml-1" size="sm" v-model="selectedSpecialWeaponEventId"
                       :value="selectedSpecialWeaponEventId" @change="updateSpecialWeaponEventId($event)">
-                      <b-form-select-option :key="0" :value="0">{{$t('blacksmith.specialEventNone')}}</b-form-select-option>
                       <b-form-select-option v-for="id in activeSpecialWeaponEventsIds" :key="id" :value="id">
                         {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
                       </b-form-select-option>
@@ -717,7 +716,12 @@ export default Vue.extend({
     },
 
     onClickForge(i: number) {
-      this.selectedSpecialWeaponEventId = +this.specialWeaponEventId;
+      if(+this.specialWeaponEventId === 0 && this.activeSpecialWeaponEventsIds.length > 0) {
+        this.selectedSpecialWeaponEventId = +this.activeSpecialWeaponEventsIds[0];
+      }
+      else {
+        this.selectedSpecialWeaponEventId = +this.specialWeaponEventId;
+      }
       this.clickedForgeButton = i;
       this.chosenElementFee = null;
       (this.$refs['forge-element-selector-modal']as BModal).show();

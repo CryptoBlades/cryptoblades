@@ -109,7 +109,7 @@ export type Networks = Partial<Record<string, { address: string }>>;
 type Abi = any[];
 
 const stakingContractAddressesFromBuild: Partial<Record<StakeType, Partial<StakingContractEntry>>> = {
-  skill: {
+  skill2: {
     stakingRewardsAddress: (skillStakingRewardsNetworks as Networks)[networkId]?.address,
     stakingTokenAddress: (skillTokenNetworks as Networks)[networkId]?.address
   },

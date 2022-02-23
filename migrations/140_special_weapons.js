@@ -43,6 +43,10 @@ module.exports = async function (deployer, accounts, network) {
  
   let skillStakingRewardsUpgradeable = await upgradeProxy(SkillStakingRewardsUpgradeable.address, SkillStakingRewardsUpgradeable, { deployer });
   await skillStakingRewardsUpgradeable.migrateTo_e1fe97c(specialWeaponsManager.address);
-  await upgradeProxy(SkillStakingRewardsUpgradeable90.address, SkillStakingRewardsUpgradeable90, { deployer });
-  await upgradeProxy(SkillStakingRewardsUpgradeable180.address, SkillStakingRewardsUpgradeable180, { deployer });
+  let skillStakingRewardsUpgradeable90 = await upgradeProxy(SkillStakingRewardsUpgradeable90.address, SkillStakingRewardsUpgradeable90, { deployer });
+  let skillStakingRewardsUpgradeable180 = await upgradeProxy(SkillStakingRewardsUpgradeable180.address, SkillStakingRewardsUpgradeable180, { deployer });
+
+  await specialWeaponsManager.grantRole(swm_GAME_ADMIN, skillStakingRewardsUpgradeable.address);
+  await specialWeaponsManager.grantRole(swm_GAME_ADMIN, skillStakingRewardsUpgradeable90.address);
+  await specialWeaponsManager.grantRole(swm_GAME_ADMIN, skillStakingRewardsUpgradeable180.address);
 };

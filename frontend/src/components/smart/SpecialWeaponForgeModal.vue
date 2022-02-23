@@ -93,37 +93,31 @@
           </div>
         </b-tab>
         <b-tab :title="$t('blacksmith.shards')">
-          <div>
-            <strong>General shards:</strong> <img class="shard-icon" :src="generalShardImg" /> {{shardsSupply[0]}}
-          </div>
           <div class="mt-2">
             <b-row class="mr-1">
-              <b-col><strong>Name</strong></b-col>
-              <b-col><strong>Status</strong></b-col>
-              <b-col><strong>Balance</strong></b-col>
+              <b-col><strong>{{$t('blacksmith.name')}}</strong></b-col>
+              <b-col><strong>{{$t('blacksmith.status')}}</strong></b-col>
+              <b-col><strong>{{$t('blacksmith.balance')}}</strong></b-col>
             </b-row>
             <div class="scrollable mt-1">
               <b-row class="bordered" v-for="id in activeSpecialWeaponEventsIds" :key="id" :value="id">
                 <b-col>{{specialWeaponEvents[id] && specialWeaponEvents[id].name}}</b-col>
-                <b-col>Live</b-col>
+                <b-col>{{$t('blacksmith.live')}}</b-col>
                 <b-col><img class="shard-icon" :src="eventShardImg" /> {{shardsSupply[id]}}</b-col>
               </b-row>
               <b-row class="bordered" v-for="id in inactiveSpecialWeaponEventsIds" :key="id" :value="id">
                 <b-col>{{specialWeaponEvents[id] && specialWeaponEvents[id].name}}</b-col>
-                <b-col>Ended</b-col>
+                <b-col>{{$t('blacksmith.ended')}}</b-col>
                 <b-col><img class="shard-icon" :src="eventShardImg" /> {{shardsSupply[id]}}</b-col>
               </b-row>
             </div>
           </div>
           <div class="mt-3 top-border-shards">
-            <h4 class="mt-2">Convert</h4>
+            <h4 class="mt-2">{{$t('blacksmith.convert')}}</h4>
             <div class="d-flex align-items-center">
               <h5 class="mb-0">{{$t('blacksmith.from')}}:</h5>
               <b-form-select class="w-25 ml-1" size="sm"
                 v-model="selectedConvertFromId" :value="selectedConvertFromId">
-                <b-form-select-option v-if="selectedConvertToId !== 0" :key="0" :value="0">
-                  {{$t('blacksmith.specialEventNone')}}
-                </b-form-select-option>
                 <b-form-select-option v-for="id in allEventsIds.filter(id => id !== selectedConvertToId)" :key="id" :value="id">
                   {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
                 </b-form-select-option>
@@ -131,15 +125,12 @@
               <h5 class="ml-3 mb-0">{{$t('blacksmith.to')}}:</h5>
               <b-form-select class="w-25 ml-1" size="sm"
                 v-model="selectedConvertToId" :value="selectedConvertToId">
-                <b-form-select-option v-if="selectedConvertFromId !== 0" :key="0" :value="0">
-                  {{$t('blacksmith.specialEventNone')}}
-                </b-form-select-option>
                 <b-form-select-option v-for="id in activeSpecialWeaponEventsIds.filter(id => id !== selectedConvertFromId)" :key="id" :value="id">
                   {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
                 </b-form-select-option>
               </b-form-select>
               <h5 class="ml-3 mb-0">{{$t('blacksmith.amount')}}:</h5>
-              <b-input type="number" class="form-control w-25" v-model="convertAmount" min="0"
+              <b-input size="sm" type="number" class="form-control w-25 ml-1" v-model="convertAmount" min="0"
                 :max="selectedConvertFromId >= 0 ? shardsSupply[selectedConvertFromId] : ''"></b-input>
             </div>
             <div class="d-flex justify-content-center">
@@ -164,6 +155,41 @@
               </b-button>
             </div>
           </div>
+          <div class="mt-3 top-border-shards">
+            <div class="d-flex align-items-center">
+              <h4 class="mt-2">{{$t('blacksmith.stakingRewards')}}</h4>
+              <b-icon-question-circle class="centered-icon ml-1" scale="1.1" v-tooltip.bottom="$t('blacksmith.stakingRewardsTooltip')"/>
+            </div>
+            <div class="d-flex flex-column align-items-center">
+              <h5><img class="shard-icon" :src="generalShardImg" /> {{shardsStakingRewards}}</h5>
+              <div class="d-flex mt-2 align-items-center justify-content-center w-100">
+                <h5 class="ml-3 mb-0">{{$t('blacksmith.claimInto')}}:</h5>
+                <b-form-select class="w-25 ml-1" size="sm" :disabled="!activeSpecialWeaponEventsIds.length"
+                  v-model="claimRewardsIntoId" :value="claimRewardsIntoId">
+                  <b-form-select-option v-for="id in activeSpecialWeaponEventsIds.filter(id => id !== selectedConvertFromId)" :key="id" :value="id">
+                    {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
+                  </b-form-select-option>
+                </b-form-select>
+                <h5 class="ml-3 mb-0">{{$t('blacksmith.amount')}}:</h5>
+                <b-input size="sm" type="number" class="form-control w-25 ml-1" step="1" v-model="claimRewardsAmount" min="0"
+                  :max="Math.floor(+shardsStakingRewards)"></b-input>
+              </div>
+              <h5 v-if="!activeSpecialWeaponEventsIds.length" class="d-flex justify-content-center mt-3">{{$t('blacksmith.noActiveEvents')}}</h5>
+              <b-button
+                      class="mt-3"
+                      variant="primary"
+                      @click="onClaimStakingRewards()"
+                      :disabled="!canClaimStakingRewards || isClaimingStakingRewards"
+                      v-if="activeSpecialWeaponEventsIds.length">
+                <span v-if="!isClaimingStakingRewards" class="gtag-link-others">
+                  {{$t('blacksmith.claim')}}
+                </span>
+                <span v-if="isClaimingStakingRewards" class="gtag-link-others">
+                  {{$t('blacksmith.claiming')}}
+                </span>
+              </b-button>
+            </div>
+          </div>
         </b-tab>
       </b-tabs>
     </b-modal>
@@ -181,6 +207,7 @@ import eventShard from '../../assets/special-weapons/eventShard.png';
 import generalShard from '../../assets/special-weapons/generalShard.png';
 import forgingGif from '../../assets/special-weapons/forging.gif';
 import WeaponIcon from '../WeaponIcon.vue';
+import { toBN } from '@/utils/common';
 
 interface SpecialWeaponEventInfo {
   eventsDetails: Record<string, Record<string, any>>;
@@ -201,6 +228,8 @@ interface StoreMappedActions {
   orderSpecialWeapon({ eventId, orderOption}: { eventId: number, orderOption: number}): Promise<void>;
   forgeSpecialWeapon(eventId: number): Promise<void>;
   fetchEventTotalOrderedCount(eventId: number): Promise<void>;
+  fetchShardsStakingRewards(): Promise<string>;
+  claimShardsStakingRewards({ eventId, amount}: { eventId: number, amount: number}): Promise<void>;
 }
 
 interface StoreMappedMutations {
@@ -223,6 +252,10 @@ interface Data {
   isForging: boolean;
   isClaiming: boolean;
   shardsCostDenominator: number;
+  shardsStakingRewards: string;
+  isClaimingStakingRewards: boolean;
+  claimRewardsIntoId: number;
+  claimRewardsAmount: number;
 }
 
 export default Vue.extend({
@@ -242,7 +275,11 @@ export default Vue.extend({
       isConverting: false,
       isForging: false,
       isClaiming: false,
-      shardsCostDenominator: 0
+      shardsCostDenominator: 0,
+      shardsStakingRewards: '',
+      isClaimingStakingRewards: false,
+      claimRewardsIntoId: 0,
+      claimRewardsAmount: 0
     } as Data;
   },
 
@@ -290,6 +327,10 @@ export default Vue.extend({
       return !!this.selectedSpecialWeaponEventId &&
         this.shardsSupply[this.selectedSpecialWeaponEventId] >= this.forgeCost &&
         this.endsIn > 0;
+    },
+
+    canClaimStakingRewards(): boolean {
+      return !!this.claimRewardsIntoId && +this.shardsStakingRewards >= 1 && +this.claimRewardsAmount <= +this.shardsStakingRewards;
     },
 
     hasSupplyLeft(): boolean {
@@ -384,7 +425,8 @@ export default Vue.extend({
 
   methods: {
     ...mapActions(['fetchSpecialWeaponEvents', 'fetchForgeCosts', 'convertShards', 'fetchShardsConvertDenominator',
-      'orderSpecialWeapon', 'forgeSpecialWeapon', 'fetchEventTotalOrderedCount']) as StoreMappedActions,
+      'orderSpecialWeapon', 'forgeSpecialWeapon', 'fetchEventTotalOrderedCount', 'fetchShardsStakingRewards',
+      'claimShardsStakingRewards']) as StoreMappedActions,
     ...mapMutations(['updateSpecialWeaponEventId']) as StoreMappedMutations,
 
     imgPath(img: string): string {
@@ -431,6 +473,19 @@ export default Vue.extend({
       }
     },
 
+    async onClaimStakingRewards() {
+      try {
+        this.isClaimingStakingRewards = true;
+        await this.claimShardsStakingRewards({
+          eventId: this.claimRewardsIntoId,
+          amount: Math.floor(this.claimRewardsAmount)
+        });
+      }
+      finally {
+        this.isClaimingStakingRewards = false;
+      }
+    },
+
     openPartnerWebsite() {
       window.open(this.eventPartnerWebsite, '_blank');
     },
@@ -446,6 +501,7 @@ export default Vue.extend({
       if(this.selectedSpecialWeaponEventId) {
         await this.fetchEventTotalOrderedCount(this.selectedSpecialWeaponEventId);
       }
+      this.shardsStakingRewards = toBN(await this.fetchShardsStakingRewards()).div(1e18).toFixed(4);
     }, 3000);
     Events.$on('show-special-forge-modal', async () => {
       this.showModal = true;

@@ -1569,9 +1569,6 @@ export function createStore(web3: Web3) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;
 
-        const generalShardsSupply = await SpecialWeaponsManager.methods.getUserGeneralShardsSupply(state.defaultAccount).call(defaultCallOptions(state));
-        commit('updateShardsSupply', { eventId: 0, shardsSupply: +generalShardsSupply });
-
         const eventCount = +await SpecialWeaponsManager.methods.eventCount().call(defaultCallOptions(state));
         for(let i = 1; i <= eventCount; i++) {
           const eventShardsSupply = await SpecialWeaponsManager.methods.getUserSpecialShardsSupply(state.defaultAccount, i).call(defaultCallOptions(state));
@@ -5244,7 +5241,23 @@ export function createStore(web3: Web3) {
         const orderedCount = await SpecialWeaponsManager.methods.getTotalOrderedCount(eventId).call(defaultCallOptions(state));
 
         commit('updateEventTotalOrderedCount', { eventId, orderedCount });
+      },
+
+      async fetchShardsStakingRewards({ state }) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        return await SpecialWeaponsManager.methods.getUserShardsRewards(state.defaultAccount).call(defaultCallOptions(state));
+      },
+
+      async claimShardsStakingRewards({ state, dispatch }, { eventId, amount }) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods.claimShardRewards(eventId, amount).send(defaultCallOptions(state));
+
+        await dispatch('fetchShardsSupply');
       }
-    },
+    }
   });
 }
