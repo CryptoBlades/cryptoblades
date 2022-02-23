@@ -1,8 +1,6 @@
 <template>
   <div class="reward-icon-container">
-    <img class="reward-icon" :src="icon" v-b-tooltip="questItemType === QuestItemType.DUST ? getDustTooltip()
-    : $t(`quests.questItemType.${QuestItemType[this.questItemType]}`)"
-         alt=""/>
+    <img class="reward-icon" :src="icon" v-b-tooltip="tooltip" alt=""/>
     <span v-if="questItemType === QuestItemType.REPUTATION" class="reward-amount">+{{ amount }} Rep</span>
     <span v-else-if="questItemType === QuestItemType.EXPERIENCE" class="reward-amount">+{{ amount }} Exp</span>
     <span v-else class="reward-amount">x{{ amount }} {{ stars }}</span>
@@ -39,7 +37,7 @@ interface Data {
   type: RequirementType | RewardType;
   stars: string;
   icon?: string;
-  tooltip?: string;
+  tooltip: string;
 }
 
 export default Vue.extend({
@@ -64,6 +62,7 @@ export default Vue.extend({
     return {
       stars: '',
       icon: undefined,
+      tooltip: '',
       QuestItemType,
     } as Data;
   },
@@ -76,10 +75,16 @@ export default Vue.extend({
         || this.questItemType === QuestItemType.SHIELD;
     },
 
-    getDustTooltip(): string {
-      return this.$t(`quests.dustRarityType.${DustRarity[this.rarity]}`)
-        + ' ' + this.$t(`quests.questItemType.${QuestItemType[this.questItemType]}`);
-    },
+    getTooltip() {
+      if (this.questItemType === QuestItemType.DUST) {
+        this.tooltip = this.$t(`quests.dustRarityType.${DustRarity[this.rarity]}`)
+          + ' ' + this.$t(`quests.questItemType.${QuestItemType[this.questItemType]}`);
+      } else if (this.questItemType === QuestItemType.EXTERNAL || this.questItemType === QuestItemType.EXTERNAL_HOLD) {
+        this.tooltip = (questItemsInfo as QuestItemsInfo).questItems[this.externalAddress].name;
+      } else {
+        this.tooltip = this.$t(`quests.questItemType.${QuestItemType[this.questItemType]}`);
+      }
+    }
   },
 
   mounted() {
@@ -111,11 +116,11 @@ export default Vue.extend({
       this.icon = raid;
     } else if (this.questItemType === QuestItemType.EXTERNAL || this.questItemType === QuestItemType.EXTERNAL_HOLD) {
       this.icon = (questItemsInfo as QuestItemsInfo).questItems[this.externalAddress].image;
-      this.tooltip = (questItemsInfo as QuestItemsInfo).questItems[this.externalAddress].name;
     }
     if (this.typeSupportsStars()) {
       this.stars = Array(this.rarity + 1).fill('★').join('');
     }
+    this.getTooltip();
   },
 
 });

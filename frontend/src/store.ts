@@ -3392,7 +3392,7 @@ export function createStore(web3: Web3) {
 
         const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
         console.log(currencyContract.options.address);
-        const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+        const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
         console.log('decimals', currencyDecimals);
         const amountTimesDecimals = web3.utils.toBN(amount * 10 ** currencyDecimals);
         console.log('amountTimesDecimals', amountTimesDecimals);
@@ -3421,7 +3421,7 @@ export function createStore(web3: Web3) {
 
         const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
         let currencyBalance = await currencyContract.methods.balanceOf(PartnerVault.options.address).call(defaultCallOptions(state));
-        const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+        const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
         console.log('before', currencyBalance);
         currencyBalance = new BigNumber(currencyBalance).div(new BigNumber(10 ** currencyDecimals)).toFixed();
         console.log('getCurrencyBalanceInPartnerVault', currencyBalance);
@@ -3545,16 +3545,22 @@ export function createStore(web3: Web3) {
         const questId = await SimpleQuests.methods.characterQuest(characterId).call(defaultCallOptions(state));
 
 
-        const quest = await SimpleQuests.methods.quests(questId).call(defaultCallOptions(state));
+        const quest = await SimpleQuests.methods.quests(questId).call(defaultCallOptions(state)) as Quest;
 
         const charQuestDataRaw = await SimpleQuests.methods.getCharacterQuestData(characterId).call(defaultCallOptions(state));
         const emptyAccount = '0x0000000000000000000000000000000000000000';
+        quest.progress = +charQuestDataRaw[0];
         if(quest.requirementExternalAddress !== emptyAccount
-          && +quest.requirementType as RequirementType === RequirementType.EXTERNAL) {
+          && (+quest.requirementType as RequirementType === RequirementType.EXTERNAL
+            || +quest.requirementType as RequirementType === RequirementType.EXTERNAL_HOLD)) {
           const currencyContract = new web3.eth.Contract(erc20Abi as any[], quest.requirementExternalAddress);
+          console.log('requirement is external');
           try{
             const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+            console.log('currencyDecimals', currencyDecimals);
             quest.requirementAmount = new BigNumber(quest.requirementAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+            quest.progress = new BigNumber(quest.progress).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+            console.log('requirementAmount', quest.requirementAmount);
           } catch (e) {
             console.log('Contract does not support decimals');
           }
@@ -3572,7 +3578,7 @@ export function createStore(web3: Web3) {
         }
 
         return {
-          progress: +charQuestDataRaw[0],
+          progress: +quest.progress,
           type: +charQuestDataRaw[1] as RequirementType,
           reputation: +charQuestDataRaw[2],
           id: +quest.id,
@@ -3739,7 +3745,7 @@ export function createStore(web3: Web3) {
         const currentWeek = Math.floor(Date.now() / 1000 / 604800);
         console.log('Current week', currentWeek);
 
-        const rewardID = await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+        const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
 
         if(rewardID === 0) {
           console.log('Weekly reward not set');
@@ -3955,6 +3961,64 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacterStamina', characterID),
           dispatch('fetchSoulBalance', characterID),
         ]);
+      },
+
+      async submitExternalProgress({state}, {characterID, tokenIds, tokenAddress}) {
+        const {SimpleQuests, PartnerVault} = state.contracts();
+        if (!SimpleQuests || !PartnerVault || !state.defaultAccount) return;
+
+        console.log(tokenAddress);
+
+        const tokenContract = new web3.eth.Contract(erc721Abi as any[], tokenAddress) as Contract<IERC721>;
+
+        console.log(tokenContract);
+
+        console.log('isApprovedForAll', state.defaultAccount, SimpleQuests.options.address);
+        const isApprovedForAll = await tokenContract.methods.isApprovedForAll(state.defaultAccount, SimpleQuests.options.address)
+          .call(defaultCallOptions(state));
+        console.log('isApprovedForAll', isApprovedForAll);
+
+        if(tokenIds.length === 1 && !isApprovedForAll) {
+          console.log('Approving token for Partner Vault');
+          await tokenContract.methods.approve(SimpleQuests.options.address, tokenIds[0]).send({
+            from: state.defaultAccount
+          });
+        } else if (!isApprovedForAll) {
+          console.log('Approving all tokens for Partner Vault');
+          await tokenContract.methods.setApprovalForAll(SimpleQuests.options.address, true).send({
+            from: state.defaultAccount
+          });
+        }
+
+        return await SimpleQuests.methods.submitProgress(characterID, tokenIds).send(defaultCallOptions(state));
+      },
+
+      async submitExternalProgressAmount({state}, {characterID, amount, currencyAddress}) {
+        const {SimpleQuests, PartnerVault} = state.contracts();
+        if (!SimpleQuests || !PartnerVault || !state.defaultAccount) return;
+        console.log('storeCurrencyToPartnerVault', currencyAddress, amount);
+
+        const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
+        console.log(currencyContract.options.address);
+        const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
+        console.log('decimals', currencyDecimals);
+        const amountTimesDecimals = web3.utils.toBN(amount * 10 ** currencyDecimals);
+        console.log('amountTimesDecimals', amountTimesDecimals);
+        await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals).send({
+          from: state.defaultAccount
+        });
+
+        return await SimpleQuests.methods.submitProgressAmount(characterID, amountTimesDecimals).send(defaultCallOptions(state));
+      },
+
+      async isExternalCurrency({state}, {currencyAddress}) {
+        try{
+          const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
+          await currencyContract.methods.decimals().call(defaultCallOptions(state));
+          return true;
+        } catch (e) {
+          return false;
+        }
       },
 
       async grantRole({state}, {walletAddress, contract, roleMethod}) {

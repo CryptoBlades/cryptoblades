@@ -330,23 +330,27 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
                 require(shields.getStars(tokenID) == quest.requirementRarity, "Wrong shield rarity");
             }
             shields.burn(tokenIds);
+        } else if (quest.requirementType == ItemType.EXTERNAL) {
+            partnerVault.storeNfts(IERC721(quest.requirementExternalAddress), tokenIds);
         } else {
             revert("Unknown requirement type");
         }
         incrementQuestProgress(characterID, questID, tokenIds.length);
     }
 
-    function submitProgressAmount(uint256 characterID, uint8 amount) public assertQuestsEnabled assertOnQuest(characterID, true) {
+    function submitProgressAmount(uint256 characterID, uint256 amount) public assertQuestsEnabled assertOnQuest(characterID, true) {
         uint256 questID = characterQuest[characterID];
         Quest memory quest = quests[questID];
         if (quest.requirementType == ItemType.STAMINA) {
-            characters.getFightDataAndDrainStamina(msg.sender, characterID, amount, false, 0);
+            characters.getFightDataAndDrainStamina(msg.sender, characterID, uint8(amount), false, 0);
         } else if (quest.requirementType == ItemType.DUST) {
             uint32[] memory decrementDustSupplies = new uint32[](3);
-            decrementDustSupplies[quest.requirementRarity] = amount;
+            decrementDustSupplies[quest.requirementRarity] = uint32(amount);
             weapons.decrementDustSupplies(msg.sender, decrementDustSupplies[0], decrementDustSupplies[1], decrementDustSupplies[2]);
         } else if (quest.requirementType == ItemType.SOUL) {
             burningManager.burnSoul(msg.sender, amount);
+        } else if (quest.requirementType == ItemType.EXTERNAL) {
+            partnerVault.storeCurrency(IERC20(quest.requirementExternalAddress), amount);
         } else {
             revert("Unknown requirement type");
         }
@@ -454,7 +458,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         emit RewardAdded(rewardID);
     }
 
-    function setWeeklyReward(uint256 id, uint256 timestamp) public restricted{
+    function setWeeklyReward(uint256 id, uint256 timestamp) public restricted {
         require(timestamp > 0, "Missing timestamp");
         uint256 week = timestamp / 1 weeks;
         weeklyRewards[week] = id;

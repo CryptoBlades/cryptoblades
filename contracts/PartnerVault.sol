@@ -47,13 +47,13 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
 
     function storeNfts(IERC721 tokenAddress, uint256[] memory tokenIds) public restricted isValidERC721(tokenAddress) {
         for (uint8 i = 0; i < tokenIds.length; i++) {
-            tokenAddress.safeTransferFrom(msg.sender, address(this), tokenIds[i]);
+            tokenAddress.safeTransferFrom(tx.origin, address(this), tokenIds[i]);
             nfts[address(tokenAddress)].push(tokenIds[i]);
         }
     }
 
     function storeCurrency(IERC20 tokenAddress, uint256 amount) public restricted {
-        tokenAddress.transferFrom(msg.sender, address(this), amount);
+        tokenAddress.transferFrom(tx.origin, address(this), amount);
         currencies[address(tokenAddress)] = currencies[address(tokenAddress)].add(amount);
     }
 
