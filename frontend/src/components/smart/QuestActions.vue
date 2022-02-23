@@ -121,7 +121,7 @@ export default Vue.extend({
     },
 
     hasIncomingDeadline(): boolean {
-      return this.isLimited && this.deadlineTime;
+      return this.isLimited && !!this.deadlineTime;
     },
   },
 

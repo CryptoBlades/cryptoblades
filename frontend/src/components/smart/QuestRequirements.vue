@@ -34,6 +34,7 @@ import QuestComponentIcon from './QuestComponentIcon.vue';
 import {questItemTypeSupportsStars, questItemTypeSupportsTimesValue} from '../../utils/common';
 import {mapActions} from 'vuex';
 import questItemsInfo from '@/data/questItems.json';
+import i18n from '@/i18n';
 
 interface StoreMappedActions {
   isExternalCurrency(payload: { currencyAddress: string }): Promise<boolean>;
@@ -66,17 +67,21 @@ export default Vue.extend({
   },
 
   computed: {
-    requirementName(): boolean {
+    requirementName(): string {
       if (this.quest.requirementType === RequirementType.EXTERNAL || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
+        if(!this.quest?.requirementExternalAddress) return '';
         return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].name;
       } else {
-        return this.$t(`quests.requirementType.${RequirementType[this.quest.requirementType]}`);
+        if(!this.quest?.requirementType) return '';
+        return i18n.t(`quests.requirementType.${RequirementType[this.quest.requirementType]}`).toString();
       }
     },
     externalTooltip(): string {
+      if(!this.quest?.requirementExternalAddress) return '';
       return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].description;
     },
     externalWebsite(): string {
+      if(!this.quest?.requirementExternalAddress) return '';
       return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].website;
     },
   },
@@ -111,7 +116,9 @@ export default Vue.extend({
   },
 
   async mounted() {
-    this.isCurrency = await this.isExternalCurrency({currencyAddress: this.quest.requirementExternalAddress});
+    if (this.quest.requirementExternalAddress) {
+      this.isCurrency = await this.isExternalCurrency({currencyAddress: this.quest.requirementExternalAddress});
+    }
   }
 
 

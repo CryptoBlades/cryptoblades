@@ -376,6 +376,9 @@ interface Data {
   rewardTypes: RewardType[];
   weeklyRewardTypes: RewardType[];
   promoQuestTemplates: boolean;
+  rewardID?: number;
+  addedWeeklyRewardId?: number;
+  week?: number;
   isLoading: boolean;
   showTemplateConfirmationModal: boolean;
   showPromoToggleConfirmationModal: boolean;
@@ -483,8 +486,8 @@ export default Vue.extend({
     },
 
     async addReward() {
-      if (this.weeklyReward.rewardType === RewardType.SOUL
-        || this.weeklyReward.rewardType === RewardType.EXTERNAL) {
+      if (this.weeklyReward.rewardType === QuestItemType.SOUL
+        || this.weeklyReward.rewardType === QuestItemType.EXTERNAL) {
         this.weeklyReward.rewardRarity = Rarity.COMMON;
       }
       try {
@@ -498,6 +501,7 @@ export default Vue.extend({
     },
 
     async setReward() {
+      if (!this.rewardID || !this.week) return;
       try {
         this.isLoading = true;
         await this.setWeeklyReward({
@@ -604,8 +608,10 @@ export default Vue.extend({
         || (this.supply && !this.timestamp)
         || ((this.questTemplate.requirementType === RequirementType.EXTERNAL
             || this.questTemplate.requirementType === RequirementType.EXTERNAL_HOLD)
+          && this.questTemplate.requirementExternalAddress
           && !isValidWeb3Address(this.questTemplate.requirementExternalAddress))
         || (this.questTemplate.rewardType === RewardType.EXTERNAL
+          && this.questTemplate.rewardExternalAddress
           && !isValidWeb3Address(this.questTemplate.rewardExternalAddress))
         || this.showTemplateConfirmationModal || this.isLoading;
     },
@@ -613,11 +619,11 @@ export default Vue.extend({
     addNewWeeklyRewardDisabled() {
       return this.weeklyReward.rewardType === undefined
         || (this.weeklyReward.rewardRarity === undefined
-          && this.weeklyReward.rewardType !== RewardType.EXPERIENCE
-          && this.weeklyReward.rewardType !== RewardType.SOUL
-          && this.weeklyReward.rewardType !== RewardType.EXTERNAL)
+          && this.weeklyReward.rewardType !== QuestItemType.EXPERIENCE
+          && this.weeklyReward.rewardType !== QuestItemType.SOUL
+          && this.weeklyReward.rewardType !== QuestItemType.EXTERNAL)
         || !this.weeklyReward.rewardAmount
-        || (this.weeklyReward.rewardType === RewardType.EXTERNAL
+        || (this.weeklyReward.rewardType === QuestItemType.EXTERNAL
           && !isValidWeb3Address(this.weeklyReward.rewardExternalAddress))
         || this.showTemplateConfirmationModal || this.isLoading;
     },

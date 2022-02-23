@@ -167,6 +167,7 @@ export default Vue.extend({
     },
 
     async isExternalCurrencyAddress() {
+      if (!this.quest?.requirementExternalAddress) return false;
       this.isCurrency = await this.isExternalCurrency({currencyAddress: this.quest.requirementExternalAddress});
     },
 
@@ -204,8 +205,8 @@ export default Vue.extend({
     async submit() {
       try {
         this.isLoading = true;
-        if (this.quest.requirementType === RequirementType.EXTERNAL
-          || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
+        if (this.externalsToBurn && this.quest?.requirementExternalAddress && (this.quest.requirementType === RequirementType.EXTERNAL
+          || this.quest.requirementType === RequirementType.EXTERNAL_HOLD)) {
           console.log('Tokens to burn: ', this.externalsToBurn.split(',').map(id => +id));
           console.log('Parameters: ', this.characterId, this.quest.requirementExternalAddress, this.externalsToBurn.split(',').map(id => +id));
           await this.submitExternalProgress({
@@ -229,8 +230,8 @@ export default Vue.extend({
       if (!this.quest) return;
       try {
         this.isLoading = true;
-        if (this.quest.requirementType === RequirementType.EXTERNAL
-          || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
+        if (this.quest.requirementExternalAddress
+          && (this.quest.requirementType === RequirementType.EXTERNAL || this.quest.requirementType === RequirementType.EXTERNAL_HOLD)) {
           console.log('Amount to burn: ', this.amountToBurn);
           await this.submitExternalProgressAmount({
             characterID: this.characterId,

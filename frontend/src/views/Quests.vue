@@ -23,12 +23,14 @@
           </div>
           <div class="d-flex justify-content-center gap-2">
             <QuestComponentIcon :questItemType="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
-                                :amount="weeklyReward.rewardAmount" :externalAddress="weeklyReward.rewardExternalAddress"/>
+                                :amount="weeklyReward.rewardAmount"
+                                :externalAddress="weeklyReward.rewardExternalAddress"/>
             <QuestComponentIcon v-if="weeklyReward.reputationAmount !== 0" :questItemType="QuestItemType.REPUTATION"
                                 :amount="weeklyReward.reputationAmount"/>
           </div>
         </div>
-        <b-button v-if="!weeklyClaimed" :disabled="isLoading || !canClaimWeeklyReward" variant="primary" @click="claimWeekly">
+        <b-button v-if="!weeklyClaimed" :disabled="isLoading || !canClaimWeeklyReward" variant="primary"
+                  @click="claimWeekly">
           {{ $t('quests.claimWeeklyReward') }}
           <Hint v-if="!canClaimWeeklyReward" class="hint" :text="$t('quests.cannotClaimWeeklyTooltip')"/>
         </b-button>
@@ -111,7 +113,6 @@ export enum RequirementType {
   EXTERNAL_HOLD = 11,
 }
 
-// NOTE: Numbers should represent ItemType in SimpleQuests.sol
 export enum RewardType {
   NONE,
   WEAPON,
@@ -124,11 +125,22 @@ export enum RewardType {
   EXTERNAL = 10,
 }
 
-enum CommonType {
-  REPUTATION = 99,
+// NOTE: Numbers should represent ItemType in SimpleQuests.sol
+export enum QuestItemType {
+  NONE,
+  WEAPON,
+  JUNK,
+  DUST,
+  TRINKET,
+  SHIELD,
+  STAMINA,
+  SOUL,
+  RAID,
+  EXPERIENCE,
+  EXTERNAL,
+  EXTERNAL_HOLD,
+  REPUTATION = 99
 }
-
-export const QuestItemType = {...RequirementType, ...RewardType, ...CommonType};
 
 export enum Rarity {
   COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
@@ -178,7 +190,7 @@ interface StoreMappedActions {
 
   hasClaimedWeeklyReward(): Promise<boolean>;
 
-  claimWeeklyReward(): Promise<void>;
+  claimWeeklyReward(): Promise<number[]>;
 }
 
 interface StoreMappedGetters {
@@ -231,7 +243,7 @@ export default Vue.extend({
     ...mapGetters(['charactersWithIds', 'getCharacterCosmetic']) as Accessors<StoreMappedGetters>,
 
     canClaimWeeklyReward(): boolean {
-      return this.weeklyReward && !this.weeklyClaimed && this.weeklyGoalReached;
+      return !!this.weeklyReward && !this.weeklyClaimed && this.weeklyGoalReached;
     },
 
     weeklyGoalReached(): boolean {
@@ -260,9 +272,9 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         const rewards = await this.claimWeeklyReward();
-        const rewardType = this.weeklyReward.rewardType;
+        const rewardType = this.weeklyReward?.rewardType;
         if (!rewardType || rewardType === RewardType.EXPERIENCE || rewardType === RewardType.DUST || rewardType === RewardType.SOUL) {
-          this.showQuestCompleteModal = true;
+          this.showWeeklyClaimedModal = true;
           return;
         } else {
           this.weeklyRewards = rewards.map((reward: number) => {

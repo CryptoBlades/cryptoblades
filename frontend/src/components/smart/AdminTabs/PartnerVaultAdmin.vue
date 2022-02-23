@@ -169,7 +169,7 @@ export default Vue.extend({
         const result = await this.getCurrencyBalanceInPartnerVault({
           currencyAddress: this.currencyBalance.address
         });
-        this.currencyBalance.amount = result[0];
+        this.currencyBalance.amount = +result[0];
         this.currencyBalance.symbol = result[1];
       } finally {
         this.isLoading = false;

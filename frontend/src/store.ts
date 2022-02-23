@@ -45,7 +45,7 @@ import {abi as ierc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as erc20Abi} from '../../build/contracts/ERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
-import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances} from '@/views/Quests.vue';
+import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances, WeeklyReward} from '@/views/Quests.vue';
 import {abi as erc721Abi} from '../../build/contracts/IERC721.json';
 import BigNumber from 'bignumber.js';
 
@@ -3396,11 +3396,11 @@ export function createStore(web3: Web3) {
         console.log('decimals', currencyDecimals);
         const amountTimesDecimals = web3.utils.toBN(amount * 10 ** currencyDecimals);
         console.log('amountTimesDecimals', amountTimesDecimals);
-        await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals).send({
+        await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
           from: state.defaultAccount
         });
 
-        return await PartnerVault.methods.storeCurrency(currencyAddress, amountTimesDecimals).send({
+        return await PartnerVault.methods.storeCurrency(currencyAddress, amountTimesDecimals.toString()).send({
           from: state.defaultAccount
         });
       },
@@ -3458,7 +3458,17 @@ export function createStore(web3: Web3) {
         if(questTemplatesIds.length === 0) return questTemplates;
 
         for (const questID of questTemplatesIds) {
-          const questTemplateRaw = await SimpleQuests.methods.quests(+questID).call(defaultCallOptions(state));
+          const questTemplateRaw = await SimpleQuests.methods.quests(+questID).call(defaultCallOptions(state)) as unknown as {
+            id: string;
+            tier: string;
+            requirementType: string;
+            requirementRarity: string;
+            requirementAmount: string;
+            rewardType: string;
+            rewardRarity: string;
+            rewardAmount: string;
+            reputationAmount: string;
+          };
           questTemplates.push({
             id: +questTemplateRaw.id,
             tier: +questTemplateRaw.tier,
@@ -3545,14 +3555,27 @@ export function createStore(web3: Web3) {
         const questId = await SimpleQuests.methods.characterQuest(characterId).call(defaultCallOptions(state));
 
 
-        const quest = await SimpleQuests.methods.quests(questId).call(defaultCallOptions(state)) as Quest;
+        const quest = await SimpleQuests.methods.quests(questId).call(defaultCallOptions(state)) as unknown as {
+          progress: string | number;
+          id: string;
+          tier: string;
+          requirementType: string;
+          requirementRarity: string;
+          requirementAmount: string;
+          requirementExternalAddress: string;
+          rewardType: string;
+          rewardRarity: string;
+          rewardAmount: string;
+          rewardExternalAddress: string;
+          reputationAmount: string;
+        };
 
         const charQuestDataRaw = await SimpleQuests.methods.getCharacterQuestData(characterId).call(defaultCallOptions(state));
         const emptyAccount = '0x0000000000000000000000000000000000000000';
         quest.progress = +charQuestDataRaw[0];
         if(quest.requirementExternalAddress !== emptyAccount
-          && (+quest.requirementType as RequirementType === RequirementType.EXTERNAL
-            || +quest.requirementType as RequirementType === RequirementType.EXTERNAL_HOLD)) {
+          && ((quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL)
+            || (quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL_HOLD))) {
           const currencyContract = new web3.eth.Contract(erc20Abi as any[], quest.requirementExternalAddress);
           console.log('requirement is external');
           try{
@@ -3696,7 +3719,14 @@ export function createStore(web3: Web3) {
 
         const rewardID = +await SimpleQuests.methods.weeklyRewards(week).call(defaultCallOptions(state));
         console.log(rewardID);
-        const weeklyRewardRaw = await SimpleQuests.methods.rewards(rewardID).call(defaultCallOptions(state));
+        const weeklyRewardRaw = await SimpleQuests.methods.rewards(rewardID).call(defaultCallOptions(state)) as unknown as {
+          id: string;
+          rewardType: string;
+          rewardRarity: string;
+          rewardAmount: string;
+          rewardExternalAddress: string;
+          reputationAmount: string;
+        };
         console.log(weeklyRewardRaw);
         return {
           id: +weeklyRewardRaw.id,
@@ -3705,7 +3735,7 @@ export function createStore(web3: Web3) {
           rewardAmount: +weeklyRewardRaw.rewardAmount,
           rewardExternalAddress: weeklyRewardRaw.rewardExternalAddress,
           reputationAmount: +weeklyRewardRaw.reputationAmount,
-        };
+        } as WeeklyReward;
       },
 
       async claimWeeklyReward({state, dispatch}) {
@@ -3715,7 +3745,7 @@ export function createStore(web3: Web3) {
         const currentWeek = Math.floor(Date.now() / 1000 / 604800);
         console.log('Current week', currentWeek);
 
-        const rewardID = await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+        const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
 
         if(rewardID === 0) {
           console.log('Weekly reward not set');
@@ -4004,11 +4034,11 @@ export function createStore(web3: Web3) {
         console.log('decimals', currencyDecimals);
         const amountTimesDecimals = web3.utils.toBN(amount * 10 ** currencyDecimals);
         console.log('amountTimesDecimals', amountTimesDecimals);
-        await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals).send({
+        await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
           from: state.defaultAccount
         });
 
-        return await SimpleQuests.methods.submitProgressAmount(characterID, amountTimesDecimals).send(defaultCallOptions(state));
+        return await SimpleQuests.methods.submitProgressAmount(characterID, amountTimesDecimals.toString()).send(defaultCallOptions(state));
       },
 
       async isExternalCurrency({state}, {currencyAddress}) {

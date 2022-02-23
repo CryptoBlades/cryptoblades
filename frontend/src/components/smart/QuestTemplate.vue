@@ -4,13 +4,13 @@
       <div class="quest-info flex-1 d-flex flex-column justify-content-center">
         <div class="quest-description">
           <span
-              class="font-weight-bold">{{
+            class="font-weight-bold">{{
               $t(`quests.rarityType.${Rarity[quest.tier]}`)
             }} {{ $t('quests.quest').toLowerCase() }}</span>
           <span class="text-center">{{
               quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.turnIn')
             }} {{ quest.requirementAmount }}x <span
-                v-if="quest.requirementType !== RequirementType.RAID
+              v-if="quest.requirementType !== RequirementType.RAID
               && quest.requirementType !== RequirementType.STAMINA && quest.requirementType !== RequirementType.SOUL">{{
                 Array(quest.requirementRarity + 1).fill('★').join('')
               }}</span> {{ $t(`quests.requirementType.${RequirementType[quest.requirementType]}`) }}</span>
@@ -27,16 +27,16 @@
                     :nft="{ type: 'shield' }"
                     :stars="quest.requirementRarity + 1"/>
           <nft-icon
-              v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.COMMON"
-              :isDefault="true" :nft="{ type: 'lbdust' }"/>
+            v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.COMMON"
+            :isDefault="true" :nft="{ type: 'lbdust' }"/>
           <nft-icon
-              v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.UNCOMMON"
-              :isDefault="true" :nft="{ type: '4bdust' }"/>
+            v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.UNCOMMON"
+            :isDefault="true" :nft="{ type: '4bdust' }"/>
           <nft-icon
-              v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.RARE"
-              :isDefault="true" :nft="{ type: '5bdust' }"/>
+            v-else-if="quest.requirementType === RequirementType.DUST && quest.requirementRarity === Rarity.RARE"
+            :isDefault="true" :nft="{ type: '5bdust' }"/>
           <nft-icon
-              v-else-if="quest.requirementType === RequirementType.SOUL" :isDefault="true" :nft="{ type: 'soul' }"/>
+            v-else-if="quest.requirementType === RequirementType.SOUL" :isDefault="true" :nft="{ type: 'soul' }"/>
         </div>
       </div>
       <QuestReward :type="quest.rewardType" :rarity="quest.rewardRarity" :rewards="questRewards"
@@ -77,6 +77,8 @@ interface StoreMappedActions {
 }
 
 interface Data {
+  deadlineCheckInterval?: ReturnType<typeof setInterval>;
+  deadlineTime?: string;
   isQuestActionLoading: boolean;
 }
 
