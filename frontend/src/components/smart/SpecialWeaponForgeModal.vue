@@ -48,18 +48,39 @@
                 <h5 class="mb-0">{{$t('blacksmith.forgeOption')}}:</h5>
                 <b-form-select v-if="forgeCosts && forgeCosts.length > 0" :disabled="!activeSpecialWeaponEventsIds.length" class="w-50 ml-1" size="sm"
                   v-model="forgeOption" :value="selectedSpecialWeaponEventId" @change="updateSpecialWeaponEventId($event)">
-                  <b-form-select-option :value="1">3-5* {{$t('blacksmith.for')}} {{forgeCosts[0]}} {{$t('blacksmith.shards')}}</b-form-select-option>
-                  <b-form-select-option :value="2">4-5* {{$t('blacksmith.for')}} {{forgeCosts[1]}} {{$t('blacksmith.shards')}}</b-form-select-option>
-                  <b-form-select-option :value="3">5* {{$t('blacksmith.for')}} {{forgeCosts[2]}} {{$t('blacksmith.shards')}}</b-form-select-option>
+                  <b-form-select-option :value="1">
+                    3-5* {{$t('blacksmith.for')}} {{forgeCosts[0]}} {{$t('blacksmith.shards')}}
+                    {{$t('blacksmith.or')}} {{formattedSkillCost(4)}} SKILL
+                  </b-form-select-option>
+                  <b-form-select-option :value="2">
+                    4-5* {{$t('blacksmith.for')}} {{forgeCosts[1]}} {{$t('blacksmith.shards')}}
+                    {{$t('blacksmith.or')}} {{formattedSkillCost(5)}} SKILL
+                  </b-form-select-option>
+                  <b-form-select-option :value="3">
+                    5* {{$t('blacksmith.for')}} {{forgeCosts[2]}} {{$t('blacksmith.shards')}}
+                    {{$t('blacksmith.or')}} {{formattedSkillCost(6)}} SKILL
+                  </b-form-select-option>
                 </b-form-select>
               </div>
               <div class="d-flex justify-content-center mt-3">
                 <b-button
                         variant="primary"
-                        @click="onForgeSpecialWeapon()"
-                        :disabled="!canForge || isForging">
+                        @click="onForgeSpecialWeapon(true)"
+                        :disabled="!canForgeWithSkill || isForging">
                   <span v-if="!isForging" class="gtag-link-others">
-                    {{$t('blacksmith.forge')}} ({{forgeCost}} {{$t('blacksmith.shards')}})
+                    {{$t('blacksmith.forge')}} ({{forgeCostSkill}} SKILL)
+                  </span>
+                  <span v-if="isForging" class="gtag-link-others">
+                    {{$t('blacksmith.forging')}}
+                  </span>
+                </b-button>
+                <b-button
+                        class="ml-2"
+                        variant="primary"
+                        @click="onForgeSpecialWeapon()"
+                        :disabled="!canForgeWithShards || isForging">
+                  <span v-if="!isForging" class="gtag-link-others">
+                    {{$t('blacksmith.forge')}} ({{forgeCostShards}} {{$t('blacksmith.shards')}})
                   </span>
                   <span v-if="isForging" class="gtag-link-others">
                     {{$t('blacksmith.forging')}}
@@ -137,9 +158,6 @@
               <h5 class="mt-3" v-if="specialWeaponEvents[selectedConvertToId]">
                 {{$t('blacksmith.youWillReceive')}} {{convertOutputAmount}} {{specialWeaponEvents[selectedConvertToId].name}} {{$t('blacksmith.shards')}}.
               </h5>
-              <h5 class="mt-3" v-if="selectedConvertToId === 0">
-                {{$t('blacksmith.youWillReceive')}} {{convertOutputAmount}} {{$t('blacksmith.generalShards')}}.
-              </h5>
             </div>
             <div class="d-flex justify-content-center mt-3">
               <b-button
@@ -207,14 +225,14 @@ import eventShard from '../../assets/special-weapons/eventShard.png';
 import generalShard from '../../assets/special-weapons/generalShard.png';
 import forgingGif from '../../assets/special-weapons/forging.gif';
 import WeaponIcon from '../WeaponIcon.vue';
-import { toBN } from '@/utils/common';
+import { fromWeiEther, toBN } from '@/utils/common';
 
 interface SpecialWeaponEventInfo {
   eventsDetails: Record<string, Record<string, any>>;
 }
 
 type StoreMappedState = Pick<IState,'activeSpecialWeaponEventsIds' | 'inactiveSpecialWeaponEventsIds' |
-'specialWeaponEvents' | 'specialWeaponEventId' | 'shardsSupply' | 'ownedWeaponIds'>;
+'specialWeaponEvents' | 'specialWeaponEventId' | 'shardsSupply' | 'ownedWeaponIds' |'skillBalance' | 'skillRewards'>;
 
 interface StoreMappedGetters {
   weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
@@ -225,7 +243,7 @@ interface StoreMappedActions {
   fetchForgeCosts(): Promise<number[]>;
   fetchShardsConvertDenominator(): Promise<number>;
   convertShards({ eventFromId, eventToId, amount }: { eventFromId: number, eventToId: number, amount: number }): Promise<void>;
-  orderSpecialWeapon({ eventId, orderOption}: { eventId: number, orderOption: number}): Promise<void>;
+  orderSpecialWeapon({ eventId, orderOption, orderWithSkill}: { eventId: number, orderOption: number, orderWithSkill: boolean}): Promise<void>;
   forgeSpecialWeapon(eventId: number): Promise<void>;
   fetchEventTotalOrderedCount(eventId: number): Promise<void>;
   fetchShardsStakingRewards(): Promise<string>;
@@ -294,7 +312,9 @@ export default Vue.extend({
       'specialWeaponEvents',
       'specialWeaponEventId',
       'shardsSupply',
-      'ownedWeaponIds'
+      'ownedWeaponIds',
+      'skillBalance',
+      'skillRewards'
     ]) as Accessors<StoreMappedState>),
     ...(mapGetters(['weaponsWithIds']) as Accessors<StoreMappedGetters>),
 
@@ -319,13 +339,25 @@ export default Vue.extend({
       return this.imgPath(fileName);
     },
 
-    forgeCost(): number {
+    forgeCostShards(): number {
       return this.forgeCosts && this.forgeCosts[this.forgeOption - 1];
     },
 
-    canForge(): boolean {
+    forgeCostSkill(): number {
+      return this.forgeCosts && +this.formattedSkillCost(this.forgeOption + 3);
+    },
+
+    canForgeWithShards(): boolean {
       return !!this.selectedSpecialWeaponEventId &&
-        this.shardsSupply[this.selectedSpecialWeaponEventId] >= this.forgeCost &&
+        this.shardsSupply[this.selectedSpecialWeaponEventId] >= this.forgeCostShards &&
+        this.endsIn > 0;
+    },
+
+    canForgeWithSkill(): boolean {
+      const cost = toBN(this.forgeCostSkill);
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
+      return !!this.selectedSpecialWeaponEventId &&
+         balance.isGreaterThanOrEqualTo(cost) &&
         this.endsIn > 0;
     },
 
@@ -387,7 +419,9 @@ export default Vue.extend({
 
     convertOutputAmount(): number {
       if(!this.shardsCostDenominator) return 0;
-      return Math.ceil(this.convertAmount / this.shardsCostDenominator);
+      return this.convertAmount === this.shardsSupply[this.selectedConvertFromId] ?
+        Math.ceil(this.convertAmount / this.shardsCostDenominator) :
+        Math.floor(this.convertAmount / this.shardsCostDenominator);
     },
 
     forgedWeapon(): IWeapon | undefined {
@@ -433,13 +467,22 @@ export default Vue.extend({
       return this.images('./' + img);
     },
 
-    async onForgeSpecialWeapon() {
+    async onForgeSpecialWeapon(forgeWithSkill: boolean = false) {
       try {
         this.isForging = true;
-        await this.orderSpecialWeapon({
-          eventId: this.selectedSpecialWeaponEventId,
-          orderOption: this.forgeOption
-        });
+        if(forgeWithSkill) {
+          await this.orderSpecialWeapon({
+            eventId: this.selectedSpecialWeaponEventId,
+            orderOption: this.forgeOption,
+            orderWithSkill: true
+          });
+        } else {
+          await this.orderSpecialWeapon({
+            eventId: this.selectedSpecialWeaponEventId,
+            orderOption: this.forgeOption,
+            orderWithSkill: false
+          });
+        }
       }
       finally {
         this.isForging = false;
@@ -489,6 +532,10 @@ export default Vue.extend({
     openPartnerWebsite() {
       window.open(this.eventPartnerWebsite, '_blank');
     },
+
+    formattedSkillCost(orderOption: number): string {
+      return toBN(this.forgeCosts[orderOption - 1]).div(1e18).toFixed(2);
+    }
   },
 
   async mounted() {

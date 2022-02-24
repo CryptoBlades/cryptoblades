@@ -5177,11 +5177,14 @@ export function createStore(web3: Web3) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;
 
-        const costLow = await SpecialWeaponsManager.methods.vars(1).call(defaultCallOptions(state));
-        const costMedium = await SpecialWeaponsManager.methods.vars(2).call(defaultCallOptions(state));
-        const costHigh = await SpecialWeaponsManager.methods.vars(3).call(defaultCallOptions(state));
+        const shardsCostLow = await SpecialWeaponsManager.methods.vars(1).call(defaultCallOptions(state));
+        const shardsCostMedium = await SpecialWeaponsManager.methods.vars(2).call(defaultCallOptions(state));
+        const shardsCostHigh = await SpecialWeaponsManager.methods.vars(3).call(defaultCallOptions(state));
+        const skillCostLow = await SpecialWeaponsManager.methods.getSkillForgeCost(1).call(defaultCallOptions(state));
+        const skillCostMedium = await SpecialWeaponsManager.methods.getSkillForgeCost(2).call(defaultCallOptions(state));
+        const skillCostHigh = await SpecialWeaponsManager.methods.getSkillForgeCost(3).call(defaultCallOptions(state));
 
-        return [+costLow, +costMedium, +costHigh];
+        return [+shardsCostLow, +shardsCostMedium, +shardsCostHigh, +skillCostLow, +skillCostMedium, +skillCostHigh];
       },
 
       async convertShards({ state, dispatch }, { eventFromId, eventToId, amount }) {
@@ -5200,15 +5203,33 @@ export function createStore(web3: Web3) {
         return +await SpecialWeaponsManager.methods.vars(5).call(defaultCallOptions(state));
       },
 
-      async orderSpecialWeapon({ state, dispatch }, { eventId, orderOption }) {
-        const { SpecialWeaponsManager } = state.contracts();
-        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+      async orderSpecialWeapon({ state, dispatch }, { eventId, orderOption, orderWithSkill }) {
+        const { SpecialWeaponsManager, CryptoBlades, SkillToken } = state.contracts();
+        if(!SpecialWeaponsManager || !CryptoBlades || !SkillToken || !state.defaultAccount) return;
 
-        await SpecialWeaponsManager.methods.orderSpecialWeapon(eventId, orderOption).send({ from: state.defaultAccount });
+        if(orderWithSkill) {
+          await approveFeeFromAnyContract(
+            CryptoBlades,
+            SpecialWeaponsManager,
+            SkillToken,
+            state.defaultAccount,
+            state.skillRewards,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            specialWeaponsManagerFunctions => specialWeaponsManagerFunctions.getSkillForgeCost(orderOption),
+            { allowInGameOnlyFunds: false, allowSkillRewards: true },
+            true
+          );
+          await SpecialWeaponsManager.methods.orderSpecialWeaponWithSkill(eventId, orderOption).send({ from: state.defaultAccount });
+        }
+        else {
+          await SpecialWeaponsManager.methods.orderSpecialWeaponWithShards(eventId, orderOption).send({ from: state.defaultAccount });
+        }
 
         await Promise.all([
           dispatch('fetchForgingStatus', eventId),
-          dispatch('fetchShardsSupply')
+          dispatch('fetchShardsSupply'),
+          dispatch('fetchSkillBalance')
         ]);
       },
 
@@ -5257,6 +5278,13 @@ export function createStore(web3: Web3) {
         await SpecialWeaponsManager.methods.claimShardRewards(eventId, amount).send(defaultCallOptions(state));
 
         await dispatch('fetchShardsSupply');
+      },
+
+      async fetchFreeOpponentRerollTimestamp({ state }, weaponId) {
+        const { PvpArena } = state.contracts();
+        if(!PvpArena || !state.defaultAccount) return;
+
+        return await PvpArena.methods.specialWeaponRerollTimestamp(weaponId).call(defaultCallOptions(state));
       }
     }
   });

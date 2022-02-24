@@ -319,7 +319,8 @@
     "claimInto": "Claim rewards into",
     "live": "Live",
     "ended": "Ended",
-    "stakingRewardsTooltip": "You can earn shards rewards for staking SKILL. These rewards can be claimed into specific shard of your choice. Only full shards can be claimed."
+    "stakingRewardsTooltip": "You can earn shards rewards for staking SKILL. These rewards can be claimed into specific shard of your choice. Only full shards can be claimed.",
+    "or": "or"
   },
   "dustBalanceDisplay": {
     "availableDust": "Available Dust",

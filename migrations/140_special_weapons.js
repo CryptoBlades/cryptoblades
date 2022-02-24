@@ -10,18 +10,19 @@ const PvpArena = artifacts.require("PvpArena");
 const SkillStakingRewardsUpgradeable = artifacts.require("SkillStakingRewardsUpgradeable");
 const SkillStakingRewardsUpgradeable90 = artifacts.require("SkillStakingRewardsUpgradeable90");
 const SkillStakingRewardsUpgradeable180 = artifacts.require("SkillStakingRewardsUpgradeable180");
+const SkillToken = artifacts.require("SkillToken");
 
 module.exports = async function (deployer, accounts, network) {
   let weapons = await upgradeProxy(Weapons.address, Weapons, { deployer });
   let promos = await upgradeProxy(Promos.address, Promos, { deployer });
   let safeRandoms = await SafeRandoms.deployed();
-  let specialWeaponsManager = await deployProxy(SpecialWeaponsManager, [promos.address, weapons.address, safeRandoms.address], { deployer });
-
+  let priceOracle = await BasicPriceOracle.deployed();
   let game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
+  let specialWeaponsManager = await deployProxy(SpecialWeaponsManager, [promos.address, weapons.address, safeRandoms.address, game.address, priceOracle.address], { deployer });
+
   await game.migrateTo_e1fe97c(specialWeaponsManager.address);
 
   let burningManager = await upgradeProxy(BurningManager.address, BurningManager, { deployer });
-  let priceOracle = await BasicPriceOracle.deployed();
   await burningManager.migrateTo_e1fe97c(weapons.address, priceOracle.address);
 
   let swm_GAME_ADMIN = await specialWeaponsManager.GAME_ADMIN();
@@ -37,7 +38,7 @@ module.exports = async function (deployer, accounts, network) {
   let safe_randoms_GAME_ADMIN = await safeRandoms.GAME_ADMIN();
   await safeRandoms.grantRole(safe_randoms_GAME_ADMIN, specialWeaponsManager.address);
 
-  await specialWeaponsManager.setVars([1, 2, 3, 5, 6], ['7', '15', '20', '3', '100000000000000000']);
+  await specialWeaponsManager.setVars([1, 2, 3, 4, 5, 6, 10, 11], ['7', '15', '20', '75', '100', '150', '3', '100000000000000000']);
 
   await upgradeProxy(PvpArena.address, PvpArena, { deployer });
  

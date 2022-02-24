@@ -90,7 +90,7 @@
           <pvp-button
             @click="reRollCharacterOpponent" :disabled="loading || !isInMatch || isCharacterInDuelQueue"
             :buttonText="$t('pvp.reRoll')"
-            :buttonsubText="'$SKILL: ' + formattedReRollCost"
+            :buttonsubText="!freeRerollReady ? '$SKILL: ' + formattedReRollCost : 'Free'"
             :secondary="true"
           />
         </div>
@@ -265,6 +265,7 @@ export default {
       },
       matchablePlayersCount: null,
       duelOffsetCost: null,
+      specialWeaponFreeRerollTimestamp: null
     };
   },
 
@@ -316,6 +317,11 @@ export default {
       }
       return lightningIcon;
     },
+
+    freeRerollReady() {
+      if(!+this.specialWeaponFreeRerollTimestamp) return false;
+      return +this.specialWeaponFreeRerollTimestamp <= Date.now()/1000;
+    }
   },
 
   methods: {
@@ -574,6 +580,8 @@ export default {
     this.duelQueue = await this.getDuelQueue();
 
     this.duelOffsetCost = await this.getDuelOffsetCost();
+
+    this.specialWeaponFreeRerollTimestamp = await this.fetchFreeOpponentRerollTimestamp(this.activeWeaponWithInformation.weaponId);
 
     this.loading = false;
   },
