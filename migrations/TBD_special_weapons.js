@@ -12,7 +12,7 @@ const SkillStakingRewardsUpgradeable90 = artifacts.require("SkillStakingRewardsU
 const SkillStakingRewardsUpgradeable180 = artifacts.require("SkillStakingRewardsUpgradeable180");
 const SkillToken = artifacts.require("SkillToken");
 
-module.exports = async function (deployer, accounts, network) {
+module.exports = async function (deployer, network) {
   if (network === "development"
   || network === "development-fork"
   || network === 'bsctestnet'

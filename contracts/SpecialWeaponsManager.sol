@@ -13,6 +13,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant SPECIAL_WEAPON_SEED = keccak256("SPECIAL_WEAPON_SEED");
 
     // STATE
@@ -30,7 +31,6 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         uint256 orderedCount;
     }
 
-    // id 0 = general shards supply
     mapping(address => mapping(uint256 => uint256)) public userEventShardSupply;
     mapping(uint256 => uint256) public vars;
     uint256 public constant VAR_SHARD_COST_LOW = 1;
@@ -257,7 +257,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
 
     function convertShards(uint256 eventIdFrom, uint256 eventIdTo, uint256 amount) external {
         require(userEventShardSupply[msg.sender][eventIdFrom] >= amount, 'Not enough shards');
-        require(eventIdTo == 0 || getIsEventActive(eventIdTo), 'Target event inactive');
+        require(getIsEventActive(eventIdTo), 'Target event inactive');
         userEventShardSupply[msg.sender][eventIdFrom] -= amount;
         uint256 convertedAmount = amount.div(vars[VAR_CONVERT_RATIO_DENOMINATOR]);
         convertedAmount += userEventShardSupply[msg.sender][eventIdFrom] == 0 && amount % vars[VAR_CONVERT_RATIO_DENOMINATOR] > 0 ? 1 : 0;
@@ -266,5 +266,19 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
 
     function updateEventEndTime(uint256 eventId, uint256 endTime) external restricted {
         eventInfo[eventId].endTime = endTime;
+    }
+
+    // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
+    function privatePartnerOrder(address[] calldata receivers, uint256 eventId, uint256 orderOption) external restricted {
+        require(hasRole(MINTER_ROLE, msg.sender), "Not minter");
+        require(getIsEventActive(eventId), 'Event inactive');
+        require(eventInfo[eventId].supply == 0 || receivers.length + eventInfo[eventId].orderedCount <= eventInfo[eventId].supply, "Not enough supply");
+        require(orderOption >= 1 && orderOption <= 3, "Invalid option");
+        for(uint i = 0; i < receivers.length; i++) {
+            if(userOrderOptionForEvent[receivers[i]][eventId] != 0) continue;
+            userOrderOptionForEvent[receivers[i]][eventId] = orderOption;
+            eventInfo[eventId].orderedCount++;
+            safeRandoms.requestSingleSeed(receivers[i], getSeed(eventId));
+        }
     }
 }
