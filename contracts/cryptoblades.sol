@@ -529,13 +529,17 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _mintWeaponNLogic(uint32 num, uint8 chosenElement, uint256 eventId) internal {
         require(num > 0 && num <= 10);
-        specialWeaponsManager.addShards(msg.sender, eventId, num);
+        if(eventId > 0) {
+            specialWeaponsManager.addShards(msg.sender, eventId, num);
+        }
         weapons.mintN(msg.sender, num, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
     function _mintWeaponLogic(uint8 chosenElement, uint256 eventId) internal {
         //uint256 seed = randoms.getRandomSeed(msg.sender);
-        specialWeaponsManager.addShards(msg.sender, eventId, 1);
+        if(eventId > 0) {
+            specialWeaponsManager.addShards(msg.sender, eventId, 1);
+        }
         weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 

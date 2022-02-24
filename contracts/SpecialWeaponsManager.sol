@@ -218,13 +218,8 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     }
 
     function addShards(address user, uint256 eventId, uint256 shardsAmount) external restricted {
-        if(eventId != 0) {
-            require(getIsEventActive(eventId), "Event inactive");
-            userEventShardSupply[user][eventId] += shardsAmount;
-        }
-        else {
-            userEventShardSupply[user][0] += shardsAmount;
-        }
+        require(getIsEventActive(eventId), "Event inactive");
+        userEventShardSupply[user][eventId] += shardsAmount;
     }
 
     function mintSpecial(address minter, uint256 eventId, uint256 seed, uint256 orderOption, uint8 element) private returns(uint256) {
