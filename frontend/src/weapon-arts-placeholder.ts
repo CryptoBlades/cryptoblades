@@ -12,7 +12,7 @@ import specialImg1 from './assets/special-weapons/pluto-alliance.png';
 import { IWeapon } from './interfaces';
 
 const allImages = [img1, img2, img3, img4, img5, img6, img7];
-const specialImage = [specialImg1, specialImg1, specialImg1, specialImg1, specialImg1, specialImg1, specialImg1, specialImg1];
+const specialImage = [specialImg1];
 
 export function getWeaponArt(weapon: IWeapon) {
   if (!weapon) {
