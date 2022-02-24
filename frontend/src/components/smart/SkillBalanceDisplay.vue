@@ -30,7 +30,8 @@
         >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/>
         </span> -->
          <div class="deposit-withdraw">
-         <span @click="showModal">Deposit</span> | <span @click="claimSkill(ClaimStage.Summary)"> Withdraw </span>
+         <!-- <span @click="showModal">Deposit</span> | <span @click="claimSkill(ClaimStage.Summary)"> Withdraw </span> -->
+         <span @click="showModal">Deposit</span> | <span> Withdraw </span>
         </div>
     </div>
 
@@ -200,6 +201,10 @@ export default Vue.extend({
 }
 .deposit-withdraw {
   margin-top: 25px;
+}
+
+.deposit-withdraw > span:nth-child(2) {
+  color : gray;
 }
 
 .deposit-withdraw > span {

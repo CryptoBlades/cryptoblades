@@ -1,130 +1,131 @@
 <template>
-  <div class="body main-font">
+  <div class="body main-font options">
     <img src="../assets/new-ui/6351903_burger_list_menu_navigation_icon@2x.png" class="burger-icon" @click="openMenu"/>
-    <div class="menu-open">
-      <div @click="closeMenu" class="x-button">X Close</div>
+    <div class="menu-open" v-if="isMenuOpen">
+      <div @click="closeMenu" class="x-button"><img src="../assets/new-ui/Close.png" /> Close (ESC)</div>
       <div></div>
       <div class="ads"></div>
       <div class="menu-icons">
         <div class="row-icons">
-            <div class="menu-icon">
+          <router-link class="menu-icon" v-if="!stakeOnly" :to="{ name: 'plaza'}" exact>
             <img src="../assets/new-ui/char-icon@2x.png">
             <p>Character</p>
-          </div>
+          </router-link>
 
-          <div class="menu-icon">
-            <img src="../assets/new-ui/char-icon@2x.png">
+          <router-link class="menu-icon" v-if="!stakeOnly" :to="{ name: 'blacksmith'}" exact>
+            <img src="../assets/new-ui/3553090_hammer_icon@2x.png">
             <p>Blacksmith</p>
-          </div>
+          </router-link>
 
-          <div class="menu-icon">
-            <img src="../assets/new-ui/char-icon@2x.png">
+          <router-link class="menu-icon" v-if="!stakeOnly" :to="{ name: 'combat'}" exact>
+            <img src="../assets/new-ui/goblin-head-svgrepo-com@2x.png">
             <p>Combat</p>
-          </div>
+          </router-link >
 
-          <div class="menu-icon">
-            <img src="../assets/new-ui/char-icon@2x.png">
+          <router-link class="menu-icon" v-if="pvp" :to="{ name: 'pvp'}" exact>
+            <img src="../assets/new-ui/_x31_30_x2C__sword_x2C__fencing_x2C__sports_x2C__weapon-1@2x.png">
+            <p>Arena</p>
+          </router-link>
+
+          <div v-else class="menu-icon disabled-hover">
+            <img src="../assets/new-ui/_x31_30_x2C__sword_x2C__fencing_x2C__sports_x2C__weapon-1@2x.png">
             <p>Arena</p>
           </div>
         </div>
 
         <div class="row-icons">
-            <div class="menu-icon">
-            <img src="../assets/new-ui/char-icon@2x.png">
+          <router-link class="menu-icon" v-if="!stakeOnly && raid" :to="{ name: 'raid'}" exact>
+            <img src="../assets/new-ui/noun-dragon-head-2602075@2x.png">
+            <p>Raid</p>
+          </router-link>
+
+          <div v-if="!raid" class="menu-icon disabled-hover">
+            <img src="../assets/new-ui/noun-dragon-head-2602075@2x.png">
             <p>Raid</p>
           </div>
 
-          <div class="menu-icon">
-            <img src="../assets/new-ui/char-icon@2x.png">
+          <router-link class="menu-icon" v-if="quests" :to="{ name: 'quests'}" exact>
+            <img src="../assets/new-ui/Teleport@2x.png" />
+            <p>Quest</p>
+            <hint v-if="!supportsQuests" class="hint" :text="$t('viewLink.functionalityNotSupportedTooltip')"/>
+          </router-link>
+
+          <div v-else class="menu-icon disabled-hover">
+            <img src="../assets/new-ui/Teleport@2x.png">
             <p>Quest</p>
           </div>
 
-          <div class="menu-icon">
-            <img src="../assets/new-ui/char-icon@2x.png">
+          <a class="menu-icon" v-if="!stakeOnly && market" href="https://bazaar.market" target="_blank">
+            <img src="../assets/new-ui/balance@2x.png">
+            <p>Bazaar</p>
+          </a>
+
+          <div v-if="!market" class="menu-icon disabled-hover">
+            <img src="../assets/new-ui/balance@2x.png">
             <p>Bazaar</p>
           </div>
 
-          <div class="menu-icon">
-            <img src="../assets/new-ui/char-icon@2x.png">
+          <router-link class="menu-icon" :to="{ name: 'select-stake-type'}" exact>
+            <img src="../assets/new-ui/2169614_bar_chart_financial_graph_graphic_icon@2x.png">
             <p>Stake</p>
-          </div>
+          </router-link>
         </div>
 
         <div class="row-icons">
-            <div class="menu-icon">
-            <img src="../assets/new-ui/char-icon@2x.png">
+            <router-link class="menu-icon" :to="{ name: 'treasury'}" exact>
+            <img src="../assets/new-ui/treasure-chest_5233099@2x.png">
             <p>Treasury</p>
-          </div>
+            </router-link>
 
-          <div class="menu-icon">
-            <img src="../assets/new-ui/char-icon@2x.png">
+          <router-link class="menu-icon" :to="{ name: 'leaderboard'}" exact>
+            <img src="../assets/new-ui/5378819_crown_games_king_royal_winner_icon@2x.png">
             <p>Leaderboard</p>
-          </div>
+          </router-link>
 
-          <div class="menu-icon">
-            <img src="../assets/new-ui/char-icon@2x.png">
+           <router-link class="menu-icon" :to="{ name: 'bridge'}" v-if="isBridgeEnabled" exact>
+            <img src="../assets/new-ui/Solid@2x.png">
+            <p>NFT Bridge</p>
+          </router-link>
+
+           <div v-else class="menu-icon disabled-hover">
+            <img src="../assets/new-ui/Solid@2x.png">
             <p>NFT Bridge</p>
           </div>
 
-          <div class="menu-icon">
-            <img src="../assets/new-ui/char-icon@2x.png">
+          <a class="menu-icon"  href="https://cryptoblades.gitbook.io/wiki/" target="_blank">
+            <img src="../assets/new-ui/298731_book_icon@2x.png">
             <p>Wiki</p>
-          </div>
+          </a>
         </div>
 
          <div class="row-icons">
-            <div class="menu-icon">
-            <img src="../assets/new-ui/char-icon@2x.png">
+            <router-link class="menu-icon" :to="{ name: 'options'}" exact>
+            <img src="../assets/new-ui/211751_gear_icon (2)@2x.png">
             <p>Settings</p>
-          </div>
+            </router-link>
         </div>
+
+        <div class="horizontal-small"></div>
+
+        <!-- disabled for now , will integrate later when other UI's merged -->
+        <!-- <div class="menu-other-options">
+          <div class="current-chain">
+            <b>Current Chain</b>
+            <select class="form-control wep-trait-form">
+                  <option v-for="x in this.$t('chainsList')" :value="x" :key="x">{{ x }}</option>
+            </select>
+          </div>
+          <div class="payout-currency">
+            <b>Payout Currency</b>
+
+            <select class="form-control wep-trait-form">
+                  <option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</option>
+            </select>
+          </div>
+        </div> -->
 
       </div>
     </div>
-    <!-- <b-navbar-nav>
-      <div>
-      <b-nav-item-dropdown right>
-        <template #button-content>
-          <i class="fa fa-bars menu-burger"></i>
-        </template>
-        <b-dropdown-group>
-
-        <b-dropdown-header>{{$t('optionsMenu.links')}}</b-dropdown-header>
-
-          <b-dropdown-item v-if="currentChainSupportsClaimTokens()" @click="onClaimTokens()"><i
-            class="fa fa-coins mr-2"></i>{{ $t('optionsMenu.claimSkill') }}
-          </b-dropdown-item>
-
-          <b-dropdown-item :to="{ name: 'leaderboard' }" class="gtag-link-others" tagname="leaderboard_screen">
-        <i class="fa fa-trophy mr-2"></i>{{$t('optionsMenu.leaderboard')}}
-        </b-dropdown-item>
-
-        <b-dropdown-item :to="{ name: 'portal' }"><i class="fa fa-dungeon mr-2"></i>{{$t('optionsMenu.portal')}}</b-dropdown-item>
-
-        <b-dropdown-item href="https://cryptoblades.gitbook.io/wiki/" target="_blank"><i class="fa fa-book mr-2"></i>{{$t('optionsMenu.wiki')}} <b-icon scale="0.8" icon="question-circle"/></b-dropdown-item>
-
-        <b-dropdown-item :to="{ name: 'nft-display' }">
-          <img src="https://seiyria.com/gameicons-font/svg/crystal-ball.svg" class="nft-display-icon"/>
-           {{$t('optionsMenu.nftDisplay')}}
-        </b-dropdown-item>
-
-        <b-dropdown-item :to="{ name: 'bridge' }" v-if="isBridgeEnabled">
-           <i class="fa fa-exchange-alt mr-2"></i>{{$t('optionsMenu.bridgeNfts')}}
-        </b-dropdown-item>
-
-        </b-dropdown-group>
-
-        <hr class="border-light">
-
-        <b-dropdown-group class="mb-2">
-
-       <b-dropdown-item :to="{ name: 'options' }">
-        <i class="fa fa-cog mr-2"></i>{{$t('optionsMenu.options')}}
-        </b-dropdown-item>
-        </b-dropdown-group>
-      </b-nav-item-dropdown>
-       </div>
-    </b-navbar-nav> -->
 
     <b-modal class="centered-modal" ref="need-gas-modal" :title="$t('needGasModal.title')"
       @ok="claimSkill(ClaimStage.Stake)" :ok-title="$t('needGasModal.okTitle')"
@@ -181,6 +182,7 @@ import {Accessors} from 'vue/types/options';
 import Vue from 'vue';
 import {fromWeiEther, toBN} from '../utils/common';
 import {nft_bridge as bridgeEnabled} from './../feature-flags';
+import {SupportedProject} from '@/views/Treasury.vue';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -196,12 +198,15 @@ interface Data {
   hideRewards: boolean;
   hideWalletWarning: boolean;
   showSkillInUsd: boolean;
+  isMenuOpen: boolean;
 }
 
 interface StoreMappedGetters {
   rewardsClaimTaxAsFactorBN: BigNumber;
   maxRewardsClaimTaxAsFactorBN: BigNumber;
+  getPartnerProjects: SupportedProject[];
 }
+
 
 enum ClaimStage {
   WaxBridge = 0,
@@ -220,6 +225,7 @@ export default Vue.extend({
   data() {
     return {
       isBridgeEnabled: bridgeEnabled,
+      isMenuOpen : false,
       showGraphics: false,
       hideRewards: false,
       hideWalletWarning: false,
@@ -228,9 +234,15 @@ export default Vue.extend({
     } as Data;
   },
 
+  watch:{
+    $route (){
+      this.isMenuOpen = false;
+    }
+  },
+
   computed: {
     ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN']) as Accessors<StoreMappedGetters>),
+    ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
 
     formattedSkillReward(): string {
       const skillRewards = fromWeiEther(this.skillRewards);
@@ -255,6 +267,22 @@ export default Vue.extend({
     canClaimTokens(): boolean {
       return !toBN(this.skillRewards).lte(0);
     },
+    supportedProjects(): SupportedProject[] {
+      const supportedProjects = this.getPartnerProjects.map(p => {
+        return {
+          id: p.id,
+          name: p.name,
+          tokenSymbol: p.tokenSymbol,
+          tokenAddress: p.tokenAddress,
+          tokenSupply: p.tokenSupply,
+          tokensClaimed: p.tokensClaimed,
+          tokenPrice: p.tokenPrice,
+          isActive: p.isActive
+        };
+      });
+
+      return supportedProjects;
+    },
   },
 
   methods: {
@@ -269,10 +297,12 @@ export default Vue.extend({
 
     openMenu() {
       console.log('open menu');
+      this.isMenuOpen = true;
     },
 
     closeMenu() {
       console.log('close menu');
+      this.isMenuOpen = false;
     },
 
     toggleRewards() {
@@ -334,9 +364,11 @@ export default Vue.extend({
   font-size: 35px;
 }
 
+.options {
+  padding : 25px;
+}
 .burger-icon {
   width: 35px;
-  margin: 25px;
 }
 .burger-icon:hover {
   cursor: pointer;
@@ -348,7 +380,7 @@ export default Vue.extend({
     top: 0;
     position: fixed;
     z-index: 999999;
-    background: rgb(3, 75, 3);
+    background-color: rgb(0 0 0 / 85%);
     left: 0;
     padding: 40px;
 }
@@ -356,20 +388,21 @@ export default Vue.extend({
 .x-button {
   float: right;
   color : white;
-  font-size: 20px;
+  font-size: 23px;
+  margin-right: 60px;
 }
-
+.x-button:hover {
+  cursor: pointer;
+}
 .ads {
   float: left;
   width: 60%;
-  background: black;
   height: 100%;
   margin-top: 30px;
 }
 .menu-icons {
   float : right;
   width: 40%;
-  background: rgb(65, 30, 30);
   height: 100%;
   padding-top: 15px;
   display: inline;
@@ -396,9 +429,33 @@ export default Vue.extend({
   height: 120px;
 }
 
-.row-icons:last-child {
+.horizontal-small {
+  margin : 45px 35px 45px 35px;
+  border-top : 2px solid rgb(85, 84, 84)
+}
+
+.row-icons-last {
   justify-content: flex-start;
   display: flex;
   margin-left: 6.5%;
+  margin-top : 15px;
+}
+
+.menu-other-options {
+  display: flex;
+  justify-content: center;
+}
+.current-chain, .payout-currency {
+  width: 50%;
+  padding: 15px 35px 15px 35px;
+}
+
+.current-chain, .payout-currency > b {
+  font-size: 18px;
+  color : white;
+}
+
+.disabled-hover {
+  cursor: not-allowed;
 }
 </style>

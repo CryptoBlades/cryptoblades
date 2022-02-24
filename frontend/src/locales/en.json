@@ -1050,6 +1050,13 @@
     "lightning": "Lightning",
     "water": "Water"
   },
+  "chainsList" : {
+    "BSC": "BSC",
+    "Polygon" : "Polygon",
+    "Heco": "Heco",
+    "Oec": "Oec",
+    "Avax": "Water"
+  },
   "copyLink": "Copy link",
   "Treasury": {
     "formulaDetailsTitle": "Claiming Formula Details",
