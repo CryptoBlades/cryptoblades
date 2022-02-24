@@ -90,8 +90,9 @@
           <pvp-button
             @click="reRollCharacterOpponent" :disabled="loading || !isInMatch || isCharacterInDuelQueue"
             :buttonText="$t('pvp.reRoll')"
-            :buttonsubText="!freeRerollReady ? '$SKILL: ' + formattedReRollCost : 'Free'"
+            :buttonsubText="!hasSpecialWeapon || !freeRerollReady ? '$SKILL: ' + formattedReRollCost : $t('pvp.free')"
             :secondary="true"
+            v-tooltip="hasSpecialWeapon && !freeRerollReady ? `${$t('pvp.freeRerollIn')} ${freeRerollLocalTimestamp}` : ''"
           />
         </div>
         <div class="leaveArenaButtonWrapper">
@@ -319,8 +320,16 @@ export default {
     },
 
     freeRerollReady() {
-      if(!+this.specialWeaponFreeRerollTimestamp) return false;
+      if(!this.hasSpecialWeapon) return false;
       return +this.specialWeaponFreeRerollTimestamp <= Date.now()/1000;
+    },
+
+    hasSpecialWeapon() {
+      return +this.activeWeaponWithInformation.information.weaponType > 1;
+    },
+
+    freeRerollLocalTimestamp() {
+      return new Date(this.specialWeaponFreeRerollTimestamp * 1000).toLocaleString();
     }
   },
 

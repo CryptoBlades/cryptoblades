@@ -176,10 +176,9 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
 
     function claimShardRewards(uint256 eventId, uint256 amount) external {
         require(amount.mul(1e18) <= getUserShardsRewards(msg.sender), "Not enough rewards");
-        userSkillStakingShardsRewards[msg.sender] = getUserShardsRewards(msg.sender);
+        userSkillStakingShardsRewards[msg.sender] = getUserShardsRewards(msg.sender).sub(amount.mul(1e18));
         userStakedSkillUpdatedTimestamp[msg.sender] = block.timestamp;
         userEventShardSupply[msg.sender][eventId] += amount;
-        userSkillStakingShardsRewards[msg.sender] -= amount.mul(1e18);
     }
 
     function orderSpecialWeaponWithShards(uint256 eventId, uint256 orderOption) public {
@@ -266,7 +265,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         require(eventIdTo == 0 || getIsEventActive(eventIdTo), 'Target event inactive');
         userEventShardSupply[msg.sender][eventIdFrom] -= amount;
         uint256 convertedAmount = amount.div(vars[VAR_CONVERT_RATIO_DENOMINATOR]);
-        convertedAmount += amount == userEventShardSupply[msg.sender][eventIdFrom] && amount % vars[VAR_CONVERT_RATIO_DENOMINATOR] > 0 ? 1 : 0;
+        convertedAmount += userEventShardSupply[msg.sender][eventIdFrom] == 0 && amount % vars[VAR_CONVERT_RATIO_DENOMINATOR] > 0 ? 1 : 0;
         userEventShardSupply[msg.sender][eventIdTo] += convertedAmount;
     }
 

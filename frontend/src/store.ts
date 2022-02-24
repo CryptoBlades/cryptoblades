@@ -5257,7 +5257,7 @@ export function createStore(web3: Web3) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;
 
-        return +await SpecialWeaponsManager.methods.vars(5).call(defaultCallOptions(state));
+        return +await SpecialWeaponsManager.methods.vars(10).call(defaultCallOptions(state));
       },
 
       async orderSpecialWeapon({ state, dispatch }, { eventId, orderOption, orderWithSkill }) {
@@ -5265,17 +5265,14 @@ export function createStore(web3: Web3) {
         if(!SpecialWeaponsManager || !CryptoBlades || !SkillToken || !state.defaultAccount) return;
 
         if(orderWithSkill) {
-          await approveFeeFromAnyContract(
+          const price = await SpecialWeaponsManager.methods.getSkillForgeCost(orderOption).call(defaultCallOptions(state));
+          await approveFeeFromAnyContractSimple(
             CryptoBlades,
-            SpecialWeaponsManager,
             SkillToken,
             state.defaultAccount,
-            state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            specialWeaponsManagerFunctions => specialWeaponsManagerFunctions.getSkillForgeCost(orderOption),
-            { allowInGameOnlyFunds: false, allowSkillRewards: true },
-            true
+            new BigNumber(price)
           );
           await SpecialWeaponsManager.methods.orderSpecialWeaponWithSkill(eventId, orderOption).send({ from: state.defaultAccount });
         }
