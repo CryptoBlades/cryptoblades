@@ -8,9 +8,9 @@
           <div v-if="!isLoading">
             <div class="d-flex mt-3 align-items-center">
               <h5 class="mb-0">{{$t('blacksmith.specialEvent')}}:</h5>
-              <b-form-select :disabled="!activeSpecialWeaponEventsIds.length" class="w-50 ml-1" size="sm"
+              <b-form-select :disabled="!activeSpecialWeaponEventsIds.length && !inactiveEventsIdsWithUnclaimedOrders.length" class="w-50 ml-1" size="sm"
                 v-model="selectedSpecialWeaponEventId" :value="selectedSpecialWeaponEventId" @change="updateSpecialWeaponEventId($event)">
-                <b-form-select-option v-for="id in activeSpecialWeaponEventsIds" :key="+id" :value="+id">
+                <b-form-select-option v-for="id in activeSpecialWeaponEventsIds.concat(inactiveEventsIdsWithUnclaimedOrders)" :key="+id" :value="+id">
                   {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
                 </b-form-select-option>
               </b-form-select>
@@ -29,7 +29,8 @@
                   </div>
                 </div>
                 <div class="w-50 mb-3">
-                  <span>{{$t('blacksmith.endsIn')}}: {{eventEndsIn}}</span>
+                  <span v-if="endsIn > 0">{{$t('blacksmith.endsIn')}}: {{eventEndsIn}}</span>
+                  <span v-if="endsIn < 0">{{$t('blacksmith.ended')}}</span>
                   <h4>{{partnerName}}</h4>
                   <div class="mt-2">
                     <h5 class="text-justify">{{eventDetails}}</h5>
@@ -438,7 +439,7 @@ export default Vue.extend({
 
     forgedWeapon(): IWeapon | undefined {
       return this.weaponsWithIds(this.ownedWeaponIds).find(w => {
-        return w.weaponType === this.selectedSpecialWeaponEventId;
+        return w && w.weaponType === this.selectedSpecialWeaponEventId;
       });
     },
 
@@ -459,6 +460,10 @@ export default Vue.extend({
         +this.specialWeaponEvents[this.selectedSpecialWeaponEventId].supply) * 100
       )}%`;
     },
+
+    inactiveEventsIdsWithUnclaimedOrders(): number[] {
+      return this.inactiveSpecialWeaponEventsIds.filter(id => this.specialWeaponEvents[id].ordered && !this.specialWeaponEvents[id].forged);
+    }
   },
 
   watch: {
@@ -569,8 +574,8 @@ export default Vue.extend({
         this.isLoading = true;
         await this.fetchSpecialWeaponEvents();
         this.forgeCosts = await this.fetchForgeCosts();
-        if(+this.specialWeaponEventId === 0 && this.activeSpecialWeaponEventsIds.length > 0) {
-          this.selectedSpecialWeaponEventId = +this.activeSpecialWeaponEventsIds[0];
+        if(+this.specialWeaponEventId === 0 && (this.activeSpecialWeaponEventsIds.length > 0 || this.inactiveEventsIdsWithUnclaimedOrders.length > 0)) {
+          this.selectedSpecialWeaponEventId = +this.activeSpecialWeaponEventsIds.concat(this.inactiveEventsIdsWithUnclaimedOrders)[0];
         }
         else {
           this.selectedSpecialWeaponEventId = +this.specialWeaponEventId;
