@@ -20,17 +20,8 @@
         </b-form-select-option>
       </b-form-select>
     </b-form>
-    <div class="d-flex gap-3 flex-wrap p-3">
-      <h3 v-if="isLoading">
-        <i class="fas fa-spinner fa-spin"/>
-        {{ $t('quests.loading') }}
-      </h3>
-      <h3 v-else-if="questTemplates.length === 0 && templatesTier !== undefined">
-        {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
-      <QuestTemplate v-else v-for="(questTemplate, index) in questTemplates" :key="index" :quest="questTemplate"
-                     :questIndex="index" :refreshQuestTemplates="refreshQuestTemplates"
-                     :deadline="questTemplate.deadline" :supply="questTemplate.supply"/>
-    </div>
+    <QuestsList v-if="templatesTier !== undefined" :tier="promoQuestTemplates ? templatesTier + 10 : templatesTier"
+                deletable/>
   </div>
 </template>
 
@@ -38,7 +29,7 @@
 import Vue from 'vue';
 import {mapActions} from 'vuex';
 import {Quest, Rarity} from '@/views/Quests.vue';
-import QuestTemplate from './QuestTemplate.vue';
+import QuestsList from './QuestsList.vue';
 
 interface StoreMappedActions {
   getQuestTemplates(payload: { tier: number }): Promise<Quest[]>;
@@ -58,7 +49,7 @@ interface Data {
 
 export default Vue.extend({
 
-  components: {QuestTemplate},
+  components: {QuestsList},
 
   data() {
     return {

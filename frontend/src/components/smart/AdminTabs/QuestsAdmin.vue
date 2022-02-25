@@ -110,7 +110,7 @@
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.limitedOptional') }}</label>
         <div class="d-flex align-items-center gap-3 mt-2">
-          <b-form-input v-model="supply" type="number" number :placeholder="$t('quests.supplyOptional')" :min="0"/>
+          <b-form-input v-model="supply" type="number" number :placeholder="$t('quests.supplyOptional')" :min="1"/>
           <i id="unix-timestamp-hint" class="far fa-question-circle hint"/>
           <b-tooltip target="unix-timestamp-hint">
             {{ $t('quests.unixTimestampHint') }} <a href="https://www.unixtimestamp.com/" target="_blank">https://www.unixtimestamp.com/</a>
@@ -291,13 +291,17 @@
         {{ $t('quests.loading') }}
       </h3>
     </b-form>
-    <b-modal v-model="showTemplateConfirmationModal" @ok.prevent="onSubmit" :ok-disabled="isLoading"
+    <b-modal v-model="showTemplateConfirmationModal" @ok.prevent="onSubmit" :ok-disabled="isLoading" size="xl"
              :title="promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest')">
       <div class="d-flex flex-column align-items-center">
         <h4 class="text-center">
           {{ promoQuestTemplates ? $t('quests.areYouSureAddPromoQuest') : $t('quests.areYouSureAddQuest') }}
         </h4>
-        <QuestTemplate :quest="questTemplate" :deadline="timestamp" :supply="supply" isDisplayOnly/>
+        <div class="quest-row p-3">
+          <QuestRequirements :quest="questTemplate"/>
+          <QuestRewards :quest="questTemplate"/>
+          <QuestActions :quest="questTemplate" :key="questTemplate.id" showSupply :deadline="timestamp" :supply="supply"/>
+        </div>
       </div>
     </b-modal>
     <b-modal v-model="showPromoToggleConfirmationModal" @ok.prevent="togglePromoQuests" :ok-disabled="isLoading"
@@ -325,7 +329,9 @@ import {
   TierChances
 } from '../../../views/Quests.vue';
 import QuestTemplatesDisplay from '../QuestTemplatesDisplay.vue';
-import QuestTemplate from '../QuestTemplate.vue';
+import QuestRequirements from '../QuestRequirements.vue';
+import QuestRewards from '../QuestRewards.vue';
+import QuestActions from '../QuestActions.vue';
 import {isValidWeb3Address} from '../../../utils/common';
 
 interface StoreMappedActions {
@@ -393,7 +399,7 @@ interface Data {
 
 export default Vue.extend({
 
-  components: {QuestTemplatesDisplay, QuestTemplate},
+  components: {QuestTemplatesDisplay, QuestRequirements, QuestRewards, QuestActions},
 
   data() {
     return {
@@ -687,5 +693,14 @@ export default Vue.extend({
 
 .invisible {
   visibility: hidden;
+}
+
+.quest-row {
+  display: flex;
+  width: 100%;
+  background: #141414;
+  border: 1px solid #60583E;
+  border-radius: 10px;
+  align-items: center;
 }
 </style>

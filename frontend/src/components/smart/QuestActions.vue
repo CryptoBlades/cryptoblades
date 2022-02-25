@@ -1,35 +1,42 @@
 <template>
-  <div v-if="isInitialized" class="quest-actions-display gap-2 p-2">
-     <span v-if="hasIncomingDeadline" class="text-center">
+  <div v-if="isInitialized && (character || deletable || supply)" class="quest-actions-display gap-2 p-2">
+    <span v-if="showSupply && supply" class="text-center">
+      {{ $t('quests.supplyLeft', {supply}) }}
+    </span>
+    <span v-if="hasIncomingDeadline" class="text-center">
        {{ $t('quests.questDeadlineIn', {time: deadlineTime}) }}
      </span>
     <span v-else-if="afterDeadline" class="text-center">
       {{ $t('quests.questDeadlineOverCannotBeCompleted') }}
     </span>
-    <b-button v-if="character.quest.id === 0" :disabled="isLoading" variant="primary" @click="request">
+    <b-button v-if="character && character.quest.id === 0" :disabled="isLoading" variant="primary" @click="request">
       {{ $t('quests.requestQuest') }}
     </b-button>
-    <b-button v-else-if="questCanBeCompleted && !afterDeadline" :disabled="isLoading" variant="primary"
+    <b-button v-else-if="questCanBeCompleted && !afterDeadline && character" :disabled="isLoading" variant="primary"
               class="flex-1"
               @click="complete" :id="character.id" :key="character.id">
       {{ $t('quests.complete') }}
     </b-button>
+    <b-button v-if="deletable" variant="primary" class="flex-1" @click="deleteQuestTemplate()"
+              :disabled="isLoading">
+      {{ $t('quests.deleteQuest') }}
+    </b-button>
     <b-button
-      v-if="quest.requirementType !== RequirementType.RAID && !questCanBeCompleted && !afterDeadline"
+      v-if="character && quest.requirementType !== RequirementType.RAID && !questCanBeCompleted && !afterDeadline"
       :disabled="isLoading" variant="primary"
       class="flex-1" @click="submit">
       {{ $t('quests.submit') }}
     </b-button>
-    <b-button v-if="!questCanBeCompleted || afterDeadline" variant="primary" class="flex-1" @click="skip"
+    <b-button v-if="character && (!questCanBeCompleted || afterDeadline)" variant="primary" class="flex-1" @click="skip"
               :disabled="(!freeSkip && !hasStaminaToSkip) || isLoading">
       {{ freeSkip ? $t('quests.freeSkip') : $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
       <Hint v-if="!freeSkip && !hasStaminaToSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
     </b-button>
-    <span v-if="nextFreeSkipTime && character.quest.id !== 0 && (!questCanBeCompleted || afterDeadline)"
+    <span v-if="nextFreeSkipTime && character && character.quest.id !== 0 && (!questCanBeCompleted || afterDeadline)"
           class="text-center">{{
         $t('quests.freeSkipResetsIn', {time: nextFreeSkipTime})
       }}</span>
-    <QuestSubmissionModal :showModal="showSubmissionModal" :character="character"
+    <QuestSubmissionModal v-if="character" :showModal="showSubmissionModal" :character="character"
                           @close-submission-modal="onCloseSubmissionModal"/>
 
     <b-modal v-model="showQuestCompleteModal" ok-only class="centered-modal" :title="$t('quests.questComplete')"
@@ -88,6 +95,20 @@ export default Vue.extend({
     refreshQuestTemplates: {
       type: Function,
     },
+    deletable: {
+      type: Boolean,
+      default: false,
+    },
+    showSupply: {
+      type: Boolean,
+      default: false,
+    },
+    deadline: {
+      type: Number,
+    },
+    supply: {
+      type: Number,
+    },
   },
 
   data() {
@@ -135,6 +156,8 @@ export default Vue.extend({
       'completeQuest',
       'nextFreeSkip',
       'getQuestDeadline',
+      'getQuestSupply',
+      'deleteQuest',
     ]),
 
     submit() {
@@ -198,12 +221,21 @@ export default Vue.extend({
       }
     },
 
+    async deleteQuestTemplate() {
+      try {
+        this.isLoading = true;
+        await this.deleteQuest({tier: this.quest.tier, questID: this.quest.id});
+        this.$emit('refresh-quest-data');
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     async refreshSkipQuestData() {
       this.hasStaminaToSkip = await this.hasStaminaToSkipQuest({characterID: this.character.id});
       this.freeSkip = await this.hasFreeSkip({characterID: this.character.id});
       this.skipQuestStaminaCost = await this.getSkipQuestStaminaCost();
       await this.getNextFreeSkipTime();
-      await this.getDeadlineTime();
     },
 
     async getNextFreeSkipTime() {
@@ -240,8 +272,29 @@ export default Vue.extend({
   },
 
   async mounted() {
-    if (!this.refreshQuestTemplates) {
+    if (!this.refreshQuestTemplates && this.character) {
       await this.refreshSkipQuestData();
+    }
+    if (!this.supply && !this.deadline) {
+      if (this.showSupply) {
+        this.supply = +await this.getQuestSupply({questID: this.quest.id});
+      }
+      await this.getDeadlineTime();
+    } else {
+      console.log('this.deadline', this.deadline);
+      console.log('this.supply', this.supply);
+      this.isLimited = true;
+      if (this.deadlineCheckInterval) {
+        clearInterval(this.deadlineCheckInterval);
+      }
+      this.deadlineCheckInterval = setInterval(() => {
+        const {total, days, hours, minutes, seconds} = getTimeRemaining(this.deadline.toString());
+        this.deadlineTime = `${days !== '00' ? `${days}d ` : ''} ${hours !== '00' ? `${hours}h ` : ''} ${minutes}m ${seconds}s`;
+        if (total <= 0 && this.deadlineCheckInterval) {
+          clearInterval(this.deadlineCheckInterval);
+          this.deadlineTime = '';
+        }
+      }, 1000);
     }
     this.isInitialized = true;
   },

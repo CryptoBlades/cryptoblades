@@ -12,14 +12,16 @@
             Array(quest.requirementRarity + 1).fill('★').join('')
           }} </span>{{ requirementName }} <i
           v-if="quest.requirementType === RequirementType.EXTERNAL || quest.requirementType === RequirementType.EXTERNAL_HOLD"
-          :id="`external-hint-${quest.id}-${characterId}`" class="far fa-question-circle hint"/></span>
+          :id="`external-hint-${quest.id}-${index}`" class="far fa-question-circle hint"/></span>
         <b-tooltip
           v-if="quest.requirementType === RequirementType.EXTERNAL || quest.requirementType === RequirementType.EXTERNAL_HOLD"
-          :target="`external-hint-${quest.id}-${characterId}`">
+          :target="`external-hint-${quest.id}-${index}`">
           {{ externalTooltip }} <a :href="externalWebsite" target="_blank">{{ externalWebsite }}</a>
         </b-tooltip>
-        <span class="progress-text">{{ $t(`quests.progress`) }}: {{ `${progress} / ${quest.requirementAmount}` }}</span>
-        <span class="rarity-label text-capitalize" :style="setRarityColor(Rarity[quest.tier])">
+        <span v-if="progress !== undefined" class="progress-text">{{
+            $t(`quests.progress`)
+          }}: {{ `${progress} / ${quest.requirementAmount}` }}</span>
+        <span class="rarity-label text-capitalize" :style="setRarityColor(quest.tier)">
           {{ $t(`quests.rarityType.${Rarity[quest.tier]}`) }}</span>
       </div>
     </div>
@@ -47,7 +49,7 @@ export default Vue.extend({
       type: Object as PropType<Quest>,
       required: true,
     },
-    characterId: {
+    index: {
       type: Number as PropType<number | string>,
     },
     progress: {
@@ -69,19 +71,19 @@ export default Vue.extend({
   computed: {
     requirementName(): string {
       if (this.quest.requirementType === RequirementType.EXTERNAL || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
-        if(!this.quest?.requirementExternalAddress) return '';
+        if (!this.quest?.requirementExternalAddress) return '';
         return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].name;
       } else {
-        if(!this.quest?.requirementType) return '';
+        if (!this.quest?.requirementType) return '';
         return i18n.t(`quests.requirementType.${RequirementType[this.quest.requirementType]}`).toString();
       }
     },
     externalTooltip(): string {
-      if(!this.quest?.requirementExternalAddress) return '';
+      if (!this.quest?.requirementExternalAddress) return '';
       return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].description;
     },
     externalWebsite(): string {
-      if(!this.quest?.requirementExternalAddress) return '';
+      if (!this.quest?.requirementExternalAddress) return '';
       return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].website;
     },
   },
@@ -94,22 +96,22 @@ export default Vue.extend({
     setRarityColor(rarity: Rarity) {
       switch (rarity) {
       case Rarity.LEGENDARY: {
-        return 'background-color:#D16100';
+        return 'background-color: #D16100';
       }
       case Rarity.EPIC: {
-        return 'background-color:#7C1EC1';
+        return 'background-color: #7C1EC1';
       }
       case Rarity.RARE: {
-        return 'background-color:#7ba224';
+        return 'background-color: #7ba224';
       }
       case Rarity.UNCOMMON: {
-        return 'background-color:#3997F5';
+        return 'background-color: #3997F5';
       }
       case Rarity.COMMON: {
-        return 'background-color:#43506A';
+        return 'background-color: #43506A';
       }
       default: {
-        return 'background-color:#43506A';
+        return 'background-color: #43506A';
       }
       }
     }

@@ -1,7 +1,26 @@
 <template>
   <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container gap-4">
     <div class="d-flex justify-content-between w-100 weekly-progress-container">
-      <span class="quests-title">{{ $t('quests.quest') }}</span>
+      <div class="d-flex flex-column justify-content-between">
+        <span class="quests-title">{{ $t('quests.quest') }}</span>
+        <b-button variant="primary" @click="showQuestsListModal = true">
+          {{ $t('quests.availableQuests') }}
+        </b-button>
+        <b-modal v-model="showQuestsListModal" :title="$t('quests.availableQuests')" hide-footer
+                 @hide="showQuestsListModal = false; tier = undefined" size="xl">
+          <div class="d-flex align-items-center gap-3">
+            <b-form-select class="mt-2 mb-2" v-model="tier">
+              <b-form-select-option :value="undefined" disabled>
+                {{ $t('quests.pleaseSelectQuestTier') }}
+              </b-form-select-option>
+              <b-form-select-option v-for="rarity in rarities" :key="rarity" :value="rarity">
+                {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
+              </b-form-select-option>
+            </b-form-select>
+          </div>
+          <QuestsList v-if="tier !== undefined" :tier="usePromoQuests ? tier + 10 : tier"/>
+        </b-modal>
+      </div>
       <div v-if="weeklyReward.id" class="d-flex flex-column gap-2">
         <div class="d-flex align-items-center gap-2">
           <div class="d-flex flex-column gap-2">
@@ -66,6 +85,7 @@ import {Accessors} from 'vue/types/options';
 import QuestRow from '@/components/smart/QuestRow.vue';
 import QuestComponentIcon from '@/components/smart/QuestComponentIcon.vue';
 import QuestReward from '@/components/smart/QuestReward.vue';
+import QuestsList from '@/components/smart/QuestsList.vue';
 import Hint from '@/components/Hint.vue';
 import hourglass from '@/assets/hourglass.png';
 import {getTimeRemaining} from '@/utils/common';
@@ -191,6 +211,8 @@ interface StoreMappedActions {
   hasClaimedWeeklyReward(): Promise<boolean>;
 
   claimWeeklyReward(): Promise<number[]>;
+
+  isUsingPromoQuests(): Promise<boolean>;
 }
 
 interface StoreMappedGetters {
@@ -209,10 +231,14 @@ interface Data {
   nextWeekResetCheckInterval?: ReturnType<typeof setInterval>;
   maxWeeklyCompletions: number;
   currentWeeklyCompletions: number;
+  showQuestsListModal: boolean;
+  rarities: Rarity[];
+  tier?: Rarity;
+  usePromoQuests: boolean;
 }
 
 export default Vue.extend({
-  components: {QuestRow, QuestComponentIcon, QuestReward, Hint},
+  components: {QuestRow, QuestComponentIcon, QuestReward, QuestsList, Hint},
 
   props: {
     showCosmetics: {
@@ -233,8 +259,13 @@ export default Vue.extend({
       nextWeekResetTime: '',
       maxWeeklyCompletions: 0,
       currentWeeklyCompletions: 0,
+      showQuestsListModal: false,
+      rarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
+      tier: undefined,
+      usePromoQuests: false,
       hourglass,
       QuestItemType,
+      Rarity,
     } as Data;
   },
 
@@ -262,6 +293,7 @@ export default Vue.extend({
       'getWeeklyReward',
       'hasClaimedWeeklyReward',
       'claimWeeklyReward',
+      'isUsingPromoQuests',
     ]) as StoreMappedActions,
 
     async claimWeekly() {
@@ -291,6 +323,7 @@ export default Vue.extend({
     async refreshQuestData() {
       try {
         this.isLoading = true;
+        this.usePromoQuests = await this.isUsingPromoQuests();
         this.currentWeeklyCompletions = await this.getWeeklyCompletions();
         this.maxWeeklyCompletions = await this.getWeeklyCompletionsGoal();
         this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});

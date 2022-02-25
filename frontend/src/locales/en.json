@@ -657,6 +657,7 @@
     "level": "Level {level}",
     "questsTitle": "Quests",
     "quest": "Quest",
+    "availableQuests": "Available quests",
     "skip": "Skip ({staminaCost} stamina)",
     "freeSkip": "Skip (FREE)",
     "freeSkipResetsIn": "Free skip resets in {time}",

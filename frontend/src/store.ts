@@ -3475,28 +3475,62 @@ export function createStore(web3: Web3) {
         if(questTemplatesIds.length === 0) return questTemplates;
 
         for (const questID of questTemplatesIds) {
-          const questTemplateRaw = await SimpleQuests.methods.quests(+questID).call(defaultCallOptions(state)) as unknown as {
+          const quest = await SimpleQuests.methods.quests(questID).call(defaultCallOptions(state)) as unknown as {
+            progress: string | number;
             id: string;
             tier: string;
             requirementType: string;
             requirementRarity: string;
             requirementAmount: string;
+            requirementExternalAddress: string;
             rewardType: string;
             rewardRarity: string;
             rewardAmount: string;
+            rewardExternalAddress: string;
             reputationAmount: string;
           };
-          questTemplates.push({
-            id: +questTemplateRaw.id,
-            tier: +questTemplateRaw.tier,
-            requirementType: +questTemplateRaw.requirementType,
-            requirementRarity: +questTemplateRaw.requirementRarity,
-            requirementAmount: +questTemplateRaw.requirementAmount,
-            rewardType: +questTemplateRaw.rewardType,
-            rewardRarity: +questTemplateRaw.rewardRarity,
-            rewardAmount: +questTemplateRaw.rewardAmount,
-            reputationAmount: +questTemplateRaw.reputationAmount,
-          } as Quest);
+          const emptyAccount = '0x0000000000000000000000000000000000000000';
+          if(quest.requirementExternalAddress !== emptyAccount
+            && ((quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL)
+              || (quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL_HOLD))) {
+            const currencyContract = new web3.eth.Contract(erc20Abi as any[], quest.requirementExternalAddress);
+            console.log('requirement is external');
+            try{
+              const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+              console.log('currencyDecimals', currencyDecimals);
+              quest.requirementAmount = new BigNumber(quest.requirementAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+              quest.progress = new BigNumber(quest.progress).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+              console.log('requirementAmount', quest.requirementAmount);
+            } catch (e) {
+              console.log('Contract does not support decimals');
+            }
+          }
+
+          if(quest.rewardExternalAddress !== emptyAccount
+            && +quest.rewardType as RewardType === RewardType.EXTERNAL) {
+            const currencyContract = new web3.eth.Contract(erc20Abi as any[], quest.rewardExternalAddress);
+            try{
+              const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+              quest.rewardAmount = new BigNumber(quest.rewardAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+            } catch (e) {
+              console.log('Contract does not support decimals');
+            }
+          }
+          const questTemplate = {
+            progress: +quest.progress,
+            id: +quest.id,
+            tier: +quest.tier as Rarity,
+            requirementType: +quest.requirementType as RequirementType,
+            requirementRarity: +quest.requirementRarity as Rarity,
+            requirementAmount: +quest.requirementAmount,
+            requirementExternalAddress: quest.requirementExternalAddress,
+            rewardType: +quest.rewardType as RewardType,
+            rewardRarity: +quest.rewardRarity as Rarity,
+            rewardAmount: +quest.rewardAmount,
+            rewardExternalAddress: quest.rewardExternalAddress,
+            reputationAmount: +quest.reputationAmount,
+          } as Quest;
+          questTemplates.push(questTemplate);
         }
 
         return questTemplates;
@@ -3546,13 +3580,14 @@ export function createStore(web3: Web3) {
           }
         }
 
+        let tier = questTemplate.tier;
         if (isPromo) {
-          questTemplate.tier += 10;
+          tier += 10;
         }
 
         console.log(questTemplate);
 
-        return await SimpleQuests.methods.addNewQuestTemplate(questTemplate.tier,
+        return await SimpleQuests.methods.addNewQuestTemplate(tier,
           questTemplate.requirementType, questTemplate.requirementRarity, requirementAmount, questTemplate.requirementExternalAddress,
           questTemplate.rewardType, questTemplate.rewardRarity, rewardAmount, questTemplate.rewardExternalAddress,
           questTemplate.reputationAmount, supply, deadline).send(defaultCallOptions(state));
