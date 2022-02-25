@@ -45,7 +45,7 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
 
     // FUNCTIONS
 
-    function storeNfts(IERC721 tokenAddress, uint256[] memory tokenIds) external restricted isValidERC721(tokenAddress) {
+    function storeNfts(IERC721 tokenAddress, uint256[] calldata tokenIds) external restricted isValidERC721(tokenAddress) {
         for (uint i = 0; i < tokenIds.length; i++) {
             tokenAddress.safeTransferFrom(tx.origin, address(this), tokenIds[i]);
             nfts[address(tokenAddress)].push(tokenIds[i]);
