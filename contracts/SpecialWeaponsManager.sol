@@ -78,6 +78,34 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender), "NGA");
     }
 
+    modifier isValidOption(uint256 orderOption) {
+        _isValidOption(orderOption);
+        _;
+    }
+
+    function _isValidOption(uint256 orderOption) internal pure {
+        require(orderOption >= 1 && orderOption <= 3, "Invalid option");
+    }
+
+    modifier isEventActive(uint256 eventId) {
+        _isEventActive(eventId);
+        _;
+    }
+
+    function _isEventActive(uint256 eventId) internal view {
+        require(getIsEventActive(eventId), "Event inactive");
+    }
+
+    modifier canBeOrdered(uint256 eventId) {
+        _canBeOrdered(eventId);
+        _;
+    }
+
+    function _canBeOrdered(uint256 eventId) internal view {
+        require(userOrderOptionForEvent[msg.sender][eventId] == 0, "Limit 1");
+        require(hasRemainingSupply(eventId), "Sold out");
+    }
+
     // VARS
 
     function setVar(uint256 varField, uint256 value) external restricted {
@@ -181,23 +209,15 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         userEventShardSupply[msg.sender][eventId] += amount;
     }
 
-    function orderSpecialWeaponWithShards(uint256 eventId, uint256 orderOption) public {
-        require(getIsEventActive(eventId), "Event inactive");
-        require(userOrderOptionForEvent[msg.sender][eventId] == 0, "Limit 1");
+    function orderSpecialWeaponWithShards(uint256 eventId, uint256 orderOption) public canBeOrdered(eventId) isEventActive(eventId) isValidOption(orderOption) {
         require(userEventShardSupply[msg.sender][eventId] >= vars[orderOption], "Not enough shards");
-        require(orderOption >= 1 && orderOption <= 3, "Invalid option");
-        require(hasRemainingSupply(eventId), "Sold out");
         userEventShardSupply[msg.sender][eventId] -= vars[orderOption];
         userOrderOptionForEvent[msg.sender][eventId] = orderOption;
         eventInfo[eventId].orderedCount++;
         safeRandoms.requestSingleSeed(msg.sender, getSeed(eventId));
     }
 
-    function orderSpecialWeaponWithSkill(uint256 eventId, uint256 orderOption) public {
-        require(getIsEventActive(eventId), "Event inactive");
-        require(userOrderOptionForEvent[msg.sender][eventId] == 0, "Limit 1");
-        require(orderOption >= 1 && orderOption <= 3, "Invalid option");
-        require(hasRemainingSupply(eventId), "Sold out");
+    function orderSpecialWeaponWithSkill(uint256 eventId, uint256 orderOption) public canBeOrdered(eventId) isEventActive(eventId) isValidOption(orderOption) {
         game.payContractTokenOnly(msg.sender, getSkillForgeCost(orderOption));
         userOrderOptionForEvent[msg.sender][eventId] = orderOption;
         eventInfo[eventId].orderedCount++;
@@ -217,8 +237,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         );
     }
 
-    function addShards(address user, uint256 eventId, uint256 shardsAmount) external restricted {
-        require(getIsEventActive(eventId), "Event inactive");
+    function addShards(address user, uint256 eventId, uint256 shardsAmount) external restricted isEventActive(eventId){
         userEventShardSupply[user][eventId] += shardsAmount;
     }
 
@@ -255,9 +274,8 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         return weapons.mintSpecialWeapon(minter, eventId, stars, seed, element);
     }
 
-    function convertShards(uint256 eventIdFrom, uint256 eventIdTo, uint256 amount) external {
+    function convertShards(uint256 eventIdFrom, uint256 eventIdTo, uint256 amount) external isEventActive(eventIdTo) {
         require(userEventShardSupply[msg.sender][eventIdFrom] >= amount, 'Not enough shards');
-        require(getIsEventActive(eventIdTo), 'Target event inactive');
         userEventShardSupply[msg.sender][eventIdFrom] -= amount;
         uint256 convertedAmount = amount.div(vars[VAR_CONVERT_RATIO_DENOMINATOR]);
         convertedAmount += userEventShardSupply[msg.sender][eventIdFrom] == 0 && amount % vars[VAR_CONVERT_RATIO_DENOMINATOR] > 0 ? 1 : 0;
@@ -269,11 +287,9 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     }
 
     // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
-    function privatePartnerOrder(address[] calldata receivers, uint256 eventId, uint256 orderOption) external restricted {
+    function privatePartnerOrder(address[] calldata receivers, uint256 eventId, uint256 orderOption) external isValidOption(orderOption) isEventActive(eventId) {
         require(hasRole(MINTER_ROLE, msg.sender), "Not minter");
-        require(getIsEventActive(eventId), 'Event inactive');
         require(eventInfo[eventId].supply == 0 || receivers.length + eventInfo[eventId].orderedCount <= eventInfo[eventId].supply, "Not enough supply");
-        require(orderOption >= 1 && orderOption <= 3, "Invalid option");
         for(uint i = 0; i < receivers.length; i++) {
             if(userOrderOptionForEvent[receivers[i]][eventId] != 0) continue;
             userOrderOptionForEvent[receivers[i]][eventId] = orderOption;

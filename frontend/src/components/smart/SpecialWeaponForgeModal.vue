@@ -5,11 +5,11 @@
           <div class="d-flex justify-content-center mt-3" v-if="isLoading">
             <h4>{{$t('blacksmith.loading')}} <img class="spinner" src="../../assets/loadingSpinner.svg" /></h4>
           </div>
-          <div v-if="!isLoading">
+          <div v-else>
             <div class="d-flex mt-3 align-items-center">
               <h5 class="mb-0">{{$t('blacksmith.specialEvent')}}:</h5>
               <b-form-select :disabled="!activeSpecialWeaponEventsIds.length && !inactiveEventsIdsWithUnclaimedOrders.length" class="w-50 ml-1" size="sm"
-                v-model="selectedSpecialWeaponEventId" :value="selectedSpecialWeaponEventId" @change="updateSpecialWeaponEventId($event)">
+                v-model="selectedSpecialWeaponEventId" @change="updateSpecialWeaponEventId($event)">
                 <b-form-select-option v-for="id in activeSpecialWeaponEventsIds.concat(inactiveEventsIdsWithUnclaimedOrders)" :key="+id" :value="+id">
                   {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
                 </b-form-select-option>
@@ -34,7 +34,7 @@
                   <h4>{{partnerName}}</h4>
                   <div class="mt-2">
                     <h5 class="text-justify">{{eventDetails}}</h5>
-                    <a class="a-button" @click="openPartnerWebsite">{{eventPartnerWebsite}}</a>
+                    <a class="a-button" :href="eventPartnerWebsite" target="_blank">{{eventPartnerWebsite}}</a>
                   </div>
                 </div>
               </div>
@@ -52,7 +52,7 @@
                 <div class="d-flex mt-3 align-items-center">
                   <h5 class="mb-0">{{$t('blacksmith.forgeOption')}}:</h5>
                   <b-form-select v-if="forgeCosts && forgeCosts.length > 0" :disabled="!activeSpecialWeaponEventsIds.length" class="w-50 ml-1" size="sm"
-                    v-model="forgeOption" :value="selectedSpecialWeaponEventId" @change="updateSpecialWeaponEventId($event)">
+                    v-model="forgeOption" @change="updateSpecialWeaponEventId($event)">
                     <b-form-select-option :value="1">
                       3-5* {{$t('blacksmith.for')}} {{forgeCosts[0]}} {{$t('blacksmith.shards')}}
                       {{$t('blacksmith.or')}} {{formattedSkillCost(4)}} SKILL
@@ -75,7 +75,7 @@
                     <span v-if="!isForging" class="gtag-link-others">
                       {{$t('blacksmith.forge')}} ({{forgeCostSkill}} SKILL)
                     </span>
-                    <span v-if="isForging" class="gtag-link-others">
+                    <span v-else class="gtag-link-others">
                       {{$t('blacksmith.forging')}}
                     </span>
                   </b-button>
@@ -87,7 +87,7 @@
                     <span v-if="!isForging" class="gtag-link-others">
                       {{$t('blacksmith.forge')}} ({{forgeCostShards}} {{$t('blacksmith.shards')}})
                     </span>
-                    <span v-if="isForging" class="gtag-link-others">
+                    <span v-else class="gtag-link-others">
                       {{$t('blacksmith.forging')}}
                     </span>
                   </b-button>
@@ -105,7 +105,7 @@
                   <span v-if="!isClaiming" class="gtag-link-others">
                     {{$t('blacksmith.claim')}}
                   </span>
-                  <span v-if="isClaiming" class="gtag-link-others">
+                  <span v-else class="gtag-link-others">
                     {{$t('blacksmith.claiming')}}
                   </span>
                 </b-button>
@@ -148,14 +148,14 @@
               <div class="d-flex align-items-center">
                 <h5 class="mb-0">{{$t('blacksmith.from')}}:</h5>
                 <b-form-select class="w-25 ml-1" size="sm"
-                  v-model="selectedConvertFromId" :value="selectedConvertFromId">
+                  v-model="selectedConvertFromId">
                   <b-form-select-option v-for="id in allEventsIds.filter(id => id !== selectedConvertToId)" :key="id" :value="id">
                     {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
                   </b-form-select-option>
                 </b-form-select>
                 <h5 class="ml-3 mb-0">{{$t('blacksmith.to')}}:</h5>
                 <b-form-select class="w-25 ml-1" size="sm"
-                  v-model="selectedConvertToId" :value="selectedConvertToId">
+                  v-model="selectedConvertToId">
                   <b-form-select-option v-for="id in activeSpecialWeaponEventsIds.filter(id => id !== selectedConvertFromId)" :key="id" :value="id">
                     {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
                   </b-form-select-option>
@@ -177,7 +177,7 @@
                   <span v-if="!isConverting" class="gtag-link-others">
                     {{$t('blacksmith.convert')}} ({{convertAmount}} {{$t('blacksmith.shards')}})
                   </span>
-                  <span v-if="isConverting" class="gtag-link-others">
+                  <span v-else class="gtag-link-others">
                     {{$t('blacksmith.converting')}}
                   </span>
                 </b-button>
@@ -193,7 +193,7 @@
                 <div class="d-flex mt-2 align-items-center justify-content-center w-100">
                   <h5 class="ml-3 mb-0">{{$t('blacksmith.claimInto')}}:</h5>
                   <b-form-select class="w-25 ml-1" size="sm" :disabled="!activeSpecialWeaponEventsIds.length"
-                    v-model="claimRewardsIntoId" :value="claimRewardsIntoId">
+                    v-model="claimRewardsIntoId">
                     <b-form-select-option v-for="id in activeSpecialWeaponEventsIds.filter(id => id !== selectedConvertFromId)" :key="id" :value="id">
                       {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
                     </b-form-select-option>

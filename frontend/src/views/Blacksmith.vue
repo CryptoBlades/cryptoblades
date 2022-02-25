@@ -41,7 +41,7 @@
                         :disabled="disableForge"
                         v-tooltip="$t('blacksmith.specialForgeTooltip')">
                   <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                  <span v-if="!disableForge" class="gtag-link-others">
+                  <span v-else class="gtag-link-others">
                     {{$t('blacksmith.specialForge')}}
                   </span>
                 </b-button>
