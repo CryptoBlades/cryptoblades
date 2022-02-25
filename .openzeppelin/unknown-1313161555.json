@@ -229,6 +229,26 @@
       "address": "0x1DE7043442F8E6AA97d76Bf95e665692B51E0B64",
       "txHash": "0xf820f1d0df9f4855df84766c277b1ed9588b1643947973bbb09c212ad9742243",
       "kind": "transparent"
+    },
+    {
+      "address": "0x6BcC16C5d00B256Bd570d283A60cA737A5d40B70",
+      "txHash": "0xe23592fd84b40b118840960884675e60718eea3b77a4ad9a4b21bb96878017d0",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x487e7F166Bec6B8E6816Fb019cbe5D69E7F225E3",
+      "txHash": "0xd927b21c771b9d7dc77b2c0494cce0d22ccf9d57326ce324411ebb4bbd8c427a|{\"gasBurned\":37580269026502,\"tx\":\"J1UVVFijN7mA2pCLaVaAMYdLLvWBVyfxKTHTmL7e6J8M\"}",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x2280D90d771b06Ae4Ddc9e063D5B455c295FA714",
+      "txHash": "0xa46a8a31532209b9cbb307e2f8f54df6083eeb0bd313c5eaa9b530d4c88f1797|{\"gasBurned\":37145682413212,\"tx\":\"82sEq3VS3vaKHXXhyK9ZF9UthZ4rjGyGe4qCfqhVsK8B\"}",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x0Ff7f673BBf4b47d8e7d31a59cEB2244a8CBEb68",
+      "txHash": "0x4d1012f0f36c88313c22df2f49b3159f6f21e0ff8e20a1090a9302d3a16e47cf|{\"gasBurned\":36641466766642,\"tx\":\"GVxVuR8zx29An3NSNgYEHRDs2wGm7Mwe8bU6pyfFHLzG\"}",
+      "kind": "transparent"
     }
   ],
   "impls": {
