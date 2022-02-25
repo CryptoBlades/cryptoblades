@@ -211,7 +211,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         }
         uint256 questID = generateNewQuest(tier, seed);
         if (questSupplies[questID] > 0) {
-            questSupplies[questID] = --questSupplies[questID];
+            questSupplies[questID]--;
             if (questSupplies[questID] == 0) {
                 deleteQuestTemplate(tier, questID);
             }
@@ -244,7 +244,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return assignNewQuest(characterID);
     }
 
-    function completeQuest(uint256 characterID) public assertQuestsEnabled assertOnQuest(characterID, true) returns (uint256[] memory questRewards) {
+    function completeQuest(uint256 characterID) public assertQuestsEnabled assertOwnsCharacter(characterID) assertOnQuest(characterID, true) returns (uint256[] memory questRewards) {
         uint256[] memory questData = getCharacterQuestData(characterID);
         require(questData[0] >= quests[characterQuest[characterID]].requirementAmount, "Not completed");
         uint256 questID = characterQuest[characterID];

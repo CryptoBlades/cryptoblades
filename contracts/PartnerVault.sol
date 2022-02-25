@@ -45,14 +45,14 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
 
     // FUNCTIONS
 
-    function storeNfts(IERC721 tokenAddress, uint256[] memory tokenIds) public restricted isValidERC721(tokenAddress) {
-        for (uint8 i = 0; i < tokenIds.length; i++) {
+    function storeNfts(IERC721 tokenAddress, uint256[] memory tokenIds) external restricted isValidERC721(tokenAddress) {
+        for (uint i = 0; i < tokenIds.length; i++) {
             tokenAddress.safeTransferFrom(tx.origin, address(this), tokenIds[i]);
             nfts[address(tokenAddress)].push(tokenIds[i]);
         }
     }
 
-    function storeCurrency(IERC20 tokenAddress, uint256 amount) public restricted {
+    function storeCurrency(IERC20 tokenAddress, uint256 amount) external restricted {
         tokenAddress.transferFrom(tx.origin, address(this), amount);
         currencies[address(tokenAddress)] = currencies[address(tokenAddress)].add(amount);
     }
@@ -65,7 +65,7 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
             currencies[tokenAddress] = currencies[tokenAddress].sub(amount);
         } else {
             IERC721 nft = IERC721(tokenAddress);
-            for (uint8 i = 0; i < amount; i++) {
+            for (uint i = 0; i < amount; i++) {
                 uint256 index = RandomUtil.randomSeededMinMax(0, nfts[tokenAddress].length - 1, seed);
                 uint256 tokenId = nfts[tokenAddress][index];
                 nft.safeTransferFrom(address(this), to, tokenId);
@@ -79,10 +79,6 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
         require(index < nfts[address(tokenAddress)].length, "Index out of bounds");
         nfts[address(tokenAddress)][index] = nfts[address(tokenAddress)][nfts[address(tokenAddress)].length - 1];
         nfts[address(tokenAddress)].pop();
-    }
-
-    function isNftOwner(IERC721 tokenAddress, address user, uint256 tokenId) public view returns (bool) {
-        return tokenAddress.ownerOf(tokenId) == user;
     }
 
 
