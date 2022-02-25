@@ -287,7 +287,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     }
 
     // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
-    function fillPrivatePartnerOrder(address[] calldata receivers, uint256 eventId, uint256 orderOption) external isValidOption(orderOption) isEventActive(eventId) {
+    function privatePartnerOrder(address[] calldata receivers, uint256 eventId, uint256 orderOption) external isValidOption(orderOption) isEventActive(eventId) {
         require(hasRole(MINTER_ROLE, msg.sender), "Not minter");
         require(eventInfo[eventId].supply == 0 || receivers.length + eventInfo[eventId].orderedCount <= eventInfo[eventId].supply, "Not enough supply");
         for(uint i = 0; i < receivers.length; i++) {
@@ -295,6 +295,25 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
             userOrderOptionForEvent[receivers[i]][eventId] = orderOption;
             eventInfo[eventId].orderedCount++;
             safeRandoms.requestSingleSeed(receivers[i], getSeed(eventId));
+        }
+    }
+
+    // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
+    function privatePartnerMint(address[] calldata receivers, uint256 eventId, uint256 orderOption) external isValidOption(orderOption) isEventActive(eventId) {
+        require(hasRole(MINTER_ROLE, msg.sender), "Not minter");
+        require(eventInfo[eventId].supply == 0 || receivers.length + eventInfo[eventId].orderedCount <= eventInfo[eventId].supply, "Not enough supply");
+        for(uint i = 0; i < receivers.length; i++) {
+            if(userOrderOptionForEvent[receivers[i]][eventId] != 0 || userForgedAtEvent[receivers[i]][eventId]) continue;
+            userOrderOptionForEvent[receivers[i]][eventId] = orderOption;
+            eventInfo[eventId].orderedCount++;
+            userForgedAtEvent[receivers[i]][eventId] = true;
+            mintSpecial(
+                receivers[i],
+                eventId,
+                uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), receivers[i]))),
+                userOrderOptionForEvent[receivers[i]][eventId],
+                eventInfo[eventId].weaponElement
+            );
         }
     }
 }
