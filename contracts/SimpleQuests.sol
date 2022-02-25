@@ -468,7 +468,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     // TODO: What should be the identifier here?
     function generateRewardWeeklySeed(uint256 rewardID) assertQuestsEnabled public {
-        safeRandoms.requestSingleSeed(address(this), RandomUtil.combineSeeds(SEED_REWARD_WEEKLY, rewardID));
+        safeRandoms.requestSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_WEEKLY, rewardID));
     }
 
     function claimWeeklyReward() public returns (uint256[] memory weeklyRewardIDs) {
@@ -482,7 +482,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function rewardWeekly(uint256 rewardID) private returns (uint256[] memory) {
-        uint256 seed = safeRandoms.popSingleSeed(address(this), RandomUtil.combineSeeds(SEED_REWARD_WEEKLY, rewardID), true, true);
+        uint256 seed = safeRandoms.popSingleSeed(tx.origin, RandomUtil.combineSeeds(SEED_REWARD_WEEKLY, rewardID), true, true);
         Reward memory reward = rewards[rewardID];
         if (reward.rewardType == ItemType.WEAPON) {
             uint256[] memory tokenIDs = new uint256[](reward.rewardAmount);
