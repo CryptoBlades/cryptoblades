@@ -6,7 +6,7 @@
   <h3 v-else-if="quests.length === 0">
     {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
   <div v-else class="d-flex flex-column gap-3">
-    <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row p-3">
+    <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row p-3 gap-5">
       <QuestRequirements :quest="quest" :index="index"/>
       <QuestRewards :quest="quest"/>
       <QuestActions :quest="quest" :key="quest.id" :deletable="deletable" showSupply @refresh-quest-data="fetchQuests"/>
@@ -89,5 +89,11 @@ export default Vue.extend({
   border: 1px solid #60583E;
   border-radius: 10px;
   align-items: center;
+}
+
+@media (max-width: 576px) {
+  .quest-row {
+    flex-direction: column;
+  }
 }
 </style>

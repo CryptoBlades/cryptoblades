@@ -1,7 +1,7 @@
 <template>
   <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container gap-4">
     <div class="d-flex justify-content-between w-100 weekly-progress-container">
-      <div class="d-flex flex-column justify-content-between">
+      <div class="d-flex flex-column justify-content-between gap-2">
         <span class="quests-title">{{ $t('quests.quest') }}</span>
         <b-button variant="primary" @click="showQuestsListModal = true">
           {{ $t('quests.availableQuests') }}
