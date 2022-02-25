@@ -77,6 +77,7 @@ interface Data {
   deadlineTime: string;
   isLimited: boolean;
   isInitialized: boolean;
+  supply: number;
 }
 
 export default Vue.extend({
@@ -106,7 +107,7 @@ export default Vue.extend({
     deadline: {
       type: Number,
     },
-    supply: {
+    questSupply: {
       type: Number,
     },
   },
@@ -126,6 +127,7 @@ export default Vue.extend({
       deadlineTime: '',
       isLimited: false,
       isInitialized: false,
+      supply: 0,
       RequirementType,
       RewardType,
       Rarity,
@@ -272,6 +274,9 @@ export default Vue.extend({
   },
 
   async mounted() {
+    if(this.questSupply) {
+      this.supply = this.questSupply;
+    }
     if (!this.refreshQuestTemplates && this.character) {
       await this.refreshSkipQuestData();
     }

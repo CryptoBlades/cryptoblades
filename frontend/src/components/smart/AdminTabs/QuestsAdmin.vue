@@ -300,7 +300,7 @@
         <div class="quest-row p-3">
           <QuestRequirements :quest="questTemplate"/>
           <QuestRewards :quest="questTemplate"/>
-          <QuestActions :quest="questTemplate" :key="questTemplate.id" showSupply :deadline="timestamp" :supply="supply"/>
+          <QuestActions :quest="questTemplate" :key="questTemplate.id" showSupply :deadline="timestamp" :questSupply="supply"/>
         </div>
       </div>
     </b-modal>

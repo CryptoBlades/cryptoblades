@@ -342,6 +342,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256 questID = characterQuest[characterID];
         Quest memory quest = quests[questID];
         if (quest.requirementType == ItemType.STAMINA) {
+            require(amount <= 255, "Incorrect stamina value");
             characters.getFightDataAndDrainStamina(msg.sender, characterID, uint8(amount), false, 0);
         } else if (quest.requirementType == ItemType.DUST) {
             uint32[] memory decrementDustSupplies = new uint32[](3);
