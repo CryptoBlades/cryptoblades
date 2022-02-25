@@ -183,7 +183,6 @@ export default Vue.extend({
         const result = await this.getNftsInPartnerVault({
           tokenAddress: this.nftBalance.address
         });
-        console.log(result);
         this.nftBalance.ids = result.join(', ');
         this.nftBalance.total = result.length;
       } finally {

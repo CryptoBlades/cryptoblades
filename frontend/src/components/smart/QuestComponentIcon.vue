@@ -108,7 +108,6 @@ export default Vue.extend({
     } else if (this.questItemType === QuestItemType.RAID) {
       this.icon = raid;
     } else if (this.questItemType === QuestItemType.EXTERNAL || this.questItemType === QuestItemType.EXTERNAL_HOLD) {
-      console.log(this.externalAddress);
       const fileName = (questItemsInfo as QuestItemsInfo).questItems[this.externalAddress].image;
       this.icon = this.imgPath(fileName);
     }
@@ -116,7 +115,6 @@ export default Vue.extend({
       this.stars = Array(this.rarity + 1).fill('★').join('');
     }
     this.getTooltip();
-    console.log(this.questItemType);
   },
 
 });

@@ -286,8 +286,6 @@ export default Vue.extend({
       }
       await this.getDeadlineTime();
     } else {
-      console.log('this.deadline', this.deadline);
-      console.log('this.supply', this.supply);
       this.isLimited = true;
       if (this.deadlineCheckInterval) {
         clearInterval(this.deadlineCheckInterval);

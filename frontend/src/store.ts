@@ -2,14 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, {isUndefined, values} from 'lodash';
-import {
-  bnMinimum,
-  currentChainSupportsMerchandise,
-  currentChainSupportsPvP,
-  currentChainSupportsQuests,
-  gasUsedToBnb,
-  toBN
-} from './utils/common';
+import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests, gasUsedToBnb, toBN} from './utils/common';
 
 import {getConfigValue, setUpContracts} from './contracts';
 
@@ -3372,30 +3365,20 @@ export function createStore(web3: Web3) {
         const {PartnerVault} = state.contracts();
         if(!PartnerVault || !state.defaultAccount) return;
 
-        console.log('storeNftsToPartnerVault', tokenAddress, tokenIds);
-
         const tokenContract = new web3.eth.Contract(erc721Abi as any[], tokenAddress) as Contract<IERC721>;
 
-        console.log(tokenContract);
-
-        console.log('isApprovedForAll', state.defaultAccount, PartnerVault.options.address);
         const isApprovedForAll = await tokenContract.methods.isApprovedForAll(state.defaultAccount, PartnerVault.options.address)
           .call(defaultCallOptions(state));
-        console.log('isApprovedForAll', isApprovedForAll);
 
         if(tokenIds.length === 1 && !isApprovedForAll) {
-          console.log('Approving token for Partner Vault');
           await tokenContract.methods.approve(PartnerVault.options.address, tokenIds[0]).send({
             from: state.defaultAccount
           });
         } else if (!isApprovedForAll) {
-          console.log('Approving all tokens for Partner Vault');
           await tokenContract.methods.setApprovalForAll(PartnerVault.options.address, true).send({
             from: state.defaultAccount
           });
         }
-
-        console.log('Storing NFTs to Partner Vault');
         return await PartnerVault.methods.storeNfts(tokenAddress, tokenIds).send({
           from: state.defaultAccount
         });
@@ -3405,14 +3388,10 @@ export function createStore(web3: Web3) {
         const {PartnerVault} = state.contracts();
         if (!PartnerVault || !state.defaultAccount) return;
 
-        console.log('storeCurrencyToPartnerVault', currencyAddress, amount);
-
         const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
-        console.log(currencyContract.options.address);
         const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
-        console.log('decimals', currencyDecimals);
         const amountTimesDecimals = web3.utils.toBN(amount * 10 ** currencyDecimals);
-        console.log('amountTimesDecimals', amountTimesDecimals);
+
         await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
           from: state.defaultAccount
         });
@@ -3427,7 +3406,6 @@ export function createStore(web3: Web3) {
         if(!PartnerVault || !state.defaultAccount) return;
 
         const nftsInVault = await PartnerVault.methods.getNftsInVault(tokenAddress).call(defaultCallOptions(state));
-        console.log(nftsInVault);
 
         return nftsInVault;
       },
@@ -3439,11 +3417,8 @@ export function createStore(web3: Web3) {
         const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
         let currencyBalance = await currencyContract.methods.balanceOf(PartnerVault.options.address).call(defaultCallOptions(state));
         const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
-        console.log('before', currencyBalance);
         currencyBalance = new BigNumber(currencyBalance).div(new BigNumber(10 ** currencyDecimals)).toFixed();
-        console.log('getCurrencyBalanceInPartnerVault', currencyBalance);
         const currencySymbol = await currencyContract.methods.symbol().call(defaultCallOptions(state));
-        console.log('getCurrencyBalanceInPartnerVault', currencySymbol);
 
         return [currencyBalance, currencySymbol];
       },
@@ -3470,8 +3445,6 @@ export function createStore(web3: Web3) {
 
         const questTemplatesIds = await SimpleQuests.methods.getQuestTemplates(tier).call(defaultCallOptions(state));
 
-        console.log('getQuestTemplates', questTemplatesIds);
-
         if(questTemplatesIds.length === 0) return questTemplates;
 
         for (const questID of questTemplatesIds) {
@@ -3494,15 +3467,12 @@ export function createStore(web3: Web3) {
             && ((quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL)
               || (quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL_HOLD))) {
             const currencyContract = new web3.eth.Contract(erc20Abi as any[], quest.requirementExternalAddress);
-            console.log('requirement is external');
             try{
               const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
-              console.log('currencyDecimals', currencyDecimals);
               quest.requirementAmount = new BigNumber(quest.requirementAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
               quest.progress = new BigNumber(quest.progress).div(new BigNumber(10 ** currencyDecimals)).toFixed();
-              console.log('requirementAmount', quest.requirementAmount);
-            } catch (e) {
-              console.log('Contract does not support decimals');
+            } catch {
+              // Contract does not support decimals
             }
           }
 
@@ -3512,8 +3482,8 @@ export function createStore(web3: Web3) {
             try{
               const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
               quest.rewardAmount = new BigNumber(quest.rewardAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
-            } catch (e) {
-              console.log('Contract does not support decimals');
+            } catch {
+              // Contract does not support decimals
             }
           }
           const questTemplate = {
@@ -3554,14 +3524,11 @@ export function createStore(web3: Web3) {
 
         if(questTemplate.requirementType === RequirementType.EXTERNAL){
           const contract = new web3.eth.Contract(erc20Abi as any[], questTemplate.requirementExternalAddress);
-          console.log(contract);
           try {
             const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(state));
-            console.log('currencyDecimals req', currencyDecimals);
             requirementAmount = web3.utils.toBN(requirementAmount * 10 ** currencyDecimals);
-            console.log('requirementAmount after', requirementAmount);
-          } catch (e) {
-            console.log('Contract does not support decimals');
+          } catch {
+            // Contract does not support decimals
           }
         }
 
@@ -3569,14 +3536,11 @@ export function createStore(web3: Web3) {
 
         if(questTemplate.rewardType === RewardType.EXTERNAL){
           const contract = new web3.eth.Contract(erc20Abi as any[], questTemplate.rewardExternalAddress);
-          console.log(contract);
           try {
             const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(state));
-            console.log('currencyDecimals rew', currencyDecimals);
             rewardAmount = web3.utils.toBN(rewardAmount * 10 ** currencyDecimals);
-            console.log('rewardAmount after', rewardAmount);
-          } catch (e) {
-            console.log('Contract does not support decimals');
+          } catch {
+            // Contract does not support decimals
           }
         }
 
@@ -3584,8 +3548,6 @@ export function createStore(web3: Web3) {
         if (isPromo) {
           tier += 10;
         }
-
-        console.log(questTemplate);
 
         return await SimpleQuests.methods.addNewQuestTemplate(tier,
           questTemplate.requirementType, questTemplate.requirementRarity, requirementAmount, questTemplate.requirementExternalAddress,
@@ -3629,15 +3591,12 @@ export function createStore(web3: Web3) {
           && ((quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL)
             || (quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL_HOLD))) {
           const currencyContract = new web3.eth.Contract(erc20Abi as any[], quest.requirementExternalAddress);
-          console.log('requirement is external');
           try{
             const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
-            console.log('currencyDecimals', currencyDecimals);
             quest.requirementAmount = new BigNumber(quest.requirementAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
             quest.progress = new BigNumber(quest.progress).div(new BigNumber(10 ** currencyDecimals)).toFixed();
-            console.log('requirementAmount', quest.requirementAmount);
-          } catch (e) {
-            console.log('Contract does not support decimals');
+          } catch {
+            // Contract does not support decimals
           }
         }
 
@@ -3647,8 +3606,8 @@ export function createStore(web3: Web3) {
           try{
             const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
             quest.rewardAmount = new BigNumber(quest.rewardAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
-          } catch (e) {
-            console.log('Contract does not support decimals');
+          } catch {
+            // Contract does not support decimals
           }
         }
 
@@ -3719,9 +3678,7 @@ export function createStore(web3: Web3) {
 
         const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
 
-        const weeklyLimit = await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_GOAL).call(defaultCallOptions(state));
-        console.log('Weekly limit', weeklyLimit);
-        return weeklyLimit;
+        return await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_GOAL).call(defaultCallOptions(state));
       },
 
       async setWeeklyCompletionsGoal({state}, {newGoal}) {
@@ -3747,11 +3704,7 @@ export function createStore(web3: Web3) {
           weeklyReward.rewardExternalAddress, weeklyReward.reputationAmount)
           .send(defaultCallOptions(state));
 
-        const rewardID = result.events.RewardAdded.returnValues.rewardID;
-
-        console.log('Reward added', rewardID);
-
-        return rewardID;
+        return result.events.RewardAdded.returnValues.rewardID;
       },
 
       async setWeeklyReward({state}, {rewardID, timestamp}) {
@@ -3767,10 +3720,8 @@ export function createStore(web3: Web3) {
 
         const weekInSeconds = 604800;
         const week = Math.floor(timestamp / 1000 / weekInSeconds);
-        console.log(week);
 
         const rewardID = +await SimpleQuests.methods.weeklyRewards(week).call(defaultCallOptions(state));
-        console.log(rewardID);
         const weeklyRewardRaw = await SimpleQuests.methods.rewards(rewardID).call(defaultCallOptions(state)) as unknown as {
           id: string;
           rewardType: string;
@@ -3779,7 +3730,6 @@ export function createStore(web3: Web3) {
           rewardExternalAddress: string;
           reputationAmount: string;
         };
-        console.log(weeklyRewardRaw);
         return {
           id: +weeklyRewardRaw.id,
           rewardType: +weeklyRewardRaw.rewardType as RewardType,
@@ -3795,12 +3745,10 @@ export function createStore(web3: Web3) {
         if (!SimpleQuests || !state.defaultAccount) return;
 
         const currentWeek = Math.floor(Date.now() / 1000 / 604800);
-        console.log('Current week', currentWeek);
 
         const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
 
         if(rewardID === 0) {
-          console.log('Weekly reward not set');
           return;
         }
 
@@ -3825,18 +3773,14 @@ export function createStore(web3: Web3) {
         if (!SimpleQuests || !state.defaultAccount) return;
 
         const currentWeek = Math.floor(Date.now() / 1000 / 604800);
-        console.log('Current week', currentWeek);
 
         const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
 
         if(rewardID === 0) {
-          console.log('Weekly reward not set');
           return false;
         }
 
-        const hasClaimed =  await SimpleQuests.methods.weeklyRewardClaimed(state.defaultAccount, currentWeek).call(defaultCallOptions(state));
-        console.log('Has claimed', hasClaimed);
-        return hasClaimed;
+        return await SimpleQuests.methods.weeklyRewardClaimed(state.defaultAccount, currentWeek).call(defaultCallOptions(state));
       },
 
       async getReputationLevelRequirements({state}) {
@@ -3973,10 +3917,7 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        const weeklyCompletions = await SimpleQuests.methods.getWeeklyCompletions(state.defaultAccount).call(defaultCallOptions(state));
-        console.log('Weekly completions: ', weeklyCompletions);
-
-        return weeklyCompletions;
+        return await SimpleQuests.methods.getWeeklyCompletions(state.defaultAccount).call(defaultCallOptions(state));
       },
 
       async skipQuest({ state, dispatch }, {characterID}) {
@@ -4049,24 +3990,16 @@ export function createStore(web3: Web3) {
         const {SimpleQuests, PartnerVault} = state.contracts();
         if (!SimpleQuests || !PartnerVault || !state.defaultAccount) return;
 
-        console.log(tokenAddress);
-
         const tokenContract = new web3.eth.Contract(erc721Abi as any[], tokenAddress) as Contract<IERC721>;
 
-        console.log(tokenContract);
-
-        console.log('isApprovedForAll', state.defaultAccount, SimpleQuests.options.address);
         const isApprovedForAll = await tokenContract.methods.isApprovedForAll(state.defaultAccount, SimpleQuests.options.address)
           .call(defaultCallOptions(state));
-        console.log('isApprovedForAll', isApprovedForAll);
 
         if(tokenIds.length === 1 && !isApprovedForAll) {
-          console.log('Approving token for Partner Vault');
           await tokenContract.methods.approve(SimpleQuests.options.address, tokenIds[0]).send({
             from: state.defaultAccount
           });
         } else if (!isApprovedForAll) {
-          console.log('Approving all tokens for Partner Vault');
           await tokenContract.methods.setApprovalForAll(SimpleQuests.options.address, true).send({
             from: state.defaultAccount
           });
@@ -4078,14 +4011,10 @@ export function createStore(web3: Web3) {
       async submitExternalProgressAmount({state}, {characterID, amount, currencyAddress}) {
         const {SimpleQuests, PartnerVault} = state.contracts();
         if (!SimpleQuests || !PartnerVault || !state.defaultAccount) return;
-        console.log('storeCurrencyToPartnerVault', currencyAddress, amount);
 
         const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
-        console.log(currencyContract.options.address);
         const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
-        console.log('decimals', currencyDecimals);
         const amountTimesDecimals = web3.utils.toBN(amount * 10 ** currencyDecimals);
-        console.log('amountTimesDecimals', amountTimesDecimals);
         await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
           from: state.defaultAccount
         });
@@ -4124,10 +4053,7 @@ export function createStore(web3: Web3) {
 
         const adminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
 
-        const hasRole =  await contract.methods.hasRole(adminRole, state.defaultAccount).call(defaultCallOptions(state));
-
-        console.log('Admin role: ',contract, hasRole);
-        return hasRole;
+        return await contract.methods.hasRole(adminRole, state.defaultAccount).call(defaultCallOptions(state));
       },
 
       async userHasMinterAccess({state}, {contract}) {
@@ -4135,10 +4061,7 @@ export function createStore(web3: Web3) {
 
         const minterRole = await contract.methods.MINTER_ROLE().call(defaultCallOptions(state));
 
-        const hasRole =  await contract.methods.hasRole(minterRole, state.defaultAccount).call(defaultCallOptions(state));
-
-        console.log('Minter role: ', contract, hasRole);
-        return hasRole;
+        return await contract.methods.hasRole(minterRole, state.defaultAccount).call(defaultCallOptions(state));
       },
 
       async userHasAnyAdminAccess({state}) {

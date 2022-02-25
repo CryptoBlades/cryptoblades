@@ -82,7 +82,6 @@ export default Vue.extend({
         for (const quest of this.questTemplates) {
           quest.deadline = +await this.getQuestDeadline({questID: quest.id});
           quest.supply = +await this.getQuestSupply({questID: quest.id});
-          console.log(quest);
         }
       } finally {
         this.isLoading = false;

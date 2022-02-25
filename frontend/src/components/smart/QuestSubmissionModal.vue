@@ -207,8 +207,6 @@ export default Vue.extend({
         this.isLoading = true;
         if (this.externalsToBurn && this.quest?.requirementExternalAddress && (this.quest.requirementType === RequirementType.EXTERNAL
           || this.quest.requirementType === RequirementType.EXTERNAL_HOLD)) {
-          console.log('Tokens to burn: ', this.externalsToBurn.split(',').map(id => +id));
-          console.log('Parameters: ', this.characterId, this.quest.requirementExternalAddress, this.externalsToBurn.split(',').map(id => +id));
           await this.submitExternalProgress({
             characterID: this.characterId,
             tokenIds: this.externalsToBurn.split(',').map(id => +id),
@@ -232,7 +230,6 @@ export default Vue.extend({
         this.isLoading = true;
         if (this.quest.requirementExternalAddress
           && (this.quest.requirementType === RequirementType.EXTERNAL || this.quest.requirementType === RequirementType.EXTERNAL_HOLD)) {
-          console.log('Amount to burn: ', this.amountToBurn);
           await this.submitExternalProgressAmount({
             characterID: this.characterId,
             amount: this.amountToBurn,
