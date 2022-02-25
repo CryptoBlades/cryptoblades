@@ -167,8 +167,9 @@
           </b-form-select>
           <b-form-input v-model="weeklyReward.rewardAmount" type="number" number :min="0"/>
         </div>
-        <label class="m-0 align-self-center">{{ $t('quests.reputation') }}</label>
-        <div class="d-flex align-items-center gap-3">
+        <!--        Temporarly hide the reputation fields, as they are not used -->
+        <label style="display: none;" class="m-0 align-self-center">{{ $t('quests.reputation') }}</label>
+        <div style="display: none;" v-if="false" class="d-flex align-items-center gap-3">
           <b-form-input v-model="weeklyReward.reputationAmount" type="number" number :min="0"/>
         </div>
       </div>
@@ -300,7 +301,8 @@
         <div class="quest-row p-3">
           <QuestRequirements :quest="questTemplate"/>
           <QuestRewards :quest="questTemplate"/>
-          <QuestActions :quest="questTemplate" :key="questTemplate.id" showSupply :deadline="timestamp" :questSupply="supply"/>
+          <QuestActions :quest="questTemplate" :key="questTemplate.id" showSupply :deadline="timestamp"
+                        :questSupply="supply"/>
         </div>
       </div>
     </b-modal>
@@ -332,7 +334,7 @@ import QuestTemplatesDisplay from '../QuestTemplatesDisplay.vue';
 import QuestRequirements from '../QuestRequirements.vue';
 import QuestRewards from '../QuestRewards.vue';
 import QuestActions from '../QuestActions.vue';
-import {isValidWeb3Address} from '../../../utils/common';
+import {isValidWeb3Address} from '@/utils/common';
 
 interface StoreMappedActions {
   addQuestTemplate(payload: { questTemplate: Quest, isPromo: boolean, supply: number, deadline: number }): Promise<void>;

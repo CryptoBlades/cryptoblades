@@ -477,8 +477,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         require(currentCompletions >= vars[VAR_WEEKLY_COMPLETIONS_GOAL], "Not enough weekly completions");
         uint256 rewardID = weeklyRewards[now / 1 weeks];
         weeklyRewardIDs = rewardWeekly(rewardID);
-        emit WeeklyRewardClaimed(msg.sender, rewardID, weeklyRewardIDs);
         weeklyRewardClaimed[msg.sender][now / 1 weeks] = true;
+        emit WeeklyRewardClaimed(msg.sender, rewardID, weeklyRewardIDs);
     }
 
     function rewardWeekly(uint256 rewardID) private returns (uint256[] memory) {
