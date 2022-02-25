@@ -287,7 +287,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     }
 
     // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
-    function privatePartnerOrder(address[] calldata receivers, uint256 eventId, uint256 orderOption) external isValidOption(orderOption) isEventActive(eventId) {
+    function fillPrivatePartnerOrder(address[] calldata receivers, uint256 eventId, uint256 orderOption) external isValidOption(orderOption) isEventActive(eventId) {
         require(hasRole(MINTER_ROLE, msg.sender), "Not minter");
         require(eventInfo[eventId].supply == 0 || receivers.length + eventInfo[eventId].orderedCount <= eventInfo[eventId].supply, "Not enough supply");
         for(uint i = 0; i < receivers.length; i++) {
