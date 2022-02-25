@@ -1011,7 +1011,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         int128 bonusShieldStats;
         if (fighter.useShield) {
             // we set bonus shield stats as 0.2
-            bonusShieldStats = _getShieldStats(character.ID).mul(20).div(100);
+            bonusShieldStats = _getShieldStats(character.ID).sub(1).mul(20).div(100);
         }
 
         (
