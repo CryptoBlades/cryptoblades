@@ -439,7 +439,7 @@ export default Vue.extend({
 
     forgedWeapon(): IWeapon | undefined {
       return this.weaponsWithIds(this.ownedWeaponIds).find(w => {
-        return w && w.weaponType === this.selectedSpecialWeaponEventId;
+        return w?.weaponType === this.selectedSpecialWeaponEventId;
       });
     },
 
