@@ -3678,24 +3678,24 @@ export function createStore(web3: Web3) {
         return await SimpleQuests.methods.vars(VAR_SKIP_QUEST_STAMINA_COST).call(defaultCallOptions(state));
       },
 
-      async getWeeklyCompletionsLimit({state}) {
+      async getWeeklyCompletionsGoal({state}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        const VAR_WEEKLY_COMPLETIONS_LIMIT = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_LIMIT().call(defaultCallOptions(state));
+        const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
 
-        const weeklyLimit = await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_LIMIT).call(defaultCallOptions(state));
+        const weeklyLimit = await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_GOAL).call(defaultCallOptions(state));
         console.log('Weekly limit', weeklyLimit);
         return weeklyLimit;
       },
 
-      async setWeeklyCompletionsLimit({state}, {newLimit}) {
+      async setWeeklyCompletionsGoal({state}, {newGoal}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        const VAR_WEEKLY_COMPLETIONS_LIMIT = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_LIMIT().call(defaultCallOptions(state));
+        const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
 
-        return await SimpleQuests.methods.setVar(VAR_WEEKLY_COMPLETIONS_LIMIT, newLimit).send(defaultCallOptions(state));
+        return await SimpleQuests.methods.setVar(VAR_WEEKLY_COMPLETIONS_GOAL, newGoal).send(defaultCallOptions(state));
       },
 
       async addWeeklyReward({state}, {weeklyReward}) {
@@ -3927,11 +3927,11 @@ export function createStore(web3: Web3) {
         return await SimpleQuests.methods.nextFreeSkip().call(defaultCallOptions(state));
       },
 
-      async nextWeeklyQuestCompletionLimitReset({state}) {
+      async nextWeeklyQuestCompletionGoalReset({state}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        return await SimpleQuests.methods.nextWeeklyQuestCompletionLimitReset().call(defaultCallOptions(state));
+        return await SimpleQuests.methods.nextWeeklyQuestCompletionGoalReset().call(defaultCallOptions(state));
       },
 
       async getWeeklyCompletions({state}) {

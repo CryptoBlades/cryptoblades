@@ -180,9 +180,9 @@ interface StoreMappedActions {
 
   getReputationLevelRequirements(): Promise<ReputationLevelRequirements>;
 
-  nextWeeklyQuestCompletionLimitReset(): Promise<string>;
+  nextWeeklyQuestCompletionGoalReset(): Promise<string>;
 
-  getWeeklyCompletionsLimit(): Promise<number>;
+  getWeeklyCompletionsGoal(): Promise<number>;
 
   getWeeklyCompletions(): Promise<number>;
 
@@ -256,8 +256,8 @@ export default Vue.extend({
       'fetchCharacters',
       'getCharacterQuestData',
       'getReputationLevelRequirements',
-      'nextWeeklyQuestCompletionLimitReset',
-      'getWeeklyCompletionsLimit',
+      'nextWeeklyQuestCompletionGoalReset',
+      'getWeeklyCompletionsGoal',
       'getWeeklyCompletions',
       'getWeeklyReward',
       'hasClaimedWeeklyReward',
@@ -292,7 +292,7 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         this.currentWeeklyCompletions = await this.getWeeklyCompletions();
-        this.maxWeeklyCompletions = await this.getWeeklyCompletionsLimit();
+        this.maxWeeklyCompletions = await this.getWeeklyCompletionsGoal();
         this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});
         this.weeklyClaimed = await this.hasClaimedWeeklyReward();
         await this.getNextWeekResetTime();
@@ -307,7 +307,7 @@ export default Vue.extend({
     },
 
     async getNextWeekResetTime() {
-      const nextWeekResetTimestamp = await this.nextWeeklyQuestCompletionLimitReset();
+      const nextWeekResetTimestamp = await this.nextWeeklyQuestCompletionGoalReset();
       if (this.nextWeekResetCheckInterval) {
         clearInterval(this.nextWeekResetCheckInterval);
       }

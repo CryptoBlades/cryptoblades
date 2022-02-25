@@ -220,14 +220,14 @@
       </b-button>
     </b-form>
     <b-form class="d-flex flex-column gap-3">
-      <h2 class="pt-3">{{ $t('quests.updateWeeklyQuestsCompletionsLimit') }}</h2>
+      <h2 class="pt-3">{{ $t('quests.updateWeeklyQuestsCompletionsGoal') }}</h2>
       <div class="requirements-grid-container gap-3">
-        <label class="m-0 align-self-center">{{ $t('quests.weeklyCompletionsLimit') }}</label>
-        <b-form-input type="number" number :min="0" v-model="weeklyCompletionsLimit"/>
+        <label class="m-0 align-self-center">{{ $t('quests.weeklyCompletionsGoal') }}</label>
+        <b-form-input type="number" number :min="0" v-model="weeklyCompletionsGoal"/>
       </div>
-      <b-button variant="primary" @click="updateWeeklyCompletionsLimit"
+      <b-button variant="primary" @click="updateWeeklyCompletionsGoal"
                 :disabled="isLoading || showTemplateConfirmationModal || showPromoToggleConfirmationModal">
-        {{ $t('quests.updateWeeklyCompletionsLimit') }}
+        {{ $t('quests.updateWeeklyCompletionsGoal') }}
       </b-button>
     </b-form>
     <b-form class="d-flex flex-column gap-3">
@@ -341,9 +341,9 @@ interface StoreMappedActions {
 
   getSkipQuestStaminaCost(): Promise<number>;
 
-  setWeeklyCompletionsLimit(payload: { newLimit: number }): Promise<void>;
+  setWeeklyCompletionsGoal(payload: { newGoal: number }): Promise<void>;
 
-  getWeeklyCompletionsLimit(): Promise<number>;
+  getWeeklyCompletionsGoal(): Promise<number>;
 
   getQuestTierChances(payload: { tier: number }): Promise<TierChances>;
 
@@ -384,7 +384,7 @@ interface Data {
   showPromoToggleConfirmationModal: boolean;
   reputationLevelRequirements?: ReputationLevelRequirements;
   staminaCost: number;
-  weeklyCompletionsLimit: number;
+  weeklyCompletionsGoal: number;
   tierChances: TierChances[];
   usePromoQuests: boolean;
   supply?: number;
@@ -436,7 +436,7 @@ export default Vue.extend({
       showPromoToggleConfirmationModal: false,
       reputationLevelRequirements: undefined,
       staminaCost: 0,
-      weeklyCompletionsLimit: 0,
+      weeklyCompletionsGoal: 0,
       tierChances: [] as TierChances[],
       usePromoQuests: false,
       supply: undefined,
@@ -455,8 +455,8 @@ export default Vue.extend({
       'setReputationLevelRequirements',
       'setSkipQuestStaminaCost',
       'getSkipQuestStaminaCost',
-      'getWeeklyCompletionsLimit',
-      'setWeeklyCompletionsLimit',
+      'getWeeklyCompletionsGoal',
+      'setWeeklyCompletionsGoal',
       'getQuestTierChances',
       'setQuestTierChances',
       'isUsingPromoQuests',
@@ -552,11 +552,11 @@ export default Vue.extend({
       }
     },
 
-    async updateWeeklyCompletionsLimit() {
+    async updateWeeklyCompletionsGoal() {
       try {
         this.isLoading = true;
-        await this.setWeeklyCompletionsLimit({newLimit: this.weeklyCompletionsLimit});
-        this.weeklyCompletionsLimit = await this.getWeeklyCompletionsLimit();
+        await this.setWeeklyCompletionsGoal({newGoal: this.weeklyCompletionsGoal});
+        this.weeklyCompletionsGoal = await this.getWeeklyCompletionsGoal();
       } finally {
         this.isLoading = false;
       }
@@ -662,7 +662,7 @@ export default Vue.extend({
       this.refreshQuestTemplates();
       this.reputationLevelRequirements = await this.getReputationLevelRequirements();
       this.staminaCost = await this.getSkipQuestStaminaCost();
-      this.weeklyCompletionsLimit = await this.getWeeklyCompletionsLimit();
+      this.weeklyCompletionsGoal = await this.getWeeklyCompletionsGoal();
       this.usePromoQuests = await this.isUsingPromoQuests();
       await this.refreshTierChances();
     } finally {

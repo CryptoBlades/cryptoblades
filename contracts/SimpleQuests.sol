@@ -54,7 +54,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     uint8 public constant VAR_REPUTATION_LEVEL_4 = 22;
     uint8 public constant VAR_REPUTATION_LEVEL_5 = 23;
     uint8 public constant VAR_SKIP_QUEST_STAMINA_COST = 30;
-    uint8 public constant VAR_WEEKLY_COMPLETIONS_LIMIT = 31;
+    uint8 public constant VAR_WEEKLY_COMPLETIONS_GOAL = 31;
     uint256 internal constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
     uint256 internal constant NFTVAR_SIMPLEQUEST_TYPE = 102;
     uint256 internal constant NFTVAR_REPUTATION = 103;
@@ -405,7 +405,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return now / 1 days > lastFreeSkipUsage[characterID] / 1 days;
     }
 
-    function nextWeeklyQuestCompletionLimitReset() public view returns (uint256) {
+    function nextWeeklyQuestCompletionGoalReset() public view returns (uint256) {
         return now + 1 weeks - now % 1 weeks;
     }
 
@@ -473,7 +473,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function claimWeeklyReward() public returns (uint256[] memory weeklyRewardIDs) {
         uint256 currentCompletions = weeklyCompletions[msg.sender][now / 1 weeks];
         require(weeklyRewardClaimed[msg.sender][now / 1 weeks] == false, "Reward already claimed");
-        require(currentCompletions >= vars[VAR_WEEKLY_COMPLETIONS_LIMIT], "Not enough weekly completions");
+        require(currentCompletions >= vars[VAR_WEEKLY_COMPLETIONS_GOAL], "Not enough weekly completions");
         uint256 rewardID = weeklyRewards[now / 1 weeks];
         weeklyRewardIDs = rewardWeekly(rewardID);
         emit WeeklyRewardClaimed(msg.sender, rewardID, weeklyRewardIDs);
