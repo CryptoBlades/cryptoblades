@@ -65,7 +65,8 @@
         {{ $t('quests.loading') }}
       </div>
       <QuestReward v-else :type="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity" :rewards="weeklyRewards"
-                   :amount="weeklyReward.rewardAmount" :reputationAmount="weeklyReward.reputationAmount"/>
+                   :amount="weeklyReward.rewardAmount" :reputationAmount="weeklyReward.reputationAmount"
+                   :externalAddress="weeklyReward.rewardExternalAddress"/>
     </b-modal>
   </div>
   <div v-else-if="isLoading">

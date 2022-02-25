@@ -466,7 +466,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         emit WeeklyRewardSet(id, week);
     }
 
-    // TODO: What should be the identifier here?
     function generateRewardWeeklySeed(uint256 rewardID) assertQuestsEnabled public {
         safeRandoms.requestSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_WEEKLY, rewardID));
     }

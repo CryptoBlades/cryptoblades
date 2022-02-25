@@ -46,7 +46,8 @@
         {{ $t('quests.loading') }}
       </div>
       <QuestReward v-else :type="quest.rewardType" :rarity="quest.rewardRarity" :rewards="questRewards"
-                   :amount="quest.rewardAmount" :reputationAmount="quest.reputationAmount"/>
+                   :amount="quest.rewardAmount" :reputationAmount="quest.reputationAmount"
+                   :externalAddress="quest.rewardExternalAddress"/>
     </b-modal>
   </div>
 </template>
