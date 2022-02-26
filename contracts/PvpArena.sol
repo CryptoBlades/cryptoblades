@@ -13,6 +13,7 @@ import "./shields.sol";
 import "./common.sol";
 
 
+
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;
     using SafeMath for uint8;
@@ -118,8 +119,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     uint256 public duelOffsetCost;
     address payable public pvpBotAddress;
-
-    uint256 private _shieldFactor;
     
     event DuelFinished(
         uint256 indexed attacker,
@@ -250,7 +249,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         prizePercentages.push(30);
         prizePercentages.push(10);
         duelOffsetCost = 0.005 ether;
-        _shieldFactor = 100;
     }
 
     /// @dev enter the arena with a character, a weapon and optionally a shield
@@ -568,8 +566,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                     attackerShieldDefense = 10;
                 }
 
-                attackerShieldDefense = uint24(attackerShieldDefense.mul(_shieldFactor).div(100));
-
                 duel.defender.roll = uint24(
                     (duel.defender.roll.mul(uint24(100).sub(attackerShieldDefense)))
                         .div(100)
@@ -589,8 +585,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 ) {
                     defenderShieldDefense = 10;
                 }
-
-                defenderShieldDefense = uint24(defenderShieldDefense.mul(_shieldFactor).div(100));
 
                 duel.attacker.roll = uint24(
                     (duel.attacker.roll.mul(uint24(100).sub(defenderShieldDefense)))
@@ -1016,7 +1010,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         int128 bonusShieldStats;
         if (fighter.useShield) {
-            bonusShieldStats = int128(int128(_shieldFactor).mulu(uint256(_getShieldStats(character.ID))).div(100));
+            // we set bonus shield stats as 0.2
+            bonusShieldStats = _getShieldStats(character.ID).sub(1).mul(20).div(100);
         }
 
         (
@@ -1032,9 +1027,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             opponentTrait
         );
 
-        uint24 playerFightPower = Common.getPlayerPower(character.basePower, (weaponMultFight.add(bonusShieldStats)), weaponBonusPower);
-
-        uint256 playerPower = RandomUtil.plusMinus10PercentSeeded(
+        uint24 playerFightPower = Common.getPlayerPowerBase100(character.basePower, (weaponMultFight.add(bonusShieldStats)), weaponBonusPower);
+        uint256 playerPower = RandomUtil.plusMinus30PercentSeeded(
             playerFightPower,
             seed
         );
@@ -1158,10 +1152,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     function setPvpBotAddress(address payable botAddress) external restricted {
         pvpBotAddress = botAddress;
-    }
-
-    function setShieldFactor(uint256 factor) external restricted {
-        _shieldFactor = factor;
     }
 
     // Note: The following are debugging functions. Remove later.
