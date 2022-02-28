@@ -103,6 +103,11 @@
             <img src="../assets/new-ui/211751_gear_icon (2)@2x.png">
             <p>Settings</p>
             </router-link>
+
+            <router-link v-if="hasAdminAccess" class="menu-icon" :to="{ name: 'admin'}" exact>
+            <img src="../assets/new-ui/211751_gear_icon (2)@2x.png">
+            <p>Admin</p>
+            </router-link>
         </div>
 
         <div class="horizontal-small"></div>
