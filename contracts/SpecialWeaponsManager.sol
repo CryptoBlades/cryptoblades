@@ -196,6 +196,10 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         );
     }
 
+    function incrementEventCount() external restricted {
+        eventCount++;
+    }
+
     function updateStakingReward(address user, uint256 stakingAmount) external restricted {
         userSkillStakingShardsRewards[user] = getUserShardsRewards(user);
         userStakedSkill[user] = stakingAmount;
