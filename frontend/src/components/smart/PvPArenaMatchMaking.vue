@@ -90,8 +90,9 @@
           <pvp-button
             @click="reRollCharacterOpponent" :disabled="loading || !isInMatch || isCharacterInDuelQueue"
             :buttonText="$t('pvp.reRoll')"
-            :buttonsubText="'$SKILL: ' + formattedReRollCost"
+            :buttonsubText="!hasSpecialWeapon || !freeRerollReady ? '$SKILL: ' + formattedReRollCost : $t('pvp.free')"
             :secondary="true"
+            v-tooltip="hasSpecialWeapon && !freeRerollReady ? `${$t('pvp.freeRerollIn')} ${freeRerollLocalTimestamp}` : ''"
           />
         </div>
         <div class="leaveArenaButtonWrapper">
@@ -265,6 +266,7 @@ export default {
       },
       matchablePlayersCount: null,
       duelOffsetCost: null,
+      specialWeaponFreeRerollTimestamp: null
     };
   },
 
@@ -316,6 +318,19 @@ export default {
       }
       return lightningIcon;
     },
+
+    freeRerollReady() {
+      if(!this.hasSpecialWeapon) return false;
+      return +this.specialWeaponFreeRerollTimestamp <= Date.now()/1000;
+    },
+
+    hasSpecialWeapon() {
+      return +this.activeWeaponWithInformation.information.weaponType > 1;
+    },
+
+    freeRerollLocalTimestamp() {
+      return new Date(this.specialWeaponFreeRerollTimestamp * 1000).toLocaleString();
+    }
   },
 
   methods: {
@@ -575,7 +590,15 @@ export default {
 
     this.duelOffsetCost = await this.getDuelOffsetCost();
 
+    this.specialWeaponFreeRerollTimestamp = await this.fetchFreeOpponentRerollTimestamp(this.activeWeaponWithInformation.weaponId);
+
     this.loading = false;
+  },
+
+  beforeDestroy() {
+    if(this.timer) {
+      clearInterval(this.timer);
+    }
   },
 
   watch: {

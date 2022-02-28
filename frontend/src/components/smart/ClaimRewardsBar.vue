@@ -207,7 +207,8 @@ export default Vue.extend({
       ClaimStage,
       remainingTokenClaimAmountPreTax: '0',
       skillAmount: 0,
-      slippage: 0
+      slippage: 0,
+      updateInterval: null as ReturnType<typeof setInterval> | null,
     };
   },
 
@@ -415,7 +416,13 @@ export default Vue.extend({
   },
 
   async mounted() {
-    setInterval(async () => await this.getRemainingTokenClaimAmountPreTax(), 3000);
+    this.updateInterval = setInterval(async () => await this.getRemainingTokenClaimAmountPreTax(), 3000);
+  },
+
+  beforeDestroy() {
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
   }
 });
 </script>

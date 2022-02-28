@@ -212,6 +212,7 @@ export default {
   },
   beforeDestroy() {
     clearInterval(this.stakeRewardProgressInterval);
+    clearInterval(this.secondsInterval);
   },
   computed: {
     ...mapState(['defaultAccount', 'staking', 'skillRewards']),

@@ -4,8 +4,12 @@
       {{ $t(`admin.tabs.${title}`) }}
       <Hint v-if="!hasTabAccess" :text="$t('admin.doNotHaveAccessTooltip')"/>
     </template>
-    <AdminMaker v-if="contract" :contract="contract"/>
-    <AdminRevoker v-if="contract" :contract="contract"/>
+    <RoleGranter v-if="contract" :contract="contract" :roleMethod="contract.methods.GAME_ADMIN" roleName="GAME_ADMIN"/>
+    <RoleRevoker v-if="contract" :contract="contract" :roleMethod="contract.methods.GAME_ADMIN" roleName="GAME_ADMIN"/>
+    <RoleGranter v-if="contract && contract.methods.MINTER_ROLE" :contract="contract"
+                 :roleMethod="contract.methods.MINTER_ROLE" roleName="MINTER_ROLE"/>
+    <RoleRevoker v-if="contract && contract.methods.MINTER_ROLE" :contract="contract"
+                 :roleMethod="contract.methods.MINTER_ROLE" roleName="MINTER_ROLE"/>
     <component :is="component" :contract="contract"/>
   </b-tab>
 </template>
@@ -15,13 +19,14 @@ import Vue from 'vue';
 import {mapActions, mapState} from 'vuex';
 import {Contract} from '@/interfaces';
 import {PropType} from 'vue/types/options';
-import AdminMaker from '@/components/smart/AdminMaker.vue';
-import QuestsAdmin from '@/components/smart/QuestsAdmin.vue';
+import RoleGranter from '@/components/smart/RoleGranter.vue';
+import QuestsAdmin from './AdminTabs/QuestsAdmin.vue';
 import Hint from '@/components/Hint.vue';
-import CBKLandAdmin from '@/components/smart/CBKLandAdmin.vue';
-import WeaponsAdmin from '@/components/smart/WeaponsAdmin.vue';
-import BurningManagerAdmin from '@/components/smart/BurningManagerAdmin.vue';
-import AdminRevoker from '@/components/smart/AdminRevoker.vue';
+import CBKLandAdmin from './AdminTabs/CBKLandAdmin.vue';
+import WeaponsAdmin from './AdminTabs/WeaponsAdmin.vue';
+import BurningManagerAdmin from './AdminTabs/BurningManagerAdmin.vue';
+import PartnerVaultAdmin from './AdminTabs/PartnerVaultAdmin.vue';
+import RoleRevoker from '@/components/smart/RoleRevoker.vue';
 
 interface StoreMappedActions {
   userHasAdminAccess(payload: { contract: Contract<any> }): Promise<boolean>;
@@ -35,7 +40,7 @@ interface Data {
 }
 
 export default Vue.extend({
-  components: {Hint, AdminMaker, AdminRevoker, QuestsAdmin, CBKLandAdmin, WeaponsAdmin, BurningManagerAdmin},
+  components: {Hint, RoleGranter, RoleRevoker, QuestsAdmin, CBKLandAdmin, WeaponsAdmin, BurningManagerAdmin, PartnerVaultAdmin},
   props: {
     title: {
       type: String as PropType<string>,
