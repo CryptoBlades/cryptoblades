@@ -1,12 +1,10 @@
 <template>
   <div class="reward-info d-flex flex-column justify-content-center">
     <span class="font-weight-bold text-center p-2">{{ $t('quests.reward') }}</span>
+    <QuestComponentIcon v-if="reputationAmount" :questItemType="QuestItemType.REPUTATION" :amount="reputationAmount"/>
     <NftList v-if="rewards && rewards.length !== 0" :showGivenNftIdTypes="true" :nftIdTypes="rewards"
              :isReward="true"/>
-    <div v-else class="d-flex justify-content-center gap-3">
-      <QuestComponentIcon :questItemType="type" :amount="amount" :rarity="rarity" :externalAddress="externalAddress"/>
-      <QuestComponentIcon :questItemType="QuestItemType.REPUTATION" :amount="reputationAmount"/>
-    </div>
+    <QuestComponentIcon v-else :questItemType="type" :amount="amount" :rarity="rarity" :externalAddress="externalAddress"/>
   </div>
 </template>
 
