@@ -325,7 +325,7 @@ export default {
     },
 
     hasSpecialWeapon() {
-      return +this.activeWeaponWithInformation.information.weaponType > 1;
+      return +this.activeWeaponWithInformation.information.weaponType >= 1;
     },
 
     freeRerollLocalTimestamp() {
@@ -350,7 +350,8 @@ export default {
       'approvePvpSkillSpending',
       'getPvpContract',
       'getFighterByCharacter',
-      'getDuelOffsetCost'
+      'getDuelOffsetCost',
+      'fetchFreeOpponentRerollTimestamp'
     ]),
 
     handleErrorMessage(value, errorMessage, returnedMessage) {
@@ -414,7 +415,9 @@ export default {
       this.loading = true;
 
       try {
-        await this.approvePvpSkillSpending(this.reRollCost.toFixed(0));
+        if(!this.freeRerollReady) {
+          await this.approvePvpSkillSpending(this.reRollCost.toFixed(0));
+        }
 
         await this.reRollOpponent(this.currentCharacterId);
       } catch (err) {

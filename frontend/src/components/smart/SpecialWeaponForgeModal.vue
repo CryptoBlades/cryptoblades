@@ -112,8 +112,8 @@
               </div>
               <div class="d-flex flex-column align-items-center mt-3 top-border-forge" v-if="isEventWeaponForged && !isClaiming">
                 <h5 class="mt-2">{{$t('blacksmith.specialWeaponClaimed')}}</h5>
-                <div class="weapon-icon-wrapper mt-2">
-                  <weapon-icon v-if="forgedWeapon" :weapon="forgedWeapon" />
+                <div v-if="forgedWeapon" class="weapon-icon-wrapper mt-2">
+                  <weapon-icon :weapon="forgedWeapon" />
                 </div>
               </div>
             </div>
@@ -136,7 +136,7 @@
                   <b-col>{{$t('blacksmith.live')}}</b-col>
                   <b-col><img class="shard-icon" :src="eventShardImg" /> {{shardsSupply[id]}}</b-col>
                 </b-row>
-                <b-row class="bordered" v-for="id in inactiveSpecialWeaponEventsIds" :key="id" :value="id">
+                <b-row class="bordered" v-for="id in validInactiveSpecialWeaponsEventsIds" :key="id" :value="id">
                   <b-col>{{specialWeaponEvents[id] && specialWeaponEvents[id].name}}</b-col>
                   <b-col>{{$t('blacksmith.ended')}}</b-col>
                   <b-col><img class="shard-icon" :src="eventShardImg" /> {{shardsSupply[id]}}</b-col>
@@ -426,8 +426,12 @@ export default Vue.extend({
       return forgingGif;
     },
 
+    validInactiveSpecialWeaponsEventsIds(): number[] {
+      return this.inactiveSpecialWeaponEventsIds.filter(id => this.specialWeaponEvents[id]?.name);
+    },
+
     allEventsIds(): number[] {
-      return this.activeSpecialWeaponEventsIds.concat(this.inactiveSpecialWeaponEventsIds);
+      return this.activeSpecialWeaponEventsIds.concat(this.validInactiveSpecialWeaponsEventsIds);
     },
 
     convertOutputAmount(): number {
@@ -462,7 +466,7 @@ export default Vue.extend({
     },
 
     inactiveEventsIdsWithUnclaimedOrders(): number[] {
-      return this.inactiveSpecialWeaponEventsIds.filter(id => this.specialWeaponEvents[id].ordered && !this.specialWeaponEvents[id].forged);
+      return this.validInactiveSpecialWeaponsEventsIds.filter(id => this.specialWeaponEvents[id]?.ordered && !this.specialWeaponEvents[id]?.forged);
     }
   },
 
@@ -621,7 +625,7 @@ export default Vue.extend({
   border-radius: 3px;
 }
 .scrollable {
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
   max-height: 10em;
 }
