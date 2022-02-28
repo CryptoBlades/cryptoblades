@@ -183,7 +183,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     modifier isOwnedCharacter(uint256 characterID) {
-        require(characters.ownerOf(characterID) == msg.sender);
+        require(_ownerByCharacter[characterID] == msg.sender);
         _;
     }
 
@@ -1179,9 +1179,38 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         rankingPointsByCharacter[characterID] = newRankingPoints;
     }
+
     /// @dev returns the amount of matcheable characters
     function getMatchablePlayerCount(uint256 characterID) public view returns(uint){
         uint8 tier = getArenaTier(characterID);
         return _matchableCharactersByTier[tier].length();   
     }
+
+    function forceRemoveCharacterFromArena(uint256 characterID)
+        external 
+        restricted
+        characterNotUnderAttack(characterID)
+        characterNotInDuel(characterID)
+    {
+        Fighter storage fighter = fighterByCharacter[characterID];
+        uint8 tier = getArenaTier(characterID);
+        uint256 wager = fighter.wager;
+        uint256 entryWager = getEntryWager(characterID);
+
+        if (matchByFinder[characterID].createdAt != 0) {
+            if (wager < entryWager.mul(withdrawFeePercent).div(100)) {
+                wager = 0;
+            } else {
+                wager = wager.sub(entryWager.mul(withdrawFeePercent).div(100));
+            }
+        }
+
+        _removeCharacterFromArena(characterID, tier);
+
+        excessWagerByCharacter[characterID] = 0;
+        fighter.wager = 0;
+
+        skillToken.safeTransfer(characters.ownerOf(characterID), wager);
+    }
+
 }
