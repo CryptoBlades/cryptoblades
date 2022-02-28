@@ -56,6 +56,7 @@ import { abi as kingStakingRewardsUpgradeable90Abi,
 import { abi as kingStakingRewardsUpgradeable180Abi,
   networks as kingStakingRewardsUpgradeable180Networks }
   from '../../build/contracts/KingStakingRewardsUpgradeable180.json';
+import { abi as specialWeaponsManagerAbi } from '../../build/contracts/SpecialWeaponsManager.json';
 import config from '../app-config.json';
 
 
@@ -110,7 +111,7 @@ export type Networks = Partial<Record<string, { address: string }>>;
 type Abi = any[];
 
 const stakingContractAddressesFromBuild: Partial<Record<StakeType, Partial<StakingContractEntry>>> = {
-  skill: {
+  skill2: {
     stakingRewardsAddress: (skillStakingRewardsNetworks as Networks)[networkId]?.address,
     stakingTokenAddress: (skillTokenNetworks as Networks)[networkId]?.address
   },
@@ -245,6 +246,12 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Characters = new web3.eth.Contract(charactersAbi as Abi, charactersAddr);
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
+
+  let SpecialWeaponsManager;
+  const specialWeaponsManagerAddr = await CryptoBlades.methods.specialWeaponsManager().call();
+  if(specialWeaponsManagerAddr) {
+    SpecialWeaponsManager = new web3.eth.Contract(specialWeaponsManagerAbi as Abi, specialWeaponsManagerAddr);
+  }
 
   const garrisonAddr = await Characters.methods.garrison().call();
   const Garrison = new web3.eth.Contract(garrisonAbi as Abi, garrisonAddr);
@@ -400,6 +407,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     BurningManager,
     KingStakingRewardsUpgradeable,
     KingStakingRewardsUpgradeable90,
-    KingStakingRewardsUpgradeable180
+    KingStakingRewardsUpgradeable180,
+    SpecialWeaponsManager
   };
 }

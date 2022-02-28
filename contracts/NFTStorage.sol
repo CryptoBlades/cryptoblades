@@ -693,19 +693,19 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     }
 
     function packedWeaponsData(uint256 weaponId) public view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {
-        (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,,,,, uint24 _burnPoints,) = weapons.get(weaponId);
+        (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,, uint24 _burnPoints,, uint24 _weaponType) = weapons.get(weaponId);
         uint32 appliedCosmetic = weaponCosmetics.getWeaponCosmetic(weaponId);
         rename = weaponRenameTagConsumables.getWeaponRename(weaponId);
         seed3dCosmetics = weapons.getCosmeticsSeed(weaponId);
-        packedData = packWeaponsData(appliedCosmetic, _properties, _stat1, _stat2, _stat3, _level, uint8(_burnPoints & 0xFF), uint8((_burnPoints >> 8) & 0xFF), uint8((_burnPoints >> 16) & 0xFF));
+        packedData = packWeaponsData(appliedCosmetic, _properties, _stat1, _stat2, _stat3, _level, uint8(_burnPoints & 0xFF), uint8((_burnPoints >> 8) & 0xFF), uint8((_burnPoints >> 16) & 0xFF), _weaponType);
     }
 
     // Applied cosmetic 32 bits is too much but will just put it as MSB for now. Can change later when something else is added.
-    function packWeaponsData(uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 weaponLevel, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) public pure returns (uint256) {
-        return  uint256(fiveStarBurnPoints | (uint256(fourStarBurnPoints) << 8) | (uint256(lowStarBurnPoints) << 16) | (uint256(weaponLevel) << 24) | (uint256(stat3) << 32) | (uint256(stat2) << 48) | (uint256(stat1) << 64) | (uint256(properties) << 80) | (uint256(appliedCosmetic) << 96));
+    function packWeaponsData(uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 weaponLevel, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints, uint24 weaponType) public pure returns (uint256) {
+        return  uint256(fiveStarBurnPoints | (uint256(fourStarBurnPoints) << 8) | (uint256(lowStarBurnPoints) << 16) | (uint256(weaponLevel) << 24) | (uint256(stat3) << 32) | (uint256(stat2) << 48) | (uint256(stat1) << 64) | (uint256(properties) << 80) | (uint256(appliedCosmetic) << 96) | (uint256(weaponType) << 128));
     }
 
-    function unpackWeaponsData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 weaponLevel, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) {
+    function unpackWeaponsData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 weaponLevel, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints, uint24 weaponType) {
         fiveStarBurnPoints = uint8(metaData & 0xFF);
         fourStarBurnPoints = uint8((metaData >> 8) & 0xFF);
         lowStarBurnPoints = uint8((metaData >> 16) & 0xFF);
@@ -715,6 +715,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         stat1 = uint16((metaData >> 64) & 0xFFFF);
         properties = uint16((metaData >> 80) & 0xFFFF);
         appliedCosmetic = uint32((metaData >> 96) & 0xFFFFFFFF);
+        weaponType = uint24((metaData >> 128) & 0xFFFFFF);
     }
 
     function packedCharacterData(uint256 characterId) public view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {

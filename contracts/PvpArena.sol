@@ -119,6 +119,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     uint256 public duelOffsetCost;
     address payable public pvpBotAddress;
+
+    mapping(uint256 => uint256) public specialWeaponRerollTimestamp;
     
     event DuelFinished(
         uint256 indexed attacker,
@@ -376,11 +378,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         _assignOpponent(characterID, tier);
 
-        skillToken.transferFrom(
-            msg.sender,
-            address(this),
-            getDuelCostByTier(tier).mul(reRollFeePercent).div(100)
-        );
+        uint256 weaponID = fighterByCharacter[characterID].weaponID;
+        if(weapons.getWeaponType(weaponID) > 0 && specialWeaponRerollTimestamp[weaponID] < block.timestamp) {
+            specialWeaponRerollTimestamp[weaponID] = block.timestamp + 24 hours;
+        }
+        else {
+            skillToken.transferFrom(
+                msg.sender,
+                address(this),
+                getDuelCostByTier(tier).mul(reRollFeePercent).div(100)
+            );
+        }
     }
 
     /// @dev adds a character to the duel queue
