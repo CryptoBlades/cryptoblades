@@ -15,6 +15,7 @@ import "./weapons.sol";
 import "./util.sol";
 import "./common.sol";
 import "./Blacksmith.sol";
+import "./SpecialWeaponsManager.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -126,6 +127,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         rewardsClaimTaxDuration = 15 days;
     }
 
+    function migrateTo_e1fe97c(SpecialWeaponsManager _swm) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+
+        specialWeaponsManager = _swm;
+    }
+
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     uint characterLimit;
     // config vars
@@ -201,6 +208,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     mapping(uint256 => uint256) public vars;
     mapping(address => mapping(uint256 => uint256)) public userVars;
+
+    SpecialWeaponsManager public specialWeaponsManager;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -471,33 +480,27 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
-            weapons.performMintWeapon(msg.sender,
-                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100), 100),
-                weapons.getRandomStat(4, 200, seed, 101),
-                0, // stat2
-                0, // stat3
-                RandomUtil.combineSeeds(seed,102)
-            );
+            weapons.mintWeaponWithStars(msg.sender, 1, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), 100);
         }
     }
 
-    function mintWeaponN(uint32 num, uint8 chosenElement)
+    function mintWeaponN(uint32 num, uint8 chosenElement, uint256 eventId)
         external
         onlyNonContract
         oncePerBlock(msg.sender)
     {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * num * chosenElementFee));
-        _mintWeaponNLogic(num, chosenElement);
+        _mintWeaponNLogic(num, chosenElement, eventId);
     }
 
-    function mintWeapon(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
+    function mintWeapon(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * chosenElementFee));
-        _mintWeaponLogic(chosenElement);
+        _mintWeaponLogic(chosenElement, eventId);
     }
 
-    function mintWeaponNUsingStakedSkill(uint32 num, uint8 chosenElement)
+    function mintWeaponNUsingStakedSkill(uint32 num, uint8 chosenElement, uint256 eventId)
         external
         onlyNonContract
         oncePerBlock(msg.sender)
@@ -508,108 +511,36 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
                 .mul(ABDKMath64x64.fromUInt(num))
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
+        payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
 
-        _mintWeaponNLogic(num, chosenElement);
+        _mintWeaponNLogic(num, chosenElement, eventId);
     }
 
-    function mintWeaponUsingStakedSkill(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
+    function mintWeaponUsingStakedSkill(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
             mintWeaponFee
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
+        payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
 
-        _mintWeaponLogic(chosenElement);
+        _mintWeaponLogic(chosenElement, eventId);
     }
 
-    function _mintWeaponNLogic(uint32 num, uint8 chosenElement) internal {
+    function _mintWeaponNLogic(uint32 num, uint8 chosenElement, uint256 eventId) internal {
         require(num > 0 && num <= 10);
+        if(eventId > 0) {
+            specialWeaponsManager.addShards(msg.sender, eventId, num);
+        }
         weapons.mintN(msg.sender, num, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
-    function _mintWeaponLogic(uint8 chosenElement) internal {
+    function _mintWeaponLogic(uint8 chosenElement, uint256 eventId) internal {
         //uint256 seed = randoms.getRandomSeed(msg.sender);
-        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
-    }
-
-    function burnWeapon(uint256 burnID) external isWeaponOwner(burnID) {
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(burnWeaponFee));
-
-        _burnWeaponLogic(burnID);
-    }
-
-    function burnWeapons(uint256[] calldata burnIDs) external isWeaponsOwner(burnIDs) {
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length))));
-
-        _burnWeaponsLogic(burnIDs);
-    }
-
-    function reforgeWeapon(uint256 reforgeID, uint256 burnID) external isWeaponOwner(reforgeID) isWeaponOwner(burnID) {
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(reforgeWeaponFee));
-
-        _reforgeWeaponLogic(reforgeID, burnID);
-    }
-
-    function reforgeWeaponWithDust(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) external isWeaponOwner(reforgeID) {
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(reforgeWeaponWithDustFee));
-
-        _reforgeWeaponWithDustLogic(reforgeID, amountLB, amount4B, amount5B);
-    }
-
-    function burnWeaponUsingStakedSkill(uint256 burnID) external isWeaponOwner(burnID) {
-        int128 discountedBurnWeaponFee =
-            burnWeaponFee.mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedBurnWeaponFee));
-
-        _burnWeaponLogic(burnID);
-    }
-
-    function burnWeaponsUsingStakedSkill(uint256[] calldata burnIDs) external isWeaponsOwner(burnIDs) {
-        int128 discountedBurnWeaponFee =
-            burnWeaponFee
-                .mul(ABDKMath64x64.fromUInt(burnIDs.length))
-                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedBurnWeaponFee));
-
-        _burnWeaponsLogic(burnIDs);
-    }
-
-    function reforgeWeaponUsingStakedSkill(uint256 reforgeID, uint256 burnID) external isWeaponOwner(reforgeID) isWeaponOwner(burnID) {
-        int128 discountedReforgeWeaponFee =
-            reforgeWeaponFee
-                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedReforgeWeaponFee));
-
-        _reforgeWeaponLogic(reforgeID, burnID);
-    }
-
-    function reforgeWeaponWithDustUsingStakedSkill(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) external isWeaponOwner(reforgeID) {
-        int128 discountedReforgeWeaponWithDustFee =
-            reforgeWeaponWithDustFee
-                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedReforgeWeaponWithDustFee));
-
-        _reforgeWeaponWithDustLogic(reforgeID, amountLB, amount4B, amount5B);
-    }
-
-    function _burnWeaponLogic(uint256 burnID) internal {
-        weapons.burn(burnID);
-    }
-
-    function _burnWeaponsLogic(uint256[] memory burnIDs) internal {
-        for(uint i = 0; i < burnIDs.length; i++) {
-            weapons.burn(burnIDs[i]);
+        if(eventId > 0) {
+            specialWeaponsManager.addShards(msg.sender, eventId, 1);
         }
-    }
-
-    function _reforgeWeaponLogic(uint256 reforgeID, uint256 burnID) internal {
-        weapons.reforge(reforgeID, burnID);
-    }
-
-    function _reforgeWeaponWithDustLogic(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) internal {
-        weapons.reforgeWithDust(reforgeID, amountLB, amount4B, amount5B);
+        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
     function migrateRandoms(IRandoms _newRandoms) external {
@@ -725,6 +656,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
     }
 
+    function payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) external restricted 
+        returns (
+            uint256 _fromInGameOnlyFunds,
+            uint256 _fromTokenRewards,
+            uint256 _fromUserWallet,
+            uint256 _fromStaked
+        ) {
+        return _payContractConvertedSupportingStaked(playerAddress, convertedAmount);
+    }
+
     function _payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) internal
         returns (
             uint256 _fromInGameOnlyFunds,
@@ -756,7 +697,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet, fromStaked);
     }
 
-    function _payContractStakedOnly(address playerAddress, uint256 convertedAmount) internal {
+    function payContractStakedOnly(address playerAddress, uint256 convertedAmount) public restricted {
         stakeFromGameImpl.unstakeToGame(playerAddress, convertedAmount);
         _trackIncome(convertedAmount);
     }
@@ -856,22 +797,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function setWeaponMintValue(uint256 cents) public restricted {
         mintWeaponFee = ABDKMath64x64.divu(cents, 100);
-    }
-
-    function setBurnWeaponValue(uint256 cents) public restricted {
-        burnWeaponFee = ABDKMath64x64.divu(cents, 100);
-    }
-
-    function setReforgeWeaponValue(uint256 cents) public restricted {
-        int128 newReforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
-        require(newReforgeWeaponFee > burnWeaponFee);
-        reforgeWeaponWithDustFee = newReforgeWeaponFee - burnWeaponFee;
-        reforgeWeaponFee = newReforgeWeaponFee;
-    }
-
-    function setReforgeWeaponWithDustValue(uint256 cents) public restricted {
-        reforgeWeaponWithDustFee = ABDKMath64x64.divu(cents, 100);
-        reforgeWeaponFee = burnWeaponFee + reforgeWeaponWithDustFee;
     }
 
     function setStaminaCostFight(uint8 points) public restricted {

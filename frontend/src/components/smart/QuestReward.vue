@@ -1,10 +1,11 @@
 <template>
-  <div class="reward-info d-flex flex-column justify-content-center">
+  <div class="d-flex flex-column justify-content-center flex-1">
     <span class="font-weight-bold text-center p-2">{{ $t('quests.reward') }}</span>
     <QuestComponentIcon v-if="reputationAmount" :questItemType="QuestItemType.REPUTATION" :amount="reputationAmount"/>
     <NftList v-if="rewards && rewards.length !== 0" :showGivenNftIdTypes="true" :nftIdTypes="rewards"
              :isReward="true"/>
-    <QuestComponentIcon v-else :questItemType="type" :amount="amount" :rarity="rarity" :externalAddress="externalAddress"/>
+    <QuestComponentIcon v-else :questItemType="type" :amount="amount" :rarity="rarity"
+                        :externalAddress="externalAddress"/>
   </div>
 </template>
 
@@ -52,9 +53,3 @@ export default Vue.extend({
 
 });
 </script>
-
-<style scoped>
-.reward-info {
-  flex: 1;
-}
-</style>
