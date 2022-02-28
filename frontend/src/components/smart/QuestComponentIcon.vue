@@ -1,6 +1,6 @@
 <template>
   <div class="reward-icon-container">
-    <img class="reward-icon" :src="icon" v-b-tooltip="tooltip" alt=""/>
+    <img class="reward-icon" :src="icon" v-b-tooltip="tooltip" alt="Reward image"/>
     <span v-if="questItemType === QuestItemType.REPUTATION" class="reward-amount">+{{ amount }} Rep</span>
     <span v-else-if="questItemType === QuestItemType.EXPERIENCE" class="reward-amount">+{{ amount }} Exp</span>
     <span v-else class="reward-amount"><span>x</span>{{ amount }} {{ stars }}</span>

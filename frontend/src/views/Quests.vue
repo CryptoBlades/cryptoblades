@@ -26,7 +26,7 @@
           <div class="d-flex flex-column gap-2">
             <div class="d-flex justify-content-between gap-4">
               <span class="text-uppercase weekly-progress">{{ $t('quests.weeklyProgress') }}</span>
-              <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon" alt=""/> {{
+              <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon" alt="Hourglass"/> {{
                   $t('quests.resetsIn', {time: nextWeekResetTime})
                 }}</span>
             </div>

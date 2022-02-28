@@ -30,7 +30,7 @@
     <div v-else-if="quest.requirementType === RequirementType.EXTERNAL
       || quest.requirementType === RequirementType.EXTERNAL_HOLD">
       <div v-if="isCurrency" class="d-flex align-items-center flex-column">
-        <h2 v-if="isCurrency">{{ $t('quests.howMuchToTurnIn') }}</h2>
+        <h2>{{ $t('quests.howMuchToTurnIn') }}</h2>
         <b-form-input type="number" number v-model="amountToBurn" class="w-50" :min="0" :max="maxAmount"/>
         <b-button class="m-3" variant="primary" @click="setRequiredAmount">{{
             $t('quests.setRequiredAmount')

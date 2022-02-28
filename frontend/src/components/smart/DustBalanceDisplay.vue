@@ -7,7 +7,7 @@
         <div class="dust">
           {{ $t(`dustBalanceDisplay.dustShortName.${DustRarity[rarity]}`) }}: <span
           class="text-warning text-nowrap">{{ $t(`dustBalanceDisplay.dustPower.${DustRarity[rarity]}`) }}</span>
-          <img :src="getDustIcon(rarity)" class="w-100 p-4" alt=""/>
+          <img :src="getDustIcon(rarity)" class="w-100 p-4" alt="Dust Icon"/>
         </div>
         <h1 class="text-center">{{ $t(`dustBalanceDisplay.dustName.${DustRarity[rarity]}`) }}</h1>
         <div class="boxed">

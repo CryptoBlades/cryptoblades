@@ -21,7 +21,7 @@
         <span v-if="progress !== undefined" class="progress-text">{{
             $t(`quests.progress`)
           }}: {{ `${progress} / ${quest.requirementAmount}` }}</span>
-        <span class="rarity-label text-capitalize" :style="setRarityColor(quest.tier)">
+        <span class="rarity-label text-capitalize" :style="getRarityColor(quest.tier)">
           {{ $t(`quests.rarityType.${Rarity[quest.tier]}`) }}</span>
       </div>
     </div>
@@ -93,7 +93,7 @@ export default Vue.extend({
       'isExternalCurrency',
     ]) as StoreMappedActions,
 
-    setRarityColor(rarity: Rarity) {
+    getRarityColor(rarity: Rarity) {
       switch (rarity) {
       case Rarity.LEGENDARY: {
         return 'background-color: #D16100';

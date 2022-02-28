@@ -2,7 +2,7 @@
   <div class="quest-character-display">
     <img class="quest-character-portrait m-4"
          :class="'character-animation-applied-' + getCharacterCosmetic(character.id)"
-         :src="getCharacterArt(character)" alt=""/>
+         :src="getCharacterArt(character)" alt="Character image"/>
     <div class="d-flex flex-column flex-1 mr-5">
       <span class="text-uppercase gold-text">{{ getCleanCharacterName(character.id) }}</span>
       <span class="gray-text">{{ $t(`quests.tier`) }}: <span class="gold-text">{{
