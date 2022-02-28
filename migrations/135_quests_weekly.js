@@ -72,7 +72,6 @@ module.exports = async function (deployer, network) {
     await simpleQuests.setTierChances(3, [69, 94, 100, 100]);
     await simpleQuests.setTierChances(4, [66, 93, 99, 100]);
 
-    // TODO: Is this needed? Ofc we need the partnerVault one
     await characters.grantRole(await characters.GAME_ADMIN(), simpleQuests.address);
     await weapons.grantRole(await weapons.GAME_ADMIN(), simpleQuests.address);
     await junk.grantRole(await junk.GAME_ADMIN(), simpleQuests.address);

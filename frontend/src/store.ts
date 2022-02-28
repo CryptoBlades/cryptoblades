@@ -3744,7 +3744,8 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        const currentWeek = Math.floor(Date.now() / 1000 / 604800);
+        const weekInSeconds = 604800;
+        const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
 
         const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
 
@@ -3772,7 +3773,8 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        const currentWeek = Math.floor(Date.now() / 1000 / 604800);
+        const weekInSeconds = 604800;
+        const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
 
         const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
 
