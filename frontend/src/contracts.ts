@@ -39,7 +39,7 @@ import { abi as junkAbi } from '../../build/contracts/Junk.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 import { abi as simpleQuestsAbi, networks as simpleQuestsNetworks } from '../../build/contracts/SimpleQuests.json';
-import { abi as partnerVaultAbi, networks as partnerVaultNetworks } from '../../build/contracts/PartnerVault.json';
+import { abi as partnerVaultAbi} from '../../build/contracts/PartnerVault.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
 import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/PvpArena.json';
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
@@ -66,7 +66,7 @@ import { Contracts, isStakeType, isNftStakeType, StakeType, NftStakeType, Stakin
 import { StakingContractEntry, stakingContractsInfo, nftStakingContractsInfo } from './stake-types';
 
 import {raid, stakeOnly, market, pvp, quests, burningManager} from './feature-flags';
-import {currentChainSupportsPartnerVault, currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
+import {currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 interface RaidContracts {
   Raid1?: Contracts['Raid1'];
@@ -341,13 +341,12 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   if(quests && currentChainSupportsQuests()) {
     const simpleQuestsContractAddr = getConfigValue('VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS') || (simpleQuestsNetworks as Networks)[networkId]!.address;
 
-    questsContracts.SimpleQuests = new web3.eth.Contract(simpleQuestsAbi as Abi, simpleQuestsContractAddr);
-  }
-
-  if(currentChainSupportsPartnerVault()) {
-    const partnerVaultContractAddr = getConfigValue('VUE_APP_PARTNER_VAULT_CONTRACT_ADDRESS') || (partnerVaultNetworks as Networks)[networkId]!.address;
-
-    questsContracts.PartnerVault = new web3.eth.Contract(partnerVaultAbi as Abi, partnerVaultContractAddr);
+    const simpleQuests = new web3.eth.Contract(simpleQuestsAbi as Abi, simpleQuestsContractAddr);
+    questsContracts.SimpleQuests = simpleQuests;
+    if (simpleQuests.methods.partnerVault) {
+      const partnerVaultContractAddr = await simpleQuests.methods.partnerVault().call();
+      questsContracts.PartnerVault = new web3.eth.Contract(partnerVaultAbi as Abi, partnerVaultContractAddr);
+    }
   }
 
   const pvpContracts: PvPContracts = {};
