@@ -6,7 +6,6 @@ import {router} from '@/main';
 import {getConfigValue, Networks} from '@/contracts';
 import {networks as pvpNetworks} from '../../../build/contracts/PvpArena.json';
 import {networks as simpleQuestsNetworks} from '../../../build/contracts/SimpleQuests.json';
-import {networks as partnerVaultNetworks} from '../../../build/contracts/PartnerVault.json';
 import {QuestItemType} from '@/views/Quests.vue';
 import {abi as erc20Abi} from '../../../build/contracts/ERC20.json';
 
@@ -134,13 +133,6 @@ export const currentChainSupportsQuests = () => {
   const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
   const contractAddress = process.env.VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS ||
     getConfigValue('VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS') || (simpleQuestsNetworks as Networks)[networkId]?.address;
-  return !!contractAddress;
-};
-
-export const currentChainSupportsPartnerVault = () => {
-  const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
-  const contractAddress = process.env.VUE_APP_PARTNER_VAULT_CONTRACT_ADDRESS ||
-    getConfigValue('VUE_APP_PARTNER_VAULT_CONTRACT_ADDRESS') || (partnerVaultNetworks as Networks)[networkId]?.address;
   return !!contractAddress;
 };
 
