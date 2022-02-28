@@ -112,8 +112,8 @@
               </div>
               <div class="d-flex flex-column align-items-center mt-3 top-border-forge" v-if="isEventWeaponForged && !isClaiming">
                 <h5 class="mt-2">{{$t('blacksmith.specialWeaponClaimed')}}</h5>
-                <div class="weapon-icon-wrapper mt-2">
-                  <weapon-icon v-if="forgedWeapon" :weapon="forgedWeapon" />
+                <div v-if="forgedWeapon" class="weapon-icon-wrapper mt-2">
+                  <weapon-icon :weapon="forgedWeapon" />
                 </div>
               </div>
             </div>
@@ -466,7 +466,7 @@ export default Vue.extend({
     },
 
     inactiveEventsIdsWithUnclaimedOrders(): number[] {
-      return this.validInactiveSpecialWeaponsEventsIds.filter(id => this.specialWeaponEvents[id].ordered && !this.specialWeaponEvents[id].forged);
+      return this.validInactiveSpecialWeaponsEventsIds.filter(id => this.specialWeaponEvents[id]?.ordered && !this.specialWeaponEvents[id]?.forged);
     }
   },
 
@@ -625,7 +625,7 @@ export default Vue.extend({
   border-radius: 3px;
 }
 .scrollable {
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
   max-height: 10em;
 }
