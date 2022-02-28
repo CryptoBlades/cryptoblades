@@ -452,7 +452,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         }
     }
 
-    // TODO: Not sure how to manage created rewards and setting the week. Maybe it should be a single function that takes in info and timestamp?
     function addReward(ItemType rewardType, uint256 rewardRarity, uint256 rewardAmount, address rewardExternalAddress, uint256 reputationAmount) public restricted {
         uint256 rewardID = nextRewardID++;
         rewards[rewardID] = Reward(rewardID, rewardType, rewardRarity, rewardAmount, rewardExternalAddress, reputationAmount);
