@@ -136,7 +136,7 @@
                   <b-col>{{$t('blacksmith.live')}}</b-col>
                   <b-col><img class="shard-icon" :src="eventShardImg" /> {{shardsSupply[id]}}</b-col>
                 </b-row>
-                <b-row class="bordered" v-for="id in inactiveSpecialWeaponEventsIds" :key="id" :value="id">
+                <b-row class="bordered" v-for="id in validInactiveSpecialWeaponsEventsIds" :key="id" :value="id">
                   <b-col>{{specialWeaponEvents[id] && specialWeaponEvents[id].name}}</b-col>
                   <b-col>{{$t('blacksmith.ended')}}</b-col>
                   <b-col><img class="shard-icon" :src="eventShardImg" /> {{shardsSupply[id]}}</b-col>
@@ -426,8 +426,12 @@ export default Vue.extend({
       return forgingGif;
     },
 
+    validInactiveSpecialWeaponsEventsIds(): number[] {
+      return this.inactiveSpecialWeaponEventsIds.filter(id => this.specialWeaponEvents[id]?.name);
+    },
+
     allEventsIds(): number[] {
-      return this.activeSpecialWeaponEventsIds.concat(this.inactiveSpecialWeaponEventsIds);
+      return this.activeSpecialWeaponEventsIds.concat(this.validInactiveSpecialWeaponsEventsIds);
     },
 
     convertOutputAmount(): number {
@@ -462,7 +466,7 @@ export default Vue.extend({
     },
 
     inactiveEventsIdsWithUnclaimedOrders(): number[] {
-      return this.inactiveSpecialWeaponEventsIds.filter(id => this.specialWeaponEvents[id].ordered && !this.specialWeaponEvents[id].forged);
+      return this.validInactiveSpecialWeaponsEventsIds.filter(id => this.specialWeaponEvents[id].ordered && !this.specialWeaponEvents[id].forged);
     }
   },
 

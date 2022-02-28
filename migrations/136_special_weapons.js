@@ -7,6 +7,7 @@ const CryptoBlades = artifacts.require("CryptoBlades");
 const BurningManager = artifacts.require("BurningManager");
 const BasicPriceOracle = artifacts.require("BasicPriceOracle");
 const PvpArena = artifacts.require("PvpArena");
+const NFTStorage = artifacts.require("NFTStorage");
 const SkillStakingRewardsUpgradeable = artifacts.require("SkillStakingRewardsUpgradeable");
 const SkillStakingRewardsUpgradeable90 = artifacts.require("SkillStakingRewardsUpgradeable90");
 const SkillStakingRewardsUpgradeable180 = artifacts.require("SkillStakingRewardsUpgradeable180");
@@ -54,6 +55,7 @@ module.exports = async function (deployer, network) {
     await specialWeaponsManager.setVars([1, 2, 3, 4, 5, 6, 10, 11], ['7', '15', '20', '75', '100', '150', '3', '100000000000000000']);
 
     await upgradeProxy(PvpArena.address, PvpArena, { deployer });
+    await upgradeProxy(NFTStorage.address, NFTStorage, { deployer });
   
     let skillStakingRewardsUpgradeable, skillStakingRewardsUpgradeable90, skillStakingRewardsUpgradeable180;
     skillStakingRewardsUpgradeable = await upgradeProxy(SkillStakingRewardsUpgradeable.address, SkillStakingRewardsUpgradeable, { deployer });
