@@ -113,12 +113,12 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         characters.upgradeWithSoul(targetId, soulAmount);
     }
 
-    function giveawaySoul(address user, uint256 soulAmount) external restricted {
+    function giveAwaySoul(address user, uint256 soulAmount) external restricted {
         userVars[user][USERVAR_SOUL_SUPPLY] += soulAmount;
     }
 
     function burnSoul(address user, uint256 soulAmount) external restricted {
-        userVars[user][USERVAR_SOUL_SUPPLY].sub(soulAmount);
+        userVars[user][USERVAR_SOUL_SUPPLY] = userVars[user][USERVAR_SOUL_SUPPLY].sub(soulAmount);
     }
 
     // VARS SETTER
