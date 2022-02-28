@@ -10,11 +10,17 @@
     </div>
     <div class="fullscreen-warning" v-if="!hideWalletWarning && (showMetamaskWarning || showNetworkError)">
       <div class="starter-panel">
+        <div class="tob-bg-img promotion-decoration">
+          <img class="vertical-decoration bottom" src="./assets/border-element.png">
+        </div>
         <span class="starter-panel-heading">{{ $t('app.warning.title') }}</span>
         <div class="center">
-          <big-button class="button" :mainText="$t('app.warning.buttons.addMetamask')" @click="startOnboarding" v-if="showMetamaskWarning" />
-          <big-button class="button" :mainText="$t('app.warning.buttons.network')" @click="configureMetamask" v-if="showNetworkError" />
-          <small-button class="button" @click="toggleHideWalletWarning" :text="$t('app.buttons.hide')" />
+          <big-button class="button common-width-button"
+          :mainText="$t('app.warning.buttons.addMetamask')" @click="startOnboarding" v-if="showMetamaskWarning" />
+          <big-button class="button common-width-button"
+          :mainText="$t('app.warning.buttons.network')" @click="configureMetamask" v-if="showNetworkError" />
+          <big-button class="button common-width-button"
+          :mainText="$t('app.warning.buttons.hide')" @click="toggleHideWalletWarning" />
         </div>
       </div>
     </div>
@@ -167,7 +173,7 @@ export default {
     ...mapGetters([
       'getExchangeTransakUrl'
     ]),
-    ...mapMutations(['updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP']),
+    ...mapMutations(['updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP', 'updateCurrentChainSupportsQuests']),
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BSC';
       const paramChain = this.$router.currentRoute.query.chain;
@@ -191,6 +197,7 @@ export default {
       }
       this.updateCurrentChainSupportsMerchandise();
       this.updateCurrentChainSupportsPvP();
+      this.updateCurrentChainSupportsQuests();
     },
     async updateCharacterStamina(id) {
       if (this.featureFlagStakeOnly) return;
@@ -350,7 +357,7 @@ export default {
       throw e;
     }
 
-    this.pollCharactersStaminaIntervalId = setInterval(async () => {
+    this.pollCharacterStaminaIntervalId = setInterval(async () => {
       this.ownCharacters.forEach(async (c) => {
         await this.updateCharacterStamina(c.id);
       });
@@ -560,6 +567,11 @@ button.close {
   border-radius: 0.1em !important;
 }
 
+.common-width-button {
+  margin: 0.8rem;
+  width: 22%;
+}
+
 .btn.disabled,
 .btn:disabled {
   cursor: auto;
@@ -701,6 +713,7 @@ div.bg-success {
 .starter-panel-heading {
   margin-left: 15px;
   font-size: clamp(18px, 2vw, 45px);
+  color: #9e8a57;
 }
 
 .starter-msg {
@@ -727,6 +740,10 @@ div.bg-success {
   margin: 5px;
 }
 
+.vertical-decoration {
+  width: 50%;
+}
+
 .center {
   display: flex;
   justify-content: center;
@@ -742,6 +759,9 @@ div.bg-success {
     padding: 10px;
   }
   .dark-bg-text {
+    width: 100%;
+  }
+  .vertical-decoration {
     width: 100%;
   }
 }

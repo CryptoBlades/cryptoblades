@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, {isUndefined, values} from 'lodash';
-import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, gasUsedToBnb, toBN} from './utils/common';
+import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests, gasUsedToBnb, toBN} from './utils/common';
 
 import {getConfigValue, setUpContracts} from './contracts';
 
@@ -33,17 +33,21 @@ import {
   StakeType
 } from './interfaces';
 import {getCharacterNameFromSeed} from './character-name';
-import {approveFee, approveFeeFromAnyContract, getFeeInSkillFromUsd} from './contract-call-utils';
+import {approveFee, approveFeeFromAnyContract, approveFeeFromAnyContractSimple, getFeeInSkillFromUsd} from './contract-call-utils';
 
-import {raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly, burningManager as featureFlagBurningManager} from './feature-flags';
-import {IERC20, IERC721, INftStakingRewards, IStakingRewards} from '../../build/abi-interfaces';
+import {burningManager as featureFlagBurningManager, raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly} from './feature-flags';
+import {ERC20, IERC20, IERC721, INftStakingRewards, IStakingRewards} from '../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from './stake-types';
-import {Nft} from './interfaces/Nft';
+import {Nft, NftTransfer, TransferedNft} from './interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
-import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
+import {abi as ierc20Abi} from '../../build/contracts/IERC20.json';
+import {abi as erc20Abi} from '../../build/contracts/ERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances, WeeklyReward} from '@/views/Quests.vue';
+import {abi as erc721Abi} from '../../build/contracts/IERC721.json';
+import BigNumber from 'bignumber.js';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -136,6 +140,7 @@ export function createStore(web3: Web3) {
       cartEntries: [],
       currentChainSupportsMerchandise: false,
       currentChainSupportsPvP: false,
+      currentChainSupportsQuests: false,
 
       characters: {},
       garrisonCharacters: {},
@@ -448,6 +453,10 @@ export function createStore(web3: Web3) {
 
       getCurrentChainSupportsPvP(state) {
         return state.currentChainSupportsPvP;
+      },
+
+      getCurrentChainSupportsQuests(state) {
+        return state.currentChainSupportsQuests;
       },
 
       ownWeapons(state, getters) {
@@ -765,6 +774,10 @@ export function createStore(web3: Web3) {
 
       updateCurrentChainSupportsPvP(state: IState) {
         state.currentChainSupportsPvP = currentChainSupportsPvP();
+      },
+
+      updateCurrentChainSupportsQuests(state: IState) {
+        state.currentChainSupportsQuests = currentChainSupportsQuests();
       },
 
       updateCharacter(state: IState, { characterId, character }) {
@@ -2171,11 +2184,6 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades) return;
         return await CryptoBlades.methods.vars(5).call(defaultCallOptions(state));
       },
-      async fetchAllowanceTimestamp({ state }) {
-        const { CryptoBlades } = state.contracts();
-        if(!CryptoBlades) return;
-        return await CryptoBlades.methods.vars(6).call(defaultCallOptions(state));
-      },
       async fetchHourlyAllowance({ state }) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
@@ -2572,17 +2580,20 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
         if(currency === 0) {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, price)
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            price
+          );
         } else {
           const tokenAddress = await Blacksmith.methods
             .getCurrency(currency)
             .call(defaultCallOptions(state));
 
-          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+          await new web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
             .approve(Blacksmith.options.address, price)
             .send({
               from: state.defaultAccount
@@ -2601,17 +2612,20 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
         if(currency === 0) {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, price)
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            price
+          );
         } else {
           const tokenAddress = await Blacksmith.methods
             .getCurrency(currency)
             .call(defaultCallOptions(state));
 
-          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+          await new web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
             .approve(Blacksmith.options.address, price)
             .send({
               from: state.defaultAccount
@@ -2629,17 +2643,20 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
         if(currency === 0) {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, price)
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            price
+          );
         } else {
           const tokenAddress = await Blacksmith.methods
             .getCurrency(currency)
             .call(defaultCallOptions(state));
 
-          await new web3.eth.Contract(erc20Abi as any[], tokenAddress).methods
+          await new web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
             .approve(Blacksmith.options.address, price)
             .send({
               from: state.defaultAccount
@@ -2714,17 +2731,6 @@ export function createStore(web3: Web3) {
           .call(defaultCallOptions(state));
       },
 
-      async isShieldPurchased({state}) {
-        const { Promos } = state.contracts();
-        if (!state.defaultAccount || !Promos) return;
-
-        return await Promos.methods
-          .getBit(
-            state.defaultAccount,
-            parseInt(await Promos.methods.BIT_LEGENDARY_DEFENDER().call(defaultCallOptions(state)), 10))
-          .call(defaultCallOptions(state));
-      },
-
       async getChunksOfReservation({state}, {reservationId}) {
         const CBKLandSale = state.contracts().CBKLandSale!;
 
@@ -2789,6 +2795,65 @@ export function createStore(web3: Web3) {
         return landIdsWithTier;
       },
 
+      async mintCBKLand({state}, {minter, tier, chunkId, reseller}) {
+        const {CBKLand} = state.contracts();
+
+        if (!CBKLand || !state.defaultAccount) return;
+
+        return await CBKLand.methods.mint(minter, tier, chunkId, reseller).send({from: state.defaultAccount});
+      },
+
+      async massMintCBKLand({state}, {minter, tier, chunkId, reseller, quantity}) {
+        const {CBKLand} = state.contracts();
+
+        if (!CBKLand || !state.defaultAccount) return;
+
+        return await CBKLand.methods.massMint(minter, tier, chunkId, reseller, quantity).send({from: state.defaultAccount});
+      },
+
+      async updateChunkId({state}, {id, chunkId}) {
+        const {CBKLand} = state.contracts();
+
+        if (!CBKLand || !state.defaultAccount) return;
+
+        return await CBKLand.methods.updateChunkId(id, chunkId).send({from: state.defaultAccount});
+      },
+
+      async updateChunkIds({state}, {ids, chunkId}) {
+        const {CBKLand} = state.contracts();
+
+        if (!CBKLand || !state.defaultAccount) return;
+
+        return await CBKLand.methods.updateChunkId(ids, chunkId).send({from: state.defaultAccount});
+      },
+
+      async incrementDustSupplies({state}, {playerAddress, amountLB, amount4B, amount5B}) {
+        const {Weapons} = state.contracts();
+        if(!state.defaultAccount || !Weapons) return;
+
+        return await Weapons.methods.incrementDustSupplies(playerAddress, amountLB, amount4B, amount5B).send({from: state.defaultAccount});
+      },
+
+      async decrementDustSupplies({state}, {playerAddress, amountLB, amount4B, amount5B}) {
+        const {Weapons} = state.contracts();
+        if(!state.defaultAccount || !Weapons) return;
+
+        return await Weapons.methods.decrementDustSupplies(playerAddress, amountLB, amount4B, amount5B).send({from: state.defaultAccount});
+      },
+
+      async mintGiveawayWeapon({state}, {to, stars, chosenElement}) {
+        const {Weapons} = state.contracts();
+        if(!state.defaultAccount || !Weapons) return;
+
+        return await Weapons.methods.mintGiveawayWeapon(to, stars, chosenElement).send({from: state.defaultAccount});
+      },
+
+      async giveAwaySoul({state}, {user, soulAmount}) {
+        const {BurningManager} = state.contracts();
+        if(!state.defaultAccount || !BurningManager) return;
+
+        return await BurningManager.methods.giveAwaySoul(user, soulAmount).send({from: state.defaultAccount});
+      },
 
       async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
         const { NFTMarket } = state.contracts();
@@ -3241,11 +3306,14 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, Blacksmith } = state.contracts();
         if(!CryptoBlades || !Blacksmith || !state.defaultAccount) return;
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, web3.utils.toWei('100', 'ether'))
-          .send({
-            from: state.defaultAccount
-          });
+        await approveFeeFromAnyContractSimple(
+          CryptoBlades,
+          SkillToken,
+          state.defaultAccount,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          new BigNumber(web3.utils.toWei('100', 'ether'))
+        );
 
         await Blacksmith.methods.purchaseShield().send({
           from: state.defaultAccount,
@@ -3275,11 +3343,14 @@ export function createStore(web3: Web3) {
           .getSkillNeededFromUserWallet(state.defaultAccount, payingAmount, true)
           .call(defaultCallOptions(state));
 
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, skillNeeded)
-          .send({
-            from: state.defaultAccount
-          });
+        await approveFeeFromAnyContractSimple(
+          CryptoBlades,
+          SkillToken,
+          state.defaultAccount,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          new BigNumber(skillNeeded)
+        );
 
         await Merchandise.methods
           .createOrder(orderNumber, payingAmount)
@@ -3288,6 +3359,751 @@ export function createStore(web3: Web3) {
           });
 
         dispatch('fetchSkillBalance');
+      },
+
+      async storeNftsToPartnerVault({state}, {tokenAddress, tokenIds}) {
+        const {PartnerVault} = state.contracts();
+        if(!PartnerVault || !state.defaultAccount) return;
+
+        const tokenContract = new web3.eth.Contract(erc721Abi as any[], tokenAddress) as Contract<IERC721>;
+
+        const isApprovedForAll = await tokenContract.methods.isApprovedForAll(state.defaultAccount, PartnerVault.options.address)
+          .call(defaultCallOptions(state));
+
+        if(tokenIds.length === 1 && !isApprovedForAll) {
+          await tokenContract.methods.approve(PartnerVault.options.address, tokenIds[0]).send({
+            from: state.defaultAccount
+          });
+        } else if (!isApprovedForAll) {
+          await tokenContract.methods.setApprovalForAll(PartnerVault.options.address, true).send({
+            from: state.defaultAccount
+          });
+        }
+        return await PartnerVault.methods.storeNfts(tokenAddress, tokenIds).send({
+          from: state.defaultAccount
+        });
+      },
+
+      async storeCurrencyToPartnerVault({state}, {currencyAddress, amount}) {
+        const {PartnerVault} = state.contracts();
+        if (!PartnerVault || !state.defaultAccount) return;
+
+        const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
+        const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
+        const amountTimesDecimals = web3.utils.toBN(amount * 10 ** currencyDecimals);
+
+        await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
+          from: state.defaultAccount
+        });
+
+        return await PartnerVault.methods.storeCurrency(currencyAddress, amountTimesDecimals.toString()).send({
+          from: state.defaultAccount
+        });
+      },
+
+      async getNftsInPartnerVault({state}, {tokenAddress}){
+        const {PartnerVault} = state.contracts();
+        if(!PartnerVault || !state.defaultAccount) return;
+
+        const nftsInVault = await PartnerVault.methods.getNftsInVault(tokenAddress).call(defaultCallOptions(state));
+
+        return nftsInVault;
+      },
+
+      async getCurrencyBalanceInPartnerVault({state}, {currencyAddress}){
+        const {PartnerVault} = state.contracts();
+        if(!PartnerVault || !state.defaultAccount) return;
+
+        const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
+        let currencyBalance = await currencyContract.methods.balanceOf(PartnerVault.options.address).call(defaultCallOptions(state));
+        const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
+        currencyBalance = new BigNumber(currencyBalance).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+        const currencySymbol = await currencyContract.methods.symbol().call(defaultCallOptions(state));
+
+        return [currencyBalance, currencySymbol];
+      },
+
+      async getQuestDeadline({state}, {questID}){
+        const {SimpleQuests} = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.questDeadlines(questID).call(defaultCallOptions(state));
+      },
+
+      async getQuestSupply({state}, {questID}){
+        const {SimpleQuests} = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.questSupplies(questID).call(defaultCallOptions(state));
+      },
+
+      async getQuestTemplates({state}, {tier}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const questTemplates: Quest[] = [];
+
+        const questTemplatesIds = await SimpleQuests.methods.getQuestTemplates(tier).call(defaultCallOptions(state));
+
+        if(questTemplatesIds.length === 0) return questTemplates;
+
+        for (const questID of questTemplatesIds) {
+          const quest = await SimpleQuests.methods.quests(questID).call(defaultCallOptions(state)) as unknown as {
+            progress: string | number;
+            id: string;
+            tier: string;
+            requirementType: string;
+            requirementRarity: string;
+            requirementAmount: string;
+            requirementExternalAddress: string;
+            rewardType: string;
+            rewardRarity: string;
+            rewardAmount: string;
+            rewardExternalAddress: string;
+            reputationAmount: string;
+          };
+          const emptyAccount = '0x0000000000000000000000000000000000000000';
+          if(quest.requirementExternalAddress !== emptyAccount
+            && ((quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL)
+              || (quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL_HOLD))) {
+            const currencyContract = new web3.eth.Contract(erc20Abi as any[], quest.requirementExternalAddress);
+            try{
+              const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+              quest.requirementAmount = new BigNumber(quest.requirementAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+              quest.progress = new BigNumber(quest.progress).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+            } catch {
+              // Contract does not support decimals
+            }
+          }
+
+          if(quest.rewardExternalAddress !== emptyAccount
+            && +quest.rewardType as RewardType === RewardType.EXTERNAL) {
+            const currencyContract = new web3.eth.Contract(erc20Abi as any[], quest.rewardExternalAddress);
+            try{
+              const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+              quest.rewardAmount = new BigNumber(quest.rewardAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+            } catch {
+              // Contract does not support decimals
+            }
+          }
+          const questTemplate = {
+            progress: +quest.progress,
+            id: +quest.id,
+            tier: +quest.tier as Rarity,
+            requirementType: +quest.requirementType as RequirementType,
+            requirementRarity: +quest.requirementRarity as Rarity,
+            requirementAmount: +quest.requirementAmount,
+            requirementExternalAddress: quest.requirementExternalAddress,
+            rewardType: +quest.rewardType as RewardType,
+            rewardRarity: +quest.rewardRarity as Rarity,
+            rewardAmount: +quest.rewardAmount,
+            rewardExternalAddress: quest.rewardExternalAddress,
+            reputationAmount: +quest.reputationAmount,
+          } as Quest;
+          questTemplates.push(questTemplate);
+        }
+
+        return questTemplates;
+      },
+
+      async addQuestTemplate({state}, {questTemplate, isPromo, supply, deadline}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const emptyAccount = '0x0000000000000000000000000000000000000000';
+
+        if (!questTemplate.requirementExternalAddress) {
+          questTemplate.requirementExternalAddress = emptyAccount;
+        }
+
+        if (!questTemplate.rewardExternalAddress) {
+          questTemplate.rewardExternalAddress = emptyAccount;
+        }
+
+        let requirementAmount = questTemplate.requirementAmount;
+
+        if(questTemplate.requirementType === RequirementType.EXTERNAL){
+          const contract = new web3.eth.Contract(erc20Abi as any[], questTemplate.requirementExternalAddress);
+          try {
+            const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(state));
+            requirementAmount = web3.utils.toBN(requirementAmount * 10 ** currencyDecimals);
+          } catch {
+            // Contract does not support decimals
+          }
+        }
+
+        let rewardAmount = questTemplate.rewardAmount;
+
+        if(questTemplate.rewardType === RewardType.EXTERNAL){
+          const contract = new web3.eth.Contract(erc20Abi as any[], questTemplate.rewardExternalAddress);
+          try {
+            const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(state));
+            rewardAmount = web3.utils.toBN(rewardAmount * 10 ** currencyDecimals);
+          } catch {
+            // Contract does not support decimals
+          }
+        }
+
+        let tier = questTemplate.tier;
+        if (isPromo) {
+          tier += 10;
+        }
+
+        return await SimpleQuests.methods.addNewQuestTemplate(tier,
+          questTemplate.requirementType, questTemplate.requirementRarity, requirementAmount, questTemplate.requirementExternalAddress,
+          questTemplate.rewardType, questTemplate.rewardRarity, rewardAmount, questTemplate.rewardExternalAddress,
+          questTemplate.reputationAmount, supply, deadline).send(defaultCallOptions(state));
+      },
+
+      async deleteQuest({state}, {tier, questID}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.deleteQuestTemplate(tier, questID).send(defaultCallOptions(state));
+      },
+
+      async getCharacterQuestData({ state }, {characterId}) {
+        const { SimpleQuests } = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        const questId = await SimpleQuests.methods.characterQuest(characterId).call(defaultCallOptions(state));
+
+
+        const quest = await SimpleQuests.methods.quests(questId).call(defaultCallOptions(state)) as unknown as {
+          progress: string | number;
+          id: string;
+          tier: string;
+          requirementType: string;
+          requirementRarity: string;
+          requirementAmount: string;
+          requirementExternalAddress: string;
+          rewardType: string;
+          rewardRarity: string;
+          rewardAmount: string;
+          rewardExternalAddress: string;
+          reputationAmount: string;
+        };
+
+        const charQuestDataRaw = await SimpleQuests.methods.getCharacterQuestData(characterId).call(defaultCallOptions(state));
+        const emptyAccount = '0x0000000000000000000000000000000000000000';
+        quest.progress = +charQuestDataRaw[0];
+        if(quest.requirementExternalAddress !== emptyAccount
+          && ((quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL)
+            || (quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL_HOLD))) {
+          const currencyContract = new web3.eth.Contract(erc20Abi as any[], quest.requirementExternalAddress);
+          try{
+            const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+            quest.requirementAmount = new BigNumber(quest.requirementAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+            quest.progress = new BigNumber(quest.progress).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+          } catch {
+            // Contract does not support decimals
+          }
+        }
+
+        if(quest.rewardExternalAddress !== emptyAccount
+          && +quest.rewardType as RewardType === RewardType.EXTERNAL) {
+          const currencyContract = new web3.eth.Contract(erc20Abi as any[], quest.rewardExternalAddress);
+          try{
+            const currencyDecimals = await currencyContract.methods.decimals().call(defaultCallOptions(state));
+            quest.rewardAmount = new BigNumber(quest.rewardAmount).div(new BigNumber(10 ** currencyDecimals)).toFixed();
+          } catch {
+            // Contract does not support decimals
+          }
+        }
+
+        return {
+          progress: +quest.progress,
+          type: +charQuestDataRaw[1] as RequirementType,
+          reputation: +charQuestDataRaw[2],
+          id: +quest.id,
+          tier: +quest.tier as Rarity,
+          requirementType: +quest.requirementType as RequirementType,
+          requirementRarity: +quest.requirementRarity as Rarity,
+          requirementAmount: +quest.requirementAmount,
+          requirementExternalAddress: quest.requirementExternalAddress,
+          rewardType: +quest.rewardType as RewardType,
+          rewardRarity: +quest.rewardRarity as Rarity,
+          rewardAmount: +quest.rewardAmount,
+          rewardExternalAddress: quest.rewardExternalAddress,
+          reputationAmount: +quest.reputationAmount,
+        } as Quest;
+      },
+
+      async getQuestTierChances({state}, {tier}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const tierChancesRaw = await SimpleQuests.methods.getTierChances(tier).call(defaultCallOptions(state));
+        const legendary = 100 - +tierChancesRaw[3];
+        const epic = 100 - +tierChancesRaw[2] - legendary;
+        const rare = 100 - +tierChancesRaw[1] - epic - legendary;
+        const uncommon = 100 - +tierChancesRaw[0] - rare - epic - legendary;
+        const common = 100 - uncommon - rare - epic - legendary;
+        return {common, uncommon, rare, epic, legendary} as TierChances;
+      },
+
+      async setQuestTierChances({state}, {tier, tierChances}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const uncommon = String(100 - tierChances.uncommon - tierChances.rare - tierChances.epic - tierChances.legendary);
+        const rare = String(100 - tierChances.rare - tierChances.epic - tierChances.legendary);
+        const epic = String(100 - tierChances.epic - tierChances.legendary);
+        const legendary = String(100 - tierChances.legendary);
+
+        return await SimpleQuests.methods.setTierChances(tier, [uncommon, rare, epic, legendary]).send(defaultCallOptions(state));
+      },
+
+      async setSkipQuestStaminaCost({state}, {staminaCost}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_SKIP_QUEST_STAMINA_COST = await SimpleQuests.methods.VAR_SKIP_QUEST_STAMINA_COST().call(defaultCallOptions(state));
+
+        return await SimpleQuests.methods.setVar(VAR_SKIP_QUEST_STAMINA_COST, staminaCost).send(defaultCallOptions(state));
+      },
+
+      async getSkipQuestStaminaCost({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_SKIP_QUEST_STAMINA_COST = await SimpleQuests.methods.VAR_SKIP_QUEST_STAMINA_COST().call(defaultCallOptions(state));
+
+        return await SimpleQuests.methods.vars(VAR_SKIP_QUEST_STAMINA_COST).call(defaultCallOptions(state));
+      },
+
+      async getWeeklyCompletionsGoal({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
+
+        return await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_GOAL).call(defaultCallOptions(state));
+      },
+
+      async setWeeklyCompletionsGoal({state}, {newGoal}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
+
+        return await SimpleQuests.methods.setVar(VAR_WEEKLY_COMPLETIONS_GOAL, newGoal).send(defaultCallOptions(state));
+      },
+
+      async addWeeklyReward({state}, {weeklyReward}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const emptyAccount = '0x0000000000000000000000000000000000000000';
+        if (weeklyReward.rewardExternalAddress === '') {
+          weeklyReward.rewardExternalAddress = emptyAccount;
+        }
+
+        const result =await SimpleQuests.methods.addReward(weeklyReward.rewardType,
+          weeklyReward.rewardRarity, weeklyReward.rewardAmount,
+          weeklyReward.rewardExternalAddress, weeklyReward.reputationAmount)
+          .send(defaultCallOptions(state));
+
+        return result.events.RewardAdded.returnValues.rewardID;
+      },
+
+      async setWeeklyReward({state}, {rewardID, timestamp}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.setWeeklyReward(rewardID, timestamp).send(defaultCallOptions(state));
+      },
+
+      async getWeeklyReward({state}, {timestamp}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const weekInSeconds = 604800;
+        const week = Math.floor(timestamp / 1000 / weekInSeconds);
+
+        const rewardID = +await SimpleQuests.methods.weeklyRewards(week).call(defaultCallOptions(state));
+        const weeklyRewardRaw = await SimpleQuests.methods.rewards(rewardID).call(defaultCallOptions(state)) as unknown as {
+          id: string;
+          rewardType: string;
+          rewardRarity: string;
+          rewardAmount: string;
+          rewardExternalAddress: string;
+          reputationAmount: string;
+        };
+        return {
+          id: +weeklyRewardRaw.id,
+          rewardType: +weeklyRewardRaw.rewardType as RewardType,
+          rewardRarity: +weeklyRewardRaw.rewardRarity as Rarity,
+          rewardAmount: +weeklyRewardRaw.rewardAmount,
+          rewardExternalAddress: weeklyRewardRaw.rewardExternalAddress,
+          reputationAmount: +weeklyRewardRaw.reputationAmount,
+        } as WeeklyReward;
+      },
+
+      async claimWeeklyReward({state, dispatch}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const weekInSeconds = 604800;
+        const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
+
+        const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+
+        if(rewardID === 0) {
+          return;
+        }
+
+        if (!await SimpleQuests.methods.hasRandomWeeklyRewardSeedRequested(rewardID).call(defaultCallOptions(state))) {
+          await SimpleQuests.methods.generateRewardWeeklySeed(rewardID).send(defaultCallOptions(state));
+        }
+        const result = await SimpleQuests.methods.claimWeeklyReward().send(defaultCallOptions(state));
+
+        const questRewards = result.events.WeeklyRewardClaimed.returnValues.rewards;
+        await Promise.all([
+          dispatch('updateWeaponIds'),
+          dispatch('updateShieldIds'),
+          dispatch('updateTrinketIds'),
+          dispatch('updateJunkIds'),
+          dispatch('updateKeyLootboxIds'),
+        ]);
+        return questRewards;
+      },
+
+      async hasClaimedWeeklyReward({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const weekInSeconds = 604800;
+        const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
+
+        const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+
+        if(rewardID === 0) {
+          return false;
+        }
+
+        return await SimpleQuests.methods.weeklyRewardClaimed(state.defaultAccount, currentWeek).call(defaultCallOptions(state));
+      },
+
+      async getReputationLevelRequirements({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_REPUTATION_LEVEL_2 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_2().call(defaultCallOptions(state));
+        const VAR_REPUTATION_LEVEL_3 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_3().call(defaultCallOptions(state));
+        const VAR_REPUTATION_LEVEL_4 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_4().call(defaultCallOptions(state));
+        const VAR_REPUTATION_LEVEL_5 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_5().call(defaultCallOptions(state));
+
+        const requirementsRaw = await SimpleQuests.methods.getVars([
+          VAR_REPUTATION_LEVEL_2,
+          VAR_REPUTATION_LEVEL_3,
+          VAR_REPUTATION_LEVEL_4,
+          VAR_REPUTATION_LEVEL_5,
+        ]).call(defaultCallOptions(state));
+        return {
+          level2: +requirementsRaw[0],
+          level3: +requirementsRaw[1],
+          level4: +requirementsRaw[2],
+          level5: +requirementsRaw[3]
+        } as ReputationLevelRequirements;
+      },
+
+      async setReputationLevelRequirements({state}, {requirements}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_REPUTATION_LEVEL_2 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_2().call(defaultCallOptions(state));
+        const VAR_REPUTATION_LEVEL_3 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_3().call(defaultCallOptions(state));
+        const VAR_REPUTATION_LEVEL_4 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_4().call(defaultCallOptions(state));
+        const VAR_REPUTATION_LEVEL_5 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_5().call(defaultCallOptions(state));
+
+        return await SimpleQuests.methods.setVars([
+          VAR_REPUTATION_LEVEL_2,
+          VAR_REPUTATION_LEVEL_3,
+          VAR_REPUTATION_LEVEL_4,
+          VAR_REPUTATION_LEVEL_5,
+        ], requirements).send(defaultCallOptions(state));
+      },
+
+      async isUsingPromoQuests({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_COMMON_TIER = await SimpleQuests.methods.VAR_COMMON_TIER().call(defaultCallOptions(state));
+        const VAR_UNCOMMON_TIER = await SimpleQuests.methods.VAR_UNCOMMON_TIER().call(defaultCallOptions(state));
+        const VAR_RARE_TIER = await SimpleQuests.methods.VAR_RARE_TIER().call(defaultCallOptions(state));
+        const VAR_EPIC_TIER = await SimpleQuests.methods.VAR_EPIC_TIER().call(defaultCallOptions(state));
+        const VAR_LEGENDARY_TIER = await SimpleQuests.methods.VAR_LEGENDARY_TIER().call(defaultCallOptions(state));
+
+        const tiersRaw = await SimpleQuests.methods.getVars([
+          VAR_COMMON_TIER,
+          VAR_UNCOMMON_TIER,
+          VAR_RARE_TIER,
+          VAR_EPIC_TIER,
+          VAR_LEGENDARY_TIER,
+        ]).call(defaultCallOptions(state));
+
+        return !(+tiersRaw[0] === 0 && +tiersRaw[1] === 1 && +tiersRaw[2] === 2 && +tiersRaw[3] === 3 && +tiersRaw[4] === 4);
+      },
+
+      async toggleUsePromoQuests({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        const VAR_COMMON_TIER = await SimpleQuests.methods.VAR_COMMON_TIER().call(defaultCallOptions(state));
+        const VAR_UNCOMMON_TIER = await SimpleQuests.methods.VAR_UNCOMMON_TIER().call(defaultCallOptions(state));
+        const VAR_RARE_TIER = await SimpleQuests.methods.VAR_RARE_TIER().call(defaultCallOptions(state));
+        const VAR_EPIC_TIER = await SimpleQuests.methods.VAR_EPIC_TIER().call(defaultCallOptions(state));
+        const VAR_LEGENDARY_TIER = await SimpleQuests.methods.VAR_LEGENDARY_TIER().call(defaultCallOptions(state));
+
+        const tiersRaw = await SimpleQuests.methods.getVars([
+          VAR_COMMON_TIER,
+          VAR_UNCOMMON_TIER,
+          VAR_RARE_TIER,
+          VAR_EPIC_TIER,
+          VAR_LEGENDARY_TIER,
+        ]).call(defaultCallOptions(state));
+
+        if(+tiersRaw[0] === 0 && +tiersRaw[1] === 1 && +tiersRaw[2] === 2 && +tiersRaw[3] === 3 && +tiersRaw[4] === 4) {
+          return await SimpleQuests.methods.setVars([
+            VAR_COMMON_TIER,
+            VAR_UNCOMMON_TIER,
+            VAR_RARE_TIER,
+            VAR_EPIC_TIER,
+            VAR_LEGENDARY_TIER,
+          ], ['10', '11', '12', '13', '14']).send(defaultCallOptions(state));
+        } else {
+          return await SimpleQuests.methods.setVars([
+            VAR_COMMON_TIER,
+            VAR_UNCOMMON_TIER,
+            VAR_RARE_TIER,
+            VAR_EPIC_TIER,
+            VAR_LEGENDARY_TIER,
+          ], ['0', '1', '2', '3', '4']).send(defaultCallOptions(state));
+        }
+      },
+
+      async hasStaminaToSkipQuest({state}, {characterID}) {
+        const {SimpleQuests, Characters} = state.contracts();
+        if (!SimpleQuests || !Characters || !state.defaultAccount) return;
+
+        const VAR_SKIP_QUEST_STAMINA_COST = await SimpleQuests.methods.VAR_SKIP_QUEST_STAMINA_COST().call(defaultCallOptions(state));
+        const staminaPoints = +await Characters.methods.getStaminaPoints(characterID).call(defaultCallOptions(state));
+        const staminaCost = +await SimpleQuests.methods.vars(VAR_SKIP_QUEST_STAMINA_COST).call(defaultCallOptions(state));
+
+        return staminaPoints >= staminaCost;
+      },
+
+      async hasFreeSkip({state}, {characterID}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.hasFreeSkip(characterID).call(defaultCallOptions(state));
+      },
+
+      async nextFreeSkip({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.nextFreeSkip().call(defaultCallOptions(state));
+      },
+
+      async nextWeeklyQuestCompletionGoalReset({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.nextWeeklyQuestCompletionGoalReset().call(defaultCallOptions(state));
+      },
+
+      async getWeeklyCompletions({state}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        return await SimpleQuests.methods.getWeeklyCompletions(state.defaultAccount).call(defaultCallOptions(state));
+      },
+
+      async skipQuest({ state, dispatch }, {characterID}) {
+        const { SimpleQuests } = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        await SimpleQuests.methods.skipQuest(characterID).send(defaultCallOptions(state));
+        await dispatch('fetchCharacterStamina', characterID);
+      },
+
+      async completeQuest({state, dispatch}, {characterID}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        if (!await SimpleQuests.methods.hasRandomQuestRewardSeedRequested(characterID).call(defaultCallOptions(state))) {
+          await SimpleQuests.methods.generateRewardQuestSeed(characterID).send(defaultCallOptions(state));
+        }
+        const result = await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(state));
+
+        const questRewards = result.events.QuestRewarded.returnValues.rewards;
+        await Promise.all([
+          dispatch('fetchCharacter', {characterId: characterID}),
+          dispatch('updateWeaponIds'),
+          dispatch('updateShieldIds'),
+          dispatch('updateTrinketIds'),
+          dispatch('updateJunkIds'),
+          dispatch('updateKeyLootboxIds'),
+        ]);
+        return questRewards;
+      },
+
+      async requestQuest({ state }, {characterID}) {
+        const { SimpleQuests } = state.contracts();
+        if(!SimpleQuests || !state.defaultAccount) return;
+
+        if (!await SimpleQuests.methods.hasRandomQuestSeedRequested(characterID).call(defaultCallOptions(state))) {
+          await SimpleQuests.methods.generateRequestQuestSeed(characterID).send(defaultCallOptions(state));
+        }
+
+        return await SimpleQuests.methods.requestQuest(characterID).send(defaultCallOptions(state));
+      },
+
+      async submitProgress({state, dispatch}, {characterID, tokenIds}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        await SimpleQuests.methods.submitProgress(characterID, tokenIds).send(defaultCallOptions(state));
+
+        await Promise.all([
+          dispatch('updateWeaponIds'),
+          dispatch('updateShieldIds'),
+          dispatch('updateTrinketIds'),
+          dispatch('updateJunkIds'),
+          dispatch('updateKeyLootboxIds'),
+        ]);
+      },
+
+      async submitProgressAmount({state, dispatch}, {characterID, amount}) {
+        const {SimpleQuests} = state.contracts();
+        if (!SimpleQuests || !state.defaultAccount) return;
+
+        await SimpleQuests.methods.submitProgressAmount(characterID, amount).send(defaultCallOptions(state));
+        await Promise.all([
+          dispatch('fetchCharacterStamina', characterID),
+          dispatch('fetchSoulBalance', characterID),
+        ]);
+      },
+
+      async submitExternalProgress({state}, {characterID, tokenIds, tokenAddress}) {
+        const {SimpleQuests, PartnerVault} = state.contracts();
+        if (!SimpleQuests || !PartnerVault || !state.defaultAccount) return;
+
+        const tokenContract = new web3.eth.Contract(erc721Abi as any[], tokenAddress) as Contract<IERC721>;
+
+        const isApprovedForAll = await tokenContract.methods.isApprovedForAll(state.defaultAccount, SimpleQuests.options.address)
+          .call(defaultCallOptions(state));
+
+        if(tokenIds.length === 1 && !isApprovedForAll) {
+          await tokenContract.methods.approve(SimpleQuests.options.address, tokenIds[0]).send({
+            from: state.defaultAccount
+          });
+        } else if (!isApprovedForAll) {
+          await tokenContract.methods.setApprovalForAll(SimpleQuests.options.address, true).send({
+            from: state.defaultAccount
+          });
+        }
+
+        return await SimpleQuests.methods.submitProgress(characterID, tokenIds).send(defaultCallOptions(state));
+      },
+
+      async submitExternalProgressAmount({state}, {characterID, amount, currencyAddress}) {
+        const {SimpleQuests, PartnerVault} = state.contracts();
+        if (!SimpleQuests || !PartnerVault || !state.defaultAccount) return;
+
+        const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
+        const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
+        const amountTimesDecimals = web3.utils.toBN(amount * 10 ** currencyDecimals);
+        await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
+          from: state.defaultAccount
+        });
+
+        return await SimpleQuests.methods.submitProgressAmount(characterID, amountTimesDecimals.toString()).send(defaultCallOptions(state));
+      },
+
+      async isExternalCurrency({state}, {currencyAddress}) {
+        try{
+          const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
+          await currencyContract.methods.decimals().call(defaultCallOptions(state));
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+
+      async grantRole({state}, {walletAddress, contract, roleMethod}) {
+        if (!contract || !state.defaultAccount || !Web3.utils.isAddress(walletAddress)) return;
+
+        const role = await roleMethod().call(defaultCallOptions(state));
+
+        await contract.methods.grantRole(role, walletAddress).send(defaultCallOptions(state));
+      },
+
+      async revokeRole({state}, {walletAddress, contract, roleMethod}) {
+        if (!contract || !state.defaultAccount || !Web3.utils.isAddress(walletAddress)) return;
+
+        const role = await roleMethod().call(defaultCallOptions(state));
+
+        await contract.methods.revokeRole(role, walletAddress).send(defaultCallOptions(state));
+      },
+
+      async userHasAdminAccess({state}, {contract}) {
+        if (!contract || !state.defaultAccount) return;
+
+        const adminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+
+        return await contract.methods.hasRole(adminRole, state.defaultAccount).call(defaultCallOptions(state));
+      },
+
+      async userHasMinterAccess({state}, {contract}) {
+        if (!contract || !contract.methods.MINTER_ROLE || !state.defaultAccount) return;
+
+        const minterRole = await contract.methods.MINTER_ROLE().call(defaultCallOptions(state));
+
+        return await contract.methods.hasRole(minterRole, state.defaultAccount).call(defaultCallOptions(state));
+      },
+
+      async userHasAnyAdminAccess({state}) {
+        const {SimpleQuests, CBKLand, Weapons, BurningManager} = state.contracts();
+        if (!BurningManager || !Weapons || !SimpleQuests || !CBKLand || !state.defaultAccount) return;
+
+        const simpleQuestsAdminRole = await SimpleQuests.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const cbkLandAdminRole = await CBKLand.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const weaponsAdminRole = await Weapons.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const burningManagerAdminRole = await BurningManager.methods.GAME_ADMIN().call(defaultCallOptions(state));
+
+        const promises: Promise<boolean>[] = [
+          SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          CBKLand.methods.hasRole(cbkLandAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          Weapons.methods.hasRole(weaponsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          BurningManager.methods.hasRole(burningManagerAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+        ];
+
+        for (const promise of promises) {
+          if (await promise) return true;
+        }
+        return false;
+      },
+
+      async userHasAnyMinterAccess({state}) {
+        const {Weapons, Characters} = state.contracts();
+        if (!Weapons || !Characters || !state.defaultAccount) return;
+
+        const weaponsMinerRole = await Weapons.methods.MINTER_ROLE().call(defaultCallOptions(state));
+        const charactersMinerRole = await Characters.methods.MINTER_ROLE().call(defaultCallOptions(state));
+
+        const promises: Promise<boolean>[] = [
+          Weapons.methods.hasRole(weaponsMinerRole, state.defaultAccount).call(defaultCallOptions(state)),
+          Characters.methods.hasRole(charactersMinerRole, state.defaultAccount).call(defaultCallOptions(state)),
+        ];
+
+        for (const promise of promises) {
+          if (await promise) return true;
+        }
+        return false;
       },
 
       async canUserAfford({ state }, {payingAmount}) {
@@ -3382,11 +4198,14 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            new BigNumber(Web3.utils.toWei('' + price))
+          );
         } catch(err) {
           console.error(err);
         }
@@ -3407,11 +4226,14 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            new BigNumber(Web3.utils.toWei('' + price))
+          );
         } catch(err) {
           console.error(err);
         }
@@ -3452,11 +4274,14 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            new BigNumber(Web3.utils.toWei('' + price))
+          );
         } catch(err) {
           console.error(err);
         }
@@ -3477,11 +4302,14 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            new BigNumber(Web3.utils.toWei('' + price))
+          );
         } catch(err) {
           console.error(err);
         }
@@ -3523,11 +4351,14 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterFireTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            new BigNumber(Web3.utils.toWei('' + price))
+          );
         } catch(err) {
           console.error(err);
         }
@@ -3569,11 +4400,14 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterEarthTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            new BigNumber(Web3.utils.toWei('' + price))
+          );
         } catch(err) {
           console.error(err);
         }
@@ -3615,11 +4449,14 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterWaterTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            new BigNumber(Web3.utils.toWei('' + price))
+          );
         } catch(err) {
           console.error(err);
         }
@@ -3661,11 +4498,14 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterLightningTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, Web3.utils.toWei('' + price))
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            new BigNumber(Web3.utils.toWei('' + price))
+          );
         } catch(err) {
           console.error(err);
         }
@@ -3706,11 +4546,14 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !WeaponCosmetics || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('' + price, 'ether'))
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            new BigNumber(web3.utils.toWei('' + price, 'ether'))
+          );
         } catch(err) {
           console.error(err);
         }
@@ -3765,11 +4608,14 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterCosmetics || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await SkillToken.methods
-            .approve(CryptoBlades.options.address, web3.utils.toWei('' + price, 'ether'))
-            .send({
-              from: state.defaultAccount
-            });
+          await approveFeeFromAnyContractSimple(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            new BigNumber(web3.utils.toWei('' + price, 'ether'))
+          );
         } catch(err) {
           console.error(err);
         }
@@ -3983,6 +4829,7 @@ export function createStore(web3: Web3) {
 
         const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
         if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
+
         const NFTContract: Contract<IERC721> =
           nftContractAddr === Weapons.options.address
             ? Weapons : nftContractAddr === Characters.options.address
@@ -4001,7 +4848,8 @@ export function createStore(web3: Web3) {
           await dispatch('updateWeaponIds');
         else if(nftContractAddr === Characters.options.address)
           await dispatch('updateCharacterIds');
-
+        else if (nftContractAddr === Shields.options.address)
+          await dispatch('updateShieldIds');
         return res;
       },
       async getStorageItemIds({ state }, { nftContractAddr }: { nftContractAddr: string}) {
@@ -4024,9 +4872,9 @@ export function createStore(web3: Web3) {
 
         return res;
       },
-      async withdrawFromStorage({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
-        const { NFTStorage, Weapons, Characters } = state.contracts();
-        if(!NFTStorage || !Weapons || !Characters || !state.defaultAccount) return;
+      async withdrawFromStorage({ state, dispatch }, { nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: number}) {
+        const { NFTStorage, Weapons, Characters, Shields } = state.contracts();
+        if(!NFTStorage || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
 
         await NFTStorage.methods
           .withdrawFromStorage(nftContractAddr, tokenId)
@@ -4038,17 +4886,22 @@ export function createStore(web3: Web3) {
           await dispatch('updateWeaponIds');
         else if(nftContractAddr === Characters.options.address)
           await dispatch('updateCharacterIds');
+        else if (nftContractAddr === Shields.options.address)
+          await dispatch('updateShieldIds');
 
       },
       async bridgeItem({ state, dispatch }, { nftContractAddr, tokenId, targetChain, bridgeFee }:
-      { nftContractAddr: string, tokenId: string, targetChain: string, bridgeFee: string }) {
+      { nftContractAddr: string, tokenId: number, targetChain: string, bridgeFee: string }) {
         const { NFTStorage, CryptoBlades, SkillToken } = state.contracts();
         if (!NFTStorage || !CryptoBlades || !SkillToken || !state.defaultAccount) return;
-
-        await SkillToken.methods
-          .approve(CryptoBlades.options.address, bridgeFee)
-          .send(defaultCallOptions(state));
-
+        await approveFeeFromAnyContractSimple(
+          CryptoBlades,
+          SkillToken,
+          state.defaultAccount,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          new BigNumber(bridgeFee)
+        );
         await NFTStorage.methods
           .bridgeItem(nftContractAddr, tokenId, targetChain)
           .send({
@@ -4056,7 +4909,7 @@ export function createStore(web3: Web3) {
           });
         dispatch('fetchSkillBalance');
       },
-      async getNFTChainId({state}, {nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: string}) {
+      async getNFTChainId({state}, {nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: number}) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage) return;
         const chainId = await NFTStorage.methods
@@ -4075,12 +4928,20 @@ export function createStore(web3: Web3) {
       async getBridgeTransfer({state}, {transferId}: { transferId: string}) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage) return;
-        const response = await NFTStorage.methods
+        const nft = await NFTStorage.methods
           .getBridgeTransfer(transferId)
           .call(defaultCallOptions(state));
-        return response;
+        return {
+          owner: nft[0],
+          nftAddress: nft[1],
+          nftId: +nft[2],
+          requestBlock: +nft[3],
+          lastUpdateBlock: +nft[4],
+          chainId: +nft[5],
+          status: +nft[6],
+        }as NftTransfer;
       },
-      async withdrawFromBridge({ state }, {tokenId}: {tokenId: string}) {
+      async withdrawFromBridge({ state }, {tokenId}: {tokenId: number}) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage || !state.defaultAccount) return;
         await NFTStorage.methods
@@ -4101,18 +4962,25 @@ export function createStore(web3: Web3) {
       async getReceivedNFTs({ state }) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage || !state.defaultAccount) return;
-        const res = await NFTStorage.methods
+        const nftIds = await NFTStorage.methods
           .getReceivedNFTs()
           .call(defaultCallOptions(state));
-        return res;
+        return nftIds.map(Number) as number[];
       },
-      async getReceivedNFT({ state }, {tokenId}: {tokenId: string}) {
+      async getReceivedNFT({ state }, {tokenId}: {tokenId: number}) {
         const { NFTStorage } = state.contracts();
         if(!NFTStorage || !state.defaultAccount) return;
-        const res = await NFTStorage.methods
+        const nft: string[] = await NFTStorage.methods
           .getReceivedNFT(tokenId)
           .call(defaultCallOptions(state));
-        return res;
+        return {
+          owner: nft[0],
+          nftType: +nft[1],
+          sourceChain: +nft[2],
+          sourceId: +nft[3],
+          status: +nft[4],
+          transferInsMeta: nft[5],
+        } as TransferedNft;
       },
       async chainEnabled({ state }, { chainId }: { chainId: string }) {
         const { NFTStorage } = state.contracts();
@@ -4511,9 +5379,14 @@ export function createStore(web3: Web3) {
         const { PvpArena, SkillToken } = state.contracts();
         if (!PvpArena || !SkillToken || !state.defaultAccount) return;
 
-        const res = await SkillToken.methods.approve(PvpArena.options.address, `${amount}`).send({ from: state.defaultAccount });
-
-        return res;
+        return await approveFeeFromAnyContractSimple(
+          PvpArena,
+          SkillToken,
+          state.defaultAccount,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          new BigNumber(`${amount}`)
+        );
       },
 
       async burnCharactersIntoCharacter({ state, dispatch }, {burnIds, targetId}) {
@@ -4521,9 +5394,14 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
 
         const burnCost = await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
-        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
-          from: state.defaultAccount
-        });
+        await approveFeeFromAnyContractSimple(
+          CryptoBlades,
+          SkillToken,
+          state.defaultAccount,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          new BigNumber(burnCost)
+        );
 
         await BurningManager.methods.burnCharactersIntoCharacter(burnIds, targetId).send({ from: state.defaultAccount });
         await Promise.all([
@@ -4537,9 +5415,14 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
 
         const burnCost = await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
-        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
-          from: state.defaultAccount
-        });
+        await approveFeeFromAnyContractSimple(
+          CryptoBlades,
+          SkillToken,
+          state.defaultAccount,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          new BigNumber(burnCost)
+        );
 
         await BurningManager.methods.burnCharactersIntoSoul(burnIds).send({ from: state.defaultAccount });
         await Promise.all([
@@ -4552,7 +5435,14 @@ export function createStore(web3: Web3) {
         const { NFTMarket, BurningManager, SkillToken, CryptoBlades } = state.contracts();
         if(!CryptoBlades || !BurningManager || !SkillToken || !NFTMarket || !state.defaultAccount) return;
 
-        await SkillToken.methods.approve(NFTMarket.options.address, maxPrice).send(defaultCallOptions(state));
+        await approveFeeFromAnyContractSimple(
+          CryptoBlades,
+          SkillToken,
+          state.defaultAccount,
+          defaultCallOptions(state),
+          defaultCallOptions(state),
+          maxPrice
+        );
 
         const burnCost = await BurningManager.methods.burnCharacterFee(charId).call(defaultCallOptions(state));
         await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({

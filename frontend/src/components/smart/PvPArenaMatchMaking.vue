@@ -176,6 +176,7 @@ import lightningIcon from '../../assets/elements/lightning.png';
 import PvPDuelModal from './PvPDuelModal.vue';
 import PvPUnderAttackModal from './PvPUnderAttackModal.vue';
 import { duelResultFromContract as formatDuelResult } from '../../contract-models';
+import i18n from '../../i18n';
 
 export default {
   inject: ['web3'],
@@ -341,7 +342,7 @@ export default {
       if (value.includes(`reverted with reason string '${errorMessage}'`)) {
         return this.$dialog.notify.error(returnedMessage);
       }
-      return 'There has been an error. Try again.';
+      return this.$dialog.notify.error(i18n.t('pvp.genericError'));
     },
 
     async leaveArena() {
@@ -354,8 +355,8 @@ export default {
       } catch (err) {
         console.log('leave arena error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'Char not in arena', 'The character is not in the arena');
-        this.handleErrorMessage(err.message, 'Defender duel in process', 'Duel already in process');
+        this.handleErrorMessage(err.message, 'Char not in arena', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(err.message, 'Defender duel in process', i18n.t('pvp.duelInProcess'));
       }
 
       this.loading = false;
@@ -374,11 +375,11 @@ export default {
       } catch (err) {
         console.log('find match error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'No enemy found', 'No opponent has been found. Try again.');
-        this.handleErrorMessage(err.message, 'Already in match', 'An opponent has already been requested.');
-        this.handleErrorMessage(err.message, 'No enemy in tier', 'No opponents available in this tier.');
-        this.handleErrorMessage(err.message, 'Char dueling', 'The character is already in a duel queue.');
-        this.handleErrorMessage(err.message, 'Char not in arena', 'The character is not in the arena.');
+        this.handleErrorMessage(err.message, 'No enemy found', i18n.t('pvp.noEnemyFound'));
+        this.handleErrorMessage(err.message, 'Already in match', i18n.t('pvp.alreadyInMatch'));
+        this.handleErrorMessage(err.message, 'No enemy in tier', i18n.t('pvp.noEnemyInTier'));
+        this.handleErrorMessage(err.message, 'Char dueling', i18n.t('pvp.charDueling'));
+        this.handleErrorMessage(err.message, 'Char not in arena', i18n.t('pvp.charNotInArena'));
 
         this.loading = false;
         return;
@@ -404,10 +405,10 @@ export default {
       } catch (err) {
         console.log('reroll opponent error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'No enemy found', 'No opponent has been found. Try again.');
-        this.handleErrorMessage(err.message, 'Not in match', 'The character is not in a match. Try again.');
-        this.handleErrorMessage(err.message, 'No enemy in tier', 'No opponents available in this tier.');
-        this.handleErrorMessage(err.message, 'Char dueling', 'The character is already in a duel queue.');
+        this.handleErrorMessage(err.message, 'No enemy found', i18n.t('pvp.noEnemyFound'));
+        this.handleErrorMessage(err.message, 'Not in match', i18n.t('pvp.notInMatch'));
+        this.handleErrorMessage(err.message, 'No enemy in tier', i18n.t('pvp.noEnemyInTier'));
+        this.handleErrorMessage(err.message, 'Char dueling', i18n.t('pvp.charDueling'));
 
         this.loading = false;
 
@@ -466,9 +467,9 @@ export default {
       } catch (err) {
         console.log('prepare perform duel error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'Decision time expired', 'Decision time expired.');
-        this.handleErrorMessage(err.message, 'Char in duel queue', 'The character is already waiting for an opponent.');
-        this.handleErrorMessage(err.message, 'Not in match', 'The character is not in a duel. Try again.');
+        this.handleErrorMessage(err.message, 'Decision time expired', i18n.t('pvp.decisionTimeExpired'));
+        this.handleErrorMessage(err.message, 'Char in duel queue', i18n.t('pvp.charDueling'));
+        this.handleErrorMessage(err.message, 'Not in match', i18n.t('pvp.notInMatch'));
 
         this.loading = false;
 
@@ -575,6 +576,12 @@ export default {
     this.duelOffsetCost = await this.getDuelOffsetCost();
 
     this.loading = false;
+  },
+
+  beforeDestroy() {
+    if(this.timer) {
+      clearInterval(this.timer);
+    }
   },
 
   watch: {
