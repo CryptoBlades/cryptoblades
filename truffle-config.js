@@ -205,7 +205,7 @@ module.exports = {
         process.env.AURORA_TESTNET_PRIVATE_KEY,
         process.env.AURORA_TESTNET_WALLET_MNEMONIC,
         {
-          providerOrUrl: process.env.AURORA_TESTNET_RPC_URL || 'https://testnet.aurora.dev'
+          providerOrUrl: process.env.AURORA_TESTNET_RPC_URL || 'wss://testnet.aurora.dev'
         }
       )),
       network_id: 0x4e454153,

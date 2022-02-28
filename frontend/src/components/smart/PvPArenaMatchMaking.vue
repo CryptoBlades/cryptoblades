@@ -595,6 +595,12 @@ export default {
     this.loading = false;
   },
 
+  beforeDestroy() {
+    if(this.timer) {
+      clearInterval(this.timer);
+    }
+  },
+
   watch: {
     async match(value) {
       this.loading = true;

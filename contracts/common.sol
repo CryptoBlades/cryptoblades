@@ -20,6 +20,14 @@ library Common {
         return uint24(weaponMultiplier.mulu(basePower).add(bonusPower));
     }
 
+    function getPlayerPowerBase100(
+        uint256 basePower,
+        int128 weaponMultiplier,
+        uint24 bonusPower
+    ) internal pure returns (uint24) {
+        // we divide total power by 100 and add the base of 10000
+       return uint24 (weaponMultiplier.mulu(basePower).add(bonusPower).div(100).add(1000));  
+    }
     function getPowerAtLevel(uint8 level) internal pure returns (uint24) {
         // does not use fixed points since the numbers are simple
         // the breakpoints every 10 levels are floored as expected

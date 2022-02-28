@@ -1,5 +1,5 @@
 {
-  "supportedChains":["BSC","HECO","OEC","POLYGON","AVAX", "AURORA"],
+  "supportedChains":["BSC","HECO","OEC","POLYGON","AVAX"],
   "merchandiseSupportedChains": ["BSC"],
   "environments": {
     "test": {
@@ -52,7 +52,7 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
           "blockExplorerUrls": ["https://testnet.bscscan.com"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab",
+          "exchangeUrl": "https://apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab",
           "fightGas": "0.0007"
         },
         "HECO": {
@@ -244,7 +244,7 @@
           "VUE_APP_MARKET_CONTRACT_ADDRESS":"0xA446c69Da0FEc2dB47E659677a21A3E09B72dcbF",
           "VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS":"0xbfEda50595A2bFCaB29048B227832ec63d446920",
           "VUE_APP_TREASURY_CONTRACT_ADDRESS": "0x2Fd095f02Dd033bF2106186638457b3A0e157751",
-          "VUE_APP_PVP_CONTRACT_ADDRESS": "0x5CCd6B4977736AcB3396b91B4786Df3BE01a6952",
+          "VUE_APP_PVP_CONTRACT_ADDRESS": "0x0Ff7f673BBf4b47d8e7d31a59cEB2244a8CBEb68",
           "VUE_APP_BURNING_MANAGER_CONTRACT_ADDRESS": "0xeC8A94061C493Beeb1D5F314E8dcF299a05257Eb",
           "VUE_APP_STORAGE_CONTRACT_ADDRESS":"0xc7B23A5d3D704183A7D9CfdFCFC30F07db9DC4F1",
 
@@ -318,7 +318,7 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://bsc-dataseed.binance.org/"],
           "blockExplorerUrls": ["https://bscscan.com/"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab",
+          "exchangeUrl": "https://apeswap.finance/swap?outputCurrency=0x154a9f9cbd3449ad22fdae23044319d6ef2a1fab",
           "fightGas": "0.0007"
         },
         "HECO": {

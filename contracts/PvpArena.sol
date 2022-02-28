@@ -13,6 +13,7 @@ import "./shields.sol";
 import "./common.sol";
 
 
+
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;
     using SafeMath for uint8;
@@ -1017,7 +1018,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         int128 bonusShieldStats;
         if (fighter.useShield) {
-            bonusShieldStats = _getShieldStats(character.ID);
+            // we set bonus shield stats as 0.2
+            bonusShieldStats = _getShieldStats(character.ID).sub(1).mul(20).div(100);
         }
 
         (
@@ -1033,9 +1035,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             opponentTrait
         );
 
-        uint24 playerFightPower = Common.getPlayerPower(character.basePower, (weaponMultFight.add(bonusShieldStats)), weaponBonusPower);
-
-        uint256 playerPower = RandomUtil.plusMinus10PercentSeeded(
+        uint24 playerFightPower = Common.getPlayerPowerBase100(character.basePower, (weaponMultFight.add(bonusShieldStats)), weaponBonusPower);
+        uint256 playerPower = RandomUtil.plusMinus30PercentSeeded(
             playerFightPower,
             seed
         );

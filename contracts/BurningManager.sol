@@ -224,12 +224,12 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         weapons.reforgeWithDust(reforgeID, amountLB, amount4B, amount5B);
     }
 
-    function giveawaySoul(address user, uint256 soulAmount) external restricted {
+    function giveAwaySoul(address user, uint256 soulAmount) external restricted {
         userVars[user][USERVAR_SOUL_SUPPLY] += soulAmount;
     }
 
     function burnSoul(address user, uint256 soulAmount) external restricted {
-        userVars[user][USERVAR_SOUL_SUPPLY].sub(soulAmount);
+        userVars[user][USERVAR_SOUL_SUPPLY] = userVars[user][USERVAR_SOUL_SUPPLY].sub(soulAmount);
     }
 
     // VARS SETTER
