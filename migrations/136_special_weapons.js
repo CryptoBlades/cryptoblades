@@ -10,7 +10,6 @@ const PvpArena = artifacts.require("PvpArena");
 const SkillStakingRewardsUpgradeable = artifacts.require("SkillStakingRewardsUpgradeable");
 const SkillStakingRewardsUpgradeable90 = artifacts.require("SkillStakingRewardsUpgradeable90");
 const SkillStakingRewardsUpgradeable180 = artifacts.require("SkillStakingRewardsUpgradeable180");
-const SkillToken = artifacts.require("SkillToken");
 
 module.exports = async function (deployer, network) {
   if (network === "development"
@@ -21,7 +20,8 @@ module.exports = async function (deployer, network) {
   || network === 'okextestnet'
   || network === 'polygontestnet'
   || network === 'avaxtestnet'
-  || network === 'avaxtestnet-fork' || network === 'auroratestnet') {
+  || network === 'avaxtestnet-fork'
+  || network === 'auroratestnet') {
     let weapons = await upgradeProxy(Weapons.address, Weapons, { deployer });
     let promos = await upgradeProxy(Promos.address, Promos, { deployer });
     let safeRandoms = await SafeRandoms.deployed();
