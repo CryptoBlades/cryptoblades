@@ -62,6 +62,8 @@ module.exports = async function (deployer, network) {
     if(network === 'bsctestnet' || network === 'bsctestnet-fork') {
       skillStakingRewardsUpgradeable90 = await upgradeProxy(SkillStakingRewardsUpgradeable90.address, SkillStakingRewardsUpgradeable90, { deployer });
       skillStakingRewardsUpgradeable180 = await upgradeProxy(SkillStakingRewardsUpgradeable180.address, SkillStakingRewardsUpgradeable180, { deployer });
+      await skillStakingRewardsUpgradeable90.migrateTo_e1fe97c(specialWeaponsManager.address);
+      await skillStakingRewardsUpgradeable180.migrateTo_e1fe97c(specialWeaponsManager.address);
       
       await specialWeaponsManager.grantRole(swm_GAME_ADMIN, skillStakingRewardsUpgradeable90.address);
       await specialWeaponsManager.grantRole(swm_GAME_ADMIN, skillStakingRewardsUpgradeable180.address);
