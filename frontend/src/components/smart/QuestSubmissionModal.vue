@@ -20,7 +20,7 @@
       || quest.requirementType === RequirementType.STAMINA
        || quest.requirementType === RequirementType.SOUL"
          class="d-flex align-items-center flex-column">
-      <dust-balance-display v-if="quest.requirementType === RequirementType.DUST" class="w-50 p-5"
+      <dust-balance-display v-if="quest.requirementType === RequirementType.DUST" class="single-dust-display p-5"
                             :rarities="[quest.requirementRarity]"/>
       <nft-icon v-else-if="quest.requirementType === RequirementType.SOUL" :isDefault="true" :nft="{ type: 'soul' }"/>
       <h2>{{ $t('quests.howMuchToTurnIn') }}</h2>
@@ -173,7 +173,20 @@ export default Vue.extend({
 
     setRequiredAmount() {
       if (!this.quest) return;
-      this.amountToBurn = this.quest.requirementAmount - this.questProgress;
+      const remainingAmount = this.quest.requirementAmount - this.questProgress;
+      if (this.quest.requirementType === RequirementType.STAMINA) {
+        this.amountToBurn = remainingAmount > this.getCharacterStamina(this.characterId) ? this.getCharacterStamina(this.characterId) : remainingAmount;
+      } else if (this.quest.requirementType === RequirementType.SOUL) {
+        this.amountToBurn = remainingAmount > this.soulBalance ? this.soulBalance : remainingAmount;
+      } else if (this.quest.requirementType === RequirementType.DUST) {
+        if (this.quest.requirementRarity === Rarity.COMMON) {
+          this.amountToBurn = remainingAmount > this.getLesserDust() ? this.getLesserDust() : remainingAmount;
+        } else if (this.quest.requirementRarity === Rarity.UNCOMMON) {
+          this.amountToBurn = remainingAmount > this.getGreaterDust() ? this.getGreaterDust() : remainingAmount;
+        } else if (this.quest.requirementRarity === Rarity.RARE) {
+          this.amountToBurn = remainingAmount > this.getPowerfulDust() ? this.getPowerfulDust() : remainingAmount;
+        }
+      }
     },
 
     addBurnToken(id: number) {
@@ -306,4 +319,13 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.single-dust-display {
+  width: 40%;
+}
+
+@media (max-width: 576px) {
+  .single-dust-display {
+    width: 100%;
+  }
+}
 </style>
