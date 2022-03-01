@@ -1096,11 +1096,9 @@ img.elements-modal:hover {
 
 @media (max-width: 576px) {
   .button-div {
-    display: flex;
     justify-content: center;
   }
   .buttons-panel {
-    display: flex;
     flex-direction: column;
   }
 }
