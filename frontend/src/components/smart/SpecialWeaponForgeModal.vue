@@ -145,23 +145,23 @@
             </div>
             <div class="mt-3 top-border-shards">
               <h4 class="mt-2">{{$t('blacksmith.convert')}}</h4>
-              <div class="d-flex align-items-center">
+              <div class="d-flex align-items-center mobile-adjustable">
                 <h5 class="mb-0">{{$t('blacksmith.from')}}:</h5>
-                <b-form-select class="w-25 ml-1" size="sm"
+                <b-form-select class="form-width ml-1" size="sm"
                   v-model="selectedConvertFromId">
                   <b-form-select-option v-for="id in allEventsIds.filter(id => id !== selectedConvertToId)" :key="id" :value="id">
                     {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
                   </b-form-select-option>
                 </b-form-select>
                 <h5 class="ml-3 mb-0">{{$t('blacksmith.to')}}:</h5>
-                <b-form-select class="w-25 ml-1" size="sm"
+                <b-form-select class="form-width ml-1" size="sm"
                   v-model="selectedConvertToId">
                   <b-form-select-option v-for="id in activeSpecialWeaponEventsIds.filter(id => id !== selectedConvertFromId)" :key="id" :value="id">
                     {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
                   </b-form-select-option>
                 </b-form-select>
                 <h5 class="ml-3 mb-0">{{$t('blacksmith.amount')}}:</h5>
-                <b-input size="sm" type="number" class="form-control w-25 ml-1" v-model="convertAmount" min="0"
+                <b-input size="sm" type="number" class="form-control form-width ml-1" v-model="convertAmount" min="0"
                   :max="selectedConvertFromId >= 0 ? shardsSupply[selectedConvertFromId] : ''"></b-input>
               </div>
               <div class="d-flex justify-content-center">
@@ -190,16 +190,16 @@
               </div>
               <div class="d-flex flex-column align-items-center">
                 <h5><img class="shard-icon" :src="generalShardImg" /> {{shardsStakingRewards}}</h5>
-                <div class="d-flex mt-2 align-items-center justify-content-center w-100">
+                <div class="d-flex mt-2 align-items-center justify-content-center w-100 mobile-adjustable">
                   <h5 class="ml-3 mb-0">{{$t('blacksmith.claimInto')}}:</h5>
-                  <b-form-select class="w-25 ml-1" size="sm" :disabled="!activeSpecialWeaponEventsIds.length"
+                  <b-form-select class="form-width ml-1" size="sm" :disabled="!activeSpecialWeaponEventsIds.length"
                     v-model="claimRewardsIntoId">
                     <b-form-select-option v-for="id in activeSpecialWeaponEventsIds.filter(id => id !== selectedConvertFromId)" :key="id" :value="id">
                       {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
                     </b-form-select-option>
                   </b-form-select>
                   <h5 class="ml-3 mb-0">{{$t('blacksmith.amount')}}:</h5>
-                  <b-input size="sm" type="number" class="form-control w-25 ml-1" step="1" v-model="claimRewardsAmount" min="0"
+                  <b-input size="sm" type="number" class="form-control form-width ml-1" step="1" v-model="claimRewardsAmount" min="0"
                     :max="Math.floor(+shardsStakingRewards)"></b-input>
                 </div>
                 <h5 v-if="!activeSpecialWeaponEventsIds.length" class="d-flex justify-content-center mt-3">{{$t('blacksmith.noActiveEvents')}}</h5>
@@ -646,5 +646,18 @@ export default Vue.extend({
   cursor: pointer;
   position: relative;
   overflow: visible;
+}
+
+.form-width {
+  width: 25%;
+}
+
+@media (max-width: 576px) {
+  .mobile-adjustable {
+    flex-direction: column;
+  }
+  .form-width {
+    width: 50%;
+  }
 }
 </style>
