@@ -78,6 +78,7 @@
         :currentRankedSeason="currentRankedSeason"
         :secondsBeforeNextSeason="secondsBeforeNextSeason"
         :characterInformation="characterInformation"
+        insideArena
       />
     </div>
   </div>
@@ -121,6 +122,7 @@ export default {
         name: '',
         level: null,
         power: null,
+        fullPower: null,
         rank: null,
         element: null,
       }
@@ -193,7 +195,7 @@ export default {
       } catch (err) {
         console.log('leave arena error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'Char not in arena', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(err.message, 'Not in arena', i18n.t('pvp.charNotInArena'));
         this.handleErrorMessage(err.message, 'Defender duel in process', i18n.t('pvp.duelInProcess'));
       } finally {
         this.loading = false;

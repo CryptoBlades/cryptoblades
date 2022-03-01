@@ -148,7 +148,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterInArena(uint256 characterID) internal view {
-        require(isCharacterInArena[characterID], "Char not in arena");
+        require(isCharacterInArena[characterID], "Not in arena");
     }
 
     modifier characterWithinDecisionTime(uint256 characterID) {
@@ -1019,6 +1019,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         int128 bonusShieldStats;
         if (fighter.useShield) {
             // we set bonus shield stats as 0.2
+            // Note: hardcoded - copied in getCharacterPower
             bonusShieldStats = _getShieldStats(character.ID).sub(1).mul(20).div(100);
         }
 
@@ -1047,17 +1048,30 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function getCharacterPower(uint256 characterID)
         external
         view
+        characterInArena(characterID)
         returns (uint24) 
     {
-        uint8 level = characters.getLevel(characterID);
-        uint8 trait = characters.getTrait(characterID);
-        uint24 basePower = Common.getPowerAtLevel(level);
+        int128 bonusShieldStats;
+        
         (
             ,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             
-        ) = weapons.getFightData(weaponID, trait);
+        ) = weapons.getFightData(fighterByCharacter[characterID].weaponID, characters.getTrait(characterID));
+
+        if (fighterByCharacter[characterID].useShield) {
+            // we set bonus shield stats as 0.2
+            // Note: hardcoded - copied in _getCharacterPowerRoll
+            bonusShieldStats = _getShieldStats(characterID).sub(1).mul(20).div(100);
+        }
+
+        return (   
+            Common.getPlayerPowerBase100(
+                Common.getPowerAtLevel(characters.getLevel(characterID)),
+                (weaponMultFight.add(bonusShieldStats)),
+                weaponBonusPower)
+        );
     }
 
     function getPVPTraitBonusAgainst(

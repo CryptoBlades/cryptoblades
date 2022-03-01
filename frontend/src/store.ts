@@ -5217,6 +5217,15 @@ export function createStore(web3: Web3) {
         return characterPower;
       },
 
+      async getCharacterFullPower({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const characterFullPower = await PvpArena.methods.getCharacterPower(characterId).call({ from: state.defaultAccount });
+
+        return characterFullPower;
+      },
+
       async getRankingPointsByCharacter({ state }, characterId) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;
