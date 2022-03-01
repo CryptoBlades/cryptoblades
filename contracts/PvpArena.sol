@@ -178,7 +178,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterNotInDuel(uint256 characterID) internal view {
-        require(!isCharacterInDuel(characterID), "In duel queue");
+        require(!isCharacterInDuel(characterID), "In queue");
     }
 
     modifier isOwnedCharacter(uint256 characterID) {
@@ -1083,7 +1083,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         int128 fightTraitBonus = game.fightTraitBonus();
         int128 charTraitFactor = ABDKMath64x64.divu(50, 100);
         if (characterTrait == weaponTrait) {
-            traitBonus = traitBonus.add(fightTraitBonus);
+            traitBonus = traitBonus.add(fightTraitBonus.mul(2));
         }
 
         // We apply 50% of char trait bonuses because they are applied twice (once per fighter)

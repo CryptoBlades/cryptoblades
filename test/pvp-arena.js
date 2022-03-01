@@ -1245,7 +1245,7 @@ contract("PvpArena", (accounts) => {
 
         await expectRevert(
           pvpArena.prepareDuel(character1ID, { from: accounts[1] }),
-          "In duel queue"
+          "In queue"
         );
       });
     });

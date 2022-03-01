@@ -485,7 +485,7 @@ export default {
         console.log('prepare perform duel error: ', err.message);
 
         this.handleErrorMessage(err.message, 'Decision time expired', i18n.t('pvp.decisionTimeExpired'));
-        this.handleErrorMessage(err.message, 'Char in duel queue', i18n.t('pvp.charDueling'));
+        this.handleErrorMessage(err.message, 'In queue', i18n.t('pvp.charDueling'));
         this.handleErrorMessage(err.message, 'Not in match', i18n.t('pvp.notInMatch'));
 
         this.loading = false;
