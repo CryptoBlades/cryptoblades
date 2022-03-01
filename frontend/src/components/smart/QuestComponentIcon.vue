@@ -1,7 +1,10 @@
 <template>
-  <div class="reward-icon-container">
+  <div class="reward-icon-container"
+       :class="(questItemType === QuestItemType.REPUTATION && amount === 0) ? 'empty' : ''">
     <img class="reward-icon" :src="icon" v-b-tooltip="tooltip" alt="Reward image"/>
-    <span v-if="questItemType === QuestItemType.REPUTATION" class="reward-amount">+{{ amount }} Rep</span>
+    <span v-if="questItemType === QuestItemType.REPUTATION" class="reward-amount">
+      <span v-if="amount !== 0">+</span>{{ amount }} Rep
+    </span>
     <span v-else-if="questItemType === QuestItemType.EXPERIENCE" class="reward-amount">+{{ amount }} Exp</span>
     <span v-else class="reward-amount"><span>x</span>{{ amount }} {{ stars }}</span>
   </div>
@@ -140,5 +143,9 @@ export default Vue.extend({
 
 .reward-amount {
   font-size: 0.8rem;
+}
+
+.empty {
+  opacity: 0.5;
 }
 </style>
