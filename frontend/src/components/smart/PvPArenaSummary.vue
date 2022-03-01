@@ -61,7 +61,7 @@
                 </li>
                 <li v-for="duel in duelHistory" :key="`${duel.attackerId}-${duel.timestamp}`">
                   <span class="date">{{ dayjs(new Date(duel.timestamp * 1000)).format('YYYY/MM/DD') }}</span>
-                  <span :class="{'lost': !duel.attackerWon}" class="result">{{ duel.attackerWon ? i18n.t('pvp.win') : i18n.t('pvp.lose') }}</span>
+                  <span :class="{'lost': !duel.attackerWon}" class="result">{{ duel.attackerWon ? $t('pvp.win') : $t('pvp.lose') }}</span>
                 </li>
               </ul>
             </div>
