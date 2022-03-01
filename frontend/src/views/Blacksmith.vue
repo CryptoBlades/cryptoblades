@@ -14,9 +14,9 @@
         </div>
         <div class="row mt-3" v-if="ownWeapons.length > 0 && !showReforge">
           <div class="col">
-            <div class="d-flex justify-content-space-between">
+            <div class="buttons-panel">
               <h1>{{$t('weapons')}} ({{ ownWeapons.length }})</h1>
-              <div class="d-flex justify-content-flex-end ml-auto">
+              <div class="button-div">
                 <b-button
                         variant="primary"
                         class="ml-3"
@@ -1076,10 +1076,32 @@ img.elements-modal:hover {
   margin-top: 0.7em;
 }
 
+.buttons-panel {
+  display: flex;
+  justify-content: space-between;
+}
+
+.button-div {
+  display: flex;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
 @media (max-width: 1000px) {
   .mobile-flip{
     display: flex;
     flex-flow: column-reverse;
+  }
+}
+
+@media (max-width: 576px) {
+  .button-div {
+    display: flex;
+    justify-content: center;
+  }
+  .buttons-panel {
+    display: flex;
+    flex-direction: column;
   }
 }
 
