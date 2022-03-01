@@ -20,7 +20,7 @@
       || quest.requirementType === RequirementType.STAMINA
        || quest.requirementType === RequirementType.SOUL"
          class="d-flex align-items-center flex-column">
-      <dust-balance-display v-if="quest.requirementType === RequirementType.DUST" class="w-50 p-5"
+      <dust-balance-display v-if="quest.requirementType === RequirementType.DUST" class="single-dust-display p-5"
                             :rarities="[quest.requirementRarity]"/>
       <nft-icon v-else-if="quest.requirementType === RequirementType.SOUL" :isDefault="true" :nft="{ type: 'soul' }"/>
       <h2>{{ $t('quests.howMuchToTurnIn') }}</h2>
@@ -319,4 +319,13 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.single-dust-display {
+  width: 40%;
+}
+
+@media (max-width: 576px) {
+  .single-dust-display {
+    width: 100%;
+  }
+}
 </style>
