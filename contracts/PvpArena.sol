@@ -1044,6 +1044,22 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         return uint24(playerTraitBonus.mulu(playerPower));
     }
 
+    function getCharacterPower(uint256 characterID)
+        external
+        view
+        returns (uint24) 
+    {
+        uint8 level = characters.getLevel(characterID);
+        uint8 trait = characters.getTrait(characterID);
+        uint24 basePower = Common.getPowerAtLevel(level);
+        (
+            ,
+            int128 weaponMultFight,
+            uint24 weaponBonusPower,
+            
+        ) = weapons.getFightData(weaponID, trait);
+    }
+
     function getPVPTraitBonusAgainst(
         uint8 characterTrait,
         uint8 weaponTrait,
