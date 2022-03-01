@@ -173,7 +173,20 @@ export default Vue.extend({
 
     setRequiredAmount() {
       if (!this.quest) return;
-      this.amountToBurn = this.quest.requirementAmount - this.questProgress;
+      const remainingAmount = this.quest.requirementAmount - this.questProgress;
+      if (this.quest.requirementType === RequirementType.STAMINA) {
+        this.amountToBurn = remainingAmount > this.getCharacterStamina(this.characterId) ? this.getCharacterStamina(this.characterId) : remainingAmount;
+      } else if (this.quest.requirementType === RequirementType.SOUL) {
+        this.amountToBurn = remainingAmount > this.soulBalance ? this.soulBalance : remainingAmount;
+      } else if (this.quest.requirementType === RequirementType.DUST) {
+        if (this.quest.requirementRarity === Rarity.COMMON) {
+          this.amountToBurn = remainingAmount > this.getLesserDust() ? this.getLesserDust() : remainingAmount;
+        } else if (this.quest.requirementRarity === Rarity.UNCOMMON) {
+          this.amountToBurn = remainingAmount > this.getGreaterDust() ? this.getGreaterDust() : remainingAmount;
+        } else if (this.quest.requirementRarity === Rarity.RARE) {
+          this.amountToBurn = remainingAmount > this.getPowerfulDust() ? this.getPowerfulDust() : remainingAmount;
+        }
+      }
     },
 
     addBurnToken(id: number) {
