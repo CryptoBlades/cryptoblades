@@ -1009,6 +1009,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint24)
     {
+        uint24 playerFightPower = getCharacterPower(character.ID);
+
         Fighter memory fighter = fighterByCharacter[character.ID];
         uint256 weaponID = fighter.weaponID;
         uint256 seed = randoms.getRandomSeedUsingHash(
@@ -1016,19 +1018,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             blockhash(block.number - 1)
         );
 
-        int128 bonusShieldStats;
-        if (fighter.useShield) {
-            // we set bonus shield stats as 0.2
-            // Note: hardcoded - copied in getCharacterPower
-            bonusShieldStats = _getShieldStats(character.ID).sub(1).mul(20).div(100);
-        }
-
-        (
-            ,
-            int128 weaponMultFight,
-            uint24 weaponBonusPower,
-            uint8 weaponTrait
-        ) = weapons.getFightData(weaponID, character.trait);
+        uint8 weaponTrait = weapons.getTrait(weaponID);
 
         int128 playerTraitBonus = getPVPTraitBonusAgainst(
             character.trait,
@@ -1036,7 +1026,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             opponentTrait
         );
 
-        uint24 playerFightPower = Common.getPlayerPowerBase100(character.basePower, (weaponMultFight.add(bonusShieldStats)), weaponBonusPower);
         uint256 playerPower = RandomUtil.plusMinus30PercentSeeded(
             playerFightPower,
             seed
@@ -1046,7 +1035,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function getCharacterPower(uint256 characterID)
-        external
+        public
         view
         characterInArena(characterID)
         returns (uint24) 
@@ -1083,7 +1072,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         int128 fightTraitBonus = game.fightTraitBonus();
         int128 charTraitFactor = ABDKMath64x64.divu(50, 100);
         if (characterTrait == weaponTrait) {
-            traitBonus = traitBonus.add(fightTraitBonus.mul(2));
+            traitBonus = traitBonus.add(fightTraitBonus.mul(3));
         }
 
         // We apply 50% of char trait bonuses because they are applied twice (once per fighter)
