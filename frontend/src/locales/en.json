@@ -2,16 +2,22 @@
   "name": "English",
   "viewLink": {
     "plaza": "Plaza",
+    "character" : "Character",
     "blacksmith": "Blacksmith",
     "combat": "Combat",
     "raid": "Raid",
     "bazaar": "Bazaar",
+    "arena" : "Arena",
     "stake": "Stake",
     "pvp": "PvP",
     "quests": "Quests",
     "treasury": "Treasury",
     "merchandise": "Merchandise",
     "admin": "Admin",
+    "leaderboard": "Leaderboard",
+    "settings": "Settings",
+    "nftbridge": "NFT Bridge",
+    "wiki": "Wiki",
     "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
   },
   "ClaimRewardsBar": {
@@ -1172,7 +1178,7 @@
     "Polygon" : "Polygon",
     "Heco": "Heco",
     "Oec": "Oec",
-    "Avax": "Water"
+    "Avax": "Avalanche"
   },
   "copyLink": "Copy link",
   "Treasury": {
