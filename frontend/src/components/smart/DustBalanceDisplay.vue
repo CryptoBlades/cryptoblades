@@ -1,48 +1,30 @@
 <template>
-  <div :class="singleDust ? '' : 'col-lg-12'">
+  <div>
     <h1 class="text-center">{{ $t('dustBalanceDisplay.availableDust') }}</h1>
-    <div class="dusts-container mt-4" :class="singleDust ? 'p-5' : ''">
-      <div v-if="rarities.includes(Rarity.COMMON)" class="dust-container text-center"
+    <div class="dusts-container mt-4">
+      <div v-for="rarity in rarities" :key="rarity" class="dust-container text-center"
            :class="singleDust ? '' : 'col-lg-2'">
         <div class="dust">
-          LB: <span class="text-warning text-nowrap">{{ $t('dustBalanceDisplay.lesserPower') }}</span>
-          <img src="../../assets/dusts/lesserDust.png" class="w-100 p-4" alt=""/>
+          {{ $t(`dustBalanceDisplay.dustShortName.${DustRarity[rarity]}`) }}: <span
+          class="text-warning text-nowrap">{{ $t(`dustBalanceDisplay.dustPower.${DustRarity[rarity]}`) }}</span>
+          <img :src="getDustIcon(rarity)" class="w-100 p-4" alt="Dust Icon"/>
         </div>
-        <h1 class="text-center">{{ $t('dustBalanceDisplay.lesser') }}</h1>
+        <h1 class="text-center">{{ $t(`dustBalanceDisplay.dustName.${DustRarity[rarity]}`) }}</h1>
         <div class="boxed">
-          <h2>{{ getLesserDust() }}</h2>
-        </div>
-      </div>
-      <div v-if="rarities.includes(Rarity.UNCOMMON)" class="dust-container text-center"
-           :class="singleDust ? '' : 'col-lg-2'">
-        <div class="dust">
-          4B: <span class="text-warning text-nowrap">{{ $t('dustBalanceDisplay.greaterPower') }}</span>
-          <img src="../../assets/dusts/greaterDust.png" class="w-100 p-4" alt=""/>
-        </div>
-        <h1 class="text-center">{{ $t('dustBalanceDisplay.greater') }}</h1>
-        <div class="boxed">
-          <h2>{{ getGreaterDust() }}</h2>
-        </div>
-      </div>
-      <div v-if="rarities.includes(Rarity.RARE)" class="dust-container text-center"
-           :class="singleDust ? '' : 'col-lg-2'">
-        <div class="dust">
-          5B: <span class="text-warning text-nowrap">{{ $t('dustBalanceDisplay.powerfulPower') }}</span>
-          <img src="../../assets/dusts/powerfulDust.png" class="w-100 p-4" alt=""/>
-        </div>
-        <h1 class="text-center">{{ $t('dustBalanceDisplay.powerful') }}</h1>
-        <div class="boxed">
-          <h2>{{ getPowerfulDust() }}</h2>
+          <h2 class="m-0">{{ getDustAmount(rarity) }}</h2>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import Vue from 'vue';
 import {mapGetters} from 'vuex';
-import {Rarity} from '@/views/Quests.vue';
+import {DustRarity} from '@/views/Quests.vue';
+import lesserDust from '@/assets/dusts/lesserDust.png';
+import greaterDust from '@/assets/dusts/greaterDust.png';
+import powerfulDust from '@/assets/dusts/powerfulDust.png';
 
 
 export default Vue.extend({
@@ -50,14 +32,14 @@ export default Vue.extend({
     rarities: {
       type: Array,
       default() {
-        return [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE];
+        return [DustRarity.LESSER, DustRarity.GREATER, DustRarity.POWERFUL];
       },
     },
   },
 
   data() {
     return {
-      Rarity
+      DustRarity
     };
   },
 
@@ -66,13 +48,35 @@ export default Vue.extend({
 
     singleDust() {
       return this.rarities.length === 1;
-    }
+    },
   },
-});
+
+  methods: {
+    getDustAmount(rarity: DustRarity) {
+      if (rarity === DustRarity.LESSER) {
+        return this.getLesserDust();
+      } else if (rarity === DustRarity.GREATER) {
+        return this.getGreaterDust();
+      } else if (rarity === DustRarity.POWERFUL) {
+        return this.getPowerfulDust();
+      }
+    },
+
+    getDustIcon(rarity: DustRarity) {
+      if (rarity === DustRarity.LESSER) {
+        return lesserDust;
+      } else if (rarity === DustRarity.GREATER) {
+        return greaterDust;
+      } else if (rarity === DustRarity.POWERFUL) {
+        return powerfulDust;
+      }
+    },
+  }
+})
+;
 </script>
 
 <style scoped>
-
 .dusts-container {
   display: flex;
   flex-wrap: wrap;
@@ -96,5 +100,4 @@ export default Vue.extend({
   border: 1px solid #9e8a57;
   margin: 2em;
 }
-
 </style>

@@ -93,10 +93,6 @@ export default Vue.extend({
     },
   },
 
-  mounted() {
-    this.fetchData();
-  },
-
   components: {
     // Hint,
     // P2EButton
