@@ -8,104 +8,104 @@
       <div class="menu-icons">
         <div class="row-icons">
           <router-link class="menu-icon" v-if="!stakeOnly" :to="{ name: 'plaza'}" exact>
-            <img src="../assets/new-ui/char-icon@2x.png">
+            <img src="../assets/new-ui/new-plaza-icon.png">
             <p>{{ $t("viewLink.character") }}</p>
           </router-link>
 
           <router-link class="menu-icon" v-if="!stakeOnly" :to="{ name: 'blacksmith'}" exact>
-            <img src="../assets/new-ui/3553090_hammer_icon@2x.png">
+            <img src="../assets/new-ui/new-blacksmith-icon.png">
             <p>{{ $t("viewLink.blacksmith") }}</p>
           </router-link>
 
           <router-link class="menu-icon" v-if="!stakeOnly" :to="{ name: 'combat'}" exact>
-            <img src="../assets/new-ui/goblin-head-svgrepo-com@2x.png">
+            <img src="../assets/new-ui/new-combat-icon.png">
             <p>{{ $t("viewLink.combat") }}</p>
           </router-link >
 
           <router-link class="menu-icon" v-if="pvp" :to="{ name: 'pvp'}" exact>
-            <img src="../assets/new-ui/_x31_30_x2C__sword_x2C__fencing_x2C__sports_x2C__weapon-1@2x.png">
+            <img src="../assets/new-ui/new-arena-icon.png">
             <p>{{ $t("viewLink.arena") }}</p>
           </router-link>
 
           <div v-else class="menu-icon disabled-hover">
-            <img src="../assets/new-ui/_x31_30_x2C__sword_x2C__fencing_x2C__sports_x2C__weapon-1@2x.png">
+            <img src="../assets/new-ui/new-arena-icon.png">
             <p>{{ $t("viewLink.arena") }}</p>
           </div>
         </div>
 
         <div class="row-icons">
           <router-link class="menu-icon" v-if="!stakeOnly && raid" :to="{ name: 'raid'}" exact>
-            <img src="../assets/new-ui/noun-dragon-head-2602075@2x.png">
+            <img src="../assets/new-ui/new-raid-icon.png">
             <p>{{ $t("viewLink.raid") }}</p>
           </router-link>
 
           <div v-if="!raid" class="menu-icon disabled-hover">
-            <img src="../assets/new-ui/noun-dragon-head-2602075@2x.png">
+            <img src="../assets/new-ui/new-raid-icon.png">
             <p>{{ $t("viewLink.raid") }}</p>
           </div>
 
           <router-link class="menu-icon" v-if="quests" :to="{ name: 'quests'}" exact>
-            <img src="../assets/new-ui/Teleport@2x.png" />
+            <img src="../assets/new-ui/new-quests-icon.png" />
             <p>{{ $t("viewLink.quests") }}</p>
             <hint v-if="!supportsQuests" class="hint" :text="$t('viewLink.functionalityNotSupportedTooltip')"/>
           </router-link>
 
           <div v-else class="menu-icon disabled-hover">
-            <img src="../assets/new-ui/Teleport@2x.png">
+            <img src="../assets/new-ui/new-quests-icon.png">
             <p>{{ $t("viewLink.quests") }}</p>
           </div>
 
           <a class="menu-icon" v-if="!stakeOnly && market" href="https://bazaar.market" target="_blank">
-            <img src="../assets/new-ui/balance@2x.png">
+            <img src="../assets/new-ui/new-bazaar-icon.png">
             <p>{{ $t("viewLink.bazaar") }}</p>
           </a>
 
           <div v-if="!market" class="menu-icon disabled-hover">
-            <img src="../assets/new-ui/balance@2x.png">
+            <img src="../assets/new-ui/new-bazaar-icon.png">
             <p>{{ $t("viewLink.bazaar") }}</p>
           </div>
 
           <router-link class="menu-icon" :to="{ name: 'select-stake-type'}" exact>
-            <img src="../assets/new-ui/2169614_bar_chart_financial_graph_graphic_icon@2x.png">
+            <img src="../assets/new-ui/new-stake-icon.png">
             <p>{{ $t("viewLink.stake") }}</p>
           </router-link>
         </div>
 
         <div class="row-icons">
             <router-link class="menu-icon" :to="{ name: 'treasury'}" exact>
-            <img src="../assets/new-ui/treasure-chest_5233099@2x.png">
+            <img src="../assets/new-ui/new-treasury-icon.png">
             <p>{{ $t("viewLink.treasury") }}</p>
             </router-link>
 
           <router-link class="menu-icon" :to="{ name: 'leaderboard'}" exact>
-            <img src="../assets/new-ui/5378819_crown_games_king_royal_winner_icon@2x.png">
+            <img src="../assets/new-ui/new-leaderboard-icon.png">
             <p>{{ $t("viewLink.leaderboard") }}</p>
           </router-link>
 
            <router-link class="menu-icon" :to="{ name: 'bridge'}" v-if="isBridgeEnabled" exact>
-            <img src="../assets/new-ui/Solid@2x.png">
+            <img src="../assets/new-ui/new-bridge-icon.png">
             <p>{{ $t("viewLink.nftbridge") }}</p>
           </router-link>
 
            <div v-else class="menu-icon disabled-hover">
-            <img src="../assets/new-ui/Solid@2x.png">
+            <img src="../assets/new-ui/new-bridge-icon.png">
             <p>{{ $t("viewLink.nftbridge") }}</p>
           </div>
 
           <a class="menu-icon"  href="https://cryptoblades.gitbook.io/wiki/" target="_blank">
-            <img src="../assets/new-ui/298731_book_icon@2x.png">
+            <img src="../assets/new-ui/new-wiki-icon.png">
             <p>{{ $t("viewLink.wiki") }}</p>
           </a>
         </div>
 
          <div class="row-icons">
             <router-link class="menu-icon" :to="{ name: 'options'}" exact>
-            <img src="../assets/new-ui/211751_gear_icon (2)@2x.png">
+            <img src="../assets/new-ui/new-gear-icon.png">
             <p>{{ $t("viewLink.settings") }}</p>
             </router-link>
 
-            <router-link v-if="hasAdminAccess" class="menu-icon" :to="{ name: 'admin'}" exact>
-            <img src="../assets/new-ui/211751_gear_icon (2)@2x.png">
+            <router-link class="menu-icon" :to="{ name: 'admin'}" exact>
+            <img src="../assets/new-ui/new-gear-icon.png">
             <p>{{ $t("viewLink.admin") }}</p>
             </router-link>
         </div>
