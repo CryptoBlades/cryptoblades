@@ -710,7 +710,7 @@ contract("PvpArena", (accounts) => {
       it("should revert", async () => {
         await expectRevert(
           pvpArena.findOpponent(character1ID, { from: accounts[1] }),
-          "Char not in arena"
+          "Not in arena"
         );
       });
     });
@@ -1245,7 +1245,7 @@ contract("PvpArena", (accounts) => {
 
         await expectRevert(
           pvpArena.prepareDuel(character1ID, { from: accounts[1] }),
-          "In duel queue"
+          "In queue"
         );
       });
     });
