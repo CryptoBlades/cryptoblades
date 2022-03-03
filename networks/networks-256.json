@@ -4529,8 +4529,8 @@
   "build/contracts/SimpleQuests.json": {
     "events": {},
     "links": {},
-    "address": "0x8Da717abd611AA4CF1a13c017ae7f3B86110715C",
-    "transactionHash": "0x4f426bbf8c59b4bb8e2f404f325943ab77813dca7ee2cd913472625e289ff997"
+    "address": "0x188AbFD45709005Adb43A21910B6D68364959a82",
+    "transactionHash": "0xf1ec10917d646c00cbb54937046cd4414f79fd24bbe89d77803fd175d06830ae"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},
