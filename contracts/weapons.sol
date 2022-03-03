@@ -315,11 +315,12 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 stat2 = uint16((metaData >> 48) & 0xFFFF);
         uint16 stat1 = uint16((metaData >> 64) & 0xFFFF);
         uint16 properties = uint16((metaData >> 80) & 0xFFFF);
+        uint24 weaponType = uint24((metaData >> 128) & 0xFFFFFF);
 
         require(lowStarBurnPoints <= 100 && fourStarBurnPoints <= 25 &&  fiveStarBurnPoints <= 10);
 
         if(tokenID == 0){
-            tokenID = performMintWeapon(minter, 0, properties, stat1, stat2, stat3, 0);
+            tokenID = performMintWeapon(minter, weaponType, properties, stat1, stat2, stat3, 0);
         }
         else {
             Weapon storage wp = tokens[tokenID];
