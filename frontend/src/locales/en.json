@@ -685,6 +685,12 @@
       "KNIGHT": "Knight",
       "KING": "King"
     },
+    "nftStatus": {
+      "AVAILABLE": "Available",
+      "IN_ARENA": "In arena",
+      "IN_RAID": "In raid",
+      "BUSY": "Busy"
+    },
     "tier": "Tier",
     "level": "Level {level}",
     "questsTitle": "Quests",

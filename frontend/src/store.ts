@@ -3689,6 +3689,15 @@ export function createStore(web3: Web3) {
         } as Quest;
       },
 
+      async getCharacterBusyStatus({state}, {characterId}) {
+        const { Characters } = state.contracts();
+        if(!Characters || !state.defaultAccount) return;
+
+        const NFTVAR_BUSY = await Characters.methods.NFTVAR_BUSY().call(defaultCallOptions(state));
+
+        return await Characters.methods.getNftVar(characterId, NFTVAR_BUSY).call(defaultCallOptions(state));
+      },
+
       async getQuestTierChances({state}, {tier}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
