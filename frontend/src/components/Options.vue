@@ -104,7 +104,7 @@
             <p>{{ $t("viewLink.settings") }}</p>
             </router-link>
 
-            <router-link class="menu-icon" :to="{ name: 'admin'}" exact>
+            <router-link v-if="hasAdminAccess" class="menu-icon" :to="{ name: 'admin'}" exact>
             <img src="../assets/new-ui/new-gear-icon.png">
             <p>{{ $t("viewLink.admin") }}</p>
             </router-link>
