@@ -11738,7 +11738,7 @@
           {
             "contract": "AccessControlUpgradeable",
             "label": "_roles",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)46206_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)46218_storage)",
             "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
           },
           {
@@ -11750,7 +11750,7 @@
           {
             "contract": "NFTStorage",
             "label": "weapons",
-            "type": "t_contract(Weapons)45759",
+            "type": "t_contract(Weapons)45771",
             "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\NFTStorage.sol:27"
           },
           {
@@ -11798,7 +11798,7 @@
           {
             "contract": "NFTStorage",
             "label": "storedItems",
-            "type": "t_mapping(t_address,t_mapping(t_address,t_struct(UintSet)52452_storage))",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_struct(UintSet)52464_storage))",
             "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\NFTStorage.sol:37"
           },
           {
@@ -11810,7 +11810,7 @@
           {
             "contract": "NFTStorage",
             "label": "allStoredItems",
-            "type": "t_mapping(t_address,t_struct(UintSet)52452_storage)",
+            "type": "t_mapping(t_address,t_struct(UintSet)52464_storage)",
             "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\NFTStorage.sol:41"
           },
           {
@@ -11870,7 +11870,7 @@
           {
             "contract": "NFTStorage",
             "label": "supportedTokenTypes",
-            "type": "t_struct(AddressSet)52331_storage",
+            "type": "t_struct(AddressSet)52343_storage",
             "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\NFTStorage.sol:84"
           },
           {
@@ -11882,7 +11882,7 @@
           {
             "contract": "NFTStorage",
             "label": "receivedNFTs",
-            "type": "t_mapping(t_address,t_struct(UintSet)52452_storage)",
+            "type": "t_mapping(t_address,t_struct(UintSet)52464_storage)",
             "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\NFTStorage.sol:114"
           },
           {
@@ -11912,7 +11912,7 @@
           {
             "contract": "NFTStorage",
             "label": "_supportedChains",
-            "type": "t_struct(UintSet)52452_storage",
+            "type": "t_struct(UintSet)52464_storage",
             "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\NFTStorage.sol:122"
           },
           {
@@ -11971,7 +11971,7 @@
           }
         ],
         "types": {
-          "t_contract(Weapons)45759": {
+          "t_contract(Weapons)45771": {
             "label": "contract Weapons"
           },
           "t_contract(Characters)28729": {
@@ -11995,25 +11995,25 @@
           "t_bool": {
             "label": "bool"
           },
-          "t_mapping(t_address,t_mapping(t_address,t_struct(UintSet)52452_storage))": {
+          "t_mapping(t_address,t_mapping(t_address,t_struct(UintSet)52464_storage))": {
             "label": "mapping(address => mapping(address => struct EnumerableSet.UintSet))"
           },
           "t_address": {
             "label": "address"
           },
-          "t_mapping(t_address,t_struct(UintSet)52452_storage)": {
+          "t_mapping(t_address,t_struct(UintSet)52464_storage)": {
             "label": "mapping(address => struct EnumerableSet.UintSet)"
           },
-          "t_struct(UintSet)52452_storage": {
+          "t_struct(UintSet)52464_storage": {
             "label": "struct EnumerableSet.UintSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)52066_storage"
+                "type": "t_struct(Set)52078_storage"
               }
             ]
           },
-          "t_struct(Set)52066_storage": {
+          "t_struct(Set)52078_storage": {
             "label": "struct EnumerableSet.Set",
             "members": [
               {
@@ -12104,12 +12104,12 @@
           "t_mapping(t_uint256,t_uint256)": {
             "label": "mapping(uint256 => uint256)"
           },
-          "t_struct(AddressSet)52331_storage": {
+          "t_struct(AddressSet)52343_storage": {
             "label": "struct EnumerableSet.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)52066_storage"
+                "type": "t_struct(Set)52078_storage"
               }
             ]
           },
@@ -12177,15 +12177,15 @@
           "t_contract(Shields)38379": {
             "label": "contract Shields"
           },
-          "t_mapping(t_bytes32,t_struct(RoleData)46206_storage)": {
+          "t_mapping(t_bytes32,t_struct(RoleData)46218_storage)": {
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
           },
-          "t_struct(RoleData)46206_storage": {
+          "t_struct(RoleData)46218_storage": {
             "label": "struct AccessControlUpgradeable.RoleData",
             "members": [
               {
                 "label": "members",
-                "type": "t_struct(AddressSet)49401_storage"
+                "type": "t_struct(AddressSet)49413_storage"
               },
               {
                 "label": "adminRole",
@@ -12193,16 +12193,16 @@
               }
             ]
           },
-          "t_struct(AddressSet)49401_storage": {
+          "t_struct(AddressSet)49413_storage": {
             "label": "struct EnumerableSetUpgradeable.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)49136_storage"
+                "type": "t_struct(Set)49148_storage"
               }
             ]
           },
-          "t_struct(Set)49136_storage": {
+          "t_struct(Set)49148_storage": {
             "label": "struct EnumerableSetUpgradeable.Set",
             "members": [
               {
