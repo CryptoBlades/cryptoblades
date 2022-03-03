@@ -3625,7 +3625,7 @@
     },
     "links": {},
     "address": "0x7EB3237Ba499A05e8915870AeA5c897048F709b1",
-    "transactionHash": "0xfc057a8fe43e2b60a722bec327ad19ea05186eeb12fdd418077724e1d6d0c1d5"
+    "transactionHash": "0x36682fb1d4cec90a0b8c1973c9b13db50d1c0e49b7833efebfb2c74272961cc9"
   },
   "build/contracts/PartnerVault.json": {
     "events": {
@@ -4529,8 +4529,8 @@
   "build/contracts/SimpleQuests.json": {
     "events": {},
     "links": {},
-    "address": "0x8Da717abd611AA4CF1a13c017ae7f3B86110715C",
-    "transactionHash": "0x4f426bbf8c59b4bb8e2f404f325943ab77813dca7ee2cd913472625e289ff997"
+    "address": "0x188AbFD45709005Adb43A21910B6D68364959a82",
+    "transactionHash": "0xf1ec10917d646c00cbb54937046cd4414f79fd24bbe89d77803fd175d06830ae"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},
@@ -5458,6 +5458,6 @@
     },
     "links": {},
     "address": "0xA4DEB2aC411f8BaA1F9A353Db0c80ABF4f3AfB8a",
-    "transactionHash": "0x6f83b8eda918530cbe2dcecd315b7de1669da65dc0cdd35a2f3b7be031523ff8"
+    "transactionHash": "0xe2bb9a42b94c7bf963e2266df3515befe96d1029d05ade73974ddb472cce56dd"
   }
 }
