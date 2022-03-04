@@ -61,7 +61,13 @@
     "Cake Monster": {
       "logo": "cakemonster.png",
       "details": "Cake Monster is a ultra-deflationary, automated dividend yield, and meme token. It offers a multitude of unique DeFi features aimed at building a flexible and multifaceted reward system for all participants without compromising the sustainability or security of the protocol ecosystem.",
-      "website": "https://cake.monster/"
+      "website": "https://cake.monster/",
+      "note": "This token has a 5% fee (2.5% fee, 2.5% burned) upon claiming"
+    },
+    "Spintop": {
+      "logo": "spintop.png",
+      "details": "Spintop's vision is to create a single platform that unites the scattered blockchain gaming world. Designed as a dynamic GameFi ecosystem where the community of players, investors and game developers can discover and play games, trade their tokens, and share NFT’s, Spintop has the tools you need to experience blockchain gaming to its fullest.",
+      "website": "https://spintop.network/"
     }
   }
 }
