@@ -1,7 +1,7 @@
 <template>
   <b-modal v-if="quest" class="centered-modal" :visible="showModal" button-size="lg" no-close-on-backdrop scrollable
            :title="$t('quests.turnIn')" size="xl" @close.prevent="resetTokens"
-           @cancel.prevent="resetTokens"
+           @cancel.prevent="resetTokens" @hide.prevent="resetTokens"
            :ok-title="$t('quests.submit')" :busy="isLoading"
            :ok-disabled="isSubmitDisabled()"
            @ok.prevent="quest.requirementType === RequirementType.DUST
