@@ -97,6 +97,7 @@ export default {
         name: '',
         level: null,
         power: null,
+        fullPower: null,
         rank: null,
         element: null,
       },
@@ -118,7 +119,8 @@ export default {
         name: '',
         level: null,
         rank: null,
-        power: null
+        power: null,
+        fullPower: null,
       },
       opponentActiveWeaponWithInformation: {
         weaponId: null,
@@ -153,6 +155,7 @@ export default {
       'getSeasonDuration',
       'getCharacterLevel',
       'getCharacterPower',
+      'getCharacterFullPower',
       'getRankingPointsByCharacter',
       'getRankingsPoolByTier',
       'getTierTopCharacters',
@@ -178,6 +181,8 @@ export default {
       this.isCharacterInArena = true;
 
       const fighter = formatFighter(await this.getFighterByCharacter(this.currentCharacterId));
+
+      this.characterInformation.fullPower = await this.getCharacterFullPower(this.currentCharacterId);
 
       this.activeWeaponWithInformation = {
         weaponId: fighter.weaponID,
@@ -227,6 +232,8 @@ export default {
 
       this.opponentInformation.power = await this.getCharacterPower(defenderId);
 
+      this.opponentInformation.fullPower = await this.getCharacterFullPower(defenderId);
+
       const fighter = formatFighter(await this.getFighterByCharacter(defenderId));
 
       this.opponentActiveWeaponWithInformation = {
@@ -249,7 +256,8 @@ export default {
         name: '',
         level: null,
         rank: null,
-        power: null
+        power: null,
+        fullPower: null
       };
 
       this.opponentActiveWeaponWithInformation = {
@@ -432,6 +440,8 @@ export default {
       if (this.isCharacterInArena) {
         const fighter = formatFighter(await this.getFighterByCharacter(this.currentCharacterId));
 
+        this.characterInformation.fullPower = await this.getCharacterFullPower(this.currentCharacterId);
+
         this.activeWeaponWithInformation = {
           weaponId: fighter.weaponID,
           information: await this.getWeaponInformation(fighter.weaponID)
@@ -552,6 +562,8 @@ export default {
 
         if (this.isCharacterInArena) {
           const fighter = formatFighter(await this.getFighterByCharacter(value));
+
+          this.characterInformation.fullPower = await this.getCharacterFullPower(value);
 
           this.activeWeaponWithInformation = {
             weaponId: fighter.weaponID,

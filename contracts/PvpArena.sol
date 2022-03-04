@@ -119,6 +119,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     uint256 public duelOffsetCost;
     address payable public pvpBotAddress;
+
+    mapping(uint256 => uint256) public specialWeaponRerollTimestamp;
     
     event DuelFinished(
         uint256 indexed attacker,
@@ -146,7 +148,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterInArena(uint256 characterID) internal view {
-        require(isCharacterInArena[characterID], "Char not in arena");
+        require(isCharacterInArena[characterID], "Not in arena");
     }
 
     modifier characterWithinDecisionTime(uint256 characterID) {
@@ -176,7 +178,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterNotInDuel(uint256 characterID) internal view {
-        require(!isCharacterInDuel(characterID), "In duel queue");
+        require(!isCharacterInDuel(characterID), "In queue");
     }
 
     modifier isOwnedCharacter(uint256 characterID) {
@@ -376,11 +378,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         _assignOpponent(characterID, tier);
 
-        skillToken.transferFrom(
-            msg.sender,
-            address(this),
-            getDuelCostByTier(tier).mul(reRollFeePercent).div(100)
-        );
+        uint256 weaponID = fighterByCharacter[characterID].weaponID;
+        if(weapons.getWeaponType(weaponID) > 0 && specialWeaponRerollTimestamp[weaponID] < block.timestamp) {
+            specialWeaponRerollTimestamp[weaponID] = block.timestamp + 24 hours;
+        }
+        else {
+            skillToken.transferFrom(
+                msg.sender,
+                address(this),
+                getDuelCostByTier(tier).mul(reRollFeePercent).div(100)
+            );
+        }
     }
 
     /// @dev adds a character to the duel queue
@@ -1001,6 +1009,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint24)
     {
+        uint24 playerFightPower = getCharacterPower(character.ID);
+
         Fighter memory fighter = fighterByCharacter[character.ID];
         uint256 weaponID = fighter.weaponID;
         uint256 seed = randoms.getRandomSeedUsingHash(
@@ -1008,18 +1018,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             blockhash(block.number - 1)
         );
 
-        int128 bonusShieldStats;
-        if (fighter.useShield) {
-            // we set bonus shield stats as 0.2
-            bonusShieldStats = _getShieldStats(character.ID).sub(1).mul(20).div(100);
-        }
-
-        (
-            ,
-            int128 weaponMultFight,
-            uint24 weaponBonusPower,
-            uint8 weaponTrait
-        ) = weapons.getFightData(weaponID, character.trait);
+        uint8 weaponTrait = weapons.getTrait(weaponID);
 
         int128 playerTraitBonus = getPVPTraitBonusAgainst(
             character.trait,
@@ -1027,13 +1026,41 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             opponentTrait
         );
 
-        uint24 playerFightPower = Common.getPlayerPowerBase100(character.basePower, (weaponMultFight.add(bonusShieldStats)), weaponBonusPower);
         uint256 playerPower = RandomUtil.plusMinus30PercentSeeded(
             playerFightPower,
             seed
         );
 
         return uint24(playerTraitBonus.mulu(playerPower));
+    }
+
+    function getCharacterPower(uint256 characterID)
+        public
+        view
+        characterInArena(characterID)
+        returns (uint24) 
+    {
+        int128 bonusShieldStats;
+        
+        (
+            ,
+            int128 weaponMultFight,
+            uint24 weaponBonusPower,
+            
+        ) = weapons.getFightData(fighterByCharacter[characterID].weaponID, characters.getTrait(characterID));
+
+        if (fighterByCharacter[characterID].useShield) {
+            // we set bonus shield stats as 0.2
+            // Note: hardcoded - copied in _getCharacterPowerRoll
+            bonusShieldStats = _getShieldStats(characterID).sub(1).mul(20).div(100);
+        }
+
+        return (   
+            Common.getPlayerPowerBase100(
+                Common.getPowerAtLevel(characters.getLevel(characterID)),
+                (weaponMultFight.add(bonusShieldStats)),
+                weaponBonusPower)
+        );
     }
 
     function getPVPTraitBonusAgainst(
@@ -1045,7 +1072,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         int128 fightTraitBonus = game.fightTraitBonus();
         int128 charTraitFactor = ABDKMath64x64.divu(50, 100);
         if (characterTrait == weaponTrait) {
-            traitBonus = traitBonus.add(fightTraitBonus);
+            traitBonus = traitBonus.add(fightTraitBonus.mul(3));
         }
 
         // We apply 50% of char trait bonuses because they are applied twice (once per fighter)

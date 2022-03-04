@@ -50,7 +50,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import {isValidWeb3Address} from '@/utils/common';
+import {isValidWeb3Address} from '../../../utils/common';
 
 interface StoreMappedActions {
   incrementDustSupplies(payload: { playerAddress: string, amountLB: number, amount4B: number, amount5B: number }): Promise<void>;
@@ -206,7 +206,4 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.gap-3 {
-  gap: 1rem;
-}
 </style>

@@ -1,9 +1,9 @@
 <template>
   <div class="d-flex flex-column align-items-start gap-2 p-1">
-    <h2 class="m-0">{{ $t('admin.grantGameAdminRole') }}</h2>
+    <h2 class="m-0">{{ $t('admin.revokeGivenRole', {role: roleName}) }}</h2>
     <b-form-input v-model="walletAddress" :placeholder="$t('admin.pasteInValidWalletAddress')"/>
     <b-button variant="primary" @click="onSubmit" :disabled="!isValidWeb3Address(walletAddress) || isLoading">
-      {{ $t('admin.grantRole') }}
+      {{ $t('admin.revokeRole') }}
     </b-button>
   </div>
 </template>
@@ -16,7 +16,7 @@ import {PropType} from 'vue/types/options';
 import {isValidWeb3Address} from '@/utils/common';
 
 interface StoreMappedActions {
-  grantGameAdminRole(payload: { walletAddress: string, contract: Contract<any> }): Promise<void>;
+  revokeRole(payload: { walletAddress: string, contract: Contract<any>, roleMethod: any }): Promise<void>;
 }
 
 interface Data {
@@ -30,6 +30,14 @@ export default Vue.extend({
       type: Object as PropType<Contract<any>>,
       required: true,
     },
+    roleMethod: {
+      type: Function as PropType<() => Promise<void>>,
+      required: true,
+    },
+    roleName: {
+      type: String as PropType<string>,
+      required: true,
+    },
   },
 
   data() {
@@ -41,11 +49,15 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['grantGameAdminRole']) as StoreMappedActions,
+    ...mapActions(['revokeRole']) as StoreMappedActions,
     async onSubmit() {
       try {
         this.isLoading = true;
-        await this.grantGameAdminRole({walletAddress: this.walletAddress, contract: this.contract});
+        await this.revokeRole({
+          walletAddress: this.walletAddress,
+          contract: this.contract,
+          roleMethod: this.roleMethod
+        });
       } catch (e) {
         console.error(e);
       } finally {
@@ -59,7 +71,4 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.gap-2 {
-  gap: 0.5rem;
-}
 </style>
