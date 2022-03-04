@@ -39,6 +39,7 @@ import { abi as junkAbi } from '../../build/contracts/Junk.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 import { abi as simpleQuestsAbi, networks as simpleQuestsNetworks } from '../../build/contracts/SimpleQuests.json';
+import { abi as partnerVaultAbi} from '../../build/contracts/PartnerVault.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
 import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/PvpArena.json';
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
@@ -55,6 +56,7 @@ import { abi as kingStakingRewardsUpgradeable90Abi,
 import { abi as kingStakingRewardsUpgradeable180Abi,
   networks as kingStakingRewardsUpgradeable180Networks }
   from '../../build/contracts/KingStakingRewardsUpgradeable180.json';
+import { abi as specialWeaponsManagerAbi } from '../../build/contracts/SpecialWeaponsManager.json';
 import config from '../app-config.json';
 
 
@@ -80,6 +82,7 @@ interface MarketContracts {
 
 interface QuestsContracts {
   SimpleQuests?: Contracts['SimpleQuests'];
+  PartnerVault?: Contracts['PartnerVault'];
 }
 
 interface Config {
@@ -108,7 +111,7 @@ export type Networks = Partial<Record<string, { address: string }>>;
 type Abi = any[];
 
 const stakingContractAddressesFromBuild: Partial<Record<StakeType, Partial<StakingContractEntry>>> = {
-  skill: {
+  skill2: {
     stakingRewardsAddress: (skillStakingRewardsNetworks as Networks)[networkId]?.address,
     stakingTokenAddress: (skillTokenNetworks as Networks)[networkId]?.address
   },
@@ -244,6 +247,12 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
 
+  let SpecialWeaponsManager;
+  const specialWeaponsManagerAddr = await CryptoBlades.methods.specialWeaponsManager().call();
+  if(specialWeaponsManagerAddr) {
+    SpecialWeaponsManager = new web3.eth.Contract(specialWeaponsManagerAbi as Abi, specialWeaponsManagerAddr);
+  }
+
   const garrisonAddr = await Characters.methods.garrison().call();
   const Garrison = new web3.eth.Contract(garrisonAbi as Abi, garrisonAddr);
 
@@ -332,7 +341,12 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   if(quests && currentChainSupportsQuests()) {
     const simpleQuestsContractAddr = getConfigValue('VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS') || (simpleQuestsNetworks as Networks)[networkId]!.address;
 
-    questsContracts.SimpleQuests = new web3.eth.Contract(simpleQuestsAbi as Abi, simpleQuestsContractAddr);
+    const simpleQuests = new web3.eth.Contract(simpleQuestsAbi as Abi, simpleQuestsContractAddr);
+    questsContracts.SimpleQuests = simpleQuests;
+    if (simpleQuests.methods.partnerVault) {
+      const partnerVaultContractAddr = await simpleQuests.methods.partnerVault().call();
+      questsContracts.PartnerVault = new web3.eth.Contract(partnerVaultAbi as Abi, partnerVaultContractAddr);
+    }
   }
 
   const pvpContracts: PvPContracts = {};
@@ -392,6 +406,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     BurningManager,
     KingStakingRewardsUpgradeable,
     KingStakingRewardsUpgradeable90,
-    KingStakingRewardsUpgradeable180
+    KingStakingRewardsUpgradeable180,
+    SpecialWeaponsManager
   };
 }

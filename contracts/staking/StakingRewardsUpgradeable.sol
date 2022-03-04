@@ -40,9 +40,9 @@ contract StakingRewardsUpgradeable is
     mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public rewards;
 
-    uint256 private _totalSupply;
-    mapping(address => uint256) private _balances;
-    mapping(address => uint256) private _stakeTimestamp;
+    uint256 internal _totalSupply;
+    mapping(address => uint256) internal _balances;
+    mapping(address => uint256) internal _stakeTimestamp;
 
     // used only by the SKILL-for-SKILL staking contract
     CryptoBlades internal __game;
@@ -150,6 +150,7 @@ contract StakingRewardsUpgradeable is
 
     function stake(uint256 amount)
         external
+        virtual
         override
         normalMode
         nonReentrant
@@ -162,6 +163,7 @@ contract StakingRewardsUpgradeable is
 
     function withdraw(uint256 amount)
         public
+        virtual
         override
         normalMode
         nonReentrant
@@ -180,6 +182,7 @@ contract StakingRewardsUpgradeable is
 
     function getReward()
         public
+        virtual
         override
         normalMode
         nonReentrant
@@ -200,12 +203,12 @@ contract StakingRewardsUpgradeable is
         }
     }
 
-    function exit() external override normalMode {
+    function exit() external virtual override normalMode {
         withdraw(_balances[msg.sender]);
         getReward();
     }
 
-    function recoverOwnStake() external failsafeMode {
+    function recoverOwnStake() external virtual failsafeMode {
         uint256 amount = _balances[msg.sender];
         if (amount > 0) {
             _totalSupply = _totalSupply.sub(amount);

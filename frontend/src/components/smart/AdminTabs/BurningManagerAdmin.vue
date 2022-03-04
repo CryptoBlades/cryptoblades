@@ -17,10 +17,10 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import {isValidWeb3Address} from '@/utils/common';
+import {isValidWeb3Address} from '../../../utils/common';
 
 interface StoreMappedActions {
-  giveawaySoul(payload: { user: string, soulAmount: number }): Promise<void>;
+  giveAwaySoul(payload: { user: string, soulAmount: number }): Promise<void>;
 }
 
 interface GiveawaySoulMint {
@@ -45,7 +45,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['giveawaySoul']) as StoreMappedActions,
+    ...mapActions(['giveAwaySoul']) as StoreMappedActions,
 
     mintGiveawaySoulDisabled(): boolean {
       return !isValidWeb3Address(this.giveawaySoulMint.user)
@@ -60,7 +60,7 @@ export default Vue.extend({
       }
       try {
         this.isLoading = true;
-        await this.giveawaySoul({
+        await this.giveAwaySoul({
           user: this.giveawaySoulMint.user,
           soulAmount: this.giveawaySoulMint.soulAmount,
         });
@@ -81,7 +81,4 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.gap-3 {
-  gap: 1rem;
-}
 </style>

@@ -20,15 +20,8 @@
         </b-form-select-option>
       </b-form-select>
     </b-form>
-    <div class="d-flex gap-3 flex-wrap p-3">
-      <h3 v-if="isLoading">
-        <i class="fas fa-spinner fa-spin"/>
-        {{ $t('quests.loading') }}
-      </h3>
-      <h3 v-else-if="questTemplates.length === 0 && templatesTier !== undefined"> {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
-      <QuestDetails v-else v-for="(questTemplate, index) in questTemplates" :key="index" :quest="questTemplate"
-                    :isQuestTemplate="true" :questIndex="index" :refreshQuestTemplates="refreshQuestTemplates"/>
-    </div>
+    <QuestsList v-if="templatesTier !== undefined" :tier="promoQuestTemplates ? templatesTier + 10 : templatesTier"
+                deletable/>
   </div>
 </template>
 
@@ -36,10 +29,14 @@
 import Vue from 'vue';
 import {mapActions} from 'vuex';
 import {Quest, Rarity} from '@/views/Quests.vue';
-import QuestDetails from '@/components/smart/QuestDetails.vue';
+import QuestsList from './QuestsList.vue';
 
 interface StoreMappedActions {
   getQuestTemplates(payload: { tier: number }): Promise<Quest[]>;
+
+  getQuestDeadline(payload: { questID: number }): Promise<number>;
+
+  getQuestSupply(payload: { questID: number }): Promise<number>;
 }
 
 interface Data {
@@ -52,7 +49,7 @@ interface Data {
 
 export default Vue.extend({
 
-  components: {QuestDetails},
+  components: {QuestsList},
 
   data() {
     return {
@@ -66,7 +63,11 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['getQuestTemplates']) as StoreMappedActions,
+    ...mapActions([
+      'getQuestTemplates',
+      'getQuestDeadline',
+      'getQuestSupply',
+    ]) as StoreMappedActions,
 
     async refreshQuestTemplates() {
       if (this.templatesTier === undefined) return;
@@ -77,6 +78,10 @@ export default Vue.extend({
           this.questTemplates = await this.getQuestTemplates({tier: promoTier});
         } else {
           this.questTemplates = await this.getQuestTemplates({tier: this.templatesTier});
+        }
+        for (const quest of this.questTemplates) {
+          quest.deadline = +await this.getQuestDeadline({questID: quest.id});
+          quest.supply = +await this.getQuestSupply({questID: quest.id});
         }
       } finally {
         this.isLoading = false;
@@ -95,7 +100,4 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.gap-3 {
-  gap: 1rem;
-}
 </style>

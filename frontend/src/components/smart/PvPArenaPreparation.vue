@@ -237,6 +237,7 @@ export default {
         name: '',
         level: null,
         power: null,
+        fullPower: null,
         rank: null,
         element: null,
       }

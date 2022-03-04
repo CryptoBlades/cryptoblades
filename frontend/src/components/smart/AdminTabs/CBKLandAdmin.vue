@@ -16,7 +16,7 @@
     </div>
     <h2 class="mt-3">{{ $t('admin.cbkLand.updateChunkIdentifier') }}</h2>
     <div class="d-flex align-items-center gap-3">
-      <b-form-input v-model="identifiers" :placeholder="$t('admin.cbkLand.identifiers')"/>
+      <b-form-input v-model="identifiers" :placeholder="$t('admin.identifiers')"/>
       <b-form-input v-model="updateChunkIdentifier" :placeholder="$t('admin.cbkLand.updateChunkIdentifier')"
                     type="number" number
                     min="1"/>
@@ -30,7 +30,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import {isValidWeb3Address} from '@/utils/common';
+import {isValidWeb3Address} from '../../../utils/common';
 
 interface StoreMappedActions {
   mintCBKLand(payload: { minter: string, tier: number, chunkId: number, reseller: string }): Promise<void>;
@@ -136,7 +136,6 @@ export default Vue.extend({
       } finally {
         this.isLoading = false;
       }
-
     },
 
     clearInputs() {
@@ -155,7 +154,4 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.gap-3 {
-  gap: 1rem;
-}
 </style>
