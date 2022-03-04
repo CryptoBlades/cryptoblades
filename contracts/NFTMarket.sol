@@ -645,6 +645,7 @@ contract NFTMarket is
         while(typeCount > 0) {
             IERC721 tokenAddress = IERC721(listedTokenTypes.at(typeCount - 1));
             discardedCount += discardSellerListingsOfToken(_seller, tokenAddress);
+            --typeCount;
         }
     }
 
