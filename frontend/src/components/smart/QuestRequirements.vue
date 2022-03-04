@@ -74,6 +74,7 @@ export default Vue.extend({
         if (!this.quest?.requirementExternalAddress) return '';
         return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].name;
       } else if (this.quest.requirementType === RequirementType.DUST) {
+        if(!this.quest.requirementRarity) return '';
         return i18n.t(`quests.dustRarityType.${DustRarity[this.quest.requirementRarity]}`).toString() + ' ' +
           i18n.t(`quests.requirementType.${RequirementType[this.quest.requirementType]}`).toString();
       } else {
