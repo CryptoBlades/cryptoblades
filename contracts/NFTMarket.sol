@@ -593,7 +593,13 @@ contract NFTMarket is
 
         _updateListedTokenTypes(_tokenAddress);
 
-        _tokenAddress.safeTransferFrom(address(this), address(0), _id);
+        uint256[] memory burnIds = new uint256[](1);
+        burnIds[0] = _id;
+        if(address(_tokenAddress) == address(weapons)) {
+            weapons.burnWithoutDust(burnIds);
+        } else {
+            revert('Unsupported token for burning');
+        }
 
         emit DiscardedListing(seller, _tokenAddress, _id);
     }
