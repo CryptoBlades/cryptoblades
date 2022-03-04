@@ -146,6 +146,11 @@ contract NFTMarket is
         IERC721 indexed nftAddress,
         uint256 indexed nftID
     );
+    event DiscardedListing(
+        address indexed seller,
+        IERC721 indexed nftAddress,
+        uint256 indexed nftID
+    );
     event PurchasedListing(
         address indexed buyer,
         address seller,
@@ -577,6 +582,65 @@ contract NFTMarket is
         emit CancelledListing(msg.sender, _tokenAddress, _id);
     }
 
+    function discardListing(IERC721 _tokenAddress, uint256 _id)
+        public restricted
+        isListed(_tokenAddress, _id)
+    {
+        address seller = listings[address(_tokenAddress)][_id].seller;
+
+        delete listings[address(_tokenAddress)][_id];
+        listedTokenIDs[address(_tokenAddress)].remove(_id);
+
+        _updateListedTokenTypes(_tokenAddress);
+
+        _tokenAddress.safeTransferFrom(address(this), address(0), _id);
+
+        emit DiscardedListing(seller, _tokenAddress, _id);
+    }
+
+    function discardSellerListingsFromTokenSlice(address _seller, IERC721 _tokenAddress, uint256 start, uint256 length)
+        public restricted
+        returns (uint256 discardedCount)
+    {
+        EnumerableSet.UintSet storage listedTokens = listedTokenIDs[address(_tokenAddress)];
+
+        uint256 index = 0;
+        uint256 stop = start + length;
+        if(stop > listedTokens.length())
+            stop = listedTokens.length();
+
+        // Enumerate backwards to allow removal while iterating.
+        while(stop > start) {
+            uint256 id = listedTokens.at(stop - 1);
+            Listing memory listing = listings[address(_tokenAddress)][id];
+            if(listing.seller == _seller) {
+                discardListing(_tokenAddress, id);
+                ++discardedCount;
+            }
+            --stop;
+        }
+    }
+
+    function discardSellerListingsOfToken(address _seller, IERC721 _tokenAddress)
+        public restricted
+        returns (uint256 discardedCount)
+    {
+        return discardSellerListingsFromTokenSlice(_seller, _tokenAddress, 0, getNumberOfListingsForToken(_tokenAddress));
+    }
+
+    function discardSellerListings(address _seller)
+        public restricted
+        returns (uint256 discardedCount)
+    {
+        // Enumerate backwards to allow removal while iterating.
+        uint256 typeCount = listedTokenTypes.length();
+        //EnumerableSet.AddressSet storage set = listedTokenTypes;
+        while(typeCount > 0) {
+            IERC721 tokenAddress = IERC721(listedTokenTypes.at(typeCount - 1));
+            discardedCount += discardSellerListingsOfToken(_seller, tokenAddress);
+        }
+    }
+
     function purchaseListing(
         IERC721 _tokenAddress,
         uint256 _id,
@@ -702,6 +766,9 @@ contract NFTMarket is
 
     function setUserBan(address user, bool to) external restricted {
         isUserBanned[user] = to;
+        if(to) {
+            discardSellerListings(user);
+        }
     }
 
     function setUserBans(address[] calldata users, bool to) external restricted {
