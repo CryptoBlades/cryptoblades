@@ -595,7 +595,9 @@ contract NFTMarket is
 
         uint256[] memory burnIds = new uint256[](1);
         burnIds[0] = _id;
-        if(address(_tokenAddress) == address(weapons)) {
+        if(address(_tokenAddress) == address(characters)) {
+            characters.burnWithoutSoul(burnIds);
+        } else if(address(_tokenAddress) == address(weapons)) {
             weapons.burnWithoutDust(burnIds);
         } else {
             revert('Unsupported token for burning');
