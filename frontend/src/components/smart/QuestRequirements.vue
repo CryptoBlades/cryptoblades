@@ -71,7 +71,7 @@ export default Vue.extend({
   computed: {
     requirementName(): string {
       if (this.quest.requirementType === RequirementType.EXTERNAL || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
-        if (!this.quest?.requirementExternalAddress) return '';
+        if (this.quest?.requirementExternalAddress === undefined) return '';
         return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].name;
       } else if (this.quest.requirementType === RequirementType.DUST) {
         return i18n.t(`quests.dustRarityType.${DustRarity[this.quest.requirementRarity]}`).toString() + ' ' +
