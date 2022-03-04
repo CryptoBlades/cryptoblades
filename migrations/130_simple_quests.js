@@ -32,6 +32,7 @@ module.exports = async function (deployer, network, accounts) {
     const partnerVault = await deployProxy(PartnerVault, [], {deployer});
     await upgradeProxy(Raid1.address, Raid1, {deployer});
     await upgradeProxy(NFTStorage.address, NFTStorage, {deployer});
+    const partnerVault = await deployProxy(PartnerVault, [], {deployer});
     const simpleQuests = await deployProxy(SimpleQuests, [characters.address, weapons.address, junk.address, trinket.address, shields.address, burningManager.address, safeRandoms.address, partnerVault.address], {deployer});
     // TODO: What should be the initial values here?
     // const VAR_COMMON_TIER = 0;
