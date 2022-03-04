@@ -604,7 +604,6 @@ contract NFTMarket is
     {
         EnumerableSet.UintSet storage listedTokens = listedTokenIDs[address(_tokenAddress)];
 
-        uint256 index = 0;
         uint256 stop = start + length;
         if(stop > listedTokens.length())
             stop = listedTokens.length();
