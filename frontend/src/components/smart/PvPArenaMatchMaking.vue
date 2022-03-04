@@ -199,6 +199,7 @@ export default {
         name: '',
         level: null,
         power: null,
+        fullPower: null,
         rank: null,
         element: null
       }
@@ -222,7 +223,8 @@ export default {
         name: '',
         level: null,
         rank: null,
-        power: null
+        power: null,
+        fullPower: null,
       }
     },
     opponentActiveWeaponWithInformation: {
@@ -371,7 +373,7 @@ export default {
       } catch (err) {
         console.log('leave arena error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'Char not in arena', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(err.message, 'Not in arena', i18n.t('pvp.charNotInArena'));
         this.handleErrorMessage(err.message, 'Defender duel in process', i18n.t('pvp.duelInProcess'));
       }
 
@@ -395,7 +397,7 @@ export default {
         this.handleErrorMessage(err.message, 'Already in match', i18n.t('pvp.alreadyInMatch'));
         this.handleErrorMessage(err.message, 'No enemy in tier', i18n.t('pvp.noEnemyInTier'));
         this.handleErrorMessage(err.message, 'Char dueling', i18n.t('pvp.charDueling'));
-        this.handleErrorMessage(err.message, 'Char not in arena', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(err.message, 'Not in arena', i18n.t('pvp.charNotInArena'));
 
         this.loading = false;
         return;
@@ -450,8 +452,8 @@ export default {
 
         if (duelFinishedResult.length) {
           const formattedResult = formatDuelResult(duelFinishedResult[duelFinishedResult.length - 1].returnValues);
-          this.duelResult.defenderPower = this.opponentInformation.power;
-          this.duelResult.attackerPower = this.characterInformation.power;
+          this.duelResult.defenderPower = this.opponentInformation.fullPower;
+          this.duelResult.attackerPower = this.characterInformation.fullPower;
           this.duelResult.result = formattedResult.attackerWon ? 'win' : 'lose';
           this.duelResult.attackerRoll = formattedResult.attackerRoll;
           this.duelResult.defenderRoll = formattedResult.defenderRoll;
@@ -486,7 +488,7 @@ export default {
         console.log('prepare perform duel error: ', err.message);
 
         this.handleErrorMessage(err.message, 'Decision time expired', i18n.t('pvp.decisionTimeExpired'));
-        this.handleErrorMessage(err.message, 'Char in duel queue', i18n.t('pvp.charDueling'));
+        this.handleErrorMessage(err.message, 'In queue', i18n.t('pvp.charDueling'));
         this.handleErrorMessage(err.message, 'Not in match', i18n.t('pvp.notInMatch'));
 
         this.loading = false;

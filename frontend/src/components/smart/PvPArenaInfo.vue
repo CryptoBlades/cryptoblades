@@ -64,9 +64,17 @@
     </ul>
     <ul class="characterAttrsList">
       <li class="characterName">{{ characterInformation.name || '' }}</li>
-      <li>
+      <li v-if="insideArena">
         <span>
           {{$t('pvp.power')}}
+        </span>
+        <span>
+          {{ characterInformation.fullPower }}
+        </span>
+      </li>
+      <li v-else>
+        <span>
+          {{$t('pvp.basePower')}}
         </span>
         <span>
           {{ characterInformation.power }}
@@ -103,6 +111,10 @@ export default {
   },
 
   props: {
+    insideArena: {
+      type: Boolean,
+      default: false,
+    },
     tierRewardsPool: {
       default: null
     },
@@ -121,6 +133,7 @@ export default {
         name: '',
         level: null,
         power: null,
+        fullPower: null,
         rank: null,
         element: null,
       }
