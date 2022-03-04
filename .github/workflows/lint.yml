@@ -41,6 +41,8 @@ jobs:
         run: npm run build -- --all
 
       - run: npm run build:frontend
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
       - name: Deploy testnet frontend
         uses: netlify/actions/cli@6c34c3fcafc69ac2e1d6dbf226560329c6dfc51b
