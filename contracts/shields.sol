@@ -125,11 +125,11 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     function getOwnedBy(address owner) public view returns(uint256[] memory) {
-        uint256[] memory tokens = new uint256[](balanceOf(owner));
-        for(uint256 i = 0; i < tokens.length; i++) {
-            tokens[i] = tokenOfOwnerByIndex(owner, i);
+        uint256[] memory owned_tokens = new uint256[](balanceOf(owner));
+        for(uint256 i = 0; i < owned_tokens.length; i++) {
+            owned_tokens[i] = tokenOfOwnerByIndex(owner, i);
         }
-        return tokens;
+        return owned_tokens;
     }
 
     function getCosmeticsSeed(uint256 id) public view noFreshLookup(id)

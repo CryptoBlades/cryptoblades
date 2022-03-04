@@ -537,7 +537,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     }
 
     // Takes bridgedNFT not meta to avoid stack too deep
-    function _withdrawWeaponFromBridge(uint256 bridgedNFT, uint256 chainId, uint256 sourceId) internal returns (uint256 mintedId) {
+    function _withdrawWeaponFromBridge(uint256 bridgedNFT, uint256 /*chainId*/, uint256 /*sourceId*/) internal returns (uint256 mintedId) {
         // Get any existing mint that has this global id
         mintedId = nftChainIdsToMintId[nftTypeToAddress[NFT_TYPE_WEAPON]][transferInChainId[bridgedNFT]];
 
@@ -569,14 +569,14 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
             }
     }
 
-    function _withdrawShieldFromBridge(uint256 bridgedNFT, uint256 chainId, uint256 sourceId) internal returns (uint256 mintedId) {
+    function _withdrawShieldFromBridge(uint256 bridgedNFT, uint256 /*chainId*/, uint256 /*sourceId*/) internal returns (uint256 mintedId) {
         mintedId = nftChainIdsToMintId[nftTypeToAddress[NFT_TYPE_SHIELD]][transferInChainId[bridgedNFT]];
 
         uint256 seed = transferInSeeds[bridgedNFT];
 
         uint256 meta = transferInsMeta[bridgedNFT];
 
-        uint32 appliedCosmetic = uint32((meta >> 96) & 0xFFFFFFFF);
+        // uint32 appliedCosmetic = uint32((meta >> 96) & 0xFFFFFFFF);
 
          mintedId =
             shields.performMintShieldDetailed(address(this), meta, seed, mintedId);

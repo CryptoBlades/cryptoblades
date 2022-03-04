@@ -745,18 +745,18 @@ contract CBKLandSale is Initializable, AccessControlUpgradeable {
             require(reservedTier == TIER_TWO || reservedTier == TIER_THREE, "NA");
 
             uint256 counter = reservedChunksCounter[reseller];
-            for(uint256 i = counter; i < counter + rcLength; i++) {
-                uint256 cId = reservedChunks[reseller].at(uint256(i % rcLength));
+            for(uint256 j = counter; j < counter + rcLength; j++) {
+                uint256 cId = reservedChunks[reseller].at(uint256(j % rcLength));
                 if(reservedTier == TIER_TWO) { // T2, find a spot with enough population
                     if(chunkT2LandSales[cId] < _allowedLandSalePerChunk) {
                         assignedChunkid = cId;
-                        reservedChunksCounter[reseller] = uint256(i + 1);
+                        reservedChunksCounter[reseller] = uint256(j + 1);
                         break;
                     }
                 }
                 else if(!takenT3Chunks.contains(cId)) { // This is a T3, find a chunk that isn't claimed as T3
                     assignedChunkid = cId;
-                     reservedChunksCounter[reseller] = uint256(i + 1);
+                     reservedChunksCounter[reseller] = uint256(j + 1);
                     break;
                 }
                 

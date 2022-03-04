@@ -39,7 +39,7 @@ contract KeyLootbox is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return tokenID;
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
+    function _beforeTokenTransfer(address from, address to, uint256 /*tokenId*/) internal override {
         require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
     }
 

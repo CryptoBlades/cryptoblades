@@ -526,7 +526,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         bool attackerWon;
     }
 
-    function createDuelist(uint256 id) internal returns (Duelist memory duelist) {
+    function createDuelist(uint256 id) internal view returns (Duelist memory duelist) {
         duelist.ID = id;
 
         (
@@ -535,10 +535,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             duelist.trait,
             , // staminaTimestamp
             , // head
+            , // arms
             , // torso
             , // legs
             , // boots
-            , // race
+            // race
         ) = characters.get(id);
 
         duelist.basePower = Common.getPowerAtLevel(duelist.level);

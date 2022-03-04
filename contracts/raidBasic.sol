@@ -35,14 +35,13 @@ contract RaidBasic is Initializable, Raid {
         participation[characterID] = true;
         // we drain ~12h of stamina from the character
         // we may want to have a specific lockout in the future
-        int128 traitMultiplier = 0;
         uint24 power = 0;
         totalPower += power;
         raiders.push(Raider(uint256(msg.sender), characterID, weaponID, power));
         emit RaiderJoined(msg.sender, characterID, weaponID, power);
     }
 
-    function completeRaid(uint256 seed) public override restricted {
+    function completeRaid(uint256 /*seed*/) public override restricted {
         require(completed == false, "Raid already completed, run reset first");
         completed = true;
 

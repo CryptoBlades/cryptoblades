@@ -39,7 +39,7 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
         _;
     }
 
-    function onERC721Received(address, address, uint256 _id, bytes calldata) external override returns (bytes4) {
+    function onERC721Received(address, address, uint256 /*_id*/, bytes calldata) external override returns (bytes4) {
         return IERC721ReceiverUpgradeable.onERC721Received.selector;
     }
 
