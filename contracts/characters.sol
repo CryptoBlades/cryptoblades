@@ -300,6 +300,18 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         }
     }
 
+    function burnWithoutSoul(uint256[] memory burnIDs) public restricted {
+        for(uint256 i = 0; i < burnIDs.length; i++) {
+            _burnWithoutSoul(burnIDs[i]);
+        }
+    }
+
+    function _burnWithoutSoul(uint256 burnID) internal {
+        address burnOwner = ownerOf(burnID);
+        _burn(burnID);
+        emit Burned(burnOwner, burnID);
+    }
+
     function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount) external restricted {
         uint256 burnPower = soulAmount.mul(10);
         require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
