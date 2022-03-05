@@ -1,7 +1,7 @@
 <template>
-  <b-modal v-if="quest" class="centered-modal" :visible="showModal" button-size="lg" no-close-on-backdrop scrollable
+  <b-modal v-if="quest" :visible="showModal" button-size="lg" no-close-on-backdrop scrollable
            :title="$t('quests.turnIn')" size="xl" @close.prevent="resetTokens"
-           @cancel.prevent="resetTokens"
+           @cancel.prevent="resetTokens" content-class="modal-footer-margin"
            :ok-title="$t('quests.submit')" :busy="isLoading"
            :ok-disabled="isSubmitDisabled()"
            @ok.prevent="quest.requirementType === RequirementType.DUST
@@ -203,6 +203,8 @@ export default Vue.extend({
     },
 
     addNftIdType(nftIdType: NftIdType) {
+      if (!this.quest) return;
+      if (this.questProgress + this.tokensToBurn.length >= this.quest.requirementAmount) return;
       this.nftIdTypesToBurn.push(nftIdType);
       this.ownedNftIdTypes = this.ownedNftIdTypes.filter(val => !this.nftIdTypesToBurn.some(nftToBurn => nftToBurn.id === val.id));
       this.tokensToBurn = this.nftIdTypesToBurn.map(nftIdType => nftIdType.id);
@@ -321,6 +323,10 @@ export default Vue.extend({
 <style scoped>
 .single-dust-display {
   width: 40%;
+}
+
+/deep/ .modal-footer-margin {
+  margin-bottom: 3rem;
 }
 
 @media (max-width: 576px) {
