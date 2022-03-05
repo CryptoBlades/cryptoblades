@@ -1,7 +1,7 @@
 <template>
   <div class="quest-character-display position-relative">
     <div v-if="character.status !== undefined && (character.status !== NftStatus.AVAILABLE)"
-         class="d-flex justify-content-center align-items-center position-absolute w-100">
+         class="d-flex justify-content-center align-items-center position-absolute w-100 h-100">
       <span class="busy-banner">{{ $t(`quests.nftStatus.${getNftStatus}`) }}</span>
     </div>
     <img class="quest-character-portrait m-4"
