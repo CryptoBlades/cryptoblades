@@ -21,12 +21,14 @@
           <QuestsList v-if="tier !== undefined" :tier="usePromoQuests ? tier + 10 : tier"/>
         </b-modal>
       </div>
-      <div v-if="weeklyReward.id" class="d-flex flex-column gap-2">
+      <div v-if="weeklyReward && weeklyReward.id && currentWeeklyCompletions !== undefined && maxWeeklyCompletions"
+           class="d-flex flex-column gap-2">
         <div class="d-flex align-items-center gap-2">
           <div class="d-flex flex-column gap-2">
             <div class="d-flex justify-content-between gap-4">
               <span class="text-uppercase weekly-progress">{{ $t('quests.weeklyProgress') }}</span>
-              <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon" alt="Hourglass"/> {{
+              <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon"
+                                                                     alt="Hourglass"/> {{
                   $t('quests.resetsIn', {time: nextWeekResetTime})
                 }}</span>
             </div>
@@ -325,8 +327,8 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         this.usePromoQuests = await this.isUsingPromoQuests();
-        this.currentWeeklyCompletions = await this.getWeeklyCompletions();
-        this.maxWeeklyCompletions = await this.getWeeklyCompletionsGoal();
+        this.currentWeeklyCompletions = +await this.getWeeklyCompletions();
+        this.maxWeeklyCompletions = +await this.getWeeklyCompletionsGoal();
         this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});
         this.weeklyClaimed = await this.hasClaimedWeeklyReward();
         await this.getNextWeekResetTime();
