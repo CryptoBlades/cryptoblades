@@ -434,6 +434,7 @@ export default Vue.extend({
 @media (max-width: 576px) {
   .quests-container {
     padding: 1rem;
+    margin-bottom: 3rem;
   }
 
   .weekly-progress-container {
