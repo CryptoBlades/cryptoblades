@@ -108,6 +108,13 @@
             <img src="../assets/new-ui/new-gear-icon.png">
             <p>{{ $t("viewLink.admin") }}</p>
             </router-link>
+
+            <router-link v-if="merchandise" class="menu-icon" :to="{ name: 'merchandise'}" exact>
+            <img src="../assets/new-ui/new-gear-icon.png">
+            <p>{{ $t("viewLink.merchandise") }}</p> <hint
+                v-if="!supportsMerchandise" class="hint"
+                :text="$t('viewLink.functionalityNotSupportedTooltip')"/>
+            </router-link>
         </div>
 
         <div class="horizontal-small"></div>
@@ -188,6 +195,7 @@ import Vue from 'vue';
 import {fromWeiEther, toBN} from '../utils/common';
 import {nft_bridge as bridgeEnabled} from './../feature-flags';
 import {SupportedProject} from '@/views/Treasury.vue';
+import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -235,7 +243,15 @@ export default Vue.extend({
       hideRewards: false,
       hideWalletWarning: false,
       showSkillInUsd: false,
-      ClaimStage
+      ClaimStage,
+      stakeOnly,
+      raid,
+      market,
+      portal,
+      pvp,
+      quests,
+      merchandise,
+      hasAdminAccess: false,
     } as Data;
   },
 
