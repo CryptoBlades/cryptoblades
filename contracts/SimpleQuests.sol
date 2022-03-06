@@ -375,7 +375,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function hasRandomWeeklyRewardSeedRequested(uint256 rewardID) public view returns (bool) {
-        return safeRandoms.hasSingleSeedRequest(address(this), RandomUtil.combineSeeds(SEED_REWARD_WEEKLY, rewardID));
+        return safeRandoms.hasSingleSeedRequest(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_WEEKLY, rewardID));
     }
 
     function getVars(uint256[] calldata varFields) external view returns (uint256[] memory) {
