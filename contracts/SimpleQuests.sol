@@ -164,6 +164,16 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         require(characters.ownerOf(characterID) == msg.sender, "Not character owner");
     }
 
+    modifier assertCanClaimWeeklyReward(address user) {
+        _assertCanClaimWeeklyReward(user);
+        _;
+    }
+
+    function _assertCanClaimWeeklyReward(address user) internal view {
+        require(weeklyRewardClaimed[user][now / 1 weeks] == false, "Reward already claimed");
+        require(weeklyCompletions[user][now / 1 weeks] >= vars[VAR_WEEKLY_COMPLETIONS_GOAL], "Not enough weekly completions");
+    }
+
     // FUNCTIONS
 
     function generateRequestQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) public {
@@ -289,6 +299,49 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             burningManager.giveAwaySoul(msg.sender, quest.rewardAmount);
         } else if (quest.rewardType == ItemType.EXTERNAL) {
             partnerVault.transferReward(quest.rewardExternalAddress, msg.sender, quest.rewardAmount, seed);
+        }
+        else {
+            revert("Unknown reward type");
+        }
+        return new uint256[](0);
+    }
+
+    function generateRewardWeeklySeed(uint256 rewardID) assertQuestsEnabled assertCanClaimWeeklyReward(msg.sender) public {
+        safeRandoms.requestSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_WEEKLY, rewardID));
+    }
+
+    function claimWeeklyReward() assertQuestsEnabled assertCanClaimWeeklyReward(msg.sender) public returns (uint256[] memory weeklyRewardIDs) {
+        uint256 rewardID = weeklyRewards[now / 1 weeks];
+        weeklyRewardIDs = rewardWeekly(rewardID);
+        weeklyRewardClaimed[msg.sender][now / 1 weeks] = true;
+        emit WeeklyRewardClaimed(msg.sender, rewardID, weeklyRewardIDs);
+    }
+
+    function rewardWeekly(uint256 rewardID) private returns (uint256[] memory) {
+        uint256 seed = safeRandoms.popSingleSeed(tx.origin, RandomUtil.combineSeeds(SEED_REWARD_WEEKLY, rewardID), true, true);
+        Reward memory reward = rewards[rewardID];
+        if (reward.rewardType == ItemType.WEAPON) {
+            uint256[] memory tokenIDs = new uint256[](reward.rewardAmount);
+            for (uint8 i = 0; i < reward.rewardAmount; i++) {
+                tokenIDs[i] = weapons.mintWeaponWithStars(msg.sender, reward.rewardRarity, seed, 100);
+                seed = RandomUtil.combineSeeds(seed, i);
+            }
+            return tokenIDs;
+        } else if (reward.rewardType == ItemType.JUNK) {
+            return junk.mintN(msg.sender, uint8(reward.rewardRarity), uint32(reward.rewardAmount));
+        } else if (reward.rewardType == ItemType.TRINKET) {
+            return trinket.mintN(msg.sender, uint8(reward.rewardRarity), uint32(reward.rewardAmount), seed);
+        } else if (reward.rewardType == ItemType.SHIELD) {
+            //0 is NORMAL SHIELD TYPE
+            return shields.mintShieldsWithStars(msg.sender, uint8(reward.rewardRarity), 0, uint32(reward.rewardAmount), seed);
+        } else if (reward.rewardType == ItemType.DUST) {
+            uint32[] memory incrementDustSupplies = new uint32[](3);
+            incrementDustSupplies[uint256(reward.rewardRarity)] = uint32(reward.rewardAmount);
+            weapons.incrementDustSupplies(msg.sender, incrementDustSupplies[0], incrementDustSupplies[1], incrementDustSupplies[2]);
+        } else if (reward.rewardType == ItemType.SOUL) {
+            burningManager.giveAwaySoul(msg.sender, reward.rewardAmount);
+        } else if (reward.rewardType == ItemType.EXTERNAL) {
+            partnerVault.transferReward(reward.rewardExternalAddress, msg.sender, reward.rewardAmount, seed);
         }
         else {
             revert("Unknown reward type");
@@ -463,52 +516,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256 week = timestamp / 1 weeks;
         weeklyRewards[week] = id;
         emit WeeklyRewardSet(id, week);
-    }
-
-    function generateRewardWeeklySeed(uint256 rewardID) assertQuestsEnabled public {
-        safeRandoms.requestSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_WEEKLY, rewardID));
-    }
-
-    function claimWeeklyReward() public returns (uint256[] memory weeklyRewardIDs) {
-        uint256 currentCompletions = weeklyCompletions[msg.sender][now / 1 weeks];
-        require(weeklyRewardClaimed[msg.sender][now / 1 weeks] == false, "Reward already claimed");
-        require(currentCompletions >= vars[VAR_WEEKLY_COMPLETIONS_GOAL], "Not enough weekly completions");
-        uint256 rewardID = weeklyRewards[now / 1 weeks];
-        weeklyRewardIDs = rewardWeekly(rewardID);
-        weeklyRewardClaimed[msg.sender][now / 1 weeks] = true;
-        emit WeeklyRewardClaimed(msg.sender, rewardID, weeklyRewardIDs);
-    }
-
-    function rewardWeekly(uint256 rewardID) private returns (uint256[] memory) {
-        uint256 seed = safeRandoms.popSingleSeed(tx.origin, RandomUtil.combineSeeds(SEED_REWARD_WEEKLY, rewardID), true, true);
-        Reward memory reward = rewards[rewardID];
-        if (reward.rewardType == ItemType.WEAPON) {
-            uint256[] memory tokenIDs = new uint256[](reward.rewardAmount);
-            for (uint8 i = 0; i < reward.rewardAmount; i++) {
-                tokenIDs[i] = weapons.mintWeaponWithStars(msg.sender, reward.rewardRarity, seed, 100);
-                seed = RandomUtil.combineSeeds(seed, i);
-            }
-            return tokenIDs;
-        } else if (reward.rewardType == ItemType.JUNK) {
-            return junk.mintN(msg.sender, uint8(reward.rewardRarity), uint32(reward.rewardAmount));
-        } else if (reward.rewardType == ItemType.TRINKET) {
-            return trinket.mintN(msg.sender, uint8(reward.rewardRarity), uint32(reward.rewardAmount), seed);
-        } else if (reward.rewardType == ItemType.SHIELD) {
-            //0 is NORMAL SHIELD TYPE
-            return shields.mintShieldsWithStars(msg.sender, uint8(reward.rewardRarity), 0, uint32(reward.rewardAmount), seed);
-        } else if (reward.rewardType == ItemType.DUST) {
-            uint32[] memory incrementDustSupplies = new uint32[](3);
-            incrementDustSupplies[uint256(reward.rewardRarity)] = uint32(reward.rewardAmount);
-            weapons.incrementDustSupplies(msg.sender, incrementDustSupplies[0], incrementDustSupplies[1], incrementDustSupplies[2]);
-        } else if (reward.rewardType == ItemType.SOUL) {
-            burningManager.giveAwaySoul(msg.sender, reward.rewardAmount);
-        } else if (reward.rewardType == ItemType.EXTERNAL) {
-            partnerVault.transferReward(reward.rewardExternalAddress, msg.sender, reward.rewardAmount, seed);
-        }
-        else {
-            revert("Unknown reward type");
-        }
-        return new uint256[](0);
     }
 
     function deleteQuestTemplate(uint256 tier, uint256 questID) public restricted {
