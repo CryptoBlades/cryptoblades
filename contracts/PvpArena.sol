@@ -149,7 +149,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterInArena(uint256 characterID) internal view {
-        require(isCharacterInArena[characterID], "Not in arena");
+        require(isCharacterInArena[characterID], "NA");
     }
 
     modifier characterWithinDecisionTime(uint256 characterID) {
@@ -160,7 +160,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function _characterWithinDecisionTime(uint256 characterID) internal view {
         require(
             isCharacterWithinDecisionTime(characterID),
-            "Decision time expired"
+            "DE"
         );
     }
 
@@ -170,7 +170,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterNotUnderAttack(uint256 characterID) internal view {
-        require(!isCharacterUnderAttack(characterID), "Under attack");
+        require(!isCharacterUnderAttack(characterID), "UA");
     }
 
     modifier characterNotInDuel(uint256 characterID) {
@@ -179,7 +179,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterNotInDuel(uint256 characterID) internal view {
-        require(!isCharacterInDuel(characterID), "In queue");
+        require(!isCharacterInDuel(characterID), "IQ");
     }
 
     modifier isOwnedCharacter(uint256 characterID) {
@@ -207,15 +207,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 weapons.ownerOf(weaponID) == msg.sender
         );
 
-        require(characters.getNftVar(characterID, 1) == 0, "Char busy");
-        require(weapons.getNftVar(weaponID, 1) == 0, "Wpn busy");
+        require(characters.getNftVar(characterID, 1) == 0 && weapons.getNftVar(weaponID, 1) == 0, "B");
 
         if (useShield) {
             require(shields.ownerOf(shieldID) == msg.sender);
-            require(shields.getNftVar(shieldID, 1) == 0, "Shld busy");
+            require(shields.getNftVar(shieldID, 1) == 0, "SB");
         }
 
-        require((arenaAccess & 1) == 1, "Arena locked");
+        require((arenaAccess & 1) == 1, "AL");
         _;
     }
 
@@ -352,7 +351,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterNotUnderAttack(characterID)
         characterNotInDuel(characterID)
     {
-        require(matchByFinder[characterID].createdAt == 0, "Already in match");
+        require(matchByFinder[characterID].createdAt == 0, "AM");
 
         uint8 tier = getArenaTier(characterID);
 
@@ -370,7 +369,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 opponentID = getOpponent(characterID);
         uint8 tier = getArenaTier(characterID);
 
-        require(matchByFinder[characterID].createdAt != 0, "Not in match");
+        require(matchByFinder[characterID].createdAt != 0, "NM");
 
         delete finderByOpponent[opponentID];
         if (isCharacterInArena[opponentID]) {
@@ -401,8 +400,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterWithinDecisionTime(attackerID)
         characterNotInDuel(attackerID)
     {
-        require((arenaAccess & 1) == 1, "Arena locked");
-        require(msg.value == duelOffsetCost, "No duel offset");
+        require((arenaAccess & 1) == 1, "AL");
+        require(msg.value == duelOffsetCost, "NO");
 
         uint256 defenderID = getOpponent(attackerID);
 
@@ -926,7 +925,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         EnumerableSet.UintSet
             storage matchableCharacters = _matchableCharactersByTier[tier];
 
-        require(matchableCharacters.length() != 0, "No enemy in tier");
+        require(matchableCharacters.length() != 0, "N1");
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 randomIndex = RandomUtil.randomSeededMinMax(
@@ -967,7 +966,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             break;
         }
 
-        require(foundOpponent, "No enemy found");
+        require(foundOpponent, "NE");
 
         matchByFinder[characterID] = Match(
             characterID,
@@ -1206,12 +1205,12 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     // Note: The following are debugging functions. Remove later.
 
-    function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
-        public
-        restricted
-    {
-        rankingPointsByCharacter[characterID] = newRankingPoints;
-    }
+    // function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
+    //     public
+    //     restricted
+    // {
+    //     rankingPointsByCharacter[characterID] = newRankingPoints;
+    // }
     /// @dev returns the amount of matcheable characters
     function getMatchablePlayerCount(uint256 characterID) public view returns(uint){
         uint8 tier = getArenaTier(characterID);
