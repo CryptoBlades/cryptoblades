@@ -20,6 +20,45 @@ library Common {
         return uint24(weaponMultiplier.mulu(basePower).add(bonusPower));
     }
 
+
+    function getBonusRanking(uint256 attackerPower, uint256 defenderPower) internal returns (uint256){
+
+        uint256 bonusRanking = 0;
+        // min roll = 30% max roll = 30%
+        uint256 attackerMin = attackerPower.mul(70).div(100);
+        uint256 attackerMax = attackerPower.mul(130).div(100);
+ 
+
+        uint256 defenderMin = defenderPower.mul(70).div(100);
+        uint256 defenderMax = defenderPower.mul(130).div(100);
+
+
+        uint256 attackerNumbersBetween = attackerMax.sub(attackerMin);
+        uint256 defenderNumbersBetween = defenderMax.sub(defenderMin);
+
+        uint256 numbersThatBeat = defenderMax.sub(attackerMin);
+ 
+        uint256 attackerChanceToRoll = numbersThatBeat.mul(100).div(attackerNumbersBetween);
+
+
+
+        uint256 defenderChanceToRoll = numbersThatBeat.mul(100).div(defenderNumbersBetween);
+
+
+        uint256 winChance = attackerChanceToRoll.mul(100).div(1000).mul(defenderChanceToRoll.mul(1000).div(100)).div(200);
+
+        if (winChance < 50) {
+            bonusRanking = getBonusRankingPoints(uint256(50).sub(winChance));
+            return bonusRanking;
+        }
+
+    }
+    function getBonusRankingPoints(uint256 processedWinChance) internal returns (uint256) {
+        return (2**(processedWinChance/5)) - 1;
+    }
+
+
+
     function getPlayerPowerBase100(
         uint256 basePower,
         int128 weaponMultiplier,
