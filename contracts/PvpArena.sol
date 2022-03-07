@@ -1202,8 +1202,27 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function setPvpBotAddress(address payable botAddress) external restricted {
         pvpBotAddress = botAddress;
     }
+    
+    /// @dev returns the amount of matcheable characters
+    function getMatchablePlayerCount(uint256 characterID) public view returns(uint){
+        uint8 tier = getArenaTier(characterID);
+        return _matchableCharactersByTier[tier].length();   
+    }
 
-    // Note: The following are debugging functions. Remove later.
+    // Note: The following are debugging functions..
+
+
+    // function clearDuelQueue(uint256 length) external restricted {
+    //     for (uint256 i = 0; i < length; i++) {
+    //         if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
+    //             isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
+    //         }
+
+    //         _duelQueue.remove(_duelQueue.at(i));
+    //     }
+
+    //     isDefending[0] = false;
+    // }
 
     // function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
     //     public
@@ -1211,9 +1230,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     // {
     //     rankingPointsByCharacter[characterID] = newRankingPoints;
     // }
-    /// @dev returns the amount of matcheable characters
-    function getMatchablePlayerCount(uint256 characterID) public view returns(uint){
-        uint8 tier = getArenaTier(characterID);
-        return _matchableCharactersByTier[tier].length();   
-    }
+
+    // Note: Unmute this to test ranking interactions 
+    
+    // function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
+    //     public
+    //     restricted
+    // {
+    //     rankingPointsByCharacter[characterID] = newRankingPoints;
+    // }
+
+
+
+
 }

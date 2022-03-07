@@ -24,7 +24,7 @@ library Common {
     function getBonusRanking(uint256 strongerPower, uint256 weakerPower) internal returns (uint256){
         
        // @TODO once tested transform to save gas:  X < Y: (1 - ( (1.3*(x-y)/0.6*y) + (0.7*(y-x)/0.6*x) )) * 0.5
-       // @TODO Adjust precision
+       // @TODO Adjust decimal precision
         uint256 bonusRanking;
         uint256 strongerMinRoll = strongerPower.mul(70).div(100);
         uint256 strongerMaxRoll = strongerPower.mul(130).div(100);
