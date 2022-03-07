@@ -44,7 +44,7 @@ library Common {
 
         uint256 weakerRollChanceToOverlap = rollOverlap.mul(100).div(weakerRollSpread);
 
-        uint256 winChance = strongerRollChanceToOverlap.mul(100).div(1000).mul(weakerRollChanceToOverlap.mul(1000).div(100)).div(200);
+        uint256 winChance = strongerRollChanceToOverlap.mul(weakerRollChanceToOverlap).mul(100).div(20000);
 
         if (winChance < 50) {
             bonusRanking = getBonusRankingPointFormula(uint256(50).sub(winChance));
