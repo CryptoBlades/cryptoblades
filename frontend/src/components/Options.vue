@@ -264,7 +264,16 @@ export default Vue.extend({
   computed: {
     ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
     ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
-
+    ...mapGetters(['getCurrentChainSupportsMerchandise', 'getCurrentChainSupportsPvP', 'getCurrentChainSupportsQuests']),
+    supportsMerchandise() {
+      return this.getCurrentChainSupportsMerchandise;
+    },
+    supportsPvP() {
+      return this.getCurrentChainSupportsPvP;
+    },
+    supportsQuests() {
+      return this.getCurrentChainSupportsQuests;
+    },
     formattedSkillReward(): string {
       const skillRewards = fromWeiEther(this.skillRewards);
       return `${toBN(skillRewards).toFixed(4)}`;
@@ -278,7 +287,6 @@ export default Vue.extend({
         this.skillRewards === '0'
           ? this.maxRewardsClaimTaxAsFactorBN
           : this.rewardsClaimTaxAsFactorBN;
-
       return `${frac.multipliedBy(100).decimalPlaces(0, BigNumber.ROUND_HALF_UP)}%`;
     },
     formattedBonusLost(): string {
@@ -317,12 +325,10 @@ export default Vue.extend({
     },
 
     openMenu() {
-      console.log('open menu');
       this.isMenuOpen = true;
     },
 
     closeMenu() {
-      console.log('close menu');
       this.isMenuOpen = false;
     },
 
