@@ -43,7 +43,7 @@ library Common {
         uint256 strongerRollChanceToOverlap = rollOverlap.mul(100).div(strongerRollSpread);
 
         uint256 weakerRollChanceToOverlap = rollOverlap.mul(100).div(weakerRollSpread);
-
+        // A * B * 100 / 10000 * 2
         uint256 winChance = strongerRollChanceToOverlap.mul(weakerRollChanceToOverlap).mul(100).div(20000);
 
         if (winChance < 50) {
@@ -53,7 +53,7 @@ library Common {
 
     }
     function getBonusRankingPointFormula(uint256 processedWinChance) internal returns (uint256) {
-        // TODO handle specific scenarios where rewards are not proportional
+        // TODO make formula more precise
         return (2**(processedWinChance/5)) - 1;
     }
 
