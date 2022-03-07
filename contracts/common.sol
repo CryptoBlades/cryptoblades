@@ -64,7 +64,7 @@ library Common {
         int128 weaponMultiplier,
         uint24 bonusPower
     ) internal pure returns (uint24) {
-        // we divide total power by 100 and add the base of 10000
+        // we divide total power by 100 and add the base of 1000
        return uint24 (weaponMultiplier.mulu(basePower).add(bonusPower).div(100).add(1000));  
     }
     function getPowerAtLevel(uint8 level) internal pure returns (uint24) {
