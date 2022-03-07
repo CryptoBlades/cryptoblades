@@ -1,5 +1,9 @@
 <template>
-  <div class="quest-character-display">
+  <div class="quest-character-display position-relative">
+    <div v-if="character.status !== undefined && (character.status !== NftStatus.AVAILABLE)"
+         class="d-flex justify-content-center align-items-center position-absolute w-100 h-100">
+      <span class="busy-banner">{{ $t(`quests.nftStatus.${getNftStatus}`) }}</span>
+    </div>
     <img class="quest-character-portrait m-4"
          :class="'character-animation-applied-' + getCharacterCosmetic(character.id)"
          :src="getCharacterArt(character)" alt="Character image"/>
@@ -68,7 +72,7 @@
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
 import {Rarity, RewardType} from '@/views/Quests.vue';
-import {Nft} from '../../interfaces/Nft';
+import {Nft, NftStatus} from '../../interfaces/Nft';
 import {getCharacterArt} from '@/character-arts-placeholder';
 import {mapActions, mapGetters} from 'vuex';
 import {getCleanName} from '@/rename-censor';
@@ -107,6 +111,7 @@ export default Vue.extend({
       RewardType,
       Rarity,
       ReputationTier,
+      NftStatus,
     } as Data;
   },
 
@@ -115,6 +120,15 @@ export default Vue.extend({
       'getCharacterCosmetic',
       'getCharacterName',
     ]),
+
+    getNftStatus(): string {
+      if (this.character.status !== undefined && this.character.status in NftStatus) {
+        return NftStatus[this.character.status];
+      } else {
+        return 'BUSY';
+      }
+    },
+
   },
 
   methods: {
@@ -219,6 +233,14 @@ export default Vue.extend({
   position: absolute;
   width: 100%;
   font-weight: bold;
+}
+
+.busy-banner {
+  text-transform: uppercase;
+  transform: rotate(15deg);
+  font-size: 30px;
+  font-weight: bold;
+  text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
 }
 
 @media (max-width: 576px) {

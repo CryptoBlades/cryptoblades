@@ -1,5 +1,6 @@
 <template>
-  <div v-if="character" class="quest-row gap-5">
+  <div v-if="character" class="quest-row gap-5"
+       :class="character.status !== undefined && (character.status !== NftStatus.AVAILABLE) ? 'busy-quest-row' : ''">
     <QuestCharacter :character="character" :quest="character.quest"
                     :reputationLevelRequirements="reputationLevelRequirements"/>
     <QuestRequirements v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
@@ -20,10 +21,12 @@ import QuestRewards from '@/components/smart/QuestRewards.vue';
 import QuestActions from '@/components/smart/QuestActions.vue';
 import {Quest, ReputationLevelRequirements} from '../../views/Quests.vue';
 import {mapActions, mapGetters} from 'vuex';
-import {Nft} from '@/interfaces/Nft';
+import {Nft, NftStatus} from '@/interfaces/Nft';
 
 interface StoreMappedActions {
   getCharacterQuestData(payload: { characterId: string | number }): Promise<Quest>;
+
+  getCharacterBusyStatus(payload: { characterId: string | number }): Promise<number>;
 }
 
 interface StoreMappedGetters {
@@ -53,6 +56,7 @@ export default Vue.extend({
       character: undefined,
       RewardType,
       Rarity,
+      NftStatus,
     } as Data;
   },
 
@@ -61,7 +65,10 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['getCharacterQuestData']) as StoreMappedActions,
+    ...mapActions([
+      'getCharacterQuestData',
+      'getCharacterBusyStatus',
+    ]) as StoreMappedActions,
     async onRefreshQuestData() {
       this.$emit('refresh-quest-data');
       await this.refreshQuestData();
@@ -82,6 +89,7 @@ export default Vue.extend({
 
   async mounted() {
     this.character = await this.charactersWithIds([this.characterId]).filter(Boolean)[0];
+    this.character.status = +await this.getCharacterBusyStatus({characterId: this.characterId});
     await this.refreshQuestData();
   },
 
@@ -97,6 +105,11 @@ export default Vue.extend({
   border: 1px solid #60583E;
   border-radius: 10px;
   align-items: center;
+}
+
+.busy-quest-row {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 @media (max-width: 576px) {

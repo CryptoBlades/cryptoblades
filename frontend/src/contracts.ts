@@ -248,7 +248,14 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
 
   let SpecialWeaponsManager;
-  const specialWeaponsManagerAddr = await CryptoBlades.methods.specialWeaponsManager().call();
+  let specialWeaponsManagerAddr;
+  try {
+    specialWeaponsManagerAddr = await CryptoBlades.methods.specialWeaponsManager().call();
+  }
+  catch(e) {
+    console.error(e);
+  }
+
   if(specialWeaponsManagerAddr) {
     SpecialWeaponsManager = new web3.eth.Contract(specialWeaponsManagerAbi as Abi, specialWeaponsManagerAddr);
   }

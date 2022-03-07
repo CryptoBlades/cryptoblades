@@ -611,7 +611,7 @@ export default Vue.extend({
           && this.questTemplate.rewardType !== RewardType.SOUL
           && this.questTemplate.rewardType !== RewardType.EXTERNAL)
         || !this.questTemplate.rewardAmount
-        || !this.questTemplate.reputationAmount
+        || this.questTemplate.reputationAmount === undefined
         || (this.timestamp && !this.supply)
         || (this.supply && !this.timestamp)
         || ((this.questTemplate.requirementType === RequirementType.EXTERNAL
