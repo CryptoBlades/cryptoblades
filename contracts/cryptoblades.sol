@@ -480,7 +480,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
-            weapons.mintWeaponWithStars(msg.sender, 1, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), 100);
+            weapons.mintWeaponWithStars(msg.sender, 0, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), 100);
         }
     }
 
