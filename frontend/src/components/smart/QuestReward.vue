@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column justify-content-center align-items-center flex-1">
+  <div class="d-flex flex-column justify-content-center align-items-center flex-1 gap-2">
     <span class="font-weight-bold text-center p-2">{{ $t('quests.reward') }}</span>
     <QuestComponentIcon v-if="reputationAmount" :questItemType="QuestItemType.REPUTATION" :amount="reputationAmount"/>
     <NftList v-if="rewards && rewards.length !== 0" :showGivenNftIdTypes="true" :nftIdTypes="rewards"

@@ -233,6 +233,7 @@ export default Vue.extend({
   position: absolute;
   width: 100%;
   font-weight: bold;
+  text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
 }
 
 .busy-banner {
