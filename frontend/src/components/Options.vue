@@ -110,7 +110,7 @@
             </router-link>
 
             <router-link v-if="merchandise" class="menu-icon" :to="{ name: 'merchandise'}" exact>
-            <img src="../assets/new-ui/new-gear-icon.png">
+            <img src="../assets/new-ui/new-bazaar-icon.png">
             <p>{{ $t("viewLink.merchandise") }}</p> <hint
                 v-if="!supportsMerchandise" class="hint"
                 :text="$t('viewLink.functionalityNotSupportedTooltip')"/>
