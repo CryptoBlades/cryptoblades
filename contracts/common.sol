@@ -22,9 +22,10 @@ library Common {
 
 
     function getBonusRanking(uint256 strongerPower, uint256 weakerPower) internal returns (uint256){
-
-        uint256 bonusRanking = 0;
-        // min roll = 30% max roll = 30%
+        
+       // @TODO once tested transform to save gas:  X < Y: (1 - ( (1.3*(x-y)/0.6*y) + (0.7*(y-x)/0.6*x) )) * 0.5
+       // @TODO Adjust precision
+        uint256 bonusRanking;
         uint256 strongerMinRoll = strongerPower.mul(70).div(100);
         uint256 strongerMaxRoll = strongerPower.mul(130).div(100);
  
@@ -33,14 +34,15 @@ library Common {
         uint256 weakerMaxRoll = weakerPower.mul(130).div(100);
 
 
-        uint256 strongerRollTotal = strongerMaxRoll.sub(strongerMinRoll);
-        uint256 weakerRollTotal = weakerMaxRoll.sub(weakerMinRoll);
+        uint256 strongerRollSpread = strongerMaxRoll.sub(strongerMinRoll);
+
+        uint256 weakerRollSpread = weakerMaxRoll.sub(weakerMinRoll);
 
         uint256 rollOverlap = weakerMaxRoll.sub(strongerMinRoll);
  
-        uint256 strongerRollChanceToOverlap = rollOverlap.mul(100).div(strongerRollTotal);
+        uint256 strongerRollChanceToOverlap = rollOverlap.mul(100).div(strongerRollSpread);
 
-        uint256 weakerRollChanceToOverlap = rollOverlap.mul(100).div(weakerRollTotal);
+        uint256 weakerRollChanceToOverlap = rollOverlap.mul(100).div(weakerRollSpread);
 
         uint256 winChance = strongerRollChanceToOverlap.mul(100).div(1000).mul(weakerRollChanceToOverlap.mul(1000).div(100)).div(200);
 
@@ -51,6 +53,7 @@ library Common {
 
     }
     function getBonusRankingPointFormula(uint256 processedWinChance) internal returns (uint256) {
+        // TODO handle specific scenarios where rewards are not proportional
         return (2**(processedWinChance/5)) - 1;
     }
 
