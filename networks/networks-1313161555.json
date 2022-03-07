@@ -2119,7 +2119,7 @@
     },
     "links": {},
     "address": "0x38BFf8C60444B56D5cf0E08819E2518DB91B45c5",
-    "transactionHash": "0x006530d87a150800debaac91cf8401184104a71c49642d18134b669fc278233d|{\"gasBurned\":17039592357216,\"tx\":\"H1uQSZP25gm3kGLBcC29ewghHKs9MPogK1PBvZT7G23D\"}"
+    "transactionHash": "0x5aec35f32e04020d68082c0e39294733282ef904ae7d2948d682dbe15841c2f2|{\"gasBurned\":16298233376780,\"tx\":\"E5bctyDpMnTaAcyC1MQrgpqudeujf7cmBXyAQUpMFeWb\"}"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2401,7 +2401,7 @@
     },
     "links": {},
     "address": "0xfe120E57849CE88A4ECaFae9b865F1B6839BEbe8",
-    "transactionHash": "0xef718b84637739f2a554e7be11ce537e7edfa0d0fb4a0d06056a89bd0b9e7c01|{\"gasBurned\":16488447526748,\"tx\":\"7JCdru2pX8VdqTRCk7QvggGhKokoVG6oBU9ChhySw1uW\"}"
+    "transactionHash": "0xc9414fcb0b7eff10da8507fad15e8a956bdd8b22f5d07f3f9343dd87447c9800|{\"gasBurned\":16488770086464,\"tx\":\"EYJ19Z5aRTw2uqd6WZyRRMV4X5KpVJrDNzerUDtvwxaC\"}"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -4293,13 +4293,13 @@
     },
     "links": {},
     "address": "0x4fa018401fFF54804caB82b19F3dABA64C30C238",
-    "transactionHash": "0x2aaefd1f8f8cd6f4b82781b77d3266a6b748b53ebf0317982d523c5955170448"
+    "transactionHash": "0xbfdcbd54012a467a440306ec4f8dbd9c3809d928ccda90d969d2cd50418c8517|{\"gasBurned\":15846547243340,\"tx\":\"8rf37Z4QDnCFy8rUDnBAM3aT3ujnY4Eoo5c4CRs7i4fd\"}"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {},
     "links": {},
     "address": "0x6959FDCb55040511fE606afe5f98aa1bFaEd41df",
-    "transactionHash": "0x05198b23dae7a377f645090422420b062653c5666b1e43b557367400b804ef54|{\"gasBurned\":16526448133900,\"tx\":\"D1ib2Sov9XQRRfdr1Dkg5uNn3bTdNAxWNXz9g6LThg5Q\"}"
+    "transactionHash": "0x19c350144d91f27a9e4b58ad731c19c3db827271d40ad7c6aed2f3d0dea269fa|{\"gasBurned\":16638129216476,\"tx\":\"34XwcjrB3H9qjQj6L7vwrTABZ1mNCmMTvqyjApsViW4p\"}"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},
