@@ -21,39 +21,36 @@ library Common {
     }
 
 
-    function getBonusRanking(uint256 attackerPower, uint256 defenderPower) internal returns (uint256){
+    function getBonusRanking(uint256 strongerPower, uint256 weakerPower) internal returns (uint256){
 
         uint256 bonusRanking = 0;
         // min roll = 30% max roll = 30%
-        uint256 attackerMin = attackerPower.mul(70).div(100);
-        uint256 attackerMax = attackerPower.mul(130).div(100);
+        uint256 strongerMinRoll = strongerPower.mul(70).div(100);
+        uint256 strongerMaxRoll = strongerPower.mul(130).div(100);
  
 
-        uint256 defenderMin = defenderPower.mul(70).div(100);
-        uint256 defenderMax = defenderPower.mul(130).div(100);
+        uint256 weakerMinRoll = weakerPower.mul(70).div(100);
+        uint256 weakerMaxRoll = weakerPower.mul(130).div(100);
 
 
-        uint256 attackerNumbersBetween = attackerMax.sub(attackerMin);
-        uint256 defenderNumbersBetween = defenderMax.sub(defenderMin);
+        uint256 strongerRollTotal = strongerMaxRoll.sub(strongerMinRoll);
+        uint256 weakerRollTotal = weakerMaxRoll.sub(weakerMinRoll);
 
-        uint256 numbersThatBeat = defenderMax.sub(attackerMin);
+        uint256 rollOverlap = weakerMaxRoll.sub(strongerMinRoll);
  
-        uint256 attackerChanceToRoll = numbersThatBeat.mul(100).div(attackerNumbersBetween);
+        uint256 strongerRollChanceToOverlap = rollOverlap.mul(100).div(strongerRollTotal);
 
+        uint256 weakerRollChanceToOverlap = rollOverlap.mul(100).div(weakerRollTotal);
 
-
-        uint256 defenderChanceToRoll = numbersThatBeat.mul(100).div(defenderNumbersBetween);
-
-
-        uint256 winChance = attackerChanceToRoll.mul(100).div(1000).mul(defenderChanceToRoll.mul(1000).div(100)).div(200);
+        uint256 winChance = strongerRollChanceToOverlap.mul(100).div(1000).mul(weakerRollChanceToOverlap.mul(1000).div(100)).div(200);
 
         if (winChance < 50) {
-            bonusRanking = getBonusRankingPoints(uint256(50).sub(winChance));
+            bonusRanking = getBonusRankingPointFormula(uint256(50).sub(winChance));
             return bonusRanking;
         }
 
     }
-    function getBonusRankingPoints(uint256 processedWinChance) internal returns (uint256) {
+    function getBonusRankingPointFormula(uint256 processedWinChance) internal returns (uint256) {
         return (2**(processedWinChance/5)) - 1;
     }
 

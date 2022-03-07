@@ -128,7 +128,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 timestamp,
         uint256 attackerRoll,
         uint256 defenderRoll,
-        bool attackerWon
+        bool attackerWon,
+        uint256 bonusRank
     );
 
     event CharacterKicked(
@@ -516,6 +517,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint8 trait;
         uint24 basePower;
         uint24 roll;
+        uint256 power;
     }
 
     struct Duel {
@@ -524,6 +526,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint8 tier;
         uint256 cost;
         bool attackerWon;
+        uint256 bonusRank;
     }
 
     function createDuelist(uint256 id) internal returns (Duelist memory duelist) {
@@ -556,6 +559,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             duel.tier = getArenaTierForLevel(duel.attacker.level);
             duel.cost = getDuelCostByTier(duel.tier);
+
+            duel.attacker.power = getCharacterPower(duel.attacker.ID);
+            duel.defender.power = getCharacterPower(duel.defender.ID);
 
             duel.attacker.roll = _getCharacterPowerRoll(duel.attacker, duel.defender.trait);
             duel.defender.roll = _getCharacterPowerRoll(duel.defender, duel.attacker.trait);
@@ -609,13 +615,22 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 ? duel.defender.ID
                 : duel.attacker.ID;
 
+            // if attacker wins and he is weaker than the defender calculate bonus rank, else do the same for the defender
+            if (winnerID == duel.attacker.ID && duel.defender.power > duel.attacker.power) {
+                duel.bonusRank = Common.getBonusRanking(duel.defender.power, duel.attacker.power);
+            } else if (winnerID == duel.defender.ID && duel.attacker.power > duel.defender.power) {
+                duel.bonusRank = Common.getBonusRanking(duel.attacker.power, duel.defender.power);           
+            }
+
+
             emit DuelFinished(
                 duel.attacker.ID,
                 duel.defender.ID,
                 block.timestamp,
                 duel.attacker.roll,
                 duel.defender.roll,
-                duel.attackerWon
+                duel.attackerWon,
+                duel.bonusRank
             );
 
             BountyDistribution
@@ -664,9 +679,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             _matchableCharactersByTier[duel.tier].add(winnerID);
 
             // Add ranking points to the winner
-            rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
-                winnerID
-            ].add(winningPoints);
+
+            if (duel.bonusRank > 0) {
+                rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
+                    winnerID
+                ].add(winningPoints.add(duel.bonusRank));
+            } else {
+                rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
+                    winnerID
+                ].add(winningPoints);
+            }
+
             // Check if the loser's current raking points are 'losingPoints' or less and set them to 0 if that's the case, else subtract the ranking points
             if (rankingPointsByCharacter[loserID] <= losingPoints) {
                 rankingPointsByCharacter[loserID] = 0;
@@ -1182,18 +1205,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     // Note: The following are debugging functions. Remove later.
-
-    function clearDuelQueue(uint256 length) external restricted {
-        for (uint256 i = 0; i < length; i++) {
-            if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
-                isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
-            }
-
-            _duelQueue.remove(_duelQueue.at(i));
-        }
-
-        isDefending[0] = false;
-    }
 
     function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
         public
