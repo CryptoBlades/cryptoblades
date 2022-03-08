@@ -149,6 +149,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     }
 
     function transferSoul(address targetAddress, uint256 soulAmount) public {
+        require(msg.sender != targetAddress);
         userVars[msg.sender][USERVAR_SOUL_SUPPLY] = userVars[msg.sender][USERVAR_SOUL_SUPPLY].sub(soulAmount);
         userVars[targetAddress][USERVAR_SOUL_SUPPLY] = userVars[targetAddress][USERVAR_SOUL_SUPPLY].add(soulAmount);
     }
