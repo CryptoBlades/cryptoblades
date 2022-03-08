@@ -6,7 +6,7 @@
       <span class="sub">{{ subText }}</span>
     </router-link>
     <!-- normal button  -->
-    <a :href="targetLink" class="button" :class="size" v-if="targetRef" @click="showTarget()">
+    <a class="button" :class="size" v-if="targetRef">
       <span>{{ mainText }}</span>
       <span class="sub">{{ subText }}</span>
     </a>
@@ -17,16 +17,6 @@
 
 export default {
   props: ['mainText', 'subText', 'disabled', 'route', 'size', 'targetRef'],
-  computed : {
-    targetLink(): string {
-      return '#'+this.targetRef;
-    }
-  },
-  methods : {
-    showTarget(){
-      this.$emit('btnAction');
-    }
-  }
 };
 
 </script>

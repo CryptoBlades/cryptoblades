@@ -265,13 +265,13 @@ export default Vue.extend({
     ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
     ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
     ...mapGetters(['getCurrentChainSupportsMerchandise', 'getCurrentChainSupportsPvP', 'getCurrentChainSupportsQuests']),
-    supportsMerchandise() {
+    supportsMerchandise(): boolean {
       return this.getCurrentChainSupportsMerchandise;
     },
-    supportsPvP() {
+    supportsPvP(): boolean  {
       return this.getCurrentChainSupportsPvP;
     },
-    supportsQuests() {
+    supportsQuests(): boolean  {
       return this.getCurrentChainSupportsQuests;
     },
     formattedSkillReward(): string {
