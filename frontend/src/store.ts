@@ -5102,8 +5102,8 @@ export function createStore(web3: Web3) {
         }
       },
       async transferNFT({ state, dispatch },{nftId, receiverAddress, nftType}: {nftId: number, receiverAddress: string, nftType: string}) {
-        const { Characters, Weapons } = state.contracts();
-        if (!Characters || !Weapons || !state.defaultAccount) return;
+        const { Characters, Junk, KeyLootbox, RaidTrinket, Shields, Weapons } = state.contracts();
+        if (!Characters || !Junk || !KeyLootbox || !RaidTrinket || !Shields || !Weapons || !state.defaultAccount) return;
 
         if (nftType === 'character') {
           await Characters.methods
@@ -5112,6 +5112,38 @@ export function createStore(web3: Web3) {
               from: state.defaultAccount,
             });
           await dispatch('updateCharacterIds');
+        }
+        else if (nftType === 'junk') {
+          await Junk.methods
+            .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+            .send({
+              from: state.defaultAccount,
+            });
+          await dispatch('updateJunkIds');
+        }
+        else if (nftType === 'keybox') {
+          await KeyLootbox.methods
+            .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+            .send({
+              from: state.defaultAccount,
+            });
+          await dispatch('updateKeyLootboxIds');
+        }
+        else if (nftType === 'shield') {
+          await Shields.methods
+            .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+            .send({
+              from: state.defaultAccount,
+            });
+          await dispatch('updateShieldIds');
+        }
+        else if (nftType === 'trinket') {
+          await RaidTrinket.methods
+            .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+            .send({
+              from: state.defaultAccount,
+            });
+          await dispatch('updateTrinketIds');
         }
         else if (nftType === 'weapon') {
           await Weapons.methods
