@@ -5553,6 +5553,13 @@ export function createStore(web3: Web3) {
         await dispatch('fetchCharacterPower', charId);
       },
 
+      async transferSoul({ state }, {targetAddress, soulAmount}) {
+        const { BurningManager } = state.contracts();
+        if(!BurningManager || !state.defaultAccount) return;
+
+        await BurningManager.methods.transferSoul(targetAddress, soulAmount).send({ from: state.defaultAccount });
+      },
+
       async fetchCharactersBurnCost({ state }, burnIds) {
         const { BurningManager } = state.contracts();
         if(!BurningManager || !state.defaultAccount) return;
