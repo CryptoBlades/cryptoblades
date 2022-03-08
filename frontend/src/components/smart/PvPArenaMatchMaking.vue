@@ -19,6 +19,18 @@
         </div>
       </div>
     </nav>
+    <a tabindex="0" class="infoPopover" id="duel-popover">
+      <span>Battle odds</span>
+      <div class="icon">!</div>
+    <b-popover ref="popover" target="duel-popover" triggers="hover blur" placement="bottom" custom-class="popoverWrapper">
+      <span class="popoverTitle">Battle odds</span>
+      <div class="oddsWrapper">
+        <p>You have X chance of getting an ultra roll by fighting this character.</p>
+        <p>You will earn X amount of ranking points if you beat this character.</p>
+        <p class="goodLuck">Good luck!</p>
+      </div>
+    </b-popover>
+    </a>
     <div class="bottom">
       <div class="characterWrapper">
         <div class="elementWrapper">
@@ -646,11 +658,68 @@ export default {
 span, p, li, button {
   font-family: 'Roboto';
 }
+.infoPopover {
+  display: flex;
+  margin: 0 auto;
+  margin-bottom: 2rem;
+  align-items: center;
+  vertical-align: middle;
+  place-content: center;
+  font-size: .85rem;
+  &:hover {
+    cursor: pointer;
+    text-shadow: none;
+  }
+  span {
+    font-family: 'Trajan';
+  }
+  .icon {
+    display: flex;
+    height: 1.25rem;
+    width: 1.25rem;
+    margin-left: 0.25rem;
+    align-items: center;
+    vertical-align: middle;
+    place-content: center;
+    border-radius: 9999px;
+    background: #cec198;
+    color: black;
+    font-weight: 700;
+  }
+}
+.popoverWrapper, .permanent {
+  padding: 1rem 1rem 0.5rem 1rem;
+  border: 1px solid #cec198;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  background-color: #141414;
+  .popoverTitle {
+    font-family: 'Trajan';
+    color: #cec198;
+  }
+  .oddsWrapper {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+  }
+  p {
+    color: #b4b0a7;
+    font-size: .8rem;
+  }
+  p:last-of-type {
+    margin-bottom: .5rem;
+    color: #cec198;
+    font-size: .9rem;
+    font-family: 'Trajan';
+  }
+  .goodLuck {
+    margin: 0 auto;
+  }
+}
   nav {
     display: flex;
     width: 100%;
     justify-content: space-between;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid #363636;
     .navTitle {
