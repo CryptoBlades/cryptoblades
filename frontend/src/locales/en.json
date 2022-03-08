@@ -714,6 +714,7 @@
     "cannotClaimWeeklyTooltip": "Weekly goal not reached",
     "progress": "Progress",
     "resetsIn": "Resets in {time}",
+    "claimed": "Claimed",
     "cannotSkipTooltip": "Not enough stamina to skip this quest",
     "cannotCompleteTooltip": "Weekly quests completion limit reached",
     "complete": "Complete",

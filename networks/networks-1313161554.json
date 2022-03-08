@@ -2013,7 +2013,7 @@
     },
     "links": {},
     "address": "0x3A7279866A6e7e9f86c5Afd5696131E5C92956af",
-    "transactionHash": "0x8e7d075b8be9e568f9251b09a2524fa7ad01811567a3501fa9df15d759a049e6|{\"gasBurned\":16685104145556,\"tx\":\"HwZrywJVQmeRhi8J8DK9T8oCar7oE4JKukzx3dodFguK\"}"
+    "transactionHash": "0x36e7daca2c9993dbf0dc92914dfe26a6bc63c16cfe965025a7424bc170f5603c|{\"gasBurned\":15879665621060,\"tx\":\"HsVSckGhJh64W9GUPZ9sdqjMgUAZWxhvNfTGLV1GxtMQ\"}"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2295,7 +2295,7 @@
     },
     "links": {},
     "address": "0x3F715995647fe44Db45411bb9e81b7A1aD5A8387",
-    "transactionHash": "0x077f043e3fa484fdf9d88f8c0f6eed622b263aec2452fa2a92d4b63c546da912|{\"gasBurned\":16133839192712,\"tx\":\"82xo76F4VM9N5cuHzUbMfQtpHiPLHQU88YDwxVuB45Jc\"}"
+    "transactionHash": "0xd387f6869a6538ad9e95697f3fe461f33ef35d427fdfdf9b3f302782a2b766c4|{\"gasBurned\":15941220486624,\"tx\":\"3QigJHUeNLgoKFrV2Sy5DYT1UbcUEepwSwZbTKvzHKZ7\"}"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},
@@ -4088,13 +4088,13 @@
     },
     "links": {},
     "address": "0xb29076d3cfbA902d8D1d1A53BF57CC696098839e",
-    "transactionHash": "0x6ca67f0c4c126b37135e5fbd602f235ea7f60e1b2095dfd6e4dbff3d4f343036"
+    "transactionHash": "0xc151b5d3d68cec3ef39d32782ead01979e6b44b845427918a95a92e807236898|{\"gasBurned\":15427813290908,\"tx\":\"2P46xpuL8CRjSFizQnFpSQYTKnYFqJZGomA2fLoidxgB\"}"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {},
     "links": {},
     "address": "0x89995f8C61d7366119773Ac791e9B427e1B63a4A",
-    "transactionHash": "0xaf57f980c0ccc42a050fd951fdf57fe439c566a0be717c59ed67a54bd99cd8d1|{\"gasBurned\":16236443439496,\"tx\":\"2qMhGuvcZQGoz9P8WJGWjGx1NK6SpXaHL9TCUKPoj46B\"}"
+    "transactionHash": "0xe5fd892051182abf3defa76e7b9500498636d53819ba2c07ec7fd70ab4ae63b0|{\"gasBurned\":16155070538696,\"tx\":\"DWF8z5fBHKWCQAPJjkZJw4p3qzDszphiSNEGiuFHqALS\"}"
   },
   "build/contracts/SkillStakingRewards.json": {
     "events": {},

@@ -2542,7 +2542,7 @@
     },
     "links": {},
     "address": "0x149529De3BDA6F95FbF027275DC5d7ccc270D5Bd",
-    "transactionHash": "0xfb290c4e8411f0479668b3d2ff64cd7de8bbf986a34e00eff1ab04e02b636d14"
+    "transactionHash": "0xf82f8c8304bac4e0866a5b9201b27d2068a17e676821049ed0e2421edd7076d2"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2911,7 +2911,7 @@
     },
     "links": {},
     "address": "0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
-    "transactionHash": "0x62f8ea05e8b541dd6b0569d31273ee5cf230edf314e442e2f38ffe7e4e18a3f4"
+    "transactionHash": "0xc851eec6acc1f29b3c90aa6eedc4f017618987be624db36b25733f0bd796d0cb"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -5503,13 +5503,13 @@
     },
     "links": {},
     "address": "0xF3e470DceE011E55b8912ebC58499CE33c863A17",
-    "transactionHash": "0x63bd4fa1d99a7cb6859b347d6171516ad11c2ab65e961b3eafb4e78165473cda"
+    "transactionHash": "0x1d20d62bcf9405b1f52f593bac4be1489a6cd70366eff9d22e5448941e29e894"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {},
     "links": {},
     "address": "0x7e9cA26c52045ef81B80f3bf0BD3041E0AED3f48",
-    "transactionHash": "0x3de17452fd3b32dcb10e68cdd3f3588a61b5d6e19ae242d983e0f0c6a6ac5729"
+    "transactionHash": "0xd77999e5f89bc3f66deeb1ec6a8db59c5d172259aa5145cbcb323555a2d48576"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},

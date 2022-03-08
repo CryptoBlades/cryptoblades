@@ -1,7 +1,7 @@
 <template>
   <div class="quest-character-display position-relative">
     <div v-if="character.status !== undefined && (character.status !== NftStatus.AVAILABLE)"
-         class="d-flex justify-content-center align-items-center position-absolute w-100">
+         class="d-flex justify-content-center align-items-center position-absolute w-100 h-100">
       <span class="busy-banner">{{ $t(`quests.nftStatus.${getNftStatus}`) }}</span>
     </div>
     <img class="quest-character-portrait m-4"
@@ -233,6 +233,7 @@ export default Vue.extend({
   position: absolute;
   width: 100%;
   font-weight: bold;
+  text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
 }
 
 .busy-banner {
