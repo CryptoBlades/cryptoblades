@@ -20,26 +20,23 @@ library Common {
         return uint24(weaponMultiplier.mulu(basePower).add(bonusPower));
     }
 
-
-    function getBonusRanking(uint256 strongerPower, uint256 weakerPower) internal returns (uint256){
-        
-       // @TODO once tested transform to save gas:  X < Y: (1 - ( (1.3*(x-y)/0.6*y) + (0.7*(y-x)/0.6*x) )) * 0.5
-       // @TODO Adjust decimal precision
+    function getBonusRankingPoints(uint256 weakerPower, uint256 strongerPower) internal pure returns (uint256) {
+        // @TODO once tested transform to save gas: 
+        // X < Y: (1 - ( (1.3*(x-y)/0.6*y) + (0.7*(y-x)/0.6*x) )) * 0.5
+        // Note: Formula hard-copied in PvPArenaMatchMaking.vue due to contract size limitations in PvPArena.sol
         uint256 bonusRanking;
+
         uint256 strongerMinRoll = strongerPower.mul(70).div(100);
         uint256 strongerMaxRoll = strongerPower.mul(130).div(100);
  
-
         uint256 weakerMinRoll = weakerPower.mul(70).div(100);
         uint256 weakerMaxRoll = weakerPower.mul(130).div(100);
 
-
         uint256 strongerRollSpread = strongerMaxRoll.sub(strongerMinRoll);
-
         uint256 weakerRollSpread = weakerMaxRoll.sub(weakerMinRoll);
 
         uint256 rollOverlap = weakerMaxRoll.sub(strongerMinRoll);
- 
+       
         uint256 strongerRollChanceToOverlap = rollOverlap.mul(100).div(strongerRollSpread);
 
         uint256 weakerRollChanceToOverlap = rollOverlap.mul(100).div(weakerRollSpread);
@@ -50,14 +47,18 @@ library Common {
             bonusRanking = getBonusRankingPointFormula(uint256(50).sub(winChance));
             return bonusRanking;
         }
-
-    }
-    function getBonusRankingPointFormula(uint256 processedWinChance) internal returns (uint256) {
-        // TODO make formula more precise
-        return (2**(processedWinChance/5)) - 1;
     }
 
-
+    function getBonusRankingPointFormula(uint256 processedWinChance) internal pure returns (uint256) {
+        // Note: Formula hard-copied in PvPArenaMatchMaking.vue due to contract size limitations in PvPArena.sol
+        if (processedWinChance <= 40) {
+            // Equivalent to (1.06**processedWinChance)
+            return (53**processedWinChance).div(50**processedWinChance);
+        } else {
+            // Equivalent to (1.5**(1.3*processedWinChance - 48)) + 7
+            return ((3**(processedWinChance.mul(13).div(10).sub(48))).div(2**(processedWinChance.mul(13).div(10).sub(48)))).add(7);
+        }
+    }
 
     function getPlayerPowerBase100(
         uint256 basePower,

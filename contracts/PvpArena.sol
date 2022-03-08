@@ -12,8 +12,6 @@ import "./weapons.sol";
 import "./shields.sol";
 import "./common.sol";
 
-
-
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;
     using SafeMath for uint8;
@@ -193,7 +191,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not admin");
+        require(hasRole(GAME_ADMIN, msg.sender), "NAD");
     }
 
     modifier enteringArenaChecks(
@@ -514,7 +512,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 ID;
         uint8 level;
         uint8 trait;
-        uint24 basePower;
         uint24 roll;
         uint256 power;
     }
@@ -528,7 +525,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 bonusRank;
     }
 
-    function createDuelist(uint256 id) internal returns (Duelist memory duelist) {
+    function createDuelist(uint256 id) internal view returns (Duelist memory duelist) {
         duelist.ID = id;
 
         (
@@ -542,8 +539,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             , // boots
             , // race
         ) = characters.get(id);
-
-        duelist.basePower = Common.getPowerAtLevel(duelist.level);
     }
 
     /// @dev performs a list of duels
@@ -614,13 +609,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 ? duel.defender.ID
                 : duel.attacker.ID;
 
-            // if attacker wins and he is weaker than the defender calculate bonus rank, else do the same for the defender
-            if (winnerID == duel.attacker.ID && duel.defender.power > duel.attacker.power) {
-                duel.bonusRank = Common.getBonusRanking(duel.defender.power, duel.attacker.power);
+            if (winnerID == duel.attacker.ID && duel.attacker.power < duel.defender.power) {
+                duel.bonusRank = Common.getBonusRankingPoints(duel.attacker.power, duel.defender.power);
             } else if (winnerID == duel.defender.ID && duel.attacker.power > duel.defender.power) {
-                duel.bonusRank = Common.getBonusRanking(duel.attacker.power, duel.defender.power);           
+                duel.bonusRank = Common.getBonusRankingPoints(duel.defender.power, duel.attacker.power);           
             }
-
 
             emit DuelFinished(
                 duel.attacker.ID,
@@ -679,15 +672,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             // Add ranking points to the winner
 
-            if (duel.bonusRank > 0) {
-                rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
-                    winnerID
-                ].add(winningPoints.add(duel.bonusRank));
-            } else {
-                rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
-                    winnerID
-                ].add(winningPoints);
-            }
+            rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
+                winnerID
+            ].add(winningPoints.add(duel.bonusRank));
 
             // Check if the loser's current raking points are 'losingPoints' or less and set them to 0 if that's the case, else subtract the ranking points
             if (rankingPointsByCharacter[loserID] <= losingPoints) {
@@ -1211,7 +1198,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     // Note: The following are debugging functions..
 
-
     // function clearDuelQueue(uint256 length) external restricted {
     //     for (uint256 i = 0; i < length; i++) {
     //         if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
@@ -1224,13 +1210,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     //     isDefending[0] = false;
     // }
 
-    // function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
-    //     public
-    //     restricted
-    // {
-    //     rankingPointsByCharacter[characterID] = newRankingPoints;
-    // }
-
     // Note: Unmute this to test ranking interactions 
     
     // function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
@@ -1239,8 +1218,4 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     // {
     //     rankingPointsByCharacter[characterID] = newRankingPoints;
     // }
-
-
-
-
 }

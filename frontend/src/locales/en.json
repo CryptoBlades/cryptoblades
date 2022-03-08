@@ -1084,7 +1084,11 @@
     "notInMatch": "The character is not in a match. Try again.",
     "decisionTimeExpired": "Decision time expired.",
     "free": "Free",
-    "freeRerollIn": "Special weapon's free reroll availabe on:"
+    "freeRerollIn": "Special weapon's free reroll availabe on:",
+    "battleOdds": "Battle odds",
+    "winChance": "Chance to win against this opponent",
+    "rankToEarn": "Ranking points you will earn if victorious",
+    "goodLuck": "Good luck!"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
