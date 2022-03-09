@@ -251,6 +251,12 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokenID;
     }
 
+    function mintGiveawayShield(address to, uint256 stars, uint256 shieldType) external restricted returns(uint256) {
+        require(shieldType != 1, "Can't mint founders shield");
+        // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
+        return mintShieldWithStars(to, stars, shieldType, uint256(keccak256(abi.encodePacked(now, tokens.length))));
+    }
+
     function getRandomProperties(uint256 stars, uint256 seed) public pure returns (uint16) {
         return uint16((stars & 0x7) // stars aren't randomized here!
             | ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) & 0x3) << 3) // trait

@@ -42,7 +42,8 @@
                     class="quest-progress-value">{{ `${currentWeeklyCompletions} / ${maxWeeklyCompletions}` }}</span>
             </div>
           </div>
-          <div class="d-flex justify-content-center gap-2">
+          <div class="d-flex justify-content-center align-items-center gap-2 position-relative h-100">
+            <span v-if="weeklyClaimed" class="claimed-banner">{{ $t('quests.claimed') }}</span>
             <QuestComponentIcon :questItemType="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
                                 :amount="weeklyReward.rewardAmount"
                                 :externalAddress="weeklyReward.rewardExternalAddress"/>
@@ -429,6 +430,15 @@ export default Vue.extend({
   position: absolute;
   width: 100%;
   font-weight: bold;
+  text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+}
+
+.claimed-banner {
+  position: absolute;
+  text-transform: uppercase;
+  transform: rotate(15deg);
+  font-weight: bold;
+  text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
 }
 
 @media (max-width: 576px) {

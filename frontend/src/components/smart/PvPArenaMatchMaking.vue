@@ -19,6 +19,18 @@
         </div>
       </div>
     </nav>
+    <a tabindex="0" class="infoPopover" id="duel-popover">
+      <span>{{$t('pvp.battleOdds')}}</span>
+      <div v-if="opponentInformation.fullPower" class="icon">!</div>
+    <b-popover v-if="opponentInformation.fullPower" ref="popover" target="duel-popover" triggers="hover blur" placement="bottom" custom-class="popoverWrapper">
+      <span class="popoverTitle">{{$t('pvp.battleOdds')}}</span>
+      <div class="oddsWrapper">
+        <p>{{$t('pvp.winChance')}}: {{ winChance }}%</p>
+        <p>{{$t('pvp.rankToEarn')}}: {{ rankPlusBonus }}</p>
+        <p class="goodLuck">{{$t('pvp.goodLuck')}}</p>
+      </div>
+    </b-popover>
+    </a>
     <div class="bottom">
       <div class="characterWrapper">
         <div class="elementWrapper">
@@ -150,7 +162,7 @@
       :defenderPower="duelResult.defenderPower"
       :defenderRoll="duelResult.defenderRoll"
       :skillEarned="duelResult.skillDifference"
-      :rankVariation="duelResult.result === 'win' ? '+5' : '-3'"
+      :rankVariation="duelResult.result === 'win' ? `+${this.duelResult.bonusRank ? 5 + +this.duelResult.bonusRank : 5}` : '-3'"
       :userCurrentRank="duelResult.rankDifference"
       @close-modal="handleCloseModal"
     />
@@ -264,7 +276,8 @@ export default {
         rankDifference: null,
         result: '',
         attackerPower: null,
-        defenderPower: null
+        defenderPower: null,
+        bonusRank: null
       },
       matchablePlayersCount: null,
       duelOffsetCost: null,
@@ -332,6 +345,27 @@ export default {
 
     freeRerollLocalTimestamp() {
       return new Date(this.specialWeaponFreeRerollTimestamp * 1000).toLocaleString();
+    },
+
+    winChance() {
+      if (this.characterInformation.fullPower === this.opponentInformation.fullPower) {
+        return 50;
+      }
+
+      if (this.characterInformation.fullPower < this.opponentInformation.fullPower) {
+        const weakerPower = this.characterInformation.fullPower;
+        const strongerPower = this.opponentInformation.fullPower;
+        return (this.getWinChance(weakerPower, strongerPower)).toFixed(1);
+      } else {
+        return '> 50';
+      }
+    },
+
+    rankPlusBonus() {
+      if (this.winChance === '> 50') {
+        return 5;
+      }
+      return (this.getBonusRank(50 - this.winChance) + 5).toFixed(0);
     }
   },
 
@@ -355,6 +389,35 @@ export default {
       'getDuelOffsetCost',
       'fetchFreeOpponentRerollTimestamp'
     ]),
+
+    getWinChance(weakerPower, strongerPower) {
+      // Formula hard-copied from common.sol due to contract size limitations in PvPArena.sol
+      const strongerMinRoll = strongerPower * 0.7;
+      const strongerMaxRoll = strongerPower * 1.3;
+
+      const weakerMinRoll = weakerPower * 0.7;
+      const weakerMaxRoll = weakerPower * 1.3;
+
+      const strongerRollSpread = strongerMaxRoll - strongerMinRoll;
+      const weakerRollSpread = weakerMaxRoll - weakerMinRoll;
+
+      const rollOverlap = weakerMaxRoll - strongerMinRoll;
+
+      const strongerRollChanceToOverlap = rollOverlap * 100 / strongerRollSpread;
+
+      const weakerRollChanceToOverlap = rollOverlap * 100 / weakerRollSpread;
+
+      return strongerRollChanceToOverlap * weakerRollChanceToOverlap / 200;
+    },
+
+    getBonusRank(processedWinChance) {
+      // Formula hard-copied from common.sol due to contract size limitations in PvPArena.sol
+      if (processedWinChance <= 40) {
+        return (53**processedWinChance) / (50**processedWinChance);
+      } else {
+        return ((3**((processedWinChance * 1.3) - 48)) / (2**((processedWinChance * 1.3) - 48))) + 7;
+      }
+    },
 
     handleErrorMessage(value, errorMessage, returnedMessage) {
       if (value.includes(`reverted with reason string '${errorMessage}'`)) {
@@ -457,12 +520,13 @@ export default {
           this.duelResult.result = formattedResult.attackerWon ? 'win' : 'lose';
           this.duelResult.attackerRoll = formattedResult.attackerRoll;
           this.duelResult.defenderRoll = formattedResult.defenderRoll;
+          this.duelResult.bonusRank = formattedResult.bonusRank;
           this.duelResult.skillDifference = formattedResult.attackerWon ?
             +this.formattedDuelCost * 0.7 :
             this.formattedDuelCost;
           // TODO: Make this prettier
           this.duelResult.rankDifference = formattedResult.attackerWon ?
-            +this.characterInformation.rank + 5 :
+            +this.characterInformation.rank + 5 + +this.duelResult.bonusRank :
             +this.characterInformation.rank - 3 <= 0 ?
               0 :
               +this.characterInformation.rank - 3;
@@ -511,7 +575,8 @@ export default {
         rankDifference: null,
         result: '',
         attackerPower: null,
-        defenderPower: null
+        defenderPower: null,
+        bonusRank: null,
       };
     },
 
@@ -646,11 +711,67 @@ export default {
 span, p, li, button {
   font-family: 'Roboto';
 }
+.infoPopover {
+  display: flex;
+  margin: 0 auto;
+  margin-bottom: 2rem;
+  align-items: center;
+  vertical-align: middle;
+  place-content: center;
+  font-size: .85rem;
+  &:hover {
+    text-shadow: none;
+  }
+  span {
+    font-family: 'Trajan';
+  }
+  .icon {
+    display: flex;
+    height: 1.25rem;
+    width: 1.25rem;
+    margin-left: 0.25rem;
+    align-items: center;
+    vertical-align: middle;
+    place-content: center;
+    border-radius: 9999px;
+    background: #cec198;
+    color: black;
+    font-weight: 700;
+  }
+}
+.popoverWrapper, .permanent {
+  padding: 1rem 1rem 0.5rem 1rem;
+  border: 1px solid #cec198;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  background-color: #141414;
+  .popoverTitle {
+    font-family: 'Trajan';
+    color: #cec198;
+  }
+  .oddsWrapper {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+  }
+  p {
+    color: #b4b0a7;
+    font-size: .8rem;
+  }
+  p:last-of-type {
+    margin-bottom: .5rem;
+    color: #cec198;
+    font-size: .9rem;
+    font-family: 'Trajan';
+  }
+  .goodLuck {
+    margin: 0 auto;
+  }
+}
   nav {
     display: flex;
     width: 100%;
     justify-content: space-between;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid #363636;
     .navTitle {
