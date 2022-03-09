@@ -24,6 +24,7 @@ const CharacterEarthTraitChangeConsumables = artifacts.require('CharacterEarthTr
 const CharacterWaterTraitChangeConsumables = artifacts.require('CharacterWaterTraitChangeConsumables');
 const CharacterLightningTraitChangeConsumables = artifacts.require('CharacterLightningTraitChangeConsumables');
 const Raid1 = artifacts.require('Raid1');
+const experienceTable = require('../../experience-table')
 
 async function prepareContracts(accounts) {
   const skillToken = await SkillToken.new();
@@ -111,7 +112,7 @@ async function prepareContracts(accounts) {
   await weapons.migrateTo_951a020();
   await weapons.migrateTo_surprise(promos.address);
 
-  await characters.migrateTo_1ee400a();
+  await characters.migrateTo_1ee400a(experienceTable.values);
   await characters.migrateTo_951a020();
   await characters.migrateTo_ef994e2(promos.address);
   await characters.migrateTo_b627f23();
