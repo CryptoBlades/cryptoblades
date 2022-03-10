@@ -7,7 +7,7 @@
         {{option.name}} <span v-if="!option.noAmount">({{option.amount}} {{$t('nftOptionsDropdown.left')}})</span>
       </b-dropdown-item>
       <b-dropdown-item v-if="showTransfer" @click="resultMsg = ''; $refs['character-transfer-modal'].show()">
-        Transfer
+        {{$t('nft.transferMenuItem')}}
       </b-dropdown-item>
     </b-dropdown>
 
@@ -15,7 +15,7 @@
       class="centered-modal"
       ref="character-transfer-modal"
       ok-title="Transfer!"
-      @ok="transfer"
+      @ok="$t('nft.transferOkButton')"
       :ok-disabled="!isValidAddress || receiverAddress === ''  || isSending"
       :cancel-disabled="isSending"
       >

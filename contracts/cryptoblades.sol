@@ -511,7 +511,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
                 .mul(ABDKMath64x64.fromUInt(num))
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
-        payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
+        _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
 
         _mintWeaponNLogic(num, chosenElement, eventId);
     }
@@ -522,7 +522,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             mintWeaponFee
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
-        payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
+        _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
 
         _mintWeaponLogic(chosenElement, eventId);
     }
@@ -697,9 +697,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet, fromStaked);
     }
 
-    function payContractStakedOnly(address playerAddress, uint256 convertedAmount) public restricted {
+    function _payContractStakedOnly(address playerAddress, uint256 convertedAmount) internal {
         stakeFromGameImpl.unstakeToGame(playerAddress, convertedAmount);
         _trackIncome(convertedAmount);
+    }
+
+    function payContractStakedOnly(address playerAddress, uint256 convertedAmount) external restricted {
+        _payContractStakedOnly(playerAddress, convertedAmount);
     }
 
     function _deductPlayerSkillStandard(
