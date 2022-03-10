@@ -55,6 +55,10 @@
     "youRolled": "You rolled:",
     "enemyRolled": "Enemy rolled:"
   },
+  "nft": {
+     "transferMenuItem": "Transfer",
+     "transferOkButton": "Transfer!"
+  },
   "nftIcon": {
     "weaponTooltip": "Weapons ({stars}*)",
     "junkTooltip": "Junk ({stars}*)",
@@ -107,6 +111,7 @@
     "burnSelected": "Burn selected characters",
     "upgradeSelected": "Upgrade selected character",
     "transferSelected": "Transfer selected soul amount",
+    "transferSouls": "Transfer souls",
     "charactersToBurn": "Characters to burn",
     "soul": "Soul",
     "burnWarning": "Please confirm you want to burn {characterAmount} selected character(s).",

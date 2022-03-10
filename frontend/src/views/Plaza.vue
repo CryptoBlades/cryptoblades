@@ -48,7 +48,7 @@
               :class="{ switch_active: isTransferring }"
               @click="isBurning = false; isUpgrading = false; isTransferring = true; clearAllBurn();"
             >
-              <span>Transfer</span>
+              <span>{{$t('plaza.transfer')}}</span>
             </button>
           </div>
         </div>
@@ -80,7 +80,7 @@
             @click="showTransferConfirmation"
             v-tooltip="$t('plaza.transferSelected')"
             :disabled="!isValidWeb3Address(receiverAddress)">
-            Transfer souls
+            {{$t('plaza.transferSouls')}}
           </b-button>
           <b-button
             variant="primary"
