@@ -3,7 +3,11 @@
     <b-navbar class="main-nav" toggleable="sm">
       <b-navbar-brand href="#" class="nav-logo">
         <router-link :to="{ name: 'plaza' }" exact class="new-game-ui-logo">
-          <img src="../assets/cb-logo.png" class="logo d-inline-block align-top" alt="Logo">
+          <img
+            src="../assets/cb-logo.png"
+            class="logo d-inline-block align-top"
+            alt="Logo"
+          />
         </router-link>
       </b-navbar-brand>
 
@@ -22,20 +26,31 @@
 
       <!-- <claim-rewards-bar :isBar="false" v-if="!canShowRewardsBar" /> -->
 
-      <options class="d-none d-sm-flex"/>
+      <options class="d-none d-sm-flex" />
 
       <!-- Render only on mobile view -->
       <div class="d-flex d-sm-none">
         <skill-balance-display class="skill-display-mobile" />
-        <options class="options-display-mobile"/>
+        <options class="options-display-mobile" />
       </div>
     </b-navbar>
     <claim-rewards-bar v-if="canShowRewardsBar" />
     <div class="container_row">
-      <img src="../assets/divider4.png" class="expander-divider">
-      <b-button class="expander-button" @click="toggleCharacterView" v-if="ownCharacters.length > 0">
-        <b-icon-arrows-expand class="expand-collapse-icon" v-if="!getIsCharacterViewExpanded" />
-        <b-icon-arrows-collapse class="expand-collapse-icon" v-if="getIsCharacterViewExpanded" aria-hidden="true" />
+      <img src="../assets/divider4.png" class="expander-divider" />
+      <b-button
+        class="expander-button"
+        @click="toggleCharacterView"
+        v-if="ownCharacters.length > 0"
+      >
+        <b-icon-arrows-expand
+          class="expand-collapse-icon"
+          v-if="!getIsCharacterViewExpanded"
+        />
+        <b-icon-arrows-collapse
+          class="expand-collapse-icon"
+          v-if="getIsCharacterViewExpanded"
+          aria-hidden="true"
+        />
       </b-button>
     </div>
   </div>
@@ -57,18 +72,17 @@ export default Vue.extend({
     ViewLinks,
     SkillBalanceDisplay,
     ClaimRewardsBar,
-    Options
+    Options,
   },
-
 
   data() {
     return {
-      canShowRewardsBar: true
+      canShowRewardsBar: true,
     };
   },
 
   computed: {
-    ...mapGetters(['getIsCharacterViewExpanded','ownCharacters'])
+    ...mapGetters(['getIsCharacterViewExpanded', 'ownCharacters']),
   },
 
   methods: {
@@ -78,8 +92,11 @@ export default Vue.extend({
     },
     toggleCharacterView(): void {
       this.setIsCharacterViewExpanded(!this.getIsCharacterViewExpanded);
-      localStorage.setItem('isCharacterViewExpanded', this.getIsCharacterViewExpanded ? 'true' : 'false');
-    }
+      localStorage.setItem(
+        'isCharacterViewExpanded',
+        this.getIsCharacterViewExpanded ? 'true' : 'false'
+      );
+    },
   },
 
   mounted() {
@@ -90,7 +107,6 @@ export default Vue.extend({
 </script>
 
 <style>
-
 /** Suggest to move this to atomic folder structure like assets/css **/
 a {
   text-decoration: none;
@@ -105,13 +121,17 @@ a.router-link-active {
   text-decoration: none !important;
 }
 
- .main-nav > .navbar-brand {
-    align-self: center;
-    padding-bottom: 0px !important;
-  }
+.main-nav > .navbar-brand {
+  align-self: center;
+  padding-bottom: 0px !important;
+}
 .dropdown-menu {
-  background: rgb(20,20,20);
-  background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
+  background: rgb(20, 20, 20);
+  background: linear-gradient(
+    45deg,
+    rgba(20, 20, 20, 1) 0%,
+    rgba(36, 39, 32, 1) 100%
+  );
   border: none !important;
 }
 
@@ -119,19 +139,18 @@ a.router-link-active {
   background: transparent !important;
 }
 @media (max-width: 1024px) {
- .navbar-expand-sm {
+  .navbar-expand-sm {
     text-align: center;
     margin: 0 auto;
   }
 }
-
-
 
 @media (max-width: 576px) {
   .main-nav {
     align-items: normal !important; /** force only for mobile to manually set alignments **/
     flex-direction: column;
   }
+
   .main-nav > .navbar-brand {
     align-self: center;
   }
@@ -139,7 +158,7 @@ a.router-link-active {
     flex-direction: row;
     justify-content: space-evenly;
   }
-  .skill-display-mobile  {
+  .skill-display-mobile {
     flex: 5;
   }
   .skill-display-mobile > .balance-container {
@@ -153,8 +172,56 @@ a.router-link-active {
     text-align: center;
     margin: 0 auto;
   }
-  .nav-logo{
-    margin-right:0 !important;
+  .nav-logo {
+    margin-right: 0 !important;
+  }
+  .menu-icons {
+    width: 100% !important;
+  }
+
+  .row-icons {
+    width: 100%;
+  }
+
+  .ads {
+    order: 2 !important;
+  }
+
+  .ads-space {
+    width: 100% !important;
+    height: 100% !important;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+  }
+
+  .ads {
+    order: 2;
+  }
+
+  .menu-icon > img {
+    height: 20px;
+    width: 20px;
+  }
+
+  .menu-icon {
+    margin-left: 10px !important;
+    width: 70px !important;
+    height: 70px !important;
+    font-size: 13px;
+    padding: 0px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .menu-icon > p {
+    margin-bottom: 0px !important;
+  }
+
+  .row-icons {
+    height: fit-content !important;
+    margin-bottom: 15px;
   }
 }
 </style>
@@ -164,10 +231,12 @@ a.router-link-active {
   max-width: 280px;
 }
 
-
-
 .main-nav {
   padding: 0px;
+}
+
+.x-button {
+  width: 100%;
 }
 
 @media (min-width: 1024px) {
@@ -182,15 +251,15 @@ a.router-link-active {
 }
 
 .navbar {
-  background: linear-gradient(45deg,#141414,#242720);
+  background: linear-gradient(45deg, #141414, #242720);
   background-color: #343a40 !important;
   border-bottom: 2px solid #404857;
 }
 .main-nav > .view-links {
-  flex : 2.3;
+  flex: 2.3;
 }
 .nav-logo {
-  flex : 0.5;
+  flex: 0.5;
 }
 
 .expand-collapse-icon {
@@ -200,18 +269,22 @@ a.router-link-active {
   color: #9e8a57;
 }
 
-.expander-button{
+.expander-button {
   position: relative;
   height: 27px;
   width: 27px;
   top: -12px;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
-  border: 2px solid #312E21 !important;
+  background: linear-gradient(
+    45deg,
+    rgba(20, 20, 20, 1) 0%,
+    rgba(36, 39, 32, 1) 100%
+  );
+  border: 2px solid #312e21 !important;
   border-radius: 0.1em;
   justify-items: center;
 }
 
-.container_row{
+.container_row {
   display: grid;
   justify-items: center;
 }
@@ -221,7 +294,8 @@ a.router-link-active {
   position: relative;
 }
 
-.expander-divider, .expander-button{
+.expander-divider,
+.expander-button {
   grid-column: 1;
   grid-row: 1;
 }

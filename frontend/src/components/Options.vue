@@ -1,126 +1,212 @@
 <template>
   <div class="body main-font options">
-    <img src="../assets/navbar-icons/6351903_burger_list_menu_navigation_icon@2x.png" class="burger-icon" @click="openMenu"/>
+    <img
+      src="../assets/navbar-icons/6351903_burger_list_menu_navigation_icon@2x.png"
+      class="burger-icon"
+      @click="openMenu"
+    />
     <div class="menu-open" v-if="isMenuOpen">
-      <div @click="closeMenu" class="x-button"><img src="../assets/navbar-icons/Close.png" /> Close (ESC)</div>
-      <div></div>
-      <div class="ads"></div>
-      <div class="menu-icons">
-        <div class="row-icons">
-          <router-link class="menu-icon" v-if="!stakeOnly" :to="{ name: 'plaza'}" exact>
-            <img src="../assets/navbar-icons/new-plaza-icon.png">
-            <p>{{ $t("viewLink.character") }}</p>
-          </router-link>
-
-          <router-link class="menu-icon" v-if="!stakeOnly" :to="{ name: 'blacksmith'}" exact>
-            <img src="../assets/navbar-icons/new-blacksmith-icon.png">
-            <p>{{ $t("viewLink.blacksmith") }}</p>
-          </router-link>
-
-          <router-link class="menu-icon" v-if="!stakeOnly" :to="{ name: 'combat'}" exact>
-            <img src="../assets/navbar-icons/new-combat-icon.png">
-            <p>{{ $t("viewLink.combat") }}</p>
-          </router-link >
-
-          <router-link class="menu-icon" v-if="pvp" :to="{ name: 'pvp'}" exact>
-            <img src="../assets/navbar-icons/new-arena-icon.png">
-            <p>{{ $t("viewLink.arena") }}</p>
-          </router-link>
-
-          <div v-else class="menu-icon disabled-hover">
-            <img src="../assets/navbar-icons/new-arena-icon.png">
-            <p>{{ $t("viewLink.arena") }}</p>
+      <b-row>
+        <b-col>
+          <div @click="closeMenu" class="x-button text-right">
+            <img src="../assets/navbar-icons/Close.png" /> Close (ESC)
           </div>
-        </div>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="12" lg="6" sm="12" class="ads">
+          <b-row class="ads-space">
+            <p>Ad Space</p>
+          </b-row>
+          <b-row class="ads-space">
+            <p>Ad Space</p>
+          </b-row>
+          <!-- <div class="ads"></div> -->
+        </b-col>
+        <b-col cols="12" lg="6" sm="12" order-md="1">
+          <div class="menu-icons">
+            <div class="row-icons">
+              <router-link
+                class="menu-icon"
+                v-if="!stakeOnly"
+                :to="{ name: 'plaza' }"
+                exact
+              >
+                <img src="../assets/navbar-icons/new-plaza-icon.png" />
+                <p>{{ $t("viewLink.character") }}</p>
+              </router-link>
 
-        <div class="row-icons">
-          <router-link class="menu-icon" v-if="!stakeOnly && raid" :to="{ name: 'raid'}" exact>
-            <img src="../assets/navbar-icons/new-raid-icon.png">
-            <p>{{ $t("viewLink.raid") }}</p>
-          </router-link>
+              <router-link
+                class="menu-icon"
+                v-if="!stakeOnly"
+                :to="{ name: 'blacksmith' }"
+                exact
+              >
+                <img src="../assets/navbar-icons/new-blacksmith-icon.png" />
+                <p>{{ $t("viewLink.blacksmith") }}</p>
+              </router-link>
 
-          <div v-if="!raid" class="menu-icon disabled-hover">
-            <img src="../assets/navbar-icons/new-raid-icon.png">
-            <p>{{ $t("viewLink.raid") }}</p>
-          </div>
+              <router-link
+                class="menu-icon"
+                v-if="!stakeOnly"
+                :to="{ name: 'combat' }"
+                exact
+              >
+                <img src="../assets/navbar-icons/new-combat-icon.png" />
+                <p>{{ $t("viewLink.combat") }}</p>
+              </router-link>
 
-          <router-link class="menu-icon" v-if="quests" :to="{ name: 'quests'}" exact>
-            <img src="../assets/navbar-icons/new-quests-icon.png" />
-            <p>{{ $t("viewLink.quests") }}</p>
-            <hint v-if="!supportsQuests" class="hint" :text="$t('viewLink.functionalityNotSupportedTooltip')"/>
-          </router-link>
+              <router-link
+                class="menu-icon"
+                v-if="pvp"
+                :to="{ name: 'pvp' }"
+                exact
+              >
+                <img src="../assets/navbar-icons/new-arena-icon.png" />
+                <p>{{ $t("viewLink.arena") }}</p>
+              </router-link>
 
-          <div v-else class="menu-icon disabled-hover">
-            <img src="../assets/navbar-icons/new-quests-icon.png">
-            <p>{{ $t("viewLink.quests") }}</p>
-          </div>
+              <div v-else class="menu-icon disabled-hover">
+                <img src="../assets/navbar-icons/new-arena-icon.png" />
+                <p>{{ $t("viewLink.arena") }}</p>
+              </div>
+            </div>
 
-          <a class="menu-icon" v-if="!stakeOnly && market" href="https://bazaar.market" target="_blank">
-            <img src="../assets/navbar-icons/new-bazaar-icon.png">
-            <p>{{ $t("viewLink.bazaar") }}</p>
-          </a>
+            <div class="row-icons">
+              <router-link
+                class="menu-icon"
+                v-if="!stakeOnly && raid"
+                :to="{ name: 'raid' }"
+                exact
+              >
+                <img src="../assets/navbar-icons/new-raid-icon.png" />
+                <p>{{ $t("viewLink.raid") }}</p>
+              </router-link>
 
-          <div v-if="!market" class="menu-icon disabled-hover">
-            <img src="../assets/navbar-icons/new-bazaar-icon.png">
-            <p>{{ $t("viewLink.bazaar") }}</p>
-          </div>
+              <div v-if="!raid" class="menu-icon disabled-hover">
+                <img src="../assets/navbar-icons/new-raid-icon.png" />
+                <p>{{ $t("viewLink.raid") }}</p>
+              </div>
 
-          <router-link class="menu-icon" :to="{ name: 'select-stake-type'}" exact>
-            <img src="../assets/navbar-icons/new-stake-icon.png">
-            <p>{{ $t("viewLink.stake") }}</p>
-          </router-link>
-        </div>
+              <router-link
+                class="menu-icon"
+                v-if="quests"
+                :to="{ name: 'quests' }"
+                exact
+              >
+                <img src="../assets/navbar-icons/new-quests-icon.png" />
+                <p>{{ $t("viewLink.quests") }}</p>
+                <hint
+                  v-if="!supportsQuests"
+                  class="hint"
+                  :text="$t('viewLink.functionalityNotSupportedTooltip')"
+                />
+              </router-link>
 
-        <div class="row-icons">
-            <router-link class="menu-icon" :to="{ name: 'treasury'}" exact>
-            <img src="../assets/navbar-icons/new-treasury-icon.png">
-            <p>{{ $t("viewLink.treasury") }}</p>
-            </router-link>
+              <div v-else class="menu-icon disabled-hover">
+                <img src="../assets/navbar-icons/new-quests-icon.png" />
+                <p>{{ $t("viewLink.quests") }}</p>
+              </div>
 
-          <router-link class="menu-icon" :to="{ name: 'leaderboard'}" exact>
-            <img src="../assets/navbar-icons/new-leaderboard-icon.png">
-            <p>{{ $t("viewLink.leaderboard") }}</p>
-          </router-link>
+              <a
+                class="menu-icon"
+                v-if="!stakeOnly && market"
+                href="https://bazaar.market"
+                target="_blank"
+              >
+                <img src="../assets/navbar-icons/new-bazaar-icon.png" />
+                <p>{{ $t("viewLink.bazaar") }}</p>
+              </a>
 
-           <router-link class="menu-icon" :to="{ name: 'bridge'}" v-if="isBridgeEnabled" exact>
-            <img src="../assets/navbar-icons/new-bridge-icon.png">
-            <p>{{ $t("viewLink.nftbridge") }}</p>
-          </router-link>
+              <div v-if="!market" class="menu-icon disabled-hover">
+                <img src="../assets/navbar-icons/new-bazaar-icon.png" />
+                <p>{{ $t("viewLink.bazaar") }}</p>
+              </div>
 
-           <div v-else class="menu-icon disabled-hover">
-            <img src="../assets/navbar-icons/new-bridge-icon.png">
-            <p>{{ $t("viewLink.nftbridge") }}</p>
-          </div>
+              <router-link
+                class="menu-icon"
+                :to="{ name: 'select-stake-type' }"
+                exact
+              >
+                <img src="../assets/navbar-icons/new-stake-icon.png" />
+                <p>{{ $t("viewLink.stake") }}</p>
+              </router-link>
+            </div>
 
-          <a class="menu-icon"  href="https://cryptoblades.gitbook.io/wiki/" target="_blank">
-            <img src="../assets/navbar-icons/new-wiki-icon.png">
-            <p>{{ $t("viewLink.wiki") }}</p>
-          </a>
-        </div>
+            <div class="row-icons">
+              <router-link class="menu-icon" :to="{ name: 'treasury' }" exact>
+                <img src="../assets/navbar-icons/new-treasury-icon.png" />
+                <p>{{ $t("viewLink.treasury") }}</p>
+              </router-link>
 
-         <div class="row-icons">
-            <router-link class="menu-icon" :to="{ name: 'options'}" exact>
-            <img src="../assets/navbar-icons/new-gear-icon.png">
-            <p>{{ $t("viewLink.settings") }}</p>
-            </router-link>
+              <router-link
+                class="menu-icon"
+                :to="{ name: 'leaderboard' }"
+                exact
+              >
+                <img src="../assets/navbar-icons/new-leaderboard-icon.png" />
+                <p>{{ $t("viewLink.leaderboard") }}</p>
+              </router-link>
 
-            <router-link v-if="hasAdminAccess" class="menu-icon" :to="{ name: 'admin'}" exact>
-            <img src="../assets/navbar-icons/new-gear-icon.png">
-            <p>{{ $t("viewLink.admin") }}</p>
-            </router-link>
+              <router-link
+                class="menu-icon"
+                :to="{ name: 'bridge' }"
+                v-if="isBridgeEnabled"
+                exact
+              >
+                <img src="../assets/navbar-icons/new-bridge-icon.png" />
+                <p>{{ $t("viewLink.nftbridge") }}</p>
+              </router-link>
 
-            <router-link v-if="merchandise" class="menu-icon" :to="{ name: 'merchandise'}" exact>
-            <img src="../assets/navbar-icons/new-bazaar-icon.png">
-            <p>{{ $t("viewLink.merchandise") }}</p> <hint
-                v-if="!supportsMerchandise" class="hint"
-                :text="$t('viewLink.functionalityNotSupportedTooltip')"/>
-            </router-link>
-        </div>
+              <div v-else class="menu-icon disabled-hover">
+                <img src="../assets/navbar-icons/new-bridge-icon.png" />
+                <p>{{ $t("viewLink.nftbridge") }}</p>
+              </div>
 
-        <div class="horizontal-small"></div>
+              <a
+                class="menu-icon"
+                href="https://cryptoblades.gitbook.io/wiki/"
+                target="_blank"
+              >
+                <img src="../assets/navbar-icons/new-wiki-icon.png" />
+                <p>{{ $t("viewLink.wiki") }}</p>
+              </a>
+            </div>
 
-        <!-- disabled for now , will integrate later when other UI's merged -->
-        <!-- <div class="menu-other-options">
+            <div class="row-icons">
+              <router-link class="menu-icon" :to="{ name: 'options' }" exact>
+                <img src="../assets/navbar-icons/new-gear-icon.png" />
+                <p>{{ $t("viewLink.settings") }}</p>
+              </router-link>
+
+              <router-link
+                v-if="hasAdminAccess"
+                class="menu-icon"
+                :to="{ name: 'admin' }"
+                exact
+              >
+                <img src="../assets/navbar-icons/new-gear-icon.png" />
+                <p>{{ $t("viewLink.admin") }}</p>
+              </router-link>
+
+              <router-link
+                v-if="merchandise"
+                class="menu-icon"
+                :to="{ name: 'merchandise' }"
+                exact
+              >
+                <img src="../assets/navbar-icons/new-bazaar-icon.png" />
+                <p>{{ $t("viewLink.merchandise") }}</p>
+                <hint
+                  v-if="!supportsMerchandise"
+                  class="hint"
+                  :text="$t('viewLink.functionalityNotSupportedTooltip')"
+                />
+              </router-link>
+            </div>
+
+            <!-- disabled for now , will integrate later when other UI's merged -->
+            <!-- <div class="menu-other-options">
           <div class="current-chain">
             <b>Current Chain</b>
             <select class="form-control wep-trait-form">
@@ -135,67 +221,98 @@
             </select>
           </div>
         </div> -->
-
-      </div>
+          </div>
+        </b-col>
+      </b-row>
+      <div></div>
     </div>
 
-    <b-modal class="centered-modal" ref="need-gas-modal" :title="$t('needGasModal.title')"
-      @ok="claimSkill(ClaimStage.Stake)" :ok-title="$t('needGasModal.okTitle')"
-      @cancel="$router.push({ name: 'portal' })" :cancel-title="$t('needGasModal.cancelTitle')" >
-        {{$t('needGasModal.needWithdraw')}}
-        <div class="text-center">
-          <hr class="hr-divider">
-          {{$t('needGasModal.holdReminder')}}<br>
-          <span v-html="$t('needGasModal.holdReminderText')"></span>
-          <div class="row">
-            <div class="col-5">{{$t('needGasModal.yourTax')}}</div>
-            <div class="col-2"><span class="text-danger font-weight-bold">{{formattedRewardsClaimTax}}</span></div>
-            <div class="col-5 text-left">{{$t('needGasModal.reduces1')}}<br>
-              {{$t('needGasModal.reduces2')}}</div>
+    <b-modal
+      class="centered-modal"
+      ref="need-gas-modal"
+      :title="$t('needGasModal.title')"
+      @ok="claimSkill(ClaimStage.Stake)"
+      :ok-title="$t('needGasModal.okTitle')"
+      @cancel="$router.push({ name: 'portal' })"
+      :cancel-title="$t('needGasModal.cancelTitle')"
+    >
+      {{ $t("needGasModal.needWithdraw") }}
+      <div class="text-center">
+        <hr class="hr-divider" />
+        {{ $t("needGasModal.holdReminder") }}<br />
+        <span v-html="$t('needGasModal.holdReminderText')"></span>
+        <div class="row">
+          <div class="col-5">{{ $t("needGasModal.yourTax") }}</div>
+          <div class="col-2">
+            <span class="text-danger font-weight-bold">{{
+              formattedRewardsClaimTax
+            }}</span>
+          </div>
+          <div class="col-5 text-left">
+            {{ $t("needGasModal.reduces1") }}<br />
+            {{ $t("needGasModal.reduces2") }}
           </div>
         </div>
+      </div>
     </b-modal>
-    <b-modal class="centered-modal" ref="stake-suggestion-modal" :title="$t('stakeModal.title')"
+    <b-modal
+      class="centered-modal"
+      ref="stake-suggestion-modal"
+      :title="$t('stakeModal.title')"
       @ok="$router.push({ name: 'select-stake-type' })"
       :ok-title="$t('stakeModal.okTitle')"
       :cancel-title="$t('stakeModal.cancelTitle')"
-      >
-        {{$t('stakeModal.stakeText')}}
+    >
+      {{ $t("stakeModal.stakeText") }}
       <a href="#" @click="claimSkill(ClaimStage.Claim)">
-      <br>
-      <span v-if="(this.rewardsClaimTaxAsFactorBN > 0)">{{$t('stakeModal.bonusWarning1')}}</span>
-      <span v-else>{{$t('stakeModal.bonusWarning2', {formattedTaxAmount : this.formattedTaxAmount})}}</span>      </a>
+        <br />
+        <span v-if="this.rewardsClaimTaxAsFactorBN > 0">{{
+          $t("stakeModal.bonusWarning1")
+        }}</span>
+        <span v-else>{{
+          $t("stakeModal.bonusWarning2", {
+            formattedTaxAmount: this.formattedTaxAmount,
+          })
+        }}</span>
+      </a>
     </b-modal>
-    <b-modal class="centered-modal" ref="claim-confirmation-modal"
-    :title="$t('stakeModal.confirmModal.title')"
-    :ok-title="$t('stakeModal.confirmModal.okTitle')"
-    :cancel-title="$t('stakeModal.confirmModal.cancelTitle')"
-    @ok="onClaimTokens()">
-      <span v-if="(this.rewardsClaimTaxAsFactorBN > 0)">
-        {{$t('stakeModal.confirmModal.claimWarning2', {
-          formattedRewardsClaimTax,
-          formattedTaxAmount : this.formattedTaxAmount,
-          formattedBonusLost
-          } )}}
+    <b-modal
+      class="centered-modal"
+      ref="claim-confirmation-modal"
+      :title="$t('stakeModal.confirmModal.title')"
+      :ok-title="$t('stakeModal.confirmModal.okTitle')"
+      :cancel-title="$t('stakeModal.confirmModal.cancelTitle')"
+      @ok="onClaimTokens()"
+    >
+      <span v-if="this.rewardsClaimTaxAsFactorBN > 0">
+        {{
+          $t("stakeModal.confirmModal.claimWarning2", {
+            formattedRewardsClaimTax,
+            formattedTaxAmount: this.formattedTaxAmount,
+            formattedBonusLost,
+          })
+        }}
       </span>
       <span v-else>
-        {{$t('stakeModal.confirmModal.claimWarning1', {formattedBonusLost})}}
+        {{
+          $t("stakeModal.confirmModal.claimWarning1", { formattedBonusLost })
+        }}
       </span>
-      <b>{{$t('stakeModal.confirmModal.cantBeUndone')}}</b>
+      <b>{{ $t("stakeModal.confirmModal.cantBeUndone") }}</b>
     </b-modal>
   </div>
 </template>
 
 <script lang="ts">
 import Events from '../events';
-import {mapActions, mapGetters, mapState} from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import {Accessors} from 'vue/types/options';
+import { Accessors } from 'vue/types/options';
 import Vue from 'vue';
-import {fromWeiEther, toBN} from '../utils/common';
-import {nft_bridge as bridgeEnabled} from './../feature-flags';
-import {SupportedProject} from '@/views/Treasury.vue';
-import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
+import { fromWeiEther, toBN } from '../utils/common';
+import { nft_bridge as bridgeEnabled } from './../feature-flags';
+import { SupportedProject } from '@/views/Treasury.vue';
+import { market, merchandise, portal, pvp, quests, raid, stakeOnly } from '@/feature-flags';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -239,7 +356,7 @@ export default Vue.extend({
   data() {
     return {
       isBridgeEnabled: bridgeEnabled,
-      isMenuOpen : false,
+      isMenuOpen: false,
       showGraphics: false,
       hideRewards: false,
       hideWalletWarning: false,
@@ -256,8 +373,8 @@ export default Vue.extend({
     } as Data;
   },
 
-  watch:{
-    $route (){
+  watch: {
+    $route() {
       this.isMenuOpen = false;
     }
   },
@@ -271,10 +388,10 @@ export default Vue.extend({
     supportsMerchandise(): boolean {
       return this.getCurrentChainSupportsMerchandise;
     },
-    supportsPvP(): boolean  {
+    supportsPvP(): boolean {
       return this.getCurrentChainSupportsPvP;
     },
-    supportsQuests(): boolean  {
+    supportsQuests(): boolean {
       return this.getCurrentChainSupportsQuests;
     },
     formattedSkillReward(): string {
@@ -282,7 +399,7 @@ export default Vue.extend({
       return `${toBN(skillRewards).toFixed(4)}`;
     },
     formattedTaxAmount(): string {
-      const skillRewards = fromWeiEther(parseFloat(String(parseFloat(this.skillRewards)*parseFloat(String(this.rewardsClaimTaxAsFactorBN)))) + '');
+      const skillRewards = fromWeiEther(parseFloat(String(parseFloat(this.skillRewards) * parseFloat(String(this.rewardsClaimTaxAsFactorBN)))) + '');
       return `${toBN(skillRewards).toFixed(4)}`;
     },
     formattedRewardsClaimTax(): string {
@@ -293,7 +410,7 @@ export default Vue.extend({
       return `${frac.multipliedBy(100).decimalPlaces(0, BigNumber.ROUND_HALF_UP)}%`;
     },
     formattedBonusLost(): string {
-      const skillLost = fromWeiEther(parseFloat(String(parseFloat(this.skillRewards)*this.directStakeBonusPercent/100)).toString());
+      const skillLost = fromWeiEther(parseFloat(String(parseFloat(this.skillRewards) * this.directStakeBonusPercent / 100)).toString());
       return `${toBN(skillLost).toFixed(4)}`;
     },
     canClaimTokens(): boolean {
@@ -347,18 +464,18 @@ export default Vue.extend({
       this.hasAdminAccess = await this.userHasAnyAdminAccess() || await this.userHasAnyMinterAccess();
     },
     async onClaimTokens() {
-      if(this.canClaimTokens) {
+      if (this.canClaimTokens) {
         await this.claimTokenRewards();
       }
     },
     async claimSkill(stage: ClaimStage) {
-      if(stage === ClaimStage.WaxBridge) {
+      if (stage === ClaimStage.WaxBridge) {
         (this.$refs['need-gas-modal'] as any).show();
       }
-      if(stage === ClaimStage.Stake) {
+      if (stage === ClaimStage.Stake) {
         (this.$refs['stake-suggestion-modal'] as any).show();
       }
-      if(stage === ClaimStage.Claim) {
+      if (stage === ClaimStage.Claim) {
         (this.$refs['stake-suggestion-modal'] as any).hide();
         (this.$refs['claim-confirmation-modal'] as any).show();
       }
@@ -391,15 +508,30 @@ export default Vue.extend({
 .nft-display-icon {
   margin-left: -3px;
   height: 20px;
-  filter: invert(75%) sepia(8%) saturate(243%) hue-rotate(8deg) brightness(96%) contrast(81%);
+  filter: invert(75%) sepia(8%) saturate(243%) hue-rotate(8deg) brightness(96%)
+    contrast(81%);
 }
 .menu-burger {
   font-size: 35px;
 }
 
 .options {
-  padding : 25px;
+  padding: 25px;
 }
+
+.ads-space {
+  background-color: #373737;
+  height: 40%;
+  width: 70%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: aliceblue;
+  font-size: 20px;
+  margin-top: 30px;
+  margin-left: 40px;
+}
+
 .burger-icon {
   width: 35px;
 }
@@ -408,84 +540,83 @@ export default Vue.extend({
 }
 
 .menu-open {
-    height: 100%;
-    width: 100%;
-    top: 0;
-    position: fixed;
-    z-index: 999999;
-    background-color: rgb(0 0 0 / 85%);
-    left: 0;
-    padding: 40px;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  position: fixed;
+  z-index: 999999;
+  background-color: rgb(0 0 0 / 85%);
+  left: 0;
+  padding: 20px;
 }
 
 .x-button {
   float: right;
-  color : white;
+  color: white;
   font-size: 23px;
-  margin-right: 60px;
 }
 .x-button:hover {
   cursor: pointer;
 }
-.ads {
-  float: left;
-  width: 60%;
-  height: 100%;
-  margin-top: 30px;
-}
+
 .menu-icons {
-  float : right;
-  width: 40%;
+  float: right;
+  width: 60%;
   height: 100%;
   padding-top: 15px;
   display: inline;
+  border-bottom: 1px solid #1a253b;
+  padding-bottom: 20px;
 }
 
 .menu-icon {
   width: 95px;
   height: 95px;
-  background: #1A253B 0% 0% no-repeat padding-box;
+  background: #1a253b 0% 0% no-repeat padding-box;
   border: 1px solid #344362;
   border-radius: 5px;
   opacity: 1;
   text-align: center;
-  padding-top:20px;
-  color : white;
+  margin-left: 20px;
+  padding-top: 20px;
+  color: white;
 }
 .menu-icon > img {
-  height : 30px;
+  height: 30px;
 }
 .row-icons {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: left;
   align-items: center;
   height: 120px;
 }
 
 .horizontal-small {
-  margin : 45px 35px 45px 35px;
-  border-top : 2px solid rgb(85, 84, 84)
+  margin: 45px 35px 45px 35px;
+  border-top: 2px solid rgb(85, 84, 84);
 }
 
 .row-icons-last {
   justify-content: flex-start;
   display: flex;
   margin-left: 6.5%;
-  margin-top : 15px;
+  margin-top: 15px;
 }
 
 .menu-other-options {
   display: flex;
   justify-content: center;
 }
-.current-chain, .payout-currency {
+.current-chain,
+.payout-currency {
   width: 50%;
   padding: 15px 35px 15px 35px;
 }
 
-.current-chain, .payout-currency > b {
+.current-chain,
+.payout-currency > b {
   font-size: 18px;
-  color : white;
+  color: white;
 }
 
 .disabled-hover {
