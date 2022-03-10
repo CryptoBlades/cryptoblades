@@ -14,8 +14,8 @@
     <b-modal
       class="centered-modal"
       ref="character-transfer-modal"
-      ok-title="Transfer!"
-      @ok="$t('nft.transferOkButton')"
+      :ok-title="$t('nft.transferOkButton')"
+      @ok="transfer"
       :ok-disabled="!isValidAddress || receiverAddress === ''  || isSending"
       :cancel-disabled="isSending"
       >
