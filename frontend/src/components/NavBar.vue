@@ -20,8 +20,6 @@
 
       <skill-balance-display class="ml-auto d-none d-sm-flex" />
 
-      <!-- <claim-rewards-bar :isBar="false" v-if="!canShowRewardsBar" /> -->
-
       <options class="d-none d-sm-flex"/>
 
       <!-- Render only on mobile view -->
@@ -107,7 +105,7 @@ a.router-link-active {
 
  .main-nav > .navbar-brand {
     align-self: center;
-    padding-bottom: 0px !important;
+    padding-bottom: 0px;
   }
 .dropdown-menu {
   background: rgb(20,20,20);
@@ -163,13 +161,9 @@ a.router-link-active {
 .logo {
   max-width: 280px;
 }
-
-
-
 .main-nav {
   padding: 0px;
 }
-
 @media (min-width: 1024px) {
   .new-game-ui-logo {
     height: 100px;
@@ -183,7 +177,6 @@ a.router-link-active {
 
 .navbar {
   background: linear-gradient(45deg,#141414,#242720);
-  background-color: #343a40 !important;
   border-bottom: 2px solid #404857;
 }
 .main-nav > .view-links {

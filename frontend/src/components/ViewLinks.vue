@@ -26,9 +26,11 @@
     </li>
 
     <li v-if="pvp" class="top-nav-links">
-      <router-link :to="{ name: 'pvp' }" exact class="nav-link">
+      <router-link v-if="pvp" :to="{ name: 'pvp' }" exact class="nav-link">
         <div class="icon"><img src="../assets/navbar-icons/new-arena-icon.png" class="new-ui-links-icon"></div>
-        <div class="link-text">{{ $t("viewLink.arena") }} </div>
+        <div class="link-text" :class="supportsPvP ? '' : 'disabled'">{{ $t("viewLink.pvp") }} <hint
+          v-if="!supportsPvP" class="hint"
+          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></div>
       </router-link>
     </li>
 
@@ -61,8 +63,8 @@
 import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
-// import Hint from '@/components/Hint';
-// import P2EButton from '@/components/P2EButton';
+import Hint from '@/components/Hint';
+
 
 export default Vue.extend({
   data() {
@@ -101,8 +103,7 @@ export default Vue.extend({
   },
 
   components: {
-    // Hint,
-    // P2EButton
+    Hint,
   },
 
   watch: {
