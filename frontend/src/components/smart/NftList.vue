@@ -281,7 +281,7 @@
           @click="onNftClick(nft.type, nft.id)"
           @contextmenu="canFavorite && toggleFavorite($event, nft.type, nft.id)"
         >
-          <nft-options-dropdown v-if="showNftOptions" :nftType="nft.type" :nftId="nft.id" :options="options" class="nft-options"/>
+          <nft-options-dropdown v-if="showNftOptions" :nftType="nft.type" :nftId="nft.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
           <nft-icon :favorite="isFavorite(nft.type, nft.id)" :nft="nft" :isShop="isShop"/>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
             <slot name="above" :nft="nft"></slot>
