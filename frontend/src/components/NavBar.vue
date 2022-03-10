@@ -2,9 +2,9 @@
   <div class="main-nav-div">
     <b-navbar class="main-nav" toggleable="sm">
       <b-navbar-brand href="#" class="nav-logo">
-        <div class="new-game-ui-logo">
+        <router-link :to="{ name: 'plaza' }" exact class="new-game-ui-logo">
           <img src="../assets/new-ui/cb-logo.png" class="logo d-inline-block align-top" alt="Logo">
-        </div>
+        </router-link>
       </b-navbar-brand>
 
       <b-navbar-toggle target="navbar-toggle-collapse">

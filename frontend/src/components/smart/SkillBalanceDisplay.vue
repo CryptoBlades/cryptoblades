@@ -31,7 +31,7 @@
         </span> -->
          <div class="deposit-withdraw">
          <!-- <span @click="showModal">Deposit</span> | <span @click="claimSkill(ClaimStage.Summary)"> Withdraw </span> -->
-         <span @click="showModal">Deposit</span> | <span> Withdraw </span>
+         <span @click="showModal">Deposit</span>
         </div>
     </div>
 
@@ -201,6 +201,8 @@ export default Vue.extend({
 }
 .deposit-withdraw {
   margin-top: 25px;
+  position: relative;
+  right: 35px;
 }
 
 .deposit-withdraw > span:nth-child(2) {
@@ -222,7 +224,7 @@ export default Vue.extend({
   right: -15px;
 }
 .skill-tooltip {
-  width: 0px;
+  width: 70px;
 }
 .add-button:hover {
   cursor: pointer;

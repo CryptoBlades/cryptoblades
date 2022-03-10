@@ -11,35 +11,35 @@
       </router-link>
     </li>
 
-   <li v-if="!stakeOnly" >
+   <li v-if="!stakeOnly" class="top-nav-links" >
       <router-link :to="{ name: 'blacksmith' }" exact class="nav-link">
         <div class="icon"><img src="../assets/new-ui/new-blacksmith-icon.png" class="new-ui-links-icon"></div>
         <div class="link-text">Blacksmith</div>
       </router-link>
     </li>
 
-    <li v-if="!stakeOnly" >
+    <li v-if="!stakeOnly" class="top-nav-links" >
       <router-link :to="{ name: 'combat' }" exact class="nav-link">
         <div class="icon"><img src="../assets/new-ui/new-combat-icon.png" class="new-ui-links-icon"></div>
         <div class="link-text">Combat</div>
       </router-link>
     </li>
 
-    <li v-if="pvp" >
+    <li v-if="pvp" class="top-nav-links">
       <router-link :to="{ name: 'pvp' }" exact class="nav-link">
         <div class="icon"><img src="../assets/new-ui/new-arena-icon.png" class="new-ui-links-icon"></div>
         <div class="link-text">Arena </div>
       </router-link>
     </li>
 
-   <li v-if="!stakeOnly && raid" >
+   <li v-if="!stakeOnly && raid" class="top-nav-links">
       <router-link :to="{ name: 'raid' }" exact class="nav-link">
         <div class="icon"><img src="../assets/new-ui/new-raid-icon.png" class="new-ui-links-icon"></div>
         <div  class="link-text">Raid </div>
       </router-link>
     </li>
 
-    <li  v-if="!stakeOnly && market" >
+    <li  v-if="!stakeOnly && market" class="top-nav-links">
       <a href="https://bazaar.market/"  class="nav-link" target="_blank">
         <div class="icon"> <img src="../assets/new-ui/new-bazaar-icon.png" class="new-ui-links-icon"> </div>
         <div  class="link-text">Bazaar</div>
