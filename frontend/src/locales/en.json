@@ -61,6 +61,10 @@
     "youRolled": "You rolled:",
     "enemyRolled": "Enemy rolled:"
   },
+  "nft": {
+     "transferMenuItem": "Transfer",
+     "transferOkButton": "Transfer!"
+  },
   "nftIcon": {
     "weaponTooltip": "Weapons ({stars}*)",
     "junkTooltip": "Junk ({stars}*)",
@@ -105,12 +109,15 @@
     "garrisonHint": "Your idle characters are in Garrison. While in Garrison they cannot fight.",
     "burn": "Burn",
     "upgrade": "Upgrade",
+    "transfer": "Transfer",
     "selectBurnCharacter": "Select characters you wish to burn",
     "cancelBurning": "Cancel Burning",
     "burnInto": "Burn into",
     "clearTargetCharacterId": "Clear Target Character",
     "burnSelected": "Burn selected characters",
     "upgradeSelected": "Upgrade selected character",
+    "transferSelected": "Transfer selected soul amount",
+    "transferSouls": "Transfer souls",
     "charactersToBurn": "Characters to burn",
     "soul": "Soul",
     "burnWarning": "Please confirm you want to burn {characterAmount} selected character(s).",
@@ -119,8 +126,12 @@
     "burnConfirmation": "Characters Burn Confirmation",
     "upgradeConfirmation": "Characters Upgrade Confirmation",
     "upgradeConfirm": "Are you sure you want to upgrade this character using",
+    "transferSoulConfirmation": "Soul Transfer Confirmation",
+    "transferSoulConfirm": "Are you sure you want to transfer",
     "characterToUpgrade": "Character to upgrade",
+    "receiverAddress": "Receiver address",
     "selectSoulAmount": "Select amount of Soul you want to use to upgrade selected character!",
+    "selectSoulAmountTransfer": "Select amount of soul you want to transfer!",
     "busyInArena": "Character is currently busy in Arena!",
     "claimXp": "Claim XP",
     "noXpToClaim": "No XP to claim",
@@ -896,7 +907,8 @@
       "deprecatedTooltip": "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."
     },
     "tier": "Tier",
-    "pickId": "Pick ID"
+    "pickId": "Pick ID",
+    "idsSelected": "IDs selected"
   },
   "options": {
     "title": "Options",
@@ -1091,7 +1103,11 @@
     "notInMatch": "The character is not in a match. Try again.",
     "decisionTimeExpired": "Decision time expired.",
     "free": "Free",
-    "freeRerollIn": "Special weapon's free reroll availabe on:"
+    "freeRerollIn": "Special weapon's free reroll availabe on:",
+    "battleOdds": "Battle odds",
+    "winChance": "Chance to win against this opponent",
+    "rankToEarn": "Ranking points you will earn if victorious",
+    "goodLuck": "Good luck!"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",

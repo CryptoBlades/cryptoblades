@@ -10406,6 +10406,2322 @@
           }
         }
       }
+    },
+    "70f37e8dd10068d83ff252318400ed4909ebecb65585e5f03795010f90c65f5b": {
+      "address": "0x0f8663c2EbEf2dE5D6f19175E8fB8193B496fFAB",
+      "txHash": "0x2b2b82f080ae76355a8cc8f283424b2bf2e2437de8426b842ee3bb72be7398d2",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)46248_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "game",
+            "type": "t_contract(CryptoBlades)32212",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:45"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "characters",
+            "type": "t_contract(Characters)28537",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:46"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "weapons",
+            "type": "t_contract(Weapons)45801",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:47"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "shields",
+            "type": "t_contract(Shields)38409",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:48"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "skillToken",
+            "type": "t_contract(IERC20)51449",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:49"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "randoms",
+            "type": "t_contract(IRandoms)32248",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:50"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_baseWagerUSD",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:53"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_tierWagerUSD",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:55"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_rankingsPoolTaxPercent",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:57"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "wageringFactor",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:59"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "winningPoints",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:61"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "losingPoints",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:63"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_maxTopCharactersPerTier",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:65"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "reRollFeePercent",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:67"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "withdrawFeePercent",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:69"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "currentRankedSeason",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:71"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "seasonStartedAt",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:73"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "seasonDuration",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:75"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "decisionSeconds",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:77"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "gameCofferTaxDue",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:79"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "arenaAccess",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:81"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "prizePercentages",
+            "type": "t_array(t_uint256)dyn_storage",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:83"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_duelQueue",
+            "type": "t_struct(UintSet)52494_storage",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:85"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "fighterByCharacter",
+            "type": "t_mapping(t_uint256,t_struct(Fighter)16364_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:88"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "matchByFinder",
+            "type": "t_mapping(t_uint256,t_struct(Match)16371_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:90"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "isCharacterInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:92"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "isWeaponInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:94"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "isShieldInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:96"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "isDefending",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:98"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "finderByOpponent",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:100"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "previousTierByCharacter",
+            "type": "t_mapping(t_uint256,t_uint8)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:102"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "excessWagerByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:104"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "seasonByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:106"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "rankingPointsByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:108"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "rankingsPoolByTier",
+            "type": "t_mapping(t_uint8,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:110"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_rankingRewardsByPlayer",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:112"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_topRankingCharactersByTier",
+            "type": "t_mapping(t_uint8,t_array(t_uint256)dyn_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:114"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_matchableCharactersByTier",
+            "type": "t_mapping(t_uint8,t_struct(UintSet)52494_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:116"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "duelOffsetCost",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:118"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "pvpBotAddress",
+            "type": "t_address_payable",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:119"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "specialWeaponRerollTimestamp",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:121"
+          }
+        ],
+        "types": {
+          "t_contract(CryptoBlades)32212": {
+            "label": "contract CryptoBlades"
+          },
+          "t_contract(Characters)28537": {
+            "label": "contract Characters"
+          },
+          "t_contract(Weapons)45801": {
+            "label": "contract Weapons"
+          },
+          "t_contract(Shields)38409": {
+            "label": "contract Shields"
+          },
+          "t_contract(IERC20)51449": {
+            "label": "contract IERC20"
+          },
+          "t_contract(IRandoms)32248": {
+            "label": "contract IRandoms"
+          },
+          "t_int128": {
+            "label": "int128"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]"
+          },
+          "t_struct(UintSet)52494_storage": {
+            "label": "struct EnumerableSet.UintSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)52108_storage"
+              }
+            ]
+          },
+          "t_struct(Set)52108_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_mapping(t_uint256,t_struct(Fighter)16364_storage)": {
+            "label": "mapping(uint256 => struct PvpArena.Fighter)"
+          },
+          "t_struct(Fighter)16364_storage": {
+            "label": "struct PvpArena.Fighter",
+            "members": [
+              {
+                "label": "characterID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "weaponID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "shieldID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "wager",
+                "type": "t_uint256"
+              },
+              {
+                "label": "useShield",
+                "type": "t_bool"
+              }
+            ]
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_uint256,t_struct(Match)16371_storage)": {
+            "label": "mapping(uint256 => struct PvpArena.Match)"
+          },
+          "t_struct(Match)16371_storage": {
+            "label": "struct PvpArena.Match",
+            "members": [
+              {
+                "label": "attackerID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "defenderID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "createdAt",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_mapping(t_uint256,t_uint8)": {
+            "label": "mapping(uint256 => uint8)"
+          },
+          "t_mapping(t_uint8,t_uint256)": {
+            "label": "mapping(uint8 => uint256)"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_uint8,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(uint8 => uint256[])"
+          },
+          "t_mapping(t_uint8,t_struct(UintSet)52494_storage)": {
+            "label": "mapping(uint8 => struct EnumerableSet.UintSet)"
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)46248_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_struct(RoleData)46248_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)49443_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)49443_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)49178_storage"
+              }
+            ]
+          },
+          "t_struct(Set)49178_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "8226669afc3213cad859a790c6b232f12d124c4bc0bbe201ec988aa3d5091202": {
+      "address": "0x019043b21d8aB7f740b1377341E135D1738fec4E",
+      "txHash": "0x03d55cc36aeb204ae8a6b3c892a0a980a39ceb7bf9ccfa6a980adb8dc26a1eb4",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)46731_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "characters",
+            "type": "t_contract(Characters)28726",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:37"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "weapons",
+            "type": "t_contract(Weapons)46284",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:38"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "junk",
+            "type": "t_contract(Junk)32867",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:39"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "trinket",
+            "type": "t_contract(RaidTrinket)33460",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:40"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "shields",
+            "type": "t_contract(Shields)38639",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:41"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "burningManager",
+            "type": "t_contract(BurningManager)2708",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:42"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "safeRandoms",
+            "type": "t_contract(SafeRandoms)20680",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:43"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "partnerVault",
+            "type": "t_contract(PartnerVault)16245",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:44"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "nextQuestID",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:88"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "nextRewardID",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:89"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "questTemplates",
+            "type": "t_mapping(t_uint256,t_array(t_uint256)dyn_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:91"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "quests",
+            "type": "t_mapping(t_uint256,t_struct(Quest)20818_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:92"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "questSupplies",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:93"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "questDeadlines",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:94"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "questIndexes",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:95"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "characterQuest",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:96"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "tierChances",
+            "type": "t_mapping(t_uint256,t_array(t_uint256)4_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:97"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "vars",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:98"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "lastFreeSkipUsage",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:99"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "weeklyCompletions",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:100"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "weeklyRewardClaimed",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_bool))",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:101"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "rewards",
+            "type": "t_mapping(t_uint256,t_struct(Reward)20831_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:102"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "weeklyRewards",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SimpleQuests.sol:103"
+          }
+        ],
+        "types": {
+          "t_contract(Characters)28726": {
+            "label": "contract Characters"
+          },
+          "t_contract(Weapons)46284": {
+            "label": "contract Weapons"
+          },
+          "t_contract(Junk)32867": {
+            "label": "contract Junk"
+          },
+          "t_contract(RaidTrinket)33460": {
+            "label": "contract RaidTrinket"
+          },
+          "t_contract(Shields)38639": {
+            "label": "contract Shields"
+          },
+          "t_contract(BurningManager)2708": {
+            "label": "contract BurningManager"
+          },
+          "t_contract(SafeRandoms)20680": {
+            "label": "contract SafeRandoms"
+          },
+          "t_contract(PartnerVault)16245": {
+            "label": "contract PartnerVault"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_uint256,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(uint256 => uint256[])"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]"
+          },
+          "t_mapping(t_uint256,t_struct(Quest)20818_storage)": {
+            "label": "mapping(uint256 => struct SimpleQuests.Quest)"
+          },
+          "t_struct(Quest)20818_storage": {
+            "label": "struct SimpleQuests.Quest",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256"
+              },
+              {
+                "label": "tier",
+                "type": "t_enum(Rarity)20850"
+              },
+              {
+                "label": "requirementType",
+                "type": "t_enum(ItemType)20844"
+              },
+              {
+                "label": "requirementRarity",
+                "type": "t_uint256"
+              },
+              {
+                "label": "requirementAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "requirementExternalAddress",
+                "type": "t_address"
+              },
+              {
+                "label": "rewardType",
+                "type": "t_enum(ItemType)20844"
+              },
+              {
+                "label": "rewardRarity",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardExternalAddress",
+                "type": "t_address"
+              },
+              {
+                "label": "reputationAmount",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_enum(Rarity)20850": {
+            "label": "enum SimpleQuests.Rarity",
+            "members": [
+              "COMMON",
+              "UNCOMMON",
+              "RARE",
+              "EPIC",
+              "LEGENDARY"
+            ]
+          },
+          "t_enum(ItemType)20844": {
+            "label": "enum SimpleQuests.ItemType",
+            "members": [
+              "NONE",
+              "WEAPON",
+              "JUNK",
+              "DUST",
+              "TRINKET",
+              "SHIELD",
+              "STAMINA",
+              "SOUL",
+              "RAID",
+              "EXPERIENCE",
+              "EXTERNAL",
+              "EXTERNAL_HOLD"
+            ]
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_mapping(t_uint256,t_array(t_uint256)4_storage)": {
+            "label": "mapping(uint256 => uint256[4])"
+          },
+          "t_array(t_uint256)4_storage": {
+            "label": "uint256[4]"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_bool))": {
+            "label": "mapping(address => mapping(uint256 => bool))"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_uint256,t_struct(Reward)20831_storage)": {
+            "label": "mapping(uint256 => struct SimpleQuests.Reward)"
+          },
+          "t_struct(Reward)20831_storage": {
+            "label": "struct SimpleQuests.Reward",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardType",
+                "type": "t_enum(ItemType)20844"
+              },
+              {
+                "label": "rewardRarity",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardExternalAddress",
+                "type": "t_address"
+              },
+              {
+                "label": "reputationAmount",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)46731_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(RoleData)46731_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)49926_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)49926_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)49661_storage"
+              }
+            ]
+          },
+          "t_struct(Set)49661_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "06d64fe331d46b52e1c7e4d14b4fd34b05d8e04f994303075d3cbe878c321ab7": {
+      "address": "0xc453C1aa4F8f5EeC180E2D03c9DB8ebf759696EC",
+      "txHash": "0x62e399a8b3253818efc962cde1254c7592a66e1ac17c196b9d93232664c266ce",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)46731_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "Garrison",
+            "label": "characters",
+            "type": "t_contract(Characters)28726",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\Garrison.sol:20"
+          },
+          {
+            "contract": "Garrison",
+            "label": "supportedTokenTypes",
+            "type": "t_struct(AddressSet)52856_storage",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\Garrison.sol:22"
+          },
+          {
+            "contract": "Garrison",
+            "label": "userGarrison",
+            "type": "t_mapping(t_address,t_struct(UintSet)52977_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\Garrison.sol:24"
+          },
+          {
+            "contract": "Garrison",
+            "label": "characterOwner",
+            "type": "t_mapping(t_uint256,t_address)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\Garrison.sol:25"
+          },
+          {
+            "contract": "Garrison",
+            "label": "allCharactersInGarrison",
+            "type": "t_struct(UintSet)52977_storage",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\Garrison.sol:26"
+          },
+          {
+            "contract": "Garrison",
+            "label": "game",
+            "type": "t_contract(CryptoBlades)32414",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\Garrison.sol:28"
+          }
+        ],
+        "types": {
+          "t_contract(Characters)28726": {
+            "label": "contract Characters"
+          },
+          "t_struct(AddressSet)52856_storage": {
+            "label": "struct EnumerableSet.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)52591_storage"
+              }
+            ]
+          },
+          "t_struct(Set)52591_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_struct(UintSet)52977_storage)": {
+            "label": "mapping(address => struct EnumerableSet.UintSet)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_struct(UintSet)52977_storage": {
+            "label": "struct EnumerableSet.UintSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)52591_storage"
+              }
+            ]
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)"
+          },
+          "t_contract(CryptoBlades)32414": {
+            "label": "contract CryptoBlades"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)46731_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_struct(RoleData)46731_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)49926_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)49926_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)49661_storage"
+              }
+            ]
+          },
+          "t_struct(Set)49661_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "c7f073ea7ef05ddeb0a23afc24dc893d22ad29e4dcda71017dd11ba8084c33f8": {
+      "address": "0x8c13C41672fd43045f76ffe7ED01694DB00F6F6C",
+      "txHash": "0x1ca469a80a9c3fa0372fbc72e75552396b40d821cb02ca9503685c597128c41e",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "ERC165Upgradeable",
+            "label": "_supportedInterfaces",
+            "type": "t_mapping(t_bytes4,t_bool)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\introspection\\ERC165Upgradeable.sol:23"
+          },
+          {
+            "contract": "ERC165Upgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\introspection\\ERC165Upgradeable.sol:59"
+          },
+          {
+            "contract": "ERC721Upgradeable",
+            "label": "_holderTokens",
+            "type": "t_mapping(t_address,t_struct(UintSet)50047_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:34"
+          },
+          {
+            "contract": "ERC721Upgradeable",
+            "label": "_tokenOwners",
+            "type": "t_struct(UintToAddressMap)49424_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:37"
+          },
+          {
+            "contract": "ERC721Upgradeable",
+            "label": "_tokenApprovals",
+            "type": "t_mapping(t_uint256,t_address)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:40"
+          },
+          {
+            "contract": "ERC721Upgradeable",
+            "label": "_operatorApprovals",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:43"
+          },
+          {
+            "contract": "ERC721Upgradeable",
+            "label": "_name",
+            "type": "t_string_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:46"
+          },
+          {
+            "contract": "ERC721Upgradeable",
+            "label": "_symbol",
+            "type": "t_string_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:49"
+          },
+          {
+            "contract": "ERC721Upgradeable",
+            "label": "_tokenURIs",
+            "type": "t_mapping(t_uint256,t_string_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:52"
+          },
+          {
+            "contract": "ERC721Upgradeable",
+            "label": "_baseURI",
+            "type": "t_string_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:55"
+          },
+          {
+            "contract": "ERC721Upgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)41_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:485"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)46731_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "Shields",
+            "label": "tokens",
+            "type": "t_array(t_struct(Shield)36603_storage)dyn_storage",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\shields.sol:59"
+          },
+          {
+            "contract": "Shields",
+            "label": "cosmetics",
+            "type": "t_array(t_struct(ShieldCosmetics)36608_storage)dyn_storage",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\shields.sol:60"
+          },
+          {
+            "contract": "Shields",
+            "label": "shieldBaseMultiplier",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\shields.sol:62"
+          },
+          {
+            "contract": "Shields",
+            "label": "defenseMultPerPointBasic",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\shields.sol:63"
+          },
+          {
+            "contract": "Shields",
+            "label": "defenseMultPerPointDEF",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\shields.sol:64"
+          },
+          {
+            "contract": "Shields",
+            "label": "defenseMultPerPointMatching",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\shields.sol:65"
+          },
+          {
+            "contract": "Shields",
+            "label": "lastMintedBlock",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\shields.sol:67"
+          },
+          {
+            "contract": "Shields",
+            "label": "firstMintedOfLastBlock",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\shields.sol:68"
+          },
+          {
+            "contract": "Shields",
+            "label": "durabilityTimestamp",
+            "type": "t_mapping(t_uint256,t_uint64)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\shields.sol:70"
+          },
+          {
+            "contract": "Shields",
+            "label": "promos",
+            "type": "t_contract(Promos)16490",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\shields.sol:75"
+          },
+          {
+            "contract": "Shields",
+            "label": "nftVars",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\shields.sol:77"
+          }
+        ],
+        "types": {
+          "t_array(t_struct(Shield)36603_storage)dyn_storage": {
+            "label": "struct Shields.Shield[]"
+          },
+          "t_struct(Shield)36603_storage": {
+            "label": "struct Shields.Shield",
+            "members": [
+              {
+                "label": "properties",
+                "type": "t_uint16"
+              },
+              {
+                "label": "stat1",
+                "type": "t_uint16"
+              },
+              {
+                "label": "stat2",
+                "type": "t_uint16"
+              },
+              {
+                "label": "stat3",
+                "type": "t_uint16"
+              }
+            ]
+          },
+          "t_uint16": {
+            "label": "uint16"
+          },
+          "t_array(t_struct(ShieldCosmetics)36608_storage)dyn_storage": {
+            "label": "struct Shields.ShieldCosmetics[]"
+          },
+          "t_struct(ShieldCosmetics)36608_storage": {
+            "label": "struct Shields.ShieldCosmetics",
+            "members": [
+              {
+                "label": "version",
+                "type": "t_uint8"
+              },
+              {
+                "label": "seed",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_int128": {
+            "label": "int128"
+          },
+          "t_mapping(t_uint256,t_uint64)": {
+            "label": "mapping(uint256 => uint64)"
+          },
+          "t_uint64": {
+            "label": "uint64"
+          },
+          "t_contract(Promos)16490": {
+            "label": "contract Promos"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(uint256 => mapping(uint256 => uint256))"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)46731_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(RoleData)46731_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)49926_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)49926_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)49661_storage"
+              }
+            ]
+          },
+          "t_struct(Set)49661_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_mapping(t_address,t_struct(UintSet)50047_storage)": {
+            "label": "mapping(address => struct EnumerableSetUpgradeable.UintSet)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_struct(UintSet)50047_storage": {
+            "label": "struct EnumerableSetUpgradeable.UintSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)49661_storage"
+              }
+            ]
+          },
+          "t_struct(UintToAddressMap)49424_storage": {
+            "label": "struct EnumerableMapUpgradeable.UintToAddressMap",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Map)49106_storage"
+              }
+            ]
+          },
+          "t_struct(Map)49106_storage": {
+            "label": "struct EnumerableMapUpgradeable.Map",
+            "members": [
+              {
+                "label": "_entries",
+                "type": "t_array(t_struct(MapEntry)49098_storage)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_struct(MapEntry)49098_storage)dyn_storage": {
+            "label": "struct EnumerableMapUpgradeable.MapEntry[]"
+          },
+          "t_struct(MapEntry)49098_storage": {
+            "label": "struct EnumerableMapUpgradeable.MapEntry",
+            "members": [
+              {
+                "label": "_key",
+                "type": "t_bytes32"
+              },
+              {
+                "label": "_value",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
+            "label": "mapping(address => mapping(address => bool))"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_string_storage": {
+            "label": "string"
+          },
+          "t_mapping(t_uint256,t_string_storage)": {
+            "label": "mapping(uint256 => string)"
+          },
+          "t_array(t_uint256)41_storage": {
+            "label": "uint256[41]"
+          },
+          "t_mapping(t_bytes4,t_bool)": {
+            "label": "mapping(bytes4 => bool)"
+          },
+          "t_bytes4": {
+            "label": "bytes4"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "a919fc115ef7009488f11c44e7708f47b9d46810e6a159e177668aceb31b403a": {
+      "address": "0x822aD630C7c959318572809B0484aCb000CDD791",
+      "txHash": "0xd517e9ad4fd1947b2af9f62c0dca3600c5f75221771b30609f75573606bbd938",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)46731_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "game",
+            "type": "t_contract(CryptoBlades)32414",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:45"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "characters",
+            "type": "t_contract(Characters)28726",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:46"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "weapons",
+            "type": "t_contract(Weapons)46284",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:47"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "shields",
+            "type": "t_contract(Shields)38639",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:48"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "skillToken",
+            "type": "t_contract(IERC20)51932",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:49"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "randoms",
+            "type": "t_contract(IRandoms)32450",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:50"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_baseWagerUSD",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:53"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_tierWagerUSD",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:55"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_rankingsPoolTaxPercent",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:57"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "wageringFactor",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:59"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "winningPoints",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:61"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "losingPoints",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:63"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_maxTopCharactersPerTier",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:65"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "reRollFeePercent",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:67"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "withdrawFeePercent",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:69"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "currentRankedSeason",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:71"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "seasonStartedAt",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:73"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "seasonDuration",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:75"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "decisionSeconds",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:77"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "gameCofferTaxDue",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:79"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "arenaAccess",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:81"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "prizePercentages",
+            "type": "t_array(t_uint256)dyn_storage",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:83"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_duelQueue",
+            "type": "t_struct(UintSet)52977_storage",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:85"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "fighterByCharacter",
+            "type": "t_mapping(t_uint256,t_struct(Fighter)16537_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:88"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "matchByFinder",
+            "type": "t_mapping(t_uint256,t_struct(Match)16544_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:90"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "isCharacterInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:92"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "isWeaponInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:94"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "isShieldInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:96"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "isDefending",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:98"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "finderByOpponent",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:100"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "previousTierByCharacter",
+            "type": "t_mapping(t_uint256,t_uint8)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:102"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "excessWagerByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:104"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "seasonByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:106"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "rankingPointsByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:108"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "rankingsPoolByTier",
+            "type": "t_mapping(t_uint8,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:110"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_rankingRewardsByPlayer",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:112"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_topRankingCharactersByTier",
+            "type": "t_mapping(t_uint8,t_array(t_uint256)dyn_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:114"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_matchableCharactersByTier",
+            "type": "t_mapping(t_uint8,t_struct(UintSet)52977_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:116"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "duelOffsetCost",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:118"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "pvpBotAddress",
+            "type": "t_address_payable",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:119"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "specialWeaponRerollTimestamp",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\PvpArena.sol:121"
+          }
+        ],
+        "types": {
+          "t_contract(CryptoBlades)32414": {
+            "label": "contract CryptoBlades"
+          },
+          "t_contract(Characters)28726": {
+            "label": "contract Characters"
+          },
+          "t_contract(Weapons)46284": {
+            "label": "contract Weapons"
+          },
+          "t_contract(Shields)38639": {
+            "label": "contract Shields"
+          },
+          "t_contract(IERC20)51932": {
+            "label": "contract IERC20"
+          },
+          "t_contract(IRandoms)32450": {
+            "label": "contract IRandoms"
+          },
+          "t_int128": {
+            "label": "int128"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]"
+          },
+          "t_struct(UintSet)52977_storage": {
+            "label": "struct EnumerableSet.UintSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)52591_storage"
+              }
+            ]
+          },
+          "t_struct(Set)52591_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_mapping(t_uint256,t_struct(Fighter)16537_storage)": {
+            "label": "mapping(uint256 => struct PvpArena.Fighter)"
+          },
+          "t_struct(Fighter)16537_storage": {
+            "label": "struct PvpArena.Fighter",
+            "members": [
+              {
+                "label": "characterID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "weaponID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "shieldID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "wager",
+                "type": "t_uint256"
+              },
+              {
+                "label": "useShield",
+                "type": "t_bool"
+              }
+            ]
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_uint256,t_struct(Match)16544_storage)": {
+            "label": "mapping(uint256 => struct PvpArena.Match)"
+          },
+          "t_struct(Match)16544_storage": {
+            "label": "struct PvpArena.Match",
+            "members": [
+              {
+                "label": "attackerID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "defenderID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "createdAt",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_mapping(t_uint256,t_uint8)": {
+            "label": "mapping(uint256 => uint8)"
+          },
+          "t_mapping(t_uint8,t_uint256)": {
+            "label": "mapping(uint8 => uint256)"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_uint8,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(uint8 => uint256[])"
+          },
+          "t_mapping(t_uint8,t_struct(UintSet)52977_storage)": {
+            "label": "mapping(uint8 => struct EnumerableSet.UintSet)"
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)46731_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_struct(RoleData)46731_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)49926_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)49926_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)49661_storage"
+              }
+            ]
+          },
+          "t_struct(Set)49661_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "ccf724bce7ee27f45aa2a214a8a49aa886b479c72a7597806907982dbef373ad": {
+      "address": "0xc0417eCCeB0C765ebfe90104Ce1F4A6eFFD4bCf8",
+      "txHash": "0xe30a671800d7fd0d764a2e2c787d589e31e5834d1a059f35f22db3a19d22957f",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)46731_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "characters",
+            "type": "t_contract(Characters)28726",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:57"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "weapons",
+            "type": "t_contract(Weapons)46284",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:58"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "skillToken",
+            "type": "t_contract(IERC20)51932",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:59"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "priceOracleSkillPerUsd",
+            "type": "t_contract(IPriceOracle)32431",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:60"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "randoms",
+            "type": "t_contract(IRandoms)32450",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:61"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "characterLimit",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:137"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "staminaCostFight",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:139"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "mintCharacterFee",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:142"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "refillStaminaFee",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:145"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "fightRewardBaseline",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:148"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "fightRewardGasOffset",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:149"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "mintWeaponFee",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:151"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "reforgeWeaponFee",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:152"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "nonce",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:154"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "lastBlockNumberCalled",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:156"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "fightXpGain",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:158"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "tokenRewards",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:160"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "xpRewards",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:161"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "oneFrac",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:163"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "fightTraitBonus",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:164"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "inGameOnlyFunds",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:166"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "totalInGameOnlyFunds",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:167"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "promos",
+            "type": "t_contract(Promos)16490",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:169"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "_rewardsClaimTaxTimerStart",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:171"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "stakeFromGameImpl",
+            "type": "t_contract(IStakeFromGame)32467",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:173"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "durabilityCostFight",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:175"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "burnWeaponFee",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:177"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "reforgeWeaponWithDustFee",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:178"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "blacksmith",
+            "type": "t_contract(Blacksmith)1671",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:180"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "mintPayments",
+            "type": "t_mapping(t_address,t_struct(MintPayment)29443_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:189"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "totalMintPaymentSkillRefundable",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:203"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "mintPaymentSkillDepositeds",
+            "type": "t_mapping(t_address,t_struct(MintPaymentSkillDeposited)29462_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:204"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "rewardsClaimTaxMax",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:206"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "rewardsClaimTaxDuration",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:207"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "vars",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:209"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "userVars",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:210"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "specialWeaponsManager",
+            "type": "t_contract(SpecialWeaponsManager)25076",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\cryptoblades.sol:212"
+          }
+        ],
+        "types": {
+          "t_contract(Characters)28726": {
+            "label": "contract Characters"
+          },
+          "t_contract(Weapons)46284": {
+            "label": "contract Weapons"
+          },
+          "t_contract(IERC20)51932": {
+            "label": "contract IERC20"
+          },
+          "t_contract(IPriceOracle)32431": {
+            "label": "contract IPriceOracle"
+          },
+          "t_contract(IRandoms)32450": {
+            "label": "contract IRandoms"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_int128": {
+            "label": "int128"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_contract(Promos)16490": {
+            "label": "contract Promos"
+          },
+          "t_contract(IStakeFromGame)32467": {
+            "label": "contract IStakeFromGame"
+          },
+          "t_contract(Blacksmith)1671": {
+            "label": "contract Blacksmith"
+          },
+          "t_mapping(t_address,t_struct(MintPayment)29443_storage)": {
+            "label": "mapping(address => struct CryptoBlades.MintPayment)"
+          },
+          "t_struct(MintPayment)29443_storage": {
+            "label": "struct CryptoBlades.MintPayment",
+            "members": [
+              {
+                "label": "blockHash",
+                "type": "t_bytes32"
+              },
+              {
+                "label": "blockNumber",
+                "type": "t_uint256"
+              },
+              {
+                "label": "nftAddress",
+                "type": "t_address"
+              },
+              {
+                "label": "count",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_mapping(t_address,t_struct(MintPaymentSkillDeposited)29462_storage)": {
+            "label": "mapping(address => struct CryptoBlades.MintPaymentSkillDeposited)"
+          },
+          "t_struct(MintPaymentSkillDeposited)29462_storage": {
+            "label": "struct CryptoBlades.MintPaymentSkillDeposited",
+            "members": [
+              {
+                "label": "skillDepositedFromWallet",
+                "type": "t_uint256"
+              },
+              {
+                "label": "skillDepositedFromRewards",
+                "type": "t_uint256"
+              },
+              {
+                "label": "skillDepositedFromIgo",
+                "type": "t_uint256"
+              },
+              {
+                "label": "skillRefundableFromWallet",
+                "type": "t_uint256"
+              },
+              {
+                "label": "skillRefundableFromRewards",
+                "type": "t_uint256"
+              },
+              {
+                "label": "skillRefundableFromIgo",
+                "type": "t_uint256"
+              },
+              {
+                "label": "refundClaimableTimestamp",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))"
+          },
+          "t_contract(SpecialWeaponsManager)25076": {
+            "label": "contract SpecialWeaponsManager"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)46731_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_struct(RoleData)46731_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)49926_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)49926_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)49661_storage"
+              }
+            ]
+          },
+          "t_struct(Set)49661_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
     }
   }
 }
