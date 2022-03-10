@@ -427,6 +427,11 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return result;
     }
 
+    function getDefenseMultiplierForTrait(uint256 id, uint8 trait) public view returns(int128) {
+        Shield storage shd = tokens[id];
+        return getDefenseMultiplierForTrait(shd.properties, shd.stat1, shd.stat2, shd.stat3, trait);
+    }
+
     function getFightData(uint256 id, uint8 charTrait) public view noFreshLookup(id) returns (int128, int128, uint24, uint8) {
         Shield storage shd = tokens[id];
         return (

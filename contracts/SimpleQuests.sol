@@ -415,6 +415,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint currentProgress = characters.getNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS);
         characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS, currentProgress + progress);
         emit QuestProgressed(questID, characterID);
+        if (quests[characterQuest[characterID]].requirementAmount <= currentProgress + progress) {
+            generateRewardQuestSeed(characterID);
+        }
     }
 
     // VIEWS
