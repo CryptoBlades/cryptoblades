@@ -416,8 +416,6 @@ export default {
 
 <style>
 
-ul, li {list-style-type: none;}
-
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
   font-weight: 600;
   text-align: center;

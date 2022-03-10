@@ -121,6 +121,9 @@ a {
   font-weight: bold;
 }
 
+.nav-top-links {
+  list-style-type: none;
+}
 .nav-top-links > span {
   color: #BFA765;
   font-size: 1.1em;
