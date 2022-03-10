@@ -1459,7 +1459,7 @@
     },
     "links": {},
     "address": "0x7319349B41B8A1b1bB43dFC550eE2fBB5FA2FB48",
-    "transactionHash": "0x31425a38c6c2880accb3d8c9905fac86ca803daff28673764c87d957b205ff58"
+    "transactionHash": "0x5880b4945f8fe582752e949a2d88ba55bd88181c3253528ffd21a3b62d59fc3b"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
@@ -2911,7 +2911,7 @@
     },
     "links": {},
     "address": "0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
-    "transactionHash": "0xc851eec6acc1f29b3c90aa6eedc4f017618987be624db36b25733f0bd796d0cb"
+    "transactionHash": "0x5e0cce9d7061a230d3f0892ff122b44dddf99db96338733b048394cff9888325"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -3126,7 +3126,7 @@
     },
     "links": {},
     "address": "0x9A9Dc83e88B48BFC8a2De359e433a8Ed3F38574b",
-    "transactionHash": "0xe1c1ea2149baf9e4a4919d19cafa1f40053d1c80614168d4cbf353750c651519"
+    "transactionHash": "0xf4f5b9a65ae3a5952632f5bdd11ab916f2ccd1ed6a5806a1807a731032a36007"
   },
   "build/contracts/Junk.json": {
     "events": {
@@ -4962,7 +4962,7 @@
     },
     "links": {},
     "address": "0xAf8f6eD3860B6f0fD97Bd50e2109E520C2Fc2328",
-    "transactionHash": "0x280e4bfa5a54a6a07756c66a4d2223f0612c635774b524567bdf140f17d1e349"
+    "transactionHash": "0x71ef957aed9343a1e4303954b93df89b353b2994f641f66e4f683be4c87cdd07"
   },
   "build/contracts/Raid1.json": {
     "events": {},
@@ -5503,13 +5503,13 @@
     },
     "links": {},
     "address": "0xF3e470DceE011E55b8912ebC58499CE33c863A17",
-    "transactionHash": "0x1d20d62bcf9405b1f52f593bac4be1489a6cd70366eff9d22e5448941e29e894"
+    "transactionHash": "0x840adc41cb30dd092a52be332baac73ac9272f5bc7b72f665b81834ef9e4c3cb"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {},
     "links": {},
     "address": "0x7e9cA26c52045ef81B80f3bf0BD3041E0AED3f48",
-    "transactionHash": "0xd77999e5f89bc3f66deeb1ec6a8db59c5d172259aa5145cbcb323555a2d48576"
+    "transactionHash": "0x2c3fb51f0bfdcb9c45714138cf814a514ba9b935d1b146964b70aa43f18292db"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},

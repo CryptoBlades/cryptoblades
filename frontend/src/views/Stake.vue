@@ -1,7 +1,7 @@
 <template>
   <div class="body main-font">
     <staking class="staking" v-if="isKnownStakeType" :stakeType="stakeType" />
-    <staking class="staking" v-else-if="isKnownNftStakeType" :stakeType="stakeType" />
+    <staking class="staking" v-else-if="isKnownNftStakeType" :stakeType="stakeType" :tier="stakeType.startsWith('cbkLand') && +stakeType.slice(-1) || 0" />
     <h1 v-else>{{$t('stake.unknownStakeType')}}</h1>
   </div>
 </template>

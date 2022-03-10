@@ -24,10 +24,18 @@ contract CBKLandT3StakingRewardsUpgradeable is NftStakingRewardsUpgradeable {
       __cbkLand = _cbkLand;
       stakeTier = 3;
     }
-    
+
     function stake(uint256 id) public virtual override {
       uint256 landTier = __cbkLand.getLandTier(id);
       require(landTier == stakeTier, 'Land tier mismatch');
       super.stake(id);
+    }
+
+    function bulkStake(uint256[] memory ids) public virtual override {
+        for(uint i = 0; i < ids.length; i++) {
+            uint256 landTier = __cbkLand.getLandTier(ids[i]);
+            require(landTier == stakeTier, 'Land tier mismatch');
+        }
+        super.bulkStake(ids);
     }
 }

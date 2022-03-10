@@ -55,7 +55,7 @@
         </div>
         <slot name="sold" :character="c"></slot>
         <nft-options-dropdown v-if="showNftOptions" :nftType="'character'" :nftId="c.id" :options="options"
-          :showTransfer="!isMarket && !isGarrison" class="nft-options"/>
+          :showTransfer="!isMarket" class="nft-options"/>
         <div class="art" >
           <div class="animation" />
           <CharacterArt :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(c.id) : '']"

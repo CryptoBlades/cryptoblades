@@ -13,7 +13,6 @@
         </div>
       </div>
     </b-modal>
-      <!-- <i class="fa fa-plus gtag-link-others" tagname="buy_skill"></i> -->
       <img src="../../assets/navbar-icons/skill-token.png" class="add-button gtag-link-others"  tagname="buy_skill">
     </div>
 
@@ -23,13 +22,9 @@
           @mouseover="hover = !isMobile() || true"
           @mouseleave="hover = !isMobile()"
         >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/></b>
-        <!-- <span class="balance"
-          v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
-          @mouseover="hover = !isMobile() || true"
-          @mouseleave="hover = !isMobile()"
-        >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/>
-        </span> -->
+
          <div class="deposit-withdraw">
+        <!-- new withdraw/claim on new ui -->
          <!-- <span @click="showModal">Deposit</span> | <span @click="claimSkill(ClaimStage.Summary)"> Withdraw </span> -->
          <span @click="showModal">Deposit</span>
         </div>

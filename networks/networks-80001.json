@@ -2402,7 +2402,7 @@
     },
     "links": {},
     "address": "0xf055e7F7cbed74821A857D80Dd0E5b45576a41BD",
-    "transactionHash": "0x1574d588e08681905a24576a2bd7e560db83fde8a1a71fb30a7f34dfe33a6c6a"
+    "transactionHash": "0x8cf88f7de274350064b98646c60b3d209d9b92a26e4ff0b0e9b7a1141cbec7e0"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -2617,7 +2617,7 @@
     },
     "links": {},
     "address": "0x7de27C2a2A44636Fdb52d642862Aa0C8607d2AD3",
-    "transactionHash": "0xd6b4af5402418aae2ced57b6edb26c85432528ea84dc312a998bf99c9ebd4cce"
+    "transactionHash": "0xde2d2f6a255193dae5df6bea1ec811b34a0a41dd81361d5b9be5f008d75500d3"
   },
   "build/contracts/Junk.json": {
     "events": {
@@ -4363,11 +4363,60 @@
         ],
         "name": "SeasonRestarted",
         "type": "event"
+      },
+      "0xd5e813a6e9b83d4a4a28930587fae27babef1714015ee302198e9019b4740691": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "attacker",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "defender",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "attackerRoll",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "defenderRoll",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "bool",
+            "name": "attackerWon",
+            "type": "bool"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "bonusRank",
+            "type": "uint256"
+          }
+        ],
+        "name": "DuelFinished",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0x02E8E6177E53026b2335bAcD2aa5E0CaB5606095",
-    "transactionHash": "0xe07b3c4d56b46c620bee4b2c46ca2b137adc3e58404cad3355c5a793629b67a8"
+    "transactionHash": "0xe61508fbe0308f587d45df38b87b1cb22efdf1cad4dd4315317306321a22803e"
   },
   "build/contracts/Raid1.json": {
     "events": {
@@ -5338,7 +5387,7 @@
     },
     "links": {},
     "address": "0x21BD9Ef086c3f4b94E9596F7Bb3932C97aE0fd1e",
-    "transactionHash": "0x846e35a5db9f6c002e79eeff62440bebd25a03ae0529d04f0bb283fea161a6e4"
+    "transactionHash": "0xb1a5fd90fb4487716bc135655876bd45c90cf0c6db6bc19ae2ea227858bfed45"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {
@@ -5578,7 +5627,7 @@
     },
     "links": {},
     "address": "0x7907c3345a645A494d5fF4924CDc89e5d892c800",
-    "transactionHash": "0xc3f87745faf0ca0b62b5c786e68a7d76b113dcb8c00ef03434899bbd8eb13cce"
+    "transactionHash": "0x319ff667ea439f8b8f87945ec76fa6e464652f968ac09e8d3281c67e97122e60"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {
