@@ -6,43 +6,50 @@
 
     <li class="character top-nav-links" >
       <router-link v-if="!stakeOnly" :to="{ name: 'plaza' }" exact class="nav-link">
-        <div class="icon"> <img src="../assets/new-ui/new-plaza-icon.png" class="new-ui-links-icon"></div>
-        <div class="link-text">Character</div>
+        <div class="icon"> <img src="../assets/navbar-icons/new-plaza-icon.png" class="new-ui-links-icon"></div>
+        <div class="link-text">{{ $t("viewLink.character") }}</div>
       </router-link>
     </li>
 
    <li v-if="!stakeOnly" class="top-nav-links" >
       <router-link :to="{ name: 'blacksmith' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/new-ui/new-blacksmith-icon.png" class="new-ui-links-icon"></div>
-        <div class="link-text">Blacksmith</div>
+        <div class="icon"><img src="../assets/navbar-icons/new-blacksmith-icon.png" class="new-ui-links-icon"></div>
+        <div class="link-text">{{ $t("viewLink.blacksmith") }}</div>
       </router-link>
     </li>
 
     <li v-if="!stakeOnly" class="top-nav-links" >
       <router-link :to="{ name: 'combat' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/new-ui/new-combat-icon.png" class="new-ui-links-icon"></div>
-        <div class="link-text">Combat</div>
+        <div class="icon"><img src="../assets/navbar-icons/new-combat-icon.png" class="new-ui-links-icon"></div>
+        <div class="link-text">{{ $t("viewLink.combat") }}</div>
       </router-link>
     </li>
 
     <li v-if="pvp" class="top-nav-links">
       <router-link :to="{ name: 'pvp' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/new-ui/new-arena-icon.png" class="new-ui-links-icon"></div>
-        <div class="link-text">Arena </div>
+        <div class="icon"><img src="../assets/navbar-icons/new-arena-icon.png" class="new-ui-links-icon"></div>
+        <div class="link-text">{{ $t("viewLink.arena") }} </div>
       </router-link>
     </li>
 
    <li v-if="!stakeOnly && raid" class="top-nav-links">
       <router-link :to="{ name: 'raid' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/new-ui/new-raid-icon.png" class="new-ui-links-icon"></div>
-        <div  class="link-text">Raid </div>
+        <div class="icon"><img src="../assets/navbar-icons/new-raid-icon.png" class="new-ui-links-icon"></div>
+        <div  class="link-text">{{ $t("viewLink.raid") }} </div>
+      </router-link>
+    </li>
+
+    <li v-if="quests" class="top-nav-links">
+      <router-link  :to="{ name: 'quests'}" exact class="nav-link">
+        <div class="icon"><img src="../assets/navbar-icons/new-quests-icon.png" class="new-ui-links-icon"></div>
+        <div  class="link-text">{{ $t("viewLink.quests") }} </div>
       </router-link>
     </li>
 
     <li  v-if="!stakeOnly && market" class="top-nav-links">
       <a href="https://bazaar.market/"  class="nav-link" target="_blank">
-        <div class="icon"> <img src="../assets/new-ui/new-bazaar-icon.png" class="new-ui-links-icon"> </div>
-        <div  class="link-text">Bazaar</div>
+        <div class="icon"> <img src="../assets/navbar-icons/new-bazaar-icon.png" class="new-ui-links-icon"> </div>
+        <div  class="link-text">{{ $t("viewLink.bazaar") }}</div>
       </a>
     </li>
 

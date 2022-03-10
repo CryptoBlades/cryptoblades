@@ -14,7 +14,7 @@
       </div>
     </b-modal>
       <!-- <i class="fa fa-plus gtag-link-others" tagname="buy_skill"></i> -->
-      <img src="../../assets/new-ui/skill-token.png" class="add-button gtag-link-others"  tagname="buy_skill">
+      <img src="../../assets/navbar-icons/skill-token.png" class="add-button gtag-link-others"  tagname="buy_skill">
     </div>
 
     <div class="balance-container">

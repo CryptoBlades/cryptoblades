@@ -1,116 +1,116 @@
 <template>
   <div class="body main-font options">
-    <img src="../assets/new-ui/6351903_burger_list_menu_navigation_icon@2x.png" class="burger-icon" @click="openMenu"/>
+    <img src="../assets/navbar-icons/6351903_burger_list_menu_navigation_icon@2x.png" class="burger-icon" @click="openMenu"/>
     <div class="menu-open" v-if="isMenuOpen">
-      <div @click="closeMenu" class="x-button"><img src="../assets/new-ui/Close.png" /> Close (ESC)</div>
+      <div @click="closeMenu" class="x-button"><img src="../assets/navbar-icons/Close.png" /> Close (ESC)</div>
       <div></div>
       <div class="ads"></div>
       <div class="menu-icons">
         <div class="row-icons">
           <router-link class="menu-icon" v-if="!stakeOnly" :to="{ name: 'plaza'}" exact>
-            <img src="../assets/new-ui/new-plaza-icon.png">
+            <img src="../assets/navbar-icons/new-plaza-icon.png">
             <p>{{ $t("viewLink.character") }}</p>
           </router-link>
 
           <router-link class="menu-icon" v-if="!stakeOnly" :to="{ name: 'blacksmith'}" exact>
-            <img src="../assets/new-ui/new-blacksmith-icon.png">
+            <img src="../assets/navbar-icons/new-blacksmith-icon.png">
             <p>{{ $t("viewLink.blacksmith") }}</p>
           </router-link>
 
           <router-link class="menu-icon" v-if="!stakeOnly" :to="{ name: 'combat'}" exact>
-            <img src="../assets/new-ui/new-combat-icon.png">
+            <img src="../assets/navbar-icons/new-combat-icon.png">
             <p>{{ $t("viewLink.combat") }}</p>
           </router-link >
 
           <router-link class="menu-icon" v-if="pvp" :to="{ name: 'pvp'}" exact>
-            <img src="../assets/new-ui/new-arena-icon.png">
+            <img src="../assets/navbar-icons/new-arena-icon.png">
             <p>{{ $t("viewLink.arena") }}</p>
           </router-link>
 
           <div v-else class="menu-icon disabled-hover">
-            <img src="../assets/new-ui/new-arena-icon.png">
+            <img src="../assets/navbar-icons/new-arena-icon.png">
             <p>{{ $t("viewLink.arena") }}</p>
           </div>
         </div>
 
         <div class="row-icons">
           <router-link class="menu-icon" v-if="!stakeOnly && raid" :to="{ name: 'raid'}" exact>
-            <img src="../assets/new-ui/new-raid-icon.png">
+            <img src="../assets/navbar-icons/new-raid-icon.png">
             <p>{{ $t("viewLink.raid") }}</p>
           </router-link>
 
           <div v-if="!raid" class="menu-icon disabled-hover">
-            <img src="../assets/new-ui/new-raid-icon.png">
+            <img src="../assets/navbar-icons/new-raid-icon.png">
             <p>{{ $t("viewLink.raid") }}</p>
           </div>
 
           <router-link class="menu-icon" v-if="quests" :to="{ name: 'quests'}" exact>
-            <img src="../assets/new-ui/new-quests-icon.png" />
+            <img src="../assets/navbar-icons/new-quests-icon.png" />
             <p>{{ $t("viewLink.quests") }}</p>
             <hint v-if="!supportsQuests" class="hint" :text="$t('viewLink.functionalityNotSupportedTooltip')"/>
           </router-link>
 
           <div v-else class="menu-icon disabled-hover">
-            <img src="../assets/new-ui/new-quests-icon.png">
+            <img src="../assets/navbar-icons/new-quests-icon.png">
             <p>{{ $t("viewLink.quests") }}</p>
           </div>
 
           <a class="menu-icon" v-if="!stakeOnly && market" href="https://bazaar.market" target="_blank">
-            <img src="../assets/new-ui/new-bazaar-icon.png">
+            <img src="../assets/navbar-icons/new-bazaar-icon.png">
             <p>{{ $t("viewLink.bazaar") }}</p>
           </a>
 
           <div v-if="!market" class="menu-icon disabled-hover">
-            <img src="../assets/new-ui/new-bazaar-icon.png">
+            <img src="../assets/navbar-icons/new-bazaar-icon.png">
             <p>{{ $t("viewLink.bazaar") }}</p>
           </div>
 
           <router-link class="menu-icon" :to="{ name: 'select-stake-type'}" exact>
-            <img src="../assets/new-ui/new-stake-icon.png">
+            <img src="../assets/navbar-icons/new-stake-icon.png">
             <p>{{ $t("viewLink.stake") }}</p>
           </router-link>
         </div>
 
         <div class="row-icons">
             <router-link class="menu-icon" :to="{ name: 'treasury'}" exact>
-            <img src="../assets/new-ui/new-treasury-icon.png">
+            <img src="../assets/navbar-icons/new-treasury-icon.png">
             <p>{{ $t("viewLink.treasury") }}</p>
             </router-link>
 
           <router-link class="menu-icon" :to="{ name: 'leaderboard'}" exact>
-            <img src="../assets/new-ui/new-leaderboard-icon.png">
+            <img src="../assets/navbar-icons/new-leaderboard-icon.png">
             <p>{{ $t("viewLink.leaderboard") }}</p>
           </router-link>
 
            <router-link class="menu-icon" :to="{ name: 'bridge'}" v-if="isBridgeEnabled" exact>
-            <img src="../assets/new-ui/new-bridge-icon.png">
+            <img src="../assets/navbar-icons/new-bridge-icon.png">
             <p>{{ $t("viewLink.nftbridge") }}</p>
           </router-link>
 
            <div v-else class="menu-icon disabled-hover">
-            <img src="../assets/new-ui/new-bridge-icon.png">
+            <img src="../assets/navbar-icons/new-bridge-icon.png">
             <p>{{ $t("viewLink.nftbridge") }}</p>
           </div>
 
           <a class="menu-icon"  href="https://cryptoblades.gitbook.io/wiki/" target="_blank">
-            <img src="../assets/new-ui/new-wiki-icon.png">
+            <img src="../assets/navbar-icons/new-wiki-icon.png">
             <p>{{ $t("viewLink.wiki") }}</p>
           </a>
         </div>
 
          <div class="row-icons">
             <router-link class="menu-icon" :to="{ name: 'options'}" exact>
-            <img src="../assets/new-ui/new-gear-icon.png">
+            <img src="../assets/navbar-icons/new-gear-icon.png">
             <p>{{ $t("viewLink.settings") }}</p>
             </router-link>
 
             <router-link v-if="hasAdminAccess" class="menu-icon" :to="{ name: 'admin'}" exact>
-            <img src="../assets/new-ui/new-gear-icon.png">
+            <img src="../assets/navbar-icons/new-gear-icon.png">
             <p>{{ $t("viewLink.admin") }}</p>
             </router-link>
 
             <router-link v-if="merchandise" class="menu-icon" :to="{ name: 'merchandise'}" exact>
-            <img src="../assets/new-ui/new-bazaar-icon.png">
+            <img src="../assets/navbar-icons/new-bazaar-icon.png">
             <p>{{ $t("viewLink.merchandise") }}</p> <hint
                 v-if="!supportsMerchandise" class="hint"
                 :text="$t('viewLink.functionalityNotSupportedTooltip')"/>

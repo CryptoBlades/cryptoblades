@@ -3,7 +3,7 @@
     <b-navbar class="main-nav" toggleable="sm">
       <b-navbar-brand href="#" class="nav-logo">
         <router-link :to="{ name: 'plaza' }" exact class="new-game-ui-logo">
-          <img src="../assets/new-ui/cb-logo.png" class="logo d-inline-block align-top" alt="Logo">
+          <img src="../assets/cb-logo.png" class="logo d-inline-block align-top" alt="Logo">
         </router-link>
       </b-navbar-brand>
 
