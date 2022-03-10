@@ -212,6 +212,7 @@ interface Data {
   hideWalletWarning: boolean;
   showSkillInUsd: boolean;
   isMenuOpen: boolean;
+  hasAdminAccess: boolean;
 }
 
 interface StoreMappedGetters {
@@ -260,7 +261,9 @@ export default Vue.extend({
       this.isMenuOpen = false;
     }
   },
-
+  mounted() {
+    this.fetchData();
+  },
   computed: {
     ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
     ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
@@ -316,6 +319,7 @@ export default Vue.extend({
 
   methods: {
     ...(mapActions(['claimTokenRewards']) as StoreMappedActions),
+    ...mapActions(['userHasAnyAdminAccess', 'userHasAnyMinterAccess']),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
       if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
@@ -339,7 +343,9 @@ export default Vue.extend({
 
       Events.$emit('setting:hideRewards', { value: this.hideRewards });
     },
-
+    async fetchData() {
+      this.hasAdminAccess = await this.userHasAnyAdminAccess() || await this.userHasAnyMinterAccess();
+    },
     async onClaimTokens() {
       if(this.canClaimTokens) {
         await this.claimTokenRewards();
