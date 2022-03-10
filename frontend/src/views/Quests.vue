@@ -349,9 +349,9 @@ export default Vue.extend({
         clearInterval(this.nextWeekResetCheckInterval);
       }
       this.nextWeekResetCheckInterval = setInterval(async () => {
-        const {days, hours, minutes, seconds} = getTimeRemaining(nextWeekResetTimestamp);
+        const {total, days, hours, minutes, seconds} = getTimeRemaining(nextWeekResetTimestamp);
         this.nextWeekResetTime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-        if (seconds <= 0 && this.nextWeekResetCheckInterval) {
+        if (total <= 1000 && this.nextWeekResetCheckInterval) {
           clearInterval(this.nextWeekResetCheckInterval);
           this.currentWeeklyCompletions = +await this.getWeeklyCompletions();
           this.maxWeeklyCompletions = +await this.getWeeklyCompletionsGoal();
