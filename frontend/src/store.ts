@@ -5144,15 +5144,24 @@ export function createStore(web3: Web3) {
         }
       },
       async transferNFT({ state, dispatch },{nftId, receiverAddress, nftType}: {nftId: number, receiverAddress: string, nftType: string}) {
-        const { Characters, Junk, KeyLootbox, RaidTrinket, Shields, Weapons } = state.contracts();
-        if (!Characters || !Junk || !KeyLootbox || !RaidTrinket || !Shields || !Weapons || !state.defaultAccount) return;
+        const { Characters, Garrison, Junk, KeyLootbox, RaidTrinket, Shields, Weapons } = state.contracts();
+        if (!Characters || !Garrison || !Junk || !KeyLootbox || !RaidTrinket || !Shields || !Weapons || !state.defaultAccount) return;
 
         if (nftType === 'character') {
-          await Characters.methods
-            .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
-            .send({
-              from: state.defaultAccount,
-            });
+          if (state.ownedGarrisonCharacterIds.includes(nftId)) {
+            await Garrison.methods
+              .transferFromGarrison(receiverAddress, nftId)
+              .send({
+                from: state.defaultAccount,
+              });
+          }
+          else {
+            await Characters.methods
+              .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+              .send({
+                from: state.defaultAccount,
+              });
+          }
           await dispatch('updateCharacterIds');
         }
         else if (nftType === 'junk') {
