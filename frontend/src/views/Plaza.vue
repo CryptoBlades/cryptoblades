@@ -295,11 +295,11 @@
         <b-icon icon="exclamation-circle" variant="danger" /> {{ $t('plaza.noRefunds')}}
       </div>
     </b-modal>
-    <b-modal class="centered-modal text-center" ref="transfer-confirmation-modal" :title="$t('transferSoulConfirmation')"
+    <b-modal class="centered-modal text-center" ref="transfer-confirmation-modal" :title="$t('plaza.transferSoulConfirmation')"
       @ok="onTransferConfirm" :ok-disabled="!isValidWeb3Address(receiverAddress) || !soulAmount">
       <div class="text-center">
         <b-icon icon="exclamation-circle" variant="danger" />
-        {{ $t('transferConfirm') }}: {{ soulAmount }} {{ $t('plaza.soul') }}<br>
+        {{ $t('plaza.transferSoulConfirm') }}: {{ soulAmount }} {{ $t('plaza.soul') }}<br>
         {{ $t('plaza.cantBeUndone') }}
       </div>
       <div class="text-center">
