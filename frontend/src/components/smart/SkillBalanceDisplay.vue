@@ -26,8 +26,8 @@
     <div class="transaction-btn">
         <div class="deposit-withdraw">
         <!-- new withdraw/claim on new ui -->
-         <span @click="showModal">Deposit</span> | <span @click="claimSkill(ClaimStage.Summary)"> Withdraw </span>
-         <!-- <span @click="showModal">Deposit</span> -->
+         <!-- <span @click="showModal">Deposit</span> | <span @click="claimSkill(ClaimStage.Summary)"> Withdraw </span> -->
+         <span @click="showModal">Deposit</span>
         </div>
     </div>
 
