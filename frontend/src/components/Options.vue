@@ -1,7 +1,7 @@
 <template>
   <div class="body main-font options">
     <img
-      src="../assets/navbar-icons/6351903_burger_list_menu_navigation_icon@2x.png"
+      src="../assets/navbar-icons/burger-menu.png"
       class="burger-icon"
       @click="openMenu"
     />
