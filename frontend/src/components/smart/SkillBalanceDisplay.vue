@@ -2,18 +2,18 @@
   <div class="skill-balance-display">
     <div size="sm" class="my-2 my-sm-0 mr-3 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
       <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
-      <div class="buy-skill-modal">
-        <div class="buy-skill-modal-child">
-         <img src="../../assets/apeswapbanana.png" class="img-apeswap"  tagname="buy_skill">
-              <b-button variant="primary" class="gtag-link-others" @click="onBuySkill">{{$t('skillBalanceDisplay.buyWithCrypto')}}</b-button>
+        <div class="buy-skill-modal">
+          <div class="buy-skill-modal-child">
+          <img src="../../assets/apeswapbanana.png" class="img-apeswap"  tagname="buy_skill">
+                <b-button variant="primary" class="gtag-link-others" @click="onBuySkill">{{$t('skillBalanceDisplay.buyWithCrypto')}}</b-button>
+          </div>
+          <div class="buy-skill-modal-child">
+                <img src="../../assets/logoTransak.png" class="img-transak"  tagname="buy_skill_test">
+                <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">{{$t('skillBalanceDisplay.buyWithFiat')}}</b-button>
+          </div>
         </div>
-        <div class="buy-skill-modal-child">
-              <img src="../../assets/logoTransak.png" class="img-transak"  tagname="buy_skill_test">
-              <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">{{$t('skillBalanceDisplay.buyWithFiat')}}</b-button>
-        </div>
-      </div>
-    </b-modal>
-      <img src="../../assets/navbar-icons/skill-token.png" class="add-button gtag-link-others"  tagname="buy_skill">
+      </b-modal>
+      <img src="../../assets/navbar-icons/skill-token.png" class="add-button gtag-link-others" :style="isMobile() ? 'width:35px':''"  tagname="buy_skill">
     </div>
 
     <div class="balance-container">
@@ -22,11 +22,12 @@
           @mouseover="hover = !isMobile() || true"
           @mouseleave="hover = !isMobile()"
         >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/></b>
-
-         <div class="deposit-withdraw">
+    </div>
+    <div class="transaction-btn">
+        <div class="deposit-withdraw">
         <!-- new withdraw/claim on new ui -->
-         <!-- <span @click="showModal">Deposit</span> | <span @click="claimSkill(ClaimStage.Summary)"> Withdraw </span> -->
-         <span @click="showModal">Deposit</span>
+         <span @click="showModal">Deposit</span> | <span @click="claimSkill(ClaimStage.Summary)"> Withdraw </span>
+         <!-- <span @click="showModal">Deposit</span> -->
         </div>
     </div>
 
@@ -180,12 +181,24 @@ export default Vue.extend({
 .skill-balance-display {
   display: flex;
   align-items: center;
+  justify-content: center;
   font-size: 1.1rem;
-      border-left: 1px solid #424A59;
-    height: 105px;
-    border-right: 1px solid #424A59;
-    padding-left : 15px;
-    padding-right: 15px;
+  border-left: 1px solid #424A59;
+  height: 105px;
+  border-right: 1px solid #424A59;
+  padding-left : 15px;
+  padding-right: 15px;
+  flex-wrap: wrap;
+}
+
+.skill-tooltip > img{
+  top: 0px;
+  left: 0px;
+}
+
+.transaction-btn{
+  flex: 100%;
+  text-align: center;
 }
 
 .balance-container {
@@ -195,9 +208,17 @@ export default Vue.extend({
   text-align: right;
 }
 .deposit-withdraw {
-  margin-top: 25px;
+  flex: 100%;
+  margin-top: -25px;
+  color: rgba(255, 255, 255, 0.364);
+
+  /* margin-top: 25px;
   position: relative;
-  right: 35px;
+  right: 35px; */
+}
+
+.deposit-withdraw > span{
+  line-height: 10px;
 }
 
 .deposit-withdraw > span:nth-child(2) {
@@ -243,4 +264,5 @@ export default Vue.extend({
   height: auto;
   margin-bottom: 30px;
 }
+
 </style>

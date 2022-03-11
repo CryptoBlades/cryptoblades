@@ -11,23 +11,22 @@
         </router-link>
       </b-navbar-brand>
 
-      <b-navbar-toggle target="navbar-toggle-collapse">
+      <b-navbar-toggle target="navbar-toggle-collapse" class="none-mobile">
         <template #default="{ expanded }">
           <b-icon v-if="expanded" icon="chevron-bar-up"></b-icon>
           <b-icon v-else icon="chevron-bar-down"></b-icon>
         </template>
       </b-navbar-toggle>
 
-      <b-collapse id="navbar-toggle-collapse" is-nav>
+      <b-collapse id="navbar-toggle-collapse" class="none-mobile" is-nav>
         <view-links class="view-links"></view-links>
       </b-collapse>
 
-      <skill-balance-display class="ml-auto d-none d-sm-flex" />
-
-      <options class="d-none d-sm-flex" />
+      <skill-balance-display class="ml-auto d-none d-sm-flex none-mobile" />
+      <options class="d-none d-sm-flex none-mobile" />
 
       <!-- Render only on mobile view -->
-      <div class="d-flex d-sm-none">
+      <div class="d-flex d-sm-none right-details">
         <skill-balance-display class="skill-display-mobile" />
         <options class="options-display-mobile" />
       </div>
@@ -158,21 +157,72 @@ a.router-link-active {
   }
   .skill-display-mobile {
     flex: 5;
+    display: flex;
+    align-items: center;
+    height: 90px !important;
   }
   .skill-display-mobile > .balance-container {
     font-size: 0.8em;
   }
-  .options-display-mobile {
-    flex: 1;
-    align-items: flex-end;
+
+  .balance-container > p{
+    font-size: 11px;
   }
+
+  .options-display-mobile {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+
+  .options-display-mobile > img{
+    width: 30px!important ;
+  }
+
   .navbar-expand-sm {
     text-align: center;
     margin: 0 auto;
   }
-  .nav-logo {
-    margin-right: 0 !important;
+
+  .deposit-withdraw > span{
+    font-size: 12px;
   }
+
+  .deposit-withdraw{
+    color: rgba(255, 255, 255, 0.364);
+  }
+
+  /* make the the menu inline */
+  .main-nav {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .new-game-ui-logo > img {
+    width: 90%;
+  }
+  .nav-logo {
+    /* margin-right: 0 !important; */
+    width: 100%;
+    display: block;
+    flex: 1  !important;
+  }
+  .right-details {
+    width: 100%;
+    flex: 1 !important;
+  }
+
+  .skill-tooltip{
+    width: fit-content  !important;
+  }
+
+  /* hide when in mobile */
+  .none-mobile {
+    display: none !important;
+  }
+
   .menu-icons {
     width: 100% !important;
   }
