@@ -1251,6 +1251,28 @@ contract("PvpArena", (accounts) => {
     });
   });
 
+  describe("#increaseRankingsPool", async () => {
+    it('increases the ranking pool of a certain tier', async () => {
+      const previousPool = (await pvpArena.rankingsPoolByTier(1)).toString();
+      expect(previousPool).to.equal('0');
+
+      await pvpArena.increaseRankingsPool(1, 1000);
+
+      const newPool = (await pvpArena.rankingsPoolByTier(1)).toString();
+      expect(newPool).to.equal('1000');
+    })
+
+    it("doesn't increase other tier's pools", async () => {
+      const previousPool = (await pvpArena.rankingsPoolByTier(1)).toString();
+      expect(previousPool).to.equal('0');
+
+      await pvpArena.increaseRankingsPool(2, 1000);
+
+      const newPool = (await pvpArena.rankingsPoolByTier(1)).toString();
+      expect(newPool).to.equal('0');
+    })
+  });
+
   describe("#performDuels", async () => {
     describe("happy path", () => {
       describe("attacker wins", () => {
