@@ -191,7 +191,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "NAD");
+        require(hasRole(GAME_ADMIN, msg.sender));
     }
 
     modifier enteringArenaChecks(
@@ -398,7 +398,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterWithinDecisionTime(attackerID)
         characterNotInDuel(attackerID)
     {
-        require((arenaAccess & 1) == 1, "AL");
+        require((arenaAccess & 1) == 1);
         require(msg.value == duelOffsetCost, "NO");
 
         uint256 defenderID = getOpponent(attackerID);
@@ -1188,6 +1188,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     function setPvpBotAddress(address payable botAddress) external restricted {
         pvpBotAddress = botAddress;
+    }
+
+    function increaseRankingsPool(uint8 tier, uint256 amount) external restricted {
+        rankingsPoolByTier[tier] = rankingsPoolByTier[tier].add(amount);
     }
     
     /// @dev returns the amount of matcheable characters
