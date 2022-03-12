@@ -625,7 +625,7 @@ export default Vue.extend({
 
   methods: {
     ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN',
-      'burnWeapon', 'reforgeWeaponWithDust', 'massBurnWeapons', 'fetchSpecialWeaponEvents']),
+      'reforgeWeaponWithDust', 'massBurnWeapons', 'fetchSpecialWeaponEvents']),
     ...mapMutations(['updateSpecialWeaponEventId']),
 
     toggleCheckbox() {

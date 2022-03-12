@@ -2081,49 +2081,6 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async burnWeapon({ state, dispatch }, { burnWeaponId, useStakedSkillOnly }: { burnWeaponId: any, useStakedSkillOnly?: boolean }) {
-        const { CryptoBlades, SkillToken, BurningManager } = state.contracts();
-        if(!CryptoBlades || !BurningManager || !state.defaultAccount) return;
-
-        if(useStakedSkillOnly) {
-          await BurningManager.methods
-            .burnWeaponsUsingStakedSkill(
-              [burnWeaponId]
-            )
-            .send({
-              from: state.defaultAccount,
-            });
-        }
-        else {
-          await approveFeeFromAnyContract(
-            CryptoBlades,
-            BurningManager,
-            SkillToken,
-            state.defaultAccount,
-            state.skillRewards,
-            defaultCallOptions(state),
-            defaultCallOptions(state),
-            burningManagerMethods => burningManagerMethods.burnWeaponFee()
-          );
-
-          await BurningManager.methods
-            .burnWeapons(
-              [burnWeaponId]
-            )
-            .send({
-              from: state.defaultAccount,
-            });
-        }
-
-        await Promise.all([
-          dispatch('fetchSkillBalance'),
-          dispatch('updateWeaponIds'),
-          dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp'),
-          dispatch('fetchDustBalance')
-        ]);
-      },
-
       async massBurnWeapons({ state, dispatch }, { burnWeaponIds, useStakedSkillOnly }: { burnWeaponIds: any[], useStakedSkillOnly?: boolean }) {
         const { CryptoBlades, SkillToken, BurningManager } = state.contracts();
         if(!CryptoBlades || !BurningManager || !state.defaultAccount) return;
