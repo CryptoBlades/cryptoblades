@@ -939,13 +939,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint8 position,
         uint256 pool
     ) private {
-        uint256 percentage = prizePercentages[position];
-        uint256 amountToTransfer = (pool.mul(percentage)).div(100);
         address playerToTransfer = characters.ownerOf(characterID);
 
         _rankingRewardsByPlayer[playerToTransfer] = _rankingRewardsByPlayer[
             playerToTransfer
-        ].add(amountToTransfer);
+        ].add((pool.mul(prizePercentages[position])).div(100));
     }
 
     /// @dev removes a character from arena and clears it's matches
