@@ -1,5 +1,6 @@
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 const assert = require('assert');
+const { deployNamedProxy } = require('./utils/named-proxy');
 
 const BasicPriceOracle = artifacts.require("BasicPriceOracle");
 const DummyRandoms = artifacts.require("DummyRandoms");
@@ -44,7 +45,7 @@ module.exports = async function (deployer, network) {
   assert(skillToken != null, 'Expected skillToken to be set to a contract');
   assert(randoms != null, 'Expected random to be set to a contract');
 
-  const priceOracle = await deployProxy(BasicPriceOracle, [], { deployer });
+  const priceOracle = await deployNamedProxy(BasicPriceOracle, [], { deployer }, 'SkillPriceOracle');
 
   const charas = await deployProxy(Characters, [], { deployer });
 
