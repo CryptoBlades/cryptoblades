@@ -967,9 +967,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         delete fighterByCharacter[characterID];
         delete matchByFinder[characterID];
 
-        if (_matchableCharactersByTier[tier].contains(characterID)) {
-            _matchableCharactersByTier[tier].remove(characterID);
-        }
+        _matchableCharactersByTier[tier].remove(characterID);
 
         isCharacterInArena[characterID] = false;
         isWeaponInArena[weaponID] = false;
