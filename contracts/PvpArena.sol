@@ -1009,8 +1009,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterInArena(characterID)
         returns (uint24) 
     {
-        int128 bonusShieldStats;
-        
         (
             ,
             int128 weaponMultFight,
@@ -1018,6 +1016,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             
         ) = weapons.getFightData(fighterByCharacter[characterID].weaponID, characters.getTrait(characterID));
 
+        int128 bonusShieldStats;
         if (fighterByCharacter[characterID].useShield) {
             // we set bonus shield stats as 0.2
             // Note: hardcoded - copied in _getCharacterPowerRoll
