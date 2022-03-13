@@ -982,25 +982,21 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint24)
     {
-        uint24 playerFightPower = getCharacterPower(character.ID);
-
-        Fighter memory fighter = fighterByCharacter[character.ID];
-        uint256 weaponID = fighter.weaponID;
         uint256 seed = randoms.getRandomSeedUsingHash(
             characters.ownerOf(character.ID),
             blockhash(block.number - 1)
         );
 
-        uint8 weaponTrait = weapons.getTrait(weaponID);
-
         int128 playerTraitBonus = getPVPTraitBonusAgainst(
             character.trait,
-            weaponTrait,
+            weapons.getTrait(
+                fighterByCharacter[character.ID].weaponID
+            ),
             opponentTrait
         );
 
         uint256 playerPower = RandomUtil.plusMinus30PercentSeeded(
-            playerFightPower,
+            getCharacterPower(character.ID),
             seed
         );
 
