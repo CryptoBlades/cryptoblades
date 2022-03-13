@@ -906,40 +906,22 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             matchableCharacters.length() - 1,
             seed
         );
-        uint256 opponentID;
+        uint256 opponentID = uint256(-1);
         uint256 matchableCharactersCount = matchableCharacters.length();
-        bool foundOpponent = false;
 
         for (uint256 i = 0; i < matchableCharactersCount; i++) {
             uint256 index = (randomIndex + i) % matchableCharactersCount;
             uint256 candidateID = matchableCharacters.at(index);
 
-            if (candidateID == characterID) {
-                if (matchableCharactersCount == 1) {
-                    break;
-                }
-                if (
-                    matchableCharacters.at(matchableCharactersCount - 1) ==
-                    candidateID
-                ) {
-                    candidateID = matchableCharacters.at(0);
-                } else {
-                    candidateID = matchableCharacters.at(index + 1);
-                }
-            }
-            if (
-                characters.ownerOf(candidateID) ==
-                msg.sender
-            ) {
-                continue;
-            }
+            if ((candidateID != characterID) &&
+                (characters.ownerOf(candidateID) != msg.sender)) {
 
-            foundOpponent = true;
-            opponentID = candidateID;
-            break;
+                opponentID = candidateID;
+                break;
+            }
         }
 
-        require(foundOpponent, "NE");
+        require(opponentID != uint256(-1), "NE");
 
         matchByFinder[characterID] = Match(
             characterID,
