@@ -994,7 +994,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
         // Shield removed first before the fighter is deleted
         if (fighter.useShield) {
-            isShieldInArena[shieldID] = false;
+            delete isShieldInArena[shieldID];
             shields.setNftVar(shieldID, 1, 0);
         }
 
@@ -1005,8 +1005,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             _matchableCharactersByTier[tier].remove(characterID);
         }
 
-        isCharacterInArena[characterID] = false;
-        isWeaponInArena[weaponID] = false;
+        delete isCharacterInArena[characterID];
+        delete isWeaponInArena[weaponID];
 
         // setting characters, weapons and shield NFTVAR_BUSY to 0
         characters.setNftVar(characterID, 1, 0);
