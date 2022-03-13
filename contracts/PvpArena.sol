@@ -876,11 +876,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         }
     }
 
-    /// @dev returns ranked prize percentages distribution
-    function getPrizePercentages() external view returns (uint256[] memory) {
-        return prizePercentages;
-    }
-
     /// @dev returns the account's ranking prize pool earnings
     function getPlayerPrizePoolRewards() public view returns (uint256) {
         return _rankingRewardsByPlayer[msg.sender];
