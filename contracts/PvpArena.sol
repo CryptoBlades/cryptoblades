@@ -861,23 +861,19 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function getTierTopCharacters(uint8 tier)
         public
         view
-        returns (uint256[] memory)
+        returns (uint256[] memory topRankers)
     {
-        uint256 arrayLength;
+        uint256 arrayLength = _topRankingCharactersByTier[tier].length;
         // we return only the top 3 players, returning the array without the pivot ranker if it exists
         if (
             _topRankingCharactersByTier[tier].length == _maxTopCharactersPerTier
         ) {
-            arrayLength = _topRankingCharactersByTier[tier].length - 1;
-        } else {
-            arrayLength = _topRankingCharactersByTier[tier].length;
+            arrayLength -= 1;
         }
-        uint256[] memory topRankers = new uint256[](arrayLength);
+        topRankers = new uint256[](arrayLength);
         for (uint256 i = 0; i < arrayLength; i++) {
             topRankers[i] = _topRankingCharactersByTier[tier][i];
         }
-
-        return topRankers;
     }
 
     /// @dev returns ranked prize percentages distribution
