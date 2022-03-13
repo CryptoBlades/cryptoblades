@@ -845,8 +845,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
     function getArenaTier(uint256 characterID) public view returns (uint8) {
-        uint8 level = characters.getLevel(characterID);
-        return getArenaTierForLevel(level);
+        return getArenaTierForLevel(characters.getLevel(characterID));
     }
 
     function getArenaTierForLevel(uint8 level) public pure returns (uint8) {
