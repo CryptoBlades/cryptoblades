@@ -831,11 +831,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     /// @dev gets the amount of SKILL that is risked per duel
     function getDuelCost(uint256 characterID) public view returns (uint256) {
-        int128 tierExtra = ABDKMath64x64
-            .divu(getArenaTier(characterID).mul(100), 100)
-            .mul(_tierWagerUSD);
-
-        return game.usdToSkill(_baseWagerUSD.add(tierExtra));
+        return getDuelCostByTier(getArenaTier(characterID));
     }
 
     /// @dev gets the amount of SKILL that is risked per duel by tier
