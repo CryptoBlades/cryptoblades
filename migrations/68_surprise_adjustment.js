@@ -1,4 +1,4 @@
-const { upgradeProxy, deployProxy } = require('@openzeppelin/truffle-upgrades');
+const { upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 
 const Promos = artifacts.require('Promos');
 const NFTMarket = artifacts.require("NFTMarket");

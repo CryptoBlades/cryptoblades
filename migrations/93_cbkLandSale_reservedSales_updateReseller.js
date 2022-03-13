@@ -1,5 +1,4 @@
-const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
-
+const { upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 
 const CBKLandSale = artifacts.require("CBKLandSale");
 

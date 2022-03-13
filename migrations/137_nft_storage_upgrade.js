@@ -1,4 +1,4 @@
-const { upgradeProxy, deployProxy } = require("@openzeppelin/truffle-upgrades");
+const { upgradeProxy } = require("@openzeppelin/truffle-upgrades");
 const NFTStorage = artifacts.require("NFTStorage");
 const Weapons = artifacts.require("Weapons");
 
