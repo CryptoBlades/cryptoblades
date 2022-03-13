@@ -1,4 +1,5 @@
-const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
+const { upgradeProxy } = require('@openzeppelin/truffle-upgrades');
+const { deployNamedProxy } = require('./utils/named-proxy');
 
 const CryptoBlades = artifacts.require("CryptoBlades");
 const Blacksmith = artifacts.require("Blacksmith");
@@ -18,7 +19,7 @@ module.exports = async function (deployer, network, accounts) {
     const LINK_SKILL_ORACLE_2 = await blacksmith.LINK_SKILL_ORACLE_2();
     await blacksmith.setLink(LINK_SKILL_ORACLE_2, skillOracle.address);
 
-    const kingOracle = await deployProxy(BasicPriceOracle, [], { deployer });
+    const kingOracle = await deployNamedProxy(BasicPriceOracle, [], { deployer }, 'KingPriceOracle');
     await kingOracle.setCurrentPrice("3333333333333333333"); // about 0.3 usd per king
     const LINK_KING_ORACLE = await blacksmith.LINK_KING_ORACLE();
     await blacksmith.setLink(LINK_KING_ORACLE, kingOracle.address);
