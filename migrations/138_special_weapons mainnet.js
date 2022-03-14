@@ -1,11 +1,13 @@
 const { upgradeProxy, deployProxy } = require("@openzeppelin/truffle-upgrades");
+const { requireNamedProxy } = require('./utils/named-proxy');
+
 const Weapons = artifacts.require("Weapons");
 const Promos = artifacts.require("Promos");
 const SafeRandoms = artifacts.require("SafeRandoms");
 const SpecialWeaponsManager = artifacts.require("SpecialWeaponsManager");
 const CryptoBlades = artifacts.require("CryptoBlades");
 const BurningManager = artifacts.require("BurningManager");
-const BasicPriceOracle = artifacts.require("BasicPriceOracle");
+const SkillPriceOracle = requireNamedProxy('BasicPriceOracle', 'SkillPriceOracle');
 const PvpArena = artifacts.require("PvpArena");
 const NFTStorage = artifacts.require("NFTStorage");
 const SkillStakingRewardsUpgradeable = artifacts.require("SkillStakingRewardsUpgradeable");
@@ -24,7 +26,7 @@ module.exports = async function (deployer, network) {
     let weapons = await upgradeProxy(Weapons.address, Weapons, { deployer });
     let promos = await Promos.deployed();
     let safeRandoms = await SafeRandoms.deployed();
-    let priceOracle = await BasicPriceOracle.deployed();
+    let priceOracle = await SkillPriceOracle.deployed();
     let game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
     let specialWeaponsManager = await deployProxy(SpecialWeaponsManager, [promos.address, weapons.address, safeRandoms.address, game.address, priceOracle.address], { deployer });
 
