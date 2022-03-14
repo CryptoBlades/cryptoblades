@@ -252,6 +252,7 @@ export default Vue.extend({
         if (total <= 0 && this.freeSkipCheckInterval) {
           clearInterval(this.freeSkipCheckInterval);
           this.nextFreeSkipTime = '';
+          this.freeSkip = true;
         }
       }, 1000);
     },

@@ -1,7 +1,7 @@
 <template>
-  <b-modal v-if="quest" class="centered-modal" :visible="showModal" button-size="lg" no-close-on-backdrop scrollable
+  <b-modal v-if="quest" :visible="showModal" button-size="lg" no-close-on-backdrop scrollable
            :title="$t('quests.turnIn')" size="xl" @close.prevent="resetTokens"
-           @cancel.prevent="resetTokens"
+           @cancel.prevent="resetTokens" content-class="modal-footer-margin"
            :ok-title="$t('quests.submit')" :busy="isLoading"
            :ok-disabled="isSubmitDisabled()"
            @ok.prevent="quest.requirementType === RequirementType.DUST
@@ -20,7 +20,7 @@
       || quest.requirementType === RequirementType.STAMINA
        || quest.requirementType === RequirementType.SOUL"
          class="d-flex align-items-center flex-column">
-      <dust-balance-display v-if="quest.requirementType === RequirementType.DUST" class="w-50 p-5"
+      <dust-balance-display v-if="quest.requirementType === RequirementType.DUST" class="single-dust-display p-5"
                             :rarities="[quest.requirementRarity]"/>
       <nft-icon v-else-if="quest.requirementType === RequirementType.SOUL" :isDefault="true" :nft="{ type: 'soul' }"/>
       <h2>{{ $t('quests.howMuchToTurnIn') }}</h2>
@@ -173,7 +173,20 @@ export default Vue.extend({
 
     setRequiredAmount() {
       if (!this.quest) return;
-      this.amountToBurn = this.quest.requirementAmount - this.questProgress;
+      const remainingAmount = this.quest.requirementAmount - this.questProgress;
+      if (this.quest.requirementType === RequirementType.STAMINA) {
+        this.amountToBurn = remainingAmount > this.getCharacterStamina(this.characterId) ? this.getCharacterStamina(this.characterId) : remainingAmount;
+      } else if (this.quest.requirementType === RequirementType.SOUL) {
+        this.amountToBurn = remainingAmount > this.soulBalance ? this.soulBalance : remainingAmount;
+      } else if (this.quest.requirementType === RequirementType.DUST) {
+        if (this.quest.requirementRarity === Rarity.COMMON) {
+          this.amountToBurn = remainingAmount > this.getLesserDust() ? this.getLesserDust() : remainingAmount;
+        } else if (this.quest.requirementRarity === Rarity.UNCOMMON) {
+          this.amountToBurn = remainingAmount > this.getGreaterDust() ? this.getGreaterDust() : remainingAmount;
+        } else if (this.quest.requirementRarity === Rarity.RARE) {
+          this.amountToBurn = remainingAmount > this.getPowerfulDust() ? this.getPowerfulDust() : remainingAmount;
+        }
+      }
     },
 
     addBurnToken(id: number) {
@@ -190,6 +203,8 @@ export default Vue.extend({
     },
 
     addNftIdType(nftIdType: NftIdType) {
+      if (!this.quest) return;
+      if (this.questProgress + this.tokensToBurn.length >= this.quest.requirementAmount) return;
       this.nftIdTypesToBurn.push(nftIdType);
       this.ownedNftIdTypes = this.ownedNftIdTypes.filter(val => !this.nftIdTypesToBurn.some(nftToBurn => nftToBurn.id === val.id));
       this.tokensToBurn = this.nftIdTypesToBurn.map(nftIdType => nftIdType.id);
@@ -306,4 +321,17 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.single-dust-display {
+  width: 40%;
+}
+
+/deep/ .modal-footer-margin {
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 576px) {
+  .single-dust-display {
+    width: 100%;
+  }
+}
 </style>

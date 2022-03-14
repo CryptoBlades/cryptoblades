@@ -1,7 +1,10 @@
 <template>
-  <div class="reward-icon-container">
+  <div class="reward-icon-container"
+       :class="(questItemType === QuestItemType.REPUTATION && amount === 0) ? 'empty' : ''">
     <img class="reward-icon" :src="icon" v-b-tooltip="tooltip" alt="Reward image"/>
-    <span v-if="questItemType === QuestItemType.REPUTATION" class="reward-amount">+{{ amount }} Rep</span>
+    <span v-if="questItemType === QuestItemType.REPUTATION" class="reward-amount">
+      <span v-if="amount !== 0">+</span>{{ amount }} Rep
+    </span>
     <span v-else-if="questItemType === QuestItemType.EXPERIENCE" class="reward-amount">+{{ amount }} Exp</span>
     <span v-else class="reward-amount"><span>x</span>{{ amount }} {{ stars }}</span>
   </div>
@@ -17,11 +20,9 @@ import powerfulDust from '@/assets/dusts/powerfulDust.png';
 import soul from '@/assets/dusts/soulDust.png';
 import sword from '@/assets/placeholder/sword-placeholder-1.png';
 import junk from '@/assets/junk/junk3.png';
-//TODO: Missing icons!
 import reputation from '@/assets/reputation.png';
-import stamina from '@/assets/reputation.png';
-import raid from '@/assets/reputation.png';
-//these three^
+import stamina from '@/assets/stamina.png';
+import raid from '@/assets/raid.png';
 import experience from '@/assets/experience.png';
 import shield from '@/assets/shield2.png';
 import trinket from '@/assets/trinkets/trinket1.png';
@@ -140,5 +141,9 @@ export default Vue.extend({
 
 .reward-amount {
   font-size: 0.8rem;
+}
+
+.empty {
+  opacity: 0.5;
 }
 </style>

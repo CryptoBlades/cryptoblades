@@ -281,7 +281,7 @@
           @click="onNftClick(nft.type, nft.id)"
           @contextmenu="canFavorite && toggleFavorite($event, nft.type, nft.id)"
         >
-          <nft-options-dropdown v-if="showNftOptions" :nftType="nft.type" :nftId="nft.id" :options="options" class="nft-options"/>
+          <nft-options-dropdown v-if="showNftOptions" :nftType="nft.type" :nftId="+nft.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
           <nft-icon :favorite="isFavorite(nft.type, nft.id)" :nft="nft" :isShop="isShop"/>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
             <slot name="above" :nft="nft"></slot>
@@ -371,7 +371,6 @@ interface Data {
   checkIfCanPurchaseLandInterval: ReturnType<typeof setInterval> | null;
   checkOwnedLandsInterval: ReturnType<typeof setInterval> | null;
   checkPlayerReservedLandInterval: ReturnType<typeof setInterval> | null;
-  fetchNftsInterval: ReturnType<typeof setInterval> | null;
   t1LandPrice: string;
   t2LandPrice: string;
   t3LandPrice: string;
@@ -567,7 +566,6 @@ export default Vue.extend({
       checkIfCanPurchaseLandInterval: null,
       checkOwnedLandsInterval: null,
       checkPlayerReservedLandInterval: null,
-      fetchNftsInterval: null,
       t1LandPrice: '',
       t2LandPrice: '',
       t3LandPrice: '',
@@ -957,12 +955,6 @@ export default Vue.extend({
       await this.updateTrinketIds();
       await this.updateJunkIds();
       await this.updateKeyLootboxIds();
-
-      this.fetchNftsInterval = setInterval(async () => {
-        await this.updateTrinketIds();
-        await this.updateJunkIds();
-        await this.updateKeyLootboxIds();
-      }, 3000);
     },
 
     async refreshLandPrices() {
@@ -1220,9 +1212,6 @@ export default Vue.extend({
     }
     if(this.checkOwnedLandsInterval){
       clearInterval(this.checkOwnedLandsInterval);
-    }
-    if(this.fetchNftsInterval) {
-      clearInterval(this.fetchNftsInterval);
     }
   }
 });

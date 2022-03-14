@@ -31,7 +31,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest, QuestItemsInfo, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
+import {Quest, QuestItemsInfo, Rarity, RequirementType, RewardType, DustRarity} from '@/views/Quests.vue';
 import QuestComponentIcon from './QuestComponentIcon.vue';
 import {questItemTypeSupportsStars, questItemTypeSupportsTimesValue} from '@/utils/common';
 import {mapActions} from 'vuex';
@@ -71,8 +71,12 @@ export default Vue.extend({
   computed: {
     requirementName(): string {
       if (this.quest.requirementType === RequirementType.EXTERNAL || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
-        if (!this.quest?.requirementExternalAddress) return '';
+        if (this.quest?.requirementExternalAddress === undefined) return '';
         return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].name;
+      } else if (this.quest.requirementType === RequirementType.DUST) {
+        if(this.quest.requirementRarity === undefined) return '';
+        return i18n.t(`quests.dustRarityType.${DustRarity[this.quest.requirementRarity]}`).toString() + ' ' +
+          i18n.t(`quests.requirementType.${RequirementType[this.quest.requirementType]}`).toString();
       } else {
         if (!this.quest?.requirementType) return '';
         return i18n.t(`quests.requirementType.${RequirementType[this.quest.requirementType]}`).toString();

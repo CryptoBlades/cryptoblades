@@ -21,12 +21,14 @@
           <QuestsList v-if="tier !== undefined" :tier="usePromoQuests ? tier + 10 : tier"/>
         </b-modal>
       </div>
-      <div v-if="weeklyReward.id" class="d-flex flex-column gap-2">
+      <div v-if="weeklyReward && weeklyReward.id && currentWeeklyCompletions !== undefined && maxWeeklyCompletions"
+           class="d-flex flex-column gap-2">
         <div class="d-flex align-items-center gap-2">
           <div class="d-flex flex-column gap-2">
             <div class="d-flex justify-content-between gap-4">
               <span class="text-uppercase weekly-progress">{{ $t('quests.weeklyProgress') }}</span>
-              <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon" alt="Hourglass"/> {{
+              <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon"
+                                                                     alt="Hourglass"/> {{
                   $t('quests.resetsIn', {time: nextWeekResetTime})
                 }}</span>
             </div>
@@ -40,7 +42,8 @@
                     class="quest-progress-value">{{ `${currentWeeklyCompletions} / ${maxWeeklyCompletions}` }}</span>
             </div>
           </div>
-          <div class="d-flex justify-content-center gap-2">
+          <div class="d-flex justify-content-center align-items-center gap-2 position-relative h-100">
+            <span v-if="weeklyClaimed" class="claimed-banner">{{ $t('quests.claimed') }}</span>
             <QuestComponentIcon :questItemType="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
                                 :amount="weeklyReward.rewardAmount"
                                 :externalAddress="weeklyReward.rewardExternalAddress"/>
@@ -325,8 +328,8 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         this.usePromoQuests = await this.isUsingPromoQuests();
-        this.currentWeeklyCompletions = await this.getWeeklyCompletions();
-        this.maxWeeklyCompletions = await this.getWeeklyCompletionsGoal();
+        this.currentWeeklyCompletions = +await this.getWeeklyCompletions();
+        this.maxWeeklyCompletions = +await this.getWeeklyCompletionsGoal();
         this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});
         this.weeklyClaimed = await this.hasClaimedWeeklyReward();
         await this.getNextWeekResetTime();
@@ -427,11 +430,21 @@ export default Vue.extend({
   position: absolute;
   width: 100%;
   font-weight: bold;
+  text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+}
+
+.claimed-banner {
+  position: absolute;
+  text-transform: uppercase;
+  transform: rotate(15deg);
+  font-weight: bold;
+  text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
 }
 
 @media (max-width: 576px) {
   .quests-container {
     padding: 1rem;
+    margin-bottom: 3rem;
   }
 
   .weekly-progress-container {

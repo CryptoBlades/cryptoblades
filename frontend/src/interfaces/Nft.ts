@@ -21,6 +21,13 @@ export interface Nft {
   tier?: number;
   chunkId?: number;
   quest?: Quest;
+  status?: NftStatus;
+}
+
+export enum NftStatus {
+  AVAILABLE,
+  IN_ARENA,
+  IN_RAID
 }
 
 export type NftType = 'weapon' | 'character' | 'shield';

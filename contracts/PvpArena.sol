@@ -12,8 +12,6 @@ import "./weapons.sol";
 import "./shields.sol";
 import "./common.sol";
 
-
-
 contract PvpArena is Initializable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;
     using SafeMath for uint8;
@@ -130,7 +128,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 timestamp,
         uint256 attackerRoll,
         uint256 defenderRoll,
-        bool attackerWon
+        bool attackerWon,
+        uint256 bonusRank
     );
 
     event CharacterKicked(
@@ -150,7 +149,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterInArena(uint256 characterID) internal view {
-        require(isCharacterInArena[characterID], "Char not in arena");
+        require(isCharacterInArena[characterID], "NA");
     }
 
     modifier characterWithinDecisionTime(uint256 characterID) {
@@ -161,7 +160,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function _characterWithinDecisionTime(uint256 characterID) internal view {
         require(
             isCharacterWithinDecisionTime(characterID),
-            "Decision time expired"
+            "DE"
         );
     }
 
@@ -171,7 +170,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterNotUnderAttack(uint256 characterID) internal view {
-        require(!isCharacterUnderAttack(characterID), "Under attack");
+        require(!isCharacterUnderAttack(characterID), "UA");
     }
 
     modifier characterNotInDuel(uint256 characterID) {
@@ -180,7 +179,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _characterNotInDuel(uint256 characterID) internal view {
-        require(!isCharacterInDuel(characterID), "In duel queue");
+        require(!isCharacterInDuel(characterID), "IQ");
     }
 
     modifier isOwnedCharacter(uint256 characterID) {
@@ -194,7 +193,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not admin");
+        require(hasRole(GAME_ADMIN, msg.sender), "NAD");
     }
 
     modifier enteringArenaChecks(
@@ -208,15 +207,14 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 weapons.ownerOf(weaponID) == msg.sender
         );
 
-        require(characters.getNftVar(characterID, 1) == 0, "Char busy");
-        require(weapons.getNftVar(weaponID, 1) == 0, "Wpn busy");
+        require(characters.getNftVar(characterID, 1) == 0 && weapons.getNftVar(weaponID, 1) == 0, "B");
 
         if (useShield) {
             require(shields.ownerOf(shieldID) == msg.sender);
-            require(shields.getNftVar(shieldID, 1) == 0, "Shld busy");
+            require(shields.getNftVar(shieldID, 1) == 0, "SB");
         }
 
-        require((arenaAccess & 1) == 1, "Arena locked");
+        require((arenaAccess & 1) == 1, "AL");
         _;
     }
 
@@ -357,7 +355,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterNotUnderAttack(characterID)
         characterNotInDuel(characterID)
     {
-        require(matchByFinder[characterID].createdAt == 0, "Already in match");
+        require(matchByFinder[characterID].createdAt == 0, "AM");
 
         uint8 tier = getArenaTier(characterID);
 
@@ -375,7 +373,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 opponentID = getOpponent(characterID);
         uint8 tier = getArenaTier(characterID);
 
-        require(matchByFinder[characterID].createdAt != 0, "Not in match");
+        require(matchByFinder[characterID].createdAt != 0, "NM");
 
         delete finderByOpponent[opponentID];
         if (isCharacterInArena[opponentID]) {
@@ -406,8 +404,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterWithinDecisionTime(attackerID)
         characterNotInDuel(attackerID)
     {
-        require((arenaAccess & 1) == 1, "Arena locked");
-        require(msg.value == duelOffsetCost, "No duel offset");
+        require((arenaAccess & 1) == 1, "AL");
+        require(msg.value == duelOffsetCost, "NO");
 
         uint256 defenderID = getOpponent(attackerID);
 
@@ -519,8 +517,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint256 ID;
         uint8 level;
         uint8 trait;
-        uint24 basePower;
         uint24 roll;
+        uint256 power;
     }
 
     struct Duel {
@@ -529,6 +527,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         uint8 tier;
         uint256 cost;
         bool attackerWon;
+        uint256 bonusRank;
     }
 
     function createDuelist(uint256 id) internal view returns (Duelist memory duelist) {
@@ -545,8 +544,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             , // boots
             , // race
         ) = characters.get(id);
-
-        duelist.basePower = Common.getPowerAtLevel(duelist.level);
     }
 
     /// @dev performs a list of duels
@@ -561,6 +558,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
             duel.tier = getArenaTierForLevel(duel.attacker.level);
             duel.cost = getDuelCostByTier(duel.tier);
+
+            duel.attacker.power = getCharacterPower(duel.attacker.ID);
+            duel.defender.power = getCharacterPower(duel.defender.ID);
 
             duel.attacker.roll = _getCharacterPowerRoll(duel.attacker, duel.defender.trait);
             duel.defender.roll = _getCharacterPowerRoll(duel.defender, duel.attacker.trait);
@@ -614,13 +614,20 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 ? duel.defender.ID
                 : duel.attacker.ID;
 
+            if (winnerID == duel.attacker.ID && duel.attacker.power < duel.defender.power) {
+                duel.bonusRank = Common.getBonusRankingPoints(duel.attacker.power, duel.defender.power);
+            } else if (winnerID == duel.defender.ID && duel.attacker.power > duel.defender.power) {
+                duel.bonusRank = Common.getBonusRankingPoints(duel.defender.power, duel.attacker.power);           
+            }
+
             emit DuelFinished(
                 duel.attacker.ID,
                 duel.defender.ID,
                 block.timestamp,
                 duel.attacker.roll,
                 duel.defender.roll,
-                duel.attackerWon
+                duel.attackerWon,
+                duel.bonusRank
             );
 
             BountyDistribution
@@ -669,9 +676,11 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             _matchableCharactersByTier[duel.tier].add(winnerID);
 
             // Add ranking points to the winner
+
             rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
                 winnerID
-            ].add(winningPoints);
+            ].add(winningPoints.add(duel.bonusRank));
+
             // Check if the loser's current raking points are 'losingPoints' or less and set them to 0 if that's the case, else subtract the ranking points
             if (rankingPointsByCharacter[loserID] <= losingPoints) {
                 rankingPointsByCharacter[loserID] = 0;
@@ -908,7 +917,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         EnumerableSet.UintSet
             storage matchableCharacters = _matchableCharactersByTier[tier];
 
-        require(matchableCharacters.length() != 0, "No enemy in tier");
+        require(matchableCharacters.length() != 0, "N1");
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 randomIndex = RandomUtil.randomSeededMinMax(
@@ -948,7 +957,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             break;
         }
 
-        require(foundOpponent, "No enemy found");
+        require(foundOpponent, "NE");
 
         matchByFinder[characterID] = Match(
             characterID,
@@ -1013,6 +1022,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         view
         returns (uint24)
     {
+        uint24 playerFightPower = getCharacterPower(character.ID);
+
         Fighter memory fighter = fighterByCharacter[character.ID];
         uint256 weaponID = fighter.weaponID;
         uint256 seed = randoms.getRandomSeedUsingHash(
@@ -1020,18 +1031,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             blockhash(block.number - 1)
         );
 
-        int128 bonusShieldStats;
-        if (fighter.useShield) {
-            // we set bonus shield stats as 0.2
-            bonusShieldStats = _getShieldStats(character.ID).sub(1).mul(20).div(100);
-        }
-
-        (
-            ,
-            int128 weaponMultFight,
-            uint24 weaponBonusPower,
-            uint8 weaponTrait
-        ) = weapons.getFightData(weaponID, character.trait);
+        uint8 weaponTrait = weapons.getTrait(weaponID);
 
         int128 playerTraitBonus = getPVPTraitBonusAgainst(
             character.trait,
@@ -1039,13 +1039,41 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             opponentTrait
         );
 
-        uint24 playerFightPower = Common.getPlayerPowerBase100(character.basePower, (weaponMultFight.add(bonusShieldStats)), weaponBonusPower);
         uint256 playerPower = RandomUtil.plusMinus30PercentSeeded(
             playerFightPower,
             seed
         );
 
         return uint24(playerTraitBonus.mulu(playerPower));
+    }
+
+    function getCharacterPower(uint256 characterID)
+        public
+        view
+        characterInArena(characterID)
+        returns (uint24) 
+    {
+        int128 bonusShieldStats;
+        
+        (
+            ,
+            int128 weaponMultFight,
+            uint24 weaponBonusPower,
+            
+        ) = weapons.getFightData(fighterByCharacter[characterID].weaponID, characters.getTrait(characterID));
+
+        if (fighterByCharacter[characterID].useShield) {
+            // we set bonus shield stats as 0.2
+            // Note: hardcoded - copied in _getCharacterPowerRoll
+            bonusShieldStats = _getShieldStats(characterID).sub(1).mul(20).div(100);
+        }
+
+        return (   
+            Common.getPlayerPowerBase100(
+                Common.getPowerAtLevel(characters.getLevel(characterID)),
+                (weaponMultFight.add(bonusShieldStats)),
+                weaponBonusPower)
+        );
     }
 
     function getPVPTraitBonusAgainst(
@@ -1057,7 +1085,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         int128 fightTraitBonus = game.fightTraitBonus();
         int128 charTraitFactor = ABDKMath64x64.divu(50, 100);
         if (characterTrait == weaponTrait) {
-            traitBonus = traitBonus.add(fightTraitBonus);
+            traitBonus = traitBonus.add(fightTraitBonus.mul(3));
         }
 
         // We apply 50% of char trait bonuses because they are applied twice (once per fighter)
@@ -1080,7 +1108,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         uint8 trait = characters.getTrait(characterID);
         uint256 shieldID = fighterByCharacter[characterID].shieldID;
-        (, int128 shieldMultFight, , ) = shields.getFightData(shieldID, trait);
+        int128 shieldMultFight = shields.getDefenseMultiplierForTrait(shieldID, trait);
         return (shieldMultFight);
     }
 
@@ -1166,27 +1194,6 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         pvpBotAddress = botAddress;
     }
 
-    // Note: The following are debugging functions. Remove later.
-
-    function clearDuelQueue(uint256 length) external restricted {
-        for (uint256 i = 0; i < length; i++) {
-            if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
-                isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
-            }
-
-            _duelQueue.remove(_duelQueue.at(i));
-        }
-
-        isDefending[0] = false;
-    }
-
-    function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
-        public
-        restricted
-    {
-        rankingPointsByCharacter[characterID] = newRankingPoints;
-    }
-
     /// @dev returns the amount of matcheable characters
     function getMatchablePlayerCount(uint256 characterID) public view returns(uint){
         uint8 tier = getArenaTier(characterID);
@@ -1220,4 +1227,26 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         skillToken.safeTransfer(characters.ownerOf(characterID), wager);
     }
 
+    // Note: The following are debugging functions..
+
+    // function clearDuelQueue(uint256 length) external restricted {
+    //     for (uint256 i = 0; i < length; i++) {
+    //         if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
+    //             isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
+    //         }
+
+    //         _duelQueue.remove(_duelQueue.at(i));
+    //     }
+
+    //     isDefending[0] = false;
+    // }
+
+    // Note: Unmute this to test ranking interactions 
+    
+    // function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
+    //     public
+    //     restricted
+    // {
+    //     rankingPointsByCharacter[characterID] = newRankingPoints;
+    // }
 }

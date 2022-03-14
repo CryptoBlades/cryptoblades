@@ -223,18 +223,19 @@ export function duelByAttackerFromContract(data: [string,string,string,boolean])
   };
 }
 
-export function duelResultFromContract(data: [string,string,string,string,string,boolean]) {
+export function duelResultFromContract(data: [string,string,string,string,string,boolean,string]) {
   const attackerId = data[0];
   const defenderId = data[1];
   const timestamp = data[2];
   const attackerRoll = data[3];
   const defenderRoll = data[4];
   const attackerWon = data[5];
+  const bonusRank = data[6];
   const previousDuelReward = 0;
   const newDuelReward = 0;
 
   return {
-    attackerId,attackerRoll,attackerWon,defenderId,defenderRoll,timestamp, previousDuelReward, newDuelReward
+    attackerId,attackerRoll,attackerWon,defenderId,defenderRoll,timestamp, previousDuelReward, newDuelReward, bonusRank
   };
 }
 

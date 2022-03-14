@@ -2344,7 +2344,7 @@ export function createStore(web3: Web3) {
 
       async stake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
         const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards || !StakingToken) return;
+        if(!StakingRewards || !StakingToken || !state.defaultAccount) return;
 
         await StakingToken.methods.approve(StakingRewards.options.address, amount).send({
           from: state.defaultAccount
@@ -2357,9 +2357,51 @@ export function createStore(web3: Web3) {
         await dispatch('fetchStakeDetails', { stakeType });
       },
 
+      async stakeNfts({ state, dispatch }, { ids, stakeType }: { ids: string[], stakeType: StakeType }) {
+        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
+        if(!StakingRewards || !StakingToken || !state.defaultAccount) return;
+
+        if(ids.length === 1) {
+          await StakingToken.methods.approve(StakingRewards.options.address, ids[0]).send({
+            from: state.defaultAccount
+          });
+
+          await StakingRewards.methods.stake(ids[0]).send({
+            from: state.defaultAccount,
+          });
+        } else {
+          await (StakingToken as Contract<IERC721>).methods.setApprovalForAll(StakingRewards.options.address, true).send({
+            from: state.defaultAccount
+          });
+
+          await (StakingRewards as Contract<INftStakingRewards>).methods.bulkStake(ids).send({
+            from: state.defaultAccount,
+          });
+        }
+
+        await dispatch('fetchStakeDetails', { stakeType });
+      },
+
+      async unstakeNfts({ state, dispatch }, { ids, stakeType }: { ids: string[], stakeType: StakeType }) {
+        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
+        if(!StakingRewards || !StakingToken || !state.defaultAccount) return;
+
+        if(ids.length === 1) {
+          await StakingRewards.methods.withdraw(ids[0]).send({
+            from: state.defaultAccount,
+          });
+        } else {
+          await (StakingRewards as Contract<INftStakingRewards>).methods.bulkWithdraw(ids).send({
+            from: state.defaultAccount,
+          });
+        }
+
+        await dispatch('fetchStakeDetails', { stakeType });
+      },
+
       async unstake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
         const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards) return;
+        if(!StakingRewards || !state.defaultAccount) return;
 
         await StakingRewards.methods.withdraw(amount).send({
           from: state.defaultAccount,
@@ -2370,7 +2412,7 @@ export function createStore(web3: Web3) {
 
       async unstakeKing({ state, dispatch }, { amount }: { amount: string }) {
         const { KingStakingRewardsUpgradeable } = state.contracts();
-        if(!KingStakingRewardsUpgradeable) return;
+        if(!KingStakingRewardsUpgradeable || !state.defaultAccount) return;
 
         await KingStakingRewardsUpgradeable.methods.withdrawWithoutFee(amount).send({
           from: state.defaultAccount,
@@ -3689,6 +3731,15 @@ export function createStore(web3: Web3) {
         } as Quest;
       },
 
+      async getCharacterBusyStatus({state}, {characterId}) {
+        const { Characters } = state.contracts();
+        if(!Characters || !state.defaultAccount) return;
+
+        const NFTVAR_BUSY = await Characters.methods.NFTVAR_BUSY().call(defaultCallOptions(state));
+
+        return await Characters.methods.getNftVar(characterId, NFTVAR_BUSY).call(defaultCallOptions(state));
+      },
+
       async getQuestTierChances({state}, {tier}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
@@ -4007,6 +4058,9 @@ export function createStore(web3: Web3) {
           dispatch('updateTrinketIds'),
           dispatch('updateJunkIds'),
           dispatch('updateKeyLootboxIds'),
+          dispatch('fetchDustBalance'),
+          dispatch('fetchCharacterStamina', characterID),
+          dispatch('fetchSoulBalance', characterID),
         ]);
         return questRewards;
       },
@@ -4045,6 +4099,7 @@ export function createStore(web3: Web3) {
         await Promise.all([
           dispatch('fetchCharacterStamina', characterID),
           dispatch('fetchSoulBalance', characterID),
+          dispatch('fetchDustBalance'),
         ]);
       },
 
@@ -5089,16 +5144,57 @@ export function createStore(web3: Web3) {
         }
       },
       async transferNFT({ state, dispatch },{nftId, receiverAddress, nftType}: {nftId: number, receiverAddress: string, nftType: string}) {
-        const { Characters, Weapons } = state.contracts();
-        if (!Characters || !Weapons || !state.defaultAccount) return;
+        const { Characters, Garrison, Junk, KeyLootbox, RaidTrinket, Shields, Weapons } = state.contracts();
+        if (!Characters || !Garrison || !Junk || !KeyLootbox || !RaidTrinket || !Shields || !Weapons || !state.defaultAccount) return;
 
         if (nftType === 'character') {
-          await Characters.methods
+          if (state.ownedGarrisonCharacterIds.includes(nftId)) {
+            await Garrison.methods
+              .transferFromGarrison(receiverAddress, nftId)
+              .send({
+                from: state.defaultAccount,
+              });
+          }
+          else {
+            await Characters.methods
+              .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+              .send({
+                from: state.defaultAccount,
+              });
+          }
+          await dispatch('updateCharacterIds');
+        }
+        else if (nftType === 'junk') {
+          await Junk.methods
             .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
             .send({
               from: state.defaultAccount,
             });
-          await dispatch('updateCharacterIds');
+          await dispatch('updateJunkIds');
+        }
+        else if (nftType === 'keybox') {
+          await KeyLootbox.methods
+            .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+            .send({
+              from: state.defaultAccount,
+            });
+          await dispatch('updateKeyLootboxIds');
+        }
+        else if (nftType === 'shield') {
+          await Shields.methods
+            .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+            .send({
+              from: state.defaultAccount,
+            });
+          await dispatch('updateShieldIds');
+        }
+        else if (nftType === 'trinket') {
+          await RaidTrinket.methods
+            .safeTransferFrom(state.defaultAccount, receiverAddress, nftId)
+            .send({
+              from: state.defaultAccount,
+            });
+          await dispatch('updateTrinketIds');
         }
         else if (nftType === 'weapon') {
           await Weapons.methods
@@ -5215,6 +5311,15 @@ export function createStore(web3: Web3) {
         const characterPower = await Characters.methods.getPower(characterId).call({ from: state.defaultAccount });
 
         return characterPower;
+      },
+
+      async getCharacterFullPower({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const characterFullPower = await PvpArena.methods.getCharacterPower(characterId).call({ from: state.defaultAccount });
+
+        return characterFullPower;
       },
 
       async getRankingPointsByCharacter({ state }, characterId) {
@@ -5529,6 +5634,13 @@ export function createStore(web3: Web3) {
 
         await BurningManager.methods.upgradeCharacterWithSoul(charId, soulAmount).send({ from: state.defaultAccount });
         await dispatch('fetchCharacterPower', charId);
+      },
+
+      async transferSoul({ state }, {targetAddress, soulAmount}) {
+        const { BurningManager } = state.contracts();
+        if(!BurningManager || !state.defaultAccount) return;
+
+        await BurningManager.methods.transferSoul(targetAddress, soulAmount).send({ from: state.defaultAccount });
       },
 
       async fetchCharactersBurnCost({ state }, burnIds) {

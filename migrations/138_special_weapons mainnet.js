@@ -13,18 +13,16 @@ const SkillStakingRewardsUpgradeable90 = artifacts.require("SkillStakingRewardsU
 const SkillStakingRewardsUpgradeable180 = artifacts.require("SkillStakingRewardsUpgradeable180");
 
 module.exports = async function (deployer, network) {
-  if (network === "development"
-  || network === "development-fork"
-  || network === 'bsctestnet'
-  || network === 'bsctestnet-fork'
-  || network === 'hecotestnet'
-  || network === 'okextestnet'
-  || network === 'polygontestnet'
-  || network === 'avaxtestnet'
-  || network === 'avaxtestnet-fork'
-  || network === 'auroratestnet') {
+  if (network === 'bscmainnet'
+    || network === 'bscmainnet-fork'
+    || network === 'hecomainnet'
+    || network === 'okexmainnet'
+    || network === 'polygonmainnet'
+    || network === 'avaxmainnet'
+    || network === 'avaxmainnet-fork'
+    || network === 'auroramainnet') {
     let weapons = await upgradeProxy(Weapons.address, Weapons, { deployer });
-    let promos = await upgradeProxy(Promos.address, Promos, { deployer });
+    let promos = await Promos.deployed();
     let safeRandoms = await SafeRandoms.deployed();
     let priceOracle = await BasicPriceOracle.deployed();
     let game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
@@ -52,7 +50,7 @@ module.exports = async function (deployer, network) {
     // 4,5,6 = skill forge costs in usd
     // 10 = shard conversion denominator
     // 11 = shards per 1 SKILL staking per day in wei
-    await specialWeaponsManager.setVars([1, 2, 3, 4, 5, 6, 10, 11], ['7', '15', '20', '75', '100', '150', '3', '100000000000000000']);
+    await specialWeaponsManager.setVars([1, 2, 3, 4, 5, 6, 10, 11], ['333', '433', '666', '750', '1000', '1500', '3', '100000000000000000']);
 
     await upgradeProxy(PvpArena.address, PvpArena, { deployer });
     await upgradeProxy(NFTStorage.address, NFTStorage, { deployer });
@@ -61,7 +59,7 @@ module.exports = async function (deployer, network) {
     skillStakingRewardsUpgradeable = await upgradeProxy(SkillStakingRewardsUpgradeable.address, SkillStakingRewardsUpgradeable, { deployer });
     await skillStakingRewardsUpgradeable.migrateTo_e1fe97c(specialWeaponsManager.address);
     await specialWeaponsManager.grantRole(swm_GAME_ADMIN, skillStakingRewardsUpgradeable.address);
-    if(network === 'bsctestnet' || network === 'bsctestnet-fork') {
+    if(network === 'bscmainnet' || network === 'bscmainnet-fork') {
       skillStakingRewardsUpgradeable90 = await upgradeProxy(SkillStakingRewardsUpgradeable90.address, SkillStakingRewardsUpgradeable90, { deployer });
       skillStakingRewardsUpgradeable180 = await upgradeProxy(SkillStakingRewardsUpgradeable180.address, SkillStakingRewardsUpgradeable180, { deployer });
       await skillStakingRewardsUpgradeable90.migrateTo_e1fe97c(specialWeaponsManager.address);
