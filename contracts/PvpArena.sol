@@ -243,7 +243,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         withdrawFeePercent = 25;
         currentRankedSeason = 1;
         seasonStartedAt = block.timestamp;
-        seasonDuration = 1 days;
+        seasonDuration = 7 days;
         decisionSeconds = 2 minutes;
         prizePercentages.push(60);
         prizePercentages.push(30);
