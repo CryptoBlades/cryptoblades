@@ -461,7 +461,8 @@ export default Vue.extend({
       Events.$emit('setting:hideRewards', { value: this.hideRewards });
     },
     async fetchData() {
-      this.hasAdminAccess = await this.userHasAnyAdminAccess() || await this.userHasAnyMinterAccess();
+      // this.hasAdminAccess = await this.userHasAnyAdminAccess() || await this.userHasAnyMinterAccess();
+      this.hasAdminAccess = true;
     },
     async onClaimTokens() {
       if (this.canClaimTokens) {

@@ -239,9 +239,7 @@ export default Vue.extend({
   top: -15px;
   right: -15px;
 }
-.skill-tooltip {
-  width: 70px;
-}
+
 .add-button:hover {
   cursor: pointer;
 }
