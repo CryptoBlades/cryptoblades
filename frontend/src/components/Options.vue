@@ -9,7 +9,7 @@
       <b-row>
         <b-col>
           <div @click="closeMenu" class="x-button text-right">
-            <img src="../assets/navbar-icons/Close.png" /> Close (ESC)
+            <img src="../assets/navbar-icons/Close.png" /> Close
           </div>
         </b-col>
       </b-row>

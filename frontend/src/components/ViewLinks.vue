@@ -44,7 +44,9 @@
     <li v-if="quests" class="top-nav-links">
       <router-link  :to="{ name: 'quests'}" exact class="nav-link">
         <div class="icon"><img src="../assets/navbar-icons/new-quests-icon.png" class="new-ui-links-icon"></div>
-        <div  class="link-text">{{ $t("viewLink.quests") }} </div>
+        <div class="link-text" :class="supportsQuests ? '' : 'disabled'">{{ $t("viewLink.quests") }} <hint
+          v-if="!supportsQuests" class="hint"
+          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></div>
       </router-link>
     </li>
 
