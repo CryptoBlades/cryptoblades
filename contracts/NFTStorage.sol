@@ -731,7 +731,13 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     }
 
     function _attachToWallet(address owner, address nftAddress, uint256 tokenId) internal {
-        allStoredItems[nftAddress].add(tokenId);
+        // Not already attached
+        require(storedItemsOwners[nftAddress][tokenId] == address(0), "NA3");
+        
+        if(!allStoredItems[nftAddress].contains(tokenId)) {
+            allStoredItems[nftAddress].add(tokenId);
+        }
+        
         storedItemsOwners[nftAddress][tokenId] = owner;
         storedItems[owner][nftAddress].add(tokenId);
 
