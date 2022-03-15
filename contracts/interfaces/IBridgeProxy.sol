@@ -6,4 +6,6 @@ interface IBridgeProxy {
     function mintOrUpdate(uint256 tokenId, uint256[] calldata uintVars,  string calldata stringVar) external returns (uint256);
 
     function isEnabled() external view returns (bool);
+
+    function sigVersion() external view returns (uint256);
 }

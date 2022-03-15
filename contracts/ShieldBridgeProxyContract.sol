@@ -47,6 +47,11 @@ contract ShieldBridgeProxyContract is Initializable, AccessControlUpgradeable, I
         uintVars[UINT_NFT_VAR_SEED3DCOSMETIC] = seed3dCosmetics;
     }
 
+    // for future use, bot will probe the returned value to know if the proxy contract has proper signature behaivior
+    function sigVersion() external view override returns (uint256) {
+        return 1;
+    }
+
     function isEnabled() external view override returns (bool) {
         return enabled;
     }
