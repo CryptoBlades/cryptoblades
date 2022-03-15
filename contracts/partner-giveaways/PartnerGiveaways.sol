@@ -33,7 +33,7 @@ contract PartnerGiveaways is Initializable, AccessControlUpgradeable {
         _setupRole(GAME_ADMIN, msg.sender);
 
         specialWeaponsManager = _specialWeaponsManager;
-        vars[SHARDS_REWARD] = 333;
+        vars[SHARDS_REWARD] = 125;
         nextGiveawayId = 0;
     }
 
