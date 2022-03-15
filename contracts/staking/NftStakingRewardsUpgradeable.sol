@@ -445,8 +445,8 @@ contract NftStakingRewardsUpgradeable is
     modifier isOwnerOfIds(uint256[] memory ids) {
         for(uint i = 0; i < ids.length; i++) {
             require(_stakedNftOwner[ids[i]] == msg.sender, "Access denied");
-            _;
         }
+        _;
     }
 
     // something
