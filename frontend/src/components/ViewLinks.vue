@@ -57,15 +57,6 @@
       </a>
     </li>
 
-    <li v-if="merchandise" class="top-nav-links">
-      <router-link v-if="merchandise" :to="{ name: 'merchandise'}" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/new-bazaar-icon.png" class="new-ui-links-icon"></div>
-        <div class="link-text" :class="supportsMerchandise ? '' : 'disabled'">{{ $t("viewLink.merchandise") }} <hint
-          v-if="!supportsMerchandise" class="hint"
-          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></div>
-      </router-link>
-    </li>
-
 
   </b-navbar-nav>
 </template>
