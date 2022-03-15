@@ -2,21 +2,27 @@
   <div v-bind:class="isDefault ? 'default-icon-wrapper' : 'nft-icon-wrapper'">
     <div v-if="isDefault" class="nft-default-icon">
       <img class="default-placeholder" v-if="nft.type === 'weapon'" src="../assets/placeholder/sword-placeholder-1.png"
-        v-tooltip="$t('nftIcon.weaponTooltip')"/>
-      <div v-if="nft.type === 'weapon'" class="default-info">2-5*</div>
-
+        v-tooltip="$t('nftIcon.weaponTooltip', {stars: stars || '2-5'})"/>
+      <div v-if="nft.type === 'weapon'" class="default-info">{{stars || '2-5'}}*</div>
       <img class="default-junk-placeholder" v-if="nft.type === 'junk'" src="../assets/junk/junk3.png"
-        v-tooltip="$t('nftIcon.junkTooltip')" />
+        v-tooltip="$t('nftIcon.junkTooltip', {stars: stars || '1-5'})" />
+      <div v-if="nft.type === 'junk'" class="default-info">{{stars || '1-5'}}*</div>
       <img class="default-trinket-placeholder" v-if="nft.type === 'trinket'" src="../assets/trinkets/trinket1.png"
-        v-tooltip="$t('nftIcon.trinketTooltip')" />
+        v-tooltip="$t('nftIcon.trinketTooltip', {stars: stars || '1-5'})" />
+      <div v-if="nft.type === 'trinket'" class="default-info">{{stars || '1-5'}}*</div>
+      <img class="default-shield-placeholder" v-if="nft.type === 'shield'" src="../assets/shield2.png"
+        v-tooltip="$t('nftIcon.shieldTooltip', {stars: stars || '1-5'})" />
+      <div v-if="nft.type === 'shield'" class="default-info">{{stars || '1-5'}}*</div>
       <img class="default-placeholder" v-if="nft.type === 'secret'" src="../assets/secret.png"
         v-tooltip="$t('nftIcon.secretTooltip')" />
-      <img class="default-dust-placeholder" v-if="nft.type === 'lbdust'" src="../assets/dusts/LesserDust.png"
+      <img class="default-dust-placeholder" v-if="nft.type === 'lbdust'" src="../assets/dusts/lesserDust.png"
         v-tooltip="$t('nftIcon.lesserDust')" />
       <img class="default-dust-placeholder" v-if="nft.type === '4bdust'" src="../assets/dusts/greaterDust.png"
         v-tooltip="$t('nftIcon.greaterDust')" />
       <img class="default-dust-placeholder" v-if="nft.type === '5bdust'" src="../assets/dusts/powerfulDust.png"
         v-tooltip="$t('nftIcon.powerfulDust')" />
+      <img class="default-dust-placeholder" v-if="nft.type === 'soul'" src="../assets/dusts/soulDust.png"
+           v-tooltip="$t('nftIcon.soul')" />
     </div>
 
     <div v-if="!isDefault" class="nft-icon"
@@ -113,7 +119,7 @@
       </div>
 
       <div v-if="nft.type === 'dustLb'" class="nft-details">
-        <img class="placeholder-dust" src="../assets/dusts/LesserDust.png" />
+        <img class="placeholder-dust" src="../assets/dusts/lesserDust.png" />
         <div v-if="!isShop" class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
       </div>
 
@@ -124,6 +130,11 @@
 
       <div v-if="nft.type === 'dust5b'" class="nft-details">
         <img class="placeholder-dust" src="../assets/dusts/powerfulDust.png" />
+        <div v-if="!isShop" class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
+      </div>
+
+      <div v-if="nft.type === 'soul'" class="nft-details">
+        <img class="placeholder-dust" src="../assets/dusts/soulDust.png" />
         <div v-if="!isShop" class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
       </div>
 
@@ -143,11 +154,11 @@
       </div>
 
       <div v-if="nft.type !== 'shield' && nft.type !== 'trinket' && nft.type !== 'junk' && nft.type !== 'keybox' && nft.type !== 'weapon'
-        && nft.type !== 'dustLb' && nft.type !== 'dust4b' && nft.type !== 'dust5b' && nft.type !== 'WeaponCosmetic'
+        && nft.type !== 'dustLb' && nft.type !== 'dust4b' && nft.type !== 'dust5b' && nft.type !== 'soul' && nft.type !== 'WeaponCosmetic'
         && nft.type !== 'CharacterCosmetic' && nft.type !== 't1land' && nft.type !== 't2land' && nft.type !== 't3land'
         && nft.type !== 'claimT2Land' && nft.type !== 'claimT3Land'"
         class="nft-details">
-        <img class="placeholder-consumable" :src="nft.image.startsWith('http') ? nft.image : imgPath(nft.image)"/>
+        <img v-if="nft.image" class="placeholder-consumable" :src="nft.image.startsWith('http') ? nft.image : imgPath(nft.image)"/>
         <span v-if="isShop" class="nft-supply">{{$t('nftIcon.owned')}} {{this.quantityOwned}}</span>
       </div>
     </div>
@@ -163,7 +174,7 @@ import { getWeaponArt } from '../weapon-arts-placeholder';
 import { Stat1PercentForChar, Stat2PercentForChar, Stat3PercentForChar } from '../interfaces';
 
 export default {
-  props: ['nft', 'isDefault', 'isShop', 'favorite'],
+  props: ['nft', 'isDefault', 'isShop', 'favorite', 'stars'],
   async created() {
 
   },
@@ -174,6 +185,7 @@ export default {
       if(this.nft.type === 'dustLb') return this.$t('nftIcon.lesserDust');
       if(this.nft.type === 'dust4b') return this.$t('nftIcon.greaterDust');
       if(this.nft.type === 'dust5b') return this.$t('nftIcon.powerfulDust');
+      if(this.nft.type === 'soul') return this.$t('nftIcon.soul');
       if(this.nft.type === 't1') return this.$t('nftIcon.lesserDust');
       if(this.nft.type.includes('land')) return this.$t('nftIcon.land', {tier : this.nft.tier});
 
@@ -401,12 +413,17 @@ export default {
   margin-top: 8px;
   transform: scale(1);
 }
+
+.default-shield-placeholder {
+  max-width: 150px;
+  max-height: 130px;
+  margin-left: 13px;
+  margin-top: -9px;
+}
 .default-dust-placeholder {
-  max-width: 100px;
-  max-height: 100px;
-  margin-left: 12px;
-  margin-top: 20px;
-  transform: scale(1.5);
+  max-width: 125px;
+  max-height: 125px;
+  margin-left: 7px;
 }
 .default-trinket-placeholder{
   max-width: 100px;
@@ -473,7 +490,6 @@ export default {
 .placeholder-dust {
   max-width: 160px;
   max-height: 200px;
-  margin-top: 40px;
   margin-left: 5px;
 }
 

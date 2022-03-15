@@ -62,7 +62,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         uint256 nftId;
 
         uint256 chainId;
-        uint8 status; // enumeration. 0 => nothing, 1 => transfer requested, 2 => moved   
+        uint8 status; // enumeration. 0 => nothing, 1 => transfer requested, 2 => moved
     }
 
     // Bot stuff
@@ -82,7 +82,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     mapping(address => mapping(uint256 => uint256)) private transferOutOfNFTs;
 
     // address is IERC721
-    EnumerableSet.AddressSet private supportedTokenTypes; 
+    EnumerableSet.AddressSet private supportedTokenTypes;
 
     uint8 public constant TRANSFER_IN_STATUS_AVAILABLE = 1;
     uint8 public constant TRANSFER_IN_STATUS_WITHDRAWN = 2;
@@ -102,15 +102,15 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         uint8 nftType;
         uint256 sourceChain;
         uint256 sourceId;
-        
+
         string rename;
 
         uint256 arrivedAt; // For tracking. Arrived on block x
         uint256 lastUpdateBlock; // For tracking. Last Update on block y
 
-        uint8 status; // enumeration. 0 => waiting, 1 => claimed 
+        uint8 status; // enumeration. 0 => waiting, 1 => claimed
     }
-    
+
     // Player address => items to be extracted
     mapping(address => EnumerableSet.UintSet) private receivedNFTs;
 
@@ -129,7 +129,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     CryptoBlades public game;
     uint256 private _bridgeFee;
-    
+
     // global chainid => local mint id
     mapping(address => mapping(string => uint256)) private nftChainIdsToMintId;
 
@@ -280,7 +280,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         );
         _;
     }
-    
+
     modifier ownsBridgedNFT(uint256 bridgedNFT) {
          require( transferIns[bridgedNFT].owner == msg.sender, "not bridged NFT owner" );
         _;
@@ -438,7 +438,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         }
     }
 
-    
+
     function toggleChainBridgeEnabled(uint256 chainId, string memory prefix, bool enable) public restricted {
         _bridgeEnabled[chainId] = enable;
         _chainPrefix[chainId] = prefix;
@@ -478,7 +478,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
             nftChainIds[address(_tokenAddress)][_id] = chainId;
             nftChainIdsToMintId[address(_tokenAddress)][chainId] = _id;
         }
-        
+
         emit NFTTransferOutRequest(msg.sender, _tokenAddress, _id);
     }
 
@@ -516,10 +516,10 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     function withdrawFromBridge(uint256 bridgedNFT) ownsBridgedNFT(bridgedNFT) canWithdrawBridgedNFT(bridgedNFT) canStore() public {
         uint256 mintedItem;
         TransferIn storage transferIn = transferIns[bridgedNFT];
-        uint256 seed = transferInSeeds[bridgedNFT]; 
+        uint256 seed = transferInSeeds[bridgedNFT];
 
         if(transferIn.nftType == NFT_TYPE_WEAPON) {
-            mintedItem = _withdrawWeaponFromBridge(bridgedNFT, transferIn.sourceChain, transferIn.sourceId);   
+            mintedItem = _withdrawWeaponFromBridge(bridgedNFT, transferIn.sourceChain, transferIn.sourceId);
             require(weapons.ownerOf(mintedItem) == address(this), "NAW"); // The minted item, if already existed, should be in storage
             if(bytes(transferIn.rename).length > 0) {
                 weaponRenameTagConsumables.setName(mintedItem, transferIn.rename);
@@ -533,7 +533,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
             }
         }
         else if(transferIn.nftType == NFT_TYPE_SHIELD) {
-            mintedItem = _withdrawShieldFromBridge(bridgedNFT, transferIn.sourceChain, transferIn.sourceId);   
+            mintedItem = _withdrawShieldFromBridge(bridgedNFT, transferIn.sourceChain, transferIn.sourceId);
             require(shields.ownerOf(mintedItem) == address(this), "NAS"); // The minted item, if already existed, should be in storage
         }
 
@@ -570,7 +570,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         uint32 appliedCosmetic = uint32((meta >> 96) & 0xFFFFFFFF);
 
-         mintedId = 
+         mintedId =
             weapons.performMintWeaponDetailed(address(this), meta, seed, mintedId);
 
         if(appliedCosmetic > 0) {
@@ -580,13 +580,13 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     // to be removed eventually; bot will now mint into storage
     function _withdrawCharacterFromBridge(uint256 bridgedNFT, uint256 metaData, uint256 seed) internal returns (uint256 mintedId) {
-        (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower)  = unpackCharactersData(metaData); 
-        
+        (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower, uint16 reputation)  = unpackCharactersData(metaData);
+
         mintedId = nftChainIdsToMintId[nftTypeToAddress[NFT_TYPE_CHARACTER]][transferInChainId[bridgedNFT]];
 
-        mintedId = 
-            characters.customMint(address(this), xp, 
-            level, trait, seed, mintedId, bonusPower);
+        mintedId =
+            characters.customMint(address(this), xp,
+            level, trait, seed, mintedId, bonusPower, reputation);
 
             if(appliedCosmetic > 0) {
                 characterCosmetics.setCharacterCosmetic(mintedId, appliedCosmetic);
@@ -603,7 +603,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         uint32 appliedCosmetic = uint32((meta >> 96) & 0xFFFFFFFF);
 
-         mintedId = 
+         mintedId =
             shields.performMintShieldDetailed(address(this), meta, seed, mintedId);
     }
 
@@ -681,7 +681,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     // Bot to update status of a transfer request (this chain => outside chain)
     function updateBridgeTransferStatus(uint256 bridgeTransferId, uint8 status, bool forced) public gameAdminRestricted {
         TransferOut storage transferOut = transferOuts[bridgeTransferId];
-        require(forced || 
+        require(forced ||
         (transferOut.status == TRANSFER_OUT_STATUS_PENDING && status == TRANSFER_OUT_STATUS_PROCESSING)
         || (transferOut.status == TRANSFER_OUT_STATUS_PROCESSING && status == TRANSFER_OUT_STATUS_DONE)
         || status == TRANSFER_OUT_STATUS_ERROR, 'Invalid status change');
@@ -722,6 +722,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         require(IERC721(nftAddress).ownerOf(mintedId) == address(this), "NA2");
         _logMintOrUpdate(sourceChain, sourceTransfer, nftAddress, mintedId, chainId);
         _attachToWallet(receiver, nftAddress, mintedId);
+        weaponType = uint24((metaData >> 128) & 0xFFFFFF);
     }
 
     function _logMintOrUpdate(uint256 sourceChain, uint256 sourceTransfer, address nftAddress, uint256 tokenId, string memory chainId) internal {
@@ -788,6 +789,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         xp = uint16(metaData  >> 16 & 0xFFFF);
         appliedCosmetic = uint32((metaData >> 32) & 0xFFFFFFFF);
         bonusPower = uint24((metaData >> 64) & 0xFFFFFF);
+        reputation = uint16((metaData >> 88) & 0xFFFF);
     }
 
     function buildChainId(uint256 sourceId) internal view returns (string memory) {

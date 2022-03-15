@@ -23,8 +23,11 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     Promos public promos;
 
     mapping(uint256 => uint8) public tokenStars;
-    
+
+    uint256 public nextTokenID;
+
     event Minted(uint256 indexed id, address indexed minter);
+    event Burned(uint256 indexed id, address indexed burner);
 
     modifier restricted() {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
@@ -42,25 +45,51 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getOwnedBy(msg.sender);
     }
 
-    function getOwnedBy(address owner) public view returns(uint256[] memory) {
-        uint256[] memory tokens = new uint256[](balanceOf(owner));
+    function getOwnedBy(address owner) public view returns(uint256[] memory tokens) {
+        tokens = new uint256[](balanceOf(owner));
         for(uint256 i = 0; i < tokens.length; i++) {
             tokens[i] = tokenOfOwnerByIndex(owner, i);
         }
-        return tokens;
     }
 
-    function mint(address minter, uint8 mintStars) public restricted returns(uint256) {
+    function getStars(uint256[] memory ids) public view returns (uint8[] memory stars) {
+        stars = new uint8[](ids.length);
+        for(uint256 i = 0; i < ids.length; i++) {
+            stars[i] = tokenStars[ids[i]];
+        }
+    }
 
-        uint256 tokenID = totalSupply();
+    function mint(address minter, uint8 mintStars) public restricted returns(uint256 tokenID) {
+        tokenID = nextTokenID++;
         tokenStars[tokenID] = mintStars;
         _mint(minter, tokenID);
         emit Minted(tokenID, minter);
-        return tokenID;
+    }
+
+    function mintN(address minter, uint8 mintStars, uint32 amount) public restricted returns(uint256[] memory tokenIds) {
+        tokenIds = new uint256[](amount);
+        for(uint i = 0; i < amount; i++) {
+            tokenIds[i] = mint(minter, mintStars);
+        }
+    }
+
+    function burn(uint256 tokenID) public restricted {
+        address burner = ownerOf(tokenID);
+        _burn(tokenID);
+        emit Burned(tokenID, burner);
+    }
+
+    function burn(uint256[] memory tokenIDs) public restricted {
+        for(uint i = 0; i < tokenIDs.length; i++) {
+            burn(tokenIDs[i]);
+        }
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false);
     }
 
+    function setNextTokenID(uint to) public restricted {
+        nextTokenID = to;
+    }
 }

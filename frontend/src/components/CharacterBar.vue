@@ -2,17 +2,17 @@
   <div class="character-bar">
     <character-display/>
     <div v-if="showAds && !isMobile()" class="ad-container">
-      <script2 async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6717992096530538"
-               crossorigin="anonymous"></script2>
-      <ins class="adsbygoogle" style="display:inline-block;width:970px;height:90px"
-           data-ad-client="ca-pub-6717992096530538" data-ad-slot="5115599573"/>
-      <script2> (adsbygoogle = window.adsbygoogle || []).push({});</script2>
-      <ins class="61c1ef3096bc5000134e9176" style="display:inline-block;width:970px;height:90px;"></ins>
-      <script2>!function(e,n,c,t,o,r){!function
-        e(n,c,t,o,r,m,s,a){s=c.getElementsByTagName(t)[0],(a=c.createElement(t)).async=!0,a.src="https://"+r[m]+"/js/"+o+".js",a.onerror=function(){a.remove(),(m+=1)>=r.length||e(n,c,t,o,r,m)},s.parentNode.insertBefore(a,s)}(window,document,"script","61c1ef3096bc5000134e9176",["cdn.bmcdn2.com"],0)}();
-      </script2>
+      <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
+        <div class="coinzilla" data-zone="C-541621de2f7bb717603"></div>
+          <script2>
+                window.coinzilla_display = window.coinzilla_display || [];
+                var c_display_preferences = {};
+                c_display_preferences.zone = "541621de2f7bb717603";
+                c_display_preferences.width = "728";
+                c_display_preferences.height = "90";
+                coinzilla_display.push(c_display_preferences);
+          </script2>
     </div>
-
     <img src="../assets/infoDivider.png" class="info-divider" alt=""/>
   </div>
 </template>
@@ -33,7 +33,8 @@ export default Vue.extend({
   },
   methods: {
     checkStorage() {
-      this.showAds = localStorage.getItem('show-ads') === 'true';
+      if (process.env.NODE_ENV === 'development') this.showAds = false;
+      else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
   },
   async mounted() {

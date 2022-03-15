@@ -249,9 +249,12 @@ export default Vue.extend({
         this.showModal = true;
         this.skillPrice = +await this.currentSkillPrice();
         await this.calculateTotalPrice();
-        this.areShippingRatesLoading = true;
-        await this.getShippingRates();
-        this.areShippingRatesLoading = false;
+        try {
+          this.areShippingRatesLoading = true;
+          await this.getShippingRates();
+        } finally {
+          this.areShippingRatesLoading = false;
+        }
         await this.calculateTotalPrice();
       } else {
         this.showModal = false;

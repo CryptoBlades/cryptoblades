@@ -13,3 +13,4 @@ public/abi
 cache
 artifacts
 .DS_Store
+.idea

@@ -12,11 +12,4 @@ module.exports = async function (deployer) {
   const weps = await Weapons.deployed();
   const newWeps = await upgradeProxy(weps.address, Weapons, { deployer });
   await newWeps.migrateTo_951a020();
-
-  const RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = await newWeps.RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP();
-
-  await Promise.all([
-    newWeps.grantRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, NFTMarket.address),
-    newCharas.grantRole(RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP, NFTMarket.address),
-  ]);
 };
