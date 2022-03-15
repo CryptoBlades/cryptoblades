@@ -44,13 +44,13 @@ contract WeaponBridgeProxyContract is Initializable, AccessControlUpgradeable, I
  
     function collectData(uint256 tokenId) external view override returns (uint256[] memory uintVars, string memory stringVar) {
         
-        (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,,,,, uint24 _burnPoints,) = weapons.get(tokenId);
+        (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,, uint24 _burnPoints,, uint24 _weaponType) = weapons.get(tokenId);
         uint32 appliedCosmetic = weaponCosmetics.getWeaponCosmetic(tokenId);
         string memory rename = weaponRenameTagConsumables.getWeaponRename(tokenId);
         uint256 seed3dCosmetics = weapons.getCosmeticsSeed(tokenId);
 
         uintVars = new uint256[](2);
-        uintVars[UINT_NFT_VAR_META] = _packWeaponsData(appliedCosmetic, _properties, _stat1, _stat2, _stat3, _level, uint8(_burnPoints & 0xFF), uint8((_burnPoints >> 8) & 0xFF), uint8((_burnPoints >> 16) & 0xFF));
+        uintVars[UINT_NFT_VAR_META] = _packWeaponsData(appliedCosmetic, _properties, _stat1, _stat2, _stat3, _level, uint8(_burnPoints & 0xFF), uint8((_burnPoints >> 8) & 0xFF), uint8((_burnPoints >> 16) & 0xFF), _weaponType);
         uintVars[UINT_NFT_VAR_SEED3DCOSMETIC] = seed3dCosmetics;
 
         stringVar = rename;
@@ -83,7 +83,7 @@ contract WeaponBridgeProxyContract is Initializable, AccessControlUpgradeable, I
         return tokenId;
     }
 
-    function _packWeaponsData(uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 weaponLevel, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints) internal pure returns (uint256) {
-        return  uint256(fiveStarBurnPoints | (uint256(fourStarBurnPoints) << 8) | (uint256(lowStarBurnPoints) << 16) | (uint256(weaponLevel) << 24) | (uint256(stat3) << 32) | (uint256(stat2) << 48) | (uint256(stat1) << 64) | (uint256(properties) << 80) | (uint256(appliedCosmetic) << 96));
+    function _packWeaponsData(uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 weaponLevel, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints, uint24 weaponType) internal pure returns (uint256) {
+        return  uint256(fiveStarBurnPoints | (uint256(fourStarBurnPoints) << 8) | (uint256(lowStarBurnPoints) << 16) | (uint256(weaponLevel) << 24) | (uint256(stat3) << 32) | (uint256(stat2) << 48) | (uint256(stat1) << 64) | (uint256(properties) << 80) | (uint256(appliedCosmetic) << 96) | (uint256(weaponType) << 128));
     }
 }

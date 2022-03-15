@@ -722,7 +722,6 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         require(IERC721(nftAddress).ownerOf(mintedId) == address(this), "NA2");
         _logMintOrUpdate(sourceChain, sourceTransfer, nftAddress, mintedId, chainId);
         _attachToWallet(receiver, nftAddress, mintedId);
-        weaponType = uint24((metaData >> 128) & 0xFFFFFF);
     }
 
     function _logMintOrUpdate(uint256 sourceChain, uint256 sourceTransfer, address nftAddress, uint256 tokenId, string memory chainId) internal {
@@ -783,7 +782,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         }
     }
 
-    function unpackCharactersData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower) {
+    function unpackCharactersData(uint256 metaData) public pure returns (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower, uint16 reputation) {
         trait = uint8((metaData) & 0xFF);
         level = uint8((metaData >> 8) & 0xFF);
         xp = uint16(metaData  >> 16 & 0xFFFF);

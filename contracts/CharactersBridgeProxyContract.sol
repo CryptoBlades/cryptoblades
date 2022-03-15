@@ -48,7 +48,6 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         uint32 appliedCosmetic = characterCosmetics.getCharacterCosmetic(tokenId);
         string memory rename = characterRenameTagConsumables.getCharacterRename(tokenId);
         uint256 seed3dCosmetics = characters.getCosmeticsSeed(tokenId);
-        uint24 bonusPower = uint24(characters.getNftVar(tokenId, 2)); // 2 => bonus Power
         uintVars = new uint256[](2);
         (uintVars[UINT_NFT_VAR_META], uintVars[UINT_NFT_VAR_SEED3DCOSMETIC], stringVar) = _packedCharacterData(tokenId);
 
@@ -66,9 +65,9 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
     function mintOrUpdate(uint256 tokenId, uint256[] calldata uintVars,  string calldata stringVar) external restricted override returns (uint256) {
         require(enabled, "not enabled");
 
-        (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower) = _unpackCharactersData(uintVars[UINT_NFT_VAR_META]); 
+        (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower, uint16 reputation) = _unpackCharactersData(uintVars[UINT_NFT_VAR_META]); 
 
-        tokenId =  _mintOrUpdate(tokenId, xp, level, trait, uintVars[UINT_NFT_VAR_SEED3DCOSMETIC], bonusPower);
+        tokenId =  _mintOrUpdate(tokenId, xp, level, trait, uintVars[UINT_NFT_VAR_SEED3DCOSMETIC], bonusPower, reputation);
         
         if(appliedCosmetic > 0) {
             characterCosmetics.setCharacterCosmetic(tokenId, uint32(appliedCosmetic));
@@ -81,19 +80,20 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         return tokenId;
     }
 
-    function _mintOrUpdate(uint256 tokenId, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint24 bonusPower) internal returns (uint256) {
+    function _mintOrUpdate(uint256 tokenId, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint24 bonusPower, uint16 reputation) internal returns (uint256) {
         tokenId = 
-            characters.customMint(nftStorageAddress, xp, level, trait, seed, tokenId, bonusPower);
+            characters.customMint(nftStorageAddress, xp, level, trait, seed, tokenId, bonusPower, reputation);
 
         return tokenId;
     }
 
-    function _unpackCharactersData(uint256 metaData) internal pure returns (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower) {
+    function _unpackCharactersData(uint256 metaData) internal pure returns (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower, uint16 reputation) {
         trait = uint8((metaData) & 0xFF);
         level = uint8((metaData >> 8) & 0xFF);
         xp = uint16(metaData  >> 16 & 0xFFFF);
         appliedCosmetic = uint32((metaData >> 32) & 0xFFFFFFFF);
         bonusPower = uint24((metaData >> 64) & 0xFFFFFF);
+        reputation = uint16((metaData >> 88) & 0xFFFF);
     }
 
 
@@ -103,10 +103,11 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         rename = characterRenameTagConsumables.getCharacterRename(characterId);
         seed3dCosmetics = characters.getCosmeticsSeed(characterId);
         uint24 bonusPower = uint24(characters.getNftVar(characterId, 2)); // 2 => bonus Power
-        packedData = _packCharactersData(appliedCosmetic, xp, level, trait, bonusPower);
+        uint16 reputation = uint16(characters.getNftVar(characterId, 103)); // 103 => reputation
+        packedData = _packCharactersData(appliedCosmetic, xp, level, trait, bonusPower, reputation);
     }
 
-    function _packCharactersData(uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower) internal pure returns (uint256) {
-        return  uint256(uint256(trait) | (uint256(level) << 8) | (uint256(xp) << 16) | (uint256(appliedCosmetic) << 32) | (uint256(bonusPower) << 64));
+    function _packCharactersData(uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower, uint16 reputation) internal pure returns (uint256) {
+        return  uint256(uint256(trait) | (uint256(level) << 8) | (uint256(xp) << 16) | (uint256(appliedCosmetic) << 32) | (uint256(bonusPower) << 64) | (uint256(reputation) << 88));
     }
 }
