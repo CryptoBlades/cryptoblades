@@ -218,10 +218,11 @@ import {GetTotalMultiplierForTrait, IWeapon} from '@/interfaces/Weapon';
 import {IRaidState, IState} from '@/interfaces';
 import {getBossArt} from '@/raid-boss-art-placeholder';
 import {traitNumberToName} from '@/contract-models';
-import {fromWeiEther} from '@/utils/common';
+import {fromWeiEther, toBN} from '@/utils/common';
 import {staminaToHours} from '@/utils/date-time';
 import {BonusXp, Dust4b, Dust5b, DustLb, Junk, Keybox, RaidRewards, Weapon} from '@/interfaces/RaidRewards';
 import i18n from '@/i18n';
+import BigNumber from 'bignumber.js';
 
 interface RaidMappedActions {
   fetchRaidState(): Promise<void>;
@@ -231,6 +232,7 @@ interface RaidMappedActions {
   fetchRaidingCharacters(): Promise<string[]>;
   fetchRaidingWeapons(): Promise<string[]>;
   fetchIsRaidStarted(): Promise<boolean>;
+  canUserAfford(payload: { payingAmount: BigNumber }): Promise<boolean>;
   fetchHaveEnoughEnergy(payload: { characterID: string, weaponID: string }): Promise<boolean>;
   fetchIsCharacterRaiding(payload: { characterID: string }): Promise<boolean>;
   fetchIsWeaponRaiding(payload: { weaponID: string }): Promise<boolean>;
@@ -367,7 +369,8 @@ export default Vue.extend({
       'fetchHaveEnoughEnergy',
       'fetchIsCharacterRaiding',
       'fetchIsWeaponRaiding',
-      'fetchCharacters'
+      'fetchCharacters',
+      'canUserAfford'
     ]) as RaidMappedActions),
     ...(mapMutations([
       'setCurrentCharacter'
@@ -407,6 +410,12 @@ export default Vue.extend({
     },
 
     async joinRaidMethod(): Promise<void> {
+      const canUserAfford = await this.canUserAfford({payingAmount: toBN(this.joinCost)});
+      if(!canUserAfford) {
+        (this as any).$dialog.notify.error(i18n.t('raid.errors.cannotAffordRaid'));
+        return;
+      }
+
       if (!this.selectedWeaponId || !this.currentCharacterId) {
         (this as any).$dialog.notify.error(i18n.t('raid.errors.selection'));
         return;
