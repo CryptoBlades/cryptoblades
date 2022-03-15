@@ -56,11 +56,11 @@ contract WeaponBridgeProxyContract is Initializable, AccessControlUpgradeable, I
         stringVar = rename;
     }
 
-    // for future use, bot will probe the returned value to know if the proxy contract has proper signature behaivior
+    // for future use, bot will probe the returned value to know if the proxy contract has proper signature behavior
     function sigVersion() external view override returns (uint256) {
         return 1;
     }
-    
+
     function isEnabled() external view override returns (bool) {
         return enabled;
     }
