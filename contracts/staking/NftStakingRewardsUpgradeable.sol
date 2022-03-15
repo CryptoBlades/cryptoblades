@@ -171,8 +171,29 @@ contract NftStakingRewardsUpgradeable is
         emit Staked(msg.sender, id);
     }
 
-    function withdraw(uint256 id)
+    function bulkStake(uint256[] memory ids)
         public
+        virtual
+        override
+        normalMode
+        nonReentrant
+        whenNotPaused
+        updateReward(msg.sender)
+    {
+        _totalSupply = _totalSupply.add(ids.length);
+        if (_stakeTimestamp[msg.sender] == 0) {
+            _stakeTimestamp[msg.sender] = block.timestamp;
+        }
+        for(uint i = 0; i < ids.length; i++) {
+            _userStakedNfts[msg.sender].add(ids[i]);
+            _stakedNftOwner[ids[i]] = msg.sender;
+            stakingToken.safeTransferFrom(msg.sender, address(this), ids[i]);
+            emit Staked(msg.sender, ids[i]);
+        }
+    }
+
+    function withdraw(uint256 id)
+        external
         override
         normalMode
         nonReentrant
@@ -193,6 +214,33 @@ contract NftStakingRewardsUpgradeable is
         }
         stakingToken.safeTransferFrom(address(this), msg.sender, id);
         emit Withdrawn(msg.sender, id);
+    }
+
+    function bulkWithdraw(uint256[] calldata ids)
+        external
+        override
+        normalMode
+        nonReentrant
+        isOwnerOfIds(ids)
+        updateReward(msg.sender)
+    {
+        require(
+            minimumStakeTime == 0 ||
+                block.timestamp.sub(_stakeTimestamp[msg.sender]) >=
+                minimumStakeTime,
+            "Cannot withdraw until minimum staking time has passed"
+        );
+        
+        _totalSupply.sub(ids.length);
+        for(uint i = 0; i < ids.length; i++) {
+            _userStakedNfts[msg.sender].remove(ids[i]);
+            delete _stakedNftOwner[ids[i]];
+            stakingToken.safeTransferFrom(address(this), msg.sender, ids[i]);
+            emit Withdrawn(msg.sender, ids[i]);
+        }
+        if (_userStakedNfts[msg.sender].length() == 0) {
+            _stakeTimestamp[msg.sender] = 0;
+        }
     }
 
     function getReward()
@@ -392,6 +440,13 @@ contract NftStakingRewardsUpgradeable is
     modifier isOwner(uint256 id) {
         require(_stakedNftOwner[id] == msg.sender, "Access denied");
         _;
+    }
+
+    modifier isOwnerOfIds(uint256[] memory ids) {
+        for(uint i = 0; i < ids.length; i++) {
+            require(_stakedNftOwner[ids[i]] == msg.sender, "Access denied");
+            _;
+        }
     }
 
     // something

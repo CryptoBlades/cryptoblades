@@ -760,7 +760,8 @@
       }
     },
     "links": {},
-    "address": "0x4d777b2B187dc41d1c8Ec6E9451F6Eb2a0Ce7DCa"
+    "address": "0x4d777b2B187dc41d1c8Ec6E9451F6Eb2a0Ce7DCa",
+    "transactionHash": "0xfae6aab451fbe26de126b71a5f8e85cc62edd4040caade214b8c63ecf1be9c24"
   },
   "build/contracts/CBKLandT2StakingRewardsUpgradeable.json": {
     "events": {
@@ -945,7 +946,8 @@
       }
     },
     "links": {},
-    "address": "0xb7F9063B6D7A9886e3adDEa9B8f858c3080A2163"
+    "address": "0xb7F9063B6D7A9886e3adDEa9B8f858c3080A2163",
+    "transactionHash": "0x86fae051ba93385a2fb04a1d3cd6f3e33b7c5ff51b9a12275688d159a901223e"
   },
   "build/contracts/CBKLandT3StakingRewardsUpgradeable.json": {
     "events": {
@@ -1130,7 +1132,8 @@
       }
     },
     "links": {},
-    "address": "0x960b824c67D8D6c48A6d0362Cc96bE980ada25d7"
+    "address": "0x960b824c67D8D6c48A6d0362Cc96bE980ada25d7",
+    "transactionHash": "0xd2b15a012a8bfc56f34c3393a1b0185051a15ae8d669616eee1d61c07d5c4dc0"
   },
   "build/contracts/ChainlinkRandoms.json": {
     "events": {
@@ -2052,7 +2055,7 @@
     },
     "links": {},
     "address": "0x39Bea96e13453Ed52A734B6ACEeD4c41F57B2271",
-    "transactionHash": "0x2b70e822caebada636bf5ed6611f6714d4fba5048d1aa4ff37fc26262ce7af6a"
+    "transactionHash": "0x34d99dab5b2a0fcb94fe3ffa39a9432a43cb815472361dbe82c6884aab6e82e8"
   },
   "build/contracts/Garrison.json": {
     "events": {
@@ -2153,7 +2156,7 @@
     },
     "links": {},
     "address": "0x0D0Ebe222F8Fc996cC1BcF497d653082708b45E4",
-    "transactionHash": "0xc6167c514255a00bae20c77edd40ec52c93a925603dc526101c07802d273a28f"
+    "transactionHash": "0x60b4b2e010360387fb062236201f5e2130756dfd45684c2b94b3356b16bba70c"
   },
   "build/contracts/Junk.json": {
     "events": {
@@ -4129,13 +4132,13 @@
     },
     "links": {},
     "address": "0xf9E9F6019631bBE7db1B71Ec4262778eb6C3c520",
-    "transactionHash": "0xc567cb32ec27bdd69cd78c0a8111f87f96a930f579187552784f77d20177bf05"
+    "transactionHash": "0xa9c65bc282bc5db4b5d17b19f7137f7d43de7a7f7bb11eed9e883b2f6d30fdb1"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {},
     "links": {},
     "address": "0xD6CDf4072EB6bcF10ef1b715aaA0fDF755B52327",
-    "transactionHash": "0x591505b68ecff6b6f16ff1b30cee4ee2c1ddf3cfadaa861b813cd1fbe59848ca"
+    "transactionHash": "0x618cf37d969432a141bada5daf4a44f441ac41a3611cdbb30a9afdd2d640e8dc"
   },
   "build/contracts/SkillStakingRewards.json": {
     "events": {},

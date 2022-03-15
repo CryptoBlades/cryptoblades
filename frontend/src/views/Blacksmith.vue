@@ -371,7 +371,7 @@
             <div class="d-flex justify-content-space-between">
               <h1>{{$t('equipment')}} ({{ nftsCount }})</h1>
             </div>
-            <nft-list v-if="nftsCount > 0" v-model="selectedNft"/>
+            <nft-list :showNftOptions="true" v-if="nftsCount > 0" v-model="selectedNft"/>
           </div>
         </div>
       </b-tab>

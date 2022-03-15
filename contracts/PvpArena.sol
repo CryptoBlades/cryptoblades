@@ -1104,7 +1104,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     {
         uint8 trait = characters.getTrait(characterID);
         uint256 shieldID = fighterByCharacter[characterID].shieldID;
-        (, int128 shieldMultFight, , ) = shields.getFightData(shieldID, trait);
+        int128 shieldMultFight = shields.getDefenseMultiplierForTrait(shieldID, trait);
         return (shieldMultFight);
     }
 

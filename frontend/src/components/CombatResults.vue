@@ -50,12 +50,16 @@
       <img src="../assets/border-element.png">
     </div>
     <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
-      <Adsense v-if="showAds && !isMobile()" data-ad-client="ca-pub-6717992096530538" data-ad-slot="5115599573"
-               data-ad-format="auto" data-full-width-responsive="yes"/>
-      <ins class="61c1ff6442013d001aecb701" style="display:inline-block;width:336px;height:280px;"/>
-      <script2>!function(e,n,c,t,o,r){!function
-        e(n,c,t,o,r,m,s,a){s=c.getElementsByTagName(t)[0],(a=c.createElement(t)).async=!0,a.src="https://"+r[m]+"/js/"+o+".js",a.onerror=function(){a.remove(),(m+=1)>=r.length||e(n,c,t,o,r,m)},s.parentNode.insertBefore(a,s)}(window,document,"script","61c1ff6442013d001aecb701",["cdn.bmcdn2.com"],0)}();
-      </script2>
+      <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
+        <div class="coinzilla" data-zone="C-316621de2f7b8b25140"></div>
+          <script2>
+                window.coinzilla_display = window.coinzilla_display || [];
+                var c_display_preferences = {};
+                c_display_preferences.zone = "316621de2f7b8b25140";
+                c_display_preferences.width = "300";
+                c_display_preferences.height = "250";
+                coinzilla_display.push(c_display_preferences);
+          </script2>
     </div>
   </div>
 </template>

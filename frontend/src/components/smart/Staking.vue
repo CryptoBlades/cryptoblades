@@ -44,9 +44,9 @@
         </div>
       </div>
       <div class="stakePage medium-dark-bg">
-        <div class="sPElement input">
-          <div class="inputBody">
-            <div :class="isNftStaking ? 'd-flex align-items-center w-100' : 'flex_row'">
+        <div class="sPElement input overflow">
+          <div class="inputBody overflow">
+            <div :class="isNftStaking ? 'd-flex align-items-center w-100 overflow' : 'flex_row'">
               <input
                 v-if="!isNftStaking"
                 class="token-amount-input"
@@ -63,17 +63,16 @@
                 value=""
                 v-model="textAmount"
               />
-              <div v-if="isNftStaking" class="mr-2 ml-3">ID:</div>
-              <b-form-select
-                class="w-100"
-                v-if="isNftStaking"
-                :title="$t('stake.tokenAmount')"
-                v-model="idToStake">
-                <template #first>
-                  <b-form-select-option :value="null" disabled>{{$t('stake.pickId')}}</b-form-select-option>
+              <div v-if="isNftStaking" class="mr-2 ml-3">ID(s):</div>
+              <multiselect v-if="isNftStaking" class="overflow" v-model="idsToStake"
+                :options="(isDeposit ? ownedLandIds : stakedIds).filter(x => +x.tier === +tier || !tier) || []"
+                :max="10" :multiple="true" :close-on-select="false" :clear-on-select="false" :placeholder="$t('stake.pickId')"
+                :custom-label="idWithTier" track-by="id"
+              >
+                <template slot="selection" :slot-scope="{ idsToStake }">
+                  <span class="multiselect__single" v-if="idsToStake && idsToStake.length">{{ idsToStake.length }} {{$t('stake.idsSelected')}}</span>
                 </template>
-                <option v-for="x in (isDeposit ? ownedLandIds : stakedIds)" :value="x.id" :key="x.id">{{x.id}} ({{$t('stake.tier')}} {{x.tier}})</option>
-              </b-form-select>
+              </multiselect>
               <div :class="isNftStaking ? 'ml-2 mr-3' : 'ant-col'">{{ stakingTokenName }}</div>
             </div>
             <div class="balance" id="balance" @click="!isNftStaking && onMAX">
@@ -162,12 +161,14 @@
 <script>
 import { toBN } from '../../utils/common';
 import { mapActions, mapState } from 'vuex';
+import Vue from 'vue';
 
 import { formatDurationFromSeconds, secondsToDDHHMMSS } from '../../utils/date-time';
 import { isStakeType, isNftStakeType } from '../../interfaces/State';
+import Multiselect from 'vue-multiselect';
 
 
-export default {
+export default Vue.extend({
   props: {
     stakeType: {
       type: String,
@@ -175,12 +176,21 @@ export default {
         return isStakeType(type) || isNftStakeType(type);
       }
     },
+    tier: {
+      type: Number,
+      default: 0
+    }
+  },
+
+  components: {
+    Multiselect
   },
 
   data() {
     return {
       textAmount: '',
-      idToStake: null,
+      idsToStake: [],
+      isOpen: false,
       isDeposit: true,
       loading: false,
       errorWhenUpdating: null,
@@ -343,7 +353,7 @@ export default {
         return 'inputIsZero';
       }
 
-      if (isNftStakeType(this.stakeType) && this.idToStake === null) {
+      if (isNftStakeType(this.stakeType) && this.idsToStake.length === 0) {
         return 'inputIsZero';
       }
 
@@ -453,7 +463,9 @@ export default {
     ...mapActions([
       'fetchStakeDetails',
       'stake',
+      'stakeNfts',
       'unstake',
+      'unstakeNfts',
       'unstakeKing',
       'claimKingReward',
       'stakeUnclaimedRewards',
@@ -461,6 +473,10 @@ export default {
       'getOwnedLandIdsWithTier',
       'getStakedIds'
     ]),
+
+    idWithTier({ id, tier }) {
+      return `${id} (${this.$t('stake.tier')} ${tier})`;
+    },
 
     updateEstimates() {
       if (this.stakeUnlockTimeLeftCurrentEstimate > 0) {
@@ -503,25 +519,35 @@ export default {
     },
     async onSubmit() {
       if (this.loading || this.currentState !== 'ok') return;
-      const amount = isNftStakeType(this.stakeType) ? this.idToStake.toString() : this.bigNumberAmount.toString();
+      const amount = this.bigNumberAmount.toString();
 
       try {
         this.loading = true;
 
         if (this.isDeposit) {
-          await this.stake({ amount, stakeType: this.stakeType });
+          if(this.isNftStaking) {
+            await this.stakeNfts({ ids: this.idsToStake.map(x => x.id), stakeType: this.stakeType });
+          }
+          else {
+            await this.stake({ amount, stakeType: this.stakeType });
+          }
         } else {
           //unstake
           if(this.stakeType === 'king') {
             await this.unstakeKing({ amount });
           }
           else {
-            await this.unstake({ amount, stakeType: this.stakeType });
+            if(this.isNftStaking) {
+              await this.unstakeNfts({ ids: this.idsToStake.map(x => x.id), stakeType: this.stakeType });
+            }
+            else {
+              await this.unstake({ amount, stakeType: this.stakeType });
+            }
           }
         }
         if(isNftStakeType(this.stakeType)) {
           await this.updateOwnedLands();
-          this.idToStake = undefined;
+          this.idsToStake = [];
         }
       } catch (e) {
         console.error(e);
@@ -620,7 +646,7 @@ export default {
     },
     isDeposit() {
       this.textAmount = '';
-      this.idToStake = undefined;
+      this.idsToStake = [];
     },
     async defaultAccount(newVal) {
       if (newVal) {
@@ -628,8 +654,10 @@ export default {
       }
     },
   },
-};
+});
 </script>
+
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style scoped>
 .stake {
@@ -894,6 +922,10 @@ export default {
 
 .gold-text {
   color: #9e8a57;
+}
+
+.overflow {
+  overflow: visible;
 }
 
 </style>
