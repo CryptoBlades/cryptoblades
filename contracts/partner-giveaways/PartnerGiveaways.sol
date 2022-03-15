@@ -11,7 +11,7 @@ contract PartnerGiveaways is Initializable, AccessControlUpgradeable {
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     
     mapping(uint256 => uint256) vars;
-    uint256 public constant SHARDS_REWARD = 1;
+    uint256 public constant VAR_SHARDS_REWARD = 1;
 
     SpecialWeaponsManager public specialWeaponsManager;
 
@@ -33,7 +33,7 @@ contract PartnerGiveaways is Initializable, AccessControlUpgradeable {
         _setupRole(GAME_ADMIN, msg.sender);
 
         specialWeaponsManager = _specialWeaponsManager;
-        vars[SHARDS_REWARD] = 125;
+        vars[VAR_SHARDS_REWARD] = 125;
         nextGiveawayId = 0;
     }
 
@@ -71,7 +71,7 @@ contract PartnerGiveaways is Initializable, AccessControlUpgradeable {
         require(block.timestamp <= giveawayEndTime[giveawayId], "Giveaway ended");
         userClaimedAtGiveaway[msg.sender][giveawayId] = true;
         nftClaimedAtGiveaway[giveawayId][nftId] = true;
-        specialWeaponsManager.addShards(msg.sender, giveawayIdToSpecialEventId[giveawayId], vars[SHARDS_REWARD]);
+        specialWeaponsManager.addShards(msg.sender, giveawayIdToSpecialEventId[giveawayId], vars[VAR_SHARDS_REWARD]);
     }
 
     // VAR SETTER
