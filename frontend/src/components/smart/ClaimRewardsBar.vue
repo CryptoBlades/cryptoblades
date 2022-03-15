@@ -125,7 +125,7 @@
           <h6 v-if="formattedMultiplier < 0.5" class="very-low-multiplier">{{$t('ClaimRewardsBar.lowMultiplier', {currentMultiplier})}}</h6>
           <h6 >{{
               $t('ClaimRewardsBar.realWithdrawValueClaimable', {
-                actualAmount: (skillAmount / formattedRatio * formattedMultiplier).toFixed(4),
+                actualAmount: (skillAmount / nonFormattedRatio * formattedMultiplier).toFixed(4),
                 tokenSymbol: selectedPartneredProject.tokenSymbol,
                 skillAmount: (+skillAmount).toFixed(4)
               })
@@ -223,9 +223,9 @@ export default Vue.extend({
       return this.selectedPartneredProject && +toBN(this.partnerProjectMultipliers[+this.selectedPartneredProject.id]).div(toBN(10).pow(18)).toFixed(4) || 1;
     },
 
-    formattedRatio(): number {
+    nonFormattedRatio(): number {
       return this.selectedPartneredProject &&
-        +toBN(1).dividedBy(toBN(this.partnerProjectRatios[+this.selectedPartneredProject.id]).dividedBy(toBN(2).exponentiatedBy(64))).toFixed(4) || 1;
+        +toBN(1).dividedBy(toBN(this.partnerProjectRatios[+this.selectedPartneredProject.id]).dividedBy(toBN(2).exponentiatedBy(64))) || 1;
     },
 
     formattedSkillReward(): string {

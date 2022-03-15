@@ -348,11 +348,15 @@ export default Vue.extend({
       if (this.nextWeekResetCheckInterval) {
         clearInterval(this.nextWeekResetCheckInterval);
       }
-      this.nextWeekResetCheckInterval = setInterval(() => {
+      this.nextWeekResetCheckInterval = setInterval(async () => {
         const {total, days, hours, minutes, seconds} = getTimeRemaining(nextWeekResetTimestamp);
         this.nextWeekResetTime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-        if (total <= 0 && this.nextWeekResetCheckInterval) {
+        if (total <= 1000 && this.nextWeekResetCheckInterval) {
           clearInterval(this.nextWeekResetCheckInterval);
+          this.currentWeeklyCompletions = +await this.getWeeklyCompletions();
+          this.maxWeeklyCompletions = +await this.getWeeklyCompletionsGoal();
+          this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});
+          this.weeklyClaimed = await this.hasClaimedWeeklyReward();
         }
       }, 1000);
     },
