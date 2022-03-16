@@ -118,7 +118,9 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     uint256 public duelOffsetCost;
     address payable public pvpBotAddress;
 
+    /// @dev owner's address by character ID
     mapping(uint256 => uint256) public specialWeaponRerollTimestamp;
+    mapping(uint256 => address) private _ownerByCharacter;
     
     event DuelFinished(
         uint256 indexed attacker,
@@ -181,7 +183,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     modifier isOwnedCharacter(uint256 characterID) {
-        require(characters.ownerOf(characterID) == msg.sender);
+        require(_ownerByCharacter[characterID] == msg.sender);
         _;
     }
 
@@ -191,7 +193,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "NAD");
+        require(hasRole(GAME_ADMIN, msg.sender));
     }
 
     modifier enteringArenaChecks(
@@ -243,7 +245,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         withdrawFeePercent = 25;
         currentRankedSeason = 1;
         seasonStartedAt = block.timestamp;
-        seasonDuration = 1 days;
+        seasonDuration = 7 days;
         decisionSeconds = 2 minutes;
         prizePercentages.push(60);
         prizePercentages.push(30);
@@ -260,6 +262,10 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     ) external enteringArenaChecks(characterID, weaponID, shieldID, useShield) {
         uint8 tier = getArenaTier(characterID);
         uint256 wager = getEntryWagerByTier(tier);
+
+        if (_ownerByCharacter[characterID] != msg.sender) {
+            _ownerByCharacter[characterID] = msg.sender;
+        }
 
         if (previousTierByCharacter[characterID] != tier) {
             rankingPointsByCharacter[characterID] = 0;
@@ -398,7 +404,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         characterWithinDecisionTime(attackerID)
         characterNotInDuel(attackerID)
     {
-        require((arenaAccess & 1) == 1, "AL");
+        require((arenaAccess & 1) == 1);
         require(msg.value == duelOffsetCost, "NO");
 
         uint256 defenderID = getOpponent(attackerID);
@@ -460,9 +466,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 _topRankingCharactersByTier[i].length < prizePercentages.length
             ) {
                 uint256 excessPercentage;
-                address topOnePlayer = characters.ownerOf(
-                    _topRankingCharactersByTier[i][0]
-                );
+                
+                address topOnePlayer = _ownerByCharacter[_topRankingCharactersByTier[i][0]];
 
                 // We accumulate excess percentage
                 for (
@@ -942,8 +947,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
                 }
             }
             if (
-                characters.ownerOf(candidateID) ==
-                msg.sender
+                _ownerByCharacter[candidateID] == msg.sender
             ) {
                 continue;
             }
@@ -973,7 +977,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     ) private {
         uint256 percentage = prizePercentages[position];
         uint256 amountToTransfer = (pool.mul(percentage)).div(100);
-        address playerToTransfer = characters.ownerOf(characterID);
+        address playerToTransfer = _ownerByCharacter[characterID];
 
         _rankingRewardsByPlayer[playerToTransfer] = _rankingRewardsByPlayer[
             playerToTransfer
@@ -1023,7 +1027,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         Fighter memory fighter = fighterByCharacter[character.ID];
         uint256 weaponID = fighter.weaponID;
         uint256 seed = randoms.getRandomSeedUsingHash(
-            characters.ownerOf(character.ID),
+            _ownerByCharacter[character.ID],
             blockhash(block.number - 1)
         );
 
@@ -1189,11 +1193,42 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     function setPvpBotAddress(address payable botAddress) external restricted {
         pvpBotAddress = botAddress;
     }
-    
+
+    function increaseRankingsPool(uint8 tier, uint256 amount) external restricted {
+        rankingsPoolByTier[tier] = rankingsPoolByTier[tier].add(amount);
+    }
+
     /// @dev returns the amount of matcheable characters
     function getMatchablePlayerCount(uint256 characterID) public view returns(uint){
         uint8 tier = getArenaTier(characterID);
         return _matchableCharactersByTier[tier].length();   
+    }
+
+    function forceRemoveCharacterFromArena(uint256 characterID)
+        external 
+        restricted
+        characterNotUnderAttack(characterID)
+        characterNotInDuel(characterID)
+    {
+        Fighter storage fighter = fighterByCharacter[characterID];
+        uint8 tier = getArenaTier(characterID);
+        uint256 wager = fighter.wager;
+        uint256 entryWager = getEntryWager(characterID);
+
+        if (matchByFinder[characterID].createdAt != 0) {
+            if (wager < entryWager.mul(withdrawFeePercent).div(100)) {
+                wager = 0;
+            } else {
+                wager = wager.sub(entryWager.mul(withdrawFeePercent).div(100));
+            }
+        }
+
+        _removeCharacterFromArena(characterID, tier);
+
+        excessWagerByCharacter[characterID] = 0;
+        fighter.wager = 0;
+
+        skillToken.safeTransfer(characters.ownerOf(characterID), wager);
     }
 
     // Note: The following are debugging functions..
