@@ -621,6 +621,9 @@ export default Vue.extend({
     const burnCost = await this.contracts.BurningManager.methods.burnWeaponFee().call({ from: this.defaultAccount });
     const skillBurnCost = await this.contracts.BurningManager.methods.usdToSkill(burnCost).call({ from: this.defaultAccount });
     this.burnCost = new BN(skillBurnCost).div(new BN(10).pow(18)).toFixed(4);
+    if(window.location.href.split('&').find(x => x === 'showSpecialForge')) {
+      Events.$emit('show-special-forge-modal');
+    }
   },
 
   methods: {

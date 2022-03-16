@@ -16,8 +16,6 @@ import createRouter from './router';
 
 import App from './App.vue';
 
-import Ads from 'vue-google-adsense';
-
 import {
   raid as featureFlagRaid,
   stakeOnly as featureFlagStakeOnly,
@@ -46,7 +44,6 @@ Vue.use(BootstrapVueDialog);
 Vue.use(BootstrapVueIcons);
 
 Vue.use(require('vue-script2'));
-Vue.use(Ads.Adsense);
 
 const store = createStore(web3);
 export const router = createRouter();

@@ -431,6 +431,7 @@
     "errors": {
       "selection": "Check Character and Weapon Selection and try again...",
       "raidNotStarted": "Raid has not started yet...",
+      "cannotAffordRaid": "Insufficient funds...",
       "lockedChar": "Selected character is locked in the raid already...",
       "lockedWeapon": "Selected weapon is locked in the raid already...",
       "notEnough": "Not enough stamina or durability...",

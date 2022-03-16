@@ -306,6 +306,14 @@
         <b-icon icon="exclamation-circle" variant="danger" /> {{ $t('plaza.noRefunds')}}
       </div>
     </b-modal>
+    <div class="ad-padding">
+    </div>
+    <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
+      <script2 async src="https://coinzillatag.com/lib/sticky.js"></script2>
+        <div class="coinzilla" data-zone="C-2621de2f7c4f7a272"></div>
+        <script2>window.coinzilla_sticky = window.coinzilla_sticky
+            || [];function czilla(){coinzilla_sticky.push(arguments);}czilla('2621de2f7c4f7a272');</script2>
+    </div>
   </div>
 </template>
 
@@ -713,4 +721,9 @@ export default Vue.extend({
   min-width: 140px;
   text-align: center;
 }
+
+.ad-padding {
+  padding: 30px;
+}
+
 </style>

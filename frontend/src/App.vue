@@ -61,13 +61,17 @@
         <div class="seperator"></div>
         <small-button class="button mm-button" @click="toggleHideWalletWarning" :text="$t('app.warning.buttons.hide')" />
       </div>
-      <div class="ad-container">
-        <Adsense v-if="showAds && !isMobile()"
-          data-ad-client="ca-pub-6717992096530538"
-          data-ad-slot="5115599573"
-          data-ad-format="auto"
-          data-full-width-responsive="yes"
-          />
+      <div v-if="showAds && !isMobile()" class="ad-container">
+      <script2 src="https://coinzillatag.com/lib/display.js"></script2>
+        <div class="coinzilla" data-zone="C-541621de2f7bb717603"></div>
+          <script2>
+                window.coinzilla_display = window.coinzilla_display || [];
+                var c_display_preferences = {};
+                c_display_preferences.zone = "541621de2f7bb717603";
+                c_display_preferences.width = "728";
+                c_display_preferences.height = "90";
+                coinzilla_display.push(c_display_preferences);
+          </script2>
       </div>
     </div>
   </div>
