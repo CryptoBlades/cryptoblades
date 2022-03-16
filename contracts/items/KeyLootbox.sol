@@ -58,4 +58,8 @@ contract KeyLootbox is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function setNextTokenID(uint to) public restricted {
         nextTokenID = to;
     }
+
+    function setBaseURI(string memory baseUri) public restricted {
+        _setBaseURI(baseUri);
+    }
 }

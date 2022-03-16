@@ -218,6 +218,10 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _weaponType = getWeaponType(id);
     }
 
+    function setBaseURI(string memory baseUri) public restricted {
+        _setBaseURI(baseUri);
+    }
+
     function mintN(address minter, uint32 amount, uint256 seed, uint8 chosenElement) public restricted {
         for(uint i = 0; i < amount; i++)
             mint(minter, RandomUtil.combineSeeds(seed,i), chosenElement);
