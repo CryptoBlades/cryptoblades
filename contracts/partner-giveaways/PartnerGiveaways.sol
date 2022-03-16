@@ -34,7 +34,6 @@ contract PartnerGiveaways is Initializable, AccessControlUpgradeable {
 
         specialWeaponsManager = _specialWeaponsManager;
         vars[VAR_SHARDS_REWARD] = 125;
-        nextGiveawayId = 0;
     }
 
     // MODIFIERS
