@@ -71,9 +71,9 @@ async function createWeapon(receiver, seed, element = 0, context = {}) {
  *
  * @return {Promise<string>} ID of the newly created shield
  */
-async function createShield(receiver, seed, context = {}) {
+async function createShield(receiver, shieldType, seed, context = {}) {
   const shields = context.shields || (await Shields.deployed());
-  const { tx: mintShieldTx } = await shields.mint(receiver, seed);
+  const { tx: mintShieldTx } = await shields.mint(receiver, shieldType, seed);
 
   const newShieldEvt = await expectEvent.inTransaction(mintShieldTx, Shields, 'NewShield', { minter: receiver });
   await time.advanceBlock();
