@@ -3422,6 +3422,12 @@
     "address": "0xc7B23A5d3D704183A7D9CfdFCFC30F07db9DC4F1",
     "transactionHash": "0x63d8bce9be5905b6ec8173ced5c949016dceeccd6a7a57ea8b57600a204ebebf"
   },
+  "build/contracts/PartnerGiveaways.json": {
+    "events": {},
+    "links": {},
+    "address": "0x15307130782Ec06c6280812f2764CA5A54579e07",
+    "transactionHash": "0x27d26f7ed556cb9f2b510b38635a085f03a8a214df3af61b346f5a0b49c4687c|{\"gasBurned\":11273371733708,\"tx\":\"CnZJx6NBzLCj52fn2LGyUj1xhLYGKnStThquPPVuVp9V\"}"
+  },
   "build/contracts/PartnerVault.json": {
     "events": {
       "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {

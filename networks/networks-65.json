@@ -3425,6 +3425,12 @@
     "address": "0x52D7757A354153fE87661C414D65052d3DFFDC3B",
     "transactionHash": "0x3c79a0e9665ac0e7aa5dcfde539dff37adb9c01d3861a3beeaaa3e1f5f51e2f6"
   },
+  "build/contracts/PartnerGiveaways.json": {
+    "events": {},
+    "links": {},
+    "address": "0x09688451D44d249c251177410945c4f381D467a3",
+    "transactionHash": "0x8a0aab6366163b1e993a0bf1f02e903368c210accd368b616677c91ddbc14c2b"
+  },
   "build/contracts/PartnerVault.json": {
     "events": {
       "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
@@ -3756,7 +3762,7 @@
     },
     "links": {},
     "address": "0xa6017694f897deAdB3195122425a43980138a90a",
-    "transactionHash": "0x2b2b82f080ae76355a8cc8f283424b2bf2e2437de8426b842ee3bb72be7398d2"
+    "transactionHash": "0x5b1464e6ac3d6946ea88b3b9c9cd098c1a9040757c8d52b42248e9085bbff6b1"
   },
   "build/contracts/Raid1.json": {
     "events": {},
