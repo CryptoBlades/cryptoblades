@@ -119,8 +119,8 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     address payable public pvpBotAddress;
 
     /// @dev owner's address by character ID
-    mapping(uint256 => address) private _ownerByCharacter;
     mapping(uint256 => uint256) public specialWeaponRerollTimestamp;
+    mapping(uint256 => address) private _ownerByCharacter;
     
     event DuelFinished(
         uint256 indexed attacker,
