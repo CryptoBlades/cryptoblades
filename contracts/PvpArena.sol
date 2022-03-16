@@ -53,34 +53,34 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     int128 private _baseWagerUSD;
     /// @dev how much extra USD is wagered per level tier
     int128 private _tierWagerUSD;
-    /// @dev how much of a duel's bounty is sent to the rankings pool
-    uint8 private _rankingsPoolTaxPercent;
+    // /// @dev how much of a duel's bounty is sent to the rankings pool
+    // uint8 private _rankingsPoolTaxPercent;
     /// @dev how many times the cost of battling must be wagered to enter the arena
     uint8 public wageringFactor;
-    /// @dev amount of points earned by winning a duel
-    uint8 public winningPoints;
-    /// @dev amount of points subtracted by losing duel
-    uint8 public losingPoints;
-    /// @dev max amount of top characters by tier
-    uint8 private _maxTopCharactersPerTier;
+    // /// @dev amount of points earned by winning a duel
+    // uint8 public winningPoints;
+    // /// @dev amount of points subtracted by losing duel
+    // uint8 public losingPoints;
+    // /// @dev max amount of top characters by tier
+    // uint8 private _maxTopCharactersPerTier;
     /// @dev percentage of duel cost charged when rerolling opponent
     uint256 public reRollFeePercent;
     /// @dev percentage of entry wager charged when withdrawing from arena with pending duel
     uint256 public withdrawFeePercent;
-    /// @dev current ranked season
-    uint256 public currentRankedSeason;
-    /// @dev timestamp of when the current season started
-    uint256 public seasonStartedAt;
-    /// @dev interval of ranked season restarts
-    uint256 public seasonDuration;
+    // /// @dev current ranked season
+    // uint256 public currentRankedSeason;
+    // /// @dev timestamp of when the current season started
+    // uint256 public seasonStartedAt;
+    // /// @dev interval of ranked season restarts
+    // uint256 public seasonDuration;
     /// @dev amount of time a match finder has to make a decision
     uint256 public decisionSeconds;
     /// @dev amount of skill due for game coffers from tax
     uint256 public gameCofferTaxDue;
     /// @dev allows or blocks entering arena (we can extend later to disable other parts such as rerolls)
     uint256 public arenaAccess; // 0 = cannot join, 1 = can join
-    /// @dev percentages of ranked prize distribution by fighter rank (represented as index)
-    uint256[] public prizePercentages;
+    // /// @dev percentages of ranked prize distribution by fighter rank (represented as index)
+    // uint256[] public prizePercentages;
     /// @dev characters by id that are on queue to perform a duel
     EnumerableSet.UintSet private _duelQueue;
 
@@ -102,16 +102,16 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint8) public previousTierByCharacter;
     /// @dev excess wager by character for when they re-enter the arena
     mapping(uint256 => uint256) public excessWagerByCharacter;
-    /// @dev season number associated to character
-    mapping(uint256 => uint256) public seasonByCharacter;
-    /// @dev ranking points by character
-    mapping(uint256 => uint256) public rankingPointsByCharacter;
-    /// @dev accumulated skill pool per tier
-    mapping(uint8 => uint256) public rankingsPoolByTier;
-    /// @dev funds available for withdrawal by address
-    mapping(address => uint256) private _rankingRewardsByPlayer;
-    /// @dev top ranking characters by tier
-    mapping(uint8 => uint256[]) private _topRankingCharactersByTier;
+    // /// @dev season number associated to character
+    // mapping(uint256 => uint256) public seasonByCharacter;
+    // /// @dev ranking points by character
+    // mapping(uint256 => uint256) public rankingPointsByCharacter;
+    // /// @dev accumulated skill pool per tier
+    // mapping(uint8 => uint256) public rankingsPoolByTier;
+    // /// @dev funds available for withdrawal by address
+    // mapping(address => uint256) private _rankingRewardsByPlayer;
+    // /// @dev top ranking characters by tier
+    // mapping(uint8 => uint256[]) private _topRankingCharactersByTier;
     /// @dev IDs of characters available for matchmaking by tier
     mapping(uint8 => EnumerableSet.UintSet) private _matchableCharactersByTier;
 
