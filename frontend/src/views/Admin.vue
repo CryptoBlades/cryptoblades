@@ -28,7 +28,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters(['contracts', 'getHasAdminAccess', 'getHasMinterAccess']),
     ...mapState(['defaultAccount']),
-    hasAccessToAnyTab() {
+    hasAccessToAnyTab(): boolean {
       return this.getHasAdminAccess || this.getHasMinterAccess;
     },
   },
@@ -66,7 +66,6 @@ export default Vue.extend({
       contract: this.contracts.PartnerVault,
       component: 'PartnerVaultAdmin',
     });
-    await this.fetchData();
   },
 });
 </script>
