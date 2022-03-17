@@ -1,34 +1,33 @@
 <template>
   <div class="skill-balance-display">
-    <div size="sm" class="my-2 my-sm-0 mr-3 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
-      <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
-        <div class="buy-skill-modal">
-          <div class="buy-skill-modal-child">
-          <img src="../../assets/apeswapbanana.png" class="img-apeswap"  tagname="buy_skill">
-                <b-button variant="primary" class="gtag-link-others" @click="onBuySkill">{{$t('skillBalanceDisplay.buyWithCrypto')}}</b-button>
+    <div class="balance-icon-container">
+      <div size="sm" class="my-2 my-sm-0 mr-3 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
+        <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
+          <div class="buy-skill-modal">
+            <div class="buy-skill-modal-child">
+              <img src="../../assets/apeswapbanana.png" class="img-apeswap"  tagname="buy_skill">
+              <b-button variant="primary" class="gtag-link-others" @click="onBuySkill">{{$t('skillBalanceDisplay.buyWithCrypto')}}</b-button>
+            </div>
+            <div class="buy-skill-modal-child">
+              <img src="../../assets/logoTransak.png" class="img-transak"  tagname="buy_skill_test">
+              <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">{{$t('skillBalanceDisplay.buyWithFiat')}}</b-button>
+            </div>
           </div>
-          <div class="buy-skill-modal-child">
-                <img src="../../assets/logoTransak.png" class="img-transak"  tagname="buy_skill_test">
-                <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">{{$t('skillBalanceDisplay.buyWithFiat')}}</b-button>
-          </div>
-        </div>
-      </b-modal>
-      <img src="../../assets/navbar-icons/skill-token.png" class="add-button gtag-link-others" :style="isMobile() ? 'width:35px':''"  tagname="buy_skill">
-    </div>
+        </b-modal>
+        <img src="../../assets/navbar-icons/skill-token.png" class="add-button gtag-link-others" :style="isMobile() ? 'width:35px':''"  tagname="buy_skill">
+      </div>
 
-    <div class="balance-container">
+      <div class="balance-container">
         <p>$SKILL </p>
         <b v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
-          @mouseover="hover = !isMobile() || true"
-          @mouseleave="hover = !isMobile()"
+           @mouseover="hover = !isMobile() || true"
+           @mouseleave="hover = !isMobile()"
         >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/></b>
+      </div>
     </div>
-    <div class="transaction-btn">
-        <div class="deposit-withdraw">
-        <!-- new withdraw/claim on new ui -->
-         <!-- <span @click="showModal">Deposit</span> | <span @click="claimSkill(ClaimStage.Summary)"> Withdraw </span> -->
-         <span @click="showModal">Deposit</span>
-        </div>
+
+    <div class="deposit-withdraw">
+      <span @click="showModal">Deposit</span>
     </div>
 
     <div class="bnb-withdraw-container mx-3" v-if="hasBnbAvailableToWithdraw">
@@ -179,16 +178,13 @@ export default Vue.extend({
 
 <style scoped>
 .skill-balance-display {
-  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
   border-left: 1px solid #424A59;
-  height: 105px;
   border-right: 1px solid #424A59;
-  padding-left : 15px;
-  padding-right: 15px;
-  flex-wrap: wrap;
+  padding: 0 1rem;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
 }
 
 .skill-tooltip > img{
@@ -201,16 +197,15 @@ export default Vue.extend({
   text-align: center;
 }
 
+.balance-icon-container {
+  display: flex;
+  align-items: center;
+}
+
 .balance-container {
-  margin-right: 5px;
   color: #b3b0a7;
   line-height: 0.2;
   text-align: right;
-}
-.deposit-withdraw {
-  flex: 100%;
-  margin-top: -25px;
-  color: rgba(255, 255, 255, 0.364);
 }
 
 .deposit-withdraw > span{
