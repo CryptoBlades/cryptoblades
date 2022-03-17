@@ -419,6 +419,7 @@ export default {
 </script>
 
 <style>
+
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
   font-weight: 600;
   text-align: center;

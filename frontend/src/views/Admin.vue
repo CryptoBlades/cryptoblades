@@ -7,15 +7,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import {mapActions, mapGetters, mapState} from 'vuex';
+import {mapGetters, mapState} from 'vuex';
 import {Contract} from '@/interfaces';
 import AdminTab from '@/components/smart/AdminTab.vue';
-
-interface StoreMappedActions {
-  userHasAnyAdminAccess(): Promise<boolean>;
-
-  userHasAnyMinterAccess(): Promise<boolean>;
-}
 
 interface Tab {
   title: string;
@@ -32,8 +26,11 @@ export default Vue.extend({
   components: {AdminTab},
 
   computed: {
-    ...mapGetters(['contracts']),
+    ...mapGetters(['contracts', 'getHasAdminAccess', 'getHasMinterAccess']),
     ...mapState(['defaultAccount']),
+    hasAccessToAnyTab(): boolean {
+      return this.getHasAdminAccess || this.getHasMinterAccess;
+    },
   },
 
   data() {
@@ -41,14 +38,6 @@ export default Vue.extend({
       hasAccessToAnyTab: false,
       tabs: [] as Tab[],
     } as Data;
-  },
-
-  methods: {
-    ...mapActions(['userHasAnyAdminAccess', 'userHasAnyMinterAccess']) as StoreMappedActions,
-
-    async fetchData() {
-      this.hasAccessToAnyTab = await this.userHasAnyAdminAccess() || await this.userHasAnyMinterAccess();
-    },
   },
 
   async mounted() {
@@ -77,16 +66,7 @@ export default Vue.extend({
       contract: this.contracts.PartnerVault,
       component: 'PartnerVaultAdmin',
     });
-    await this.fetchData();
   },
-
-  watch: {
-    async defaultAccount(newVal) {
-      if (newVal) {
-        await this.fetchData();
-      }
-    },
-  }
 });
 </script>
 
