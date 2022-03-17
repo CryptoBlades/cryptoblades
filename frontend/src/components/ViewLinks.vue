@@ -139,6 +139,7 @@ a {
 .link-text {
   font-weight: bolder;
   white-space: nowrap;
+  font-size: clamp(0.8rem, 1vw, 1rem);
 }
 
 .disabled {
