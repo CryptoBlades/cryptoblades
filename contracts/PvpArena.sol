@@ -236,20 +236,20 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
         // TODO: Tweak these values
         _baseWagerUSD = ABDKMath64x64.divu(500, 100); // $5
         _tierWagerUSD = ABDKMath64x64.divu(50, 100); // $0.5
-        _rankingsPoolTaxPercent = 15;
+        // _rankingsPoolTaxPercent = 15;
         wageringFactor = 3;
-        winningPoints = 5;
-        losingPoints = 3;
-        _maxTopCharactersPerTier = 4;
+        // winningPoints = 5;
+        // losingPoints = 3;
+        // _maxTopCharactersPerTier = 4;
         reRollFeePercent = 25;
         withdrawFeePercent = 25;
-        currentRankedSeason = 1;
-        seasonStartedAt = block.timestamp;
-        seasonDuration = 7 days;
+        // currentRankedSeason = 1;
+        // seasonStartedAt = block.timestamp;
+        // seasonDuration = 7 days;
         decisionSeconds = 2 minutes;
-        prizePercentages.push(60);
-        prizePercentages.push(30);
-        prizePercentages.push(10);
+        // prizePercentages.push(60);
+        // prizePercentages.push(30);
+        // prizePercentages.push(10);
         duelOffsetCost = 0.005 ether;
     }
 

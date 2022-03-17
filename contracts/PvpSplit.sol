@@ -67,8 +67,42 @@ contract PvpSplit is Initializable, AccessControlUpgradeable {
     );
 
     modifier isOwnedCharacter(uint256 characterID) {
+        // TODO: See if we can use ownerByCharacter
         require(characters.ownerOf(characterID) == msg.sender);
         _;
     }
 
+    modifier restricted() {
+        _restricted();
+        _;
+    }
+
+    function _restricted() internal view {
+        require(hasRole(GAME_ADMIN, msg.sender));
+    }
+
+    function initialize(
+        address gameContract
+    ) public initializer {
+        __AccessControl_init_unchained();
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        game = CryptoBlades(gameContract);
+        characters = Characters(game.characters());
+        // weapons = Weapons(game.weapons());
+        // shields = Shields(shieldsContract);
+        // skillToken = IERC20(game.skillToken());
+        // randoms = IRandoms(randomsContract);
+
+        _rankingsPoolTaxPercent = 15;
+        winningPoints = 5;
+        losingPoints = 3;
+        _maxTopCharactersPerTier = 4;
+        currentRankedSeason = 1;
+        seasonStartedAt = block.timestamp;
+        seasonDuration = 7 days;
+        prizePercentages.push(60);
+        prizePercentages.push(30);
+        prizePercentages.push(10);
+    }
 }
