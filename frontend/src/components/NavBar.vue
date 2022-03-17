@@ -338,7 +338,7 @@ a.router-link-active {
 }
 @media (max-width: 576px) {
   .main-nav {
-    height: 9vh;
+    height: 12vh;
   }
   .nav-logo {
     border: 0;

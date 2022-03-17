@@ -11,7 +11,7 @@
         class="ml-3 bar"
         @click="claimSkill(ClaimStage.Summary)">
         <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
-          <strong>SKILL</strong> {{ formattedSkillReward }}
+          <strong>SKILL</strong>{{ formattedSkillReward }}
         </span>
       </b-nav-item>
 
@@ -19,7 +19,7 @@
         class="ml-3 bar"
         :disabled="!canClaimXp"
         @click="onClaimXp">
-          <div class="gtag-link-others" v-html="`<strong>XP</strong> ${formattedXpRewardsBar}`"></div>
+          <div class="gtag-link-others" v-html="`<strong>XP</strong>${formattedXpRewardsBar}`"></div>
       </b-nav-item>
     </b-navbar>
 
@@ -436,6 +436,7 @@ export default Vue.extend({
 
 .claim-xp-bar {
   height: 55px;
+  gap: 0.5rem;
 }
 
 .nav-item.bar {
