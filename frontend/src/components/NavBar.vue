@@ -276,11 +276,12 @@ a.router-link-active {
 
 <style scoped>
 .logo {
-  max-width: 280px;
+  max-width: 90%;
 }
 
 .main-nav {
-  padding: 0px;
+  padding: 0;
+  height: 7vh;
 }
 
 .x-button {
@@ -289,12 +290,9 @@ a.router-link-active {
 
 @media (min-width: 1024px) {
   .new-game-ui-logo {
-    height: 100px;
-    width: 400px;
     justify-content: center;
     display: flex;
     align-items: center;
-    border-right: 2px solid #404857;
   }
 }
 
@@ -306,7 +304,10 @@ a.router-link-active {
   flex: 2.3;
 }
 .nav-logo {
-  flex: 0.5;
+  flex: 1;
+  height: 100%;
+  border-right: 2px solid #404857;
+  display: flex;
 }
 
 .expand-collapse-icon {

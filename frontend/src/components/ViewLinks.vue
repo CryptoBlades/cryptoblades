@@ -157,8 +157,11 @@ li:last-child {
   padding-right: 0;
 }
 
+.top-nav-links .nav-link {
+  padding: 0;
+}
+
 li .nav-link {
-  font-size: 18px;
   text-transform: uppercase;
   font-weight: 500;
   text-align: center;
