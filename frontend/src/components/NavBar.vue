@@ -255,11 +255,6 @@ a.router-link-active {
     order: 2;
   }
 
-  .menu-icon > img {
-    height: 20px;
-    width: 20px;
-  }
-
   .menu-icon {
     margin-left: 10px;
     width: 70px;

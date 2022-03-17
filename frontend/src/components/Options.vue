@@ -9,19 +9,12 @@
       <b-row>
         <b-col>
           <div @click="closeMenu" class="x-button text-right">
-            <img src="../assets/navbar-icons/Close.png" alt="Close"/>{{ $t("combat.close") }}
+            <img src="../assets/navbar-icons/Close.png" alt="Close"/> {{ $t("combat.close") }}
           </div>
         </b-col>
       </b-row>
       <b-row>
         <b-col cols="12" lg="6" sm="12" class="ads">
-          <b-row class="ads-space">
-            <p>Ad Space</p>
-          </b-row>
-          <b-row class="ads-space">
-            <p>Ad Space</p>
-          </b-row>
-          <!-- <div class="ads"></div> -->
         </b-col>
         <b-col cols="12" lg="6" sm="12" order-md="1">
           <div class="menu-icons">
@@ -61,9 +54,14 @@
                 v-if="pvp"
                 :to="{ name: 'pvp' }"
                 exact
+                :class="supportsPvP ? '' : 'disabled-link'"
               >
                 <img src="../assets/navbar-icons/arena-icon.png" alt="Arena"/>
-                <p>{{ $t("viewLink.arena") }}</p>
+                <span>{{ $t("viewLink.arena") }} <hint
+                  v-if="!supportsPvP"
+                  class="hint"
+                  :text="$t('viewLink.functionalityNotSupportedTooltip')"
+                /></span>
               </router-link>
 
               <div v-else class="menu-icon disabled-hover">
@@ -93,20 +91,15 @@
                 v-if="quests"
                 :to="{ name: 'quests' }"
                 exact
+                :class="supportsQuests ? '' : 'disabled-link'"
               >
                 <img src="../assets/navbar-icons/quests-icon.png" alt="Quests"/>
-                <p>{{ $t("viewLink.quests") }}</p>
-                <hint
+                <span>{{ $t("viewLink.quests") }} <hint
                   v-if="!supportsQuests"
                   class="hint"
                   :text="$t('viewLink.functionalityNotSupportedTooltip')"
-                />
+                /></span>
               </router-link>
-
-              <div v-else class="menu-icon disabled-hover">
-                <img src="../assets/navbar-icons/quests-icon.png" alt="Quests"/>
-                <p>{{ $t("viewLink.quests") }}</p>
-              </div>
 
               <a
                 class="menu-icon"
@@ -194,14 +187,15 @@
                 class="menu-icon"
                 :to="{ name: 'merchandise' }"
                 exact
+                :class="supportsMerchandise ? '' : 'disabled-link'"
               >
                 <img src="../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
-                <p>{{ $t("viewLink.merchandise") }}</p>
-                <hint
+                <span>{{ $t("viewLink.merchandise") }} <hint
                   v-if="!supportsMerchandise"
                   class="hint"
                   :text="$t('viewLink.functionalityNotSupportedTooltip')"
-                />
+                /></span>
+
               </router-link>
             </div>
 
@@ -548,10 +542,15 @@ export default Vue.extend({
   width: 100%;
   top: 0;
   position: fixed;
-  z-index: 999999;
+  z-index: 10;
   background-color: rgb(0 0 0 / 85%);
   left: 0;
   padding: 20px;
+}
+
+.disabled-link {
+  cursor: not-allowed;
+  color: gray;
 }
 
 .x-button {
@@ -566,36 +565,33 @@ export default Vue.extend({
 
 .menu-icons {
   float: right;
-  width: 60%;
-  height: 100%;
-  padding-top: 15px;
-  display: inline;
   border-bottom: 1px solid #1a253b;
-  padding-bottom: 20px;
 }
 
 .menu-icon {
-  width: 95px;
-  height: 95px;
+  min-height: 7rem;
+  min-width: 7rem;
   background: #1a253b 0% 0% no-repeat padding-box;
   border: 1px solid #344362;
   border-radius: 5px;
-  opacity: 1;
   text-align: center;
-  margin-left: 20px;
-  padding-top: 20px;
-  color: white;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .menu-icon > img {
-  height: 30px;
+  height: 2rem;
 }
 
 .row-icons {
   display: flex;
   justify-content: left;
   align-items: center;
-  height: 120px;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
 }
 
 .horizontal-small {
@@ -629,5 +625,16 @@ export default Vue.extend({
 
 .disabled-hover {
   cursor: not-allowed;
+}
+
+@media (max-width: 576px) {
+  .menu-icon {
+    min-height: 4rem;
+    min-width: 4rem;
+  }
+
+  .menu-icon > img {
+    height: 1.5rem;
+  }
 }
 </style>
