@@ -138,6 +138,7 @@ a {
 
 .link-text {
   font-weight: bolder;
+  white-space: nowrap;
 }
 
 .disabled {
@@ -150,7 +151,7 @@ a {
 }
 li {
   display: inline-block;
-  width: 110px;
+  flex:1;
 }
 
 li:last-child {
@@ -187,9 +188,6 @@ li .nav-link .icon {
 }
 
 @media (max-width: 1366px) {
-  .top-nav-links > a {
-    font-size: 0.7rem;
-  }
   .play-to-earn > div {
     text-align: center;
     width: 176px;

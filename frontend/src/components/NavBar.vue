@@ -62,7 +62,7 @@ import SkillBalanceDisplay from './smart/SkillBalanceDisplay.vue';
 import ClaimRewardsBar from './smart/ClaimRewardsBar.vue';
 
 import Events from '../events';
-import { mapGetters, mapMutations } from 'vuex';
+import {mapGetters, mapMutations} from 'vuex';
 
 export default Vue.extend({
   components: {
@@ -116,6 +116,12 @@ a.router-link-active {
   color: #f2e3bc;
   text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #e1bb34, 0 0 10px #e1bb34;
   text-decoration: none !important;
+}
+
+.view-links {
+  width: 100%;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .main-nav > .navbar-brand {
@@ -281,19 +287,17 @@ a.router-link-active {
 
 .main-nav {
   padding: 0;
-  height: 7vh;
+  height: 6vh;
 }
 
 .x-button {
   width: 100%;
 }
 
-@media (min-width: 1024px) {
-  .new-game-ui-logo {
-    justify-content: center;
-    display: flex;
-    align-items: center;
-  }
+.new-game-ui-logo {
+  justify-content: center;
+  display: flex;
+  align-items: center;
 }
 
 .navbar {
