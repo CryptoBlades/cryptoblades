@@ -24,9 +24,14 @@
       <div v-if="opponentInformation.fullPower" class="icon">!</div>
     <b-popover v-if="opponentInformation.fullPower" ref="popover" target="duel-popover" triggers="hover blur" placement="bottom" custom-class="popoverWrapper">
       <span class="popoverTitle">{{$t('pvp.battleOdds')}}</span>
-      <div class="oddsWrapper">
+      <div v-if="winChance !== '> 50'" class="oddsWrapper">
         <p>{{$t('pvp.winChance')}}: {{ winChance }}%</p>
         <p>{{$t('pvp.rankToEarn')}}: {{ rankPlusBonus }}</p>
+        <p class="goodLuck">{{$t('pvp.goodLuck')}}</p>
+      </div>
+      <div v-else class="oddsWrapper">
+        <p>{{$t('pvp.noOdds')}}</p>
+        <p>{{$t('pvp.noBonus')}}</p>
         <p class="goodLuck">{{$t('pvp.goodLuck')}}</p>
       </div>
     </b-popover>
@@ -392,20 +397,20 @@ export default {
 
     getWinChance(weakerPower, strongerPower) {
       // Formula hard-copied from common.sol due to contract size limitations in PvPArena.sol
-      const strongerMinRoll = strongerPower * 0.7;
-      const strongerMaxRoll = strongerPower * 1.3;
+      const strongerMinRoll = Math.floor(strongerPower * 0.7);
+      const strongerMaxRoll = Math.floor(strongerPower * 1.3);
 
-      const weakerMinRoll = weakerPower * 0.7;
-      const weakerMaxRoll = weakerPower * 1.3;
+      const weakerMinRoll = Math.floor(weakerPower * 0.7);
+      const weakerMaxRoll = Math.floor(weakerPower * 1.3);
 
       const strongerRollSpread = strongerMaxRoll - strongerMinRoll;
       const weakerRollSpread = weakerMaxRoll - weakerMinRoll;
 
       const rollOverlap = weakerMaxRoll - strongerMinRoll;
 
-      const strongerRollChanceToOverlap = rollOverlap * 100 / strongerRollSpread;
+      const strongerRollChanceToOverlap = Math.floor(rollOverlap * 100 / strongerRollSpread);
 
-      const weakerRollChanceToOverlap = rollOverlap * 100 / weakerRollSpread;
+      const weakerRollChanceToOverlap = Math.floor(rollOverlap * 100 / weakerRollSpread);
 
       return strongerRollChanceToOverlap * weakerRollChanceToOverlap / 200;
     },
@@ -413,9 +418,9 @@ export default {
     getBonusRank(processedWinChance) {
       // Formula hard-copied from common.sol due to contract size limitations in PvPArena.sol
       if (processedWinChance <= 40) {
-        return (53**processedWinChance) / (50**processedWinChance);
+        return Math.floor((53**processedWinChance) / (50**processedWinChance));
       } else {
-        return ((3**((processedWinChance * 1.3) - 48)) / (2**((processedWinChance * 1.3) - 48))) + 7;
+        return Math.floor(((3**((Math.floor(processedWinChance * 1.3)) - 48)) / (2**((Math.floor(processedWinChance * 1.3)) - 48))) + 7);
       }
     },
 
