@@ -4,56 +4,63 @@
       <P2EButton mainText="Play-to-earn" route="play-to-earn" />
     </li> -->
 
-    <li class="character top-nav-links" >
+    <li class="character top-nav-links">
       <router-link v-if="!stakeOnly" :to="{ name: 'plaza' }" exact class="nav-link">
-        <div class="icon"> <img src="../assets/navbar-icons/new-plaza-icon.png" class="new-ui-links-icon"></div>
+        <div class="icon"><img src="../assets/navbar-icons/plaza-icon.png" class="ui-link-icon" alt="Plaza"></div>
         <div class="link-text">{{ $t("viewLink.character") }}</div>
       </router-link>
     </li>
 
-   <li v-if="!stakeOnly" class="top-nav-links" >
+    <li v-if="!stakeOnly" class="top-nav-links">
       <router-link :to="{ name: 'blacksmith' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/new-blacksmith-icon.png" class="new-ui-links-icon"></div>
+        <div class="icon"><img src="../assets/navbar-icons/blacksmith-icon.png" class="ui-link-icon" alt="Blacksmith">
+        </div>
         <div class="link-text">{{ $t("viewLink.blacksmith") }}</div>
       </router-link>
     </li>
 
-    <li v-if="!stakeOnly" class="top-nav-links" >
+    <li v-if="!stakeOnly" class="top-nav-links">
       <router-link :to="{ name: 'combat' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/new-combat-icon.png" class="new-ui-links-icon"></div>
+        <div class="icon"><img src="../assets/navbar-icons/combat-icon.png" class="ui-link-icon" alt="Combat"></div>
         <div class="link-text">{{ $t("viewLink.combat") }}</div>
       </router-link>
     </li>
 
     <li v-if="pvp" class="top-nav-links">
-      <router-link v-if="pvp" :to="{ name: 'pvp' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/new-arena-icon.png" class="new-ui-links-icon"></div>
-        <div class="link-text" :class="supportsPvP ? '' : 'disabled'">{{ $t("viewLink.pvp") }} <hint
-          v-if="!supportsPvP" class="hint"
-          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></div>
+      <router-link v-if="pvp" :to="{ name: 'pvp' }" exact class="nav-link" :class="supportsPvP ? '' : 'disabled-link'">
+        <div class="icon"><img src="../assets/navbar-icons/arena-icon.png" class="ui-link-icon" alt="Arena"></div>
+        <div class="link-text">{{ $t("viewLink.pvp") }}
+          <hint
+            v-if="!supportsPvP" class="hint"
+            :text="$t('viewLink.functionalityNotSupportedTooltip')"/>
+        </div>
       </router-link>
     </li>
 
-   <li v-if="!stakeOnly && raid" class="top-nav-links">
+    <li v-if="!stakeOnly && raid" class="top-nav-links">
       <router-link :to="{ name: 'raid' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/new-raid-icon.png" class="new-ui-links-icon"></div>
-        <div  class="link-text">{{ $t("viewLink.raid") }} </div>
+        <div class="icon"><img src="../assets/navbar-icons/raid-icon.png" class="ui-link-icon" alt="Raid"></div>
+        <div class="link-text">{{ $t("viewLink.raid") }}</div>
       </router-link>
     </li>
 
     <li v-if="quests" class="top-nav-links">
-      <router-link  :to="{ name: 'quests'}" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/new-quests-icon.png" class="new-ui-links-icon"></div>
-        <div class="link-text" :class="supportsQuests ? '' : 'disabled'">{{ $t("viewLink.quests") }} <hint
-          v-if="!supportsQuests" class="hint"
-          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></div>
+      <router-link :to="{ name: 'quests'}" exact class="nav-link" :class="supportsQuests ? '' : 'disabled-link'">
+        <div class="icon"><img src="../assets/navbar-icons/quests-icon.png" class="ui-link-icon" alt="Quests"></div>
+        <div class="link-text">{{ $t("viewLink.quests") }}
+          <hint
+            v-if="!supportsQuests" class="hint"
+            :text="$t('viewLink.functionalityNotSupportedTooltip')"/>
+        </div>
       </router-link>
     </li>
 
-    <li  v-if="!stakeOnly && market" class="top-nav-links">
-      <a href="https://bazaar.market/"  class="nav-link" target="_blank">
-        <div class="icon"> <img src="../assets/navbar-icons/new-bazaar-icon.png" class="new-ui-links-icon"> </div>
-        <div  class="link-text">{{ $t("viewLink.bazaar") }}</div>
+    <li v-if="!stakeOnly && market" class="top-nav-links">
+      <a href="https://bazaar.market/" class="nav-link" target="_blank">
+        <div class="icon"><img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar"></div>
+        <div class="link-text">{{ $t("viewLink.bazaar") }}
+          <b-icon-box-arrow-up-right scale="0.7"/>
+        </div>
       </a>
     </li>
 
@@ -126,14 +133,15 @@ a {
 .nav-top-links {
   list-style-type: none;
 }
+
 .nav-top-links > span {
   color: #BFA765;
   font-size: 1.1em;
   padding: 0 5px 0 5px;
 }
 
-.new-ui-links-icon {
-  height:25px;
+.ui-link-icon {
+  height: 2vh;
 }
 
 .link-text {
@@ -142,7 +150,7 @@ a {
   font-size: clamp(0.8rem, 1vw, 1rem);
 }
 
-.disabled {
+.disabled-link > div {
   cursor: not-allowed;
   color: gray !important;
 }
@@ -150,9 +158,10 @@ a {
 .navbar-nav {
   display: flex;
 }
+
 li {
   display: inline-block;
-  flex:1;
+  flex: 1;
 }
 
 li:last-child {
@@ -175,13 +184,14 @@ li.active a,
 }
 
 li .nav-link .icon {
-  margin-bottom: 5px;
+  padding-bottom: 0.5rem;
 }
 
 .play-to-earn {
   display: flex;
   align-items: center;
 }
+
 .play-to-earn a {
   border: 1px solid #EDCD90;
   display: block;
