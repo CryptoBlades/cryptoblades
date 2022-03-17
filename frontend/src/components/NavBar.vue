@@ -22,18 +22,18 @@
         <view-links class="view-links"></view-links>
       </b-collapse>
 
-      <skill-balance-display class="ml-auto d-none d-sm-flex none-mobile" />
-      <options class="d-none d-sm-flex none-mobile" />
+      <skill-balance-display class="ml-auto d-none d-sm-flex none-mobile"/>
+      <options class="d-none d-sm-flex none-mobile"/>
 
       <!-- Render only on mobile view -->
       <div class="d-flex d-sm-none right-details">
-        <skill-balance-display class="skill-display-mobile" />
-        <options class="options-display-mobile" />
+        <skill-balance-display class="skill-display-mobile"/>
+        <options class="options-display-mobile"/>
       </div>
     </b-navbar>
-    <claim-rewards-bar v-if="canShowRewardsBar" />
+    <claim-rewards-bar v-if="canShowRewardsBar"/>
     <div class="container_row">
-      <img src="../assets/divider4.png" class="expander-divider" />
+      <img src="../assets/divider4.png" class="expander-divider"/>
       <b-button
         class="expander-button"
         @click="toggleCharacterView"
@@ -128,6 +128,7 @@ a.router-link-active {
   align-self: center;
   padding-bottom: 0;
 }
+
 .dropdown-menu {
   background: rgb(20, 20, 20);
   background: linear-gradient(
@@ -141,6 +142,7 @@ a.router-link-active {
 .dropdown-menu li a:hover {
   background: transparent;
 }
+
 @media (max-width: 1024px) {
   .navbar-expand-sm {
     text-align: center;
@@ -149,29 +151,27 @@ a.router-link-active {
 }
 
 @media (max-width: 576px) {
-  .main-nav {
-    align-items: normal !important; /** force only for mobile to manually set alignments **/
-    flex-direction: column;
-  }
-
   .main-nav > .navbar-brand {
     align-self: center;
   }
+
   .main-nav > .navbar-nav {
     flex-direction: row;
     justify-content: space-evenly;
   }
+
   .skill-display-mobile {
     flex: 5;
     display: flex;
     align-items: center;
     height: 90px;
   }
+
   .skill-display-mobile > .balance-container {
     font-size: 0.8em;
   }
 
-  .balance-container > p{
+  .balance-container > p {
     font-size: 11px;
   }
 
@@ -183,8 +183,8 @@ a.router-link-active {
     padding-right: 15px;
   }
 
-  .options-display-mobile > img{
-    width: 30px ;
+  .options-display-mobile > img {
+    width: 30px;
   }
 
   .navbar-expand-sm {
@@ -192,11 +192,11 @@ a.router-link-active {
     margin: 0 auto;
   }
 
-  .deposit-withdraw > span{
+  .deposit-withdraw > span {
     font-size: 12px;
   }
 
-  .deposit-withdraw{
+  .deposit-withdraw {
     color: rgba(255, 255, 255, 0.364);
   }
 
@@ -209,17 +209,21 @@ a.router-link-active {
   .game-ui-logo > img {
     width: 90%;
   }
+
   .nav-logo {
     width: 100%;
     display: block;
-    flex: 1 ;
+    flex: 1;
+    border: 0;
+    margin: 0;
   }
+
   .right-details {
     width: 100%;
     flex: 1;
   }
 
-  .skill-tooltip{
+  .skill-tooltip {
     width: fit-content;
   }
 
@@ -303,9 +307,11 @@ a.router-link-active {
   background: linear-gradient(45deg, #141414, #242720);
   border-bottom: 2px solid #404857;
 }
+
 .main-nav > .view-links {
   flex: 2.3;
 }
+
 .nav-logo {
   flex: 1;
   height: 100%;
@@ -349,6 +355,15 @@ a.router-link-active {
 .expander-button {
   grid-column: 1;
   grid-row: 1;
+}
+@media (max-width: 576px) {
+  .main-nav {
+    height: 9vh;
+  }
+  .nav-logo {
+    border: 0;
+    margin: 0;
+  }
 }
 </style>
 
