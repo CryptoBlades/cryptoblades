@@ -139,13 +139,14 @@ a {
 }
 
 .ui-link-icon {
-  height: 2vh;
+  height: 1.5rem;
 }
 
 .link-text {
   font-weight: bolder;
   white-space: nowrap;
   font-size: clamp(0.8rem, 1vw, 1rem);
+  color: #dfcc9a;
 }
 
 .disabled-link > div {

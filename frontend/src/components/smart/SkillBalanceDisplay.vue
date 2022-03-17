@@ -181,15 +181,15 @@ export default Vue.extend({
   align-items: center;
   border-left: 1px solid #424A59;
   border-right: 1px solid #424A59;
-  padding: 0 1rem;
+  padding: 0.5rem;
   flex-direction: column;
   height: 100%;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .skill-tooltip > img{
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
 }
 
 .transaction-btn{
@@ -224,8 +224,7 @@ export default Vue.extend({
   color : #BFA765;
 }
 .add-button {
-  width: 45px;
-  height: 100%;
+  height: 2rem;
   position: relative;
   top: -15px;
   right: -15px;

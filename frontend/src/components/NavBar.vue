@@ -1,7 +1,7 @@
 <template>
   <div class="main-nav-div">
     <b-navbar class="main-nav" toggleable="sm">
-      <b-navbar-brand href="#" class="nav-logo">
+      <div class="nav-logo">
         <router-link :to="{ name: 'plaza' }" exact class="game-ui-logo">
           <img
             src="../assets/cb-logo.png"
@@ -9,7 +9,7 @@
             alt="Logo"
           />
         </router-link>
-      </b-navbar-brand>
+      </div>
 
       <b-navbar-toggle target="navbar-toggle-collapse" class="none-mobile">
         <template #default="{ expanded }">
@@ -216,6 +216,7 @@ a.router-link-active {
     flex: 1;
     border: 0;
     margin: 0;
+    padding:0;
   }
 
   .right-details {
@@ -264,12 +265,12 @@ a.router-link-active {
 
 <style scoped>
 .logo {
-  max-width: 90%;
+  max-width: 85%;
 }
 
 .main-nav {
   padding: 0;
-  height: 6vh;
+  height: 5rem;
 }
 
 .x-button {

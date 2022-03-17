@@ -25,7 +25,7 @@
               exact
             >
               <img src="../assets/navbar-icons/plaza-icon.png" alt="Plaza"/>
-              <p>{{ $t("viewLink.character") }}</p>
+              <span>{{ $t("viewLink.character") }}</span>
             </router-link>
 
             <router-link
@@ -35,7 +35,7 @@
               exact
             >
               <img src="../assets/navbar-icons/blacksmith-icon.png" alt="Blacksmith"/>
-              <p>{{ $t("viewLink.blacksmith") }}</p>
+              <span>{{ $t("viewLink.blacksmith") }}</span>
             </router-link>
 
             <router-link
@@ -45,7 +45,7 @@
               exact
             >
               <img src="../assets/navbar-icons/combat-icon.png" alt="Combat"/>
-              <p>{{ $t("viewLink.combat") }}</p>
+              <span>{{ $t("viewLink.combat") }}</span>
             </router-link>
 
             <router-link
@@ -65,7 +65,7 @@
 
             <div v-else class="menu-icon disabled-hover">
               <img src="../assets/navbar-icons/arena-icon.png" alt="Arena"/>
-              <p>{{ $t("viewLink.arena") }}</p>
+              <span>{{ $t("viewLink.arena") }}</span>
             </div>
 
             <router-link
@@ -75,12 +75,12 @@
               exact
             >
               <img src="../assets/navbar-icons/raid-icon.png" alt="Raid"/>
-              <p>{{ $t("viewLink.raid") }}</p>
+              <span>{{ $t("viewLink.raid") }}</span>
             </router-link>
 
             <div v-if="!raid" class="menu-icon disabled-hover">
               <img src="../assets/navbar-icons/raid-icon.png" alt="Raid"/>
-              <p>{{ $t("viewLink.raid") }}</p>
+              <span>{{ $t("viewLink.raid") }}</span>
             </div>
 
             <router-link
@@ -105,12 +105,12 @@
               target="_blank"
             >
               <img src="../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
-              <p>{{ $t("viewLink.bazaar") }}</p>
+              <span>{{ $t("viewLink.bazaar") }}</span>
             </a>
 
             <div v-if="!market" class="menu-icon disabled-hover">
               <img src="../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
-              <p>{{ $t("viewLink.bazaar") }}</p>
+              <span>{{ $t("viewLink.bazaar") }}</span>
             </div>
 
             <router-link
@@ -119,12 +119,12 @@
               exact
             >
               <img src="../assets/navbar-icons/stake-icon.png" alt="Stake"/>
-              <p>{{ $t("viewLink.stake") }}</p>
+              <span>{{ $t("viewLink.stake") }}</span>
             </router-link>
 
             <router-link class="menu-icon" :to="{ name: 'treasury' }" exact>
               <img src="../assets/navbar-icons/treasury-icon.png" alt="Treasury"/>
-              <p>{{ $t("viewLink.treasury") }}</p>
+              <span>{{ $t("viewLink.treasury") }}</span>
             </router-link>
 
             <router-link
@@ -133,7 +133,7 @@
               exact
             >
               <img src="../assets/navbar-icons/leaderboard-icon.png" alt="Leaderboard"/>
-              <p>{{ $t("viewLink.leaderboard") }}</p>
+              <span>{{ $t("viewLink.leaderboard") }}</span>
             </router-link>
 
             <router-link
@@ -143,12 +143,12 @@
               exact
             >
               <img src="../assets/navbar-icons/bridge-icon.png" alt="Bridge"/>
-              <p>{{ $t("viewLink.nftbridge") }}</p>
+              <span>{{ $t("viewLink.nftbridge") }}</span>
             </router-link>
 
             <div v-else class="menu-icon disabled-hover">
               <img src="../assets/navbar-icons/bridge-icon.png" alt="Bridge"/>
-              <p>{{ $t("viewLink.nftbridge") }}</p>
+              <span>{{ $t("viewLink.nftbridge") }}</span>
             </div>
 
             <a
@@ -157,12 +157,12 @@
               target="_blank"
             >
               <img src="../assets/navbar-icons/wiki-icon.png" alt="Wiki"/>
-              <p>{{ $t("viewLink.wiki") }}</p>
+              <span>{{ $t("viewLink.wiki") }}</span>
             </a>
 
             <router-link class="menu-icon" :to="{ name: 'options' }" exact>
               <img src="../assets/navbar-icons/gear-icon.png" alt="Options"/>
-              <p>{{ $t("viewLink.settings") }}</p>
+              <span>{{ $t("viewLink.settings") }}</span>
             </router-link>
 
             <router-link
@@ -172,7 +172,7 @@
               exact
             >
               <img src="../assets/navbar-icons/gear-icon.png" alt="Admin"/>
-              <p>{{ $t("viewLink.admin") }}</p>
+              <span>{{ $t("viewLink.admin") }}</span>
             </router-link>
 
             <router-link
@@ -505,7 +505,7 @@ export default Vue.extend({
 }
 
 .options {
-  padding: 25px;
+  padding: 0 25px;
 }
 
 .ads-space {
@@ -522,7 +522,7 @@ export default Vue.extend({
 }
 
 .burger-icon {
-  width: 35px;
+  height: 1.5rem;
 }
 
 .burger-icon:hover {
@@ -562,7 +562,7 @@ export default Vue.extend({
   justify-content: left;
   align-items: center;
   gap: 0.5rem;
-  margin: 0.5rem 0;
+  padding: 0.5rem 0;
   flex-wrap: wrap;
 }
 
