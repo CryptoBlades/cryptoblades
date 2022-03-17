@@ -152,7 +152,7 @@ a {
 
 .disabled-link > div {
   cursor: not-allowed;
-  color: gray !important;
+  color: gray;
 }
 
 .navbar-nav {

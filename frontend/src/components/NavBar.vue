@@ -126,7 +126,7 @@ a.router-link-active {
 
 .main-nav > .navbar-brand {
   align-self: center;
-  padding-bottom: 0px !important;
+  padding-bottom: 0;
 }
 .dropdown-menu {
   background: rgb(20, 20, 20);
@@ -135,11 +135,11 @@ a.router-link-active {
     rgba(20, 20, 20, 1) 0%,
     rgba(36, 39, 32, 1) 100%
   );
-  border: none !important;
+  border: none;
 }
 
 .dropdown-menu li a:hover {
-  background: transparent !important;
+  background: transparent;
 }
 @media (max-width: 1024px) {
   .navbar-expand-sm {
@@ -165,7 +165,7 @@ a.router-link-active {
     flex: 5;
     display: flex;
     align-items: center;
-    height: 90px !important;
+    height: 90px;
   }
   .skill-display-mobile > .balance-container {
     font-size: 0.8em;
@@ -179,12 +179,12 @@ a.router-link-active {
     display: flex;
     flex: 1;
     align-items: center;
-    padding-left: 15px !important;
-    padding-right: 15px !important;
+    padding-left: 15px;
+    padding-right: 15px;
   }
 
   .options-display-mobile > img{
-    width: 30px!important ;
+    width: 30px ;
   }
 
   .navbar-expand-sm {
@@ -210,27 +210,26 @@ a.router-link-active {
     width: 90%;
   }
   .nav-logo {
-    /* margin-right: 0 !important; */
     width: 100%;
     display: block;
-    flex: 1  !important;
+    flex: 1 ;
   }
   .right-details {
     width: 100%;
-    flex: 1 !important;
+    flex: 1;
   }
 
   .skill-tooltip{
-    width: fit-content  !important;
+    width: fit-content;
   }
 
   /* hide when in mobile */
   .none-mobile {
-    display: none !important;
+    display: none;
   }
 
   .menu-icons {
-    width: 100% !important;
+    width: 100%;
   }
 
   .row-icons {
@@ -238,14 +237,14 @@ a.router-link-active {
   }
 
   .ads {
-    order: 2 !important;
+    order: 2;
   }
 
   .ads-space {
-    width: 100% !important;
-    height: 100% !important;
-    margin-left: 0px !important;
-    margin-right: 0px !important;
+    width: 100%;
+    height: 100%;
+    margin-left: 0;
+    margin-right: 0;
   }
 
   .ads {
@@ -258,23 +257,23 @@ a.router-link-active {
   }
 
   .menu-icon {
-    margin-left: 10px !important;
-    width: 70px !important;
-    height: 70px !important;
+    margin-left: 10px;
+    width: 70px;
+    height: 70px;
     font-size: 13px;
-    padding: 0px !important;
+    padding: 0px;
     display: flex;
     flex-direction: column;
-    justify-content: center !important;
-    align-items: center !important;
+    justify-content: center;
+    align-items: center;
   }
 
   .menu-icon > p {
-    margin-bottom: 0px !important;
+    margin-bottom: 0;
   }
 
   .row-icons {
-    height: fit-content !important;
+    height: fit-content;
     margin-bottom: 15px;
   }
 }
@@ -331,7 +330,7 @@ a.router-link-active {
     rgba(20, 20, 20, 1) 0%,
     rgba(36, 39, 32, 1) 100%
   );
-  border: 2px solid #312e21 !important;
+  border: 2px solid #312e21;
   border-radius: 0.1em;
   justify-items: center;
 }
