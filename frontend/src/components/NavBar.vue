@@ -255,22 +255,6 @@ a.router-link-active {
     order: 2;
   }
 
-  .menu-icon {
-    margin-left: 10px;
-    width: 70px;
-    height: 70px;
-    font-size: 13px;
-    padding: 0px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .menu-icon > p {
-    margin-bottom: 0;
-  }
-
   .row-icons {
     height: fit-content;
     margin-bottom: 15px;
