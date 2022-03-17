@@ -2,7 +2,7 @@
   <div class="main-nav-div">
     <b-navbar class="main-nav" toggleable="sm">
       <b-navbar-brand href="#" class="nav-logo">
-        <router-link :to="{ name: 'plaza' }" exact class="new-game-ui-logo">
+        <router-link :to="{ name: 'plaza' }" exact class="game-ui-logo">
           <img
             src="../assets/cb-logo.png"
             class="logo d-inline-block align-top"
@@ -206,7 +206,7 @@ a.router-link-active {
     flex-direction: row;
   }
 
-  .new-game-ui-logo > img {
+  .game-ui-logo > img {
     width: 90%;
   }
   .nav-logo {
@@ -294,7 +294,7 @@ a.router-link-active {
   width: 100%;
 }
 
-.new-game-ui-logo {
+.game-ui-logo {
   justify-content: center;
   display: flex;
   align-items: center;
