@@ -64,13 +64,19 @@
       </a>
     </li>
 
+    <li v-if="hasAdminAccess" class="top-nav-links">
+      <router-link :to="{ name: 'admin' }" exact class="nav-link">
+        <div class="icon"><img src="../assets/navbar-icons/gear-icon.png" class="ui-link-icon" alt="Admin"></div>
+        <div class="link-text">{{ $t("viewLink.admin") }}</div>
+      </router-link>
+    </li>
 
   </b-navbar-nav>
 </template>
 
 <script>
 import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
-import {mapActions, mapGetters, mapState} from 'vuex';
+import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
 import Hint from '@/components/Hint';
 
@@ -85,13 +91,18 @@ export default Vue.extend({
       pvp,
       quests,
       merchandise,
-      hasAdminAccess: false,
     };
   },
 
   computed: {
     ...mapState(['defaultAccount']),
-    ...mapGetters(['getCurrentChainSupportsMerchandise', 'getCurrentChainSupportsPvP', 'getCurrentChainSupportsQuests']),
+    ...mapGetters([
+      'getCurrentChainSupportsMerchandise',
+      'getCurrentChainSupportsPvP',
+      'getCurrentChainSupportsQuests',
+      'getHasAdminAccess',
+      'getHasMinterAccess',
+    ]),
     supportsMerchandise() {
       return this.getCurrentChainSupportsMerchandise;
     },
@@ -101,27 +112,14 @@ export default Vue.extend({
     supportsQuests() {
       return this.getCurrentChainSupportsQuests;
     },
-  },
-
-  methods: {
-    ...mapActions(['userHasAnyAdminAccess', 'userHasAnyMinterAccess']),
-
-    async fetchData() {
-      this.hasAdminAccess = await this.userHasAnyAdminAccess() || await this.userHasAnyMinterAccess();
+    hasAdminAccess() {
+      return this.getHasAdminAccess || this.getHasMinterAccess;
     },
   },
 
   components: {
     Hint,
   },
-
-  watch: {
-    async defaultAccount(newVal) {
-      if (newVal) {
-        await this.fetchData();
-      }
-    },
-  }
 });
 </script>
 

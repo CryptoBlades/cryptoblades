@@ -325,7 +325,6 @@ interface Data {
   hideWalletWarning: boolean;
   showSkillInUsd: boolean;
   isMenuOpen: boolean;
-  hasAdminAccess: boolean;
 }
 
 interface StoreMappedGetters {
@@ -366,7 +365,6 @@ export default Vue.extend({
       pvp,
       quests,
       merchandise,
-      hasAdminAccess: false,
     } as Data;
   },
 
@@ -375,13 +373,16 @@ export default Vue.extend({
       this.isMenuOpen = false;
     }
   },
-  mounted() {
-    this.fetchData();
-  },
   computed: {
     ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
     ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
-    ...mapGetters(['getCurrentChainSupportsMerchandise', 'getCurrentChainSupportsPvP', 'getCurrentChainSupportsQuests']),
+    ...mapGetters([
+      'getCurrentChainSupportsMerchandise',
+      'getCurrentChainSupportsPvP',
+      'getCurrentChainSupportsQuests',
+      'getHasAdminAccess',
+      'getHasMinterAccess',
+    ]),
     supportsMerchandise(): boolean {
       return this.getCurrentChainSupportsMerchandise;
     },
@@ -390,6 +391,9 @@ export default Vue.extend({
     },
     supportsQuests(): boolean {
       return this.getCurrentChainSupportsQuests;
+    },
+    hasAdminAccess(): boolean {
+      return this.getHasAdminAccess || this.getHasMinterAccess;
     },
     formattedSkillReward(): string {
       const skillRewards = fromWeiEther(this.skillRewards);
@@ -433,7 +437,6 @@ export default Vue.extend({
 
   methods: {
     ...(mapActions(['claimTokenRewards']) as StoreMappedActions),
-    ...mapActions(['userHasAnyAdminAccess', 'userHasAnyMinterAccess']),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
       if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
@@ -456,9 +459,6 @@ export default Vue.extend({
       else localStorage.setItem('hideRewards', 'false');
 
       Events.$emit('setting:hideRewards', {value: this.hideRewards});
-    },
-    async fetchData() {
-      this.hasAdminAccess = await this.userHasAnyAdminAccess() || await this.userHasAnyMinterAccess();
     },
     async onClaimTokens() {
       if (this.canClaimTokens) {
