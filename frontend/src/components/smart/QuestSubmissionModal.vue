@@ -12,9 +12,10 @@
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
                    showGivenWeaponIds @chooseweapon="addBurnToken"
-                   :starsOptions="[quest.requirementRarity + 1]" :canFavorite="false"/>
+                   :starsOptions="getRequiredStarsAndHigher" :canFavorite="false"
+                   :chosenStarsOption="getRequiredStars"/>
       <weapon-grid :weaponIds="tokensToBurn" showGivenWeaponIds @chooseweapon="removeBurnToken"
-                   :starsOptions="[quest.requirementRarity + 1]" :canFavorite="false"/>
+                   :canFavorite="false" :chosenStarsOption="''"/>
     </div>
     <div v-else-if="quest.requirementType === RequirementType.DUST
       || quest.requirementType === RequirementType.STAMINA
@@ -44,11 +45,11 @@
     </div>
     <div v-else class="d-flex">
       <nft-list v-model="selectedToken" showGivenNftIdTypes :nftIdTypes="ownedNftIdTypes"
-                @choosenft="addNftIdType" :starsOptions="[quest.requirementRarity + 1]"
-                :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"/>
+                @choosenft="addNftIdType" :starsOptions="getRequiredStarsAndHigher"
+                :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"
+                :chosenStarsOption="getRequiredStars"/>
       <nft-list showGivenNftIdTypes :nftIdTypes="nftIdTypesToBurn" @choosenft="removeNftIdType"
-                :starsOptions="[quest.requirementRarity + 1]"
-                :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"/>
+                :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]" :chosenStarsOption="''"/>
     </div>
   </b-modal>
 </template>
@@ -149,6 +150,15 @@ export default Vue.extend({
       } else if (this.quest.requirementType === RequirementType.SOUL) {
         return this.soulBalance;
       } else return 0;
+    },
+
+    getRequiredStars(): number {
+      if(!this.quest?.requirementRarity) return 0;
+      return this.quest.requirementRarity + 1;
+    },
+
+    getRequiredStarsAndHigher(): number[] {
+      return Array.from(Array(5 - this.getRequiredStars + 1).keys()).map(x => x + this.getRequiredStars);
     },
   },
 

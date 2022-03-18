@@ -359,28 +359,28 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(weapons.ownerOf(tokenID) == msg.sender, "Not weapon owner");
-                require(weapons.getStars(tokenID) == quest.requirementRarity, "Wrong weapon rarity");
+                require(weapons.getStars(tokenID) >= quest.requirementRarity, "Wrong weapon rarity");
             }
             weapons.burnWithoutDust(tokenIds);
         } else if (quest.requirementType == ItemType.JUNK) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(junk.ownerOf(tokenID) == msg.sender, "Not junk owner");
-                require(junk.tokenStars(tokenID) == quest.requirementRarity, "Wrong junk rarity");
+                require(junk.tokenStars(tokenID) >= quest.requirementRarity, "Wrong junk rarity");
             }
             junk.burn(tokenIds);
         } else if (quest.requirementType == ItemType.TRINKET) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(trinket.ownerOf(tokenID) == msg.sender, "Not trinket owner");
-                require(trinket.tokenStars(tokenID) == quest.requirementRarity, "Wrong trinket rarity");
+                require(trinket.tokenStars(tokenID) >= quest.requirementRarity, "Wrong trinket rarity");
             }
             trinket.burn(tokenIds);
         } else if (quest.requirementType == ItemType.SHIELD) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(shields.ownerOf(tokenID) == msg.sender, "Not shield owner");
-                require(shields.getStars(tokenID) == quest.requirementRarity, "Wrong shield rarity");
+                require(shields.getStars(tokenID) >= quest.requirementRarity, "Wrong shield rarity");
             }
             shields.burn(tokenIds);
         } else if (quest.requirementType == ItemType.EXTERNAL) {
