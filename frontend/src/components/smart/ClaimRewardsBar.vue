@@ -11,7 +11,7 @@
         class="ml-3 bar"
         @click="claimSkill(ClaimStage.Summary)">
         <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
-          <strong>SKILL</strong>{{ formattedSkillReward }}
+          <strong>SKILL </strong>{{ formattedSkillReward }}
         </span>
       </b-nav-item>
 
@@ -19,7 +19,7 @@
         class="ml-3 bar"
         :disabled="!canClaimXp"
         @click="onClaimXp">
-          <div class="gtag-link-others" v-html="`<strong>XP</strong>${formattedXpRewardsBar}`"></div>
+          <div class="gtag-link-others" v-html="`<strong>XP </strong>${formattedXpRewardsBar}`"></div>
       </b-nav-item>
     </b-navbar>
 
@@ -35,8 +35,7 @@
         <b-dropdown-item
           @click="claimSkill(ClaimStage.Summary)" class="rewards-info gtag-link-others" tagname="claim_skill"
            v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
-            SKILL
-            <div class="pl-3">{{ formattedSkillReward }}</div>
+            SKILL<div class="pl-3">{{ formattedSkillReward }}</div>
         </b-dropdown-item>
 
         <b-dropdown-item
