@@ -2,6 +2,7 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./cryptoblades.sol";
 import "./characters.sol";
 import "./weapons.sol";
@@ -18,6 +19,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
+    using SafeMath for uint256;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     uint256 internal constant SEED_RANDOM_QUEST = uint(keccak256("SEED_RANDOM_QUEST"));
@@ -268,8 +270,14 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         assignNewQuest(characterID);
     }
 
-    function generateRewardQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) public {
-        safeRandoms.requestSingleSeed(address(this), RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID));
+    function generateRewardQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) assertOnQuest(characterID, true) public {
+        uint256[] memory questData = getCharacterQuestData(characterID);
+        require(questData[0] >= quests[characterQuest[characterID]].requirementAmount);
+        _generateRewardQuestSeed(characterID, false);
+    }
+
+    function _generateRewardQuestSeed(uint256 characterID, bool forced) internal {
+        safeRandoms.requestSingleSeed(address(this), RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID), forced);
     }
 
     function rewardQuest(uint256 questID, uint256 characterID) private returns (uint256[] memory) {
@@ -412,11 +420,12 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function incrementQuestProgress(uint256 characterID, uint256 questID, uint256 progress) private {
-        uint currentProgress = characters.getNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS);
-        characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS, currentProgress + progress);
+        require(progress > 0);
+        uint totalProgress = characters.getNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS) + progress;
+        characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS, totalProgress);
         emit QuestProgressed(questID, characterID);
-        if (quests[characterQuest[characterID]].requirementAmount <= currentProgress + progress) {
-            generateRewardQuestSeed(characterID);
+        if (quests[characterQuest[characterID]].requirementAmount.sub(totalProgress) == 0) {
+            _generateRewardQuestSeed(characterID, true);
         }
     }
 
