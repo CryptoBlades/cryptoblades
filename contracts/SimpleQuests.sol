@@ -421,10 +421,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function incrementQuestProgress(uint256 characterID, uint256 questID, uint256 progress) private {
         require(progress > 0);
-        uint currentProgress = characters.getNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS);
-        characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS, currentProgress + progress);
+        uint totalProgress = characters.getNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS) + progress;
+        characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS, totalProgress);
         emit QuestProgressed(questID, characterID);
-        if (quests[characterQuest[characterID]].requirementAmount.sub(progress) == currentProgress) {
+        if (quests[characterQuest[characterID]].requirementAmount.sub(totalProgress) == 0) {
             _generateRewardQuestSeed(characterID, true);
         }
     }
