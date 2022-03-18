@@ -18,7 +18,6 @@ interface Tab {
 }
 
 interface Data {
-  hasAccessToAnyTab: boolean;
   tabs: Tab[];
 }
 
@@ -28,6 +27,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters(['contracts', 'getHasAdminAccess', 'getHasMinterAccess']),
     ...mapState(['defaultAccount']),
+
     hasAccessToAnyTab(): boolean {
       return this.getHasAdminAccess || this.getHasMinterAccess;
     },
@@ -35,7 +35,6 @@ export default Vue.extend({
 
   data() {
     return {
-      hasAccessToAnyTab: false,
       tabs: [] as Tab[],
     } as Data;
   },
