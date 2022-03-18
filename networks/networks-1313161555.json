@@ -2121,6 +2121,88 @@
     "address": "0x38BFf8C60444B56D5cf0E08819E2518DB91B45c5",
     "transactionHash": "0x5aec35f32e04020d68082c0e39294733282ef904ae7d2948d682dbe15841c2f2|{\"gasBurned\":16298233376780,\"tx\":\"E5bctyDpMnTaAcyC1MQrgpqudeujf7cmBXyAQUpMFeWb\"}"
   },
+  "build/contracts/CharactersBridgeProxyContract.json": {
+    "events": {
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0x0eb78Cb95B725f067944C6F54d8550D114DD2f1b",
+    "transactionHash": "0x08305950a7e008e8866a7c0e1dbafe80602b4ae946d62bf8a58754188f59744c|{\"gasBurned\":11740505798076,\"tx\":\"DuDkaqrcz7hMND9vBCcH2xAUEQfMDQhB4wUzcG21H7rY\"}"
+  },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
       "0xa1b80121614573ea442456373a4eb428b5440ea927e3359f748cbc7a530c9909": {
@@ -3420,7 +3502,7 @@
     "events": {},
     "links": {},
     "address": "0xc7B23A5d3D704183A7D9CfdFCFC30F07db9DC4F1",
-    "transactionHash": "0x63d8bce9be5905b6ec8173ced5c949016dceeccd6a7a57ea8b57600a204ebebf"
+    "transactionHash": "0x812b932fef092c154ccf3fd24c165c8397280397cd27a4ef80a641dddaebfafc|{\"gasBurned\":16477536382226,\"tx\":\"EF5kCvMrYZopfxoonDVwpjdteM8CH6j4FUEeiqwSsp4d\"}"
   },
   "build/contracts/PartnerGiveaways.json": {
     "events": {},
@@ -4104,7 +4186,89 @@
     },
     "links": {},
     "address": "0xe057c3E1b2c70eeD485b4966aca8C507D4AB2E7F",
-    "transactionHash": "0x795f9806616790ea59ce949a3e0935c286e441ec04e5a882cf10c1d1ecc50b8e"
+    "transactionHash": "0x2d8dcfe9a0b13a208e729b06eef99f96fc1b8a0bf9f36b73ed3081ab34981fd5|{\"gasBurned\":11711226490620,\"tx\":\"52CpcxjN97XFfwiPa9hhSfhZ3pxduKCy1ExYVcPhRxkX\"}"
+  },
+  "build/contracts/ShieldBridgeProxyContract.json": {
+    "events": {
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0xC271146DDF449Edae01f241688ed2B9B82d185Da",
+    "transactionHash": "0x5f47e1d3be58f66f26ebc1fa1fe6144ac90800d3e658885941019a28a9de9fce|{\"gasBurned\":11111310599088,\"tx\":\"HdfAEEAHbk4ooRXmqciMAVkEAFieCEfm5QzqZAJEbGEY\"}"
   },
   "build/contracts/Shields.json": {
     "events": {
@@ -4305,7 +4469,7 @@
     "events": {},
     "links": {},
     "address": "0x6959FDCb55040511fE606afe5f98aa1bFaEd41df",
-    "transactionHash": "0x79e7df2f7d1ae16772f656e35a9d6a6fb94bfae4d69a69fc1ef5dc73f7ebdf94|{\"gasBurned\":16585470836426,\"tx\":\"EEMgH64Fz5s1jkksFyNmnLU5s3azjf5McqwoXBic2xe2\"}"
+    "transactionHash": "0x60270d9eb72583fa87e15ee102c646d47ab4ee3cdc26a65e3daefe6bb6079d86|{\"gasBurned\":16556696960602,\"tx\":\"22p6jK6wajckSSjA2U1Z29r5h95mvWjwK4wVxgp5Yx1P\"}"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},
@@ -4539,6 +4703,88 @@
     "links": {},
     "address": "0xbfEda50595A2bFCaB29048B227832ec63d446920",
     "transactionHash": "0xf48f750d24f78c08d1728e00de69b4c4f1651eccd06537969b78d07d932040f6"
+  },
+  "build/contracts/WeaponBridgeProxyContract.json": {
+    "events": {
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0x1C7195cc9b4c9981602F6Bc3e41cBd6E36B497C0",
+    "transactionHash": "0xd83e87962c1bfff70a42f9a6d6fdd1b3f7914d2994d888b87315afcc24397c6c|{\"gasBurned\":11341837029144,\"tx\":\"9dJNJZjthZ19Kz3vx2FTBmBqQ8sBX1hAsbSprYh4msam\"}"
   },
   "build/contracts/WeaponCosmetics.json": {
     "events": {

@@ -531,6 +531,9 @@ export default Vue.extend({
         return ['', 'Shield', 'Trinket', 'Junk', 'Keybox', 'Land'];
       },
     },
+    chosenStarsOption: {
+      type: [String, Number],
+    },
   },
 
   data() {
@@ -1164,6 +1167,8 @@ export default Vue.extend({
       this.starFilter = sessionStorage.getItem('market-nft-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('market-nft-elementfilter') || '';
       this.priceSort = sessionStorage.getItem('market-nft-price-order') || '';
+    } else if (this.chosenStarsOption !== undefined) {
+      this.starFilter = this.chosenStarsOption;
     } else {
       this.typeFilter = sessionStorage.getItem('nft-typefilter') || '';
       this.starFilter = sessionStorage.getItem('nft-starfilter') || '';
