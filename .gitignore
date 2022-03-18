@@ -9,6 +9,7 @@ node_modules/
 report*.json
 .vscode/launch.json
 .vs
+.vscode
 public/abi
 cache
 artifacts

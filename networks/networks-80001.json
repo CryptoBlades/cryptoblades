@@ -5280,7 +5280,7 @@
     },
     "links": {},
     "address": "0x19EDb339A8de6644349dD693871eF973Ea65547F",
-    "transactionHash": "0xa58a5cb5f59b15e7523a4e768190ecdd9afc3ac2257c31c134077e01136e71c2"
+    "transactionHash": "0xfb036d8fe69a523188217ce33da2495488be1bba9e4ce42cff079fab0ab787ba"
   },
   "build/contracts/ShieldBridgeProxyContract.json": {
     "events": {
@@ -5797,7 +5797,7 @@
     },
     "links": {},
     "address": "0x7907c3345a645A494d5fF4924CDc89e5d892c800",
-    "transactionHash": "0x319ff667ea439f8b8f87945ec76fa6e464652f968ac09e8d3281c67e97122e60"
+    "transactionHash": "0xf2e4411e6c51d836752d1ae66e146b3f1a14d0cef781a1072a2e5c86ffc9a6c2"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {

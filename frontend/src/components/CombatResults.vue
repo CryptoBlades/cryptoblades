@@ -129,7 +129,8 @@ export default Vue.extend({
       return fromWeiEther(this.fightResults.skillGain) as unknown as number * this.skillPrice as unknown as number;
     },
     checkStorage() {
-      this.showAds =  localStorage.getItem('show-ads') === 'true';
+      if (process.env.NODE_ENV === 'development') this.showAds = false;
+      else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
   },
 

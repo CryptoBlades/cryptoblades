@@ -12,7 +12,7 @@ import Portal from './views/Portal.vue';
 import Options from './views/Options.vue';
 import PvP from './views/PvP.vue';
 import Quests from './views/Quests.vue';
-import Admin from '@/views/Admin.vue';
+import Admin from './views/Admin.vue';
 import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
