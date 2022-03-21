@@ -60,6 +60,8 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     mapping(uint256 => address) public links;
 
+    mapping(address => uint256) lastBlockNumberCalled;
+
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
     function initialize(Weapons _weapons, IRandoms _randoms)
@@ -126,7 +128,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         IERC20(tokenAddress).safeTransfer(msg.sender, amount);
     }
 
-    function purchaseShield() public {
+    function purchaseShield() public oncePerBlock(msg.sender) {
         require(itemFlatPrices[ITEM_SHIELD] > 0);
 
         uint256 shieldType = numberParameters[VAR_PURCHASE_SHIELD_TYPE];
@@ -153,6 +155,16 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     
     function _isAdmin() internal view {
          require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+    }
+
+    modifier oncePerBlock(address user) {
+        _oncePerBlock(user);
+        _;
+    }
+
+    function _oncePerBlock(address user) internal {
+        require(lastBlockNumberCalled[user] < block.number, "OCB");
+        lastBlockNumberCalled[user] = block.number;
     }
 
     /* ========== Generic Getters ========== */
