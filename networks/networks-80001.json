@@ -2120,7 +2120,7 @@
     },
     "links": {},
     "address": "0x2BA963ca7dE9D99eDf5644bE94fc90118d74d92A",
-    "transactionHash": "0x968b006a0deb386d12d44e9d1f6ed2677fd39bcf92b20861d9bf4c0a81c3200d"
+    "transactionHash": "0x8e20ef45561cda738ce71246f4d7ddaeddf8f126a3c52c76d136d11f92202917"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -2894,7 +2894,7 @@
     },
     "links": {},
     "address": "0xE870702c78eA941ACBD68ff109a1Af8d17881a0b",
-    "transactionHash": "0x8babe4593b11b49d4fe8644fcdaca6196ad47652b466abc340ebcd3d9e12684b"
+    "transactionHash": "0x2f2e5366ad93ea6b064a493485f16c453fd1ac0846d5ca12192209cab8c5a739"
   },
   "build/contracts/KeyLootbox.json": {
     "events": {
@@ -3070,7 +3070,7 @@
     },
     "links": {},
     "address": "0x487e7F166Bec6B8E6816Fb019cbe5D69E7F225E3",
-    "transactionHash": "0x0e426eb2aea52f378db46024c496bcedeffc3d7545ed99284d9dc44ce7e2ae2e"
+    "transactionHash": "0x5a4c480cfe25459bd68f7ba8b3afbbcee6a8091ecd7ac8832ba86aba27968182"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {
@@ -5141,7 +5141,7 @@
     },
     "links": {},
     "address": "0xF7a1DB01779dF1762E238c0E32b329F58BF2800d",
-    "transactionHash": "0x78699de3342ffba6aaf89db3df7aeec241ceafb3ea752aa9a8acba68d8833b2b"
+    "transactionHash": "0x18a36ecea2dcad0be176022bc5f520da035b93eca28c9b286abb36b6ab8c6475"
   },
   "build/contracts/SafeRandoms.json": {
     "events": {
@@ -5557,7 +5557,7 @@
     },
     "links": {},
     "address": "0x21BD9Ef086c3f4b94E9596F7Bb3932C97aE0fd1e",
-    "transactionHash": "0xb1a5fd90fb4487716bc135655876bd45c90cf0c6db6bc19ae2ea227858bfed45"
+    "transactionHash": "0x202f158e572b2642ccc6035d7d566af0a11721f92765d72a21251f4e847f940a"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {
@@ -7054,6 +7054,6 @@
     },
     "links": {},
     "address": "0x540728445c37C2557157C6a1B4a941be0a3C3B1D",
-    "transactionHash": "0x0091b2b67fc2c9a3ad33f8b99defeff390cde566286251ce2c6f8f9bf1d00fc5"
+    "transactionHash": "0xca3caa2f6c74f65349fbcbae7da7e3a55bf00ceb25cc3aeadf8a8085934feee8"
   }
 }
