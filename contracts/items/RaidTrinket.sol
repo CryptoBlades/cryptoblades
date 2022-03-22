@@ -98,4 +98,8 @@ contract RaidTrinket is Initializable, ERC721Upgradeable, AccessControlUpgradeab
     function setNextTokenID(uint to) public restricted {
         nextTokenID = to;
     }
+
+    function setBaseURI(string memory baseUri) public restricted {
+        _setBaseURI(baseUri);
+    }
 }
