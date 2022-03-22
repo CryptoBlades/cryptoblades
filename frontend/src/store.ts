@@ -141,6 +141,8 @@ export function createStore(web3: Web3) {
       currentChainSupportsMerchandise: false,
       currentChainSupportsPvP: false,
       currentChainSupportsQuests: false,
+      hasAdminAccess: false,
+      hasMinterAccess: false,
 
       characters: {},
       garrisonCharacters: {},
@@ -463,6 +465,14 @@ export function createStore(web3: Web3) {
 
       getCurrentChainSupportsQuests(state) {
         return state.currentChainSupportsQuests;
+      },
+
+      getHasAdminAccess(state) {
+        return state.hasAdminAccess;
+      },
+
+      getHasMinterAccess(state) {
+        return state.hasMinterAccess;
       },
 
       ownWeapons(state, getters) {
@@ -788,6 +798,14 @@ export function createStore(web3: Web3) {
 
       updateCurrentChainSupportsQuests(state: IState) {
         state.currentChainSupportsQuests = currentChainSupportsQuests();
+      },
+
+      updateHasAdminAccess(state: IState, hasAdminAccess: boolean) {
+        state.hasAdminAccess = hasAdminAccess;
+      },
+
+      updateHasMinterAccess(state: IState, hasMinterAccess: boolean) {
+        state.hasMinterAccess = hasMinterAccess;
       },
 
       updateCharacter(state: IState, { characterId, character }) {
@@ -1164,6 +1182,9 @@ export function createStore(web3: Web3) {
         await dispatch('setupWeaponCosmetics');
 
         await dispatch('fetchSpecialWeaponEvents');
+
+        await dispatch('fetchHasAdminAccess');
+        await dispatch('fetchHasMinterAccess');
       },
 
       async pollAccountsAndNetwork({ state, dispatch, commit }) {
@@ -4181,7 +4202,7 @@ export function createStore(web3: Web3) {
         return await contract.methods.hasRole(minterRole, state.defaultAccount).call(defaultCallOptions(state));
       },
 
-      async userHasAnyAdminAccess({state}) {
+      async fetchHasAdminAccess({state, commit}) {
         const {SimpleQuests, CBKLand, Weapons, BurningManager} = state.contracts();
         if (!BurningManager || !Weapons || !SimpleQuests || !CBKLand || !state.defaultAccount) return;
 
@@ -4198,12 +4219,12 @@ export function createStore(web3: Web3) {
         ];
 
         for (const promise of promises) {
-          if (await promise) return true;
+          if (await promise) return commit('updateHasAdminAccess', true);
         }
-        return false;
+        return commit('updateHasAdminAccess', false);
       },
 
-      async userHasAnyMinterAccess({state}) {
+      async fetchHasMinterAccess({state, commit}) {
         const {Weapons, Characters} = state.contracts();
         if (!Weapons || !Characters || !state.defaultAccount) return;
 
@@ -4216,9 +4237,9 @@ export function createStore(web3: Web3) {
         ];
 
         for (const promise of promises) {
-          if (await promise) return true;
+          if (await promise) return commit('updateHasMinterAccess', true);
         }
-        return false;
+        return commit('updateHasMinterAccess', false);
       },
 
       async canUserAfford({ state }, {payingAmount}) {

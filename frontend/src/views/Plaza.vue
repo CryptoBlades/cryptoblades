@@ -492,7 +492,8 @@ export default Vue.extend({
       return balance.isGreaterThanOrEqualTo(cost);
     },
     checkStorage() {
-      this.showAds =  localStorage.getItem('show-ads') === 'true';
+      if (process.env.NODE_ENV === 'development') this.showAds = false;
+      else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
     async toggleSoulCreation() {
       this.soulCreationActive = !this.soulCreationActive;

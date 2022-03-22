@@ -232,6 +232,9 @@ export default Vue.extend({
         return ['', 1, 2, 3, 4, 5];
       },
     },
+    chosenStarsOption: {
+      type: [String, Number],
+    },
   },
   data() {
     return {
@@ -497,12 +500,11 @@ export default Vue.extend({
       this.priceSort = sessionStorage.getItem('market-weapon-price-order') || '';
       this.minPriceFilter = sessionStorage.getItem('market-weapon-price-minfilter') || '';
       this.maxPriceFilter = sessionStorage.getItem('market-weapon-price-maxfilter') || '';
+    } else if (this.chosenStarsOption !== undefined) {
+      this.starFilter = this.chosenStarsOption;
     } else {
       this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
-    }
-    if(this.starsOptions?.length === 1) {
-      this.starFilter = this.starsOptions[0];
     }
     this.haveRename = await this.fetchTotalWeaponRenameTags();
     await this.loadCosmeticsCount();

@@ -113,11 +113,23 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
 
     function requestSingleSeed(address user, uint256 requestID) public restricted {
         _resolveSeedPublic(user);
-        _requestSingleSeed(user, requestID);
+        _requestSingleSeedAssert(user, requestID);
     }
 
-    function _requestSingleSeed(address user, uint256 requestID) internal {
+    function requestSingleSeed(address user, uint256 requestID, bool force) public restricted {
+        _resolveSeedPublic(user);
+        if(force)
+            _requestSingleSeed(user, requestID);
+        else
+            _requestSingleSeedAssert(user, requestID);
+    }
+
+    function _requestSingleSeedAssert(address user, uint256 requestID) internal {
         require(singleSeedRequests[user][requestID] == 0);
+        _requestSingleSeed(user, requestID);
+    }
+    
+    function _requestSingleSeed(address user, uint256 requestID) internal {
         singleSeedRequests[user][requestID] = currentSeedIndex;
         if(firstRequestBlockNumber < seedIndexBlockNumber)
             firstRequestBlockNumber = block.number;
