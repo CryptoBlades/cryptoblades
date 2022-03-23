@@ -183,7 +183,7 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
     }
 
     modifier isOwnedCharacter(uint256 characterID) {
-        require(_ownerByCharacter[characterID] == msg.sender);
+        require(_ownerByCharacter[characterID] == msg.sender, "NOW");
         _;
     }
 

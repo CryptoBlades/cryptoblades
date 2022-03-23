@@ -346,7 +346,7 @@ export default {
         } catch(err) {
           console.log('Enter Arena Approval Error: ', err);
           this.loading = false;
-          this.handleErrorMessage();
+          this.handleErrorMessage(err.message, 'NOW', i18n.t('pvp.notOwner'));
           return;
         }
         try {
@@ -359,7 +359,7 @@ export default {
         } catch(err){
           console.log('Enter Arena Error: ', err);
           this.loading = false;
-          this.handleErrorMessage();
+          this.handleErrorMessage(err.message, 'NOW', i18n.t('pvp.notOwner'));
           return;
         }
         this.$emit('enteredArena');

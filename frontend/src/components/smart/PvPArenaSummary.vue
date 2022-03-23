@@ -197,6 +197,7 @@ export default {
 
         this.handleErrorMessage(err.message, 'Not in arena', i18n.t('pvp.charNotInArena'));
         this.handleErrorMessage(err.message, 'Defender duel in process', i18n.t('pvp.duelInProcess'));
+        this.handleErrorMessage(err.message, 'NOW', i18n.t('pvp.notOwner'));
       } finally {
         this.loading = false;
       }
