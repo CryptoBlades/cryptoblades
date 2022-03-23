@@ -49,6 +49,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_PARAM_HOURLY_MAX_POWER_PERCENT = 16;
     uint256 public constant VAR_PARAM_SIGNIFICANT_HOUR_FIGHTS = 17;
     uint256 public constant VAR_PARAM_HOURLY_PAY_ALLOWANCE = 18;
+    uint256 public constant VAR_MINT_FEE_DECREASE_SPEED = 19;
+    uint256 public constant VAR_WEAPON_MINT_TIMESTAMP = 20;
+    uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 21;
+    uint256 public constant VAR_WEAPON_FEE_INCREASE = 22;
+    uint256 public constant VAR_CHARACTER_FEE_INCREASE = 23;
+    uint256 public constant VAR_MIN_WEAPON_FEE = 24;
+    uint256 public constant VAR_MIN_CHARACTER_FEE = 25;
 
     // Mapped user variable(userVars[]) keys, one value per wallet
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
@@ -482,6 +489,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         if(weapons.balanceOf(msg.sender) == 0) {
             weapons.mintWeaponWithStars(msg.sender, 0, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), 100);
         }
+
+        _updateCharacterMintFee();
     }
 
     function mintWeaponN(uint32 num, uint8 chosenElement, uint256 eventId)
@@ -532,6 +541,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         if(eventId > 0) {
             specialWeaponsManager.addShards(msg.sender, eventId, num);
         }
+        _updateWeaponMintFee(num);
         weapons.mintN(msg.sender, num, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
@@ -540,7 +550,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         if(eventId > 0) {
             specialWeaponsManager.addShards(msg.sender, eventId, 1);
         }
+        _updateWeaponMintFee(1);
         weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
+    }
+
+    function _updateWeaponMintFee(uint256 num) internal {
+        mintWeaponFee = getMintWeaponFee() + ABDKMath64x64.fromUInt(vars[VAR_WEAPON_FEE_INCREASE].mul(num));
+        vars[VAR_WEAPON_MINT_TIMESTAMP] = block.timestamp;
+    }
+
+    function _updateCharacterMintFee() internal {
+        mintCharacterFee = getMintCharacterFee() + ABDKMath64x64.fromUInt(vars[VAR_CHARACTER_FEE_INCREASE]);
+        vars[VAR_CHARACTER_MINT_TIMESTAMP] = block.timestamp;
     }
 
     function migrateRandoms(IRandoms _newRandoms) external {
@@ -996,6 +1017,24 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getOwnRewardsClaimTax() public view returns (int128) {
         return _getRewardsClaimTax(msg.sender);
+    }
+
+    function getMintWeaponFee() public view returns (int128) {
+        int128 decrease = ABDKMath64x64.fromUInt(block.timestamp.sub(vars[VAR_WEAPON_MINT_TIMESTAMP]).mul(vars[VAR_MINT_FEE_DECREASE_SPEED]));
+        int128 minWeaponFee = ABDKMath64x64.fromUInt(vars[VAR_MIN_WEAPON_FEE]);
+        if(decrease > mintWeaponFee || mintWeaponFee - decrease < minWeaponFee) {
+            return minWeaponFee;
+        }
+        return mintWeaponFee.sub(decrease);
+    }
+
+    function getMintCharacterFee() public view returns (int128) {
+        int128 decrease = ABDKMath64x64.fromUInt(block.timestamp.sub(vars[VAR_CHARACTER_MINT_TIMESTAMP]).mul(vars[VAR_MINT_FEE_DECREASE_SPEED]));
+        int128 minCharacterFee = ABDKMath64x64.fromUInt(vars[VAR_MIN_CHARACTER_FEE]);
+        if(decrease > mintCharacterFee || mintCharacterFee - decrease < minCharacterFee) {
+            return minCharacterFee;
+        }
+        return mintCharacterFee.sub(decrease);
     }
 
 }
