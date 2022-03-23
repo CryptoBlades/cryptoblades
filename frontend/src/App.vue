@@ -2,9 +2,9 @@
   <div class="app">
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content dark-bg-text">
-      <b-row>
+      <b-row class="set-normal">
         <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
-        <b-col :class="toggleSideBar ? 'can-show-app' : 'col-xl-9 col-lg-8 col-md-8 col-sm-10 cols-11 set-normal'">
+        <b-col :class="toggleSideBar ? 'can-show-app' : 'col-xl-9 col-lg-8 col-md-8 col-sm-10 cols-11'">
         <!-- :class="!featureFlagStakeOnly && currentCharacterId !== null ? 'bg-image' : ''"> -->
           <router-view v-if="canShowApp" />
         </b-col>
@@ -12,7 +12,10 @@
       </b-row>
     </div>
     <div class="content dark-bg-text" v-if="!canShowApp">
-      {{$t('app.cantView')}}
+      <img class="loadingSpinner" src="./assets/loadingSpinner.svg" />
+      <p class="text-center">
+          {{ $t('app.loading') }}
+      </p>
     </div>
     <div class="fullscreen-warning" v-if="!hideWalletWarning && (showMetamaskWarning || showNetworkError)">
       <div class="starter-panel">
@@ -260,7 +263,6 @@ export default {
         .then(() => {
           this.errorMessage = i18n.t('app.warning.errorMessage.success');
           this.isConnecting = false;
-
           this.initializeStore();
           this.toggleHideWalletWarning();
         })
@@ -468,6 +470,7 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   margin-right: auto;
   transition: 1s all;
   background-image: url('./assets/combat-bg.png');
+  background-size: cover;
 }
 
 hr.hr-divider {
@@ -724,7 +727,7 @@ div.bg-success {
   background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
 }
 </style>
-<style scoped>
+<style scoped lang="scss">
 .app {
   margin: 0;
 }
@@ -821,8 +824,6 @@ div.bg-success {
   padding-top: 40px;
 }
 
-
-
 @media all and (max-width: 600px) {
   .can-show-app{
     overflow-y: hidden ;
@@ -841,4 +842,21 @@ div.bg-success {
     width: 100%;
   }
 }
+
+  .loadingSpinner {
+    display: flex;
+    height: 3rem;
+    width: 3rem;
+    margin: 0 auto;
+    margin-top: 3rem ;
+    animation: spin 1s linear infinite;
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  }
 </style>
