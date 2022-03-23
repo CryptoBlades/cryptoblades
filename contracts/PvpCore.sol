@@ -124,18 +124,13 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         uint256 timestamp
     );
 
-    event SeasonRestarted(
-        uint256 indexed newSeason,
-        uint256 timestamp
-    );
-
     modifier characterInArena(uint256 characterID) {
         _characterInArena(characterID);
         _;
     }
 
     function _characterInArena(uint256 characterID) internal view {
-        require(isCharacterInArena[characterID], "NA");
+        require(isCharacterInArena[characterID], "N");
     }
 
     modifier characterWithinDecisionTime(uint256 characterID) {
@@ -146,7 +141,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     function _characterWithinDecisionTime(uint256 characterID) internal view {
         require(
             isCharacterWithinDecisionTime(characterID),
-            "DE"
+            "D"
         );
     }
 
@@ -156,7 +151,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     }
 
     function _characterNotUnderAttack(uint256 characterID) internal view {
-        require(!isCharacterUnderAttack(characterID), "UA");
+        require(!isCharacterUnderAttack(characterID), "U");
     }
 
     modifier characterNotInDuel(uint256 characterID) {
@@ -165,7 +160,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     }
 
     function _characterNotInDuel(uint256 characterID) internal view {
-        require(!isCharacterInDuel(characterID), "IQ");
+        require(!isCharacterInDuel(characterID), "Q");
     }
 
     modifier isOwnedCharacter(uint256 characterID) {
@@ -180,28 +175,6 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
     function _restricted() internal view {
         require(hasRole(GAME_ADMIN, msg.sender));
-    }
-
-    modifier enteringArenaChecks(
-        uint256 characterID,
-        uint256 weaponID,
-        uint256 shieldID,
-        bool useShield
-    ) {
-        require(
-            characters.ownerOf(characterID) == msg.sender &&
-                weapons.ownerOf(weaponID) == msg.sender
-        );
-
-        require(characters.getNftVar(characterID, 1) == 0 && weapons.getNftVar(weaponID, 1) == 0, "B");
-
-        if (useShield) {
-            require(shields.ownerOf(shieldID) == msg.sender);
-            require(shields.getNftVar(shieldID, 1) == 0, "SB");
-        }
-
-        require((arenaAccess & 1) == 1, "AL");
-        _;
     }
 
     function initialize(
@@ -237,7 +210,21 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         uint256 weaponID,
         uint256 shieldID,
         bool useShield
-    ) external enteringArenaChecks(characterID, weaponID, shieldID, useShield) {
+    ) external {
+        require(
+            characters.ownerOf(characterID) == msg.sender &&
+                weapons.ownerOf(weaponID) == msg.sender
+        );
+
+        require(characters.getNftVar(characterID, 1) == 0 && weapons.getNftVar(weaponID, 1) == 0, "B");
+
+        if (useShield) {
+            require(shields.ownerOf(shieldID) == msg.sender);
+            require(shields.getNftVar(shieldID, 1) == 0, "S");
+        }
+
+        require((arenaAccess & 1) == 1, "L");
+
         uint8 tier = getArenaTier(characterID);
         uint256 wager = getEntryWagerByTier(tier);
 
@@ -322,7 +309,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         characterNotUnderAttack(characterID)
         characterNotInDuel(characterID)
     {
-        require(matchByFinder[characterID].createdAt == 0, "AM");
+        require(matchByFinder[characterID].createdAt == 0, "M");
 
         uint8 tier = getArenaTier(characterID);
 
@@ -340,7 +327,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         uint256 opponentID = getOpponent(characterID);
         uint8 tier = getArenaTier(characterID);
 
-        require(matchByFinder[characterID].createdAt != 0, "NM");
+        require(matchByFinder[characterID].createdAt != 0, "R");
 
         delete finderByOpponent[opponentID];
         if (isCharacterInArena[opponentID]) {
@@ -372,7 +359,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         characterNotInDuel(attackerID)
     {
         require((arenaAccess & 1) == 1);
-        require(msg.value == duelOffsetCost, "NO");
+        require(msg.value == duelOffsetCost, "O");
 
         uint256 defenderID = getOpponent(attackerID);
 
@@ -404,7 +391,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev performs a list of duels
-    function performDuels(uint256[] memory attackerIDs) public restricted {
+    function performDuels(uint256[] calldata attackerIDs) external restricted {
         for (uint256 i = 0; i < attackerIDs.length; i++) {
             Duel memory duel;
             duel.attacker = createDuelist(attackerIDs[i]);
@@ -540,7 +527,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
     /// @dev wether or not the character is still in time to start a duel
     function isCharacterWithinDecisionTime(uint256 characterID)
-        public
+        internal
         view
         returns (bool)
     {
@@ -567,7 +554,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
     /// @dev checks wether or not the character is currently in the duel queue
     function isCharacterInDuel(uint256 characterID)
-        public
+        internal
         view
         returns (bool)
     {
@@ -580,7 +567,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev gets the amount of SKILL required to enter the arena by tier
-    function getEntryWagerByTier(uint8 tier) public view returns (uint256) {
+    function getEntryWagerByTier(uint8 tier) internal view returns (uint256) {
         return getDuelCostByTier(tier).mul(wageringFactor);
     }
 
@@ -594,7 +581,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev gets the amount of SKILL that is risked per duel by tier
-    function getDuelCostByTier(uint8 tier) public view returns (uint256) {
+    function getDuelCostByTier(uint8 tier) internal view returns (uint256) {
         int128 tierExtra = ABDKMath64x64
             .divu(tier.mul(100), 100)
             .mul(_tierWagerUSD);
@@ -608,7 +595,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         return getArenaTierForLevel(level);
     }
 
-    function getArenaTierForLevel(uint8 level) public pure returns (uint8) {
+    function getArenaTierForLevel(uint8 level) internal pure returns (uint8) {
         return uint8(level.div(10));
     }
 
@@ -634,7 +621,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         EnumerableSet.UintSet
             storage matchableCharacters = _matchableCharactersByTier[tier];
 
-        require(matchableCharacters.length() != 0, "N1");
+        require(matchableCharacters.length() != 0, "L");
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 randomIndex = RandomUtil.randomSeededMinMax(
@@ -674,7 +661,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
             break;
         }
 
-        require(foundOpponent, "NE");
+        require(foundOpponent, "E");
 
         matchByFinder[characterID] = Match(
             characterID,
@@ -734,7 +721,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
         uint8 weaponTrait = weapons.getTrait(weaponID);
 
-        int128 playerTraitBonus = getPVPTraitBonusAgainst(
+        int128 playerTraitBonus = _getPVPTraitBonusAgainst(
             character.trait,
             weaponTrait,
             opponentTrait
@@ -776,11 +763,11 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         );
     }
 
-    function getPVPTraitBonusAgainst(
+    function _getPVPTraitBonusAgainst(
         uint8 characterTrait,
         uint8 weaponTrait,
         uint8 opponentTrait
-    ) public view returns (int128) {
+    ) private view returns (int128) {
         int128 traitBonus = ABDKMath64x64.fromUInt(1);
         int128 fightTraitBonus = game.fightTraitBonus();
         int128 charTraitFactor = ABDKMath64x64.divu(50, 100);
@@ -849,7 +836,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev returns the amount of matcheable characters
-    function getMatchablePlayerCount(uint256 characterID) public view returns(uint){
+    function getMatchablePlayerCount(uint256 characterID) external view returns(uint){
         uint8 tier = getArenaTier(characterID);
         return _matchableCharactersByTier[tier].length();   
     }
@@ -883,15 +870,15 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
     // Note: The following are debugging functions, they can be muted to save contract size
 
-    function clearDuelQueue(uint256 length) external restricted {
-        for (uint256 i = 0; i < length; i++) {
-            if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
-                isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
-            }
+    // function clearDuelQueue(uint256 length) external restricted {
+    //     for (uint256 i = 0; i < length; i++) {
+    //         if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
+    //             isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
+    //         }
 
-            _duelQueue.remove(_duelQueue.at(i));
-        }
+    //         _duelQueue.remove(_duelQueue.at(i));
+    //     }
 
-        isDefending[0] = false;
-    }
+    //     isDefending[0] = false;
+    // }
 }

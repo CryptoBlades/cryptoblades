@@ -355,6 +355,7 @@ contract PvpAddons is Initializable, AccessControlUpgradeable {
         }
     }
 
+    // TODO: Rethink name
     function handlePerformDuel(uint256 winnerID, uint256 loserID, uint256 bonusRank, uint8 tier, uint256 poolTax) external restricted {
         rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
                 winnerID
@@ -406,13 +407,4 @@ contract PvpAddons is Initializable, AccessControlUpgradeable {
     function setSeasonDuration(uint256 duration) external restricted {
         seasonDuration = duration;
     }
-
-    // Note: Unmute this to test ranking interactions 
-    
-    // function setRankingPoints(uint256 characterID, uint8 newRankingPoints)
-    //     public
-    //     restricted
-    // {
-    //     rankingPointsByCharacter[characterID] = newRankingPoints;
-    // }
 }
