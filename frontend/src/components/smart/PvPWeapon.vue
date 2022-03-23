@@ -10,7 +10,7 @@
         />
       </div>
       <div class="weaponWrapper">
-        <img :src="getWeaponArtById(weaponId)" alt="weapon image">
+        <img :src="getWeaponArt(weapon)" alt="weapon image">
         <b-popover v-if="hasInfoPopover" :target="`${weaponId}-info-w`" variant="dark"
         triggers="hover" data-trigger="focus" placement="top right" custom-class="customPopover">
           <div v-if="weaponId" class="weapon-icon-wrapper">
@@ -37,7 +37,7 @@ import fire from '../../assets/elements/fire.png';
 import water from '../../assets/elements/water.png';
 import earth from '../../assets/elements/earth.png';
 import lightning from '../../assets/elements/lightning.png';
-import { getWeaponArtById } from '../../weapon-arts-placeholder';
+import { getWeaponArt } from '../../weapon-arts-placeholder';
 import { BPopover } from 'bootstrap-vue';
 
 export default {
@@ -77,7 +77,7 @@ export default {
     }
   },
   methods: {
-    getWeaponArtById,
+    getWeaponArt,
     getStatStyles(value) {
       return {
         red: value === 'STR',
@@ -152,6 +152,7 @@ export default {
   margin: 0 auto;
   height: 80%;
   width: 80%;
+  justify-content: center;
 }
 
 .elementWrapper {

@@ -10,11 +10,17 @@
     </div>
     <div class="fullscreen-warning" v-if="!hideWalletWarning && (showMetamaskWarning || showNetworkError)">
       <div class="starter-panel">
+        <div class="tob-bg-img promotion-decoration">
+          <img class="vertical-decoration bottom" src="./assets/border-element.png">
+        </div>
         <span class="starter-panel-heading">{{ $t('app.warning.title') }}</span>
         <div class="center">
-          <big-button class="button" :mainText="$t('app.warning.buttons.addMetamask')" @click="startOnboarding" v-if="showMetamaskWarning" />
-          <big-button class="button" :mainText="$t('app.warning.buttons.network')" @click="configureMetamask" v-if="showNetworkError" />
-          <small-button class="button" @click="toggleHideWalletWarning" :text="$t('app.buttons.hide')" />
+          <big-button class="button common-width-button"
+          :mainText="$t('app.warning.buttons.addMetamask')" @click="startOnboarding" v-if="showMetamaskWarning" />
+          <big-button class="button common-width-button"
+          :mainText="$t('app.warning.buttons.network')" @click="configureMetamask" v-if="showNetworkError" />
+          <big-button class="button common-width-button"
+          :mainText="$t('app.warning.buttons.hide')" @click="toggleHideWalletWarning" />
         </div>
       </div>
     </div>
@@ -55,13 +61,17 @@
         <div class="seperator"></div>
         <small-button class="button mm-button" @click="toggleHideWalletWarning" :text="$t('app.warning.buttons.hide')" />
       </div>
-      <div class="ad-container">
-        <Adsense v-if="showAds && !isMobile()"
-          data-ad-client="ca-pub-6717992096530538"
-          data-ad-slot="5115599573"
-          data-ad-format="auto"
-          data-full-width-responsive="yes"
-          />
+      <div v-if="showAds && !isMobile()" class="ad-container">
+      <script2 src="https://coinzillatag.com/lib/display.js"></script2>
+        <div class="coinzilla" data-zone="C-541621de2f7bb717603"></div>
+          <script2>
+                window.coinzilla_display = window.coinzilla_display || [];
+                var c_display_preferences = {};
+                c_display_preferences.zone = "541621de2f7bb717603";
+                c_display_preferences.width = "728";
+                c_display_preferences.height = "90";
+                coinzilla_display.push(c_display_preferences);
+          </script2>
       </div>
     </div>
   </div>
@@ -167,7 +177,7 @@ export default {
     ...mapGetters([
       'getExchangeTransakUrl'
     ]),
-    ...mapMutations(['updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP']),
+    ...mapMutations(['updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP', 'updateCurrentChainSupportsQuests']),
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BSC';
       const paramChain = this.$router.currentRoute.query.chain;
@@ -191,6 +201,7 @@ export default {
       }
       this.updateCurrentChainSupportsMerchandise();
       this.updateCurrentChainSupportsPvP();
+      this.updateCurrentChainSupportsQuests();
     },
     async updateCharacterStamina(id) {
       if (this.featureFlagStakeOnly) return;
@@ -202,7 +213,8 @@ export default {
 
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
-      this.showAds =  localStorage.getItem('show-ads') === 'true';
+      if (process.env.NODE_ENV === 'development') this.showAds = false;
+      else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
     async initializeRecruitCost() {
       const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
@@ -350,7 +362,7 @@ export default {
       throw e;
     }
 
-    this.pollCharactersStaminaIntervalId = setInterval(async () => {
+    this.pollCharacterStaminaIntervalId = setInterval(async () => {
       this.ownCharacters.forEach(async (c) => {
         await this.updateCharacterStamina(c.id);
       });
@@ -408,6 +420,7 @@ export default {
 </script>
 
 <style>
+
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
   font-weight: 600;
   text-align: center;
@@ -560,6 +573,11 @@ button.close {
   border-radius: 0.1em !important;
 }
 
+.common-width-button {
+  margin: 0.8rem;
+  width: 22%;
+}
+
 .btn.disabled,
 .btn:disabled {
   cursor: auto;
@@ -701,6 +719,7 @@ div.bg-success {
 .starter-panel-heading {
   margin-left: 15px;
   font-size: clamp(18px, 2vw, 45px);
+  color: #9e8a57;
 }
 
 .starter-msg {
@@ -727,6 +746,10 @@ div.bg-success {
   margin: 5px;
 }
 
+.vertical-decoration {
+  width: 50%;
+}
+
 .center {
   display: flex;
   justify-content: center;
@@ -742,6 +765,9 @@ div.bg-success {
     padding: 10px;
   }
   .dark-bg-text {
+    width: 100%;
+  }
+  .vertical-decoration {
     width: 100%;
   }
 }

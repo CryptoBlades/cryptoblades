@@ -1,6 +1,7 @@
 <template>
   <div class="body main-font">
-    <b-navbar v-if="isBar">
+
+    <b-navbar v-if="isBar" class="claim-xp-bar">
       <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
       variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="$t('ClaimRewardsBar.readyToClaim')"/>
 
@@ -8,9 +9,9 @@
 
       <b-nav-item
         class="ml-3 bar"
-        @click="claimSkill(ClaimStage.Summary)"><!-- moved gtag-link below b-nav-item -->
+        @click="claimSkill(ClaimStage.Summary)">
         <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
-          <strong>SKILL</strong> {{ formattedSkillReward }}
+          <strong>SKILL </strong>{{ formattedSkillReward }}
         </span>
       </b-nav-item>
 
@@ -18,7 +19,7 @@
         class="ml-3 bar"
         :disabled="!canClaimXp"
         @click="onClaimXp">
-          <div class="gtag-link-others" v-html="`<strong>XP</strong> ${formattedXpRewardsBar}`"></div>
+          <div class="gtag-link-others" v-html="`<strong>XP </strong>${formattedXpRewardsBar}`"></div>
       </b-nav-item>
     </b-navbar>
 
@@ -34,8 +35,7 @@
         <b-dropdown-item
           @click="claimSkill(ClaimStage.Summary)" class="rewards-info gtag-link-others" tagname="claim_skill"
            v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
-            SKILL
-            <div class="pl-3">{{ formattedSkillReward }}</div>
+            SKILL<div class="pl-3">{{ formattedSkillReward }}</div>
         </b-dropdown-item>
 
         <b-dropdown-item
@@ -125,15 +125,14 @@
           <h6 v-if="formattedMultiplier < 0.5" class="very-low-multiplier">{{$t('ClaimRewardsBar.lowMultiplier', {currentMultiplier})}}</h6>
           <h6 >{{
               $t('ClaimRewardsBar.realWithdrawValueClaimable', {
-                actualAmount: (skillAmount / formattedRatio * formattedMultiplier).toFixed(4),
+                actualAmount: (skillAmount / nonFormattedRatio * formattedMultiplier).toFixed(4),
                 tokenSymbol: selectedPartneredProject.tokenSymbol,
                 skillAmount: (+skillAmount).toFixed(4)
               })
             }}</h6>
         </div>
-        <div class="mt-3" v-if="!selectedPartneredProject">
-          <h5>{{withdrawalInfoText}}</h5>
-          <h6>{{$t('ClaimRewardsBar.earlyWithdrawTax')}}: {{ formattedRewardsClaimTax }} {{$t('ClaimRewardsBar.taxReduce')}} {{getTaxTimerNextTick}}</h6>
+        <div class="mt-3" v-if="isNoProjectAvailable">
+          <h5>{{$t('ClaimRewardsBar.noProjects')}}</h5>
         </div>
       </div>
     </b-modal>
@@ -148,7 +147,6 @@ import BigNumber from 'bignumber.js';
 import {RequiredXp} from '../../interfaces';
 import {ICharacter} from '@/interfaces';
 import {fromWeiEther, toBN} from '../../utils/common';
-import {secondsToDDHHMMSS} from '../../utils/date-time';
 import {getCleanName} from '../../rename-censor';
 import {SupportedProject} from '@/views/Treasury.vue';
 import PartneredProject from '../PartneredProject.vue';
@@ -209,7 +207,8 @@ export default Vue.extend({
       ClaimStage,
       remainingTokenClaimAmountPreTax: '0',
       skillAmount: 0,
-      slippage: 0
+      slippage: 0,
+      updateInterval: null as ReturnType<typeof setInterval> | null,
     };
   },
 
@@ -224,9 +223,9 @@ export default Vue.extend({
       return this.selectedPartneredProject && +toBN(this.partnerProjectMultipliers[+this.selectedPartneredProject.id]).div(toBN(10).pow(18)).toFixed(4) || 1;
     },
 
-    formattedRatio(): number {
+    nonFormattedRatio(): number {
       return this.selectedPartneredProject &&
-        +toBN(1).dividedBy(toBN(this.partnerProjectRatios[+this.selectedPartneredProject.id]).dividedBy(toBN(2).exponentiatedBy(64))).toFixed(4) || 1;
+        +toBN(1).dividedBy(toBN(this.partnerProjectRatios[+this.selectedPartneredProject.id]).dividedBy(toBN(2).exponentiatedBy(64))) || 1;
     },
 
     formattedSkillReward(): string {
@@ -262,34 +261,8 @@ export default Vue.extend({
       return (this.formattedMultiplier*100).toFixed(2) + '%';
     },
 
-    getTaxTimerNextTick(): string {
-      let frac: BigNumber;
-
-      // if has no skill rewards do not display timer next tick.
-      // or if tax is zero also do not display timer next tick.
-      if (this.skillRewards === '0' || this.rewardsClaimTaxAsFactorBN.toString() === '0') {
-        return '';
-      } else {
-        frac = this.rewardsClaimTaxAsFactorBN;
-      }
-
-      // get 2 decimal values
-      const decVal = toBN(frac.multipliedBy(100).decimalPlaces(2).toString().split('.')[1]);
-      // convert to seconds
-      const toSec = decVal.dividedBy(100).multipliedBy(24).multipliedBy(60).multipliedBy(60);
-      // return message
-      return ` Next -1% reduction happens in ${secondsToDDHHMMSS(toSec.toNumber())}.`;
-    },
-
     skillRewardNumber(): number {
       return +toBN(fromWeiEther(this.skillRewards.substr(0, this.skillRewards.length - 3) + '000'));
-    },
-
-    withdrawalInfoText(): string {
-      if(this.skillRewardNumber >= 1) {
-        return `${i18n.t('ClaimRewardsBar.withdrawalInfoText1')} ${this.formattedRemainingClaimableSkill}`;
-      }
-      return `${i18n.t('ClaimRewardsBar.withdrawalInfoText2')} ${this.formattedRemainingClaimableSkill}`;
     },
 
     xpRewardsForOwnedCharacters(): string[] {
@@ -317,20 +290,14 @@ export default Vue.extend({
     },
 
     canClaimTokens(): boolean {
-      if(toBN(this.skillRewards).lte(0) || toBN(this.remainingTokenClaimAmountPreTax).lte(0)) {
-        return false;
-      }
-
-      return true;
+      const areSkillRewardsZeroOrLess = toBN(this.skillRewards).lte(0);
+      const isRemainingTokenClaimAmountPreTaxZeroOrLess = toBN(this.remainingTokenClaimAmountPreTax).lte(0);
+      return !(areSkillRewardsZeroOrLess || isRemainingTokenClaimAmountPreTaxZeroOrLess);
     },
 
     canClaimXp(): boolean {
-      const allXpsAreZeroOrLess = this.xpRewardsForOwnedCharacters.every(xp => toBN(xp).lte(0));
-      if(allXpsAreZeroOrLess) {
-        return false;
-      }
-
-      return true;
+      const areAllXpsZeroOrLess = this.xpRewardsForOwnedCharacters.every(xp => toBN(xp).lte(0));
+      return !areAllXpsZeroOrLess;
     },
 
     supportedProjects(): SupportedProject[] {
@@ -352,6 +319,11 @@ export default Vue.extend({
 
     selectedPartneredProject(): SupportedProject | undefined {
       return this.supportedProjects.find(x => x.id === this.payoutCurrencyId);
+    },
+
+    isNoProjectAvailable(): boolean {
+      this.choosePayoutCurrencyIfNotChosenBefore();
+      return this.payoutCurrencyId === '-1';
     },
 
     canClaimSelectedProject(): boolean {
@@ -423,6 +395,13 @@ export default Vue.extend({
       this.remainingTokenClaimAmountPreTax = await this.fetchRemainingTokenClaimAmountPreTax();
     },
 
+    choosePayoutCurrencyIfNotChosenBefore() {
+      const supportedProjects = this.supportedProjects;
+      if(this.payoutCurrencyId === '-1' && supportedProjects.length !== 0) {
+        this.updatePayoutCurrencyId(supportedProjects[0].id);
+      }
+    },
+
     getCleanCharacterName(id: number): string {
       return getCleanName(this.getCharacterName(id));
     },
@@ -437,7 +416,13 @@ export default Vue.extend({
   },
 
   async mounted() {
-    setInterval(async () => await this.getRemainingTokenClaimAmountPreTax(), 3000);
+    this.updateInterval = setInterval(async () => await this.getRemainingTokenClaimAmountPreTax(), 3000);
+  },
+
+  beforeDestroy() {
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
   }
 });
 </script>
@@ -446,7 +431,11 @@ export default Vue.extend({
 
 .navbar {
   background: rgb(20,20,20);
-  background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
+}
+
+.claim-xp-bar {
+  height: 55px;
+  gap: 0.5rem;
 }
 
 .nav-item.bar {

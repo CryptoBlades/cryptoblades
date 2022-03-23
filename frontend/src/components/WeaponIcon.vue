@@ -534,8 +534,8 @@ export default {
 .placeholder {
   max-width: 180px;
   max-height: 180px;
-  margin-left: 10px;
-  margin-top: 5px;
+  margin: auto;
+  display: block;
 
   transform: scale(0.7);
 }

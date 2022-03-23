@@ -21,6 +21,26 @@
   z-index: 1;
 }
 
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 1rem;
+}
+
+.gap-4 {
+  gap: 1.5rem;
+}
+
+.gap-5 {
+  gap: 2rem;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
 .tooltip[x-placement^="top"] {
   margin-bottom: 5px;
 }
@@ -98,8 +118,6 @@
 }
 
 .add-button {
-  width: 21px;
-  height: 20px;
   border-radius: 50%;
   border: 1px solid #968332;
   color: #968332;

@@ -35,7 +35,7 @@
       <div class="name black-outline" v-if="!portrait">{{ getCleanCharacterName(character.id) }} </div>
       <div v-if="!portrait">Lv.<span class="white">{{ character.level + 1 }}</span></div>
     </div>
-    <div class="score-id-container">
+    <div class="score-id-container" :class="hideIdContainer ? 'visibility: hidden' : undefined">
     <div class="black-outline" v-if="!portrait">{{$t('CharacterArt.id')}} <span class="white">{{ character.id }}</span></div>
     <div class="black-outline" v-if="!portrait">
       {{$t('CharacterArt.score')}} <span class="white">{{ heroScore.toLocaleString() }}</span>
@@ -49,7 +49,7 @@
       <div class="stamina-text black-outline">{{$t('CharacterArt.staminaShort')}} {{ characterStamina }} / 200</div>
     </div>
 
-    <div class="xp" v-if="!portrait">
+    <div class="xp" v-if="!portrait" :class="hideXpBar ? 'visibility: hidden' : undefined">
       <b-progress :max="RequiredXp(character.level)" variant="success"
       v-tooltip.bottom="` ${$t('CharacterArt.claimableXP')} ${this.getCharacterUnclaimedXp(character.id)}`">
         <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} {{$t('CharacterArt.xp')}}</strong>
@@ -92,7 +92,7 @@ function transformModel(model) {
 }
 
 export default {
-  props: ['character', 'portrait', 'isMarket', 'isGarrison'],
+  props: ['character', 'portrait', 'isMarket', 'isGarrison', 'hideXpBar', 'hideIdContainer'],
   components: {
     //SmallButton,
   },
@@ -562,10 +562,6 @@ export default {
   flex-direction: column;
 }
 
-.xp {
-  position: absolute;
-}
-
 .trait {
   top: -30px;
   justify-self: center;
@@ -595,6 +591,7 @@ export default {
 }
 
 .xp {
+  position: absolute;
   bottom: -30px;
   left: 30px;
   width: 150px;

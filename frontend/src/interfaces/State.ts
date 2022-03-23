@@ -71,6 +71,16 @@ export interface IPartnerProject {
   isActive: boolean;
 }
 
+export interface ISpecialWeaponEvent {
+  name: string;
+  weaponElement: string;
+  endTime: string;
+  supply: string;
+  orderedCount: string;
+  ordered: boolean;
+  forged: boolean;
+}
+
 export interface IItemPrices {
   itemWeaponRenamePrice: string;
   itemCharacterRenamePrice: string;
@@ -147,6 +157,9 @@ export interface IState {
   cartEntries: CartEntry[];
   currentChainSupportsMerchandise: boolean;
   currentChainSupportsPvP: boolean;
+  currentChainSupportsQuests: boolean;
+  hasAdminAccess: boolean;
+  hasMinterAccess: boolean;
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;
@@ -193,6 +206,12 @@ export interface IState {
   partnerProjectRatios: Record<number, string>;
   payoutCurrencyId: string;
   defaultSlippage: string;
+
+  activeSpecialWeaponEventsIds: number[];
+  inactiveSpecialWeaponEventsIds: number[];
+  specialWeaponEvents: Record<number, ISpecialWeaponEvent>;
+  specialWeaponEventId: string;
+  shardsSupply: Record<number, number>;
 
   itemPrices: IItemPrices;
 }

@@ -8,13 +8,22 @@
         <p>
           {{$t('pvp.enterAndWin')}}
           ($SKILL).</p>
-        <div></div>
-        <div class="buttonWrapper">
-          <pvp-button
-            class="pvpButton"
-            @click="handleEnterArenaClick()"
-            :buttonText="$t('pvp.enterArena')"
-          />
+        <div class="buttonsWrapper">
+          <div class="buttonWrapper">
+            <pvp-button
+              class="pvpButton"
+              @click="handleEnterArenaClick"
+              :buttonText="$t('pvp.enterArena')"
+            />
+          </div>
+          <div class="buttonWrapperSecondary">
+            <pvp-button
+              @click="leaveArena"
+              :disabled="loading"
+              :buttonText="$t('pvp.leaveArena')"
+              secondary
+            />
+          </div>
         </div>
         <div class="bottomWrapper">
           <div class="bottomWrapperNav">
@@ -52,7 +61,7 @@
                 </li>
                 <li v-for="duel in duelHistory" :key="`${duel.attackerId}-${duel.timestamp}`">
                   <span class="date">{{ dayjs(new Date(duel.timestamp * 1000)).format('YYYY/MM/DD') }}</span>
-                  <span :class="{'lost': !duel.attackerWon}" class="result">{{ duel.attackerWon ? i18n.t('pvp.win') : i18n.t('pvp.lose') }}</span>
+                  <span :class="{'lost': !duel.attackerWon}" class="result">{{ duel.attackerWon ? $t('pvp.win') : $t('pvp.lose') }}</span>
                 </li>
               </ul>
             </div>
@@ -69,19 +78,21 @@
         :currentRankedSeason="currentRankedSeason"
         :secondsBeforeNextSeason="secondsBeforeNextSeason"
         :characterInformation="characterInformation"
+        insideArena
       />
     </div>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import PvPWeapon from './PvPWeapon.vue';
 import PvPShield from './PvPShield.vue';
 import PvPButton from './PvPButton.vue';
 import PvPCharacter from './PvPCharacter.vue';
 import dayjs from 'dayjs';
 import PvPArenaInfo from './PvPArenaInfo.vue';
+import i18n from '../../i18n';
 
 export default {
   components: {
@@ -111,6 +122,7 @@ export default {
         name: '',
         level: null,
         power: null,
+        fullPower: null,
         rank: null,
         element: null,
       }
@@ -135,7 +147,10 @@ export default {
   data() {
     return {
       tab: 0,
-      dayjs
+      dayjs,
+      loading: false,
+      duelQueue: [],
+      isCharacterInDuelQueue: false,
     };
   },
 
@@ -144,14 +159,66 @@ export default {
   },
 
   methods: {
+    ...mapActions([
+      'withdrawFromArena',
+      'getDuelQueue'
+    ]),
+
     setTab(tabNumber) {
       this.tab = tabNumber;
+    },
+
+    handleErrorMessage(value, errorMessage, returnedMessage) {
+      if (value.includes(`reverted with reason string '${errorMessage}'`)) {
+        return this.$dialog.notify.error(returnedMessage);
+      }
+      return this.$dialog.notify.error(i18n.t('pvp.genericError'));
     },
 
     async handleEnterArenaClick() {
       this.$emit('enterMatchMaking');
     },
+
+    async leaveArena() {
+      this.loading = true;
+
+      if (this.isCharacterInDuelQueue) {
+        alert(i18n.t('pvp.currentlyInDuel'));
+        this.loading = false;
+        return;
+      }
+
+      try {
+        await this.withdrawFromArena(this.currentCharacterId);
+
+        this.$emit('leaveArena');
+      } catch (err) {
+        console.log('leave arena error: ', err.message);
+
+        this.handleErrorMessage(err.message, 'Not in arena', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(err.message, 'Defender duel in process', i18n.t('pvp.duelInProcess'));
+      } finally {
+        this.loading = false;
+      }
+    },
   },
+
+  async created() {
+    this.loading = true;
+
+    try {
+      this.duelQueue = await this.getDuelQueue();
+
+      if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
+        this.isCharacterInDuelQueue = true;
+      }
+    } catch (err) {
+      console.log('get duel queue error: ', err.message);
+      this.handleErrorMessage();
+    }
+
+    this.loading = false;
+  }
 };
 </script>
 
@@ -206,13 +273,24 @@ span, p, li, button, a {
       color: #cec198;
     }
   }
-  .buttonWrapper {
-    margin-top: 2.25rem;
-    height: 5rem;
-    width: 80%;
+  .buttonsWrapper {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    .buttonWrapper {
+      margin-top: 2.25rem;
+      height: 5rem;
+      width: 80%;
 
-    .pvpButton {
-      text-transform: uppercase;
+      .pvpButton {
+        text-transform: uppercase;
+      }
+    }
+    .buttonWrapperSecondary {
+      margin-top: 2rem;
+      margin-left: 10%;
+      height: 3rem;
+      width: 60%;
     }
   }
 }

@@ -134,7 +134,7 @@ contract("PvpArena", (accounts) => {
 
     beforeEach(async () => {
       weaponId = await helpers.createWeapon(accounts[1], "123", 0, { weapons });
-      shieldId = await helpers.createShield(accounts[1], "123", { shields });
+      shieldId = await helpers.createShield(accounts[1], 0, "123", { shields });
       characterID = await helpers.createCharacter(accounts[1], "123", {
         characters,
       });
@@ -572,7 +572,7 @@ contract("PvpArena", (accounts) => {
         weapon2Id = await helpers.createWeapon(accounts[1], "123", 0, {
           weapons,
         });
-        shieldId = await helpers.createShield(accounts[1], "446", { shields });
+        shieldId = await helpers.createShield(accounts[1], 0, "446", { shields });
 
         cost = await pvpArena.getEntryWager(character2ID, {
           from: accounts[1],
@@ -710,7 +710,7 @@ contract("PvpArena", (accounts) => {
       it("should revert", async () => {
         await expectRevert(
           pvpArena.findOpponent(character1ID, { from: accounts[1] }),
-          "Char not in arena"
+          "Not in arena"
         );
       });
     });
@@ -858,7 +858,7 @@ contract("PvpArena", (accounts) => {
       const characterID = await helpers.createCharacter(accounts[1], "123", {
         characters,
       });
-      const shieldID = await helpers.createShield(accounts[1], "123", {
+      const shieldID = await helpers.createShield(accounts[1], 0, "123", {
         shields,
       });
       const weaponID = await helpers.createWeapon(accounts[1], "123", 0, {
@@ -1245,10 +1245,32 @@ contract("PvpArena", (accounts) => {
 
         await expectRevert(
           pvpArena.prepareDuel(character1ID, { from: accounts[1] }),
-          "In duel queue"
+          "In queue"
         );
       });
     });
+  });
+
+  describe("#increaseRankingsPool", async () => {
+    it('increases the ranking pool of a certain tier', async () => {
+      const previousPool = (await pvpArena.rankingsPoolByTier(1)).toString();
+      expect(previousPool).to.equal('0');
+
+      await pvpArena.increaseRankingsPool(1, 1000);
+
+      const newPool = (await pvpArena.rankingsPoolByTier(1)).toString();
+      expect(newPool).to.equal('1000');
+    })
+
+    it("doesn't increase other tier's pools", async () => {
+      const previousPool = (await pvpArena.rankingsPoolByTier(1)).toString();
+      expect(previousPool).to.equal('0');
+
+      await pvpArena.increaseRankingsPool(2, 1000);
+
+      const newPool = (await pvpArena.rankingsPoolByTier(1)).toString();
+      expect(newPool).to.equal('0');
+    })
   });
 
   describe("#performDuels", async () => {
@@ -1759,10 +1781,10 @@ contract("PvpArena", (accounts) => {
         weapons,
       });
 
-      shieldID = await helpers.createShield(accounts[1], "123",  {
+      shieldID = await helpers.createShield(accounts[1], 0, "123",  {
         shields,
       });
-      shield2ID = await helpers.createShield(accounts[2], "123", {
+      shield2ID = await helpers.createShield(accounts[2], 0, "123", {
         shields,
       });
       cost = await pvpArena.getEntryWager(character2ID, {

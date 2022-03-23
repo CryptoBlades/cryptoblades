@@ -66,7 +66,6 @@ export interface Item {
 interface Data {
   products: Product[];
   selectedProduct?: Product;
-  isLoading: boolean;
   isVariantModalLoading: boolean;
   currentPage: number;
   perPage: number;
@@ -87,7 +86,6 @@ export default Vue.extend({
     return {
       products: [],
       selectedProduct: undefined,
-      isLoading: false,
       isVariantModalLoading: false,
       currentPage: 1,
       perPage: 30,
@@ -140,12 +138,15 @@ export default Vue.extend({
     },
 
     async openChooseVariantModal(product: Product) {
-      this.isVariantModalLoading = true;
-      this.selectedProduct = product;
-      const variants = await this.fetchVariants(product.id);
-      const skillPrice = +await this.currentSkillPrice();
-      this.$root.$emit('merchandise-variant-modal', this.selectedProduct, variants, skillPrice);
-      this.isVariantModalLoading = false;
+      try {
+        this.isVariantModalLoading = true;
+        this.selectedProduct = product;
+        const variants = await this.fetchVariants(product.id);
+        const skillPrice = +await this.currentSkillPrice();
+        this.$root.$emit('merchandise-variant-modal', this.selectedProduct, variants, skillPrice);
+      } finally {
+        this.isVariantModalLoading = false;
+      }
     },
     isMobile() {
       return screen.width <= 576;

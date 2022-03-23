@@ -3,6 +3,7 @@ pragma solidity ^0.6.5;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -110,7 +111,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     }
 
     function getRemainingPartnerTokenSupply(uint256 partnerId) public view returns(uint256) {
-        return IERC20(partneredProjects[partnerId].tokenAddress).balanceOf(address(this));
+        return partneredProjects[partnerId].tokenSupply.mul(1e18).sub(tokensClaimed[partnerId]);
     }
 
     function getAmountInPartnerToken(uint256 partnerId, uint256 skillAmount) public view returns(uint256) {
@@ -121,6 +122,14 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
     function getProjectDistributionTime(uint256 projectId) public view returns(uint256) {
         return projectDistributionTime[projectId];
+    }
+
+    function getAmountWithAdjustedDecimals(uint256 partnerTokenAmount, uint256 partnerTokenDecimals) internal pure returns(uint256 partnerTokenAmountAdjusted) {
+        if(partnerTokenDecimals > 18) {
+            partnerTokenAmountAdjusted = partnerTokenAmount.mul(10**uint(partnerTokenDecimals - 18));
+        } else {
+            partnerTokenAmountAdjusted = partnerTokenAmount.div(10**uint(18 - partnerTokenDecimals));
+        }
     }
 
     // Mutative
@@ -156,6 +165,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     function claim(uint256 partnerId, uint256 skillClaimingAmount, uint256 currentMultiplier, uint256 slippage) public {
         require(game.getTokenRewardsFor(msg.sender) >= skillClaimingAmount, 'Claim amount exceeds available rewards balance');
         require(currentMultiplier.mul(uint(1e18).sub(slippage)).div(1e18) < getProjectMultiplier(partnerId), 'Slippage exceeded');
+        require(partneredProjects[partnerId].isActive == true, 'Project inactive');
 
         uint256 partnerTokenAmount = getAmountInPartnerToken(partnerId, skillClaimingAmount);
         uint256 remainingPartnerTokenSupply = getRemainingPartnerTokenSupply(partnerId);
@@ -168,7 +178,9 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
         game.deductAfterPartnerClaim(skillToDeduct, msg.sender);
         tokensClaimed[partnerId] += partnerTokenAmount;
-        IERC20(partneredProjects[partnerId].tokenAddress).safeTransfer(msg.sender, partnerTokenAmount);
+
+        uint256 partnerTokenDecimals = ERC20(partneredProjects[partnerId].tokenAddress).decimals();
+        IERC20(partneredProjects[partnerId].tokenAddress).safeTransfer(msg.sender, getAmountWithAdjustedDecimals(partnerTokenAmount, partnerTokenDecimals));
 
         multiplierTimestamp[partnerId] = multiplierTimestamp[partnerId].add(partnerTokenAmount.div(partneredProjects[partnerId].tokenSupply.div(projectDistributionTime[partnerId])).div(uint(1e18).div(multiplierUnit)));
     }
