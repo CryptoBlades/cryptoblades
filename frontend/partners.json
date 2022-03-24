@@ -72,7 +72,8 @@
     "Hololoot": {
       "logo": "hololoot.png",
       "details": "Hololoot introduces the world's first AR NFT Generator, Marketplace, and Metaverse designed for widespread adoption. Our goal is to bring the 3D assets of the Metaverse into reality through our proprietary AR tech stack.",
-      "website": "https://www.hololoot.io/"
+      "website": "https://www.hololoot.io/",
+      "note": "This token has a 3% fee upon claiming"
     }
   }
 }
