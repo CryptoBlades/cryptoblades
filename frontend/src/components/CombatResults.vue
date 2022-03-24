@@ -40,7 +40,7 @@
           <b-col class="earned">
             <h4>
               {{formattedSkill}}  {{formattedUsd}}
-              <Hint :text="$t('combatResults.hint')" /> sadasdsad
+              <Hint :text="$t('combatResults.hint')" />
             </h4>
             <h5>+ {{formattedXpGain}}</h5>
           </b-col>
@@ -244,7 +244,6 @@ export default Vue.extend({
 .earned > h5{
   font-family: Roboto;
   color: rgb(186, 186, 4);
-  /* margin-bottom: 30px; */
 }
 
 .gas-spent{
@@ -276,32 +275,11 @@ export default Vue.extend({
 
 }
 
-.modal-body > div{
-  width: 600px !important;
-}
-
 
 .tob-bg-img > img{
   margin-top: -40px !important;
 }
 
-.modal-content{
-  background-color: rgba(255, 255, 255, 0) !important;
-}
-
-.modal-body{
-  background: linear-gradient(to right, rgb(20 20 20 / 10%), rgba(20,20,20,80%),rgb(20 20 20 / 100%),
-  rgb(20 20 20 / 80%),rgb(20 20 20 / 40%),rgb(20 20 20 / 10%)) !important;
-  text-align: center !important;
-  width: 630px !important;
-}
-
-.modal-dialog{
-  margin-top: 5em;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
 
 @media all and (max-width: 600px) {
   .modal-dialog{

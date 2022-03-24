@@ -9,7 +9,9 @@
         <CombatResults v-if="resultsAvailable" :fightResults="fightResults" class="mb-3" />
         <div class="footer-close">
             <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
-            <span @click="$bvModal.hide('fightResultsModal')"><img style="margin: auto;width: 40px !important;" src="../assets/close-btn.png" alt=""></span>
+            <span class="tap" @click="$bvModal.hide('fightResultsModal')">
+              <img style="width: 40px; margin-left: 215px;" src="../assets/close-btn.png" alt="">
+              </span>
         </div>
       </b-modal>
 
@@ -80,8 +82,7 @@
               <div class="col weapon-selection mb-4">
                 <div class="header-row d-flex justify-content-between">
                   <div class="d-flex align-items-end selectedWeaponDetails">
-
-                    <div class="message-box select-weapons" v-if="!selectedWeapon">
+                    <div class="message-box select-weapons" v-if="!selectedWeaponId">
                        <span class="isMobile">{{$t('combat.selectAWeapon')}}</span>
                         <button :v-tooltip="$t('combat.changeWeapon')"  class="ml-3 ct-btn mb-3 ml-2" @click="changeEquipedWeapon()">
                           <img src="../assets/swithc-wep.png">
@@ -90,17 +91,14 @@
                     <!-- selected weapon for combat details -->
                     <div v-if="selectedWeaponId" class="mr-3">
                       <weapon-inventory class="weapon-icon" :weapon="selectedWeapon" :displayType="'adventure'"/>
+                      <button v-tooltip="'Change Weapon'" class="ml-3 btn ct-btn mb-3"
+                        @click="changeEquipedWeapon()">
+                        <img src="../assets/swithc-wep.png">
+                      </button>
                     </div>
-
-                    <button v-tooltip="'Change Weapon'" v-if="selectedWeaponId" class="ml-3 btn ct-btn mb-3"
-                    @click="changeEquipedWeapon()">
-                      <img src="../assets/swithc-wep.png">
-                    </button>
                   </div>
-                  <div :style="!selectedWeaponId ? 'align-self: baseline' : 'align-self: center'">
-                      <div>
-                        <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
-                      </div>
+                  <div :style="'align-self: baseline'">
+                      <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
                   </div>
                 </div>
               </div>
@@ -1226,9 +1224,7 @@ h1 {
 }
 
 .footer-close{
-  justify-content: center;
-  align-items: center;
-  position: absolute;
+  margin: auto;
 }
 
 .footer-close > span{
@@ -1239,6 +1235,8 @@ h1 {
   font-size: 15px;
   color: #fff;
   margin-top: 40px;
+  text-align: center;
+  margin-left: auto;
   margin-bottom: 20px;
   font-family: Roboto;
 }
