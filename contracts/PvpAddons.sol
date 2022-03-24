@@ -103,7 +103,7 @@ contract PvpAddons is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function restartRankedSeason() public restricted {
+    function restartRankedSeason() external restricted {
         uint256[] memory duelQueue = pvpcore.getDuelQueue();
 
         if (duelQueue.length > 0) {
@@ -261,7 +261,7 @@ contract PvpAddons is Initializable, AccessControlUpgradeable {
     }
 
     function getTierTopCharacters(uint8 tier)
-        public
+        external
         view
         returns (uint256[] memory)
     {
@@ -282,11 +282,7 @@ contract PvpAddons is Initializable, AccessControlUpgradeable {
         return topRankers;
     }
 
-    function getPrizePercentages() external view returns (uint256[] memory) {
-        return prizePercentages;
-    }
-
-    function getPlayerPrizePoolRewards() public view returns (uint256) {
+    function getPlayerPrizePoolRewards() external view returns (uint256) {
         return _rankingRewardsByPlayer[msg.sender];
     }
 
@@ -317,7 +313,7 @@ contract PvpAddons is Initializable, AccessControlUpgradeable {
         return (reward, poolTax);
     }
 
-    function fillGameCoffers() public restricted {
+    function fillGameCoffers() external restricted {
         skillToken.safeTransfer(address(game), gameCofferTaxDue);
         game.trackIncome(gameCofferTaxDue);
         gameCofferTaxDue = 0;
