@@ -153,7 +153,7 @@ export default Vue.extend({
     },
 
     getRequiredStars(): number {
-      if(!this.quest?.requirementRarity) return 0;
+      if(this.quest?.requirementRarity === undefined) return 0;
       return this.quest.requirementRarity + 1;
     },
 

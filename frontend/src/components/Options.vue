@@ -165,14 +165,9 @@
               <span>{{ $t("viewLink.settings") }}</span>
             </router-link>
 
-            <router-link
-              v-if="hasAdminAccess"
-              class="menu-icon"
-              :to="{ name: 'admin' }"
-              exact
-            >
-              <img src="../assets/navbar-icons/gear-icon.png" alt="Admin"/>
-              <span>{{ $t("viewLink.admin") }}</span>
+            <router-link class="menu-icon" :to="{ name: 'nft-display' }" exact>
+              <img src="../assets/navbar-icons/nft-display.svg" class="nft-display-icon" alt="Nft Display"/>
+              <span>{{ $t("viewLink.nftDisplay") }}</span>
             </router-link>
 
             <router-link
@@ -182,13 +177,22 @@
               exact
               :class="supportsMerchandise ? '' : 'disabled-link'"
             >
-              <img src="../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
+              <img src="../assets/navbar-icons/bazaar-icon.png" alt="Merchandise"/>
               <span>{{ $t("viewLink.merchandise") }} <hint
                 v-if="!supportsMerchandise"
                 class="hint"
                 :text="$t('viewLink.functionalityNotSupportedTooltip')"
               /></span>
+            </router-link>
 
+            <router-link
+              v-if="hasAdminAccess"
+              class="menu-icon"
+              :to="{ name: 'admin' }"
+              exact
+            >
+              <img src="../assets/navbar-icons/gear-icon.png" alt="Admin"/>
+              <span>{{ $t("viewLink.admin") }}</span>
             </router-link>
 
             <!-- disabled for now , will integrate later when other UI's merged -->
@@ -495,9 +499,7 @@ export default Vue.extend({
 
 <style scoped>
 .nft-display-icon {
-  margin-left: -3px;
-  height: 20px;
-  filter: invert(75%) sepia(8%) saturate(243%) hue-rotate(8deg) brightness(96%) contrast(81%);
+  filter: invert(81%) sepia(97%) saturate(276%) hue-rotate(317deg) brightness(97%) contrast(91%);
 }
 
 .menu-burger {
