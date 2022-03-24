@@ -40,7 +40,7 @@
           <b-col class="earned">
             <h4>
               {{formattedSkill}}  {{formattedUsd}}
-              <Hint :text="$t('combatResults.hint')" /> sadasdsad
+              <Hint :text="$t('combatResults.hint')" />
             </h4>
             <h5>+ {{formattedXpGain}}</h5>
           </b-col>
