@@ -2880,7 +2880,7 @@
     },
     "links": {},
     "address": "0x49621e881B5f87dBd6A02f4581fE067BCC0f847D",
-    "transactionHash": "0xfb2b113b12f4c8de39c7e3a98cbef31a44ef01411f091fae97adbe75a81b3dfe"
+    "transactionHash": "0xdcad96fb0eeac88b97b0c57db9d5b8cd6e0b2b914630cdb101734994e54a4863"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {
@@ -4976,7 +4976,7 @@
     },
     "links": {},
     "address": "0xA397649d96Af0d0055c7057de5f879F74D577377",
-    "transactionHash": "0xef4a71f91ef6cbf437f0f76b010b299fd518bec120828016dab2b8a075163b65"
+    "transactionHash": "0x539748dff4e790cf3f520407ef685a9d87c51eab260fae89d8d80bc41cca05f7"
   },
   "build/contracts/SafeRandoms.json": {
     "events": {

@@ -530,6 +530,7 @@ export default Vue.extend({
 }
 
 .menu-open {
+  overflow-y: auto;
   height: 100%;
   width: 100%;
   top: 0;

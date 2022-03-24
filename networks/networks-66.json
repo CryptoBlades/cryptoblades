@@ -1953,7 +1953,7 @@
     },
     "links": {},
     "address": "0x6A1d1803d4EDF5CF27EDb64ae95A22F81707eA38",
-    "transactionHash": "0x9e96b1f8a53bdcf8a983a365bf0e51f0eb5164e1220b297135acf52cdaabc847"
+    "transactionHash": "0x3cdb7fdd49825eadecf360590a4b818ec0487569f197499ce3767a37bbfc32a5"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2537,7 +2537,7 @@
     },
     "links": {},
     "address": "0x1ED741bdC14d6546409FCd0c9Ebda70d39b67d92",
-    "transactionHash": "0x568cfeb728731a1db97d6b771be7674cb1a0ccb28aad02ec767a338a7d36ffb1"
+    "transactionHash": "0xcb80f5946a239e973b13e0c553e68475c3f7f9913748c4a6b4ab9b43cf41ae5e"
   },
   "build/contracts/KeyLootbox.json": {
     "events": {
@@ -2713,7 +2713,7 @@
     },
     "links": {},
     "address": "0x21BD9Ef086c3f4b94E9596F7Bb3932C97aE0fd1e",
-    "transactionHash": "0x0cd9907a20a23b08e65934f72ae4f5c67725317e23c17bcbbd48484c57fbe9de"
+    "transactionHash": "0x1652e643c1df0ff9b9ee215ad3fc7a81d8d1d4142986b74f4b8dc23c364b9045"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
@@ -3652,7 +3652,7 @@
     },
     "links": {},
     "address": "0xCCa5ee79E4af5918cC85e5d9000B540f36D28166",
-    "transactionHash": "0x2cfd7876b4690e15b57c02b7dd5d0f748d89845eeda036bcbad71c0666f69208"
+    "transactionHash": "0x635979c49100eef1a5d6bd34846cd8c79ded235c37a393cf82acc6fbcc3a1fb9"
   },
   "build/contracts/SafeRandoms.json": {
     "events": {
@@ -3986,7 +3986,7 @@
     },
     "links": {},
     "address": "0x8c52FabF2442b0EB83518DaB93A8073Ce5B0BA15",
-    "transactionHash": "0x0ba359c627f2aec956c8f74b0cc1c7e93fd2793dbbba485df781ce00d0710821"
+    "transactionHash": "0x45ccf766c435132096d4c7ddad8b53e43bdfb436c1f57551b0feed9a01712157"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {},
@@ -4875,6 +4875,6 @@
     },
     "links": {},
     "address": "0x364759180A6484e57ECD73C042264A6Da75770e8",
-    "transactionHash": "0x916dcaea3bf3b1b1c2fc27f5c9eb5899a3b680ba6b554ea6157ad035fa3549a8"
+    "transactionHash": "0x5993b2d634d6ad75f2f7ccd0b9336da0694ca531edd0e621826cbcb4ba0f5094"
   }
 }

@@ -25,7 +25,8 @@ module.exports = async function (deployer, network, accounts) {
 
   const bscDeployerAddress = "0xa2bB660A6A3Bb5c74E36415ffe5D4862eFfc417A";
   const altChainsDeployerAddress = "0x15C899E13be4db3bDaa518A4bb29Cbb9F4e7B8Be";
-  
+  let networkName = 'bsc';
+
   if(network === 'development') {
     await weapons.grantRole(weapons_GA, accounts[0]);
     await characters.grantRole(characters_GA, accounts[0]);
@@ -43,6 +44,22 @@ module.exports = async function (deployer, network, accounts) {
     await keyLootbox.grantRole(keyLootbox_GA, bscDeployerAddress);
   }
   else {
+    if(network === 'hecomainnet' || network === 'hecotestnet') {
+      networkName = 'heco';
+    }
+    else if(network === 'okexmainnet' || network === 'okextestnet') {
+      networkName = 'oec';
+    }
+    else if(network === 'polygonmainnet' || network === 'polygontestnet') {
+      networkName = 'polygon';
+    }
+    else if(network === 'avaxmainnet' || network === 'avaxtestnet') {
+      networkName = 'avax';
+    }
+    else if(network === 'auroramainnet' || network === 'auroratestnet') {
+      networkName = 'aurora';
+    }
+
     await weapons.grantRole(weapons_GA, altChainsDeployerAddress);
     await characters.grantRole(characters_GA, altChainsDeployerAddress);
     await shields.grantRole(shields_GA, altChainsDeployerAddress);
@@ -51,7 +68,7 @@ module.exports = async function (deployer, network, accounts) {
     await keyLootbox.grantRole(keyLootbox_GA, altChainsDeployerAddress);
   }
 
-  await weapons.setBaseURI("https://testapi.cryptoblades.io/nfts/view/bsc/cb-weapon/");
-  await characters.setBaseURI("https://testapi.cryptoblades.io/nfts/view/bsc/cb-character/");
-  await shields.setBaseURI("https://testapi.cryptoblades.io/nfts/view/bsc/cb-shield/");
+  await weapons.setBaseURI(`https://testapi.cryptoblades.io/nfts/view/${networkName}/cb-weapon/`);
+  await characters.setBaseURI(`https://testapi.cryptoblades.io/nfts/view/${networkName}/cb-character/`);
+  await shields.setBaseURI(`https://testapi.cryptoblades.io/nfts/view/${networkName}/cb-shield/`);
 };
