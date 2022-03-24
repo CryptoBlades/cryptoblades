@@ -1915,7 +1915,7 @@ export function createStore(web3: Web3) {
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee(),
+          cryptoBladesMethods => cryptoBladesMethods.getMintCharacterFee(),
           { allowInGameOnlyFunds: false }
         );
 
@@ -1947,7 +1947,7 @@ export function createStore(web3: Web3) {
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
+            cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
             { feeMultiplier: num * 4 * chosenElementFee, allowInGameOnlyFunds: true }
           );
 
@@ -1982,7 +1982,7 @@ export function createStore(web3: Web3) {
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
+            cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
             { feeMultiplier: chosenElementFee, allowInGameOnlyFunds: true }
           );
 

@@ -515,6 +515,7 @@ interface Data {
   haveWeaponCosmetic1: number;
   haveWeaponCosmetic2: number;
   selectedSpecialWeaponEventId: number;
+  updateInterval: ReturnType<typeof setInterval> | null;
 }
 
 export default Vue.extend({
@@ -553,7 +554,8 @@ export default Vue.extend({
       targetSkin: '',
       haveWeaponCosmetic1: 0,
       haveWeaponCosmetic2: 0,
-      selectedSpecialWeaponEventId: 0
+      selectedSpecialWeaponEventId: 0,
+      updateInterval: null as ReturnType<typeof setInterval> | null,
     } as Data;
   },
 
@@ -598,11 +600,8 @@ export default Vue.extend({
     await this.fetchSpecialWeaponEvents();
     this.selectedSpecialWeaponEventId = +this.specialWeaponEventId;
     if(!this.contracts.CryptoBlades || !this.contracts.BurningManager) return;
-    const forgeCost = await this.contracts.CryptoBlades.methods.mintWeaponFee().call({ from: this.defaultAccount });
-    const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
-    this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
+    this.updateInterval = setInterval(async () => { await this.updateMintWeaponFee(); }, 2000);
     const stakedSkillBalanceThatCanBeSpentBN: BN = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18));
-    this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
 
     if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8))).isLessThan(0)) {
       this.disableUseStakedForForge = true;
@@ -623,6 +622,12 @@ export default Vue.extend({
     this.burnCost = new BN(skillBurnCost).div(new BN(10).pow(18)).toFixed(4);
     if(window.location.href.split('&').find(x => x === 'showSpecialForge')) {
       Events.$emit('show-special-forge-modal');
+    }
+  },
+
+  destroyed() {
+    if(this.updateInterval) {
+      clearInterval(this.updateInterval);
     }
   },
 
@@ -857,6 +862,15 @@ export default Vue.extend({
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotBurn'));
       }
     },
+
+    async updateMintWeaponFee() {
+      if(!this.contracts.CryptoBlades) return;
+      const forgeCost = await this.contracts.CryptoBlades.methods.getMintWeaponFee().call({ from: this.defaultAccount });
+      const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
+      console.log(forgeCost, skillForgeCost);
+      this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
+      this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
+    }
   },
 
   components: {
