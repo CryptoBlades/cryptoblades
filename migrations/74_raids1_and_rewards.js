@@ -7,6 +7,7 @@ const Raid1 = artifacts.require("Raid1");
 const KeyLootbox = artifacts.require("KeyLootbox");
 const RaidTrinket = artifacts.require("RaidTrinket");
 const Junk = artifacts.require("Junk");
+const NFTMarket = artifacts.require("NFTMarket");
 
 module.exports = async function (deployer, network, accounts) {
 
@@ -36,4 +37,9 @@ module.exports = async function (deployer, network, accounts) {
   await raid1.registerLink(keyLootbox.address, LINK_KEYBOX);
   await raid1.registerLink(raidTrinket.address, LINK_TRINKET);
   await raid1.registerLink(junk.address, LINK_JUNK);
+
+  const market = await NFTMarket.deployed();
+  await market.allowToken(keyLootbox.address);
+  await market.allowToken(raidTrinket.address);
+  await market.allowToken(junk.address);
 };
