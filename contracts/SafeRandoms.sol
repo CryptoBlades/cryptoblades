@@ -184,8 +184,7 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
         if(resolve)
             _resolveSeedPublic(user);
 
-        seed = readSingleSeed(user, requestID, false);
-        require(seed != 0);
+        seed = readSingleSeed(user, requestID, false); // reverts on zero
         delete singleSeedRequests[user][requestID];
 
         if(emitPopEvent)
@@ -196,8 +195,16 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
     }
 
     function readSingleSeed(address user, uint256 requestID, bool allowZero) public view returns (uint256 seed) {
-        seed = uint(seedHashes[singleSeedRequests[user][requestID]]);
-        require(allowZero || seed != 0);
+        if(seedHashes[singleSeedRequests[user][requestID]] == 0) {
+            require(allowZero);
+            // seed stays 0 by default if allowed
+        }
+        else {
+            seed = uint256(keccak256(abi.encodePacked(
+                seedHashes[singleSeedRequests[user][requestID]],
+                user, requestID
+            )));
+        }
     }
 
     function saltSingleSeed(address user, uint256 requestID, bool resolve) public restricted returns (uint256 seed) {
