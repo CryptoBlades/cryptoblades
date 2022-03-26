@@ -4,7 +4,8 @@
     <div class="content dark-bg-text">
       <b-row>
         <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
-        <b-col :class="toggleSideBar ? 'can-show-app' : 'col-xl-9 col-lg-8 col-md-8 col-sm-10 cols-11 set-normal'">
+        <b-col :class="toggleSideBar ? 'can-show-app' : 'col-xl-9 col-lg-8 col-md-8 col-sm-10 cols-11 set-normal'"
+        :id="!featureFlagStakeOnly && currentCharacterId !== null ? 'bg-combat' : ''">
         <!-- :class="!featureFlagStakeOnly && currentCharacterId !== null ? 'bg-image' : ''"> -->
           <router-view v-if="canShowApp" />
         </b-col>
@@ -470,6 +471,9 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   margin-left: auto;
   margin-right: auto;
   transition: 1s all;
+}
+
+#bg-combat{
   background-image: url('./assets/combat-bg.png');
 }
 
