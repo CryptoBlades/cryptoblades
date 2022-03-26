@@ -8,7 +8,7 @@
         <!-- :class="!featureFlagStakeOnly && currentCharacterId !== null ? 'bg-image' : ''"> -->
           <router-view v-if="canShowApp" />
         </b-col>
-        <WeaponRowGrid v-if="showWeapon" v-model="currentWeaponId" :checkForDurability="true"/>
+        <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
       </b-row>
     </div>
     <div class="content dark-bg-text" v-if="!canShowApp">
@@ -126,6 +126,7 @@ export default {
     isOptions: false,
     showWeapon: false,
     currentWeaponId: null,
+    weaponId: null,
     toggleSideBar: true
   }),
 
@@ -157,9 +158,6 @@ export default {
 
     async currentCharacterId() {
       await this.updateCharacterStamina(this.currentCharacterId);
-    },
-    currentWeaponId(){
-      Events.$emit('setWeaponId', this.currentWeaponId);
     },
     $route(to) {
       // react to route changes
@@ -340,6 +338,11 @@ export default {
     Events.$on('weapon-inventory', (bol) =>{
       this.showWeapon = bol;
     });
+
+    Events.$on('chooseweapon', (id) =>{
+      this.weaponId = id;
+    });
+
     Events.$on('toggle-sideBar', (bol) =>{
       this.toggleSideBar = bol;
     });

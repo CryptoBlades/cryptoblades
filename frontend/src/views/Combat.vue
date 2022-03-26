@@ -82,9 +82,9 @@
               <div class="col weapon-selection mb-4">
                 <div class="header-row d-flex justify-content-between">
                   <div class="d-flex align-items-end selectedWeaponDetails">
-                    <div class="message-box select-weapons" v-if="!selectedWeaponId">
+                    <div class="select-weapons" v-if="!selectedWeaponId">
                        <span class="isMobile">{{$t('combat.selectAWeapon')}}</span>
-                        <button :v-tooltip="$t('combat.changeWeapon')"  class="ml-3 ct-btn mb-3 ml-2" @click="changeEquipedWeapon()">
+                        <button :v-tooltip="$t('combat.changeWeapon')"  class="ml-3 ct-btn ml-2" @click="changeEquipedWeapon()">
                           <img src="../assets/swithc-wep.png">
                       </button>
                     </div>
@@ -107,6 +107,7 @@
 
               <transition-group
                 appear @before-enter="beforeEnter" @enter="enter"
+                :key="index"
                 class="row mb-3 enemy-container" v-if="targets.length > 0">
               <div class="col-12 col-md-6 col-lg-6 col-sm-6 col-xl-3 encounter" v-for="(e, i) in targets" :key="e.original" :data-index="i">
                 <div class="encounter-container">
@@ -223,12 +224,15 @@ export default {
       powerAvg: null,
       expectedSkill: null,
       activeCard: null,
-      isToggled: false
+      isToggled: false,
+      index: 1
     };
   },
   async mounted(){
-    Events.$on('setWeaponId', (id) =>{
+    this.selectedWeaponId = this.currentWeaponId;
+    Events.$on('chooseweapon', (id) =>{
       this.selectedWeaponId = id;
+      this.index++;
     });
   },
   created() {
@@ -246,7 +250,7 @@ export default {
     clearInterval(this.counterInterval);
   },
   computed: {
-    ...mapState(['currentCharacterId']),
+    ...mapState(['currentCharacterId','currentWeaponId']),
     ...mapGetters([
       'getTargetsByCharacterIdAndWeaponId',
       'ownCharacters',
@@ -790,6 +794,16 @@ div.encounter.text-center {
   font-size: 0.8em;
 }
 
+.selectedWeaponDetails > div >  button > img{
+  width: 30px;
+}
+
+.selectedWeaponDetails > div {
+  display: flex;
+  align-items: flex-end;
+}
+
+
 .loot-chest{
   position: absolute;
   bottom: 0;
@@ -905,6 +919,16 @@ h1 {
   width: 30px;
   margin-left: 20px;
 }
+
+.select-weapons .ct-btn > img{
+  width: 30px;
+  margin-left: 20px;
+}
+
+.select-weapons .ct-btn{
+  background-color: rgba(0, 0, 0, 0);
+}
+
 
 
 .message-box  .ct-btn{
@@ -1143,7 +1167,7 @@ h1 {
 
 /* for change weapon compnent */
 .change-weapon{
-  position: absolute;
+  position: fixed;
   right: 0;
   height: 100vh;
   width: 30%;

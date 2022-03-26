@@ -415,6 +415,7 @@ export default Vue.extend({
       this.$emit('chooseweapon', id);
       this.$emit('choose-weapon', id);
       Events.$emit('weapon-inventory', false);
+      Events.$emit('chooseweapon', id);
     },
     checkStorageFavorite() {
       const favoritesFromStorage = localStorage.getItem('favorites');
@@ -523,6 +524,8 @@ export default Vue.extend({
    margin-bottom: 20px;
 }
 .weapon-grid {
+  overflow-x: scroll;
+  height: 80vh;
   list-style-type: none;
   justify-content: left;
   margin: 0;
@@ -611,14 +614,13 @@ export default Vue.extend({
 
 /* for change weapon compnent */
 .change-weapon{
-  position: absolute;
+  position: fixed;
   right: 0;
   top: 0;
   height: 100vh;
   width: 450px;
   z-index: 9999;
   background-color: rgb(27, 29, 24);
-  overflow-x:auto;
 }
 
 .cw-content h4{
