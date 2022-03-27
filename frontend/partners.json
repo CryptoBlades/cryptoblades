@@ -68,6 +68,12 @@
       "logo": "spintop.png",
       "details": "Spintop's vision is to create a single platform that unites the scattered blockchain gaming world. Designed as a dynamic GameFi ecosystem where the community of players, investors and game developers can discover and play games, trade their tokens, and share NFT’s, Spintop has the tools you need to experience blockchain gaming to its fullest.",
       "website": "https://spintop.network/"
+    },
+    "Hololoot": {
+      "logo": "hololoot.png",
+      "details": "Hololoot introduces the world's first AR NFT Generator, Marketplace, and Metaverse designed for widespread adoption. Our goal is to bring the 3D assets of the Metaverse into reality through our proprietary AR tech stack.",
+      "website": "https://www.hololoot.io/",
+      "note": "This token has a 3% fee upon claiming"
     }
   }
 }
