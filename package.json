@@ -50,7 +50,7 @@
     "contract:prepare": "npm run build",
     "contract:deploy": "npm run deploy",
     "build": "truffle compile",
-    "postbuild": "node scripts/generate-ts-from-abis.js",
+    "postbuild": "npm --prefix frontend/ run setup-app-config && node scripts/generate-ts-from-abis.js",
     "test": "truffle test",
     "test:local": "hardhat test",
     "deploy": "truffle migrate --reset",
