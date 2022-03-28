@@ -125,6 +125,7 @@ h1{
 @media only screen and (max-width: 768px)  {
   .stake-select-item {
     width: 100%;
+    margin: 1rem 0;
   }
 }
 </style>

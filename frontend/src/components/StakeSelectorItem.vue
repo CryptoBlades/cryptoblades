@@ -602,7 +602,7 @@ export default {
 <style scoped>
 .container {
   background: rgb(22, 22, 22); /* change to: background: #000E1D; */
-  padding: 45px 40px;
+  /* padding: 45px 40px; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -756,6 +756,7 @@ export default {
   border: 1px solid #404857;
   touch-action: manipulation;
   margin-bottom: 20px;
+  width: 100%;
 }
 
 .stake-submit-button{
@@ -810,6 +811,9 @@ export default {
 .stats-col{
   align-items: center;
   justify-content: center;
+}
+.inputSection{
+  width: 100%;
 }
 }
 </style>
