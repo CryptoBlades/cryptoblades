@@ -136,8 +136,9 @@ import { toBN } from '@/utils/common';
 import { mapActions, mapState } from 'vuex';
 import { secondsToDDHHMMSS } from '../utils/date-time';
 import Multiselect from 'vue-multiselect';
+import Vue from 'vue';
 
-export default {
+export default Vue.extend({
   props: [
     'stakeTitle',
     'stakeTokenName',
@@ -596,7 +597,7 @@ export default {
       console.log(this.ownedLandIds);
     }
   }
-};
+});
 </script>
 
 <style scoped>

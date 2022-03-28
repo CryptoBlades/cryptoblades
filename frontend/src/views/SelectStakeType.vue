@@ -28,11 +28,11 @@ import _ from 'lodash';
 BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 import StakeSelectorItem from '../components/StakeSelectorItem.vue';
-
+import Vue from 'vue';
 import { humanReadableDetailsForStakeTypes, humanReadableDetailsForNftStakeTypes } from '../stake-types';
 import { isNftStakeType } from '@/interfaces';
 
-export default {
+export default Vue.extend({
   components: {
     StakeSelectorItem,
   },
@@ -91,7 +91,7 @@ export default {
   async mounted() {
     await this.fetchStakeOverviewData();
   }
-};
+});
 </script>
 
 <style scoped>
