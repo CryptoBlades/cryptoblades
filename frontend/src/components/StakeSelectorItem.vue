@@ -116,7 +116,7 @@
           <span class="multiselect__single" v-if="idsToStake && idsToStake.length">{{ idsToStake.length }} {{$t('stake.idsSelected')}}</span>
         </template>
         <template slot="noOptions">
-          <span>{{(isDeposit ? $t('stake.noLandStaked') : $t('stake.noLandToStake'))}}</span>
+          <span>{{(isDeposit ? $t('stake.StakeSelectorItem.noLandStaked') : $t('stake.StakeSelectorItem.noLandToStake'))}}</span>
         </template>
       </multiselect>
       <button class="stake-button stake-submit-button"
