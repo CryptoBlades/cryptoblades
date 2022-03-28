@@ -401,47 +401,6 @@ export default {
         this.textAmount = newBnAmount.dividedBy(1e18);
       },
     },
-
-    stakeUnclaimedRewardsButtonShown() {
-      return false;
-      // return stakeTypeThatCanHaveUnclaimedRewardsStakedTo === this.stakeType && this.isDeposit;
-    },
-
-    canStakeUnclaimedRewards() {
-      return !this.loading && toBN(this.skillRewards).gt(0);
-      // return true;
-    },
-
-    formattedSkillRewards() {
-      const b = toBN(this.skillRewards);
-      return b.dividedBy(1e18).toFixed(4);
-    },
-    exclamationMark() {
-      let exclamationMark = '';
-
-      if (this.rewardDistributionTimeLeft > 0) {
-        exclamationMark += 'green-exclamation-mark ';
-      } else {
-        exclamationMark += 'red-exclamation-mark ';
-      }
-
-      if (toBN(this.currentRewardEarned > 0)) {
-        exclamationMark += 'gold-background';
-      }
-      return exclamationMark;
-    },
-    rewardTooltip() {
-      if(this.rewardDistributionTimeLeft > 0) {
-        if (this.currentRewardEarned > 0) {
-          return this.$t('stake.StakeSelectorItem.rewardsAvailableEarnedTooltip');
-        }
-        return this.$t('stake.StakeSelectorItem.rewardsAvailableTooltip');
-      }
-      if (this.currentRewardEarned > 0) {
-        return this.$t('stake.StakeSelectorItem.rewardsDepletedEarnedTooltip');
-      }
-      return this.$t('stake.StakeSelectorItem.rewardsDepletedTooltip');
-    },
   },
   watch: {
     rewardDistributionTimeLeftInternal(newValue, oldValue) {
