@@ -18,6 +18,7 @@
     "settings": "Settings",
     "nftbridge": "NFT Bridge",
     "wiki": "Wiki",
+    "nftDisplay": "Nft Display",
     "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
   },
   "ClaimRewardsBar": {
@@ -732,6 +733,7 @@
     "complete": "Complete",
     "questComplete": "Quest complete",
     "submit": "Submit",
+    "submitDisclaimer": "Disclaimer: All nfts and resources submitted for quest progression will be lost forever",
     "reputation": "Reputation",
     "limitedOptional": "Limited (optional)",
     "supplyOptional": "Supply (optional)",
