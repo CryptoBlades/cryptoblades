@@ -434,6 +434,7 @@ export default Vue.extend({
 }
 
 .claim-xp-bar {
+  height: 55px;
   gap: 0.5rem;
 }
 
