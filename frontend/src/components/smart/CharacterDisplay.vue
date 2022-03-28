@@ -1,8 +1,8 @@
 <template>
   <div class="character-display-container bd-right" >
         <div class="row character-full-list">
-          <div class="btn-trigger" @click="hideSideBar(isToggled ? false : true)">
-            <img :class="isToggled ? 'rotateLeft' : 'rotateRight'" src="../../assets/left-arrow.png" alt="">
+          <div class="btn-trigger" @click="hideSideBar(!toggled)">
+            <img :class="!toggled ? 'rotateLeft' : 'rotateRight'" src="../../assets/left-arrow.png" alt="">
           </div>
           <b-col class="character-list"
               v-bind:class="[getIsInCombat ? 'disabled-li' : '', getIsCharacterViewExpanded ? '' : 'centered-list']">
@@ -91,8 +91,7 @@ export default Vue.extend({
   data() {
     return {
       traits: CharacterTrait,
-      isPlaza : false,
-      isToggled: false
+      isPlaza : false
     };
   },
   methods: {
@@ -126,7 +125,6 @@ export default Vue.extend({
 
     //toggle the sidebar
     hideSideBar(bol: any){
-      this.isToggled = bol;
       Events.$emit('toggle-sideBar', bol);
     },
 

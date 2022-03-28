@@ -128,7 +128,7 @@ export default {
     showWeapon: false,
     currentWeaponId: null,
     weaponId: null,
-    toggleSideBar: true
+    toggleSideBar: false
   }),
 
   computed: {
