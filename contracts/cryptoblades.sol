@@ -556,12 +556,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _updateWeaponMintFee(uint256 num) internal {
-        mintWeaponFee = getMintWeaponFee() + ABDKMath64x64.divu(vars[VAR_WEAPON_FEE_INCREASE].mul(num), 10000);
+        mintWeaponFee = getMintWeaponFee() + ABDKMath64x64.divu(vars[VAR_WEAPON_FEE_INCREASE].mul(num), 1e18);
         vars[VAR_WEAPON_MINT_TIMESTAMP] = block.timestamp;
     }
 
     function _updateCharacterMintFee() internal {
-        mintCharacterFee = getMintCharacterFee() + ABDKMath64x64.divu(vars[VAR_CHARACTER_FEE_INCREASE], 10000);
+        mintCharacterFee = getMintCharacterFee() + ABDKMath64x64.divu(vars[VAR_CHARACTER_FEE_INCREASE], 1e18);
         vars[VAR_CHARACTER_MINT_TIMESTAMP] = block.timestamp;
     }
 
