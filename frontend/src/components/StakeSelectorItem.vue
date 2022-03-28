@@ -53,14 +53,13 @@
       </div>
       <div class="progressBarWrapper"
         :style="(progressBarWidth === 100 && {opacity:0})">
-        <div
-        class="progressBar"
-        :style="{
-          width: progressBarWidth + '%',
-        }"
-        >
-        </div>
-        <span>{{estimatedUnlockTimeLeftFormatted}}</span>
+          <div
+            class="progressBar"
+            :style="{
+              width: progressBarWidth + '%',
+            }"
+          ></div>
+          <span>{{estimatedUnlockTimeLeftFormatted}}</span>
       </div>
     </div>
     <div class="stake-buttons">
@@ -77,9 +76,7 @@
         Unstake
         </button>
     </div>
-
     <div class="divider"></div>
-
     <div class="inputSection">
       <!-- Input for stake amount -->
       <input
@@ -110,9 +107,7 @@
         :options="(isDeposit ? ownedLandIds : stakedIds).filter(x => +x.tier === +tier || !tier) || []"
         :max="10" :multiple="true" :close-on-select="false" :clear-on-select="false" :placeholder="$t('stake.pickId')"
         :custom-label="idWithTier" track-by="id"
-        tagPosition="bottom"
-      >
-      <!-- :noOptions="(isDeposit ? 'no land staked' : 'you have no land to stake' )" -->
+        tagPosition="bottom">
         <template slot="selection" :slot-scope="{ idsToStake }">
           <span class="multiselect__single" v-if="idsToStake && idsToStake.length">{{ idsToStake.length }} {{$t('stake.idsSelected')}}</span>
         </template>
@@ -120,7 +115,6 @@
           <span>{{(isDeposit ? 'No don\'t have any unstaked land!' : 'No land staked or still locked')}}</span>
         </template>
       </multiselect>
-
       <button class="stake-button stake-submit-button"
         @click="onSubmit"
         :disabled="currentState !== 'ok'"
@@ -165,7 +159,6 @@ export default Vue.extend({
       loading: false,
       errorWhenUpdating: null,
       rewardClaimLoading: false,
-
       stakeUnlockTimeLeftCurrentEstimate: 0,
       stakeRewardDistributionTimeLeftCurrentEstimate: 0,
       ownedLandIds: [],
@@ -244,11 +237,6 @@ export default Vue.extend({
       default:
         return 'unknown';
       }
-    },
-
-    stakingRewardsName() {
-      if(this.stakeType.startsWith('king') || this.stakeType.startsWith('cbkLand')) return 'KING';
-      return 'SKILL';
     },
 
     minimumStakeTimeFormatted() {
@@ -591,10 +579,8 @@ export default Vue.extend({
     },
 
     async updateOwnedLands() {
-      console.log(this.ownedLandIds);
       this.ownedLandIds = await this.getOwnedLandIdsWithTier();
       this.stakedIds = await this.getStakedIds(this.stakeType);
-      console.log(this.ownedLandIds);
     }
   }
 });
@@ -603,7 +589,7 @@ export default Vue.extend({
 <style scoped>
 .container {
   background: rgb(22, 22, 22); /* change to: background: #000E1D; */
-  /* padding: 45px 40px; */
+  padding: 45px 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -627,7 +613,6 @@ export default Vue.extend({
 
 .stake-stats-item-title{
   font: normal normal normal 16px/21px Roboto;
-  letter-spacing: 0px;
   color: #EDCD90;
   margin-bottom:5px;
 }
@@ -658,7 +643,7 @@ export default Vue.extend({
   background: #404857;
 }
 .progressBar{
-  height:15px;
+  height: 15px;
   background: hsl(43, 29%, 48%);
   border-radius: 5px;
   position: absolute;
@@ -666,7 +651,7 @@ export default Vue.extend({
   animation: progressBar 3s ease-in-out;
   animation-fill-mode:both;
 }
-.progressBarWrapper>span{
+.progressBarWrapper > span{
   font: 12px Roboto;
   position: absolute;
   color:#fff;
@@ -678,7 +663,7 @@ export default Vue.extend({
   0% {
     background: hsl(43, 0%, 48%);
     width: 0;
-    }
+  }
 }
 .claim-rewards{
   margin-top: 15px;
@@ -809,12 +794,12 @@ export default Vue.extend({
   .claim-rewards-btns{
     justify-content: center;
   }
-.stats-col{
-  align-items: center;
-  justify-content: center;
-}
-.inputSection{
-  width: 100%;
-}
+  .stats-col{
+    align-items: center;
+    justify-content: center;
+  }
+  .inputSection{
+    width: 100%;
+  }
 }
 </style>
