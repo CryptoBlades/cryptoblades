@@ -16,6 +16,7 @@ export default {
   },
 
   methods:{
+
     setIdForElement(){
       if(this.trait === PvPConstants.FIRE_ELEMENT){
         return 'fire-element';
