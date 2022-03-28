@@ -68,20 +68,20 @@
     </div>
     <div class="stake-buttons">
       <button class="stake-button"
-        @click="isDeposit = true"
-        :class="{ btn_active: isDeposit }"
+        @click="isDeposit = startedStaking = true"
+        :class="{ btn_active: (isDeposit&&startedStaking) }"
         >
         {{ $t('stake.StakeSelectorItem.stake') }}
         </button>
       <button class="stake-button"
-        @click="isDeposit = false"
-        :class="{ btn_active: !isDeposit }"
+        @click="isDeposit = false; startedStaking = true"
+        :class="{ btn_active: (!isDeposit&&startedStaking) }"
         >
         {{ $t('stake.StakeSelectorItem.unstake') }}
         </button>
     </div>
     <div class="divider"></div>
-    <div class="inputSection">
+    <div class="inputSection" v-if="startedStaking">
       <!-- Input for stake amount -->
       <input
         v-if="!isNftStaking && currentState !== 'stakeLocked'"
@@ -161,6 +161,7 @@ export default Vue.extend({
       isOpen: false,
       isDeposit: true,
       loading: false,
+      startedStaking: false,
       errorWhenUpdating: null,
       rewardClaimLoading: false,
       stakeUnlockTimeLeftCurrentEstimate: 0,
