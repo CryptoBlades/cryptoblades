@@ -905,7 +905,17 @@
       "rewardsDepletedTooltip":"Rewards depleted.",
       "rewardsAvailableEarnedTooltip":"You have rewards ready to claim in this stake pool and you can still earn more.",
       "rewardsDepletedEarnedTooltip":"Rewards depleted but you can claim your reward.",
-      "deprecatedTooltip": "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed."
+      "deprecatedTooltip": "This stake pool has been deprecated, and should not be staked in anymore. You can still pull tokens out or stake at your own risk, but it is not recommended, and it cannot be reversed.",
+      "totalStaked": "Total Staked",
+      "staked": "Staked",
+      "availableInWallet": "Available in Wallet",
+      "rewards": "Rewards",
+      "claim": "Claim!",
+      "stake": "Stake",
+      "unstake": "Unstake",
+      "max": "MAX",
+      "noLandStaked": "You don't have any unstaked Land!",
+      "noLandToStake": "No land staked or still locked"
     },
     "tier": "Tier",
     "pickId": "Pick ID",
