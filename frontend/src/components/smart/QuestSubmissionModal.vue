@@ -9,6 +9,7 @@
            || quest.requirementType === RequirementType.SOUL
            || isCurrency ?
             submitAmount() : submit()">
+    <h5 class="text-center">{{ $t('quests.submitDisclaimer') }}</h5>
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
                    showGivenWeaponIds @chooseweapon="addBurnToken"
@@ -153,7 +154,7 @@ export default Vue.extend({
     },
 
     getRequiredStars(): number {
-      if(this.quest?.requirementRarity === undefined) return 0;
+      if (this.quest?.requirementRarity === undefined) return 0;
       return this.quest.requirementRarity + 1;
     },
 
