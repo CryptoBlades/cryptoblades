@@ -686,8 +686,6 @@ div.bg-success {
 .multiselect--above .multiselect__content-wrapper{
   border-top:none;
 }
-.multiselect__tags>input,.multiselect__placeholder,.multiselect__content-wrapper{
-}
 
 .multiselect__option--selected.multiselect__option--highlight,
 .multiselect__option--selected.multiselect__option--highlight::after{
