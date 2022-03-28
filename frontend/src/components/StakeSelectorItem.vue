@@ -1,6 +1,10 @@
 <template>
   <div class="container">
-    <h1 class="stake-type-title">{{ stakeTitle }}</h1>
+    <h1 class="stake-type-title">{{ stakeTitle }}
+      <b-icon-question-circle-fill v-if="deprecated"
+        v-tooltip="$t('stake.StakeSelectorItem.deprecatedTooltip')" />
+    </h1>
+
     <div class="stake-stats">
       <div class="stake-stats-item">
         <div class="stake-stats-item-title">{{ $t('stake.StakeSelectorItem.earn') }}</div>
@@ -24,22 +28,22 @@
     </div>
     <div class="stats-row">
       <div class="stats-col">
-        <div class="stake-stats-item-title">Total Staked</div>
+        <div class="stake-stats-item-title">{{ $t('stake.StakeSelectorItem.totalStaked') }}</div>
         <div class="stake-stats-item-value">{{ totalStakedFormatted }} {{stakeTokenName}}</div>
       </div>
       <div class="stats-col">
-        <div class="stake-stats-item-title">Staked</div>
+        <div class="stake-stats-item-title">{{ $t('stake.StakeSelectorItem.staked') }}</div>
         <div class="stake-stats-item-value">{{ stakedBalanceFormatted }} {{stakeTokenName}}</div>
       </div>
       <div class="stats-col">
-        <div class="stake-stats-item-title">Available in Wallet</div>
+        <div class="stake-stats-item-title">{{ $t('stake.StakeSelectorItem.availableInWallet') }}</div>
         <div class="stake-stats-item-value">{{ walletBalanceFormatted }} {{stakeTokenName}}</div>
       </div>
     </div>
     <div class="claim-rewards-wrapper">
       <div class="claim-rewards">
         <div>
-          <div class="stake-stats-item-title">Rewards</div>
+          <div class="stake-stats-item-title">{{ $t('stake.StakeSelectorItem.rewards') }}</div>
           <div class="stake-stats-item-value">{{currentRewardEarnedFormatted}} {{rewardTokenName}}</div>
         </div>
         <div class="claim-rewards-btns">
@@ -47,7 +51,7 @@
             @click="onClaimReward"
             :disabled="rewardClaimState !== 'ok' || !showRewardClaimSection"
             data-toggle="tooltip" data-placement="right" :title="claimRewardButtonLabel"
-            >Claim!
+            >{{ $t('stake.StakeSelectorItem.claim') }}
           </button>
         </div>
       </div>
@@ -67,13 +71,13 @@
         @click="isDeposit = true"
         :class="{ btn_active: isDeposit }"
         >
-        Stake
+        {{ $t('stake.StakeSelectorItem.stake') }}
         </button>
       <button class="stake-button"
         @click="isDeposit = false"
         :class="{ btn_active: !isDeposit }"
         >
-        Unstake
+        {{ $t('stake.StakeSelectorItem.unstake') }}
         </button>
     </div>
     <div class="divider"></div>
@@ -99,7 +103,7 @@
         <button class="stake-button ratio-button" @click="inputByRatio(0.25)">25%</button>
         <button class="stake-button ratio-button" @click="inputByRatio(0.50)">50%</button>
         <button class="stake-button ratio-button" @click="inputByRatio(0.75)">75%</button>
-        <button class="stake-button ratio-button" @click="inputByRatio(1)">MAX</button>
+        <button class="stake-button ratio-button" @click="inputByRatio(1)">{{ $t('stake.StakeSelectorItem.max') }}</button>
       </div>
 
       <!-- Input staking NFTs  && ownedLandIds && stakedIds -->
@@ -112,7 +116,7 @@
           <span class="multiselect__single" v-if="idsToStake && idsToStake.length">{{ idsToStake.length }} {{$t('stake.idsSelected')}}</span>
         </template>
         <template slot="noOptions">
-          <span>{{(isDeposit ? 'You don\'t have any unstaked land!' : 'No land staked or still locked')}}</span>
+          <span>{{(isDeposit ? $t('stake.noLandStaked') : $t('stake.noLandToStake'))}}</span>
         </template>
       </multiselect>
       <button class="stake-button stake-submit-button"
