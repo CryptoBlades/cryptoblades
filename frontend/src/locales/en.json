@@ -897,7 +897,7 @@
       "yieldTooltip": "Estimated yearly yield per NFT.",
       "apy": "APY",
       "yield": "YIELD",
-      "stakeLocked": "Stake locked",
+      "stakeLocked": "Lock",
       "rewardsDuration": "Distribution",
       "warning": "Warning",
       "select": "Select",
