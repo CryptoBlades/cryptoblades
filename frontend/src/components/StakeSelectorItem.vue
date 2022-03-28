@@ -112,7 +112,7 @@
           <span class="multiselect__single" v-if="idsToStake && idsToStake.length">{{ idsToStake.length }} {{$t('stake.idsSelected')}}</span>
         </template>
         <template slot="noOptions">
-          <span>{{(isDeposit ? 'No don\'t have any unstaked land!' : 'No land staked or still locked')}}</span>
+          <span>{{(isDeposit ? 'You don\'t have any unstaked land!' : 'No land staked or still locked')}}</span>
         </template>
       </multiselect>
       <button class="stake-button stake-submit-button"
