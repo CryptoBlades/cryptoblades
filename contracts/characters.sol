@@ -445,12 +445,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function safeTransferFrom(address from, address to, uint256 tokenId) override public {
-        // Adjust 'to' if the target is a garrison.
-        if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to) && balanceOf(to) >= characterLimit) {
-            garrison.redirectToGarrison(to, tokenId);
-            to = address(garrison);
-        }
-
         // Adjust 'from' if the source is a garrison.
         if((from != ownerOf(tokenId)) && (from == garrison.characterOwner(tokenId))) {
             garrison.redirectFromGarrison(from, tokenId);
@@ -460,6 +454,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
                 // Required by super.safeTransferFrom().
                 _approve(msg.sender, tokenId);
             }
+        }
+
+        // Adjust 'to' if the target is a garrison.
+        if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to) && balanceOf(to) >= characterLimit) {
+            garrison.redirectToGarrison(to, tokenId);
+            to = address(garrison);
         }
 
         // For garrison to garrison transfer, no need to actually transfer.
