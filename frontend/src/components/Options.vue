@@ -166,7 +166,7 @@
             </router-link>
 
             <router-link class="menu-icon" :to="{ name: 'nft-display' }" exact>
-              <img src="../assets/navbar-icons/nft-display.svg" class="nft-display-icon" alt="Nft Display"/>
+              <img src="../assets/navbar-icons/nft-display.svg" class="gold-icon" alt="Nft Display"/>
               <span>{{ $t("viewLink.nftDisplay") }}</span>
             </router-link>
 
@@ -177,7 +177,7 @@
               exact
               :class="supportsMerchandise ? '' : 'disabled-link'"
             >
-              <img src="../assets/navbar-icons/bazaar-icon.png" alt="Merchandise"/>
+              <img src="../assets/navbar-icons/shopping-bag.svg" class="gold-icon" alt="Merchandise"/>
               <span>{{ $t("viewLink.merchandise") }} <hint
                 v-if="!supportsMerchandise"
                 class="hint"
@@ -498,7 +498,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.nft-display-icon {
+.gold-icon {
   filter: invert(81%) sepia(97%) saturate(276%) hue-rotate(317deg) brightness(97%) contrast(91%);
 }
 
