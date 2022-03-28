@@ -18,6 +18,7 @@
     "settings": "Settings",
     "nftbridge": "NFT Bridge",
     "wiki": "Wiki",
+    "nftDisplay": "Nft Display",
     "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
   },
   "ClaimRewardsBar": {
