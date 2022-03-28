@@ -266,6 +266,7 @@ export default {
       allLoadStarted: false,
       loadCount: 0,
       loadCountTotal: 0,
+      showPlaceholder: false
     };
   },
 
