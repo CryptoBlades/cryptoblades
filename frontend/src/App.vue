@@ -675,6 +675,31 @@ div.bg-success {
   background: rgb(61, 61, 64);
   background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
 }
+
+.multiselect *{
+  background: transparent;
+  color:#fff;
+}
+.multiselect__tags, .multiselect__content-wrapper{
+  border:1px solid #404857;
+}
+.multiselect--above .multiselect__content-wrapper{
+  border-top:none;
+}
+.multiselect__tags>input,.multiselect__placeholder,.multiselect__content-wrapper{
+}
+
+.multiselect__option--selected.multiselect__option--highlight,
+.multiselect__option--selected.multiselect__option--highlight::after{
+  background: #9E8A57;
+}
+
+.multiselect__option--selected,
+.multiselect__option--selected::after,
+.multiselect__option--highlight,
+.multiselect__option--highlight::after{
+  background: #404857;
+}
 </style>
 <style scoped>
 .app {
