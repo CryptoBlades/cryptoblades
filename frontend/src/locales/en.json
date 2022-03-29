@@ -1060,7 +1060,7 @@
     "enterTheArena": "Enter the Arena",
     "enterArenaWillCost": " Entering the Arena will cost you {formattedEntryWager} $SKILL.",
     "playersCanAttackYou": " Players can attack you while you are in the Arena.",
-    "leavingWillCost": " Leaving the Arena will cost you {leavingArenaCost} $SKILL.",
+    "leavingWillCost": " If in a match, leaving the Arena will deduct {formattedWithdrawCost} $SKILL from your wager.",
     "iUnderstand": "I understand.",
     "enterArena": "Enter Arena",
     "equipment": "Equipment",

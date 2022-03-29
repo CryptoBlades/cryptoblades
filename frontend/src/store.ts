@@ -5435,6 +5435,15 @@ export function createStore(web3: Web3) {
         return reRollFeePercent;
       },
 
+      async getWithdrawFeePercent({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const withdrawFeePercent = await PvpArena.methods.withdrawFeePercent().call({ from: state.defaultAccount });
+
+        return withdrawFeePercent;
+      },
+
       async getPlayerPrizePoolRewards({ state }) {
         const { PvpArena } = state.contracts();
         if (!PvpArena || !state.defaultAccount) return;

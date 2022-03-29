@@ -22,14 +22,21 @@
     <a tabindex="0" class="infoPopover" id="duel-popover">
       <span>{{$t('pvp.battleOdds')}}</span>
       <div v-if="opponentInformation.fullPower" class="icon">!</div>
-    <b-popover v-if="opponentInformation.fullPower" ref="popover" target="duel-popover" triggers="hover blur" placement="bottom" custom-class="popoverWrapper">
-      <span class="popoverTitle">{{$t('pvp.battleOdds')}}</span>
-      <div class="oddsWrapper">
-        <p>{{$t('pvp.winChance')}}: {{ winChance }}%</p>
-        <p>{{$t('pvp.rankToEarn')}}: {{ rankPlusBonus }}</p>
-        <p class="goodLuck">{{$t('pvp.goodLuck')}}</p>
-      </div>
-    </b-popover>
+      <b-popover
+        v-if="opponentInformation.fullPower"
+        ref="popover"
+        target="duel-popover"
+        triggers="hover blur"
+        placement="bottom"
+        custom-class="popoverWrapper"
+      >
+        <span class="popoverTitle">{{$t('pvp.battleOdds')}}</span>
+        <div class="oddsWrapper">
+          <p>{{$t('pvp.winChance')}}: {{ winChance }}%</p>
+          <p>{{$t('pvp.rankToEarn')}}: {{ rankPlusBonus }}</p>
+          <p class="goodLuck">{{$t('pvp.goodLuck')}}</p>
+        </div>
+      </b-popover>
     </a>
     <div class="bottom">
       <div class="characterWrapper">
@@ -112,6 +119,7 @@
             @click="leaveArena"
             :disabled="loading || isCharacterInDuelQueue"
             :buttonText="$t('pvp.leaveArena')"
+            :buttonsubText="opponentInformation.fullPower ? '$SKILL: ' + formattedWithdrawCost : $t('pvp.free')"
             :secondary="true"
           />
         </div>
@@ -251,6 +259,9 @@ export default {
         information: {}
       }
     },
+    withdrawCost: {
+      default: null
+    }
   },
 
   data() {
@@ -299,6 +310,11 @@ export default {
     formattedReRollCost() {
       return new BN(this.reRollCost).div(new BN(10).pow(18)).toFixed(2);
     },
+
+    formattedWithdrawCost() {
+      return new BN(this.withdrawCost).div(new BN(10).pow(18)).toFixed(2);
+    },
+
     formattedMatchablePlayersCount(){
       // TODO subtract from this number the player's other characters that are locked in the arena
       const formattedMatchablePlayersCount = this.matchablePlayersCount - 1;
@@ -383,6 +399,7 @@ export default {
       'getDecisionSeconds',
       'getDuelCost',
       'getReRollFeePercent',
+      'getWithdrawFeePercent',
       'approvePvpSkillSpending',
       'getPvpContract',
       'getFighterByCharacter',

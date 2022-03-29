@@ -21,6 +21,7 @@
               @click="leaveArena"
               :disabled="loading"
               :buttonText="$t('pvp.leaveArena')"
+              :buttonsubText="opponentInformation.fullPower ? '$SKILL: ' + formattedWithdrawCost : $t('pvp.free')"
               secondary
             />
           </div>
@@ -85,6 +86,7 @@
 </template>
 
 <script>
+import BN from 'bignumber.js';
 import { mapState, mapActions } from 'vuex';
 import PvPWeapon from './PvPWeapon.vue';
 import PvPShield from './PvPShield.vue';
@@ -139,6 +141,20 @@ export default {
         information: {}
       }
     },
+    opponentInformation: {
+      default: {
+        if: null,
+        element: '',
+        name: '',
+        level: null,
+        rank: null,
+        power: null,
+        fullPower: null,
+      }
+    },
+    withdrawCost: {
+      default: null
+    },
     duelHistory: {
       default: []
     }
@@ -156,6 +172,9 @@ export default {
 
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount']),
+    formattedWithdrawCost() {
+      return new BN(this.withdrawCost).div(new BN(10).pow(18)).toFixed(2);
+    },
   },
 
   methods: {
