@@ -4753,6 +4753,28 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacterCosmetic', id)
         ]);
       },
+
+      async addPartnerProject({state}, {partnerProject}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        console.log(partnerProject);
+
+        return await Treasury.methods.addPartnerProject(
+          partnerProject.name,
+          partnerProject.tokenSymbol,
+          partnerProject.tokenAddress,
+          partnerProject.tokenSupply,
+          partnerProject.tokenPrice,
+          partnerProject.distributionTime,
+          partnerProject.isActive,
+          partnerProject.logo,
+          partnerProject.details,
+          partnerProject.website,
+          partnerProject.note,
+        ).send({from: state.defaultAccount});
+      },
+
       async fetchPartnerProjects({ state, dispatch }) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;

@@ -823,7 +823,8 @@
       "cbkLand": "CBK Land",
       "weapons": "Weapons",
       "burningManager": "Burning Manager",
-      "partnerVault": "Partner Vault"
+      "partnerVault": "Partner Vault",
+      "treasury": "Treasury"
     },
     "cbkLand": {
       "minter": "Minter",
@@ -878,6 +879,21 @@
       "storeInPartnerVault": "Store in partner vault",
       "checkERC721Balance": "Check ERC721 balance",
       "checkERC20Balance": "Check ERC20 balance"
+    },
+    "treasury": {
+      "addNewPartnerProject": "Add new partner project",
+      "projectName": "Project name",
+      "tokenSymbol": "Token symbol",
+      "tokenAddress": "Token address",
+      "tokenSupply": "Token supply",
+      "tokensClaimed": "Tokens claimed",
+      "tokenPrice": "Token price",
+      "distributionTime": "Distribution time",
+      "isProjectActive": "Is project active",
+      "logoUrl": "Logo URL",
+      "details": "Details",
+      "websiteUrl": "Website URL",
+      "noteOptional": "Note (optional)"
     },
     "identifiers": "Identifiers",
     "amount": "Amount",
