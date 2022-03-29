@@ -4,7 +4,7 @@
     <div class="content dark-bg-text">
       <b-row>
         <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
-        <b-col :class="toggleSideBar ? 'can-show-app' : 'col-xl-9 col-lg-8 col-md-8 col-sm-10 cols-11 set-normal'"
+        <b-col :class="renderPageDisplay()"
         :id="!featureFlagStakeOnly && currentCharacterId !== null ? 'bg-combat' : ''">
         <!-- :class="!featureFlagStakeOnly && currentCharacterId !== null ? 'bg-image' : ''"> -->
           <router-view v-if="canShowApp" />
@@ -222,6 +222,22 @@ export default {
       if (id !== null) {
         await this.fetchCharacterStamina(id);
       }
+    },
+
+    renderPageDisplay(){
+      let toDisplay;
+
+      if(!this.featureFlagStakeOnly && this.currentCharacterId !== null){
+        if(this.toggleSideBar){
+          toDisplay = 'can-show-app';
+        }else{
+          toDisplay = 'col-xl-9 col-lg-8 col-md-8 col-sm-10 cols-11 set-normal';
+        }
+      }else{
+        toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
+      }
+
+      return toDisplay;
     },
 
     checkStorage() {
@@ -475,6 +491,8 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
 
 #bg-combat{
   background-image: url('./assets/combat-bg.png');
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 hr.hr-divider {

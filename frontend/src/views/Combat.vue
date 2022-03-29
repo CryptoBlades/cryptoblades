@@ -1115,6 +1115,11 @@ h1 {
   .encounter img {
     width: calc(100% - 60px);
   }
+
+  .frame-line {
+    display: none;
+  }
+
   .enemy-list{
     flex-direction:column;
     align-items:center;
