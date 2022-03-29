@@ -491,6 +491,8 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
 
 #bg-combat{
   background-image: url('./assets/combat-bg.png');
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 hr.hr-divider {
