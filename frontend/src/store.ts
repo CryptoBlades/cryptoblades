@@ -9,7 +9,6 @@ import {getConfigValue, setUpContracts} from './contracts';
 import {
   characterFromContract,
   junkFromContract,
-  partnerProjectFromContract,
   raidFromContract,
   shieldFromContract,
   targetFromContract,
@@ -45,6 +44,7 @@ import {abi as ierc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as erc20Abi} from '../../build/contracts/ERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import {SupportedProject} from '@/views/Treasury.vue';
 import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances, WeeklyReward} from '@/views/Quests.vue';
 import {abi as erc721Abi} from '../../build/contracts/IERC721.json';
 import BigNumber from 'bignumber.js';
@@ -4769,11 +4769,29 @@ export function createStore(web3: Web3) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        const partnerProject = partnerProjectFromContract(
-          await Treasury.methods.getPartnerProject(id).call(defaultCallOptions(state))
-        );
+        const partnerProjectRaw = await Treasury.methods.partneredProjects(id).call(defaultCallOptions(state));
+        const tokensClaimed = await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(state));
+        const logo = await Treasury.methods.projectLogo(id).call(defaultCallOptions(state));
+        const details = await Treasury.methods.projectDetails(id).call(defaultCallOptions(state));
+        const website = await Treasury.methods.projectWebsite(id).call(defaultCallOptions(state));
+        const note = await Treasury.methods.projectNote(id).call(defaultCallOptions(state));
 
-        commit('updatePartnerProjectsState', { partnerProjectId: id, partnerProject });
+        const partnerProject = {
+          id: +partnerProjectRaw[0],
+          name: partnerProjectRaw[1],
+          tokenSymbol: partnerProjectRaw[2],
+          tokenAddress: partnerProjectRaw[3],
+          tokenSupply: +partnerProjectRaw[4],
+          tokensClaimed: +tokensClaimed,
+          tokenPrice: +partnerProjectRaw[5],
+          isActive: partnerProjectRaw[6],
+          logo,
+          details,
+          website,
+          note,
+        } as SupportedProject;
+
+        commit('updatePartnerProjectsState', { partnerProjectId: partnerProject.id, partnerProject });
       },
 
       async fetchDefaultSlippage({ state, commit }) {
@@ -4799,18 +4817,14 @@ export function createStore(web3: Web3) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        const distributionTime = await Treasury.methods.getProjectDistributionTime(id).call(defaultCallOptions(state));
-
-        return distributionTime;
+        return await Treasury.methods.projectDistributionTime(id).call(defaultCallOptions(state));
       },
 
       async getPartnerProjectClaimedAmount({ state }, id) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        const claimedAmount = await Treasury.methods.getProjectClaimedAmount(id).call(defaultCallOptions(state));
-
-        return claimedAmount;
+        return await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(state));
       },
 
       async getSkillToPartnerRatio({ state, commit }, id) {

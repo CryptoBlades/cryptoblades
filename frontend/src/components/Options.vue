@@ -413,22 +413,6 @@ export default Vue.extend({
     canClaimTokens(): boolean {
       return !toBN(this.skillRewards).lte(0);
     },
-    supportedProjects(): SupportedProject[] {
-      const supportedProjects = this.getPartnerProjects.map(p => {
-        return {
-          id: p.id,
-          name: p.name,
-          tokenSymbol: p.tokenSymbol,
-          tokenAddress: p.tokenAddress,
-          tokenSupply: p.tokenSupply,
-          tokensClaimed: p.tokensClaimed,
-          tokenPrice: p.tokenPrice,
-          isActive: p.isActive
-        };
-      });
-
-      return supportedProjects;
-    },
   },
 
   methods: {
