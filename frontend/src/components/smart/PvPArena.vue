@@ -463,9 +463,9 @@ export default {
           };
         }
 
-        const defenderID = (await this.getMatchByFinder(this.currentCharacterId)).defenderID;
+        const { defenderID, createdAt } = (await this.getMatchByFinder(this.currentCharacterId));
 
-        if (+defenderID) {
+        if (+createdAt) {
           await this.updateOpponentInformation(defenderID);
         } else {
           this.clearOpponentInformation();
@@ -601,9 +601,9 @@ export default {
             };
           }
 
-          const defenderID = (await this.getMatchByFinder(value)).defenderID;
+          const { defenderID, createdAt } = (await this.getMatchByFinder(value));
 
-          if (+defenderID) {
+          if (+createdAt) {
             await this.updateOpponentInformation(defenderID);
           } else {
             this.clearOpponentInformation();
