@@ -8,8 +8,6 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./interfaces/IRandoms.sol";
 import "./cryptoblades.sol";
 import "./characters.sol";
-import "./weapons.sol";
-import "./shields.sol";
 import "./common.sol";
 import "./PvpCore.sol";
 
