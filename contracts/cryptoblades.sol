@@ -517,7 +517,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
-            mintWeaponFee
+            getMintWeaponFee()
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
                 .mul(ABDKMath64x64.fromUInt(num))
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
@@ -529,7 +529,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function mintWeaponUsingStakedSkill(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
-            mintWeaponFee
+            getMintWeaponFee()
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
         _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
@@ -1021,33 +1021,25 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function getMintWeaponFee() public view returns (int128) {
-        int128 decrease = ABDKMath64x64.divu(block.timestamp.sub(vars[VAR_WEAPON_MINT_TIMESTAMP]).mul(vars[VAR_MINT_FEE_DECREASE_SPEED]), 10000);
-        int128 minWeaponFee = ABDKMath64x64.fromUInt(vars[VAR_MIN_WEAPON_FEE]);
+        int128 decrease = ABDKMath64x64.divu(block.timestamp.sub(vars[VAR_WEAPON_MINT_TIMESTAMP]).mul(vars[VAR_MINT_FEE_DECREASE_SPEED]), 1e18);
+        int128 weaponFeeMin = ABDKMath64x64.divu(vars[VAR_MIN_WEAPON_FEE], 100);
         if(decrease > mintWeaponFee) {
-            return minWeaponFee;
+            return weaponFeeMin;
         }
-        if(mintWeaponFee - decrease < minWeaponFee) {
-            return minWeaponFee;
+        if(mintWeaponFee - decrease < weaponFeeMin) {
+            return weaponFeeMin;
         }
         return mintWeaponFee.sub(decrease);
     }
 
-    function getDecrease() public view returns (int128) {
-        return ABDKMath64x64.fromUInt((block.timestamp.sub(vars[VAR_CHARACTER_MINT_TIMESTAMP])).mul(vars[VAR_MINT_FEE_DECREASE_SPEED]));
-    }
-
-    function getMinFee() public view returns (int128) {
-        return ABDKMath64x64.fromUInt(vars[VAR_MIN_CHARACTER_FEE]);
-    }
-
     function getMintCharacterFee() public view returns (int128) {
-        int128 decrease = ABDKMath64x64.divu(block.timestamp.sub(vars[VAR_CHARACTER_MINT_TIMESTAMP]).mul(vars[VAR_MINT_FEE_DECREASE_SPEED]), 10000);
-        int128 minCharacterFee = ABDKMath64x64.fromUInt(vars[VAR_MIN_CHARACTER_FEE]);
+        int128 decrease = ABDKMath64x64.divu(block.timestamp.sub(vars[VAR_CHARACTER_MINT_TIMESTAMP]).mul(vars[VAR_MINT_FEE_DECREASE_SPEED]), 1e18);
+        int128 characterFeeMin = ABDKMath64x64.divu(vars[VAR_MIN_CHARACTER_FEE], 100);
         if(decrease > mintCharacterFee) {
-            return minCharacterFee;
+            return characterFeeMin;
         }
-        if(minCharacterFee - decrease < minCharacterFee) {
-            return minCharacterFee;
+        if(mintCharacterFee - decrease < characterFeeMin) {
+            return characterFeeMin;
         }
         return mintCharacterFee.sub(decrease);
     }

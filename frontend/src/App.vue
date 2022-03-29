@@ -217,7 +217,7 @@ export default {
       else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
     async initializeRecruitCost() {
-      const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
+      const recruitCost = await this.contracts.CryptoBlades.methods.getMintCharacterFee().call({ from: this.defaultAccount });
       const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
       this.recruitCost = BN(skillRecruitCost)
         .div(BN(10).pow(18))

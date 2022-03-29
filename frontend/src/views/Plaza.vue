@@ -195,8 +195,7 @@
                     :disabled="!haveCharacters"
                     variant="primary"
                     class="ml-3 gtag-link-others"
-                    @click="toggleSoulCreation"
-                    v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+                    @click="toggleSoulCreation">
                     {{$t('plaza.burn')}} / {{$t('plaza.upgrade')}} / {{$t('plaza.transfer')}}
                   </b-button>
                   <b-button
@@ -207,6 +206,12 @@
                     v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
                     {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
                   </b-button>
+                  <b-checkbox
+                    variant="primary"
+                    class="mx-3 my-auto"
+                    v-model="mintSlippageApproved">
+                    <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
+                  </b-checkbox>
                 </div>
               </div>
 
@@ -256,6 +261,12 @@
                     v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
                     {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
                   </b-button>
+                  <b-checkbox
+                    variant="primary"
+                    class="mx-3 my-auto"
+                    v-model="mintSlippageApproved">
+                    <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
+                  </b-checkbox>
                 </div>
               </div>
 
@@ -356,6 +367,8 @@ interface Data {
   isBurnInProgress: boolean;
   isUpgradeInProgress: boolean;
   isTransferInProgress: boolean;
+  updateInterval: ReturnType<typeof setInterval> | null;
+  mintSlippageApproved: boolean;
 }
 
 export default Vue.extend({
@@ -432,9 +445,14 @@ export default Vue.extend({
   },
 
   async created() {
-    const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
-    const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
-    this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
+    this.updateMintCharacterFee();
+    this.updateInterval = setInterval(async () => { await this.updateMintCharacterFee(); }, 2000);
+  },
+
+  destroyed() {
+    if(this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
   },
 
   data() {
@@ -460,7 +478,9 @@ export default Vue.extend({
       isBurnInProgress: false,
       isUpgradeInProgress: false,
       isTransferInProgress: false,
-      isValidWeb3Address
+      isValidWeb3Address,
+      updateInterval: null as ReturnType<typeof setInterval> | null,
+      mintSlippageApproved: false
     } as Data;
   },
 
@@ -473,7 +493,7 @@ export default Vue.extend({
 
     async onMintCharacter() {
       try {
-        await this.mintCharacter();
+        await this.mintCharacter(this.mintSlippageApproved);
       } catch (e) {
         (this as any).$dialog.notify.error(i18n.t('plaza.couldNotMint'));
       }
@@ -614,6 +634,12 @@ export default Vue.extend({
       } else {
         this.soulAmount = this.remainingPowerLimit > this.soulBalance * 10 ? this.soulBalance : this.remainingPowerLimit / 10;
       }
+    },
+
+    async updateMintCharacterFee() {
+      const recruitCost = await this.contracts.CryptoBlades.methods.getMintCharacterFee().call({ from: this.defaultAccount });
+      const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
+      this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
     }
   },
 

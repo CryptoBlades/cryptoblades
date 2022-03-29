@@ -1905,8 +1905,9 @@ export function createStore(web3: Web3) {
           commit('updateCharacterCosmetic', { characterId, characterCosmetic });
         }
       },
-      async mintCharacter({ state, dispatch }) {
+      async mintCharacter({ state, dispatch }, approveMintSlippage: boolean) {
         if(featureFlagStakeOnly || !state.defaultAccount) return;
+        const slippageMultiplier = approveMintSlippage ? 1.05 : 1;
 
         await approveFee(
           state.contracts().CryptoBlades!,
@@ -1916,7 +1917,7 @@ export function createStore(web3: Web3) {
           defaultCallOptions(state),
           defaultCallOptions(state),
           cryptoBladesMethods => cryptoBladesMethods.getMintCharacterFee(),
-          { allowInGameOnlyFunds: false }
+          { feeMultiplier: slippageMultiplier, allowInGameOnlyFunds: false }
         );
 
         await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
@@ -1928,11 +1929,12 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement, eventId = 0 }:
-      { num: any, useStakedSkillOnly?: boolean, chosenElement: any, eventId: any }) {
+      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
+      { num: any, useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
         const chosenElementFee = chosenElement === 100 ? 1 : 2;
+        const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
@@ -1948,7 +1950,7 @@ export function createStore(web3: Web3) {
             defaultCallOptions(state),
             defaultCallOptions(state),
             cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
-            { feeMultiplier: num * 4 * chosenElementFee, allowInGameOnlyFunds: true }
+            { feeMultiplier: num * 4 * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
           );
 
           await CryptoBlades.methods.mintWeaponN(num, chosenElement, eventId).send({ from: state.defaultAccount, gas: '5000000' });
@@ -1963,11 +1965,12 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement, eventId = 0 }:
-      { useStakedSkillOnly?: boolean, chosenElement: any, eventId: any }) {
+      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
+      { useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
         const chosenElementFee = chosenElement === 100 ? 1 : 2;
+        const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
@@ -1983,7 +1986,7 @@ export function createStore(web3: Web3) {
             defaultCallOptions(state),
             defaultCallOptions(state),
             cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
-            { feeMultiplier: chosenElementFee, allowInGameOnlyFunds: true }
+            { feeMultiplier: chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
           );
 
           await CryptoBlades.methods.mintWeapon(chosenElement, eventId).send({ from: state.defaultAccount });

@@ -72,6 +72,12 @@
                   <b-checkbox
                     variant="primary"
                     class="mx-3 my-auto"
+                    v-model="mintSlippageApproved">
+                    <span><b>{{$t('blacksmith.approveMintSlippage')}}</b></span>
+                  </b-checkbox>
+                  <b-checkbox
+                    variant="primary"
+                    class="mx-3 my-auto"
                     :disabled="disableUseStakedForForge"
                     v-model="useStakedForForge">
                     <span v-if="disableUseStakedForForge"> <b>{{$t('blacksmith.notEnoughStakedSkill')}}<br></b></span>
@@ -516,6 +522,7 @@ interface Data {
   haveWeaponCosmetic2: number;
   selectedSpecialWeaponEventId: number;
   updateInterval: ReturnType<typeof setInterval> | null;
+  mintSlippageApproved: boolean;
 }
 
 export default Vue.extend({
@@ -556,6 +563,7 @@ export default Vue.extend({
       haveWeaponCosmetic2: 0,
       selectedSpecialWeaponEventId: 0,
       updateInterval: null as ReturnType<typeof setInterval> | null,
+      mintSlippageApproved: false
     } as Data;
   },
 
@@ -600,6 +608,7 @@ export default Vue.extend({
     await this.fetchSpecialWeaponEvents();
     this.selectedSpecialWeaponEventId = +this.specialWeaponEventId;
     if(!this.contracts.CryptoBlades || !this.contracts.BurningManager) return;
+    await this.updateMintWeaponFee();
     this.updateInterval = setInterval(async () => { await this.updateMintWeaponFee(); }, 2000);
     const stakedSkillBalanceThatCanBeSpentBN: BN = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18));
 
@@ -663,7 +672,8 @@ export default Vue.extend({
         await this.mintWeapon({
           useStakedSkillOnly: this.useStakedForForge,
           chosenElement: this.selectedElement || 100,
-          eventId: this.selectedSpecialWeaponEventId
+          eventId: this.selectedSpecialWeaponEventId,
+          mintSlippageApproved: this.mintSlippageApproved
         });
 
       } catch (e) {
@@ -695,7 +705,8 @@ export default Vue.extend({
           num: forgeMultiplier,
           useStakedSkillOnly: this.useStakedForForge,
           chosenElement: this.selectedElement,
-          eventId: this.selectedSpecialWeaponEventId
+          eventId: this.selectedSpecialWeaponEventId,
+          mintSlippageApproved: this.mintSlippageApproved
         });
 
       } catch (e) {
@@ -867,7 +878,6 @@ export default Vue.extend({
       if(!this.contracts.CryptoBlades) return;
       const forgeCost = await this.contracts.CryptoBlades.methods.getMintWeaponFee().call({ from: this.defaultAccount });
       const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
-      console.log(forgeCost, skillForgeCost);
       this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
       this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
     }

@@ -137,7 +137,8 @@
     "noXpToClaim": "No XP to claim",
     "upgrading": "Upgrading...",
     "burning": "Burning...",
-    "claiming": "Claiming..."
+    "claiming": "Claiming...",
+    "approveMintSlippage": "Enable 5% mint price slippage"
   },
   "bridge": {
     "bridgeForYourNfts": "Bridge for your NFTs",
@@ -250,6 +251,7 @@
     "forge": "Forge",
     "coolingForge": "Cooling forge ...",
     "notEnoughStakedSkill": "Not enough staked SKILL!",
+    "approveMintSlippage": "Enable 5% mint price slippage",
     "spendStakedFunds": "Spend Staked Funds <br> for 20% Discount!",
     "clickForForgePercentages": "Click for forge percentages",
     "forgePercentages": "Forge Percentages",
