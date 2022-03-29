@@ -209,7 +209,6 @@ export default Vue.extend({
     },
     walletBalanceFormatted() {
       return toBN(this.walletBalance).dividedBy(1e18).toFixed(3);
-      // return this.walletBalance;
     },
     stakedBalanceFormatted(){
       return this.isNftStaking ? this.stakedBalance: toBN(this.stakedBalance).dividedBy(1e18).toFixed(3);
