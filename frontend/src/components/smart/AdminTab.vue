@@ -4,8 +4,14 @@
       {{ $t(`admin.tabs.${title}`) }}
       <Hint v-if="!hasTabAccess" :text="$t('admin.doNotHaveAccessTooltip')"/>
     </template>
-    <RoleGranter v-if="contract" :contract="contract" :roleMethod="contract.methods.GAME_ADMIN" roleName="GAME_ADMIN"/>
-    <RoleRevoker v-if="contract" :contract="contract" :roleMethod="contract.methods.GAME_ADMIN" roleName="GAME_ADMIN"/>
+    <RoleGranter v-if="contract && contract.methods.DEFAULT_ADMIN_ROLE" :contract="contract"
+                 :roleMethod="contract.methods.DEFAULT_ADMIN_ROLE" roleName="DEFAULT_ADMIN"/>
+    <RoleRevoker v-if="contract && contract.methods.DEFAULT_ADMIN_ROLE" :contract="contract"
+                 :roleMethod="contract.methods.DEFAULT_ADMIN_ROLE" roleName="DEFAULT_ADMIN"/>
+    <RoleGranter v-if="contract && contract.methods.GAME_ADMIN" :contract="contract"
+                 :roleMethod="contract.methods.GAME_ADMIN" roleName="GAME_ADMIN"/>
+    <RoleRevoker v-if="contract && contract.methods.GAME_ADMIN" :contract="contract"
+                 :roleMethod="contract.methods.GAME_ADMIN" roleName="GAME_ADMIN"/>
     <RoleGranter v-if="contract && contract.methods.MINTER_ROLE" :contract="contract"
                  :roleMethod="contract.methods.MINTER_ROLE" roleName="MINTER_ROLE"/>
     <RoleRevoker v-if="contract && contract.methods.MINTER_ROLE" :contract="contract"
@@ -28,9 +34,13 @@ import WeaponsAdmin from './AdminTabs/WeaponsAdmin.vue';
 import BurningManagerAdmin from './AdminTabs/BurningManagerAdmin.vue';
 import PartnerVaultAdmin from './AdminTabs/PartnerVaultAdmin.vue';
 import TreasuryAdmin from './AdminTabs/TreasuryAdmin.vue';
+import CryptoBladesAdmin from './AdminTabs/CryptoBladesAdmin.vue';
+import BlacksmithAdmin from './AdminTabs/BlacksmithAdmin.vue';
 
 interface StoreMappedActions {
-  userHasAdminAccess(payload: { contract: Contract<any> }): Promise<boolean>;
+  userHasDefaultAdminAccess(payload: { contract: Contract<any> }): Promise<boolean>;
+
+  userHasGameAdminAccess(payload: { contract: Contract<any> }): Promise<boolean>;
 
   userHasMinterAccess(payload: { contract: Contract<any> }): Promise<boolean>;
 }
@@ -50,7 +60,9 @@ export default Vue.extend({
     WeaponsAdmin,
     BurningManagerAdmin,
     PartnerVaultAdmin,
-    TreasuryAdmin
+    TreasuryAdmin,
+    CryptoBladesAdmin,
+    BlacksmithAdmin,
   },
   props: {
     title: {
@@ -79,10 +91,12 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['userHasAdminAccess', 'userHasMinterAccess']) as StoreMappedActions,
+    ...mapActions(['userHasDefaultAdminAccess', 'userHasGameAdminAccess', 'userHasMinterAccess']) as StoreMappedActions,
 
     async fetchData() {
-      this.hasTabAccess = await this.userHasAdminAccess({contract: this.contract}) || await this.userHasMinterAccess({contract: this.contract});
+      this.hasTabAccess = await this.userHasDefaultAdminAccess({contract: this.contract})
+        || await this.userHasGameAdminAccess({contract: this.contract})
+        || await this.userHasMinterAccess({contract: this.contract});
     },
   },
 

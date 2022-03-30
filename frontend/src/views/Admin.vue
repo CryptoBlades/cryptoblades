@@ -70,6 +70,16 @@ export default Vue.extend({
       contract: this.contracts.Treasury,
       component: 'TreasuryAdmin',
     });
+    this.tabs.push({
+      title: 'cryptoblades',
+      contract: this.contracts.CryptoBlades,
+      component: 'CryptoBladesAdmin',
+    });
+    this.tabs.push({
+      title: 'blacksmith',
+      contract: this.contracts.Blacksmith,
+      component: 'BlacksmithAdmin',
+    });
   },
 });
 </script>
