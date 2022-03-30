@@ -563,6 +563,7 @@ h5{
 
 
 .enemy-character {
+  height: 100%;
   position: relative;
   width: 14em;
   cursor: pointer;
@@ -589,7 +590,7 @@ h5{
 }
 
 .encounter img {
-  width: 140px;
+  max-width: 200px;
   transition: 1s all;
 }
 
@@ -610,6 +611,8 @@ h5{
 .frame-line{
   position: absolute;
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .frame-line > img{
@@ -631,8 +634,7 @@ h5{
 
 
 .frame-line > img{
-  width: 112%;
-  margin-left: -13px;
+  width: 100%;
 }
 
 .combat-hints {
