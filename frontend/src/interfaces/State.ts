@@ -6,7 +6,7 @@ import { Nft } from './Nft';
 import { IShield } from './Shield';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 
-export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'king' | 'skill90' | 'skill180' | 'king90' | 'king180' | 'cbkLandT1' | 'cbkLandT2' | 'cbkLandT3';
+export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'king' | 'skill90' | 'skill180' | 'king90' | 'king180';
 export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2', 'king', 'skill90', 'skill180', 'king90', 'king180'];
 export type NftStakeType = 'cbkLandT1' | 'cbkLandT2' | 'cbkLandT3';
 export const allNftStakeTypes: NftStakeType[] = ['cbkLandT1', 'cbkLandT2', 'cbkLandT3'];
