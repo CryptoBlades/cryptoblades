@@ -19,13 +19,13 @@
 
 import aprilFools1 from './assets/raid-bosses/april_fools/shaman.png';
 import aprilFools2 from './assets/raid-bosses/april_fools/brute.png';
-import aprilFools3 from './assets/raid-bosses/april_fools/sad_hat_guy.gif';
+import aprilFools3 from './assets/raid-bosses/april_fools/sad_hat_guy.png';
 
 const allImages = [
   // hellborn1, hellborn2, hellborn3, hellborn4, hellborn5, hellborn6,
   // halloween1, halloween2, halloween3, halloween4, halloween5,
   // christmas1, christmas2, christmas3, christmas4, christmas5,
-  aprilFools1, aprilFools2, aprilFools3,
+  aprilFools3, aprilFools1, aprilFools2,
 ];
 
 export function getBossArt(id: number) {
