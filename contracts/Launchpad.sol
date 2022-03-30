@@ -2,14 +2,19 @@ pragma solidity ^0.6.2;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "./SkillStakingRewardsUpgradeable.sol";
+import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract Launchpad is Initializable, AccessControlUpgradeable {
+    using SafeMath for uint256;
+    using SafeERC20 for IERC20;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     struct LaunchpadProject {
-        uint256 phase;
         string name;
         string tokenSymbol;
         string details;
@@ -18,11 +23,8 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         uint256 startTime;
         uint256 fundsToRaise;
         address fundingTokenAddress;
+        uint256 phase;
     }
-
-    SkillStakingRewardsUpgradeable public skillStaking30days;
-    SkillStakingRewardsUpgradeable public skillStaking90days;
-    SkillStakingRewardsUpgradeable public skillStaking180days;
 
     mapping(uint256 => uint256) public vars;
     uint256 public VAR_TIERS_AMOUNT = 1;
@@ -34,17 +36,18 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     mapping(uint256 => LaunchpadProject) public launchpadProjects;
     mapping(uint256 => uint256) public launchpadProjectTotalRaised;
     mapping(uint256 => mapping(address => uint256)) public userInvestment;
+    mapping(uint256 => uint256) public launchBaseAllocation;
+    mapping(uint256 => EnumerableSet.AddressSet) launchEligibleUsersSnapshot;
+    mapping(uint256 => mapping(address => uint256)) public launchUserStakedAmountSnapshot;
 
-    uint256 latestLaunchpadProjectId;
+    uint256 public nextLaunchpadProjectId;
 
-    function initialize(SkillStakingRewardsUpgradeable _skillStaking30days, SkillStakingRewardsUpgradeable _skillStaking90days, SkillStakingRewardsUpgradeable _skillStaking180days) public initializer {
+    function initialize() public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(GAME_ADMIN, msg.sender);
 
-        skillStaking30days = _skillStaking30days;
-        skillStaking90days = _skillStaking90days;
-        skillStaking180days = _skillStaking180days;
+        nextLaunchpadProjectId = 1;
     }
 
     // MODIFIERS
@@ -59,61 +62,95 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     // VIEWS
 
-    function getTotalUserStakedSkill(address user) public view returns (uint256){
-        uint256 stakedFor30days = skillStaking30days.balanceOf(user);
-        uint256 stakedFor90days = skillStaking30days.balanceOf(user);
-        uint256 stakedFor180days = skillStaking30days.balanceOf(user);
-
-        return stakedFor30days + stakedFor90days + stakedFor180days;
-    }
-
-    function getUserTier(address user) public view returns (uint256 tier) {
-        uint256 totalStakedSkill = getTotalUserStakedSkill(user);
-        for(uint i = 1; i <= vars[VAR_TIERS_AMOUNT]; i++) {
-            if(totalStakedSkill > tierStakingRequirement[i]) {
+    function getTierForStakedAmount(uint256 amount) public view returns (uint256 tier) {
+        for (uint256 i = 1; i <= vars[VAR_TIERS_AMOUNT]; i++) {
+            if (amount > tierStakingRequirement[i]) {
                 tier++;
             } else {
-              break;
+                break;
             }
         }
     }
 
-    function getLaunchAllocationForTier(uint256 launchId, uint256 tier) {
-        
+    function getLaunchAllocationForTier(uint256 launchId, uint256 tier) public view returns (uint256) {
+        return launchBaseAllocation[launchId].mul(tierAllocationWeight[tier]);
+    }
+
+    function getUserMaxAllocationForLaunch(address user, uint256 launchId) public view returns (uint256) {
+        return getLaunchAllocationForTier(launchId, getTierForStakedAmount(launchUserStakedAmountSnapshot[launchId][user]));
     }
 
     // RESTRICTED FUNCTIONS
 
-    function setBrandNewTiers(uint256[] calldata tierIds, uint256[] calldata stakingRequirements) external restricted {
-        require(tierIds.length == stakingRequirements.length, 'Wrong input');
+    // TIERS
+
+    function setBrandNewTiers( uint256[] calldata tierIds, uint256[] calldata stakingRequirements, uint256[] calldata tierWeights) external restricted {
+        require(tierIds.length == stakingRequirements.length, "Wrong input");
         vars[VAR_TIERS_AMOUNT] = tierIds.length;
-        for(uint i = 0; i < tierIds.length; i++) {
-            require(tierIds[i] > 0 && tierIds[i] <= vars[VAR_TIERS_AMOUNT], 'Wrong id');
+        for (uint256 i = 0; i < tierIds.length; i++) {
+            require(tierIds[i] > 0 && tierIds[i] <= vars[VAR_TIERS_AMOUNT], "Wrong id");
             tierStakingRequirement[tierIds[i]] = stakingRequirements[i];
+            tierAllocationWeight[tierIds[i]] = tierWeights[i];
         }
     }
 
     function setTiersRequirements(uint256[] calldata tierIds, uint256[] calldata stakingRequirements) external restricted {
-        require(tierIds.length <= vars[VAR_TIERS_AMOUNT], 'Too many tiers');
-        require(tierIds.length == stakingRequirements.length, 'Wrong input');
-        for(uint i = 0; i < tierIds.length; i++) {
-            require(tierIds[i] > 0 && tierIds[i] <= vars[VAR_TIERS_AMOUNT], 'Wrong id');
+        require(tierIds.length <= vars[VAR_TIERS_AMOUNT], "Too many tiers");
+        require(tierIds.length == stakingRequirements.length, "Wrong input");
+        for (uint256 i = 0; i < tierIds.length; i++) {
+            require(tierIds[i] > 0 && tierIds[i] <= vars[VAR_TIERS_AMOUNT], "Wrong id");
             tierStakingRequirement[tierIds[i]] = stakingRequirements[i];
         }
     }
-    
-    function setTiersAllocationWeights(uint256[] calldata tierIds, uint256[] calldata allocationWeights) external restricted {
-        require(tierIds.length <= vars[VAR_TIERS_AMOUNT], 'Too many tiers');
-        require(tierIds.length == allocationWeights.length, 'Wrong input');
-        for(uint i = 0; i < tierIds.length; i++) {
-            require(tierIds[i] > 0 && tierIds[i] <= vars[VAR_TIERS_AMOUNT], 'Wrong id');
-            tierAllocationWeight[tierIds[i]] = allocationWeights[i];
+
+    function setTiersAllocationWeights(uint256[] calldata tierIds, uint256[] calldata tierWeights) external restricted {
+        require(tierIds.length <= vars[VAR_TIERS_AMOUNT], "Too many tiers");
+        require(tierIds.length == tierWeights.length, "Wrong input");
+        for (uint256 i = 0; i < tierIds.length; i++) {
+            require(tierIds[i] > 0 && tierIds[i] <= vars[VAR_TIERS_AMOUNT], "Wrong id");
+            tierAllocationWeight[tierIds[i]] = tierWeights[i];
         }
     }
 
-    function addNewLaunchpadProject(uint256 phase, string calldata name, string calldata tokenSymbol, string calldata details, string calldata image, uint256 tokenPrice, uint256 startTime, uint256 fundsToRaise, address fundingTokenAddress) external restricted {
-        latestLaunchpadProjectId++;
-        launchpadProjects[latestLaunchpadProjectId] = LaunchpadProject(phase, name, tokenSymbol, details, image, tokenPrice, startTime, fundsToRaise, fundingTokenAddress);
+    // PROJECT DETAILS
+
+    function addNewLaunchpadProject(
+        string calldata name,
+        string calldata tokenSymbol,
+        string calldata details,
+        string calldata imageUri,
+        uint256 tokenPrice,
+        uint256 startTime,
+        uint256 fundsToRaise,
+        address fundingTokenAddress
+    ) external restricted {
+        launchpadProjects[nextLaunchpadProjectId] = LaunchpadProject(
+            name,
+            tokenSymbol,
+            details,
+            imageUri,
+            tokenPrice,
+            startTime,
+            fundsToRaise,
+            fundingTokenAddress,
+            1
+        );
+        nextLaunchpadProjectId += 2;
+    }
+
+    function addSecondPhaseForLaunch(uint256 launchId, uint256 startTime) external restricted {
+        LaunchpadProject memory lp = launchpadProjects[launchId];
+        launchpadProjects[launchId + 1] = LaunchpadProject(
+            lp.name,
+            lp.tokenSymbol,
+            lp.details,
+            lp.imageUri,
+            lp.tokenPrice,
+            startTime,
+            lp.fundsToRaise.sub(launchpadProjectTotalRaised[launchId]),
+            lp.fundingTokenAddress,
+            2
+        );
     }
 
     function removeLaunchpadProject(uint256 id) external restricted {
@@ -124,7 +161,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         launchpadProjects[id].tokenPrice = tokenPrice;
     }
 
-    function updateLaunchpadProjectFundingTokenAddress(uint256 id, address fundingTokenAddress) external restricted {
+    function updateLaunchpadProjectFundingTokenAddress( uint256 id, address fundingTokenAddress) external restricted {
         launchpadProjects[id].fundingTokenAddress = fundingTokenAddress;
     }
 
@@ -132,25 +169,47 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         launchpadProjects[id].startTime = startTime;
     }
 
+    // WHITELISTING
+
+    function setEligibleUsersData(uint256 launchId, address[] calldata users, uint256[] calldata stakedAmounts) external restricted {
+        LaunchpadProject memory lp = launchpadProjects[launchId];
+        require(nextLaunchpadProjectId >= launchId, "Wrong launch ID");
+        require(users.length == stakedAmounts.length, "Wrong input");
+        require(lp.startTime > block.timestamp, "Event already started");
+
+        uint totalWeight = 0;
+        for(uint i = 0; i < users.length; i++) {
+            launchEligibleUsersSnapshot[launchId].add(users[i]);
+            launchUserStakedAmountSnapshot[launchId][users[i]] = stakedAmounts[i];
+            totalWeight += tierAllocationWeight[getTierForStakedAmount(stakedAmounts[i])];
+        }
+        launchBaseAllocation[launchId] = lp.fundsToRaise.div(totalWeight);
+    }
+
+    // VARS SETTERS
+
     function setVar(uint256 varField, uint256 value) external restricted {
         vars[varField] = value;
     }
 
     function setVars(uint256[] calldata varFields, uint256[] calldata values) external restricted {
-        for(uint i = 0; i < varFields.length; i++) {
+        for (uint256 i = 0; i < varFields.length; i++) {
             vars[varFields[i]] = values[i];
         }
     }
 
     // USER FUNCTIONS
 
-    function invest(uint256 id, uint256 amount, uint256 phase) external {
-        LaunchpadProject memory lp = launchpadProjects[id];
+    function invest(uint256 launchId, uint256 amount) external {
+        LaunchpadProject memory lp = launchpadProjects[launchId];
         require(lp.startTime != 0 && block.timestamp > lp.startTime, "Launch not started");
         require(lp.tokenPrice != 0, "Token price not set");
         require((lp.phase == 1 && block.timestamp < lp.startTime + vars[VAR_FUNDING_PERIOD_PHASE_1]) || (lp.phase == 2 && block.timestamp < lp.startTime + vars[VAR_FUNDING_PERIOD_PHASE_2]), "Launch ended");
-        require(launchpadProjectTotalRaised[id] + amount <= lp.fundsToRaise, "Amount exceeds remaining supply");
+        require(launchpadProjectTotalRaised[launchId] + amount <= lp.fundsToRaise, "Amount exceeds remaining supply");
+        require(getUserMaxAllocationForLaunch(msg.sender, launchId) >= amount, "Allocation allowance exceeded");
 
-
+        IERC20(lp.fundingTokenAddress).safeTransferFrom(msg.sender, address(this), amount);
+        userInvestment[launchId][msg.sender] += amount;
+        launchpadProjectTotalRaised[launchId] += amount;
     }
 }
