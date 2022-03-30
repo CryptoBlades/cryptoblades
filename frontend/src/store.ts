@@ -4297,7 +4297,7 @@ export function createStore(web3: Web3) {
         if (!CryptoBlades) return;
 
         const fee = +await CryptoBlades.methods.mintCharacterFee().call(defaultCallOptions(state));
-        return fee * 100;
+        return Number(BigInt(fee) >> BigInt(64)) * 100;
       },
 
       async getWeaponMintValue({state}) {
@@ -4305,7 +4305,7 @@ export function createStore(web3: Web3) {
         if (!CryptoBlades) return;
 
         const fee = +await CryptoBlades.methods.mintWeaponFee().call(defaultCallOptions(state));
-        return fee * 100;
+        return Number(BigInt(fee) >> BigInt(64)) * 100;
       },
 
       async fetchWaxBridgeDetails({ state, commit }) {
