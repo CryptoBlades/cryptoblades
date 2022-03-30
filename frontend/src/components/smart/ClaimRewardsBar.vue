@@ -113,7 +113,7 @@
             <b-form-input type="number" max="100" step="0.5" v-model="slippage" class="claim-input" />
           </div>
         </div>
-        <PartneredProject v-if="selectedPartneredProject" :partnerProject="selectedPartneredProject"/>
+        <PartneredProject v-if="selectedPartneredProject" :partnerProject="selectedPartneredProject" :key="selectedPartneredProject.id"/>
         <div class="mt-3" v-if="selectedPartneredProject && !canClaimSelectedProject">
           <h5>{{$t('ClaimRewardsBar.partnerTokenClaimed')}}</h5>
         </div>
@@ -297,7 +297,7 @@ export default Vue.extend({
     },
 
     selectedPartneredProject(): SupportedProject | undefined {
-      return this.getPartnerProjects.find(partnerProject => partnerProject.id.toString() === this.payoutCurrencyId);
+      return this.getPartnerProjects.find(partnerProject => partnerProject.id.toString() === this.payoutCurrencyId.toString());
     },
 
     isNoProjectAvailable(): boolean {

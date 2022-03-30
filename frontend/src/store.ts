@@ -4758,8 +4758,6 @@ export function createStore(web3: Web3) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        console.log(partnerProject);
-
         return await Treasury.methods.addPartnerProject(
           partnerProject.name,
           partnerProject.tokenSymbol,

@@ -203,7 +203,7 @@ export default Vue.extend({
     },
 
     async setPartnerProjectProperty() {
-      if (this.selectedPartnerProject.selectedProperty === undefined) return;
+      if (this.selectedPartnerProject.selectedProperty === undefined || this.selectedPartnerProject.id === undefined) return;
       try {
         this.isLoading = true;
         switch (this.selectedPartnerProject.selectedProperty) {

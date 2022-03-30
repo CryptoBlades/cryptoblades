@@ -81,7 +81,7 @@ export default Vue.extend({
       tokensClaimed: '0',
       skillToPartnerRatio: '0',
       updateInterval: null,
-      detailsOpened: false
+      detailsOpened: false,
     } as Data;
   },
 
@@ -127,10 +127,9 @@ export default Vue.extend({
   },
 
   async created() {
-    console.log(this.partnerProject);
     await this.update();
     this.updateInterval = setInterval(async () => {
-      this.update();
+      await this.update();
     }, 10000);
   },
 
@@ -155,7 +154,7 @@ export default Vue.extend({
 }
 
 .partner-logo {
-  max-width: 100px;
+  width: 100px;
   height: auto;
   align-self: center;
 }
