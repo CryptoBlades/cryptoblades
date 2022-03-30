@@ -66,7 +66,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
     function getAmountOfActiveProjects() public view returns (uint256 activeCount) {
         activeCount = 0;
-        for (uint i = 0; i < partneredProjects.length; i++) {
+        for (uint i; i < partneredProjects.length; i++) {
             if (partneredProjects[i].isActive) {
                 activeCount += 1;
             }
@@ -116,6 +116,10 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         } else {
             partnerTokenAmountAdjusted = partnerTokenAmount.div(10 ** uint(18 - partnerTokenDecimals));
         }
+    }
+
+    function getProjectData(uint256 partnerId) public view returns (string memory, string memory, string memory, string memory) {
+        return (projectLogo[partnerId], projectDetails[partnerId], projectWebsite[partnerId], projectNote[partnerId]);
     }
 
     // Mutative

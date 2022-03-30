@@ -4790,35 +4790,35 @@ export function createStore(web3: Web3) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        return await Treasury.methods.setProjectLogo(id, logo).send({from: state.defaultAccount});
+        await Treasury.methods.setProjectLogo(id, logo).send({from: state.defaultAccount});
       },
 
       async setPartnerProjectDetails({state}, {id, details}) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        return await Treasury.methods.setProjectDetails(id, details).send({from: state.defaultAccount});
+        await Treasury.methods.setProjectDetails(id, details).send({from: state.defaultAccount});
       },
 
       async setPartnerProjectWebsite({state}, {id, website}) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        return await Treasury.methods.setProjectWebsite(id, website).send({from: state.defaultAccount});
+        await Treasury.methods.setProjectWebsite(id, website).send({from: state.defaultAccount});
       },
 
       async setPartnerProjectNote({state}, {id, note}) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        return await Treasury.methods.setProjectNote(id, note).send({from: state.defaultAccount});
+        await Treasury.methods.setProjectNote(id, note).send({from: state.defaultAccount});
       },
 
       async setPartnerProjectIsActive({state}, {id, isActive}) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        return await Treasury.methods.setIsActive(id, isActive).send({from: state.defaultAccount});
+        await Treasury.methods.setIsActive(id, isActive).send({from: state.defaultAccount});
       },
 
       async fetchPartnerProjects({ state, dispatch }) {
@@ -4839,10 +4839,7 @@ export function createStore(web3: Web3) {
 
         const partnerProjectRaw = await Treasury.methods.partneredProjects(id).call(defaultCallOptions(state));
         const tokensClaimed = await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(state));
-        const logo = await Treasury.methods.projectLogo(id).call(defaultCallOptions(state));
-        const details = await Treasury.methods.projectDetails(id).call(defaultCallOptions(state));
-        const website = await Treasury.methods.projectWebsite(id).call(defaultCallOptions(state));
-        const note = await Treasury.methods.projectNote(id).call(defaultCallOptions(state));
+        const data = await Treasury.methods.getProjectData(id).call(defaultCallOptions(state));
 
         const partnerProject = {
           id: +partnerProjectRaw[0],
@@ -4853,10 +4850,10 @@ export function createStore(web3: Web3) {
           tokensClaimed: +tokensClaimed,
           tokenPrice: +partnerProjectRaw[5],
           isActive: partnerProjectRaw[6],
-          logo,
-          details,
-          website,
-          note,
+          logo: data[0],
+          details: data[1],
+          website: data[2],
+          note: data[3],
         } as SupportedProject;
 
         commit('updatePartnerProjectsState', { partnerProjectId: partnerProject.id, partnerProject });
