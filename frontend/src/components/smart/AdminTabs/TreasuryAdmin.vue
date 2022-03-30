@@ -7,8 +7,6 @@
       <b-form-input v-model="newPartnerProject.tokenAddress" :placeholder="$t('admin.treasury.tokenAddress')"/>
       <b-form-input v-model="newPartnerProject.tokenSupply" type="number" number
                     :placeholder="$t('admin.treasury.tokenSupply')"/>
-      <b-form-input v-model="newPartnerProject.tokensClaimed" type="number" number
-                    :placeholder="$t('admin.treasury.tokensClaimed')"/>
       <b-form-input v-model="newPartnerProject.tokenPrice" type="number" number
                     :placeholder="$t('admin.treasury.tokenPrice')"/>
       <b-form-input v-model="newPartnerProject.distributionTime" type="number" number
@@ -22,6 +20,29 @@
                 class="text-nowrap">
         {{ $t('admin.treasury.addNewPartnerProject') }}
       </b-button>
+    </div>
+    <h2 class="mt-3">{{ $t('admin.treasury.findActivePartnerProjects') }}</h2>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <b-button @click="getActiveProjects()" :disabled="isLoading" variant="primary"
+                class="text-nowrap">
+        {{ $t('admin.treasury.findActivePartnerProjects') }}
+      </b-button>
+      <table class="table text-white" v-if="activeProjects.length">
+        <thead>
+        <tr>
+          <th>{{ $t('admin.treasury.name') }}</th>
+          <th>{{ $t('admin.treasury.symbol') }}</th>
+          <th>{{ $t('admin.treasury.id') }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="activeProject in activeProjects" :key="activeProject.id">
+          <td>{{ activeProject.name }}</td>
+          <td>{{ activeProject.tokenSymbol }}</td>
+          <td>{{ activeProject.id }}</td>
+        </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -48,10 +69,13 @@ interface NewPartnerProject {
 
 interface StoreMappedActions {
   addPartnerProject(payload: { partnerProject: NewPartnerProject }): Promise<void>;
+
+  getActivePartnerProjects(): Promise<NewPartnerProject[]>;
 }
 
 interface Data {
   newPartnerProject: NewPartnerProject,
+  activeProjects: NewPartnerProject[],
   isLoading: boolean;
 }
 
@@ -63,7 +87,7 @@ export default Vue.extend({
         tokenSymbol: '',
         tokenAddress: '',
         tokenSupply: undefined,
-        tokensClaimed: undefined,
+        tokensClaimed: 0,
         tokenPrice: undefined,
         distributionTime: undefined,
         isActive: true,
@@ -72,6 +96,7 @@ export default Vue.extend({
         website: '',
         note: '',
       },
+      activeProjects: [],
       isLoading: false,
     } as Data;
   },
@@ -95,7 +120,17 @@ export default Vue.extend({
   methods: {
     ...mapActions([
       'addPartnerProject',
+      'getActivePartnerProjects',
     ]) as StoreMappedActions,
+
+    async getActiveProjects() {
+      try {
+        this.isLoading = true;
+        this.activeProjects = await this.getActivePartnerProjects();
+      } finally {
+        this.isLoading = false;
+      }
+    },
 
     async addNewPartnerProject() {
       if (this.addNewPartnerProjectButtonDisabled) return;

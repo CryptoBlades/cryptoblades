@@ -4765,7 +4765,7 @@ export function createStore(web3: Web3) {
           partnerProject.tokenSymbol,
           partnerProject.tokenAddress,
           partnerProject.tokenSupply,
-          partnerProject.tokenPrice,
+          Web3.utils.toWei(partnerProject.tokenPrice.toString(), 'ether').toString(),
           partnerProject.distributionTime,
           partnerProject.isActive,
           partnerProject.logo,
@@ -4773,6 +4773,19 @@ export function createStore(web3: Web3) {
           partnerProject.website,
           partnerProject.note,
         ).send({from: state.defaultAccount});
+      },
+
+      async getActivePartnerProjects({state}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const ids = await Treasury.methods.getActivePartnerProjectsIds().call(defaultCallOptions(state));
+        const projects = [];
+        for(let i = 0; i < ids.length; i++) {
+          const project = await Treasury.methods.partneredProjects(ids[i]).call(defaultCallOptions(state));
+          projects.push(project);
+        }
+        return projects;
       },
 
       async fetchPartnerProjects({ state, dispatch }) {
