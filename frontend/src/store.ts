@@ -2399,7 +2399,7 @@ export function createStore(web3: Web3) {
         await dispatch('fetchStakeDetails', { stakeType: 'king' });
       },
 
-      async getStakedIds({ state }, stakeType) {
+      async getStakedIds({ state }, {stakeType}: {stakeType: StakeType}) {
         const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
         const CBKLand = state.contracts().CBKLand!;
         if(!StakingRewards || !CBKLand || !state.defaultAccount || !isNftStakeType(stakeType)) return;
@@ -2659,27 +2659,16 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
         if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
-        if(currency === 0) {
-          await approveFeeFromAnyContractSimple(
-            CryptoBlades,
-            SkillToken,
-            state.defaultAccount,
-            defaultCallOptions(state),
-            defaultCallOptions(state),
-            price
-          );
-        } else {
-          const tokenAddress = await Blacksmith.methods
-            .getCurrency(currency)
-            .call(defaultCallOptions(state));
 
-          await new web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
-            .approve(Blacksmith.options.address, price)
-            .send({
-              from: state.defaultAccount
-            });
-        }
+        const tokenAddress = await Blacksmith.methods
+          .getCurrency(currency)
+          .call(defaultCallOptions(state));
 
+        await new web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
+          .approve(Blacksmith.options.address, price)
+          .send({
+            from: state.defaultAccount
+          });
         return await Blacksmith.methods
           .purchaseT1CBKLand(price, currency)
           .send({
