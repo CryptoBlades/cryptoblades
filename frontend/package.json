@@ -60,6 +60,7 @@
     "eslint-plugin-vue": "^6.2.2",
     "sass-loader": "^10.1.1",
     "typescript": "~4.1.5",
+    "vue-multiselect": "^2.1.6",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
