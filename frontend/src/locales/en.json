@@ -896,7 +896,17 @@
       "findActivePartnerProjects": "Find active partner projects",
       "name": "Name",
       "symbol": "Symbol",
-      "id": "ID"
+      "id": "ID",
+      "setPartnerProjectProperty": "Set partner project property",
+      "pleaseSelectProperty": "Please select property",
+      "propertyValue": "Property value",
+      "property": {
+        "LOGO": "Logo",
+        "DETAILS": "Details",
+        "WEBSITE": "Website",
+        "NOTE": "Note",
+        "IS_ACTIVE": "Is active"
+      }
     },
     "identifiers": "Identifiers",
     "amount": "Amount",
