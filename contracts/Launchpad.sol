@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
+import "./CryptoBlades.sol";
+
 contract Launchpad is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -28,6 +30,8 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     uint256 public VAR_TIERS_AMOUNT = 1;
     uint256 public VAR_FUNDING_PERIOD_PHASE_1 = 2;
     uint256 public VAR_FUNDING_PERIOD_PHASE_2 = 3;
+    uint256 public VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER = 3;
+    
 
     // TIERS INFO
     mapping(uint256 => uint256) public tierStakingRequirement;
@@ -47,6 +51,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     mapping(uint256 => EnumerableSet.AddressSet) launchEligibleUsersSnapshot;
     mapping(uint256 => mapping(address => uint256)) public launchUserStakedAmountSnapshot;    
     mapping(uint256 => mapping(address => uint256)) public launchUserInvestment;
+    mapping(uint256 => mapping(address => uint256)) public launchUserUnclaimedSkillCommittedValue;
 
     // VESTING INFO
     mapping(uint256 => uint256[]) launchVestingsPercentage;
@@ -54,12 +59,16 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
 
     uint256 public nextLaunchId;
+    uint256 public skillPrice;
 
-    function initialize() public initializer {
+    CryptoBlades _game;
+
+    function initialize(CryptoBlades game) public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(GAME_ADMIN, msg.sender);
 
+        _game = game;
         nextLaunchId = 1;
     }
 
@@ -89,12 +98,14 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         return launchBaseAllocation[launchId].mul(tierAllocationWeight[tier]);
     }
 
-    function getUserMaxAllocationForLaunch(address user, uint256 launchId) public view returns (uint256) {
-        return getLaunchAllocationForTier(launchId, getTierForStakedAmount(launchUserStakedAmountSnapshot[launchId][user]));
+    function getUserRemainingAllocationForLaunch(address user, uint256 launchId) public view returns (uint256 maxAllocation) {
+        maxAllocation = getLaunchAllocationForTier(launchId, getTierForStakedAmount(launchUserStakedAmountSnapshot[launchId][user]));
+        maxAllocation += launchUserUnclaimedSkillCommittedValue[launchId][user].mul(vars[VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER]);
+        maxAllocation = maxAllocation.sub(launchUserInvestment[launchId][user]);
     }
 
     function getAvailabeClaimAmount(address user, uint256 launchId, uint256 vestingId) public view returns (uint256) {
-        return launchUserInvestment[launchId][msg.sender].mul(1e18).div(launchTokenPrice[launchId]).mul(launchVestingsPercentage[launchId][vestingId]).div(100);
+        return launchUserInvestment[launchId][user].mul(1e18).div(launchTokenPrice[launchId]).mul(launchVestingsPercentage[launchId][vestingId]).div(100);
     }
 
     // RESTRICTED FUNCTIONS
@@ -218,6 +229,10 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         }
     }
 
+    function setSkillPrice(uint256 price) external restricted {
+        skillPrice = price;
+    }
+
     // USER FUNCTIONS
 
     function invest(uint256 launchId, uint256 amount) external {
@@ -227,7 +242,8 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
             || (lp.phase == 2 && block.timestamp < launchStartTime[launchId] + vars[VAR_FUNDING_PERIOD_PHASE_2]), "Launch ended");
         require(launchTokenPrice[launchId] != 0, "Token price not set");
         require(launchTotalRaised[launchId] + amount <= launchFundsToRaise[launchId], "Amount exceeds remaining supply");
-        require(getUserMaxAllocationForLaunch(msg.sender, launchId) >= amount, "Allocation allowance exceeded");
+        require(getUserRemainingAllocationForLaunch(msg.sender, launchId) >= amount, "Allocation allowance exceeded");
+        require(launchEligibleUsersSnapshot[launchId].contains(msg.sender), "Not whitelisted");
 
         IERC20(lp.fundingTokenAddress).safeTransferFrom(msg.sender, address(this), amount);
         launchUserInvestment[launchId][msg.sender] += amount;
@@ -241,5 +257,11 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         userClaimedVestingPortion[msg.sender][launchId][vestingId] = true;
         uint256 claimAmount = getAvailabeClaimAmount(msg.sender, launchId, vestingId);
         IERC20(launchTokenAddress[launchId]).safeTransferFrom(address(this), msg.sender, claimAmount);
+    }
+
+    function commitUnclaimedSkill(uint256 launchId, uint256 amount) external {
+        require(launchEligibleUsersSnapshot[launchId].contains(msg.sender), "Not whitelisted");
+        game.deductAfterPartnerClaim(amount, msg.sender);
+        launchUserUnclaimedSkillCommittedValue[launchId] += amount.mul(skillPrice).div(1e18);
     }
 }
