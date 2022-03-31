@@ -287,10 +287,12 @@ export default {
     },
 
     async getKickedEvents(pvpContract, blockToScanFrom) {
-      let fromBlock = blockToScanFrom;
+      let fromBlock;
 
       if (!blockToScanFrom) {
         fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 1800, 0);
+      } else {
+        fromBlock = Math.max(blockToScanFrom, await this.web3.eth.getBlockNumber() - 1800);
       }
 
       const kickedEvents = await pvpContract.getPastEvents('CharacterKicked', {
@@ -340,6 +342,10 @@ export default {
             return;
           }
           scanning = true;
+
+          console.log('RESULT: ', result);
+
+          console.log('SAD: ', blockToScan);
 
           const seasonRestartedEvents = await pvpContract.getPastEvents('SeasonRestarted', {
             fromBlock: blockToScan,
