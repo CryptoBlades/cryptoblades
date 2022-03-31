@@ -14,41 +14,53 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
-    struct LaunchpadProject {
+    struct Launch {
         string name;
         string tokenSymbol;
         string details;
         string imageUri;
-        uint256 tokenPrice;
-        uint256 startTime;
-        uint256 fundsToRaise;
         address fundingTokenAddress;
         uint256 phase;
     }
 
+    // VARS
     mapping(uint256 => uint256) public vars;
     uint256 public VAR_TIERS_AMOUNT = 1;
     uint256 public VAR_FUNDING_PERIOD_PHASE_1 = 2;
     uint256 public VAR_FUNDING_PERIOD_PHASE_2 = 3;
 
+    // TIERS INFO
     mapping(uint256 => uint256) public tierStakingRequirement;
     mapping(uint256 => uint256) public tierAllocationWeight;
-    mapping(uint256 => LaunchpadProject) public launchpadProjects;
-    mapping(uint256 => uint256) public launchpadProjectTotalRaised;
-    mapping(uint256 => mapping(address => uint256)) public userInvestment;
-    mapping(uint256 => uint256) public launchBaseAllocation;
-    mapping(uint256 => EnumerableSet.AddressSet) launchEligibleUsersSnapshot;
-    mapping(uint256 => mapping(address => uint256)) public launchUserStakedAmountSnapshot;
-    mapping(uint256 => mapping(uint256 => uint256)) public launchVestingPercentage;
 
-    uint256 public nextLaunchpadProjectId;
+    // LAUNCHPAD PROJECT INFO
+    mapping(uint256 => Launch) public launches;
+    mapping(uint256 => uint256) public launchTokenPrice;
+    mapping(uint256 => uint256) public launchStartTime;
+    mapping(uint256 => uint256) public launchAmountToSell;
+    mapping(uint256 => uint256) public launchFundsToRaise;
+    mapping(uint256 => uint256) public launchBaseAllocation;
+    mapping(uint256 => uint256) public launchTotalRaised;
+    mapping(uint256 => address) public launchTokenAddress;
+
+    // USER INFO
+    mapping(uint256 => EnumerableSet.AddressSet) launchEligibleUsersSnapshot;
+    mapping(uint256 => mapping(address => uint256)) public launchUserStakedAmountSnapshot;    
+    mapping(uint256 => mapping(address => uint256)) public launchUserInvestment;
+
+    // VESTING INFO
+    mapping(uint256 => uint256[]) launchVestingsPercentage;
+    mapping(address => mapping(uint256 => mapping(uint256 => bool))) userClaimedVestingPortion;
+
+
+    uint256 public nextLaunchId;
 
     function initialize() public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(GAME_ADMIN, msg.sender);
 
-        nextLaunchpadProjectId = 1;
+        nextLaunchId = 1;
     }
 
     // MODIFIERS
@@ -79,6 +91,10 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     function getUserMaxAllocationForLaunch(address user, uint256 launchId) public view returns (uint256) {
         return getLaunchAllocationForTier(launchId, getTierForStakedAmount(launchUserStakedAmountSnapshot[launchId][user]));
+    }
+
+    function getAvailabeClaimAmount(address user, uint256 launchId, uint256 vestingId) public view returns (uint256) {
+        return launchUserInvestment[launchId][msg.sender].mul(1e18).div(launchTokenPrice[launchId]).mul(launchVestingsPercentage[launchId][vestingId]).div(100);
     }
 
     // RESTRICTED FUNCTIONS
@@ -115,72 +131,71 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     // PROJECT DETAILS
 
-    function addNewLaunchpadProject(
+    function addNewLaunch(
         string calldata name,
         string calldata tokenSymbol,
         string calldata details,
         string calldata imageUri,
-        uint256 tokenPrice,
-        uint256 startTime,
-        uint256 fundsToRaise,
         address fundingTokenAddress
     ) external restricted {
-        launchpadProjects[nextLaunchpadProjectId] = LaunchpadProject(
+        launches[nextLaunchId] = Launch(
             name,
             tokenSymbol,
             details,
             imageUri,
-            tokenPrice,
-            startTime,
-            fundsToRaise,
             fundingTokenAddress,
             1
         );
-        nextLaunchpadProjectId += 2;
+        nextLaunchId += 2;
     }
 
     function addSecondPhaseForLaunch(uint256 launchId, uint256 startTime) external restricted {
-        LaunchpadProject memory lp = launchpadProjects[launchId];
-        launchpadProjects[launchId + 1] = LaunchpadProject(
+        Launch memory lp = launches[launchId];
+        launches[launchId + 1] = Launch(
             lp.name,
             lp.tokenSymbol,
             lp.details,
             lp.imageUri,
-            lp.tokenPrice,
-            startTime,
-            lp.fundsToRaise.sub(launchpadProjectTotalRaised[launchId]),
             lp.fundingTokenAddress,
             2
         );
+        
+        launchStartTime[launchId + 1] = startTime;
+        launchTokenPrice[launchId + 1] = launchTokenPrice[launchId];
+        launchAmountToSell[launchId + 1] = launchAmountToSell[launchId].sub(launchTotalRaised[launchId].mul(1e18).div(launchTokenPrice[launchId]));
+        launchFundsToRaise[launchId + 1] = launchFundsToRaise[launchId].sub(launchTotalRaised[launchId]);
+        launchBaseAllocation[launchId + 1] = launchBaseAllocation[launchId];
+        launchTokenAddress[launchId + 1] = launchTokenAddress[launchId];
     }
 
-    function removeLaunchpadProject(uint256 id) external restricted {
-        delete launchpadProjects[id];
+    function removeLaunch(uint256 launchId) external restricted {
+        delete launches[launchId];
     }
 
-    function updateLaunchpadProjectTokenPrice(uint256 id, uint256 tokenPrice) external restricted {
-        launchpadProjects[id].tokenPrice = tokenPrice;
+    function updateLaunchTokenPrice(uint256 launchId, uint256 tokenPrice) external restricted {
+        launchTokenPrice[launchId] = tokenPrice;
     }
 
-    function updateLaunchpadProjectFundingTokenAddress( uint256 id, address fundingTokenAddress) external restricted {
-        launchpadProjects[id].fundingTokenAddress = fundingTokenAddress;
+    function updateLaunchFundingTokenAddress(uint256 launchId, address fundingTokenAddress) external restricted {
+        launches[launchId].fundingTokenAddress = fundingTokenAddress;
     }
 
-    function updateLaunchpadProjectStartTime(uint256 id, uint256 startTime) external restricted {
-        launchpadProjects[id].startTime = startTime;
+    function updateLaunchStartTime(uint256 launchId, uint256 startTime) external restricted {
+        launchStartTime[launchId] = startTime;
     }
 
     function enableVesting(uint256 launchId, uint256 percentage) external restricted {
-        
+        require(launchTokenAddress[launchId] != address(0), "Token address not set");
+        //require(IERC20(launchTokenAddress[launchId]).balanceOf(address(this)) >= launchPad);
+        launchVestingsPercentage[launchId].push(percentage);
     }
 
     // WHITELISTING
 
     function setEligibleUsersData(uint256 launchId, address[] calldata users, uint256[] calldata stakedAmounts) external restricted {
-        LaunchpadProject memory lp = launchpadProjects[launchId];
-        require(nextLaunchpadProjectId >= launchId, "Wrong launch ID");
+        require(nextLaunchId >= launchId, "Wrong launch ID");
         require(users.length == stakedAmounts.length, "Wrong input");
-        require(lp.startTime > block.timestamp, "Event already started");
+        require(launchStartTime[launchId] > block.timestamp, "Event already started");
 
         uint totalWeight = 0;
         for(uint i = 0; i < users.length; i++) {
@@ -188,7 +203,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
             launchUserStakedAmountSnapshot[launchId][users[i]] = stakedAmounts[i];
             totalWeight += tierAllocationWeight[getTierForStakedAmount(stakedAmounts[i])];
         }
-        launchBaseAllocation[launchId] = lp.fundsToRaise.div(totalWeight);
+        launchBaseAllocation[launchId] = launchFundsToRaise[launchId].div(totalWeight);
     }
 
     // VARS SETTERS
@@ -206,15 +221,25 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     // USER FUNCTIONS
 
     function invest(uint256 launchId, uint256 amount) external {
-        LaunchpadProject memory lp = launchpadProjects[launchId];
-        require(lp.startTime != 0 && block.timestamp > lp.startTime, "Launch not started");
-        require(lp.tokenPrice != 0, "Token price not set");
-        require((lp.phase == 1 && block.timestamp < lp.startTime + vars[VAR_FUNDING_PERIOD_PHASE_1]) || (lp.phase == 2 && block.timestamp < lp.startTime + vars[VAR_FUNDING_PERIOD_PHASE_2]), "Launch ended");
-        require(launchpadProjectTotalRaised[launchId] + amount <= lp.fundsToRaise, "Amount exceeds remaining supply");
+        Launch memory lp = launches[launchId];
+        require(launchStartTime[launchId] != 0 && block.timestamp > launchStartTime[launchId], "Launch not started");
+        require((lp.phase == 1 && block.timestamp < launchStartTime[launchId] + vars[VAR_FUNDING_PERIOD_PHASE_1])
+            || (lp.phase == 2 && block.timestamp < launchStartTime[launchId] + vars[VAR_FUNDING_PERIOD_PHASE_2]), "Launch ended");
+        require(launchTokenPrice[launchId] != 0, "Token price not set");
+        require(launchTotalRaised[launchId] + amount <= launchFundsToRaise[launchId], "Amount exceeds remaining supply");
         require(getUserMaxAllocationForLaunch(msg.sender, launchId) >= amount, "Allocation allowance exceeded");
 
         IERC20(lp.fundingTokenAddress).safeTransferFrom(msg.sender, address(this), amount);
-        userInvestment[launchId][msg.sender] += amount;
-        launchpadProjectTotalRaised[launchId] += amount;
+        launchUserInvestment[launchId][msg.sender] += amount;
+        launchTotalRaised[launchId] += amount;
+    }
+
+    function claim(uint256 launchId, uint256 vestingId) external {
+        require(vestingId > 0 && launchVestingsPercentage[launchId].length >= vestingId, "Vesting unavailable");
+        require(!userClaimedVestingPortion[msg.sender][launchId][vestingId], "Vesting already claimed");
+
+        userClaimedVestingPortion[msg.sender][launchId][vestingId] = true;
+        uint256 claimAmount = getAvailabeClaimAmount(msg.sender, launchId, vestingId);
+        IERC20(launchTokenAddress[launchId]).safeTransferFrom(address(this), msg.sender, claimAmount);
     }
 }
