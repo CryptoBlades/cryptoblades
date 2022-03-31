@@ -4772,7 +4772,7 @@
     },
     "links": {},
     "address": "0xB244c6d4059f5357Cd6558A041d2A7d622cAD555",
-    "transactionHash": "0xf5a8eb6e3b5bb31dfc045affacc1efeaf8cdc5a6dc3acb3364b61f437aef0376"
+    "transactionHash": "0x9488d8055ec64ed2e25f6b1cf4b8733d53f26944fb27193d6e4a17c4854386a5"
   },
   "build/contracts/Treasury.json": {
     "events": {},
