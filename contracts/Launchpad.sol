@@ -39,6 +39,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public launchBaseAllocation;
     mapping(uint256 => EnumerableSet.AddressSet) launchEligibleUsersSnapshot;
     mapping(uint256 => mapping(address => uint256)) public launchUserStakedAmountSnapshot;
+    mapping(uint256 => mapping(uint256 => uint256)) public launchVestingPercentage;
 
     uint256 public nextLaunchpadProjectId;
 
@@ -167,6 +168,10 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     function updateLaunchpadProjectStartTime(uint256 id, uint256 startTime) external restricted {
         launchpadProjects[id].startTime = startTime;
+    }
+
+    function enableVesting(uint256 launchId, uint256 percentage) external restricted {
+        
     }
 
     // WHITELISTING
