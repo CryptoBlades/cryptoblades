@@ -49,9 +49,11 @@
         <div class="claim-rewards-btns">
           <button class="stake-button claim-reward-btn"
             @click="onClaimReward"
-            :disabled="rewardClaimState !== 'ok' || !showRewardClaimSection"
+            :disabled="rewardClaimState !== RewardClaimState.ok"
             data-toggle="tooltip" data-placement="right" :title="claimRewardButtonLabel"
-            >{{ $t('stake.StakeSelectorItem.claim') }}
+            >
+            <span v-if="isLoadingClaim"><i class="fa fa-spinner fa-spin"></i></span>
+            <span v-else>{{ $t('stake.StakeSelectorItem.claim') }}</span>
           </button>
         </div>
       </div>
@@ -84,7 +86,7 @@
     <div class="inputSection" v-if="startedStaking">
       <!-- Input for stake amount -->
       <input
-        v-if="!isNftStaking && currentState !== currentState.stakeLocked"
+        v-if="!isNftStaking && currentState !== CurrentState.stakeLocked"
         class="token-amount-input text-center"
         inputmode="decimal"
         :title="$t('stake.tokenAmount')"
@@ -99,7 +101,7 @@
         value=""
         v-model="textAmount"
       />
-      <div v-if="!isNftStaking && currentState !== currentState.stakeLocked" class="input-ratio-buttons">
+      <div v-if="!isNftStaking && currentState !== CurrentState.stakeLocked" class="input-ratio-buttons">
         <button class="stake-button ratio-button" @click="inputByRatio(0.25)">25%</button>
         <button class="stake-button ratio-button" @click="inputByRatio(0.50)">50%</button>
         <button class="stake-button ratio-button" @click="inputByRatio(0.75)">75%</button>
@@ -121,8 +123,10 @@
       </multiselect>
       <button class="stake-button stake-submit-button"
         @click="onSubmit"
-        :disabled="currentState !== 'ok'"
-        >{{ submitButtonLabel }}</button>
+        :disabled="currentState !== CurrentState.ok">
+        <span v-if="isLoadingStake"><i class="fa fa-spinner fa-spin"></i></span>
+        <span v-else>{{ submitButtonLabel }}</span>
+        </button>
     </div>
   </div>
 </template>
@@ -130,7 +134,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { formatDurationFromSeconds } from '../utils/date-time';
-import { isStakeType, isNftStakeType, StakeType } from '../interfaces/State';
+import { isStakeType, isNftStakeType, StakeType, NftStakeType } from '../interfaces/State';
 import { toBN } from '@/utils/common';
 import { secondsToDDHHMMSS } from '../utils/date-time';
 import {Multiselect} from 'vue-multiselect';
@@ -141,62 +145,68 @@ import i18n from '@/i18n';
 import { TranslateResult } from 'vue-i18n';
 
 interface StoreMappedActions {
-  fetchStakeDetails(payload: {stakeType: StakeType}): Promise<void>;
-  stake(payload: {
-    amount: string; stakeType: StakeType}): void;
-  stakeNfts(payload: {
-    ids: string[]; stakeType: StakeType}): void;
-  unstake(payload: {
-    amount: string; stakeType: StakeType}): void;
-  unstakeNfts(payload: {
-    ids: string[]; stakeType: StakeType}): void;
-  unstakeKing(payload: {
-    amount: string;}): Promise<void>;
-  claimKingReward(): Promise<void>;
-  stakeUnclaimedRewards(payload: {
-    stakeType: StakeType;}): Promise<void>;
-  claimReward(payload: {
-    stakeType: StakeType;}): Promise<void>;
-  getOwnedLandIdsWithTier(): Promise<string[]>;
-  getStakedIds(payload: {
-    stakeType: StakeType;
-  }): Promise<string[]>;
-}
-// interface Data {
-//   stakeUnlockTimeLeftCurrentEstimate: number;
-//   stakeRewardDistributionTimeLeftCurrentEstimate: number;
-// }
-
-enum currentState {
-  connectWallet = '',
-  stakeLocked = 'ok',
-  contractFull = '',
-  amountIsTooBig = '',
-  waiting = '',
-  inputIsZero = '',
-  insufficientBalance = '',
-  notEnoughFundsInExitPool = '',
-  notEnoughFundsInExitPoolForFee = '',
-  ok = 'ok',
+  fetchStakeDetails(payload: {stakeType: StakeType | NftStakeType}):
+  Promise<void>;
+  stake(payload: {amount: string; stakeType: StakeType | NftStakeType}):
+  void;
+  stakeNfts(payload: {ids: string[]; stakeType: StakeType | NftStakeType}):
+  void;
+  unstake(payload: {amount: string; stakeType: StakeType | NftStakeType}):
+  void;
+  unstakeNfts(payload: {ids: string[]; stakeType: StakeType | NftStakeType}):
+  void;
+  unstakeKing(payload: {amount: string;}):
+  Promise<void>;
+  claimKingReward():
+  Promise<void>;
+  stakeUnclaimedRewards(payload: {stakeType: StakeType;}):
+  Promise<void>;
+  claimReward(payload: {stakeType: StakeType | NftStakeType;}):
+  Promise<void>;
+  getOwnedLandIdsWithTier():
+  Promise<LandIds[]>;
+  getStakedIds(payload: {stakeType: StakeType | NftStakeType;}):
+  Promise<string[]>;
 }
 
-enum claimState {
-  loading = 'loading',
-  rewardLocked = 'rewardLocked',
-  ok = 'ok',
+enum CurrentState {
+  connectWallet,
+  stakeLocked,
+  contractFull,
+  amountIsTooBig,
+  waiting,
+  inputIsZero,
+  insufficientBalance,
+  notEnoughFundsInExitPool,
+  notEnoughFundsInExitPoolForFee,
+  ok,
+}
+
+enum RewardClaimState {
+  loading,
+  rewardLocked,
+  ok,
+  noReward,
+}
+
+interface LandIds {
+  id: string,
+  tier: number,
 }
 
 interface StakeData {
   contractBalance: string;
   currentRewardEarned: string;
   ownBalance: string;
-  remainingCapacityForDeposit: string;
-  remainingCapacityForWithdraw: string;
+  remainingCapacityForDeposit: BN;
+  remainingCapacityForWithdraw: BN;
   rewardDistributionTimeLeft: number;
   rewardMinimumStakeTime: number;
   stakedBalance: string;
   unlockTimeLeft: number;
 }
+
+type AllStakeTypes = StakeType | NftStakeType;
 
 export default Vue.extend({
   components: {
@@ -205,11 +215,9 @@ export default Vue.extend({
   props: {
     stakeTitle: {
       type: String,
-      required: true,
-      default: '',
     },
     stakeType: {
-      type: String as PropType<StakeType>,
+      type: String as PropType<AllStakeTypes>,
     },
     stakeTokenName: {
       type: String,
@@ -245,23 +253,24 @@ export default Vue.extend({
   data() {
     return {
       textAmount: '' as string,
-      idsToStake: [] as string[],
+      idsToStake: [] as LandIds[],
       isOpen: false as boolean,
       isDeposit: true as boolean,
-      loading: false as boolean,
+      isLoadingClaim: false as boolean,
+      isLoadingStake: false as boolean,
       startedStaking: false as boolean,
-      errorWhenUpdating: false as boolean,
       rewardClaimLoading: false as boolean,
       stakeUnlockTimeLeftCurrentEstimate: 0 as number,
       stakeRewardDistributionTimeLeftCurrentEstimate: 0 as number,
-      ownedLandIds: [] as string[],
+      ownedLandIds: [] as LandIds[],
       stakedIds: [] as string[],
       secondsInterval: null as ReturnType<typeof setInterval> | null,
       stakeRewardProgressInterval: null as ReturnType<typeof setInterval> | null,
+      CurrentState,
+      RewardClaimState,
     };
   },
   computed: {
-    // ...(mapState(['defaultAccount','staking','skillRewards'])),
     ...mapState(['staking', 'defaultAccount']),
     progressBarWidth(): number{
       if(this.minimumStakeTime === 0) return 100;
@@ -286,7 +295,6 @@ export default Vue.extend({
       return toBN(this.walletBalance).dividedBy(1e18).toFixed(3);
     },
     stakedBalanceFormatted(): string {
-      // !!!
       return this.isNftStaking ? this.stakedBalance.toFixed(3) : this.stakedBalance.dividedBy(1e18).toFixed(3);
     },
     stakeData(): StakeData {
@@ -327,133 +335,129 @@ export default Vue.extend({
       return secondsToDDHHMMSS(this.stakeUnlockTimeLeftCurrentEstimate);
     },
 
-    showRewardClaimSection(): boolean {
-      if (this.rewardClaimState === 'loading') {
-        return true;
-      }
-
-      return toBN(this.currentRewardEarned).gt(0);
-    },
-
     stakedBalance(): BN{
       return toBN(this.stakeData.stakedBalance);
     },
 
-    remainingCapacityForDeposit(): BN {
+    remainingCapacityForDeposit(): BN | null {
       if (!this.stakeData.remainingCapacityForDeposit) {
-        return toBN(0);
-        // TODO Check!
+        return null;
       }
-
-      return toBN(this.stakeData.remainingCapacityForDeposit);
+      return this.stakeData.remainingCapacityForDeposit;
     },
 
     remainingCapacityForWithdraw(): BN {
-      return toBN(this.stakeData.remainingCapacityForWithdraw);
+      return this.stakeData.remainingCapacityForWithdraw;
     },
 
     contractBalance(): BN {
       return toBN(this.stakeData.contractBalance);
     },
 
-    currentState(): string {
-      if (!this.defaultAccount || this.errorWhenUpdating) {
-        return currentState.connectWallet;
+    currentState(): CurrentState {
+      // no account connect / error
+      if (!this.defaultAccount) {
+        return CurrentState.connectWallet;
       }
 
+      // staked funds still locked
       if (!this.isDeposit && this.unlockTimeLeftInternal > 0) {
-        return currentState.stakeLocked;
+        return CurrentState.stakeLocked;
       }
 
+      // limit of contract reached
       if (
         this.remainingCapacityForDeposit &&
         this.remainingCapacityForDeposit.eq(0) &&
         this.isDeposit
       ) {
-        return currentState.contractFull;
+        return CurrentState.contractFull;
       }
 
+      // limit of contract will be reached due to deposit
       if (
         this.remainingCapacityForDeposit &&
         this.bigNumberAmount.gt(this.remainingCapacityForDeposit) &&
         this.isDeposit
       ) {
-        return currentState.amountIsTooBig;
+        return CurrentState.amountIsTooBig;
       }
 
-      if (this.textAmount[this.textAmount.length - 1] === '.') {
-        return 'waiting';
-      }
-
+      // no input given
       if (isStakeType(this.stakeType) && +this.textAmount <= 0) {
-        return 'inputIsZero';
+        return CurrentState.inputIsZero;
       }
 
       if (isNftStakeType(this.stakeType) && this.idsToStake.length === 0) {
-        return 'inputIsZero';
+        return CurrentState.inputIsZero;
       }
 
       const hasSufficientBalance = this.isDeposit
         ? toBN(this.walletBalance).gte(this.bigNumberAmount)
         : this.stakedBalance.gte(this.bigNumberAmount);
 
+      // not enough funds in wallet
       if (!hasSufficientBalance) {
-        return 'insufficientBalance';
+        return CurrentState.insufficientBalance;
       }
 
+      // user input bigger than funds in pool
       if (this.bigNumberAmount.gt(this.contractBalance) && !this.isDeposit) {
-        return 'notEnoughFundsInExitPool';
+        return CurrentState.notEnoughFundsInExitPool;
       }
 
+      // user input bigger than funds in pool
       if (
         this.bigNumberAmount.gt(this.remainingCapacityForWithdraw) &&
         !this.isDeposit
       ) {
-        return 'notEnoughFundsInExitPool';
+        return CurrentState.notEnoughFundsInExitPool;
       }
 
-      return 'ok';
+      return CurrentState.ok;
     },
 
     submitButtonLabel(): TranslateResult {
       switch (this.currentState) {
-      case 'ok':
+      case CurrentState.ok:
         return this.isDeposit ? i18n.t('stake.stakeButtonLabel') : i18n.t('stake.unstakeButtonLabel');
-      case currentState.contractFull:
+      case CurrentState.contractFull:
         return i18n.t('stake.contractIsFullButtonLabel');
-      case currentState.amountIsTooBig:
+      case CurrentState.amountIsTooBig:
         return i18n.t('stake.amountIsTooBigButtonLabel');
-      case currentState.waiting:
+      case CurrentState.waiting:
         return i18n.t('stake.waitingButtonLabel');
-      case currentState.inputIsZero:
+      case CurrentState.inputIsZero:
         return i18n.t('stake.enterAnAmountButtonLabel');
-      case currentState.insufficientBalance:
+      case CurrentState.insufficientBalance:
         return i18n.t('stake.insufficientBalanceButtonLabel');
-      case currentState.notEnoughFundsInExitPool:
+      case CurrentState.notEnoughFundsInExitPool:
         return i18n.t('stake.notEnoughFundsInExitPoolButtonLabel');
-      case currentState.stakeLocked:
+      case CurrentState.stakeLocked:
         return i18n.t('stake.sorryStake', {estimatedUnlockTimeLeftFormatted : this.estimatedUnlockTimeLeftFormatted});
       default:
         return i18n.t('stake.connectToWalletButtonLabel');
       }
     },
 
-    rewardClaimState(): string {
-      if (this.rewardClaimLoading) {
-        return claimState.loading;
+    rewardClaimState(): RewardClaimState {
+      if (this.isLoadingClaim) {
+        return RewardClaimState.loading;
       }
-
       if (this.unlockTimeLeftInternal > 0) {
-        return claimState.rewardLocked;
+        return RewardClaimState.rewardLocked;
       }
-      return claimState.ok;
+      if(!toBN(this.currentRewardEarned).gt(0)){
+        return RewardClaimState.noReward;
+      }
+      return RewardClaimState.ok;
     },
 
     claimRewardButtonLabel(): TranslateResult {
       switch (this.rewardClaimState) {
-      case claimState.loading:
+      case RewardClaimState.loading:
         return i18n.t('stake.loading');
-      case claimState.rewardLocked:
+      case RewardClaimState.rewardLocked:
         return i18n.t('stake.sorryReward', {estimatedUnlockTimeLeftFormatted : this.estimatedUnlockTimeLeftFormatted});
       default:
         return i18n.t('stake.claimReward');
@@ -481,11 +485,57 @@ export default Vue.extend({
     this.secondsInterval = setInterval(() => {
       this.updateEstimates();
     }, 1000);
-    // console.log(typeof(this.secondsInterval));
   },
   beforeDestroy() {
     if(this.stakeRewardProgressInterval) clearInterval(this.stakeRewardProgressInterval);
     if(this.secondsInterval) clearInterval(this.secondsInterval);
+  },
+  watch: {
+    rewardDistributionTimeLeftInternal(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        this.stakeRewardDistributionTimeLeftCurrentEstimate = newValue;
+      }
+    },
+    unlockTimeLeftInternal(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        this.stakeUnlockTimeLeftCurrentEstimate = newValue;
+      }
+    },
+    textAmount(newValue, oldVal) {
+      if (newValue.length > 40) {
+        this.textAmount = oldVal;
+        return;
+      }
+      if (newValue[newValue.length - 1] === 0) {
+        this.textAmount = newValue;
+        return;
+      }
+      if (
+        newValue[newValue.length - 1] === '.' &&
+        newValue[newValue.length - 2] !== '.'
+      ) {
+        return;
+      }
+      if (isNaN(newValue)) {
+        this.textAmount = oldVal;
+        return;
+      }
+      if (!newValue) {
+        this.textAmount = '0';
+      }
+    },
+    isDeposit() {
+      this.textAmount = '';
+      this.idsToStake = [];
+    },
+    async defaultAccount(newVal) {
+      if (newVal) {
+        await this.fetchData();
+        if(this.stakeType.startsWith('cbkLand')) {
+          await this.updateOwnedLands();
+        }
+      }
+    },
   },
   methods:{
     ...(mapActions([
@@ -514,6 +564,7 @@ export default Vue.extend({
     },
 
     updateEstimates(): void {
+      console.log('udpate');
       if (this.stakeUnlockTimeLeftCurrentEstimate > 0) {
         this.stakeUnlockTimeLeftCurrentEstimate--;
       }
@@ -524,13 +575,14 @@ export default Vue.extend({
     },
 
     async onSubmit(): Promise<void> {
-      if (this.loading || this.currentState !== 'ok') return;
+      if (this.isLoadingStake || this.currentState !== CurrentState.ok) return;
       const amount = this.bigNumberAmount.toString();
 
       try {
-        this.loading = true;
+        this.isLoadingStake = true;
 
         if (this.isDeposit) {
+          //stake
           if(this.isNftStaking) {
             await this.stakeNfts({ ids: this.idsToStake.map(x => x.id), stakeType: this.stakeType });
           }
@@ -558,14 +610,16 @@ export default Vue.extend({
       } catch (e) {
         console.error(e);
       } finally {
-        this.loading = false;
+        this.isLoadingStake = false;
+        this.textAmount = '';
+        this.idsToStake = [];
       }
     },
     async onClaimReward(): Promise<void> {
-      if (this.rewardClaimState !== 'ok') return;
+      if (this.rewardClaimState !== RewardClaimState.ok) return;
 
       try {
-        this.rewardClaimLoading = true;
+        this.isLoadingClaim = true;
 
         if(this.stakeType === 'king') {
           await this.claimKingReward();
@@ -576,23 +630,16 @@ export default Vue.extend({
       } catch (e) {
         console.error(e);
       } finally {
-        this.rewardClaimLoading = false;
+        this.isLoadingClaim = false;
       }
     },
     async fetchData(): Promise<void> {
       try {
-        this.errorWhenUpdating = false;
-        this.loading = true;
-
         await this.fetchStakeDetails({ stakeType: this.stakeType });
       } catch (err) {
-        this.errorWhenUpdating = true;
         console.log(err);
-      } finally {
-        this.loading = false;
       }
     },
-
     async updateOwnedLands(): Promise<void> {
       this.ownedLandIds = await this.getOwnedLandIdsWithTier();
       this.stakedIds = await this.getStakedIds({ stakeType: this.stakeType });
@@ -702,16 +749,29 @@ export default Vue.extend({
   font: normal 16px/21px Roboto;
   text-align: center;
 }
+
+.stake-button span{
+  font: normal 16px/21px Roboto;
+  text-align: center;
+}
+
 .stake-button{
+  font: normal 16px/21px Roboto;
   text-align: center;
   background: #9E8A57; /* change to: #1168D0; */
   border-radius: 5px;
   border:none;
   color: #FFFFFF;
-  font: normal 16px/21px Roboto;
   width:100%;
   padding:5px 23px;
 }
+
+.stake-button:disabled{
+  background: #404857;
+  color: #9D98A1;
+  cursor: default;
+}
+
 .stake-buttons{
   width:100%;
   margin: 0 auto;
@@ -723,12 +783,6 @@ export default Vue.extend({
   width:calc(50% - 7px);
   min-height: 43px;
 }
-
-.stake-button:disabled{
-  background: #404857;
-  color: #9D98A1;
-  cursor: default;
-  }
 
 .btn_active{
   background: hsl(43, 15%, 18%);
