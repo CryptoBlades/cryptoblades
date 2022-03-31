@@ -124,8 +124,6 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
-
 a {
   font-weight: bold;
 }
@@ -147,7 +145,6 @@ a {
 .link-text {
   font-weight: bolder;
   white-space: nowrap;
-  font-family: 'Oswald', 'serif';
   font-size: clamp(0.8rem, 1vw, 1rem);
   color: #dfcc9a;
 }
