@@ -1,16 +1,9 @@
 <template>
   <div class="app">
-    <nav-bar :isToggled="toggleSideBar"/>
+    <nav-bar />
+    <character-bar v-if="!featureFlagStakeOnly && currentCharacterId !== null" />
     <div class="content dark-bg-text">
-      <b-row>
-        <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
-        <b-col :class="renderPageDisplay()"
-        :id="!featureFlagStakeOnly && currentCharacterId !== null ? 'bg-combat' : ''">
-        <!-- :class="!featureFlagStakeOnly && currentCharacterId !== null ? 'bg-image' : ''"> -->
-          <router-view v-if="canShowApp" />
-        </b-col>
-        <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
-      </b-row>
+      <router-view v-if="canShowApp" />
     </div>
     <div class="content dark-bg-text" v-if="!canShowApp">
       {{$t('app.cantView')}}
@@ -96,7 +89,6 @@ import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
-import WeaponRowGrid from './components/smart/WeaponRowGrid.vue';
 import { apiUrl } from './utils/common';
 import i18n from './i18n';
 import { getConfigValue } from './contracts';
@@ -115,7 +107,6 @@ export default {
     CharacterBar,
     BigButton,
     SmallButton,
-    WeaponRowGrid
   },
 
   data: () => ({
@@ -125,10 +116,6 @@ export default {
     isConnecting: false,
     recruitCost: '',
     isOptions: false,
-    showWeapon: false,
-    currentWeaponId: null,
-    weaponId: null,
-    toggleSideBar: false
   }),
 
   computed: {
@@ -222,22 +209,6 @@ export default {
       if (id !== null) {
         await this.fetchCharacterStamina(id);
       }
-    },
-
-    renderPageDisplay(){
-      let toDisplay;
-
-      if(!this.featureFlagStakeOnly && this.currentCharacterId !== null){
-        if(this.toggleSideBar){
-          toDisplay = 'can-show-app';
-        }else{
-          toDisplay = 'col-xl-9 col-lg-8 col-md-8 col-sm-10 cols-11 set-normal';
-        }
-      }else{
-        toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
-      }
-
-      return toDisplay;
     },
 
     checkStorage() {
@@ -352,17 +323,6 @@ export default {
     //     },
     //   );
     // });
-    Events.$on('weapon-inventory', (bol) =>{
-      this.showWeapon = bol;
-    });
-
-    Events.$on('chooseweapon', (id) =>{
-      this.weaponId = id;
-    });
-
-    Events.$on('toggle-sideBar', (bol) =>{
-      this.toggleSideBar = bol;
-    });
 
     document.body.addEventListener('click', (e) => {
       const tagname = e.target.getAttribute('tagname');
@@ -461,38 +421,9 @@ export default {
 
 <style>
 
-@font-face {
-    font-family: 'Trajan';
-    src: url('./assets/fonts/Trajan.ttf');
-    font-weight: normal;
-    font-style: normal;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
-
-
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
   font-weight: 600;
   text-align: center;
-}
-
-.app{
-  width: auto;
-}
-
-
-.set-normal{
-  margin-top: 20px;
-  margin-left: auto;
-  margin-right: auto;
-  transition: 1s all;
-}
-
-#bg-combat{
-  background-image: url('./assets/combat-bg.png');
-  background-size: cover;
-  background-repeat: no-repeat;
 }
 
 hr.hr-divider {
@@ -501,7 +432,7 @@ hr.hr-divider {
 }
 body {
   margin: 0;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, #242720 100%);
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
 }
 
 .no-margin {
@@ -531,12 +462,7 @@ body {
 }
 
 .body {
-  padding-top: 15px 35px;
-  /* max-height: calc(100vh - 56px - 160px); */
-}
-
-.body  > div{
-  padding-left: 20px;
+  max-height: calc(100vh - 56px - 160px);
 }
 
 button,
@@ -586,9 +512,10 @@ button,
   color: grey;
 }
 
-.fire-icon,.str-icon {
+.fire-icon,
+.str-icon {
   color: red;
-  content: url('assets/elements/icon-fire.png');
+  content: url('assets/elements/fire.png');
   width: 1em;
   height: 1em;
 }
@@ -596,7 +523,7 @@ button,
 .earth-icon,
 .dex-icon {
   color: green;
-  content: url('assets/elements/icon-earth.png');
+  content: url('assets/elements/earth.png');
   width: 1em;
   height: 1em;
 }
@@ -604,7 +531,7 @@ button,
 .water-icon,
 .int-icon {
   color: cyan;
-  content: url('assets/elements/icon-water.png');
+  content: url('assets/elements/water.png');
   width: 1em;
   height: 1em;
 }
@@ -612,7 +539,7 @@ button,
 .lightning-icon,
 .cha-icon {
   color: yellow;
-  content: url('assets/elements/icon-thunder.png');
+  content: url('assets/elements/lightning.png');
   width: 1em;
   height: 1em;
 }
@@ -833,31 +760,9 @@ div.bg-success {
   border: 1px solid #9e8a57;
 }
 
-.bg-image{
-  background: url('./assets/combat-bg.png');
-  background-repeat: no-repeat;
-  background-size:cover;
-  border-radius:0px;
-}
-
-
-.can-show-app{
-  width: 100%;
-  padding-top: 40px;
-}
-
-
-
-@media all and (max-width: 600px) {
-  .can-show-app{
-    overflow-y: hidden ;
-  }
-}
-
 @media all and (max-width: 767.98px) {
   .content {
     padding: 10px;
-    padding-top: 0px;
   }
   .dark-bg-text {
     width: 100%;
