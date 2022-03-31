@@ -18,12 +18,14 @@ import aprilFools9 from './assets/enemies/april_fools/spider.png';
 import aprilFools10 from './assets/enemies/april_fools/banan_cut.png';
 import aprilFools11 from './assets/enemies/april_fools/hedgehog.png';
 import aprilFools12 from './assets/enemies/april_fools/knight.png';
+import aprilFools13 from './assets/enemies/april_fools/cat.png';
+import aprilFools14 from './assets/enemies/april_fools/ogre.png';
 
 const allImages = [
 // img1, img2, img3, img4, img5, img6, img7, img8,
   aprilFools1, aprilFools2, aprilFools3, aprilFools4, aprilFools5,
   aprilFools6, aprilFools7, aprilFools8, aprilFools9, aprilFools10,
-  aprilFools11, aprilFools12,
+  aprilFools11, aprilFools12, aprilFools13, aprilFools14,
 ];
 
 export function getEnemyArt(enemyID: number) {
