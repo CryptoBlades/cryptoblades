@@ -731,6 +731,7 @@ div.encounter.text-center {
 }
 
 .chance-winning{
+    z-index: 1;
     color: #fff;
     padding: 1px 15px;
     border-radius: 2px;
