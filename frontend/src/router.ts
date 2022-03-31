@@ -16,6 +16,7 @@ import Admin from './views/Admin.vue';
 import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
+import PlayToEarn from './views/PlayToEarn.vue';
 
 import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from './feature-flags';
 import Merchandise from '@/components/smart/Merchandise.vue';
@@ -46,6 +47,7 @@ export default function createRouter() {
       {path: '/bridge', name: 'bridge', component: Bridge},
       {path: '/treasury', name: 'treasury', component: Treasury},
       {path: '/admin', name: 'admin', component: Admin},
+      {path: '/play-to-earn', name: 'play-to-earn', component: PlayToEarn},
     ]
   });
 

@@ -1,53 +1,62 @@
 <template>
   <div>
     <div class="tob-bg-img promotion-decoration">
-      <img class="vertical-decoration bottom" src="../assets/border-element.png">
-    </div>
-    <div class="float-left crypto-warrior-image">
-      <img class="vertical-decoration" src="../assets/cryptowarrior.png">
+      <img class="vertical-decoration bottom" src="../assets/header-ads.png">
     </div>
   <div class="results-panel">
-    <div class="float-right">
-      <h1 class="text-left outcome">{{ formattedOutcome }}</h1>
-      <b-container v-if="fightResults.isVictory">
-        <b-row>
-          <b-col class="text-left no-padding">
-            <h4>{{$t('combatResults.earned')}}</h4>
+    <div class="float-center">
+      <h1 class="text-center outcome pt-4 pb-4">{{ formattedOutcome.toUpperCase() }}</h1>
+      <b-container>
+        <b-row class="power-rolled">
+          <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
+            <h5>{{$t('combatResults.youRolled')}}</h5>
           </b-col>
-          <b-col class="text-center no-padding">
-            <h4>
-              {{formattedUsd}}
-              <Hint :text="$t('combatResults.hint')" />
-            </h4>
-            <h6 class="formatted-skill">{{formattedSkill}}</h6>
-            <h5>{{formattedXpGain}}</h5>
+          <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
+            <img src="../assets/arrow-right.png" alt="">
+          </b-col>
+          <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
+            <h5>{{fightResults.playerRoll}}</h5>
+          </b-col>
+        </b-row>
+        <b-row class="power-rolled">
+          <b-col cols="4"  lg="5" sm="4" md="4" class="win-details">
+            <h5>{{$t('combatResults.enemyRolled')}}</h5>
+          </b-col>
+          <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
+            <img src="../assets/arrow-right.png" alt="">
+          </b-col>
+          <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
+            <h5>{{fightResults.enemyRoll}}</h5>
           </b-col>
         </b-row>
       </b-container>
-      <h6 class="text-left gas-spent">
+      <b-container v-if="fightResults.isVictory">
+        <b-row>
+          <b-col class="you-earned">
+            <h4>{{$t('combatResults.earned')}}</h4>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col class="earned">
+            <h4>
+              {{formattedSkill}}  {{formattedUsd}}
+              <Hint :text="$t('combatResults.hint')" />
+            </h4>
+            <h5>+ {{formattedXpGain}}</h5>
+          </b-col>
+        </b-row>
+      </b-container>
+      <h6 class="text-center gas-spent">
         {{$t('combatResults.gasFee', {
           bnbGasUsed : fightResults.bnbGasUsed,
           gasToken : gasToken
           })
         }}
       </h6>
-      <img src="../assets/divider4.png" class="expander-divider">
-      <b-container>
-        <b-row>
-          <b-col class="text-left no-padding">
-            <h5 class="no-margin">{{$t('combatResults.youRolled')}}</h5>
-            <h5 class="no-margin">{{$t('combatResults.enemyRolled')}}</h5>
-          </b-col>
-          <b-col class="text-center no-padding">
-            <h5 class="no-margin">{{fightResults.playerRoll}}</h5>
-            <h5 class="no-margin">{{fightResults.enemyRoll}}</h5>
-          </b-col>
-        </b-row>
-      </b-container>
     </div>
   </div>
     <div class="bot-bg-img promotion-decoration">
-      <img src="../assets/border-element.png">
+      <img src="../assets/separator.png">
     </div>
     <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
       <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
@@ -67,7 +76,6 @@
 <script lang="ts">
 import Vue from 'vue';
 import {fromWeiEther, toBN} from '../utils/common';
-import Hint from '../components/Hint.vue';
 import {PropType} from 'vue/types/options';
 import axios from 'axios';
 import {getConfigValue} from '@/contracts';
@@ -140,9 +148,6 @@ export default Vue.extend({
     await new Promise(f => setTimeout(f, 1000));
     this.checkStorage();
   },
-  components: {
-    Hint,
-  },
 });
 </script>
 
@@ -156,6 +161,7 @@ export default Vue.extend({
   text-align: center;
 }
 .outcome {
+  font-family: Trajan;
   font-size: 2em;
   font-weight: bold;
   padding: 0.1em;
@@ -185,9 +191,117 @@ export default Vue.extend({
 .crypto-warrior-image {
   max-width: 13em;
 }
+
+.results-panel > div > div{
+  margin-bottom: 40px;
+}
+
+.results-panel > div > div:nth-child(2) > div > div{
+  text-align: center;
+  padding: 0px;
+}
+
+
+.power-rolled{
+  border-bottom: 1px solid rgba(255, 255, 255, 0.282);
+  widows: 70%;
+  margin: auto;
+}
+
+.power-rolled .win-details:nth-child(1){
+  text-align: right;
+}
+
+.power-rolled .win-details:nth-child(2){
+  text-align: center;
+}
+
+.power-rolled .win-details:nth-child(3){
+  text-align: left;
+  flex-wrap:nowrap;
+}
+
+
+
+.win-details{
+  padding: 0px;
+}
+
+.win-details > h5{
+  font-family: Roboto;
+  color: rgba(255, 255, 255, 0.405);
+  font-size: 1em;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.earned > h4{
+  font-family: Roboto;
+  color: #fff;
+  font-size:1em;
+}
+
+.earned > h5{
+  font-family: Roboto;
+  color: rgb(186, 186, 4);
+}
+
+.gas-spent{
+    font-family: Roboto;
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.357);
+}
+
+.win-details > img{
+  width: 9px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.you-earned > h4{
+  font-size: 1.6em;
+  font-family: 'Roboto', 'serif'  !important;
+}
+
 .ad-container {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
+
+.top-bg-img > img, .bot-bg-img > img {
+    width: 69% !important;
+    margin-bottom: -70px;
+
+}
+
+
+.tob-bg-img > img{
+  margin-top: -40px !important;
+}
+
+
+@media all and (max-width: 600px) {
+  .modal-dialog{
+    margin-top: 10em;
+  }
+
+  .outcome{
+    font-size: 1.5em;
+  }
+
+  .modal-content{
+    width: auto !important;
+  }
+
+  .float-center .container{
+    padding: 0px !important;;
+  }
+
+  .float-center .container .power-rolled{
+    padding: 0px !important;
+    width: 100% !important;
+  }
+}
+
 </style>
