@@ -343,10 +343,6 @@ export default {
           }
           scanning = true;
 
-          console.log('RESULT: ', result);
-
-          console.log('SAD: ', blockToScan);
-
           const seasonRestartedEvents = await pvpContract.getPastEvents('SeasonRestarted', {
             fromBlock: blockToScan,
             toBlock: 'latest',
