@@ -74,10 +74,13 @@
       </div>
       <!-- --------------------------------------- -->
 
-      <div class="row" v-if="currentCharacterStamina >= staminaPerFight">
-      <!-- <div class="row"> -->
+      <div class="row">
         <div class="col">
-          <div class="combat-enemy-container">
+        <div class="mb-3" :style="'align-self: baseline; width: 20vw'">
+          <span class="isMobile">{{$t('combat.selectStamina')}}</span>
+          <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
+        </div>
+          <div  v-if="currentCharacterStamina >= staminaPerFight" class="combat-enemy-container">
               <!-- selected weapon for combat details -->
               <div class="col weapon-selection mb-4">
                 <div class="header-row d-flex justify-content-between">
@@ -96,9 +99,6 @@
                         <img src="../assets/swithc-wep.png">
                       </button>
                     </div>
-                  </div>
-                  <div :style="'align-self: baseline'">
-                      <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
                   </div>
                 </div>
               </div>
@@ -153,10 +153,6 @@
 
                         <div class="skill-gain mb-1">
                           + ~{{formattedSkill(targetExpectedPayouts[i] * fightMultiplier)}}
-                        </div>
-
-                        <div class="loot-chest" v-if="getWinChance(e.power, e.trait).toUpperCase() == 'UNLIKELY'">
-                          <img src="../assets/chest.png" alt="">
                         </div>
                     </div>
                 <p v-if="isLoadingTargets">{{$t('combat.loading')}}</p>
@@ -569,7 +565,6 @@ h5{
   cursor: pointer;
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 115%;
   background-image: url('../assets/enemy-bg-transparent.png');
   background-color: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, #242720 100%);
   border: 1px solid #a28d54;
@@ -805,22 +800,6 @@ div.encounter.text-center {
   display: flex;
   align-items: flex-end;
 }
-
-
-.loot-chest{
-  position: absolute;
-  bottom: 0;
-  margin-bottom: -38px;
-  border: 1px solid #9e8a57;
-  border-radius: 7px;
-  padding: 5px;
-  background-color:#131518;
-}
-
-.loot-chest > img{
-  width: 40px;
-}
-
 
 .victory-chance {
   left: 0;
@@ -1091,21 +1070,6 @@ h1 {
   .combant-hint{
     position: absolute;
   }
-
-  .loot-chest{
-    position: absolute;
-    bottom: 0;
-    margin-bottom: -30px;
-    border: 1px solid #9e8a57;
-    border-radius: 7px;
-    padding: 5px;
-    background-color:#131518;
-  }
-
-  .loot-chest > img{
-    width: 40px !important;
-  }
-
 
 }
 
