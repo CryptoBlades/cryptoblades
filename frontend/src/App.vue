@@ -2,7 +2,7 @@
   <div class="app">
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content dark-bg-text">
-      <b-row class="bg-combat">
+      <b-row>
         <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
         <b-col :class="renderPageDisplay()">
           <router-view v-if="canShowApp" />
@@ -487,11 +487,6 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   transition: 1s all;
 }
 
-.bg-combat{
-  background-image: url('./assets/combat-bg.png');
-  background-size: cover;
-  background-repeat: no-repeat;
-}
 
 hr.hr-divider {
   border-top: 1px solid #9e8a57;

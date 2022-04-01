@@ -550,7 +550,11 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
-
+.body{
+  background: linear-gradient(0deg, rgba(22, 22, 22, 0.95), rgba(22, 22, 22, 0.95)), url('../assets/combat-bg.png');
+  background-size:cover;
+  min-height: 100%;
+}
 h5{
   font-family: Trajan;
   font-size: 25px;
