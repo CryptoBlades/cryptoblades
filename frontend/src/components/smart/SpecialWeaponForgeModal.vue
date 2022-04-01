@@ -33,7 +33,7 @@
                   <span v-if="endsIn < 0">{{$t('blacksmith.ended')}}</span>
                   <h4>{{partnerName}}</h4>
                   <div class="mt-2">
-                    <h5 class="text-justify">{{eventDetails}}</h5>
+                    <h5 class="text-justify preline">{{eventDetails}}</h5>
                     <a class="a-button" :href="eventPartnerWebsite" target="_blank">{{eventPartnerWebsite}}</a>
                   </div>
                 </div>
@@ -650,6 +650,10 @@ export default Vue.extend({
 
 .form-width {
   width: 25%;
+}
+
+.preline {
+  white-space: pre-line;
 }
 
 @media (max-width: 576px) {

@@ -4364,7 +4364,7 @@
     },
     "links": {},
     "address": "0x09d87c9fC6E57B8A92a2327e57eb403514339eCa",
-    "transactionHash": "0x2f348e1c2952be2861978832612914478a8296070fb7b42f563c9e0717f6e251|{\"gasBurned\":13022336245464,\"tx\":\"FwiztMuCDd2pDH5q18ShD4oGNRCK9sfFV7eFJtWiqkKs\"}"
+    "transactionHash": "0x80b355090b543a578de6c6ccff635ae2fdb465536d24b8a0dccd1863fb6b13ed|{\"gasBurned\":13227938485492,\"tx\":\"EiePT54kZxT5GVzp6NY1GZqEGnViadoC1HkPZSKX4HYu\"}"
   },
   "build/contracts/Treasury.json": {
     "events": {},
