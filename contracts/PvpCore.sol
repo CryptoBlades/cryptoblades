@@ -78,6 +78,8 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     uint256 public arenaAccess; // 0 = cannot join, 1 = can join
     /// @dev value sent by players to offset bot's duel costs
     uint256 public duelOffsetCost;
+    /// @dev value that enables or disables tiers (all tiers are 0 if disabled)
+    bool public tiersEnabled;
     /// @dev PvP bot address
     address payable public pvpBotAddress;
     /// @dev characters by id that are on queue to perform a duel
@@ -226,12 +228,14 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         require((arenaAccess & 1) == 1, "L");
 
         uint8 tier = getArenaTier(characterID);
+
         uint256 wager = getEntryWagerByTier(tier);
 
         if (_ownerByCharacter[characterID] != msg.sender) {
             _ownerByCharacter[characterID] = msg.sender;
         }
 
+        // If tiers are disabled we leave this so all players reset their ranks
         if (previousTierByCharacter[characterID] != tier) {
             pvpaddons.changeRankingPoints(characterID, 0);
         }
@@ -282,7 +286,9 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     {
         Fighter storage fighter = fighterByCharacter[characterID];
         uint256 wager = fighter.wager;
+
         uint8 tier = getArenaTier(characterID);
+
         uint256 entryWager = getEntryWager(characterID);
 
         if (matchByFinder[characterID].createdAt != 0) {
@@ -401,6 +407,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
             duel.defender = createDuelist(getOpponent(duel.attacker.ID));
 
             duel.tier = getArenaTierForLevel(duel.attacker.level);
+
             duel.cost = getDuelCostByTier(duel.tier);
 
             duel.attacker.power = getCharacterPower(duel.attacker.ID);
@@ -591,11 +598,17 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
     /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
     function getArenaTier(uint256 characterID) public view returns (uint8) {
+        if (!tiersEnabled) {
+            return 0;
+        }
         uint8 level = characters.getLevel(characterID);
         return getArenaTierForLevel(level);
     }
 
-    function getArenaTierForLevel(uint8 level) internal pure returns (uint8) {
+    function getArenaTierForLevel(uint8 level) internal view returns (uint8) {
+        if (!tiersEnabled) {
+            return 0;
+        }
         return uint8(level.div(10));
     }
 
@@ -825,6 +838,10 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
     function setArenaAccess(uint256 accessFlags) external restricted {
         arenaAccess = accessFlags;
+    }
+
+    function setTiersEnabled(bool tiersFlag) external restricted {
+        tiersEnabled = tiersFlag;
     }
 
     function setDuelOffsetCost(uint256 cost) external restricted {
