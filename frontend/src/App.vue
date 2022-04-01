@@ -2,11 +2,9 @@
   <div class="app">
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content dark-bg-text">
-      <b-row>
+      <b-row class="bg-combat">
         <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
-        <b-col :class="renderPageDisplay()"
-        :id="!featureFlagStakeOnly && currentCharacterId !== null ? 'bg-combat' : ''">
-        <!-- :class="!featureFlagStakeOnly && currentCharacterId !== null ? 'bg-image' : ''"> -->
+        <b-col :class="renderPageDisplay()">
           <router-view v-if="canShowApp" />
         </b-col>
         <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
@@ -489,7 +487,7 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   transition: 1s all;
 }
 
-#bg-combat{
+.bg-combat{
   background-image: url('./assets/combat-bg.png');
   background-size: cover;
   background-repeat: no-repeat;
