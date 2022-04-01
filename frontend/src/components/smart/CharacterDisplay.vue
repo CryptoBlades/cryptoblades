@@ -4,7 +4,7 @@
           <div class="btn-trigger" @click="hideSideBar(!toggled)">
             <img :class="!toggled ? 'rotateLeft' : 'rotateRight'" src="../../assets/left-arrow.png" alt="">
           </div>
-          <b-col class="character-list"
+          <b-col class="character-list" v-if="currentPath != '/blacksmith'"
               v-bind:class="[getIsInCombat ? 'disabled-li' : '', getIsCharacterViewExpanded ? '' : 'centered-list']">
                 <div
                   :class="`${setListClassForSelChar(c.id, currentCharacterId)}`"
@@ -16,9 +16,7 @@
                 <div class="character-element">
                   <div class="element-frame">
                       <div>
-                        <span
-                          :id="`${setIdForElement(c.trait, c.isSelected)}`"
-                        />
+                        <span :id="`${setIdForElement(c.trait, c.isSelected)}`"/>
                       </div>
                   </div>
                   <div class="element-frame-active">
@@ -43,6 +41,34 @@
                 </div>
                 </div>
           </b-col>
+          <b-col class="character-list centered-list" v-else>
+                <div v-for="s in sideBarBlacksmith"
+                  :key="s.id"
+                  @click="setCurrentCharacter(c.id)"
+                >
+                <div class="character-element">
+                  <div class="element-frame">
+                      <div>
+                        <span :id="`${s.iconName}`"/>
+                      </div>
+                  </div>
+                  <div class="element-frame-active">
+                     <div>
+                        <span
+                          :id="`${s.iconName}`">
+                      </div>
+                  </div>
+                </div>
+                <div class="character-details">
+                  <div class="name-list">
+                    {{ s.title }}
+                  </div>
+                  <div class="char-level">
+                      {{ s.desc }}
+                  </div>
+                </div>
+                </div>
+          </b-col>
         </div>
   </div>
 </template>
@@ -58,7 +84,7 @@ import { toBN, fromWeiEther } from '../../utils/common';
 import { getCleanName } from '../../rename-censor';
 
 export default Vue.extend({
-  props:['toggled'],
+  props:['toggled','currentPath'],
   computed: {
     ...mapState(['maxStamina', 'currentCharacterId', 'ownedCharacterIds']),
     ...mapGetters([
@@ -91,7 +117,33 @@ export default Vue.extend({
   data() {
     return {
       traits: CharacterTrait,
-      isPlaza : false
+      isPlaza : false,
+      sideBarBlacksmith: [
+        {
+          id: 0,
+          title: 'Weapon',
+          desc: 'Forge Weapon and Create Dust',
+          iconName: 'icon-weapon'
+        },
+        {
+          id: 1,
+          title: 'Equpment',
+          desc: 'Shield, Trinket and Armor',
+          iconName: 'icon-equipment'
+        },
+        {
+          id: 2,
+          title: 'Dust Storage',
+          desc: 'Forge your weapon with dust',
+          iconName: 'icon-dust'
+        },
+        {
+          id: 3,
+          title: 'Land',
+          desc: 'Own a land and conquer',
+          iconName: 'icon-land'
+        },
+      ]
     };
   },
   methods: {
@@ -629,4 +681,35 @@ li.character-highlight{
   width: 30px;
   background: rgba(0, 0, 0, 0.076);
 }
+
+
+/* FOR BLACKSMITH SIDEBAR */
+#icon-weapon {
+  content: url("../../assets/raid-sidebar/icon-sword.png");
+  height: 30px;
+  width: 30px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
+#icon-equipment {
+  content: url("../../assets/raid-sidebar/icon-shield.png");
+  height: 30px;
+  width: 30px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
+#icon-land {
+  content: url("../../assets/raid-sidebar/icon-map.png");
+  height: 30px;
+  width: 30px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
+#icon-dust {
+  content: url("../../assets/raid-sidebar/icon-dust.png");
+  height: 30px;
+  width: 30px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
 </style>

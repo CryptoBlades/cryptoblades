@@ -1,7 +1,7 @@
 <template>
   <div class="body main-font">
     <b-tabs justified>
-      <b-tab :title="$t('weapons')">
+      <b-tab :title="$t('weapons') +'DASDSADASD'">
         <div class="blank-slate" v-if="ownWeapons.length === 0">
           <span v-html="$t('blacksmith.noWeapons')"/>
           <br>
@@ -160,9 +160,13 @@
                 </b-modal>
               </div>
             </div>
+
+            <!---------------------------------- BLACKSMITH CONTENT ------------------------------------------->
             <div class="" v-if="showBlacksmith">
               <weapon-grid :showNftOptions="true" v-model="reforgeWeaponId" />
             </div>
+            <!-------------------------------------------------------------------------------------------------->
+
           </div>
         </div>
 
@@ -331,7 +335,7 @@
                                 @click="clearAllMassBurn()"
                                 v-tooltip="$t('blacksmith.clearAll')"
                                 :disabled="burnWeaponIds === []">
-                          {{$t('blacksmith.clearAll')}}
+                          {{$t('blacksmith.clearAll')}} ajsdhaskjdhaskjd
                         </b-button>
                       </h1>
                       <div class="weapon-grid-container">
@@ -361,6 +365,8 @@
           </div>
         </div>
       </b-tab>
+
+  <!--------------------------------------------------- TABS HERE------------------------------------------------>
       <b-tab>
         <template #title>
           {{$t('equipment')}} <b-icon-question-circle class="centered-icon" scale="0.8"
@@ -391,7 +397,9 @@
           </div>
         </div>
       </b-tab>
-    </b-tabs>
+  <!--------------------------------------------------- TABS HERE END ------------------------------------------------>
+
+  </b-tabs>
     <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
              :title="$t('blacksmith.dustReforgeConfirmation')" @ok="onReforgeWeaponWithDust">
       <div class="row">

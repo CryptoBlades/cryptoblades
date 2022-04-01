@@ -1,7 +1,7 @@
 <template>
   <b-col :class="isToggled ? 'sideBorder' : 'col-xl-3 col-lg-4 col-md-4 col-sm-2 cols-1'" class="animates">
     <div class="character-bar">
-      <character-display :toggled="isToggled"/>
+      <character-display :toggled="isToggled" :currentPath="currentPath" :key="componentKey"/>
       <div v-if="showAds && !isMobile()" class="ad-container">
         <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
           <div class="coinzilla" data-zone="C-541621de2f7bb717603"></div>
@@ -24,13 +24,15 @@ import CharacterDisplay from './smart/CharacterDisplay.vue';
 import '@/mixins/general';
 
 export default Vue.extend({
-  props: ['isToggled'],
+  props: ['isToggled', 'sidebarType'],
   components: {
     CharacterDisplay,
   },
   data() {
     return {
-      showAds: false
+      showAds: false,
+      componentKey: 0,
+      currentPath: ''
     };
   },
   methods: {
@@ -51,6 +53,17 @@ export default Vue.extend({
   async mounted() {
     this.checkStorage();
   },
+  watch:{
+    $route (to, from){
+      this.componentKey += 1;
+      try {
+        this.currentPath = this.$route.path;
+      } catch (error) {
+        console.log(error);
+      }
+      console.log(to+''+from);
+    },
+  }
 });
 </script>
 
