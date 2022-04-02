@@ -57,23 +57,6 @@
 
       <img src="../assets/divider7.png" class="info-divider enemy-divider" />
 
-      <!-- // error message boxes -->
-      <div class="row">
-        <div class="col">
-          <div class="message-box" v-if="!currentCharacter">{{$t('combat.errors.needToSelectChar')}}</div>
-          <div class="row">
-            <div class="col-12 text-center">
-              <div class="message-box flex-column" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
-                {{$t('combat.needStamina', {staminaPerFight })}}
-                <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">{{$t('combat.errors.notEnoughDurability')}}</div>
-                <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">{{$t('combat.errors.lastSeconds')}}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- --------------------------------------- -->
-
       <div class="row">
         <div class="col">
         <div class="mb-3" :style="'align-self: baseline; width: 20vw'">
@@ -162,8 +145,22 @@
           </div>
         </div>
       </div>
-
-      <div></div>
+      <!-- // error message boxes -->
+      <div class="row">
+        <div class="col">
+          <div class="message-box" v-if="!currentCharacter">{{$t('combat.errors.needToSelectChar')}}</div>
+          <div class="row">
+            <div class="col-12 text-center">
+              <div class="message-box flex-column" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
+                {{$t('combat.needStamina', {staminaPerFight })}}
+                <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">{{$t('combat.errors.notEnoughDurability')}}</div>
+                <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">{{$t('combat.errors.lastSeconds')}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- --------------------------------------- -->
     </div>
     <b-modal class="centered-modal" ref="no-skill-warning-modal" @ok="fightTarget(targetToFight,targetToFightIndex)">
       <template #modal-title>
@@ -550,7 +547,11 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
-
+.body{
+  background: linear-gradient(0deg, rgba(22, 22, 22, 0.95), rgba(22, 22, 22, 0.95)), url('../assets/combat-bg.png');
+  background-size:cover;
+  min-height: 100%;
+}
 h5{
   font-family: Trajan;
   font-size: 25px;
