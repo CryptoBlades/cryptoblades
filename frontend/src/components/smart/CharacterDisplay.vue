@@ -13,38 +13,39 @@
                   :key="c.id"
                   @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
                 >
-                <div class="character-element">
-                  <div class="element-frame">
+                  <div class="character-element">
+                    <div class="element-frame">
+                        <div>
+                          <span :id="`${setIdForElement(c.trait, c.isSelected)}`"/>
+                        </div>
+                    </div>
+                    <div class="element-frame-active">
                       <div>
-                        <span :id="`${setIdForElement(c.trait, c.isSelected)}`"/>
-                      </div>
+                          <span
+                            :id="`${setIdForElement(c.trait, c.isSelected)}`"
+                          />
+                        </div>
+                    </div>
                   </div>
-                  <div class="element-frame-active">
-                     <div>
-                        <span
-                          :id="`${setIdForElement(c.trait, c.isSelected)}`"
-                        />
-                      </div>
+                  <div class="character-details">
+                    <div class="name-list">
+                      {{ getCleanCharacterName(c.id) }}
+                    </div>
+                    <div class="small-stamina-char"
+                      :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
+                      v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))">
+                    </div>
+                    <div class="char-level">
+                        {{$t('PlayToEarn.level')}} {{ c.level + 1}} <span> (STA {{ getCharacterStamina(c.id) }} / 200)</span>
+                    </div>
                   </div>
-                </div>
-                <div class="character-details">
-                  <div class="name-list">
-                    {{ getCleanCharacterName(c.id) }}
-                  </div>
-                  <div class="small-stamina-char"
-                    :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
-                    v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))">
-                  </div>
-                  <div class="char-level">
-                      {{$t('PlayToEarn.level')}} {{ c.level + 1}} <span> (STA {{ getCharacterStamina(c.id) }} / 200)</span>
-                  </div>
-                </div>
                 </div>
           </b-col>
           <b-col class="character-list centered-list" v-else>
                 <div v-for="s in sideBarBlacksmith"
                   :key="s.id"
-                  @click="setCurrentCharacter(c.id)"
+                  :class="s.status === 'active' ? 'character-highlight' : 'character'"
+                  @click="setActiveTab(s)"
                 >
                 <div class="character-element">
                   <div class="element-frame">
@@ -55,7 +56,7 @@
                   <div class="element-frame-active">
                      <div>
                         <span
-                          :id="`${s.iconName}`">
+                          :id="`${s.iconName}`"/>
                       </div>
                   </div>
                 </div>
@@ -63,6 +64,7 @@
                   <div class="name-list">
                     {{ s.title }}
                   </div>
+                  <div class="nav-line"></div>
                   <div class="char-level">
                       {{ s.desc }}
                   </div>
@@ -123,25 +125,33 @@ export default Vue.extend({
           id: 0,
           title: 'Weapon',
           desc: 'Forge Weapon and Create Dust',
-          iconName: 'icon-weapon'
+          iconName: 'icon-weapon',
+          status: 'active',
+          route: 'weapon'
         },
         {
           id: 1,
-          title: 'Equpment',
+          title: 'Equipment',
           desc: 'Shield, Trinket and Armor',
-          iconName: 'icon-equipment'
+          iconName: 'icon-equipment',
+          status: '',
+          route: 'equipment'
         },
         {
           id: 2,
           title: 'Dust Storage',
           desc: 'Forge your weapon with dust',
-          iconName: 'icon-dust'
+          iconName: 'icon-dust',
+          status: '',
+          route: 'dust'
         },
         {
           id: 3,
           title: 'Land',
           desc: 'Own a land and conquer',
-          iconName: 'icon-land'
+          iconName: 'icon-land',
+          status: '',
+          route: 'land'
         },
       ]
     };
@@ -159,6 +169,14 @@ export default Vue.extend({
       }
 
       else return 'character';
+    },
+
+    setActiveTab(tab: any){
+      this.$router.push({ path: 'blacksmith', query: { tab: tab.route }});
+      this.sideBarBlacksmith.forEach(x => {
+        if(x.id === tab.id) x.status = 'active';
+        else x.status = '';
+      });
     },
 
     toolTipHtml(time: string): string {
@@ -473,6 +491,15 @@ li.character-highlight{
   height :2.5px;
   margin: 5px 0px 5px 0px;
   background : linear-gradient(to right, rgb(236, 75, 75) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+}
+
+.nav-line {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height :1px;
+  margin: 5px 0px 5px 0px;
+  background : rgba(255, 255, 255, 0.075);
 }
 
 .stamina-text {

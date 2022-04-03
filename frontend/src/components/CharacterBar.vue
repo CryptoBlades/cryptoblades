@@ -1,5 +1,5 @@
 <template>
-  <b-col :class="isToggled ? 'sideBorder' : 'col-xl-3 col-lg-4 col-md-4 col-sm-2 cols-1'" class="animates">
+  <b-col :class="renderPageDisplay()" class="animates">
     <div class="character-bar">
       <character-display :toggled="isToggled" :currentPath="currentPath" :key="componentKey"/>
       <div v-if="showAds && !isMobile()" class="ad-container">
@@ -40,6 +40,20 @@ export default Vue.extend({
       if (process.env.NODE_ENV === 'development') this.showAds = false;
       else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
+    renderPageDisplay(){
+      let toDisplay;
+
+      if(this.isToggled){
+        toDisplay = 'sideBorder';
+      }else{
+        if(this.currentPath === '/blacksmith'){
+          toDisplay = 'col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1';
+        }else{
+          toDisplay = 'col-xl-3 col-lg-4 col-md-4 col-sm-2 cols-1';
+        }
+      }
+      return toDisplay;
+    },
   },
   computed:{
     isTablet() {
@@ -54,14 +68,8 @@ export default Vue.extend({
     this.checkStorage();
   },
   watch:{
-    $route (to, from){
-      this.componentKey += 1;
-      try {
-        this.currentPath = this.$route.path;
-      } catch (error) {
-        console.log(error);
-      }
-      console.log(to+''+from);
+    $route (to){
+      this.currentPath = to.path;
     },
   }
 });

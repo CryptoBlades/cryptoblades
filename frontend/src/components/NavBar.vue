@@ -1,7 +1,7 @@
 <template>
   <div class="main-nav-div">
     <b-navbar class="main-nav" toggleable="sm">
-      <div class="nav-logo col-xl-3 col-lg-4 col-md-4 col-sm-2 cols-1">
+      <div class="nav-logo" :class="renderPageDisplay()">
         <router-link :to="{ name: 'plaza' }" exact class="game-ui-logo">
           <img
             src="../assets/cb-logo.png"
@@ -57,6 +57,7 @@ export default Vue.extend({
   data() {
     return {
       canShowRewardsBar: true,
+      currentRoute: ''
     };
   },
 
@@ -76,12 +77,29 @@ export default Vue.extend({
         this.getIsCharacterViewExpanded ? 'true' : 'false'
       );
     },
+    renderPageDisplay(){
+      let toDisplay;
+
+      if(this.currentRoute === '/blacksmith'){
+        toDisplay = 'col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1';
+      }else{
+        toDisplay = 'col-xl-3 col-lg-4 col-md-4 col-sm-2 cols-1';
+      }
+
+      return toDisplay;
+    },
   },
 
   mounted() {
     this.checkStorage();
     Events.$on('setting:hideRewards', () => this.checkStorage());
   },
+
+  watch:{
+    $route(to){
+      this.currentRoute = to.path;
+    }
+  }
 });
 </script>
 
@@ -200,6 +218,7 @@ a.router-link-active {
     border: 0;
     margin: 0;
     padding:0;
+    transition: 0.5s all;
   }
 
   .right-details {
