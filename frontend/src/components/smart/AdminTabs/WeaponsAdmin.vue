@@ -48,7 +48,7 @@
         $t('admin.weapons.setBurnPointMultiplierCurrent', {multiplier: currentBurnPointMultiplier})
       }}</h2>
     <div class="d-flex align-items-center gap-3">
-      <b-form-input v-model="newBurnPointMultiplier" :placeholder="$t('admin.weapons.multiplier')"/>
+      <b-form-input v-model="newBurnPointMultiplier" :placeholder="$t('admin.weapons.multiplier')" number type="number"/>
       <b-button @click="setNewBurnPointMultiplier()" :disabled="setNewBurnPointMultiplierButtonDisabled"
                 variant="primary" class="text-nowrap">
         {{ $t('admin.weapons.setBurnPointMultiplier') }}

@@ -4308,6 +4308,22 @@ export function createStore(web3: Web3) {
         return Number(BigInt(fee) >> BigInt(64)) * 100;
       },
 
+      async getFightXpGain({state}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        return +await CryptoBlades.methods.fightXpGain().call(defaultCallOptions(state));
+      },
+
+      async setFightXpGain({state}, {xpGain}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        await CryptoBlades.methods.setFightXpGain(xpGain).send({
+          from: state.defaultAccount,
+        });
+      },
+
       async setFlatPriceOfItem({state}, {itemIndex, price}) {
         const {Blacksmith} = state.contracts();
         if (!Blacksmith) return;

@@ -1,6 +1,8 @@
 <template>
   <div class="p-1">
-    <h2 class="mt-3">{{ $t('admin.cryptoblades.setCharacterMintValueCurrent', {cents: currentCharacterMintValue}) }}</h2>
+    <h2 class="mt-3">{{
+        $t('admin.cryptoblades.setCharacterMintValueCurrent', {cents: currentCharacterMintValue})
+      }}</h2>
     <div class="d-flex align-items-center gap-3 flex-wrap">
       <b-form-input v-model="newCharacterMintValue" type="number" number
                     :placeholder="$t('admin.cryptoblades.newValueInCents')"/>
@@ -16,6 +18,14 @@
       <b-button @click="setNewWeaponMintValue()" :disabled="setWeaponMintValueButtonDisabled" variant="primary"
                 class="text-nowrap">
         {{ $t('admin.cryptoblades.setWeaponMintValue') }}
+      </b-button>
+    </div>
+    <h2 class="mt-2">{{ $t('admin.cryptoblades.setFightXpGainCurrent', {xpGain: currentFightXpGain}) }}</h2>
+    <div class="d-flex align-items-center gap-3">
+      <b-form-input v-model="newFightXpGain" :placeholder="$t('admin.cryptoblades.fightXpGain')" number type="number"/>
+      <b-button @click="setNewFightXpGain()" :disabled="setNewFightXpGainButtonDisabled"
+                variant="primary" class="text-nowrap">
+        {{ $t('admin.cryptoblades.setFightXpGain') }}
       </b-button>
     </div>
   </div>
@@ -34,6 +44,10 @@ interface StoreMappedActions {
   getCharacterMintValue(): Promise<number>;
 
   getWeaponMintValue(): Promise<number>;
+
+  getFightXpGain(): Promise<number>;
+
+  setFightXpGain(payload: { xpGain: number }): Promise<void>;
 }
 
 interface Data {
@@ -41,6 +55,8 @@ interface Data {
   newWeaponMintValue?: number;
   currentCharacterMintValue?: number;
   currentWeaponMintValue?: number;
+  currentFightXpGain?: number;
+  newFightXpGain?: number;
   isLoading: boolean;
 }
 
@@ -51,6 +67,8 @@ export default Vue.extend({
       newWeaponMintValue: undefined,
       currentCharacterMintValue: undefined,
       currentWeaponMintValue: undefined,
+      currentFightXpGain: undefined,
+      newFightXpGain: undefined,
       isLoading: false,
     } as Data;
   },
@@ -64,6 +82,10 @@ export default Vue.extend({
       return this.newWeaponMintValue === undefined
         || this.isLoading;
     },
+    setNewFightXpGainButtonDisabled(): boolean {
+      return this.newFightXpGain === undefined
+        || this.isLoading;
+    },
   },
 
   methods: {
@@ -72,6 +94,8 @@ export default Vue.extend({
       'setWeaponMintValue',
       'getCharacterMintValue',
       'getWeaponMintValue',
+      'getFightXpGain',
+      'setFightXpGain',
     ]) as StoreMappedActions,
 
     async setNewCharacterMintValue() {
@@ -98,11 +122,24 @@ export default Vue.extend({
       }
     },
 
+    async setNewFightXpGain() {
+      if (this.setNewFightXpGainButtonDisabled) return;
+      try {
+        this.isLoading = true;
+        await this.setFightXpGain({xpGain: this.newFightXpGain!});
+        await this.loadCurrentValues();
+        this.newFightXpGain = undefined;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     async loadCurrentValues() {
       try {
         this.isLoading = true;
         this.currentCharacterMintValue = await this.getCharacterMintValue();
         this.currentWeaponMintValue = await this.getWeaponMintValue();
+        this.currentFightXpGain = await this.getFightXpGain();
       } finally {
         this.isLoading = false;
       }
