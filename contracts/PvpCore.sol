@@ -78,8 +78,6 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     uint256 public arenaAccess; // 0 = cannot join, 1 = can join
     /// @dev value sent by players to offset bot's duel costs
     uint256 public duelOffsetCost;
-    /// @dev value that enables or disables tiers (all tiers are 0 if disabled)
-    bool public tiersEnabled;
     /// @dev PvP bot address
     address payable public pvpBotAddress;
     /// @dev characters by id that are on queue to perform a duel
@@ -211,7 +209,9 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         uint256 characterID,
         uint256 weaponID,
         uint256 shieldID,
-        bool useShield
+        bool useShield,
+        // TODO: Test tierless everything
+        bool tierless
     ) external {
         require(
             characters.ownerOf(characterID) == msg.sender &&
@@ -227,7 +227,12 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
         require((arenaAccess & 1) == 1, "L");
 
-        uint8 tier = getArenaTier(characterID);
+        uint8 tier;
+        if (tierless) {
+            tier = 20;
+        } else {
+            tier = getArenaTier(characterID);
+        }
 
         uint256 wager = getEntryWagerByTier(tier);
 
@@ -235,7 +240,6 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
             _ownerByCharacter[characterID] = msg.sender;
         }
 
-        // If tiers are disabled we leave this so all players reset their ranks
         if (previousTierByCharacter[characterID] != tier) {
             pvpaddons.changeRankingPoints(characterID, 0);
         }
@@ -287,7 +291,13 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         Fighter storage fighter = fighterByCharacter[characterID];
         uint256 wager = fighter.wager;
 
-        uint8 tier = getArenaTier(characterID);
+        uint8 tier;
+        
+        if (previousTierByCharacter[characterID] == 20) {
+            tier = 20;
+        } else {
+            tier = getArenaTier(characterID);
+        }
 
         uint256 entryWager = getEntryWager(characterID);
 
@@ -317,7 +327,13 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     {
         require(matchByFinder[characterID].createdAt == 0, "M");
 
-        uint8 tier = getArenaTier(characterID);
+        uint8 tier;
+
+        if (previousTierByCharacter[characterID] == 20) {
+            tier = 20;
+        } else {
+            tier = getArenaTier(characterID);
+        }
 
         _assignOpponent(characterID, tier);
     }
@@ -331,7 +347,13 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         characterNotInDuel(characterID)
     {
         uint256 opponentID = getOpponent(characterID);
-        uint8 tier = getArenaTier(characterID);
+        uint8 tier;
+        
+        if (previousTierByCharacter[characterID] == 20) {
+            tier = 20;
+        } else {
+            tier = getArenaTier(characterID);
+        }
 
         require(matchByFinder[characterID].createdAt != 0, "R");
 
@@ -406,7 +428,11 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
             duel.defender = createDuelist(getOpponent(duel.attacker.ID));
 
-            duel.tier = getArenaTierForLevel(duel.attacker.level);
+            if (previousTierByCharacter[duel.attacker.ID] == 20) {
+                duel.tier = 20;
+            } else {
+                duel.tier = getArenaTierForLevel(duel.attacker.level);
+            }
 
             duel.cost = getDuelCostByTier(duel.tier);
 
@@ -580,6 +606,11 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
     /// @dev gets the amount of SKILL that is risked per duel
     function getDuelCost(uint256 characterID) public view returns (uint256) {
+        // TODO: Test
+        if (previousTierByCharacter[characterID] == 20) {
+            return  game.usdToSkill(_baseWagerUSD);
+        }
+
         int128 tierExtra = ABDKMath64x64
             .divu(getArenaTier(characterID).mul(100), 100)
             .mul(_tierWagerUSD);
@@ -589,6 +620,11 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
     /// @dev gets the amount of SKILL that is risked per duel by tier
     function getDuelCostByTier(uint8 tier) internal view returns (uint256) {
+        // TODO: Test
+        if (tier == 20) {
+            return game.usdToSkill(_baseWagerUSD);
+        }
+
         int128 tierExtra = ABDKMath64x64
             .divu(tier.mul(100), 100)
             .mul(_tierWagerUSD);
@@ -598,17 +634,11 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
     /// @dev gets the arena tier of a character (tiers are 1-10, 11-20, etc...)
     function getArenaTier(uint256 characterID) public view returns (uint8) {
-        if (!tiersEnabled) {
-            return 0;
-        }
         uint8 level = characters.getLevel(characterID);
         return getArenaTierForLevel(level);
     }
 
-    function getArenaTierForLevel(uint8 level) internal view returns (uint8) {
-        if (!tiersEnabled) {
-            return 0;
-        }
+    function getArenaTierForLevel(uint8 level) internal pure returns (uint8) {
         return uint8(level.div(10));
     }
 
@@ -776,6 +806,12 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         );
     }
 
+    /// @dev returns the amount of matcheable characters
+    function getMatchablePlayerCount(uint256 characterID) external view returns(uint){
+        uint8 tier = getArenaTier(characterID);
+        return _matchableCharactersByTier[tier].length();   
+    }
+
     function _getPVPTraitBonusAgainst(
         uint8 characterTrait,
         uint8 weaponTrait,
@@ -840,10 +876,6 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         arenaAccess = accessFlags;
     }
 
-    function setTiersEnabled(bool tiersFlag) external restricted {
-        tiersEnabled = tiersFlag;
-    }
-
     function setDuelOffsetCost(uint256 cost) external restricted {
         duelOffsetCost = cost;
     }
@@ -852,11 +884,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         pvpBotAddress = botAddress;
     }
 
-    /// @dev returns the amount of matcheable characters
-    function getMatchablePlayerCount(uint256 characterID) external view returns(uint){
-        uint8 tier = getArenaTier(characterID);
-        return _matchableCharactersByTier[tier].length();   
-    }
+    // Note: The following are debugging functions, they can be muted to save contract size
 
     function forceRemoveCharacterFromArena(uint256 characterID)
         external 
@@ -865,7 +893,14 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         characterNotInDuel(characterID)
     {
         Fighter storage fighter = fighterByCharacter[characterID];
-        uint8 tier = getArenaTier(characterID);
+        uint8 tier;
+        
+        if (previousTierByCharacter[characterID] == 20) {
+            tier = 20;
+        } else {
+            tier = getArenaTier(characterID);
+        }
+
         uint256 wager = fighter.wager;
         uint256 entryWager = getEntryWager(characterID);
 
@@ -884,8 +919,6 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
         skillToken.safeTransfer(characters.ownerOf(characterID), wager);
     }
-
-    // Note: The following are debugging functions, they can be muted to save contract size
 
     // function clearDuelQueue(uint256 length) external restricted {
     //     for (uint256 i = 0; i < length; i++) {

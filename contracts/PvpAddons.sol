@@ -108,8 +108,8 @@ contract PvpAddons is Initializable, AccessControlUpgradeable {
             pvpcore.performDuels(duelQueue);
         }
 
-        // Loops over 15 tiers. Should not be reachable anytime in the foreseeable future
-        for (uint8 i = 0; i <= 15; i++) {
+        // Loops over 20 tiers. Should not be reachable anytime in the foreseeable future
+        for (uint8 i = 0; i <= 20; i++) {
             if (_topRankingCharactersByTier[i].length == 0) {
                 continue;
             }
