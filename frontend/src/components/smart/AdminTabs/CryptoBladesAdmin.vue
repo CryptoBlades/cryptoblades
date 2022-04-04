@@ -78,7 +78,7 @@ export default Vue.extend({
       if (this.setCharacterMintValueButtonDisabled) return;
       try {
         this.isLoading = true;
-        await this.setCharacterMintValue({cents: this.newCharacterMintValue});
+        await this.setCharacterMintValue({cents: this.newCharacterMintValue!});
         await this.loadCurrentValues();
         this.newCharacterMintValue = undefined;
       } finally {
@@ -90,7 +90,7 @@ export default Vue.extend({
       if (this.setWeaponMintValueButtonDisabled) return;
       try {
         this.isLoading = true;
-        await this.setWeaponMintValue({cents: this.newWeaponMintValue});
+        await this.setWeaponMintValue({cents: this.newWeaponMintValue!});
         await this.loadCurrentValues();
         this.newWeaponMintValue = undefined;
       } finally {

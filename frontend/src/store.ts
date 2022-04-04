@@ -4323,7 +4323,7 @@ export function createStore(web3: Web3) {
         const {Blacksmith} = state.contracts();
         if (!Blacksmith) return;
 
-        prices = prices.map((price) => Web3.utils.toWei(price.toString(), 'ether').toString());
+        prices = prices.map((price: number) => Web3.utils.toWei(price.toString(), 'ether').toString());
 
         await Blacksmith.methods.setFlatPriceOfItemSeries(itemIndex, indices, prices).send({
           from: state.defaultAccount,

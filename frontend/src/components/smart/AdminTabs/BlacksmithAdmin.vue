@@ -137,6 +137,8 @@ interface Data {
   selectedSeriesItem: SelectedSeriesItem;
   nonSeriesItems: NonSeriesItem[];
   seriesItems: SeriesItem[];
+  weaponCosmetics: WeaponCosmetic[];
+  characterCosmetics: CharacterCosmetic[];
   isLoading: boolean;
 }
 
@@ -237,8 +239,8 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         await this.setFlatPriceOfItem({
-          itemIndex: this.selectedNonSeriesItem.id,
-          price: this.selectedNonSeriesItem.price
+          itemIndex: this.selectedNonSeriesItem.id!,
+          price: this.selectedNonSeriesItem.price!,
         });
         this.selectedNonSeriesItem.id = undefined;
         this.selectedNonSeriesItem.price = undefined;
@@ -251,15 +253,15 @@ export default Vue.extend({
       if (this.setFlatPriceOfSeriesItemButtonDisabled) return;
       try {
         this.isLoading = true;
-        let indices = [];
+        let indices = [] as CharacterCosmetic[] | WeaponCosmetic[];
         if (this.selectedSeriesItem.id === SeriesItem.ITEM_COSMETIC_WEAPON) {
-          indices = this.weaponCosmetics.filter((cosmetic, index) => this.selectedSeriesItem.prices[index]);
+          indices = this.weaponCosmetics.filter((cosmetic: WeaponCosmetic, index: number) => this.selectedSeriesItem.prices[index]);
         } else if (this.selectedSeriesItem.id === SeriesItem.ITEM_COSMETIC_CHARACTER) {
-          indices = this.characterCosmetics.filter((cosmetic, index) => this.selectedSeriesItem.prices[index]);
+          indices = this.characterCosmetics.filter((cosmetic: CharacterCosmetic, index: number) => this.selectedSeriesItem.prices[index]);
         }
         const prices = this.selectedSeriesItem.prices.filter(price => price);
         await this.setFlatPriceOfItemSeries({
-          itemIndex: this.selectedSeriesItem.id,
+          itemIndex: this.selectedSeriesItem.id!,
           indices,
           prices
         });
