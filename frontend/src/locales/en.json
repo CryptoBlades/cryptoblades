@@ -18,7 +18,21 @@
     "settings": "Settings",
     "nftbridge": "NFT Bridge",
     "wiki": "Wiki",
+    "nftDisplay": "Nft Display",
     "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
+  },
+  "PlayToEarn":{
+    "playToEarn": "PLAY TO EARN",
+    "adventure": "ADVENTURE",
+    "adventureDesc": "Engage on  PVE battles to earn rewards.",
+    "btnCombat": "COMBAT",
+    "raid": "RAID",
+    "raidDesc": "Join the players in defeating the boss.",
+    "btnJoin": "JOIN",
+    "arena": "ARENA",
+    "arenaDesc": "Defeat others Players on PVP battles.",
+    "btnPvp": "PVP",
+    "level": "Level"
   },
   "ClaimRewardsBar": {
     "noProjects": "No projects found",
@@ -369,6 +383,16 @@
     }
   },
   "combat": {
+    "youWill1": "You will not gain any SKILL from this fight, but you will still earn",
+    "youWill2": "Rewards will be filled in",
+    "youWill3": "There were up to",
+    "youWill4": "distributed during the last allowance.",
+    "changeWeapon": "Change Weapon",
+    "selectStamina": "Select stamina usage",
+    "selectAWeapon": "Select a weapon",
+    "adventure": "ADVENTURE",
+    "tabAnywhere": "Tap Anywhere to Continue",
+    "warning": "WARNING",
     "error": "Error:",
     "close": "Close",
     "errors": {
@@ -737,6 +761,7 @@
     "complete": "Complete",
     "questComplete": "Quest complete",
     "submit": "Submit",
+    "submitDisclaimer": "Disclaimer: All nfts and resources submitted for quest progression will be lost forever",
     "reputation": "Reputation",
     "limitedOptional": "Limited (optional)",
     "supplyOptional": "Supply (optional)",

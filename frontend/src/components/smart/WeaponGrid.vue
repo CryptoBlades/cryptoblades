@@ -62,8 +62,7 @@
         :class="{ selected: highlight !== null && weapon.id === highlight }"
         v-for="weapon in nonIgnoredWeapons"
         :key="weapon.id"
-        @click=
-        "(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
+        @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
         <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
         <div class="weapon-icon-wrapper">

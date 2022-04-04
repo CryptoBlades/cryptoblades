@@ -320,4 +320,20 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
             );
         }
     }
+
+    // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
+    function reserveForGiveaways(address reservingAddress, uint256 eventId, uint256 orderOption, uint256 amount) external isValidOption(orderOption) isEventActive(eventId) {
+        require(hasRole(MINTER_ROLE, msg.sender), "Not minter");
+        require(eventInfo[eventId].supply == 0 || amount + eventInfo[eventId].orderedCount <= eventInfo[eventId].supply, "Not enough supply");
+        for(uint i = 0; i < amount; i++) {
+            eventInfo[eventId].orderedCount++;
+            mintSpecial(
+                reservingAddress,
+                eventId,
+                uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), reservingAddress, i))),
+                orderOption,
+                eventInfo[eventId].weaponElement
+            );
+        }
+    }
 }
