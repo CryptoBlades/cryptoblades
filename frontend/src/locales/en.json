@@ -866,7 +866,10 @@
         "WATER": "Water",
         "LIGHTNING": "Lightning",
         "EARTH": "Earth"
-      }
+      },
+      "setBurnPointMultiplierCurrent": "Set burn point multiplier (current: {multiplier})",
+      "multiplier": "Multiplier",
+      "setBurnPointMultiplier": "Set burn point multiplier"
     },
     "burningManager": {
       "playerAddress": "Player address",
@@ -931,7 +934,55 @@
         "ITEM_SHIELD": "Shield"
       },
       "nonSeriesItemPrice": "Non-series item price",
-      "setFlatPriceOfItemSeries": "Set flat price of item series"
+      "setFlatPriceOfItemSeries": "Set flat price of item series",
+      "pleaseSelectSeriesItem": "Please select series item",
+      "seriesItem": {
+        "ITEM_COSMETIC_WEAPON": "Weapon cosmetic",
+        "ITEM_COSMETIC_CHARACTER": "Character cosmetic"
+      },
+      "weaponCosmetic": {
+        "GRAYSCALE": "Grayscale",
+        "CONTRAST": "Contrast",
+        "SEPIA": "Sepia",
+        "INVERT": "Invert",
+        "BLUR": "Blur",
+        "FIRE_GLOW": "Fire glow",
+        "EARTH_GLOW": "Earth glow",
+        "LIGHTNING_GLOW": "Lightning glow",
+        "WATER_GLOW": "Water glow",
+        "RAINBOW_GLOW": "Rainbow glow",
+        "DARK_GLOW": "Dark glow",
+        "GHOST": "Ghost",
+        "POLICE": "Police",
+        "NEON_BORDER": "Neon border",
+        "ROTATING_NEON_BORDER": "Rotating neon border",
+        "DIAMOND_BORDER": "Diamond border",
+        "GOLD_BORDER": "Gold border",
+        "SILVER_BORDER": "Silver border",
+        "BRONZE_BORDER": "Bronze border"
+      },
+      "weaponCosmeticPriceInSkillOptional": "Weapon cosmetic price (in skill, optional)",
+      "characterCosmetic": {
+        "GRAYSCALE": "Grayscale",
+        "CONTRAST": "Contrast",
+        "SEPIA": "Sepia",
+        "INVERT": "Invert",
+        "BLUR": "Blur",
+        "FIRE_GLOW": "Fire glow",
+        "EARTH_GLOW": "Earth glow",
+        "LIGHTNING_GLOW": "Lightning glow",
+        "WATER_GLOW": "Water glow",
+        "RAINBOW_GLOW": "Rainbow glow",
+        "DARK_GLOW": "Dark glow",
+        "GHOST": "Ghost",
+        "POLICE": "Police",
+        "NEON_BORDER": "Neon border",
+        "DIAMOND_BORDER": "Diamond border",
+        "GOLD_BORDER": "Gold border",
+        "SILVER_BORDER": "Silver border",
+        "BRONZE_BORDER": "Bronze border"
+      },
+      "characterCosmeticPriceInSkillOptional": "Character cosmetic price (in skill, optional)"
     },
     "identifiers": "Identifiers",
     "amount": "Amount",

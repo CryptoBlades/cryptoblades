@@ -11,12 +11,46 @@
         </b-form-select-option>
       </b-form-select>
       <b-form-input v-model="selectedNonSeriesItem.price" :placeholder="$t('admin.blacksmith.nonSeriesItemPrice')"/>
-      <b-button @click="setPriceOfNonSeriesItem()" :disabled="setFlatPriceOfItemButtonDisabled" variant="primary"
+      <b-button @click="setPriceOfNonSeriesItem()" :disabled="setFlatPriceOfNonSeriesItemButtonDisabled"
+                variant="primary"
                 class="text-nowrap">
         {{ $t('admin.blacksmith.setFlatPriceOfItem') }}
       </b-button>
     </div>
     <h2 class="mt-3">{{ $t('admin.blacksmith.setFlatPriceOfItemSeries') }}</h2>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <b-form-select class="mt-2 mb-2" v-model="selectedSeriesItem.id">
+        <b-form-select-option :value="undefined" disabled>
+          {{ $t('admin.blacksmith.pleaseSelectSeriesItem') }}
+        </b-form-select-option>
+        <b-form-select-option v-for="seriesItem in seriesItems" :key="seriesItem" :value="seriesItem">
+          {{ $t(`admin.blacksmith.seriesItem.${SeriesItem[seriesItem]}`) }}
+        </b-form-select-option>
+      </b-form-select>
+      <div v-if="selectedSeriesItem.id === SeriesItem.ITEM_COSMETIC_WEAPON" class="w-100">
+        <div v-for="(weaponCosmetic, index) in weaponCosmetics" :key="weaponCosmetic" class="d-flex mb-2">
+          <label class="m-0 align-self-center w-50">{{
+              $t(`admin.blacksmith.weaponCosmetic.${WeaponCosmetic[weaponCosmetic]}`)
+            }}</label>
+          <b-form-input v-model="selectedSeriesItem.prices[index]"
+                        :placeholder="$t('admin.blacksmith.weaponCosmeticPriceInSkillOptional')" number type="number"/>
+        </div>
+      </div>
+      <div v-else-if="selectedSeriesItem.id === SeriesItem.ITEM_COSMETIC_CHARACTER" class="w-100">
+        <div v-for="(characterCosmetic, index) in characterCosmetics" :key="characterCosmetic" class="d-flex mb-2">
+          <label class="m-0 align-self-center w-50">{{
+              $t(`admin.blacksmith.characterCosmetic.${CharacterCosmetic[characterCosmetic]}`)
+            }}</label>
+          <b-form-input v-model="selectedSeriesItem.prices[index]"
+                        :placeholder="$t('admin.blacksmith.characterCosmeticPriceInSkillOptional')" number
+                        type="number"/>
+        </div>
+      </div>
+      <b-button @click="setPriceOfSeriesItems()" :disabled="setFlatPriceOfSeriesItemButtonDisabled" variant="primary"
+                class="text-nowrap">
+        {{ $t('admin.blacksmith.setFlatPriceOfItemSeries') }}
+      </b-button>
+    </div>
   </div>
 </template>
 
@@ -46,7 +80,6 @@ interface SelectedNonSeriesItem {
 
 interface SelectedSeriesItem {
   id?: SeriesItem;
-  indices: WeaponCosmetic[] | CharacterCosmetic[];
   prices: number[];
 }
 
@@ -116,7 +149,6 @@ export default Vue.extend({
       },
       selectedSeriesItem: {
         id: undefined,
-        indices: [],
         prices: [],
       },
       nonSeriesItems: [
@@ -182,9 +214,14 @@ export default Vue.extend({
   },
 
   computed: {
-    setFlatPriceOfItemButtonDisabled(): boolean {
+    setFlatPriceOfNonSeriesItemButtonDisabled(): boolean {
       return this.selectedNonSeriesItem.id === undefined
         || this.selectedNonSeriesItem.price === undefined
+        || this.isLoading;
+    },
+
+    setFlatPriceOfSeriesItemButtonDisabled(): boolean {
+      return this.selectedSeriesItem.prices.length === 0
         || this.isLoading;
     },
   },
@@ -196,7 +233,7 @@ export default Vue.extend({
     ]) as StoreMappedActions,
 
     async setPriceOfNonSeriesItem() {
-      if (this.setFlatPriceOfItemButtonDisabled) return;
+      if (this.setFlatPriceOfNonSeriesItemButtonDisabled) return;
       try {
         this.isLoading = true;
         await this.setFlatPriceOfItem({
@@ -205,6 +242,29 @@ export default Vue.extend({
         });
         this.selectedNonSeriesItem.id = undefined;
         this.selectedNonSeriesItem.price = undefined;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async setPriceOfSeriesItems() {
+      if (this.setFlatPriceOfSeriesItemButtonDisabled) return;
+      try {
+        this.isLoading = true;
+        let indices = [];
+        if (this.selectedSeriesItem.id === SeriesItem.ITEM_COSMETIC_WEAPON) {
+          indices = this.weaponCosmetics.filter((cosmetic, index) => this.selectedSeriesItem.prices[index]);
+        } else if (this.selectedSeriesItem.id === SeriesItem.ITEM_COSMETIC_CHARACTER) {
+          indices = this.characterCosmetics.filter((cosmetic, index) => this.selectedSeriesItem.prices[index]);
+        }
+        const prices = this.selectedSeriesItem.prices.filter(price => price);
+        await this.setFlatPriceOfItemSeries({
+          itemIndex: this.selectedSeriesItem.id,
+          indices,
+          prices
+        });
+        this.selectedSeriesItem.id = undefined;
+        this.selectedSeriesItem.prices = [];
       } finally {
         this.isLoading = false;
       }

@@ -4323,9 +4323,7 @@ export function createStore(web3: Web3) {
         const {Blacksmith} = state.contracts();
         if (!Blacksmith) return;
 
-        prices.map((price) => {
-          Web3.utils.toWei(price.toString(), 'ether').toString();
-        });
+        prices = prices.map((price) => Web3.utils.toWei(price.toString(), 'ether').toString());
 
         await Blacksmith.methods.setFlatPriceOfItemSeries(itemIndex, indices, prices).send({
           from: state.defaultAccount,
@@ -5802,6 +5800,20 @@ export function createStore(web3: Web3) {
         if(!BurningManager || !state.defaultAccount) return;
 
         return await BurningManager.methods.vars(2).call(defaultCallOptions(state));
+      },
+
+      async getBurnPointMultiplier({ state }) {
+        const { Weapons } = state.contracts();
+        if(!Weapons || !state.defaultAccount) return;
+
+        return await Weapons.methods.burnPointMultiplier().call(defaultCallOptions(state));
+      },
+
+      async setBurnPointMultiplier({state}, {multiplier}) {
+        const { Weapons } = state.contracts();
+        if(!Weapons || !state.defaultAccount) return;
+
+        await Weapons.methods.setBurnPointMultiplier(multiplier).send({ from: state.defaultAccount });
       },
 
       async fetchSpecialWeaponEvents({ state, dispatch, commit }) {

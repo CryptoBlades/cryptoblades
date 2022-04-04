@@ -15,7 +15,7 @@
                     max="3"/>
       <b-form-input v-model="amount4B" :placeholder="$t('admin.weapons.amount4B')" type="number" number min="0"/>
       <b-form-input v-model="amount5B" :placeholder="$t('admin.weapons.amount5B')" type="number" number min="0"/>
-      <b-button @click="incrementDust ? incrementSupplies() : decrementSupplies()" :disabled="suppliesButtonDisabled()"
+      <b-button @click="incrementDust ? incrementSupplies() : decrementSupplies()" :disabled="suppliesButtonDisabled"
                 variant="primary"
                 class="text-nowrap">
         {{ incrementDust ? $t('admin.weapons.incrementDustSupplies') : $t('admin.weapons.decrementDustSupplies') }}
@@ -40,8 +40,18 @@
           {{ $t(`admin.weapons.elements.${Element[element]}`) }}
         </b-form-select-option>
       </b-form-select>
-      <b-button @click="mintWeapon()" :disabled="mintWeaponButtonDisabled()" variant="primary" class="text-nowrap">
+      <b-button @click="mintWeapon()" :disabled="mintWeaponButtonDisabled" variant="primary" class="text-nowrap">
         {{ $t('admin.weapons.mintWeapon') }}
+      </b-button>
+    </div>
+    <h2 class="mt-2">{{
+        $t('admin.weapons.setBurnPointMultiplierCurrent', {multiplier: currentBurnPointMultiplier})
+      }}</h2>
+    <div class="d-flex align-items-center gap-3">
+      <b-form-input v-model="newBurnPointMultiplier" :placeholder="$t('admin.weapons.multiplier')"/>
+      <b-button @click="setNewBurnPointMultiplier()" :disabled="setNewBurnPointMultiplierButtonDisabled"
+                variant="primary" class="text-nowrap">
+        {{ $t('admin.weapons.setBurnPointMultiplier') }}
       </b-button>
     </div>
   </div>
@@ -58,6 +68,10 @@ interface StoreMappedActions {
   decrementDustSupplies(payload: { playerAddress: string, amountLB: number, amount4B: number, amount5B: number }): Promise<void>;
 
   mintGiveawayWeapon(payload: { to: string, stars: number, chosenElement: number }): Promise<void>;
+
+  getBurnPointMultiplier(): Promise<number>;
+
+  setBurnPointMultiplier(payload: { multiplier: number }): Promise<void>;
 }
 
 enum Rarity {
@@ -87,6 +101,8 @@ interface Data {
   giveawayWeaponMint: GiveawayWeaponMint;
   weaponRarities: Rarity[];
   weaponElements: Element[];
+  currentBurnPointMultiplier?: number;
+  newBurnPointMultiplier?: number;
   isLoading: boolean;
 }
 
@@ -105,15 +121,15 @@ export default Vue.extend({
       },
       weaponRarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
       weaponElements: [Element.FIRE, Element.WATER, Element.EARTH, Element.LIGHTNING, Element.RANDOM],
+      currentBurnPointMultiplier: undefined,
+      newBurnPointMultiplier: undefined,
       isLoading: false,
       Rarity,
       Element,
     } as Data;
   },
 
-  methods: {
-    ...mapActions(['incrementDustSupplies', 'decrementDustSupplies', 'mintGiveawayWeapon']) as StoreMappedActions,
-
+  computed: {
     suppliesButtonDisabled(): boolean {
       return !isValidWeb3Address(this.playerAddress)
         || this.amountLB === undefined
@@ -128,6 +144,21 @@ export default Vue.extend({
         || this.giveawayWeaponMint.chosenElement === undefined
         || this.isLoading;
     },
+
+    setNewBurnPointMultiplierButtonDisabled(): boolean {
+      return this.newBurnPointMultiplier === undefined
+        || this.isLoading;
+    },
+  },
+
+  methods: {
+    ...mapActions([
+      'incrementDustSupplies',
+      'decrementDustSupplies',
+      'mintGiveawayWeapon',
+      'getBurnPointMultiplier',
+      'setBurnPointMultiplier',
+    ]) as StoreMappedActions,
 
     async incrementSupplies() {
       if (!isValidWeb3Address(this.playerAddress)
@@ -190,6 +221,29 @@ export default Vue.extend({
       }
     },
 
+    async setNewBurnPointMultiplier() {
+      if (this.newBurnPointMultiplier === undefined) return;
+      try {
+        this.isLoading = true;
+        await this.setBurnPointMultiplier({
+          multiplier: this.newBurnPointMultiplier,
+        });
+        await this.fetchCurrentBurnPointMultiplier();
+        this.newBurnPointMultiplier = undefined;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async fetchCurrentBurnPointMultiplier() {
+      try {
+        this.isLoading = true;
+        this.currentBurnPointMultiplier = await this.getBurnPointMultiplier();
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     clearInputs() {
       this.playerAddress = '';
       this.amountLB = undefined;
@@ -201,6 +255,10 @@ export default Vue.extend({
         chosenElement: undefined,
       };
     }
+  },
+
+  async mounted() {
+    await this.fetchCurrentBurnPointMultiplier();
   },
 });
 </script>
