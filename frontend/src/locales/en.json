@@ -138,7 +138,8 @@
     "upgrading": "Upgrading...",
     "burning": "Burning...",
     "claiming": "Claiming...",
-    "approveMintSlippage": "Enable 5% mint price slippage"
+    "approveMintSlippage": "Enable 5% mint price slippage",
+    "dynamicPricesDetails": "Each character minted increases the price by {increaseAmount} SKILL. Mint price is being decreased every second at a rate of {decreaseAmount} SKILL per hour down to minimum price: {minimumPrice} SKILL. Allowing slippage will approve greater amount to be spent in case the price increases by the time your transactions is processed."
   },
   "bridge": {
     "bridgeForYourNfts": "Bridge for your NFTs",
@@ -252,6 +253,8 @@
     "coolingForge": "Cooling forge ...",
     "notEnoughStakedSkill": "Not enough staked SKILL!",
     "approveMintSlippage": "Enable 5% mint price slippage",
+    "dynamicPricesDetails": "Each weapon minted increases the price by {increaseAmount} SKILL. Mint price is being decreased every second at a rate of {decreaseAmount} SKILL per hour down to minimum price: {minimumPrice} SKILL per weapon.",
+    "mintSlippageDetails": "Allowing slippage will approve greater amount to be spent in case the price increases by the time your transactions is processed.",
     "spendStakedFunds": "Spend Staked Funds <br> for 20% Discount!",
     "clickForForgePercentages": "Click for forge percentages",
     "forgePercentages": "Forge Percentages",

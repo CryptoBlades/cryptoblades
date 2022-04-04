@@ -5828,7 +5828,72 @@ export function createStore(web3: Web3) {
         if(!PvpArena || !state.defaultAccount) return;
 
         return await PvpArena.methods.specialWeaponRerollTimestamp(weaponId).call(defaultCallOptions(state));
-      }
+      },
+
+      async fetchMintPriceDecreasePerSecond({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const decreaseRaw = await CryptoBlades.methods.vars(19).call(defaultCallOptions(state));
+        const decreaseBN = new BigNumber(decreaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const decreaseInSkill = await CryptoBlades.methods.usdToSkill(decreaseBN).call(defaultCallOptions(state));
+        return new BigNumber(decreaseInSkill).div(1e18);
+      },
+
+      async fetchWeaponMintIncreasePrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const increaseRaw = await CryptoBlades.methods.vars(20).call(defaultCallOptions(state));
+        const increaseBN = new BigNumber(increaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const increaseInSkill = await CryptoBlades.methods.usdToSkill(increaseBN).call(defaultCallOptions(state));
+        return new BigNumber(increaseInSkill).div(1e18);
+      },
+
+      async fetchCharacterMintIncreasePrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const increaseRaw = await CryptoBlades.methods.vars(21).call(defaultCallOptions(state));
+        const increaseBN = new BigNumber(increaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const increaseInSkill = await CryptoBlades.methods.usdToSkill(increaseBN).call(defaultCallOptions(state));
+        return new BigNumber(increaseInSkill).div(1e18);
+      },
+
+      async fetchMintWeaponMinPrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const priceInUsdRaw = await CryptoBlades.methods.vars(22).call(defaultCallOptions(state));
+        const priceInUsd = new BigNumber(priceInUsdRaw).multipliedBy(new BigNumber(2).pow(64)).div(100).toString();
+        return await CryptoBlades.methods.usdToSkill(priceInUsd).call(defaultCallOptions(state));
+      },
+
+      async fetchMintCharacterMinPrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const priceInUsdRaw = await CryptoBlades.methods.vars(23).call(defaultCallOptions(state));
+        const priceInUsd = new BigNumber(priceInUsdRaw).multipliedBy(new BigNumber(2).pow(64)).div(100).toString();
+        return await CryptoBlades.methods.usdToSkill(priceInUsd).call(defaultCallOptions(state));
+      },
+
+      async fetchMintWeaponFee({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        return CryptoBlades.methods.getMintWeaponFee().call(defaultCallOptions(state));
+      },
+
+      async fetchMintCharacterFee({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        return CryptoBlades.methods.getMintCharacterFee().call(defaultCallOptions(state));
+      },
     }
   });
 }

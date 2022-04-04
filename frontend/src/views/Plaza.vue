@@ -211,6 +211,8 @@
                     class="mx-3 my-auto"
                     v-model="mintSlippageApproved">
                     <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
+                    <b-icon-question-circle class="ml-1 centered-icon" v-tooltip.bottom="$t('plaza.dynamicPricesDetails',
+                      { decreaseAmount: mintPriceDecreasePerHour, increaseAmount: mintCharacterPriceIncrease, minimumPrice: mintCharacterMinPrice})"/>
                   </b-checkbox>
                 </div>
               </div>
@@ -262,10 +264,13 @@
                     {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
                   </b-button>
                   <b-checkbox
+                    v-if="ownCharacters.length === 4"
                     variant="primary"
                     class="mx-3 my-auto"
                     v-model="mintSlippageApproved">
                     <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
+                    <b-icon-question-circle class="ml-1 centered-icon" v-tooltip.bottom="$t('plaza.dynamicPricesDetails',
+                      { decreaseAmount: mintPriceDecreasePerHour, increaseAmount: mintCharacterPriceIncrease, minimumPrice: mintCharacterMinPrice})"/>
                   </b-checkbox>
                 </div>
               </div>
@@ -369,6 +374,9 @@ interface Data {
   isTransferInProgress: boolean;
   updateInterval: ReturnType<typeof setInterval> | null;
   mintSlippageApproved: boolean;
+  mintPriceDecreasePerHour: string;
+  mintCharacterPriceIncrease: string;
+  mintCharacterMinPrice: string;
 }
 
 export default Vue.extend({
@@ -445,6 +453,9 @@ export default Vue.extend({
   },
 
   async created() {
+    this.mintPriceDecreasePerHour = new BN(await this.fetchMintPriceDecreasePerSecond()).div(new BN(10).pow(18)).multipliedBy(60*60).toFixed(6);
+    this.mintCharacterPriceIncrease = new BN(await this.fetchCharacterMintIncreasePrice()).div(new BN(10).pow(18)).toFixed(6);
+    this.mintCharacterMinPrice = new BN(await this.fetchMintCharacterMinPrice()).div(new BN(10).pow(18)).toFixed(4);
     this.updateMintCharacterFee();
     this.updateInterval = setInterval(async () => { await this.updateMintCharacterFee(); }, 2000);
   },
@@ -480,7 +491,10 @@ export default Vue.extend({
       isTransferInProgress: false,
       isValidWeb3Address,
       updateInterval: null as ReturnType<typeof setInterval> | null,
-      mintSlippageApproved: false
+      mintSlippageApproved: false,
+      mintPriceDecreasePerHour: '0',
+      mintCharacterPriceIncrease: '0',
+      mintCharacterMinPrice: '0',
     } as Data;
   },
 
@@ -488,7 +502,8 @@ export default Vue.extend({
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
       'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'claimGarrisonXp', 'fetchBurnPowerMultiplier',
-      'transferSoul']),
+      'transferSoul', 'fetchMintPriceDecreasePerSecond', 'fetchCharacterMintIncreasePrice',
+      'fetchMintCharacterMinPrice', 'fetchMintCharacterFee']),
     ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
@@ -637,7 +652,7 @@ export default Vue.extend({
     },
 
     async updateMintCharacterFee() {
-      const recruitCost = await this.contracts.CryptoBlades.methods.getMintCharacterFee().call({ from: this.defaultAccount });
+      const recruitCost = await this.fetchMintCharacterFee();
       const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
       this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
     }
