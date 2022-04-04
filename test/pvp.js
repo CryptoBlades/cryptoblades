@@ -7,8 +7,8 @@ const helpers = require("./helpers");
 
 const { BN, toBN, fromWei } = web3.utils;
 
-contract("PvpArena", (accounts) => {
-  let pvpArena, characters, weapons, shields, priceOracle, randoms, raid1;
+contract("PvpCore", (accounts) => {
+  let pvpCore, pvpAddons, characters, weapons, shields, priceOracle, randoms, raid1;
 
   async function createCharacterInPvpTier(
     account,
@@ -30,13 +30,13 @@ contract("PvpArena", (accounts) => {
 
     await helpers.levelUpTo(characterID, tier * 10, { characters });
 
-    const cost = await pvpArena.getEntryWager(characterID, { from: account });
+    const cost = await pvpCore.getEntryWager(characterID, { from: account });
 
-    await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+    await skillToken.approve(pvpCore.address, web3.utils.toWei(cost), {
       from: account,
     });
 
-    await pvpArena.enterArena(characterID, weaponIDToUse, 0, false, {
+    await pvpCore.enterArena(characterID, weaponIDToUse, 0, false, false, {
       from: account,
     });
 
@@ -51,7 +51,8 @@ contract("PvpArena", (accounts) => {
     shields = contracts.shields;
     randoms = contracts.randoms;
     priceOracle = contracts.priceOracle;
-    pvpArena = contracts.pvpArena;
+    pvpCore = contracts.pvpCore;
+    pvpAddons = contracts.pvpAddons;
     raid1 = contracts.raid1;
 
     await priceOracle.setCurrentPrice(web3.utils.toWei("1", "ether")); // 1/5 SKILL per USD, AKA 5 USD per SKILL
@@ -77,7 +78,8 @@ contract("PvpArena", (accounts) => {
       web3.utils.toWei("1", "kether")
     );
 
-    await pvpArena.grantRole(await pvpArena.GAME_ADMIN(), accounts[0]);
+    await pvpCore.grantRole(await pvpCore.GAME_ADMIN(), accounts[0]);
+    await pvpAddons.grantRole(await pvpAddons.GAME_ADMIN(), accounts[0]);
     await characters.grantRole(await characters.GAME_ADMIN(), accounts[0]);
     await characters.grantRole(await characters.NO_OWNED_LIMIT(), accounts[1]);
     await characters.grantRole(await characters.NO_OWNED_LIMIT(), accounts[2]);
@@ -85,14 +87,14 @@ contract("PvpArena", (accounts) => {
     await shields.grantRole(await shields.GAME_ADMIN(), accounts[0]);
     await raid1.grantRole(await raid1.GAME_ADMIN(), accounts[0]);
     
-    await pvpArena.setArenaAccess(1, { from: accounts[0] });
-    await pvpArena.setPvpBotAddress(accounts[10], { from: accounts[0] });
+    await pvpCore.setArenaAccess(1, { from: accounts[0] });
+    await pvpCore.setPvpBotAddress(accounts[10], { from: accounts[0] });
   });
 
   describe("#getDuelCost", () => {
     it("should return the correct cost", async () => {
       const charID = await createCharacterInPvpTier(accounts[1], 5, "888");
-      const cost = await pvpArena.getDuelCost(charID, { from: accounts[1] });
+      const cost = await pvpCore.getDuelCost(charID, { from: accounts[1] });
 
       expect(cost.toString()).to.be.equal(web3.utils.toWei("7.5"));
     });
@@ -115,10 +117,10 @@ contract("PvpArena", (accounts) => {
     });
 
     it("should return the right arena tier", async () => {
-      const character0arenaTier = await pvpArena.getArenaTier(character0ID, {
+      const character0arenaTier = await pvpCore.getArenaTier(character0ID, {
         from: accounts[1],
       });
-      const character1arenaTier = await pvpArena.getArenaTier(character1ID, {
+      const character1arenaTier = await pvpCore.getArenaTier(character1ID, {
         from: accounts[1],
       });
       expect(character0arenaTier.toString()).to.equal("0");
@@ -141,17 +143,16 @@ contract("PvpArena", (accounts) => {
     });
 
     describe("happy path", async () => {
-      let enterArenaReceipt;
-
       beforeEach(async () => {
-        cost = await pvpArena.getEntryWager(characterID, { from: accounts[1] });
-        await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+        cost = await pvpCore.getEntryWager(characterID, { from: accounts[1] });
+        await skillToken.approve(pvpCore.address, web3.utils.toWei(cost), {
           from: accounts[1],
         });
-        enterArenaReceipt = await pvpArena.enterArena(
+        await pvpCore.enterArena(
           characterID,
           weaponId,
           0,
+          false,
           false,
           {
             from: accounts[1],
@@ -160,19 +161,19 @@ contract("PvpArena", (accounts) => {
       });
 
       it("should place character in current season if it had never entered PVP before", async () => {
-        const currentSeason = (await pvpArena.currentRankedSeason()).toString();
+        const currentSeason = (await pvpAddons.currentRankedSeason()).toString();
 
         character1ID = await createCharacterInPvpTier(accounts[1], 2);
 
         expect(
-          (await pvpArena.seasonByCharacter(character1ID)).toString()
+          (await pvpAddons.seasonByCharacter(character1ID)).toString()
         ).to.equal(currentSeason);
       });
 
       it("should reset character's rank if it changes tier", async () => {
         const weapon1ID = await helpers.createWeapon(
           accounts[1],
-          "101",
+          "100",
           helpers.elements.water,
           {
             weapons,
@@ -180,7 +181,7 @@ contract("PvpArena", (accounts) => {
         );
         const weapon2ID = await helpers.createWeapon(
           accounts[2],
-          "111",
+          "199",
           helpers.elements.fire,
           {
             weapons,
@@ -207,37 +208,37 @@ contract("PvpArena", (accounts) => {
           from: accounts[0],
         });
 
-        await pvpArena.findOpponent(character1ID, {
+        await pvpCore.findOpponent(character1ID, {
           from: accounts[1],
         });
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character1ID, { from: accounts[1], value: await pvpCore.duelOffsetCost() });
 
-        let duelQueue = await pvpArena.getDuelQueue();
+        let duelQueue = await pvpCore.getDuelQueue();
 
-        await pvpArena.performDuels(duelQueue, {
+        await pvpCore.performDuels(duelQueue, {
           from: accounts[0],
         });
 
         expect(
           (
-            await pvpArena.rankingPointsByCharacter(character1ID, {
+            await pvpAddons.rankingPointsByCharacter(character1ID, {
               from: accounts[1],
             })
           ).toString()
         ).to.equal("5");
 
-        await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+        await pvpCore.withdrawFromArena(character1ID, { from: accounts[1] });
 
         await helpers.levelUpTo(character1ID, 30, { characters });
 
-        await pvpArena.enterArena(character1ID, weapon1ID, 0, false, {
+        await pvpCore.enterArena(character1ID, weapon1ID, 0, false, false, {
           from: accounts[1],
         });
 
         expect(
           (
-            await pvpArena.rankingPointsByCharacter(character1ID, {
+            await pvpAddons.rankingPointsByCharacter(character1ID, {
               from: accounts[1],
             })
           ).toString()
@@ -247,7 +248,7 @@ contract("PvpArena", (accounts) => {
       it("should reset character's rank and place it in current season if it's off-season. Resets rankings by tier as well (leaderboard)", async () => {
         const weapon1ID = await helpers.createWeapon(
           accounts[1],
-          "101",
+          "100",
           helpers.elements.water,
           {
             weapons,
@@ -255,7 +256,7 @@ contract("PvpArena", (accounts) => {
         );
         const weapon2ID = await helpers.createWeapon(
           accounts[2],
-          "111",
+          "199",
           helpers.elements.fire,
           {
             weapons,
@@ -282,62 +283,62 @@ contract("PvpArena", (accounts) => {
           from: accounts[0],
         });
 
-        await time.increase(await pvpArena.decisionSeconds());
-        await pvpArena.findOpponent(character1ID, {
+        await time.increase(await pvpCore.decisionSeconds());
+        await pvpCore.findOpponent(character1ID, {
           from: accounts[1],
         });
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character1ID, { from: accounts[1], value: await pvpCore.duelOffsetCost() });
 
-        let duelQueue = await pvpArena.getDuelQueue();
+        let duelQueue = await pvpCore.getDuelQueue();
 
-        await pvpArena.performDuels(duelQueue, {
+        await pvpCore.performDuels(duelQueue, {
           from: accounts[0],
         });
 
-        const previousLeaderBoard = await pvpArena.getTierTopCharacters(
-          await pvpArena.getArenaTier(character1ID)
+        const previousLeaderBoard = await pvpAddons.getTierTopCharacters(
+          await pvpCore.getArenaTier(character1ID)
         );
 
         expect(previousLeaderBoard.length).to.equal(2);
 
         const isCharacter1RankingGreaterThanZero =
           (
-            await pvpArena.rankingPointsByCharacter(character1ID, {
+            await pvpAddons.rankingPointsByCharacter(character1ID, {
               from: accounts[1],
             })
           ).toString() > 0;
 
         expect(isCharacter1RankingGreaterThanZero).to.equal(true);
 
-        await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+        await pvpCore.withdrawFromArena(character1ID, { from: accounts[1] });
 
-        await pvpArena.restartRankedSeason();
+        await pvpAddons.restartRankedSeason();
         
-        await pvpArena.enterArena(character1ID, weapon1ID, 0, false, {
+        await pvpCore.enterArena(character1ID, weapon1ID, 0, false, false, {
           from: accounts[1],
         });
 
         expect(
           (
-            await pvpArena.rankingPointsByCharacter(character1ID, {
+            await pvpAddons.rankingPointsByCharacter(character1ID, {
               from: accounts[1],
             })
           ).toString()
         ).to.equal("0");
 
-        const currentSeason = (await pvpArena.currentRankedSeason()).toString();
+        const currentSeason = (await pvpAddons.currentRankedSeason()).toString();
 
         expect(
-          (await pvpArena.seasonByCharacter(character1ID)).toString()
+          (await pvpAddons.seasonByCharacter(character1ID)).toString()
         ).to.equal(currentSeason);
       });
 
       it("should add the character with its weapon and shield to the arena", async () => {
-        const isCharacterInArena = await pvpArena.isCharacterInArena(
+        const isCharacterInArena = await pvpCore.isCharacterInArena(
           characterID
         );
-        const fighter = await pvpArena.fighterByCharacter(characterID);
+        const fighter = await pvpCore.fighterByCharacter(characterID);
 
         expect(isCharacterInArena).to.equal(true);
         expect(fighter.characterID.toString()).to.equal(
@@ -348,7 +349,7 @@ contract("PvpArena", (accounts) => {
       it("should add pre-existing wager for characters re-entering arena", async () => {
         const weapon1ID = await helpers.createWeapon(
           accounts[1],
-          "101",
+          "100",
           helpers.elements.water,
           {
             weapons,
@@ -356,7 +357,7 @@ contract("PvpArena", (accounts) => {
         );
         const weapon2ID = await helpers.createWeapon(
           accounts[2],
-          "111",
+          "130",
           helpers.elements.fire,
           {
             weapons,
@@ -384,7 +385,7 @@ contract("PvpArena", (accounts) => {
           weapon2ID
         );
 
-        const previousWager = (await pvpArena.fighterByCharacter(character2ID)).wager;
+        const previousWager = (await pvpCore.fighterByCharacter(character2ID)).wager;
 
         await characters.setTrait(character1ID, helpers.elements.water, {
           from: accounts[0],
@@ -393,33 +394,33 @@ contract("PvpArena", (accounts) => {
           from: accounts[0],
         });
 
-        await time.increase(await pvpArena.decisionSeconds());
-        await pvpArena.findOpponent(character1ID, {
+        await time.increase(await pvpCore.decisionSeconds());
+        await pvpCore.findOpponent(character1ID, {
           from: accounts[1],
         });
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character1ID, { from: accounts[1], value: await pvpCore.duelOffsetCost() });
 
-        let duelQueue = await pvpArena.getDuelQueue();
+        let duelQueue = await pvpCore.getDuelQueue();
 
-        await pvpArena.performDuels(duelQueue, {
+        await pvpCore.performDuels(duelQueue, {
           from: accounts[0],
         });
 
-        await time.increase(await pvpArena.decisionSeconds());
-        await pvpArena.findOpponent(character1ID, {
+        await time.increase(await pvpCore.decisionSeconds());
+        await pvpCore.findOpponent(character1ID, {
           from: accounts[1],
         });
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character1ID, { from: accounts[1], value: await pvpCore.duelOffsetCost() });
 
-        duelQueue = await pvpArena.getDuelQueue();
+        duelQueue = await pvpCore.getDuelQueue();
 
-        await pvpArena.performDuels(duelQueue, {
+        await pvpCore.performDuels(duelQueue, {
           from: accounts[0],
         });
 
-        await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+        await pvpCore.withdrawFromArena(character1ID, { from: accounts[1] });
 
         character3ID = await createCharacterInPvpTier(
           accounts[3],
@@ -433,55 +434,55 @@ contract("PvpArena", (accounts) => {
         });
 
         // Now we make character 2 win one so he gets a non-fractional excedent
-        await time.increase(await pvpArena.decisionSeconds());
-        await pvpArena.findOpponent(character2ID, {
+        await time.increase(await pvpCore.decisionSeconds());
+        await pvpCore.findOpponent(character2ID, {
           from: accounts[2],
         });
 
-        await pvpArena.prepareDuel(character2ID, { from: accounts[2], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character2ID, { from: accounts[2], value: await pvpCore.duelOffsetCost() });
 
-        duelQueue = await pvpArena.getDuelQueue();
+        duelQueue = await pvpCore.getDuelQueue();
 
-        await pvpArena.performDuels(duelQueue, {
+        await pvpCore.performDuels(duelQueue, {
           from: accounts[0],
         });
 
-        await pvpArena.withdrawFromArena(character3ID, { from: accounts[3] });
+        await pvpCore.withdrawFromArena(character3ID, { from: accounts[3] });
 
         // Now we defeat him again to kick him
-        await pvpArena.enterArena(character1ID, weapon1ID, 0, false, {
+        await pvpCore.enterArena(character1ID, weapon1ID, 0, false, false, {
           from: accounts[1],
         });
 
-        await time.increase(await pvpArena.decisionSeconds());
-        await pvpArena.findOpponent(character1ID, {
+        await time.increase(await pvpCore.decisionSeconds());
+        await pvpCore.findOpponent(character1ID, {
           from: accounts[1],
         });
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character1ID, { from: accounts[1], value: await pvpCore.duelOffsetCost() });
 
-        duelQueue = await pvpArena.getDuelQueue();
+        duelQueue = await pvpCore.getDuelQueue();
 
-        await pvpArena.performDuels(duelQueue, {
+        await pvpCore.performDuels(duelQueue, {
           from: accounts[0],
         });
 
-        const wager = await pvpArena.excessWagerByCharacter(character2ID);
+        const wager = await pvpCore.excessWagerByCharacter(character2ID);
 
         const isWagerPositive = wager > toBN(0);
 
-        const isCharacterInArena = await pvpArena.isCharacterInArena(
+        const isCharacterInArena = await pvpCore.isCharacterInArena(
           character2ID
         );
 
         expect(isCharacterInArena).to.equal(false);
         expect(isWagerPositive).to.equal(true);
 
-        await pvpArena.enterArena(character2ID, weapon2ID, 0, false, {
+        await pvpCore.enterArena(character2ID, weapon2ID, 0, false, false, {
           from: accounts[2],
         });
 
-        const newWager = (await pvpArena.fighterByCharacter(character2ID)).wager;
+        const newWager = (await pvpCore.fighterByCharacter(character2ID)).wager;
 
         const isNewWagerValid =
           newWager.toString() === previousWager.add(wager).toString();
@@ -502,30 +503,30 @@ contract("PvpArena", (accounts) => {
           characters,
         });
 
-        const cost = await pvpArena.getEntryWager(characterID, {
+        const cost = await pvpCore.getEntryWager(characterID, {
           from: accounts[1],
         });
-        await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+        await skillToken.approve(pvpCore.address, web3.utils.toWei(cost), {
           from: accounts[1],
         });
-        pvpArena.enterArena(characterID, weaponId, 0, false, {
+        pvpCore.enterArena(characterID, weaponId, 0, false, false, {
           from: accounts[1],
         });
       });
 
       it("should revert", async () => {
-        const cost = await pvpArena.getEntryWager(characterID, {
+        const cost = await pvpCore.getEntryWager(characterID, {
           from: accounts[1],
         });
-        await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+        await skillToken.approve(pvpCore.address, web3.utils.toWei(cost), {
           from: accounts[1],
         });
 
         await expectRevert(
-          pvpArena.enterArena(characterID, weapon2Id, 0, false, {
+          pvpCore.enterArena(characterID, weapon2Id, 0, false, false, {
             from: accounts[1],
           }),
-          "Char busy"
+          "B"
         );
       });
     });
@@ -536,29 +537,29 @@ contract("PvpArena", (accounts) => {
           characters,
         });
 
-        cost = await pvpArena.getEntryWager(characterID, { from: accounts[1] });
+        cost = await pvpCore.getEntryWager(characterID, { from: accounts[1] });
 
-        await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+        await skillToken.approve(pvpCore.address, web3.utils.toWei(cost), {
           from: accounts[1],
         });
-        await pvpArena.enterArena(characterID, weaponId, 0, false, {
+        await pvpCore.enterArena(characterID, weaponId, 0, false, false, {
           from: accounts[1],
         });
       });
 
       it("should revert", async () => {
-        cost = await pvpArena.getEntryWager(character2ID, {
+        cost = await pvpCore.getEntryWager(character2ID, {
           from: accounts[1],
         });
-        await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+        await skillToken.approve(pvpCore.address, web3.utils.toWei(cost), {
           from: accounts[1],
         });
 
         await expectRevert(
-          pvpArena.enterArena(character2ID, weaponId, 0, false, {
+          pvpCore.enterArena(character2ID, weaponId, 0, false, false, {
             from: accounts[1],
           }),
-          "Wpn busy"
+          "B"
         );
       });
     });
@@ -574,30 +575,30 @@ contract("PvpArena", (accounts) => {
         });
         shieldId = await helpers.createShield(accounts[1], 0, "446", { shields });
 
-        cost = await pvpArena.getEntryWager(character2ID, {
+        cost = await pvpCore.getEntryWager(character2ID, {
           from: accounts[1],
         });
-        await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+        await skillToken.approve(pvpCore.address, web3.utils.toWei(cost), {
           from: accounts[1],
         });
-        await pvpArena.enterArena(characterID, weaponId, shieldId, true, {
+        await pvpCore.enterArena(characterID, weaponId, shieldId, true, false, {
           from: accounts[1],
         });
       });
 
       it("should revert", async () => {
-        cost = await pvpArena.getEntryWager(character2ID, {
+        cost = await pvpCore.getEntryWager(character2ID, {
           from: accounts[1],
         });
-        await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+        await skillToken.approve(pvpCore.address, web3.utils.toWei(cost), {
           from: accounts[1],
         });
 
         await expectRevert(
-          pvpArena.enterArena(character2ID, weapon2Id, shieldId, true, {
+          pvpCore.enterArena(character2ID, weapon2Id, shieldId, true, {
             from: accounts[1],
           }),
-          "Shld busy"
+          "S"
         );
       });
     });
@@ -610,30 +611,22 @@ contract("PvpArena", (accounts) => {
           characters,
         });
 
-        cost = await pvpArena.getEntryWager(characterID, {
+        cost = await pvpCore.getEntryWager(characterID, {
           from: accounts[1],
         });
 
-        await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+        await skillToken.approve(pvpCore.address, web3.utils.toWei(cost), {
           from: accounts[1],
         });
       });
 
       it("should revert", async () => {
         await expectRevert.unspecified(
-          pvpArena.enterArena(otherCharacterId, weaponId, 0, false, {
+          pvpCore.enterArena(otherCharacterId, weaponId, 0, false, {
             from: accounts[1],
           })
         );
       });
-    });
-
-    describe("character is in a raid", () => {
-      it("should revert");
-    });
-
-    describe("weapon is in a raid", () => {
-      it("should revert");
     });
   });
 
@@ -660,10 +653,10 @@ contract("PvpArena", (accounts) => {
       });
 
       it("reverts", async () => {
-        await pvpArena.findOpponent(character0ID, { from: accounts[1] });
+        await pvpCore.findOpponent(character0ID, { from: accounts[1] });
         await expectRevert(
-          pvpArena.findOpponent(character0ID, { from: accounts[1] }),
-          "Already in match"
+          pvpCore.findOpponent(character0ID, { from: accounts[1] }),
+          "M"
         );
       });
     });
@@ -680,12 +673,12 @@ contract("PvpArena", (accounts) => {
       });
 
       it("should only pick characters from the same tier", async () => {
-        await time.increase(await pvpArena.decisionSeconds());
+        await time.increase(await pvpCore.decisionSeconds());
 
-        const { tx } = await pvpArena.findOpponent(character0ID, {
+        const { tx } = await pvpCore.findOpponent(character0ID, {
           from: accounts[1],
         });
-        const opponentID = await pvpArena.getOpponent(character0ID, {
+        const opponentID = await pvpCore.getOpponent(character0ID, {
           from: accounts[1],
         });
 
@@ -693,24 +686,23 @@ contract("PvpArena", (accounts) => {
       });
 
       it("should not consider characters owned by the sender", async () => {
-        const character2ID = await createCharacterInPvpTier(accounts[1], 8);
-        await time.increase(await pvpArena.decisionSeconds());
+        await createCharacterInPvpTier(accounts[1], 8);
+        await time.increase(await pvpCore.decisionSeconds());
         const characterID = await createCharacterInPvpTier(accounts[1], 8);
 
         await expectRevert(
-          pvpArena.findOpponent(characterID, {
+          pvpCore.findOpponent(characterID, {
             from: accounts[1],
           }),
-          "No enemy found"
+          "E"
         );
       });
     });
 
     describe("character not in the arena", () => {
       it("should revert", async () => {
-        await expectRevert(
-          pvpArena.findOpponent(character1ID, { from: accounts[1] }),
-          "Not in arena"
+        await expectRevert.unspecified(
+          pvpCore.findOpponent(character1ID, { from: accounts[1] })
         );
       });
     });
@@ -724,9 +716,9 @@ contract("PvpArena", (accounts) => {
         character1ID = await createCharacterInPvpTier(accounts[1], 4);
         character2ID = await createCharacterInPvpTier(accounts[2], 4);
 
-        await time.increase(await pvpArena.decisionSeconds());
+        await time.increase(await pvpCore.decisionSeconds());
 
-        const { tx } = await pvpArena.findOpponent(character1ID, {
+        const { tx } = await pvpCore.findOpponent(character1ID, {
           from: accounts[1],
         });
 
@@ -734,7 +726,7 @@ contract("PvpArena", (accounts) => {
       });
 
       it("should put the attacker in an active match", async () => {
-        const isInMatch = (await pvpArena.matchByFinder(character1ID, {
+        const isInMatch = (await pvpCore.matchByFinder(character1ID, {
           from: accounts[1],
         })).createdAt.toString() !== '0';
 
@@ -747,10 +739,10 @@ contract("PvpArena", (accounts) => {
         const character1ID = await createCharacterInPvpTier(accounts[1], 6);
 
         await expectRevert(
-          pvpArena.findOpponent(character1ID, {
+          pvpCore.findOpponent(character1ID, {
             from: accounts[1],
           }),
-          "No enemy found"
+          "E"
         );
       });
     });
@@ -769,27 +761,27 @@ contract("PvpArena", (accounts) => {
         "221"
       );
 
-      expect(await pvpArena.isCharacterInArena(character1ID, {
+      expect(await pvpCore.isCharacterInArena(character1ID, {
         from: accounts[1],
       })).to.equal(true);
 
-      expect(await pvpArena.isCharacterInArena(character2ID, {
+      expect(await pvpCore.isCharacterInArena(character2ID, {
         from: accounts[1],
       })).to.equal(true);
 
-      await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+      await pvpCore.withdrawFromArena(character1ID, { from: accounts[1] });
 
-      expect(await pvpArena.isCharacterInArena(character1ID, {
+      expect(await pvpCore.isCharacterInArena(character1ID, {
         from: accounts[1],
       })).to.equal(false);
 
-      expect(await pvpArena.isCharacterInArena(character2ID, {
+      expect(await pvpCore.isCharacterInArena(character2ID, {
         from: accounts[1],
       })).to.equal(true);
 
-      await pvpArena.withdrawFromArena(character2ID, { from: accounts[1] });
+      await pvpCore.withdrawFromArena(character2ID, { from: accounts[1] });
 
-      expect(await pvpArena.isCharacterInArena(character2ID, {
+      expect(await pvpCore.isCharacterInArena(character2ID, {
         from: accounts[1],
       })).to.equal(false);
     });
@@ -800,9 +792,9 @@ contract("PvpArena", (accounts) => {
         1,
         "222"
       );
-      const characterWager = (await pvpArena.fighterByCharacter(character2ID)).wager;
+      const characterWager = (await pvpCore.fighterByCharacter(character2ID)).wager;
       const previousBalance = await skillToken.balanceOf(accounts[1]);
-      await pvpArena.withdrawFromArena(character2ID, { from: accounts[1] });
+      await pvpCore.withdrawFromArena(character2ID, { from: accounts[1] });
 
       const newBalance = await skillToken.balanceOf(accounts[1]);
 
@@ -819,17 +811,17 @@ contract("PvpArena", (accounts) => {
       );
       await createCharacterInPvpTier(accounts[2], 4, "221");
 
-      const characterWager = (await pvpArena.fighterByCharacter(character1ID)).wager;
+      const characterWager = (await pvpCore.fighterByCharacter(character1ID)).wager;
       const previousBalance = await skillToken.balanceOf(accounts[1]);
 
-      const wagerMinusPenalty = toBN(characterWager - characterWager * (await pvpArena.withdrawFeePercent())/100);
+      const wagerMinusPenalty = toBN(characterWager - characterWager * (await pvpCore.withdrawFeePercent())/100);
 
-      await time.increase(await pvpArena.decisionSeconds());
-      await pvpArena.findOpponent(character1ID, {
+      await time.increase(await pvpCore.decisionSeconds());
+      await pvpCore.findOpponent(character1ID, {
         from: accounts[1],
       });
 
-      await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+      await pvpCore.withdrawFromArena(character1ID, { from: accounts[1] });
       const newBalance = await skillToken.balanceOf(accounts[1]);
 
       expect(newBalance.toString()).to.equal(
@@ -847,11 +839,11 @@ contract("PvpArena", (accounts) => {
         weapon1ID
       );
 
-      expect(await pvpArena.isWeaponInArena(weapon1ID)).to.equal(true);
+      expect(await pvpCore.isWeaponInArena(weapon1ID)).to.equal(true);
 
-      await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+      await pvpCore.withdrawFromArena(character1ID, { from: accounts[1] });
 
-      expect(await pvpArena.isWeaponInArena(weapon1ID)).to.equal(false);
+      expect(await pvpCore.isWeaponInArena(weapon1ID)).to.equal(false);
     });
 
     it("should withdraw the character's shield", async () => {
@@ -865,35 +857,34 @@ contract("PvpArena", (accounts) => {
         weapons,
       });
 
-      const cost = await pvpArena.getEntryWager(characterID, {
+      const cost = await pvpCore.getEntryWager(characterID, {
         from: accounts[1],
       });
 
-      await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+      await skillToken.approve(pvpCore.address, web3.utils.toWei(cost), {
         from: accounts[1],
       });
-      await pvpArena.enterArena(characterID, weaponID, shieldID, true, {
+      await pvpCore.enterArena(characterID, weaponID, shieldID, true, false, {
         from: accounts[1],
       });
 
-      expect(await pvpArena.isShieldInArena(shieldID)).to.equal(true);
+      expect(await pvpCore.isShieldInArena(shieldID)).to.equal(true);
 
-      await pvpArena.withdrawFromArena(characterID, { from: accounts[1] });
+      await pvpCore.withdrawFromArena(characterID, { from: accounts[1] });
 
-      expect(await pvpArena.isShieldInArena(shieldID)).to.equal(false);
+      expect(await pvpCore.isShieldInArena(shieldID)).to.equal(false);
     });
 
     describe("with unclaimed earnings", async () => {
       describe("happy path", () => {
         let character1ID;
         let character2ID;
-        let unclaimedEarnings;
         let wager;
 
         beforeEach(async () => {
           const weapon1ID = await helpers.createWeapon(
             accounts[1],
-            "101",
+            "100",
             helpers.elements.water,
             {
               weapons,
@@ -901,7 +892,7 @@ contract("PvpArena", (accounts) => {
           );
           const weapon2ID = await helpers.createWeapon(
             accounts[2],
-            "111",
+            "199",
             helpers.elements.fire,
             {
               weapons,
@@ -928,29 +919,29 @@ contract("PvpArena", (accounts) => {
             from: accounts[0],
           });
 
-          await time.increase(await pvpArena.decisionSeconds());
-          await pvpArena.findOpponent(character1ID, {
+          await time.increase(await pvpCore.decisionSeconds());
+          await pvpCore.findOpponent(character1ID, {
             from: accounts[1],
           });
-          await pvpArena.prepareDuel(character1ID, {
+          await pvpCore.prepareDuel(character1ID, {
             from: accounts[1],
-            value: await pvpArena.duelOffsetCost()
+            value: await pvpCore.duelOffsetCost()
           });
 
-          let duelQueue = await pvpArena.getDuelQueue();
+          let duelQueue = await pvpCore.getDuelQueue();
 
-          await pvpArena.performDuels(duelQueue, {
+          await pvpCore.performDuels(duelQueue, {
             from: accounts[0],
           });
 
-          wager = (await pvpArena.fighterByCharacter(character1ID)).wager;
+          wager = (await pvpCore.fighterByCharacter(character1ID)).wager;
         });
 
         it("should pay the owner the character's earnings", async () => {
           const previousBalance = await skillToken.balanceOf(accounts[1]);
-          await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+          await pvpCore.withdrawFromArena(character1ID, { from: accounts[1] });
 
-          const newWager = (await pvpArena.fighterByCharacter(character1ID)).wager;
+          const newWager = (await pvpCore.fighterByCharacter(character1ID)).wager;
 
           const balance = await skillToken.balanceOf(accounts[1]);
 
@@ -970,7 +961,7 @@ contract("PvpArena", (accounts) => {
         beforeEach(async () => {
           const weapon1ID = await helpers.createWeapon(
             accounts[1],
-            "101",
+            "100",
             helpers.elements.water,
             {
               weapons,
@@ -978,7 +969,7 @@ contract("PvpArena", (accounts) => {
           );
           const weapon2ID = await helpers.createWeapon(
             accounts[2],
-            "111",
+            "199",
             helpers.elements.fire,
             {
               weapons,
@@ -1005,39 +996,39 @@ contract("PvpArena", (accounts) => {
             from: accounts[0],
           });
 
-          await time.increase(await pvpArena.decisionSeconds());
-          await pvpArena.findOpponent(character1ID, {
+          await time.increase(await pvpCore.decisionSeconds());
+          await pvpCore.findOpponent(character1ID, {
             from: accounts[1],
           });
-          await pvpArena.prepareDuel(character1ID, {
+          await pvpCore.prepareDuel(character1ID, {
             from: accounts[1],
-            value: await pvpArena.duelOffsetCost()
+            value: await pvpCore.duelOffsetCost()
           });
 
-          let duelQueue = await pvpArena.getDuelQueue();
+          let duelQueue = await pvpCore.getDuelQueue();
 
-          await pvpArena.performDuels(duelQueue, {
+          await pvpCore.performDuels(duelQueue, {
             from: accounts[0],
           });
 
-          wager = (await pvpArena.fighterByCharacter(character1ID)).wager;
+          wager = (await pvpCore.fighterByCharacter(character1ID)).wager;
 
-          await time.increase(await pvpArena.decisionSeconds());
+          await time.increase(await pvpCore.decisionSeconds());
 
-          await pvpArena.findOpponent(character1ID, {
+          await pvpCore.findOpponent(character1ID, {
             from: accounts[1],
           });
         });
 
         it("should return unclaimed earnings minus the penalty from the refunded amount", async () => {
           const previousBalance = await skillToken.balanceOf(accounts[1]);
-          await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+          await pvpCore.withdrawFromArena(character1ID, { from: accounts[1] });
 
-          const newWager = (await pvpArena.fighterByCharacter(character1ID)).wager;
+          const newWager = (await pvpCore.fighterByCharacter(character1ID)).wager;
 
           const balance = await skillToken.balanceOf(accounts[1]);
 
-          const entryWager = await pvpArena.getEntryWager(character1ID);
+          const entryWager = await pvpCore.getEntryWager(character1ID);
 
           expect(newWager.toString()).to.equal(toBN(0).toString());
 
@@ -1047,9 +1038,9 @@ contract("PvpArena", (accounts) => {
         });
 
         it("should reset the character's duel", async () => {
-          await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
+          await pvpCore.withdrawFromArena(character1ID, { from: accounts[1] });
 
-          const isInMatch = (await pvpArena.matchByFinder(character1ID)).createdAt.toString() !== '0';
+          const isInMatch = (await pvpCore.matchByFinder(character1ID)).createdAt.toString() !== '0';
 
           expect(isInMatch).to.equal(false);
         });
@@ -1064,7 +1055,7 @@ contract("PvpArena", (accounts) => {
       beforeEach(async () => {
         const weapon1ID = await helpers.createWeapon(
           accounts[1],
-          "101",
+          "100",
           helpers.elements.water,
           {
             weapons,
@@ -1072,7 +1063,7 @@ contract("PvpArena", (accounts) => {
         );
         const weapon2ID = await helpers.createWeapon(
           accounts[2],
-          "111",
+          "199",
           helpers.elements.fire,
           {
             weapons,
@@ -1099,38 +1090,38 @@ contract("PvpArena", (accounts) => {
           from: accounts[0],
         });
 
-        await time.increase(await pvpArena.decisionSeconds());
-        await pvpArena.findOpponent(character1ID, {
+        await time.increase(await pvpCore.decisionSeconds());
+        await pvpCore.findOpponent(character1ID, {
           from: accounts[1],
         });
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character1ID, { from: accounts[1], value: await pvpCore.duelOffsetCost() });
 
-        let duelQueue = await pvpArena.getDuelQueue();
+        let duelQueue = await pvpCore.getDuelQueue();
 
-        await pvpArena.performDuels(duelQueue, {
+        await pvpCore.performDuels(duelQueue, {
           from: accounts[0],
         });
 
-        wager = (await pvpArena.fighterByCharacter(character1ID)).wager;
+        wager = (await pvpCore.fighterByCharacter(character1ID)).wager;
 
-        await time.increase(await pvpArena.decisionSeconds());
+        await time.increase(await pvpCore.decisionSeconds());
 
-        await pvpArena.findOpponent(character1ID, {
+        await pvpCore.findOpponent(character1ID, {
           from: accounts[1],
         });
       });
 
       it("should subtract the penalty from the refunded amount", async () => {
-        await time.increase(await pvpArena.decisionSeconds());
+        await time.increase(await pvpCore.decisionSeconds());
 
         const previousBalance = await skillToken.balanceOf(accounts[1]);
 
-        await pvpArena.withdrawFromArena(character1ID, { from: accounts[1] });
-        const newWager = (await pvpArena.fighterByCharacter(character1ID)).wager;
+        await pvpCore.withdrawFromArena(character1ID, { from: accounts[1] });
+        const newWager = (await pvpCore.fighterByCharacter(character1ID)).wager;
 
         const balance = await skillToken.balanceOf(accounts[1]);
 
-        const entryWager = await pvpArena.getEntryWager(character1ID);
+        const entryWager = await pvpCore.getEntryWager(character1ID);
 
         expect(newWager.toString()).to.equal(toBN(0).toString());
 
@@ -1150,7 +1141,7 @@ contract("PvpArena", (accounts) => {
     beforeEach(async () => {
       weapon1ID = await helpers.createWeapon(
         accounts[1],
-        "111",
+        "100",
         helpers.elements.water,
         {
           weapons,
@@ -1158,7 +1149,7 @@ contract("PvpArena", (accounts) => {
       );
       weapon2ID = await helpers.createWeapon(
         accounts[2],
-        "111",
+        "199",
         helpers.elements.fire,
         {
           weapons,
@@ -1188,31 +1179,31 @@ contract("PvpArena", (accounts) => {
 
     describe("happy path", () => {
       it("updates the duel queue", async () => {
-        await pvpArena.findOpponent(character1ID, {
+        await pvpCore.findOpponent(character1ID, {
           from: accounts[1],
         });
 
-        const previousDuelQueue = await pvpArena.getDuelQueue();
+        const previousDuelQueue = await pvpCore.getDuelQueue();
 
         expect(previousDuelQueue.length).to.equal(0);
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character1ID, { from: accounts[1], value: await pvpCore.duelOffsetCost() });
 
-        const newDuelQueue = await pvpArena.getDuelQueue();
+        const newDuelQueue = await pvpCore.getDuelQueue();
 
         expect(newDuelQueue.length).to.equal(1);
       });
 
       it("transfers duelOffsetCost", async () => {
-        await pvpArena.findOpponent(character1ID, {
+        await pvpCore.findOpponent(character1ID, {
           from: accounts[1],
         });
 
-        const duelOffsetCostInGwei = web3.utils.fromWei(await pvpArena.duelOffsetCost(), 'Gwei');
+        const duelOffsetCostInGwei = web3.utils.fromWei(await pvpCore.duelOffsetCost(), 'Gwei');
 
         const previousBalanceInGwei = web3.utils.fromWei(await web3.eth.getBalance(accounts[10]), 'Gwei');
         
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character1ID, { from: accounts[1], value: await pvpCore.duelOffsetCost() });
         
         const nextBalanceInGwei = web3.utils.fromWei(await web3.eth.getBalance(accounts[10]), 'Gwei');
         
@@ -1222,55 +1213,33 @@ contract("PvpArena", (accounts) => {
 
     describe("unhappy path", () => {
       it("reverts if decision time expired", async () => {
-        await time.increase(await pvpArena.decisionSeconds());
-        await pvpArena.findOpponent(character1ID, {
+        await time.increase(await pvpCore.decisionSeconds());
+        await pvpCore.findOpponent(character1ID, {
           from: accounts[1],
         });
 
-        await time.increase(await pvpArena.decisionSeconds());
+        await time.increase(await pvpCore.decisionSeconds());
 
         await expectRevert(
-          pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() }),
-          "Decision time expired"
+          pvpCore.prepareDuel(character1ID, { from: accounts[1], value: await pvpCore.duelOffsetCost() }),
+          "D"
         );
       });
 
       it("reverts if character is already in duel queue", async () => {
-        await time.increase(await pvpArena.decisionSeconds());
-        await pvpArena.findOpponent(character1ID, {
+        await time.increase(await pvpCore.decisionSeconds());
+        await pvpCore.findOpponent(character1ID, {
           from: accounts[1],
         });
 
-        await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character1ID, { from: accounts[1], value: await pvpCore.duelOffsetCost() });
 
         await expectRevert(
-          pvpArena.prepareDuel(character1ID, { from: accounts[1] }),
-          "In queue"
+          pvpCore.prepareDuel(character1ID, { from: accounts[1] }),
+          "Q"
         );
       });
     });
-  });
-
-  describe("#increaseRankingsPool", async () => {
-    it('increases the ranking pool of a certain tier', async () => {
-      const previousPool = (await pvpArena.rankingsPoolByTier(1)).toString();
-      expect(previousPool).to.equal('0');
-
-      await pvpArena.increaseRankingsPool(1, 1000);
-
-      const newPool = (await pvpArena.rankingsPoolByTier(1)).toString();
-      expect(newPool).to.equal('1000');
-    })
-
-    it("doesn't increase other tier's pools", async () => {
-      const previousPool = (await pvpArena.rankingsPoolByTier(1)).toString();
-      expect(previousPool).to.equal('0');
-
-      await pvpArena.increaseRankingsPool(2, 1000);
-
-      const newPool = (await pvpArena.rankingsPoolByTier(1)).toString();
-      expect(newPool).to.equal('0');
-    })
   });
 
   describe("#performDuels", async () => {
@@ -1280,7 +1249,6 @@ contract("PvpArena", (accounts) => {
         let character2ID;
         let character1Wager;
         let character2Wager;
-        let duelEvent;
         let bounty;
         let poolTax;
         let winnerReward;
@@ -1291,7 +1259,7 @@ contract("PvpArena", (accounts) => {
           // the same
           const weapon1ID = await helpers.createWeapon(
             accounts[1],
-            "101",
+            "100",
             helpers.elements.water,
             {
               weapons,
@@ -1299,7 +1267,7 @@ contract("PvpArena", (accounts) => {
           );
           const weapon2ID = await helpers.createWeapon(
             accounts[2],
-            "111",
+            "199",
             helpers.elements.fire,
             {
               weapons,
@@ -1326,38 +1294,38 @@ contract("PvpArena", (accounts) => {
             from: accounts[0],
           });
 
-          await time.increase(await pvpArena.decisionSeconds());
-          await pvpArena.findOpponent(character1ID, {
+          await time.increase(await pvpCore.decisionSeconds());
+          await pvpCore.findOpponent(character1ID, {
             from: accounts[1],
           });
 
-          character1Wager = (await pvpArena.fighterByCharacter(character1ID, {
+          character1Wager = (await pvpCore.fighterByCharacter(character1ID, {
             from: accounts[1],
           })).wager;
-          character2Wager = (await pvpArena.fighterByCharacter(character2ID, {
+          character2Wager = (await pvpCore.fighterByCharacter(character2ID, {
             from: accounts[2],
           })).wager;
 
-          await pvpArena.prepareDuel(character1ID, {
+          await pvpCore.prepareDuel(character1ID, {
             from: accounts[1],
-            value: await pvpArena.duelOffsetCost()
+            value: await pvpCore.duelOffsetCost()
           });
 
-          let duelQueue = await pvpArena.getDuelQueue();
+          let duelQueue = await pvpCore.getDuelQueue();
 
-          const transaction = await pvpArena.performDuels(duelQueue, {
+          const transaction = await pvpCore.performDuels(duelQueue, {
             from: accounts[0],
           });
 
           previousBalance = await skillToken.balanceOf(accounts[1]);
-          duelEvent = await expectEvent.inTransaction(
+          await expectEvent.inTransaction(
             transaction.tx,
-            pvpArena,
+            pvpCore,
             "DuelFinished"
           );
 
           duelTx = transaction.tx;
-          duelCost = await pvpArena.getDuelCost(character1ID, {
+          duelCost = await pvpCore.getDuelCost(character1ID, {
             from: accounts[1],
           });
 
@@ -1367,7 +1335,7 @@ contract("PvpArena", (accounts) => {
         });
 
         it("should add to the winner's earnings balance", async () => {
-          const newWager = (await pvpArena.fighterByCharacter(character1ID)).wager;
+          const newWager = (await pvpCore.fighterByCharacter(character1ID)).wager;
 
           expect(newWager.toString()).to.equal(
             winnerReward.add(character1Wager).toString()
@@ -1375,7 +1343,7 @@ contract("PvpArena", (accounts) => {
         });
 
         it("should remove the duel cost from the loser's wager", async () => {
-          const character2NewWager = (await pvpArena.fighterByCharacter(
+          const character2NewWager = (await pvpCore.fighterByCharacter(
             character2ID,
             {
               from: accounts[2],
@@ -1390,53 +1358,53 @@ contract("PvpArena", (accounts) => {
 
         it("Should remove defender from arena if his/her wager is lower than duel cost", async () => {
           // We make them duel until character2's wager is 0
-          await time.increase(await pvpArena.decisionSeconds());
-          await pvpArena.findOpponent(character1ID, {
+          await time.increase(await pvpCore.decisionSeconds());
+          await pvpCore.findOpponent(character1ID, {
             from: accounts[1],
           });
 
-          await pvpArena.prepareDuel(character1ID, {
+          await pvpCore.prepareDuel(character1ID, {
             from: accounts[1],
-            value: await pvpArena.duelOffsetCost()
+            value: await pvpCore.duelOffsetCost()
           });
 
-          let duelQueue = await pvpArena.getDuelQueue();
+          let duelQueue = await pvpCore.getDuelQueue();
 
-          await pvpArena.performDuels(duelQueue, {
+          await pvpCore.performDuels(duelQueue, {
             from: accounts[0],
           });
 
-          await time.increase(await pvpArena.decisionSeconds());
-          await pvpArena.findOpponent(character1ID, {
+          await time.increase(await pvpCore.decisionSeconds());
+          await pvpCore.findOpponent(character1ID, {
             from: accounts[1],
           });
 
-          await pvpArena.prepareDuel(character1ID, {
+          await pvpCore.prepareDuel(character1ID, {
             from: accounts[1],
-            value: await pvpArena.duelOffsetCost()
+            value: await pvpCore.duelOffsetCost()
           });
 
-          duelQueue = await pvpArena.getDuelQueue();
+          duelQueue = await pvpCore.getDuelQueue();
 
-          await pvpArena.performDuels(duelQueue, {
+          await pvpCore.performDuels(duelQueue, {
             from: accounts[0],
           });
 
-          await time.increase(await pvpArena.decisionSeconds());
+          await time.increase(await pvpCore.decisionSeconds());
 
           await expectRevert(
-            pvpArena.findOpponent(character1ID, {
+            pvpCore.findOpponent(character1ID, {
               from: accounts[1],
             }),
-            "No enemy found"
+            "E"
           );
         });
 
         it("should save the ranking prize pool", async () => {
-          const tier = await pvpArena.getArenaTier(character1ID, {
+          const tier = await pvpCore.getArenaTier(character1ID, {
             from: accounts[1],
           });
-          const rewardsInPool = await pvpArena.rankingsPoolByTier(tier, {
+          const rewardsInPool = await pvpAddons.rankingsPoolByTier(tier, {
             from: accounts[1],
           });
 
@@ -1444,11 +1412,11 @@ contract("PvpArena", (accounts) => {
         });
 
         it("should emit the DuelFinished event", async () => {
-          await expectEvent.inTransaction(duelTx, pvpArena, "DuelFinished");
+          await expectEvent.inTransaction(duelTx, pvpCore, "DuelFinished");
         });
 
         it("should mark the attacker as no longer in an active duel", async () => {
-          const isInMatch = (await pvpArena.matchByFinder(character1ID, {
+          const isInMatch = (await pvpCore.matchByFinder(character1ID, {
             from: accounts[1],
           })).createdAt.toString() !== '0';
 
@@ -1466,7 +1434,7 @@ contract("PvpArena", (accounts) => {
         beforeEach(async () => {
           weapon1ID = await helpers.createWeapon(
             accounts[1],
-            "101",
+            "100",
             helpers.elements.water,
             {
               weapons,
@@ -1474,7 +1442,7 @@ contract("PvpArena", (accounts) => {
           );
           weapon2ID = await helpers.createWeapon(
             accounts[2],
-            "111",
+            "199",
             helpers.elements.fire,
             {
               weapons,
@@ -1501,19 +1469,19 @@ contract("PvpArena", (accounts) => {
             from: accounts[0],
           });
 
-          await time.increase(await pvpArena.decisionSeconds());
-          await pvpArena.findOpponent(character1ID, {
+          await time.increase(await pvpCore.decisionSeconds());
+          await pvpCore.findOpponent(character1ID, {
             from: accounts[1],
           });
 
-          await pvpArena.prepareDuel(character1ID, {
+          await pvpCore.prepareDuel(character1ID, {
             from: accounts[1],
-            value: await pvpArena.duelOffsetCost()
+            value: await pvpCore.duelOffsetCost()
           });
 
-          let duelQueue = await pvpArena.getDuelQueue();
+          let duelQueue = await pvpCore.getDuelQueue();
 
-          const { tx } = await pvpArena.performDuels(duelQueue, {
+          const { tx } = await pvpCore.performDuels(duelQueue, {
             from: accounts[0],
           });
 
@@ -1523,7 +1491,7 @@ contract("PvpArena", (accounts) => {
         it("should apply bonus to the attacker", async () => {
           const duelEvent = await expectEvent.inTransaction(
             duelTx,
-            pvpArena,
+            pvpCore,
             "DuelFinished"
           );
 
@@ -1547,7 +1515,7 @@ contract("PvpArena", (accounts) => {
         beforeEach(async () => {
           weapon1ID = await helpers.createWeapon(
             accounts[1],
-            "111",
+            "199",
             helpers.elements.fire,
             {
               weapons,
@@ -1555,7 +1523,7 @@ contract("PvpArena", (accounts) => {
           );
           weapon2ID = await helpers.createWeapon(
             accounts[2],
-            "101",
+            "100",
             helpers.elements.water,
             {
               weapons,
@@ -1574,7 +1542,7 @@ contract("PvpArena", (accounts) => {
             "222",
             weapon2ID
           );
-          const duelCost = await pvpArena.getDuelCost(character1ID, {
+          const duelCost = await pvpCore.getDuelCost(character1ID, {
             from: accounts[1],
           });
 
@@ -1585,26 +1553,26 @@ contract("PvpArena", (accounts) => {
             from: accounts[0],
           });
 
-          character1Wager = (await pvpArena.fighterByCharacter(character1ID, {
+          character1Wager = (await pvpCore.fighterByCharacter(character1ID, {
             from: accounts[1],
           })).wager;
-          character2Wager = (await pvpArena.fighterByCharacter(character2ID, {
+          character2Wager = (await pvpCore.fighterByCharacter(character2ID, {
             from: accounts[2],
           })).wager;
 
-          await time.increase(await pvpArena.decisionSeconds());
-          await pvpArena.findOpponent(character1ID, {
+          await time.increase(await pvpCore.decisionSeconds());
+          await pvpCore.findOpponent(character1ID, {
             from: accounts[1],
           });
 
-          await pvpArena.prepareDuel(character1ID, {
+          await pvpCore.prepareDuel(character1ID, {
             from: accounts[1],
-            value: await pvpArena.duelOffsetCost()
+            value: await pvpCore.duelOffsetCost()
           });
 
-          let duelQueue = await pvpArena.getDuelQueue();
+          let duelQueue = await pvpCore.getDuelQueue();
 
-          const { tx } = await pvpArena.performDuels(duelQueue, {
+          const { tx } = await pvpCore.performDuels(duelQueue, {
             from: accounts[0],
           });
 
@@ -1615,7 +1583,7 @@ contract("PvpArena", (accounts) => {
         });
 
         it("should pay the defender their prize", async () => {
-          const newWager = (await pvpArena.fighterByCharacter(character2ID)).wager;
+          const newWager = (await pvpCore.fighterByCharacter(character2ID)).wager;
 
           expect(newWager.toString()).to.equal(
             winnerReward.add(character2Wager).toString()
@@ -1623,7 +1591,7 @@ contract("PvpArena", (accounts) => {
         });
 
         it("should remove the duel cost from the attacker's wager", async () => {
-          const character1NewWager = (await pvpArena.fighterByCharacter(
+          const character1NewWager = (await pvpCore.fighterByCharacter(
             character1ID,
             {
               from: accounts[1],
@@ -1636,97 +1604,97 @@ contract("PvpArena", (accounts) => {
         });
       });
     });
+  });
 
-    describe("#reRollOpponent", () => {
-      it("should fail if character is not dueling", async () => {
-        const character1ID = await createCharacterInPvpTier(accounts[1], 2);
-        await createCharacterInPvpTier(accounts[2], 2);
+  describe("#reRollOpponent", () => {
+    it("should fail if character is not dueling", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      await createCharacterInPvpTier(accounts[2], 2);
 
-        await expectRevert(
-          pvpArena.reRollOpponent(character1ID, {
-            from: accounts[1],
-          }),
-          "Not in match"
-        );
+      await expectRevert(
+        pvpCore.reRollOpponent(character1ID, {
+          from: accounts[1],
+        }),
+        "M"
+      );
+    });
+
+    it("should transfer skill from the sender to the contract", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      await createCharacterInPvpTier(accounts[2], 2);
+      await createCharacterInPvpTier(accounts[3], 2);
+
+      await time.increase(await pvpCore.decisionSeconds());
+
+      await pvpCore.findOpponent(character1ID, {
+        from: accounts[1],
       });
 
-      it("should transfer skill from the sender to the contract", async () => {
-        const character1ID = await createCharacterInPvpTier(accounts[1], 2);
-        await createCharacterInPvpTier(accounts[2], 2);
-        await createCharacterInPvpTier(accounts[3], 2);
+      const previousBalance = await skillToken.balanceOf(accounts[1]);
 
-        await time.increase(await pvpArena.decisionSeconds());
-
-        await pvpArena.findOpponent(character1ID, {
-          from: accounts[1],
-        });
-
-        const previousBalance = await skillToken.balanceOf(accounts[1]);
-
-        await pvpArena.reRollOpponent(character1ID, {
-          from: accounts[1],
-        });
-
-        const newBalance = await skillToken.balanceOf(accounts[1]);
-
-        const duelCost = await pvpArena.getDuelCost(character1ID);
-
-        const reRollPenalty = duelCost.div(toBN(4));
-
-        expect(newBalance.toString()).to.equal(
-          previousBalance.sub(reRollPenalty).toString()
-        );
+      await pvpCore.reRollOpponent(character1ID, {
+        from: accounts[1],
       });
 
-      it("can reroll the same opponent", async () => {
-        const character1ID = await createCharacterInPvpTier(accounts[1], 2);
-        const character2ID = await createCharacterInPvpTier(accounts[2], 2);
+      const newBalance = await skillToken.balanceOf(accounts[1]);
 
-        await pvpArena.findOpponent(character1ID, {
-          from: accounts[1],
-        });
+      const duelCost = await pvpCore.getDuelCost(character1ID);
 
-        expect((await pvpArena.matchByFinder(character1ID)).defenderID.toString()).to.equal(character2ID);
+      const reRollPenalty = duelCost.div(toBN(4));
 
-        await pvpArena.reRollOpponent(character1ID, {
-          from: accounts[1],
-        });
+      expect(newBalance.toString()).to.equal(
+        previousBalance.sub(reRollPenalty).toString()
+      );
+    });
 
-        expect((await pvpArena.matchByFinder(character1ID)).defenderID.toString()).to.equal(character2ID);
+    it("can reroll the same opponent", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      const character2ID = await createCharacterInPvpTier(accounts[2], 2);
+
+      await pvpCore.findOpponent(character1ID, {
+        from: accounts[1],
       });
 
-      it("should assign a new opponent", async () => {
-        const character1ID = await createCharacterInPvpTier(accounts[1], 2);
-        await createCharacterInPvpTier(accounts[2], 2);
-        await createCharacterInPvpTier(accounts[3], 2);
+      expect((await pvpCore.matchByFinder(character1ID)).defenderID.toString()).to.equal(character2ID);
 
-        await pvpArena.findOpponent(character1ID, {
-          from: accounts[1],
-        });
-
-        const opponentID = (await pvpArena.matchByFinder(character1ID)).defenderID.toString();
-
-        let characterToMatchAfterReRoll;
-        let accountToWithdrawFrom;
-
-        if (opponentID === "1") {
-          characterToMatchAfterReRoll = "2"
-          accountToWithdrawFrom = accounts[2];
-        } else {
-          characterToMatchAfterReRoll = "1"
-          accountToWithdrawFrom = accounts[3];
-        }
-
-        await time.increase(await pvpArena.decisionSeconds());
-
-        await pvpArena.withdrawFromArena(opponentID, { from: accountToWithdrawFrom });
-
-        await pvpArena.reRollOpponent(character1ID, {
-          from: accounts[1],
-        });
-
-        expect((await pvpArena.matchByFinder(character1ID)).defenderID.toString()).to.equal(characterToMatchAfterReRoll);
+      await pvpCore.reRollOpponent(character1ID, {
+        from: accounts[1],
       });
+
+      expect((await pvpCore.matchByFinder(character1ID)).defenderID.toString()).to.equal(character2ID);
+    });
+
+    it("should assign a new opponent", async () => {
+      const character1ID = await createCharacterInPvpTier(accounts[1], 2);
+      await createCharacterInPvpTier(accounts[2], 2);
+      await createCharacterInPvpTier(accounts[3], 2);
+
+      await pvpCore.findOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      const opponentID = (await pvpCore.matchByFinder(character1ID)).defenderID.toString();
+
+      let characterToMatchAfterReRoll;
+      let accountToWithdrawFrom;
+
+      if (opponentID === "1") {
+        characterToMatchAfterReRoll = "2"
+        accountToWithdrawFrom = accounts[2];
+      } else {
+        characterToMatchAfterReRoll = "1"
+        accountToWithdrawFrom = accounts[3];
+      }
+
+      await time.increase(await pvpCore.decisionSeconds());
+
+      await pvpCore.withdrawFromArena(opponentID, { from: accountToWithdrawFrom });
+
+      await pvpCore.reRollOpponent(character1ID, {
+        from: accounts[1],
+      });
+
+      expect((await pvpCore.matchByFinder(character1ID)).defenderID.toString()).to.equal(characterToMatchAfterReRoll);
     });
   });
 
@@ -1739,15 +1707,15 @@ contract("PvpArena", (accounts) => {
         character0ID = await createCharacterInPvpTier(accounts[1], 1);
         character1ID = await createCharacterInPvpTier(accounts[2], 1);
 
-        await time.increase(await pvpArena.decisionSeconds());
+        await time.increase(await pvpCore.decisionSeconds());
 
-        await pvpArena.findOpponent(character0ID, {
+        await pvpCore.findOpponent(character0ID, {
           from: accounts[1],
         });
       });
 
       it("should return the opponent", async () => {
-        const opponentID = await pvpArena.getOpponent(character0ID);
+        const opponentID = await pvpCore.getOpponent(character0ID);
 
         expect(opponentID.toString()).to.equal(character1ID);
       });
@@ -1787,36 +1755,36 @@ contract("PvpArena", (accounts) => {
       shield2ID = await helpers.createShield(accounts[2], 0, "123", {
         shields,
       });
-      cost = await pvpArena.getEntryWager(character2ID, {
+      cost = await pvpCore.getEntryWager(character2ID, {
         from: accounts[1],
       });
-      await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+      await skillToken.approve(pvpCore.address, web3.utils.toWei(cost), {
         from: accounts[1],
       });
-      await skillToken.approve(pvpArena.address, web3.utils.toWei(cost), {
+      await skillToken.approve(pvpCore.address, web3.utils.toWei(cost), {
         from: accounts[2],
       });
-      await pvpArena.enterArena(character1ID, weapon1ID, shieldID, true, {
+      await pvpCore.enterArena(character1ID, weapon1ID, shieldID, true, false, {
         from: accounts[1],
       });
-      await pvpArena.enterArena(character2ID, weapon2ID, shield2ID, true, {
+      await pvpCore.enterArena(character2ID, weapon2ID, shield2ID, true, false, {
         from: accounts[2],
       });
 
-      await time.increase(await pvpArena.decisionSeconds());
-      await pvpArena.findOpponent(character1ID, {
+      await time.increase(await pvpCore.decisionSeconds());
+      await pvpCore.findOpponent(character1ID, {
         from: accounts[1],
       });
 
       // perform a duel making sure character4 is always going to win
-      await pvpArena.prepareDuel(character1ID, {
+      await pvpCore.prepareDuel(character1ID, {
         from: accounts[1],
-        value: await pvpArena.duelOffsetCost()
+        value: await pvpCore.duelOffsetCost()
       });
 
-      let duelQueue = await pvpArena.getDuelQueue();
+      let duelQueue = await pvpCore.getDuelQueue();
 
-      await pvpArena.performDuels(duelQueue, {
+      await pvpCore.performDuels(duelQueue, {
         from: accounts[0],
       });
     });
@@ -1830,7 +1798,7 @@ contract("PvpArena", (accounts) => {
         character4ID = await createCharacterInPvpTier(accounts[2], 2, "222");
         character5ID = await createCharacterInPvpTier(accounts[2], 2, "222");
         character6ID = await createCharacterInPvpTier(accounts[1], 2, "222");
-        const characterTier = await pvpArena.getTierTopCharacters(await pvpArena.getArenaTier(character1ID), {
+        const characterTier = await pvpAddons.getTierTopCharacters(await pvpCore.getArenaTier(character1ID), {
           from: accounts[1],
         });
         expect(characterTier[0].toString()).to.equal(character1ID.toString());
@@ -1846,27 +1814,28 @@ contract("PvpArena", (accounts) => {
           weapons,
         });
 
-        await pvpArena.setRankingPoints(character1ID, 35, {
+        await pvpAddons.changeRankingPoints(character1ID, 35, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character2ID, 34, {
+        await pvpAddons.changeRankingPoints(character2ID, 34, {
           from: accounts[0],
         });
 
-        const previousRankingPoints = await pvpArena.rankingPointsByCharacter(
+        const previousRankingPoints = await pvpAddons.rankingPointsByCharacter(
           character2ID
         );
         await helpers.levelUpTo(character2ID, 30, { characters });
 
-        await pvpArena.withdrawFromArena(character2ID, {from: accounts[1] });
-        await pvpArena.enterArena(character2ID, weapon2ID, 0, false, { from: accounts[1] });
+        await pvpCore.withdrawFromArena(character2ID, {from: accounts[1] });
+        await pvpCore.enterArena(character2ID, weapon2ID, 0, false, false, { from: accounts[1] });
 
-        const postRankingPoints = await pvpArena.rankingPointsByCharacter(
+        const postRankingPoints = await pvpAddons.rankingPointsByCharacter(
           character2ID
         );
         expect(previousRankingPoints.toString()).to.equal("34");
         expect(postRankingPoints.toString()).to.equal("0");
       });
+
       it("should not reset the rakning if the player levels up but doesn't skip a tier", async () => {
         character1ID = await createCharacterInPvpTier(accounts[1], 2, "222");
         character2ID = await createCharacterInPvpTier(accounts[1], 2, "222");
@@ -1874,21 +1843,21 @@ contract("PvpArena", (accounts) => {
           weapons,
         });
 
-        await pvpArena.setRankingPoints(character1ID, 35, {
+        await pvpAddons.changeRankingPoints(character1ID, 35, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character2ID, 34, {
+        await pvpAddons.changeRankingPoints(character2ID, 34, {
           from: accounts[0],
         });
-        const previousRankingPoints = await pvpArena.rankingPointsByCharacter(
+        const previousRankingPoints = await pvpAddons.rankingPointsByCharacter(
           character2ID
         );
         await helpers.levelUpTo(character2ID, 8, { characters });
 
-        await pvpArena.withdrawFromArena(character2ID, {from: accounts[1] });
-        await pvpArena.enterArena(character2ID, weapon2ID, 0, false, { from: accounts[1] });
+        await pvpCore.withdrawFromArena(character2ID, {from: accounts[1] });
+        await pvpCore.enterArena(character2ID, weapon2ID, 0, false, false, { from: accounts[1] });
 
-        const postRankingPoints = await pvpArena.rankingPointsByCharacter(
+        const postRankingPoints = await pvpAddons.rankingPointsByCharacter(
           character2ID
         );
         expect(previousRankingPoints.toString()).to.equal("34");
@@ -1898,11 +1867,11 @@ contract("PvpArena", (accounts) => {
 
     describe("after the fight", () => {
       it("update the ranks of both the winner and the loser and add/subtract points respectively", async () => {
-        const winningPoints = await pvpArena.winningPoints();
-        const losingPoints = await pvpArena.losingPoints();
+        const winningPoints = await pvpAddons.winningPoints();
+        const losingPoints = await pvpAddons.losingPoints();
         weapon1ID = await helpers.createWeapon(
           accounts[2],
-          "101",
+          "100",
           helpers.elements.water,
           {
             weapons,
@@ -1937,47 +1906,47 @@ contract("PvpArena", (accounts) => {
           from: accounts[0],
         });
         // we set the ranking points to determine the tier, char2 being the first, followed by char 1 and then char3
-        await pvpArena.setRankingPoints(character1ID, 35, {
+        await pvpAddons.changeRankingPoints(character1ID, 35, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character2ID, 34, {
+        await pvpAddons.changeRankingPoints(character2ID, 34, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character3ID, 33, {
+        await pvpAddons.changeRankingPoints(character3ID, 33, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character4ID, 32, {
+        await pvpAddons.changeRankingPoints(character4ID, 32, {
           from: accounts[0],
         });
 
         const winnerPreviousRankPoints =
-          await pvpArena.rankingPointsByCharacter(character4ID);
+          await pvpAddons.rankingPointsByCharacter(character4ID);
         const loserPreviousRankPoints =
-          await pvpArena.rankingPointsByCharacter(character1ID);
+          await pvpAddons.rankingPointsByCharacter(character1ID);
 
-        await time.increase(await pvpArena.decisionSeconds());
-        await pvpArena.findOpponent(character4ID, {
+        await time.increase(await pvpCore.decisionSeconds());
+        await pvpCore.findOpponent(character4ID, {
           from: accounts[2],
         });
 
         // perform a duel making sure character4 is always going to win
-        await pvpArena.prepareDuel(character4ID, { from: accounts[2], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character4ID, { from: accounts[2], value: await pvpCore.duelOffsetCost() });
 
-        let duelQueue = await pvpArena.getDuelQueue();
+        let duelQueue = await pvpCore.getDuelQueue();
 
-        await pvpArena.performDuels(duelQueue, {
+        await pvpCore.performDuels(duelQueue, {
           from: accounts[0],
         });
 
-        const winnerPostRankPoints = await pvpArena.rankingPointsByCharacter(
+        const winnerPostRankPoints = await pvpAddons.rankingPointsByCharacter(
           character4ID
         );
-        const loserPostRankPoints = await pvpArena.rankingPointsByCharacter(
+        const loserPostRankPoints = await pvpAddons.rankingPointsByCharacter(
           character1ID
         );
 
         // get the post  duel ranking points
-        const playerTier = await pvpArena.getTierTopCharacters(await pvpArena.getArenaTier(character1ID), {
+        const playerTier = await pvpAddons.getTierTopCharacters(await pvpCore.getArenaTier(character1ID), {
           from: accounts[1],
         });
         // expect the last player to be the first and the former first player to not be in the ranks
@@ -1995,7 +1964,7 @@ contract("PvpArena", (accounts) => {
       it("should update the player if he is not within the top 4 and has a higher score than the 4th ranked player", async () => {
         weapon1ID = await helpers.createWeapon(
           accounts[2],
-          "101",
+          "100",
           helpers.elements.water,
           {
             weapons,
@@ -2033,38 +2002,38 @@ contract("PvpArena", (accounts) => {
           from: accounts[0],
         });
 
-        await pvpArena.setRankingPoints(character1ID, 35, {
+        await pvpAddons.changeRankingPoints(character1ID, 35, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character2ID, 34, {
+        await pvpAddons.changeRankingPoints(character2ID, 34, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character3ID, 33, {
+        await pvpAddons.changeRankingPoints(character3ID, 33, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character4ID, 32, {
+        await pvpAddons.changeRankingPoints(character4ID, 32, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character5ID, 31, {
+        await pvpAddons.changeRankingPoints(character5ID, 31, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character6ID, 30, {
+        await pvpAddons.changeRankingPoints(character6ID, 30, {
           from: accounts[0],
         });
-        await time.increase(await pvpArena.decisionSeconds());
-        await pvpArena.findOpponent(character6ID, {
+        await time.increase(await pvpCore.decisionSeconds());
+        await pvpCore.findOpponent(character6ID, {
           from: accounts[2],
         });
 
         // perform a duel making sure character6 is always going to win
-        await pvpArena.prepareDuel(character6ID, { from: accounts[2], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character6ID, { from: accounts[2], value: await pvpCore.duelOffsetCost() });
 
-        let duelQueue = await pvpArena.getDuelQueue();
+        let duelQueue = await pvpCore.getDuelQueue();
 
-        await pvpArena.performDuels(duelQueue, {
+        await pvpCore.performDuels(duelQueue, {
           from: accounts[0],
         });
-        const playerTier = await pvpArena.getTierTopCharacters(await pvpArena.getArenaTier(character6ID));
+        const playerTier = await pvpAddons.getTierTopCharacters(await pvpCore.getArenaTier(character6ID));
         // expect the last character to be the first one, climibing through the entire ladder
         expect(playerTier[0].toString()).to.equal(character6ID).toString();
       });
@@ -2072,7 +2041,7 @@ contract("PvpArena", (accounts) => {
       it("should process the winner and the loser with only 2 players inside the tier", async () => {
         weapon1ID = await helpers.createWeapon(
           accounts[2],
-          "101",
+          "100",
           helpers.elements.water,
           {
             weapons,
@@ -2104,39 +2073,40 @@ contract("PvpArena", (accounts) => {
         await characters.setTrait(character1ID, helpers.elements.fire, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character1ID, 15, {
+        await pvpAddons.changeRankingPoints(character1ID, 15, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character2ID, 13, {
+        await pvpAddons.changeRankingPoints(character2ID, 13, {
           from: accounts[0],
         });
 
-        await time.increase(await pvpArena.decisionSeconds());
-        await pvpArena.findOpponent(character2ID, {
+        await time.increase(await pvpCore.decisionSeconds());
+        await pvpCore.findOpponent(character2ID, {
           from: accounts[2],
         });
 
         // perform a duel making sure character1 is always going to lose, meaning character 2 will be the top 1
-        await pvpArena.prepareDuel(character2ID, { from: accounts[2], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character2ID, { from: accounts[2], value: await pvpCore.duelOffsetCost() });
 
-        let duelQueue = await pvpArena.getDuelQueue();
+        let duelQueue = await pvpCore.getDuelQueue();
 
-        await pvpArena.performDuels(duelQueue, {
+        await pvpCore.performDuels(duelQueue, {
           from: accounts[0],
         });
 
-        const playerTier = await pvpArena.getTierTopCharacters(await pvpArena.getArenaTier(character1ID));
+        const playerTier = await pvpAddons.getTierTopCharacters(await pvpCore.getArenaTier(character1ID));
 
         expect(playerTier[0].toString()).to.equal(character2ID).toString();
         expect(playerTier[1].toString()).to.equal(character1ID).toString();
         expect(playerTier[2]).to.equal(undefined);
       });
     });
+
     describe("loser path", () => {
       it("should not update the ranks if the loser is not within the top 4", async () => {
         weapon1ID = await helpers.createWeapon(
           accounts[2],
-          "111",
+          "100",
           helpers.elements.water,
           {
             weapons,
@@ -2144,7 +2114,7 @@ contract("PvpArena", (accounts) => {
         );
         weapon2ID = await helpers.createWeapon(
           accounts[1],
-          "111",
+          "199",
           helpers.elements.fire,
           {
             weapons,
@@ -2173,37 +2143,37 @@ contract("PvpArena", (accounts) => {
           from: accounts[0],
         });
         // we set the ranking points to determine the tier, char1 being the first, followed by char 2 and then char4
-        await pvpArena.setRankingPoints(character1ID, 35, {
+        await pvpAddons.changeRankingPoints(character1ID, 35, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character2ID, 34, {
+        await pvpAddons.changeRankingPoints(character2ID, 34, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character3ID, 33, {
+        await pvpAddons.changeRankingPoints(character3ID, 33, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character4ID, 32, {
+        await pvpAddons.changeRankingPoints(character4ID, 32, {
           from: accounts[0],
         });
-        await pvpArena.setRankingPoints(character5ID, 10, {
+        await pvpAddons.changeRankingPoints(character5ID, 10, {
           from: accounts[0],
         });
 
-        await time.increase(await pvpArena.decisionSeconds());
-        await pvpArena.findOpponent(character5ID, {
+        await time.increase(await pvpCore.decisionSeconds());
+        await pvpCore.findOpponent(character5ID, {
           from: accounts[2],
         });
         // perform a duel making sure character1 is always going to lose
-        await pvpArena.prepareDuel(character5ID, { from: accounts[2], value: await pvpArena.duelOffsetCost() });
+        await pvpCore.prepareDuel(character5ID, { from: accounts[2], value: await pvpCore.duelOffsetCost() });
 
-        let duelQueue = await pvpArena.getDuelQueue();
+        let duelQueue = await pvpCore.getDuelQueue();
 
-        await pvpArena.performDuels(duelQueue, {
+        await pvpCore.performDuels(duelQueue, {
           from: accounts[0],
         });
 
         // get the post  duel ranking points
-        const playerTier = await pvpArena.getTierTopCharacters(await pvpArena.getArenaTier(character1ID), {
+        const playerTier = await pvpAddons.getTierTopCharacters(await pvpCore.getArenaTier(character1ID), {
           from: accounts[1],
         });
 
@@ -2217,45 +2187,71 @@ contract("PvpArena", (accounts) => {
     });
   });
 
+  describe("#increaseRankingsPool", async () => {
+    it('increases the ranking pool of a certain tier', async () => {
+      const previousPool = (await pvpAddons.rankingsPoolByTier(1)).toString();
+      expect(previousPool).to.equal('0');
+
+      await pvpAddons.increaseRankingsPool(1, 1000);
+
+      const newPool = (await pvpAddons.rankingsPoolByTier(1)).toString();
+      expect(newPool).to.equal('1000');
+    })
+
+    it("doesn't increase other tier's pools", async () => {
+      const previousPool = (await pvpAddons.rankingsPoolByTier(1)).toString();
+      expect(previousPool).to.equal('0');
+
+      await pvpAddons.increaseRankingsPool(2, 1000);
+
+      const newPool = (await pvpAddons.rankingsPoolByTier(1)).toString();
+      expect(newPool).to.equal('0');
+    })
+  });
+
   describe("#restartRankedSeason", () => {
     // These tests assume prizes will be distributed amongst at least 2 players and at most 4 players.
     beforeEach(async () => {
       character1ID = await createCharacterInPvpTier(accounts[1], 1);
       character2ID = await createCharacterInPvpTier(accounts[2], 1);
 
-      await pvpArena.setRankingPoints(character1ID, 100, {
+      await pvpAddons.changeRankingPoints(character1ID, 100, {
         from: accounts[0],
       });
-      await pvpArena.setRankingPoints(character2ID, 80, {
+      await pvpAddons.changeRankingPoints(character2ID, 80, {
         from: accounts[0],
       });
 
-      await time.increase(await pvpArena.decisionSeconds());
+      await time.increase(await pvpCore.decisionSeconds());
 
       // We execute a duel so theres a prize pool
-      await pvpArena.findOpponent(character1ID, {
+      await pvpCore.findOpponent(character1ID, {
         from: accounts[1],
       });
 
-      await pvpArena.prepareDuel(character1ID, { from: accounts[1], value: await pvpArena.duelOffsetCost() });
+      await pvpCore.prepareDuel(character1ID, { from: accounts[1], value: await pvpCore.duelOffsetCost() });
 
-      let duelQueue = await pvpArena.getDuelQueue();
+      let duelQueue = await pvpCore.getDuelQueue();
 
-      await pvpArena.performDuels(duelQueue, {
+      await pvpCore.performDuels(duelQueue, {
         from: accounts[0],
       });
     });
 
     it("distributes rewards correctly to top characters' owners", async () => {
-      const prizePercentages = await pvpArena.getPrizePercentages();
+      const prizePercentages = [
+        await pvpAddons.prizePercentages(0), 
+        await pvpAddons.prizePercentages(1), 
+        await pvpAddons.prizePercentages(2)
+      ];
 
       const character3ID = await createCharacterInPvpTier(accounts[3], 1);
       const character4ID = await createCharacterInPvpTier(accounts[4], 1);
 
-      await pvpArena.setRankingPoints(character3ID, 60, {
+      await pvpAddons.changeRankingPoints(character3ID, 60, {
         from: accounts[0],
       });
-      await pvpArena.setRankingPoints(character4ID, 40, {
+      await pvpAddons.changeRankingPoints(character4ID, 40, {
         from: accounts[0],
       });
 
@@ -2264,12 +2260,11 @@ contract("PvpArena", (accounts) => {
       const balanceThree = await skillToken.balanceOf(accounts[3]);
       const balanceFour = await skillToken.balanceOf(accounts[4]);
 
-      await pvpArena.restartRankedSeason({ from: accounts[0] });
-
-      await pvpArena.withdrawRankedRewards({ from: accounts[1] });
-      await pvpArena.withdrawRankedRewards({ from: accounts[2] });
-      await pvpArena.withdrawRankedRewards({ from: accounts[3] });
-      await pvpArena.withdrawRankedRewards({ from: accounts[4] });
+      await pvpAddons.restartRankedSeason({ from: accounts[0] });
+      await pvpAddons.withdrawRankedRewards({ from: accounts[1] });
+      await pvpAddons.withdrawRankedRewards({ from: accounts[2] });
+      await pvpAddons.withdrawRankedRewards({ from: accounts[3] });
+      await pvpAddons.withdrawRankedRewards({ from: accounts[4] });
 
       const newBalanceOne = await skillToken.balanceOf(accounts[1]);
       const newBalanceTwo = await skillToken.balanceOf(accounts[2]);
@@ -2322,15 +2317,19 @@ contract("PvpArena", (accounts) => {
     });
 
     it("gives excess rewards to top 1 player if there are less players than the amount of top slots", async () => {
-      const prizePercentages = await pvpArena.getPrizePercentages();
+      const prizePercentages = [
+        await pvpAddons.prizePercentages(0), 
+        await pvpAddons.prizePercentages(1), 
+        await pvpAddons.prizePercentages(2)
+      ];
 
       const balanceOne = await skillToken.balanceOf(accounts[1]);
       const balanceTwo = await skillToken.balanceOf(accounts[2]);
 
-      await pvpArena.restartRankedSeason({ from: accounts[0] });
+      await pvpAddons.restartRankedSeason({ from: accounts[0] });
 
-      await pvpArena.withdrawRankedRewards({ from: accounts[1] });
-      await pvpArena.withdrawRankedRewards({ from: accounts[2] });
+      await pvpAddons.withdrawRankedRewards({ from: accounts[1] });
+      await pvpAddons.withdrawRankedRewards({ from: accounts[2] });
 
       const newBalanceOne = await skillToken.balanceOf(accounts[1]);
       const newBalanceTwo = await skillToken.balanceOf(accounts[2]);
@@ -2373,34 +2372,34 @@ contract("PvpArena", (accounts) => {
       const balanceTwo = await skillToken.balanceOf(accounts[2]);
 
       const firstSeasonStartedAt = +(
-        await pvpArena.seasonStartedAt()
+        await pvpAddons.seasonStartedAt()
       ).toString();
 
-      expect((await pvpArena.currentRankedSeason()).toString()).to.equal("1");
+      expect((await pvpAddons.currentRankedSeason()).toString()).to.equal("1");
 
-      await pvpArena.restartRankedSeason({ from: accounts[0] });
+      await pvpAddons.restartRankedSeason({ from: accounts[0] });
 
       const secondSeasonStartedAt = +(
-        await pvpArena.seasonStartedAt()
+        await pvpAddons.seasonStartedAt()
       ).toString();
 
       expect(secondSeasonStartedAt > firstSeasonStartedAt).to.equal(true);
-      expect((await pvpArena.currentRankedSeason()).toString()).to.equal("2");
+      expect((await pvpAddons.currentRankedSeason()).toString()).to.equal("2");
 
-      await pvpArena.withdrawRankedRewards({ from: accounts[1] });
-      await pvpArena.withdrawRankedRewards({ from: accounts[2] });
+      await pvpAddons.withdrawRankedRewards({ from: accounts[1] });
+      await pvpAddons.withdrawRankedRewards({ from: accounts[2] });
 
       const newerBalanceOne = await skillToken.balanceOf(accounts[1]);
       const newerBalanceTwo = await skillToken.balanceOf(accounts[2]);
 
-      await pvpArena.restartRankedSeason({ from: accounts[0] });
+      await pvpAddons.restartRankedSeason({ from: accounts[0] });
 
       const thirdSeasonStartedAt = +(
-        await pvpArena.seasonStartedAt()
+        await pvpAddons.seasonStartedAt()
       ).toString();
 
       expect(thirdSeasonStartedAt > secondSeasonStartedAt).to.equal(true);
-      expect((await pvpArena.currentRankedSeason()).toString()).to.equal("3");
+      expect((await pvpAddons.currentRankedSeason()).toString()).to.equal("3");
 
       const newestBalanceOne = await skillToken.balanceOf(accounts[1]);
       const newestBalanceTwo = await skillToken.balanceOf(accounts[2]);
@@ -2416,75 +2415,5 @@ contract("PvpArena", (accounts) => {
       expect(didBalanceOneGrowAgain).to.equal(false);
       expect(didBalanceTwoGrowAgain).to.equal(false);
     });
-  });
-
-  describe("#InteractionsWithOtherContracts", () => {
-    let character1ID;
-    let character2ID;
-    let weapon1ID;
-    let weapon2ID;
-    let shieldID;
-    it("should not allow a player to join the arena if he is busy", async () => {
-      // Due to the issues with  starting a raid from here, for now we are testing this against the same arena
-      // commenting the necessary code for future uses
-      // await raid1.doRaid(1000, 100, 1, { from: accounts[0] });
-      // const character1ID = await helpers.createCharacter(accounts[0], "123", {
-      //   characters,
-      // });
-      // await raid1.joinRaid(character1ID, weapon1ID, { from: accounts[0] });
-      weapon1ID = await helpers.createWeapon(accounts[0], "123", 0, {
-        weapons,
-      });
-      character1ID = await createCharacterInPvpTier(accounts[0], 1);
-      await expectRevert(
-        pvpArena.enterArena(character1ID, weapon1ID, 0, false, {
-          from: accounts[0],
-        }),
-        "Char busy"
-      );
-    });
-
-    it("should not allow a player to join a raid if he is already busy", async () => {
-      weapon1ID = await helpers.createWeapon(accounts[0], "123", 0, {
-        weapons,
-      });
-      character1ID = await createCharacterInPvpTier(accounts[0], 1);
-
-      await expectRevert(
-        raid1.joinRaid(character1ID, weapon1ID),
-        "Cannot join raid right now!"
-      );
-    });
-    it("should not allow a weapon to join a raid if it is already busy", async () => {
-      weapon1ID = await helpers.createWeapon(accounts[0], "123", 0, {
-        weapons,
-      });
-      character1ID = await createCharacterInPvpTier(
-        accounts[0],
-        1,
-        "222",
-        weapon1ID
-      );
-      character2ID = await helpers.createCharacter(accounts[0], "123", {
-        characters,
-      });
-
-      await expectRevert(
-        raid1.joinRaid(character2ID, weapon1ID),
-        "Cannot join raid right now!"
-      );
-    });
-
-    // it("should not allow a player to perform a regular fight if he is busy", async () => {
-    //   weapon1ID = await helpers.createWeapon(accounts[0], "123", 0, {
-    //     weapons,
-    //   });
-    //   character1ID = await createCharacterInPvpTier(accounts[0], 1);
-
-    //   await expectRevert(
-    //     characters.getFightDataAndDrainStamina(accounts[0], character1ID, 0, false, 1),
-    //     "Character is busy"
-    //   );
-    // });
   });
 });

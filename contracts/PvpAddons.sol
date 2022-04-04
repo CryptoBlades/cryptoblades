@@ -68,8 +68,7 @@ contract PvpAddons is Initializable, AccessControlUpgradeable {
     }
 
     function initialize(
-        address gameContract,
-        address pvpCoreContract
+        address gameContract
     ) public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -77,7 +76,6 @@ contract PvpAddons is Initializable, AccessControlUpgradeable {
         game = CryptoBlades(gameContract);
         characters = Characters(game.characters());
         skillToken = IERC20(game.skillToken());
-        pvpcore = PvpCore(pvpCoreContract);
 
         _rankingsPoolTaxPercent = 15;
         winningPoints = 5;
@@ -317,6 +315,7 @@ contract PvpAddons is Initializable, AccessControlUpgradeable {
         gameCofferTaxDue = 0;
     }
 
+    // TODO: TEST
     function increaseRankingsPool(uint8 tier, uint256 amount) external restricted {
         rankingsPoolByTier[tier] = rankingsPoolByTier[tier].add(amount);
     }
@@ -400,5 +399,9 @@ contract PvpAddons is Initializable, AccessControlUpgradeable {
 
     function setSeasonDuration(uint256 duration) external restricted {
         seasonDuration = duration;
+    }
+
+    function setPvpCoreAddress(address pvpCoreContract) external restricted {
+        pvpcore = PvpCore(pvpCoreContract);
     }
 }
