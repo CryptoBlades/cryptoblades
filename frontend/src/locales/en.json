@@ -920,7 +920,7 @@
       "setCharacterMintValue": "Set character mint value",
       "setWeaponMintValue": "Set weapon mint value",
       "newValueInCents": "New value (in cents)",
-      "setFightXpGainCurrent": "Set fight XP gain (current: {xpGain} xp)",
+      "setFightXpGainCurrentDefault32": "Set fight XP gain (current: {xpGain} xp, default: 32 xp)",
       "setFightXpGain": "Set fight XP gain",
       "fightXpGain": "Fight XP gain"
     },

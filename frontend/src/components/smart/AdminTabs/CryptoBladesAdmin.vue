@@ -20,7 +20,7 @@
         {{ $t('admin.cryptoblades.setWeaponMintValue') }}
       </b-button>
     </div>
-    <h2 class="mt-2">{{ $t('admin.cryptoblades.setFightXpGainCurrent', {xpGain: currentFightXpGain}) }}</h2>
+    <h2 class="mt-2">{{ $t('admin.cryptoblades.setFightXpGainCurrentDefault32', {xpGain: currentFightXpGain}) }}</h2>
     <div class="d-flex align-items-center gap-3">
       <b-form-input v-model="newFightXpGain" :placeholder="$t('admin.cryptoblades.fightXpGain')" number type="number"/>
       <b-button @click="setNewFightXpGain()" :disabled="setNewFightXpGainButtonDisabled"
