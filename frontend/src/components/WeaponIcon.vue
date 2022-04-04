@@ -18,12 +18,13 @@
         class="placeholder" :src="getWeaponArt(weapon)" />
 
       <div class="trait">
-        <span :class="weapon.element.toLowerCase() + '-icon'"></span>
+        <!-- <span :class="weapon.element.toLowerCase() + '-icon'"></span> -->
         <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
       </div>
 
       <div class="name">
-        {{ getCleanWeaponName(weapon.id, weapon.stars) }}
+        <span style="font-size: 18px"  :class="weapon.element.toLowerCase() + '-icon'"></span>
+         {{ getCleanWeaponName(weapon.id, weapon.stars) }}
       </div>
 
       <div class="bonus-power">
@@ -41,7 +42,9 @@
 
     </div>
 
-    <div class="id">{{$t('weaponIcon.id')}} {{ weapon.id }}</div>
+    <!-- <div class="id">{{$t('weaponIcon.id')}} #{{ weapon.id }}</div> -->
+    <div class="rarity-label" :class="['rarity-' + (weapon.stars || 0)]">{{setRarity(weapon.stars)}}</div>
+
 
     <div class="stats">
       <div v-if="weapon.stat1Value">
@@ -391,6 +394,14 @@ export default {
         this.loadingFinished();
       }
     },
+
+    setRarity(rarity){
+      if(rarity === 0) return 'Normal';
+      if(rarity === 1) return 'Rare';
+      if(rarity === 2) return 'Unique';
+      if(rarity === 3) return 'Legendary';
+      if(rarity === 4) return 'Mythical';
+    },
     loadingFinished() {
 
       const bladeMaterial = this.baseMaterial.clone();
@@ -463,14 +474,15 @@ export default {
 
 <style scoped>
 @import '../styles/weapon-cosmetics.css';
+
 .small-durability-bar {
   position: relative;
   top: -5px;
-  height: 10px;
+  height: 5px;
   width: 80%;
   margin: 0 auto;
   border-radius: 2px;
-  border: 0.5px solid rgb(216, 215, 215);
+  /* border: 0.5px solid rgb(216, 215, 215); */
   background : linear-gradient(to right, rgb(236, 75, 75) var(--durabilityReady), rgba(255, 255, 255, 0.1) 0);
 }
 
@@ -479,6 +491,11 @@ export default {
   width: 100%;
   position: relative;
   overflow: hidden;
+}
+
+.stats > div{
+  font-size: 13px;
+  font-family: Roboto;
 }
 
 .glow-container {
@@ -505,6 +522,16 @@ export default {
   position: absolute;
 }
 
+.rarity-label{
+  color: #fff;
+  padding: 0px 10px;
+  position: absolute;
+  left: 10px;
+  top: 10px !important;
+  font-size: 12px;
+  border-radius: 3px;
+}
+
 .trait {
   top: 10px;
   left: 10px;
@@ -517,7 +544,7 @@ export default {
 
 .id {
   top: 8px;
-  left: 30px;
+  left: 15px;
   font-style: italic;
 }
 
@@ -542,11 +569,13 @@ export default {
 
 .name {
   position: absolute;
-  bottom: 15px;
+  bottom: 20px;
   left: 12%;
   right: 12%;
-  font-size: 0.9em;
-  text-align: center;
+  font-size: 0.6vw;
+  color: #fff;
+  font-family: Roboto;
+  text-align: left;
 }
 
 .glow-0 {
@@ -554,19 +583,43 @@ export default {
 }
 
 .glow-1 {
-  box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5);
+  /* box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5); */
+  border: 1px solid rgba(0, 162, 255);
 }
 
 .glow-2 {
-  box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5);
+  /* box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5); */
+  border: 1px solid rgba(125, 0, 125);
 }
 
 .glow-3 {
-  box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3);
+  /* box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3); */
+  border: 1px solid rgba(255, 102, 0);
 }
 
 .glow-4 {
-  box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5);
+  /* box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5); */
+  border: 1px solid rgba(125, 0, 0);
+}
+
+.rarity-0 {
+  background-color: rgb(85, 85, 85);
+}
+
+.rarity-1 {
+  background-color: rgba(0, 162, 255);
+}
+
+.rarity-2 {
+  background-color: rgba(125, 0, 125);
+}
+
+.rarity-3 {
+  background-color: rgba(255, 102, 0);
+}
+
+.rarity-4 {
+  background-color: rgba(125, 0, 0);
 }
 
 

@@ -1,7 +1,7 @@
 <template>
   <div class="body main-font">
-    <b-tabs justified>
-      <b-tab :title="$t('weapons')">
+    <b-tabs justified  style="overflow-x:auto;height:90vh">
+      <b-tab>
         <div class="blank-slate" v-if="ownWeapons.length === 0">
           <span v-html="$t('blacksmith.noWeapons')"/>
           <br>
@@ -14,69 +14,79 @@
         </div>
         <div class="row mt-3" v-if="ownWeapons.length > 0 && !showReforge">
           <div class="col">
-            <div class="buttons-panel">
-              <h1>{{$t('weapons')}} ({{ ownWeapons.length }})</h1>
+            <div class="weapon-header">
+              <div class="nav-icons">
+                <div class="forge-btn">
+                  <span id="forge"></span>
+                  <span>Forge</span>
+                </div>
+                <div>
+                  <div class="line"></div>
+                </div>
+                <div class="salvage-btn" @click="displayDustCreation()">
+                  <span id="salvage"></span>
+                  <span>Create Dust</span>
+                </div>
+              </div>
               <div class="button-div">
                 <b-button
-                        variant="primary"
                         class="ml-3"
                         v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
                         @click="displayDustReforge()"
                         tagname="reforge_weapon"
                         v-tooltip="$t('blacksmith.useDust')">
-                  {{$t('blacksmith.reforgeWithDust')}}
+                  <span>{{$t('blacksmith.reforgeWithDust').toUpperCase()}}</span>
                 </b-button>
-                <b-button
+                <!-- <b-button
                         variant="primary"
                         class="ml-3"
                         @click="displayDustCreation()"
                         tagname="reforge_weapon"
                         v-tooltip="$t('blacksmith.burnWeapons')">
                   {{$t('blacksmith.createDust')}}
-                </b-button>
+                </b-button> -->
                 <b-button
-                        variant="primary"
                         class="ml-3"
                         @click="onClickSpecialForge()"
                         :disabled="disableForge"
                         v-tooltip="$t('blacksmith.specialForgeTooltip')">
                   <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                  <span v-else class="gtag-link-others">
-                    {{$t('blacksmith.specialForge')}}
-                  </span>
+                  <span v-else class="gtag-link-others"><span>{{$t('blacksmith.specialForge').toUpperCase()}}</span></span>
                 </b-button>
                 <b-button
-                        variant="primary"
                         class="ml-3"
                         @click="onClickForge(0)"
                         :disabled="disableForge"
                         v-tooltip="$t('blacksmith.forgeNew')">
                   <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
                   <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                    {{$t('blacksmith.forge')}} x1 ({{ forgeCost }} SKILL) <i class="fas fa-plus"></i>
+                    <span>{{$t('blacksmith.forge').toUpperCase()}} x1</span> <br>
+                     ({{ forgeCost }} SKILL)
+                     <!-- <i class="fas fa-plus"></i> -->
                   </span>
                 </b-button>
 
                 <b-button
-                        variant="primary"
                         class="ml-3"
                         @click="onClickForge(1)"
                         :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
                         v-tooltip="$t('blacksmith.forge10New')">
                   <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
                   <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                    {{$t('blacksmith.forge')}} x10 ({{ (forgeCost*10).toFixed(4) }} SKILL)
-                    <i class="fas fa-plus"></i>
+                    <span>{{$t('blacksmith.forge').toUpperCase()}} x10</span><br>
+                    ({{ (forgeCost*10).toFixed(4) }} SKILL)
+                    <!-- <i class="fas fa-plus"></i> -->
                   </span>
                 </b-button>
-                  <b-checkbox
-                    variant="primary"
+
+                <!-- FOR STAKINGGGGGG -->
+                  <!-- <b-checkbox
                     class="mx-3 my-auto"
                     :disabled="disableUseStakedForForge"
                     v-model="useStakedForForge">
                     <span v-if="disableUseStakedForForge"> <b>{{$t('blacksmith.notEnoughStakedSkill')}}<br></b></span>
                     <span v-html="$t('blacksmith.spendStakedFunds')"></span>
-                  </b-checkbox>
+                  </b-checkbox> -->
                 <b-icon-question-circle class="centered-icon" scale="1.5"
                   v-on:click="onShowForgeDetails" v-tooltip.bottom="$t('blacksmith.clickForForgePercentages')"/>
 
@@ -98,12 +108,19 @@
                   </div>
                 </b-modal>
 
-                <b-modal hide-footer ref="forge-element-selector-modal" title="Select Element">
+                <b-modal size="lg" hide-footer hide-header ref="forge-element-selector-modal">
+                  <div class="row justify-content-center">
+                    <h4 class="select-el">Select an Element</h4>
+                  </div>
                   <div class="row justify-content-md-center select-elements-container">
                     <div id="random-border" v-on:click="setChosenElement($event, 100)"> </div>
+                    <div class="line-sep"></div>
                     <div id="fire-border" v-on:click="setChosenElement($event, 0)"> </div>
+                    <div class="line-sep"></div>
                     <div id="earth-border" v-on:click="setChosenElement($event, 1)"> </div>
+                    <div class="line-sep"></div>
                     <div id="lightning-border" v-on:click="setChosenElement($event, 2)"> </div>
+                    <div class="line-sep"></div>
                     <div id="water-border" v-on:click="setChosenElement($event, 3)"> </div>
                   </div>
                   <div v-if="activeSpecialWeaponEventsIds.length > 0" class="row justify-content-md-center select-elements-container align-items-baseline mt-4">
@@ -120,27 +137,35 @@
                     <b-button
                       v-if="clickedForgeButton === 0"
                       variant="primary"
-                      class="row justify-content-md-center"
+                      class="row justify-content-md-center forge-btns"
                       @click="onForgeWeapon"
                       :disabled="disableConfirmButton"
                       v-tooltip="$t('blacksmith.forgeNew')">
                         <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                          {{$t('blacksmith.forge')}} ({{Number.parseFloat(forgeCost * this.chosenElementFee).toFixed(2)}} SKILL)
+                          {{$t('blacksmith.forge').toUpperCase()}}
+                        </span>
+                        <span>
+                          ({{Number.parseFloat(forgeCost * this.chosenElementFee).toFixed(2)}} SKILL)
                         </span>
                     </b-button>
                     <b-button
                       v-if="clickedForgeButton === 1"
                       variant="primary"
-                      class="row justify-content-md-center"
+                      class="row justify-content-md-center forge-btns"
                       @click="onForgeWeaponx10"
                       :disabled="disableConfirmButton"
                       v-tooltip="$t('blacksmith.forge10New')">
                         <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                          {{$t('blacksmith.forge')}} ({{Number.parseFloat(forgeCost * this.chosenElementFee * 10).toFixed(2)}} SKILL)
+                          {{$t('blacksmith.forge').toUpperCase()}}
+                        </span>
+                        <span>
+                          ({{Number.parseFloat(forgeCost * this.chosenElementFee * 10).toFixed(2)}} SKILL)
                         </span>
                     </b-button>
                   </div>
                 </b-modal>
+
+                <!-- // Forging Modal ---------------------------------->
                 <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
                   <template #modal-header>
                     <div v-if="!spin" class="new-weapon-header-text text-center">
@@ -158,15 +183,36 @@
                   <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true"/>
                   <template #modal-footer></template>
                 </b-modal>
+
+
+
               </div>
             </div>
-            <div class="" v-if="showBlacksmith">
-              <weapon-grid :showNftOptions="true" v-model="reforgeWeaponId" />
+            <!-- <div class="buttons-panel">
+              <h2>{{$t('weapons')}} ({{ ownWeapons.length }})</h2>
+            </div> -->
+            <div class="weapon-content" v-if="showBlacksmith">
+              <weapon-grid :showNftOptions="true" :ownWeapons="ownWeapons.length" v-model="reforgeWeaponId" />
             </div>
           </div>
         </div>
 
         <div class="row mt-3" v-if="showReforge && !showReforgeDust">
+          <div class="weapon-header">
+              <div class="nav-icons">
+                <div class="forge-btn">
+                  <span id="forge"></span>
+                  <span>Forge</span>
+                </div>
+                <div>
+                  <div class="line"></div>
+                </div>
+                <div class="salvage-btn">
+                  <span id="salvage"></span>
+                  <span>Create Dust</span>
+                </div>
+              </div>
+            </div>
           <div class="col">
             <div class="d-flex justify-content-space-between">
               <h1>{{$t('blacksmith.createDust')}}</h1>
@@ -362,10 +408,6 @@
         </div>
       </b-tab>
       <b-tab>
-        <template #title>
-          {{$t('equipment')}} <b-icon-question-circle class="centered-icon" scale="0.8"
-            v-tooltip.bottom="$t('blacksmith.buyShield')"/>
-        </template>
         <div class="row mt-3">
           <div class="col">
             <div class="d-flex justify-content-space-between">
@@ -376,15 +418,9 @@
         </div>
       </b-tab>
       <b-tab>
-        <template #title>
-          {{$t('blacksmith.dustStorage')}} <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="$t('blacksmith.dustGained')"/>
-        </template>
         <dust-balance-display/>
       </b-tab>
       <b-tab>
-        <template #title>
-          {{$t('blacksmith.lands')}} <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="$t('blacksmith.landsAvailable')"/>
-        </template>
         <div class="row mt-3">
           <div class="col">
             <nft-list :isLandTab="true" :showLimit="30" />
@@ -873,125 +909,318 @@ export default Vue.extend({
 
 <style scoped>
 
+#weapon-bg{
+  background-image: url('../assets/blacksmith/blacksmith-bg.png');
+}
+
+.weapon-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.buttons-panel > h2{
+  font-family: 'Trajan', 'serif';
+}
+
+.forge-btns > span:nth-child(1){
+  font-family: Oswald;
+  font-size: 20px;
+  color: #fff;
+}
+
+
+.forge-btns{
+  display: flex;
+  flex-direction: column;
+  border: none;
+  width: 200px;
+  height: 70px;
+  align-items: center;
+  vertical-align: middle;
+  justify-content: center;
+  background-image: url('../assets/buttonOutline.svg');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  -o-object-fit: fill;
+  object-fit: fill;
+  border: none !important;
+}
+
+
+.button-div > button{
+  display: flex;
+  flex-direction: column;
+  border: none;
+  width: 200px;
+  height: 70px;
+  align-items: center;
+  vertical-align: middle;
+  justify-content: center;
+  background-image: url('../assets/buttonOutline.svg');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  -o-object-fit: fill;
+  object-fit: fill;
+  border: none !important;
+}
+
+/* TO TEMPORARILY OVERRIDE THE PRIMARY BUTTON HOVER EFFECT */
+.button-div > button:hover, .forge-btns:hover{
+  display: flex !important;
+  flex-direction: column !important;
+  width: 200px !important;
+  height: 70px !important;
+  align-items: center !important;
+  vertical-align: middle !important;
+  justify-content: center !important;
+  background-image: url('../assets/buttonOutline.svg') !important;
+  background-color: transparent !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  -o-object-fit: fill !important;
+  object-fit: fill !important;
+  border: 0px !important;
+}
+
+
+.weapon-content{
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 50px;
+  padding-top: 20px;
+  margin-top: 50px;
+  border-radius: 5px;
+}
+
+.button-div > button >span{
+ color: #e9c97a;
+}
+
+
+.button-div > button >span > span{
+  font-family: Oswald;
+  font-size: 20px;
+  color: #fff;
+}
+
+
+.nav-icons,.nav-icons> div {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.select-el{
+  font-family: Trajan;
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: #e9c97a;
+}
+
+.line{
+  margin: 0px 10px;
+  background-color: rgba(255, 255, 255, 0.5);
+  height: 2px;
+  width: 5vw;
+}
+
+.nav-icons> div > span{
+  font-family: Roboto;
+  margin-right: 10px;
+  color: #fff;
+}
+
+#forge {
+  content: url("../assets/blacksmith/forge.png");
+  height: 50px;
+  width: 50px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
+#salvage {
+  content: url("../assets/blacksmith/salvage.png");
+  height: 50px;
+  width: 50px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
 
 #random-border{
-  background-image: url('../assets/questionmark-icon.png');
-  background-size: 4em 4em;
+  background-image: url('../assets/questionmark-icon-45.png');
+  background-size: 2em 2em;
   background-repeat: no-repeat;
-  width: 4em;
-  height: 4em;
+  background-position: center;
+  border: 1px solid white;
+  width: 2.5em;
+  height: 2.5em;
   margin-left: 1em;
   margin-right: 1em;
+  transform: rotate(45deg);
 }
 
 #random-border:hover{
   background-image: url('../assets/questionmark-icon-45.png');
   background-position: center;
-  border: 2px solid white;
   transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 2.5em 2.5em;
+  width: 3em;
+  height: 3em;
+  transition: all 0.2s ease-in-out;
 }
 
 #random-border.done {
   background-image: url('../assets/questionmark-icon-45.png');
   background-position: center;
-  border: 2px solid white;
   transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 2.5em 2.5em;
+  width: 3em;
+  height: 3em;
+  transition: all 0.2s ease-in-out;
 }
 
 #fire-border{
-  background-image: url('../assets/elements/fire.png');
-  background-size: 4em 4em;
+  background-image: url('../assets/elements/fire-45.png');
+  background-size: 2em 2em;
   background-repeat: no-repeat;
-  width: 4em;
-  height: 4em;
+  background-position: center;
+  width: 2.5em;
+  height: 2.5em;
   margin-left: 1em;
   margin-right: 1em;
+  border: 1px solid white;
+  transform: rotate(45deg);
 }
 
 #fire-border:hover{
   background-image: url('../assets/elements/fire-45.png');
   background-position: center;
-  border: 2px solid white;
   transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 2.5em 2.5em;
+  width: 3em;
+  height: 3em;
+  transition: all 0.2s ease-in-out;
 }
 
 #fire-border.done {
   background-image: url('../assets/elements/fire-45.png');
   background-position: center;
-  border: 2px solid white;
   transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 2.5em 2.5em;
+  width: 3em;
+  height: 3em;
+  transition: all 0.2s ease-in-out;
 }
 
 #earth-border{
-  background-image: url('../assets/elements/earth.png');
-  background-size: 4em 4em;
+  background-image: url('../assets/elements/earth-45.png');
+  background-size: 2em 2em;
   background-repeat: no-repeat;
-  width: 4em;
-  height: 4em;
+  background-position: center;
+  width: 2.5em;
+  height: 2.5em;
   margin-left: 1em;
   margin-right: 1em;
+  border: 1px solid white;
+  transform: rotate(45deg);
 }
 
 #earth-border:hover{
   background-image: url('../assets/elements/earth-45.png');
   background-position: center;
-  border: 2px solid white;
   transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 2.5em 2.5em;
+  width: 3em;
+  height: 3em;
+  transition: all 0.2s ease-in-out;
 }
 
 #earth-border.done {
   background-image: url('../assets/elements/earth-45.png');
   background-position: center;
-  border: 2px solid white;
   transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 2.5em 2.5em;
+  width: 3em;
+  height: 3em;
+  transition: all 0.2s ease-in-out;
 }
 
 #lightning-border{
-  background-image: url('../assets/elements/lightning.png');
-  background-size: 4em 4em;
+  background-image: url('../assets/elements/lightning-45.png');
+  background-size: 2em 2em;
   background-repeat: no-repeat;
-  width: 4em;
-  height: 4em;
+  background-position: center;
+  width: 2.5em;
+  height: 2.5em;
   margin-left: 1em;
   margin-right: 1em;
+  border: 1px solid white;
+  transform: rotate(45deg);
 }
 
 #lightning-border:hover{
   background-image: url('../assets/elements/lightning-45.png');
   background-position: center;
-  border: 2px solid white;
   transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 2.5em 2.5em;
+  width: 3em;
+  height: 3em;
+  transition: all 0.2s ease-in-out;
 }
 
 #lightning-border.done {
   background-image: url('../assets/elements/lightning-45.png');
   background-position: center;
-  border: 2px solid white;
   transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 2.5em 2.5em;
+  width: 3em;
+  height: 3em;
+  transition: all 0.2s ease-in-out;
 }
 
 #water-border{
-  background-image: url('../assets/elements/water.png');
-  background-size: 4em 4em;
+  background-image: url('../assets/elements/water-45.png');
+  background-size: 2em 2em;
   background-repeat: no-repeat;
-  width: 4em;
-  height: 4em;
+  background-position: center;
+  padding: 10px;
+  width: 2.5em;
+  height: 2.5em;
   margin-left: 1em;
   margin-right: 1em;
+  border: 1px solid white;
+  transform: rotate(45deg);
 }
 
 #water-border:hover{
   background-image: url('../assets/elements/water-45.png');
   background-position: center;
-  border: 2px solid white;
   transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 2.5em 2.5em;
+  width: 3em;
+  height: 3em;
+  transition: all 0.2s ease-in-out;
 }
 
 #water-border.done {
   background-image: url('../assets/elements/water-45.png');
   background-position: center;
-  border: 2px solid white;
   transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 2.5em 2.5em;
+  width: 3em;
+  height: 3em;
+  transition: all 0.2s ease-in-out;
 }
 
 .new-weapon-header-text{
@@ -1073,15 +1302,22 @@ img.elements-modal:hover {
 }
 
 .margin-top{
-  margin-top: 1.7em;
+  margin-top: 4em;
 }
 .select-elements-container {
   margin-top: 0.7em;
+  align-items: center;
 }
 
 .buttons-panel {
   display: flex;
   justify-content: space-between;
+}
+
+.line-sep{
+  width: 2vw;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 0.349);
 }
 
 .button-div {

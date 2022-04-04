@@ -4,7 +4,7 @@
     <div class="content dark-bg-text">
       <b-row>
         <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
-        <b-col :class="renderPageDisplay()">
+        <b-col :class="renderPageDisplay()" :id="setBgImage()">
           <router-view v-if="canShowApp" />
         </b-col>
         <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
@@ -236,6 +236,10 @@ export default {
       }
 
       return toDisplay;
+    },
+
+    setBgImage(){
+      return 'blacksmith-bg';
     },
 
     checkStorage() {
@@ -833,6 +837,17 @@ div.bg-success {
   border-radius:0px;
 }
 
+
+#blacksmith-bg{
+  background: rgba(20, 20, 20, 1);
+  background-image: url("./assets/blacksmith/blacksmith-bg.png");
+  background-image: url("./assets/blacksmith/blacksmith-bg.png"), linear-gradient(rgba(0, 68, 111, 0) 0%,
+  rgba(20, 20, 20, 0.4) 30%,rgba(20, 20, 20, 1) 100%); /* W3C */
+  /* background: radial-gradient(closest-side at 50% 50%, rgba(0, 68, 111, 0) 10%,
+  rgba(20, 20, 20, 0.4) 50%,rgba(20, 20, 20, 1) 100%), url('./assets/blacksmith/blacksmith-bg.png'); */
+  background-repeat: no-repeat;
+  background-size: cover;
+}
 
 .can-show-app{
   width: 100%;
