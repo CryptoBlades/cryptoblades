@@ -57,27 +57,13 @@
 
       <img src="../assets/divider7.png" class="info-divider enemy-divider" />
 
-      <!-- // error message boxes -->
       <div class="row">
         <div class="col">
-          <div class="message-box" v-if="!currentCharacter">{{$t('combat.errors.needToSelectChar')}}</div>
-          <div class="row">
-            <div class="col-12 text-center">
-              <div class="message-box flex-column" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
-                {{$t('combat.needStamina', {staminaPerFight })}}
-                <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">{{$t('combat.errors.notEnoughDurability')}}</div>
-                <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">{{$t('combat.errors.lastSeconds')}}</div>
-              </div>
-            </div>
-          </div>
+        <div class="mb-3" :style="'align-self: baseline; width: 20vw'">
+          <span class="isMobile">{{$t('combat.selectStamina')}}</span>
+          <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
         </div>
-      </div>
-      <!-- --------------------------------------- -->
-
-      <div class="row" v-if="currentCharacterStamina >= staminaPerFight">
-      <!-- <div class="row"> -->
-        <div class="col">
-          <div class="combat-enemy-container">
+          <div  v-if="currentCharacterStamina >= staminaPerFight" class="combat-enemy-container">
               <!-- selected weapon for combat details -->
               <div class="col weapon-selection mb-4">
                 <div class="header-row d-flex justify-content-between">
@@ -96,9 +82,6 @@
                         <img src="../assets/swithc-wep.png">
                       </button>
                     </div>
-                  </div>
-                  <div :style="'align-self: baseline'">
-                      <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
                   </div>
                 </div>
               </div>
@@ -154,10 +137,6 @@
                         <div class="skill-gain mb-1">
                           + ~{{formattedSkill(targetExpectedPayouts[i] * fightMultiplier)}}
                         </div>
-
-                        <div class="loot-chest" v-if="getWinChance(e.power, e.trait).toUpperCase() == 'UNLIKELY'">
-                          <img src="../assets/chest.png" alt="">
-                        </div>
                     </div>
                 <p v-if="isLoadingTargets">{{$t('combat.loading')}}</p>
                 </div>
@@ -166,8 +145,22 @@
           </div>
         </div>
       </div>
-
-      <div></div>
+      <!-- // error message boxes -->
+      <div class="row">
+        <div class="col">
+          <div class="message-box" v-if="!currentCharacter">{{$t('combat.errors.needToSelectChar')}}</div>
+          <div class="row">
+            <div class="col-12 text-center">
+              <div class="message-box flex-column" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
+                {{$t('combat.needStamina', {staminaPerFight })}}
+                <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">{{$t('combat.errors.notEnoughDurability')}}</div>
+                <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">{{$t('combat.errors.lastSeconds')}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- --------------------------------------- -->
     </div>
     <b-modal class="centered-modal" ref="no-skill-warning-modal" @ok="fightTarget(targetToFight,targetToFightIndex)">
       <template #modal-title>
@@ -554,7 +547,11 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
-
+.body{
+  background: linear-gradient(0deg, rgba(22, 22, 22, 0.95), rgba(22, 22, 22, 0.95)), url('../assets/combat-bg.png');
+  background-size:cover;
+  min-height: 100%;
+}
 h5{
   font-family: Trajan;
   font-size: 25px;
@@ -563,12 +560,12 @@ h5{
 
 
 .enemy-character {
+  height: 100%;
   position: relative;
   width: 14em;
   cursor: pointer;
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 115%;
   background-image: url('../assets/enemy-bg-transparent.png');
   background-color: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, #242720 100%);
   border: 1px solid #a28d54;
@@ -589,7 +586,7 @@ h5{
 }
 
 .encounter img {
-  width: 140px;
+  max-width: 200px;
   transition: 1s all;
 }
 
@@ -610,6 +607,8 @@ h5{
 .frame-line{
   position: absolute;
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .frame-line > img{
@@ -631,8 +630,7 @@ h5{
 
 
 .frame-line > img{
-  width: 112%;
-  margin-left: -13px;
+  width: 100%;
 }
 
 .combat-hints {
@@ -729,6 +727,7 @@ div.encounter.text-center {
 }
 
 .chance-winning{
+    z-index: 1;
     color: #fff;
     padding: 1px 15px;
     border-radius: 2px;
@@ -802,22 +801,6 @@ div.encounter.text-center {
   display: flex;
   align-items: flex-end;
 }
-
-
-.loot-chest{
-  position: absolute;
-  bottom: 0;
-  margin-bottom: -38px;
-  border: 1px solid #9e8a57;
-  border-radius: 7px;
-  padding: 5px;
-  background-color:#131518;
-}
-
-.loot-chest > img{
-  width: 40px;
-}
-
 
 .victory-chance {
   left: 0;
@@ -1088,21 +1071,6 @@ h1 {
   .combant-hint{
     position: absolute;
   }
-
-  .loot-chest{
-    position: absolute;
-    bottom: 0;
-    margin-bottom: -30px;
-    border: 1px solid #9e8a57;
-    border-radius: 7px;
-    padding: 5px;
-    background-color:#131518;
-  }
-
-  .loot-chest > img{
-    width: 40px !important;
-  }
-
 
 }
 

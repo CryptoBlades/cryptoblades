@@ -4614,7 +4614,7 @@
     },
     "links": {},
     "address": "0x7E8584Ef6bF6CfadFE0a30c688eB61A513fCC3f3",
-    "transactionHash": "0xf8b3dd555ee2069116eb22a8a46c86a3735c0612d47dd32dc08795bb0d90a5aa|{\"gasBurned\":13441166460348,\"tx\":\"E5L6862MGzDfeQw2nTUbuy6FBHMnqhB8epUQrW68S5qW\"}"
+    "transactionHash": "0x9a6d7941ce3051abf2953ab7aa0f6d44e17f66a9e85ed8b34b03483d4c0ab7a6|{\"gasBurned\":13579421535478,\"tx\":\"BGEqikNTjsjEQ8SKsmL6oq2LCwCtn7nPPb3iHRCn1M3Y\"}"
   },
   "build/contracts/Treasury.json": {
     "events": {},
