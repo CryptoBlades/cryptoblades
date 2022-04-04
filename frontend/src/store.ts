@@ -4308,6 +4308,30 @@ export function createStore(web3: Web3) {
         return Number(BigInt(fee) >> BigInt(64)) * 100;
       },
 
+      async setFlatPriceOfItem({state}, {itemIndex, price}) {
+        const {Blacksmith} = state.contracts();
+        if (!Blacksmith) return;
+
+        price = Web3.utils.toWei(price.toString(), 'ether').toString();
+
+        await Blacksmith.methods.setFlatPriceOfItem(itemIndex, price).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async setFlatPriceOfItemSeries({state}, {itemIndex, indices, prices}) {
+        const {Blacksmith} = state.contracts();
+        if (!Blacksmith) return;
+
+        prices.map((price) => {
+          Web3.utils.toWei(price.toString(), 'ether').toString();
+        });
+
+        await Blacksmith.methods.setFlatPriceOfItemSeries(itemIndex, indices, prices).send({
+          from: state.defaultAccount,
+        });
+      },
+
       async fetchWaxBridgeDetails({ state, commit }) {
         const { WaxBridge } = state.contracts();
         if(!WaxBridge || !state.defaultAccount) return;

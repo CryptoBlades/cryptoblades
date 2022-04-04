@@ -919,7 +919,19 @@
       "newValueInCents": "New value (in cents)"
     },
     "blacksmith": {
-
+      "setFlatPriceOfItem": "Set flat price of item",
+      "pleaseSelectNonSeriesItem": "Please select non-series item",
+      "nonSeriesItem": {
+        "ITEM_WEAPON_RENAME": "Weapon rename",
+        "ITEM_CHARACTER_RENAME": "Character rename",
+        "ITEM_CHARACTER_TRAITCHANGE_FIRE": "Character trait change (fire)",
+        "ITEM_CHARACTER_TRAITCHANGE_EARTH": "Character trait change (earth)",
+        "ITEM_CHARACTER_TRAITCHANGE_WATER": "Character trait change (water)",
+        "ITEM_CHARACTER_TRAITCHANGE_LIGHTNING": "Character trait change (lightning)",
+        "ITEM_SHIELD": "Shield"
+      },
+      "nonSeriesItemPrice": "Non-series item price",
+      "setFlatPriceOfItemSeries": "Set flat price of item series"
     },
     "identifiers": "Identifiers",
     "amount": "Amount",

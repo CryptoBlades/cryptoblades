@@ -1,215 +1,218 @@
 <template>
   <div class="p-1">
-    <h2 class="mt-3">{{ $t('admin.treasury.addNewPartnerProject') }}</h2>
+    <h2 class="mt-3">{{ $t('admin.blacksmith.setFlatPriceOfItem') }}</h2>
     <div class="d-flex align-items-center gap-3 flex-wrap">
-      <b-form-input v-model="newPartnerProject.name" :placeholder="$t('admin.treasury.projectName')"/>
-      <b-button @click="addNewPartnerProject()" :disabled="addNewPartnerProjectButtonDisabled" variant="primary"
+      <b-form-select class="mt-2 mb-2" v-model="selectedNonSeriesItem.id">
+        <b-form-select-option :value="undefined" disabled>
+          {{ $t('admin.blacksmith.pleaseSelectNonSeriesItem') }}
+        </b-form-select-option>
+        <b-form-select-option v-for="nonSeriesItem in nonSeriesItems" :key="nonSeriesItem" :value="nonSeriesItem">
+          {{ $t(`admin.blacksmith.nonSeriesItem.${NonSeriesItem[nonSeriesItem]}`) }}
+        </b-form-select-option>
+      </b-form-select>
+      <b-form-input v-model="selectedNonSeriesItem.price" :placeholder="$t('admin.blacksmith.nonSeriesItemPrice')"/>
+      <b-button @click="setPriceOfNonSeriesItem()" :disabled="setFlatPriceOfItemButtonDisabled" variant="primary"
                 class="text-nowrap">
-        {{ $t('admin.treasury.addNewPartnerProject') }}
+        {{ $t('admin.blacksmith.setFlatPriceOfItem') }}
       </b-button>
     </div>
+    <h2 class="mt-3">{{ $t('admin.blacksmith.setFlatPriceOfItemSeries') }}</h2>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import {isValidWeb3Address} from '../../../utils/common';
 
-enum PartnerProperty {
-  LOGO, DETAILS, WEBSITE, NOTE, IS_ACTIVE
+enum NonSeriesItem {
+  ITEM_WEAPON_RENAME = 1,
+  ITEM_CHARACTER_RENAME,
+  ITEM_CHARACTER_TRAITCHANGE_FIRE,
+  ITEM_CHARACTER_TRAITCHANGE_EARTH,
+  ITEM_CHARACTER_TRAITCHANGE_WATER,
+  ITEM_CHARACTER_TRAITCHANGE_LIGHTNING,
+  ITEM_SHIELD = 9,
 }
 
-interface SelectedPartnerProject {
-  id?: number;
-  selectedProperty?: PartnerProperty;
-  propertyBooleanValue: boolean;
-  propertyStringValue: string;
+enum SeriesItem {
+  ITEM_COSMETIC_WEAPON = 7,
+  ITEM_COSMETIC_CHARACTER = 8,
 }
 
-interface NewPartnerProject {
-  name: string;
-  tokenSymbol: string;
-  tokenAddress: string;
-  tokenSupply?: number;
-  tokensClaimed?: number;
-  tokenPrice?: number;
-  distributionTime?: number;
-  isActive: boolean;
-  logo: string;
-  details: string;
-  website: string;
-  note: string;
+interface SelectedNonSeriesItem {
+  id?: NonSeriesItem;
+  price?: number;
+}
+
+interface SelectedSeriesItem {
+  id?: SeriesItem;
+  indices: WeaponCosmetic[] | CharacterCosmetic[];
+  prices: number[];
+}
+
+enum WeaponCosmetic {
+  GRAYSCALE = 1,
+  CONTRAST,
+  SEPIA,
+  INVERT,
+  BLUR,
+  FIRE_GLOW,
+  EARTH_GLOW,
+  LIGHTNING_GLOW,
+  WATER_GLOW,
+  RAINBOW_GLOW,
+  DARK_GLOW,
+  GHOST,
+  POLICE,
+  NEON_BORDER,
+  ROTATING_NEON_BORDER,
+  DIAMOND_BORDER,
+  GOLD_BORDER,
+  SILVER_BORDER,
+  BRONZE_BORDER,
+}
+
+enum CharacterCosmetic {
+  GRAYSCALE = 1,
+  CONTRAST,
+  SEPIA,
+  INVERT,
+  BLUR,
+  FIRE_GLOW,
+  EARTH_GLOW,
+  LIGHTNING_GLOW,
+  WATER_GLOW,
+  RAINBOW_GLOW,
+  DARK_GLOW,
+  GHOST,
+  POLICE,
+  NEON_BORDER,
+  DIAMOND_BORDER,
+  GOLD_BORDER,
+  SILVER_BORDER,
+  BRONZE_BORDER,
 }
 
 interface StoreMappedActions {
-  addPartnerProject(payload: { partnerProject: NewPartnerProject }): Promise<void>;
+  setFlatPriceOfItem(payload: { itemIndex: NonSeriesItem, price: number }): Promise<void>;
 
-  getActivePartnerProjects(): Promise<NewPartnerProject[]>;
-
-  setPartnerProjectLogo(payload: { id: number, logo: string }): Promise<void>;
-
-  setPartnerProjectDetails(payload: { id: number, details: string }): Promise<void>;
-
-  setPartnerProjectWebsite(payload: { id: number, website: string }): Promise<void>;
-
-  setPartnerProjectNote(payload: { id: number, note: string }): Promise<void>;
-
-  setPartnerProjectIsActive(payload: { id: number, isActive: boolean }): Promise<void>;
+  setFlatPriceOfItemSeries(payload: { itemIndex: SeriesItem, indices: WeaponCosmetic[] | CharacterCosmetic[], prices: number[] }): Promise<void>;
 }
 
 interface Data {
-  newPartnerProject: NewPartnerProject,
-  selectedPartnerProject: SelectedPartnerProject,
-  activeProjects: NewPartnerProject[],
+  selectedNonSeriesItem: SelectedNonSeriesItem;
+  selectedSeriesItem: SelectedSeriesItem;
+  nonSeriesItems: NonSeriesItem[];
+  seriesItems: SeriesItem[];
   isLoading: boolean;
 }
 
 export default Vue.extend({
   data() {
     return {
-      newPartnerProject: {
-        name: '',
-        tokenSymbol: '',
-        tokenAddress: '',
-        tokenSupply: undefined,
-        tokensClaimed: 0,
-        tokenPrice: undefined,
-        distributionTime: undefined,
-        isActive: true,
-        logo: '',
-        details: '',
-        website: '',
-        note: '',
-      },
-      partnerProjectProperties: [
-        PartnerProperty.LOGO,
-        PartnerProperty.DETAILS,
-        PartnerProperty.WEBSITE,
-        PartnerProperty.NOTE,
-        PartnerProperty.IS_ACTIVE,
-      ],
-      selectedPartnerProject: {
+      selectedNonSeriesItem: {
         id: undefined,
-        selectedProperty: undefined,
-        propertyBooleanValue: true,
-        propertyStringValue: '',
+        price: undefined,
       },
-      activeProjects: [],
+      selectedSeriesItem: {
+        id: undefined,
+        indices: [],
+        prices: [],
+      },
+      nonSeriesItems: [
+        NonSeriesItem.ITEM_WEAPON_RENAME,
+        NonSeriesItem.ITEM_CHARACTER_RENAME,
+        NonSeriesItem.ITEM_CHARACTER_TRAITCHANGE_FIRE,
+        NonSeriesItem.ITEM_CHARACTER_TRAITCHANGE_EARTH,
+        NonSeriesItem.ITEM_CHARACTER_TRAITCHANGE_WATER,
+        NonSeriesItem.ITEM_CHARACTER_TRAITCHANGE_LIGHTNING,
+        NonSeriesItem.ITEM_SHIELD,
+      ],
+      seriesItems: [
+        SeriesItem.ITEM_COSMETIC_WEAPON,
+        SeriesItem.ITEM_COSMETIC_CHARACTER,
+      ],
+      weaponCosmetics: [
+        WeaponCosmetic.GRAYSCALE,
+        WeaponCosmetic.CONTRAST,
+        WeaponCosmetic.SEPIA,
+        WeaponCosmetic.INVERT,
+        WeaponCosmetic.BLUR,
+        WeaponCosmetic.FIRE_GLOW,
+        WeaponCosmetic.EARTH_GLOW,
+        WeaponCosmetic.LIGHTNING_GLOW,
+        WeaponCosmetic.WATER_GLOW,
+        WeaponCosmetic.RAINBOW_GLOW,
+        WeaponCosmetic.DARK_GLOW,
+        WeaponCosmetic.GHOST,
+        WeaponCosmetic.POLICE,
+        WeaponCosmetic.NEON_BORDER,
+        WeaponCosmetic.ROTATING_NEON_BORDER,
+        WeaponCosmetic.DIAMOND_BORDER,
+        WeaponCosmetic.GOLD_BORDER,
+        WeaponCosmetic.SILVER_BORDER,
+        WeaponCosmetic.BRONZE_BORDER,
+      ],
+      characterCosmetics: [
+        CharacterCosmetic.GRAYSCALE,
+        CharacterCosmetic.CONTRAST,
+        CharacterCosmetic.SEPIA,
+        CharacterCosmetic.INVERT,
+        CharacterCosmetic.BLUR,
+        CharacterCosmetic.FIRE_GLOW,
+        CharacterCosmetic.EARTH_GLOW,
+        CharacterCosmetic.LIGHTNING_GLOW,
+        CharacterCosmetic.WATER_GLOW,
+        CharacterCosmetic.RAINBOW_GLOW,
+        CharacterCosmetic.DARK_GLOW,
+        CharacterCosmetic.GHOST,
+        CharacterCosmetic.POLICE,
+        CharacterCosmetic.NEON_BORDER,
+        CharacterCosmetic.DIAMOND_BORDER,
+        CharacterCosmetic.GOLD_BORDER,
+        CharacterCosmetic.SILVER_BORDER,
+        CharacterCosmetic.BRONZE_BORDER,
+      ],
       isLoading: false,
-      PartnerProperty,
+      SeriesItem,
+      NonSeriesItem,
+      WeaponCosmetic,
+      CharacterCosmetic,
     } as Data;
   },
 
   computed: {
-    addNewPartnerProjectButtonDisabled(): boolean {
-      return !isValidWeb3Address(this.newPartnerProject.tokenAddress)
-        || this.newPartnerProject.name === ''
-        || this.newPartnerProject.tokenSymbol === ''
-        || this.newPartnerProject.tokenSupply === undefined
-        || this.newPartnerProject.tokensClaimed === undefined
-        || this.newPartnerProject.tokenPrice === undefined
-        || this.newPartnerProject.distributionTime === undefined
-        || this.newPartnerProject.logo === ''
-        || this.newPartnerProject.details === ''
-        || this.newPartnerProject.website === ''
-        || this.isLoading;
-    },
-    setPartnerProjectPropertyButtonDisabled(): boolean {
-      return this.selectedPartnerProject.id === undefined
-        || this.selectedPartnerProject.selectedProperty === undefined
+    setFlatPriceOfItemButtonDisabled(): boolean {
+      return this.selectedNonSeriesItem.id === undefined
+        || this.selectedNonSeriesItem.price === undefined
         || this.isLoading;
     },
   },
 
   methods: {
     ...mapActions([
-      'addPartnerProject',
-      'getActivePartnerProjects',
-      'setPartnerProjectLogo',
-      'setPartnerProjectDetails',
-      'setPartnerProjectWebsite',
-      'setPartnerProjectNote',
-      'setPartnerProjectIsActive',
+      'setFlatPriceOfItem',
+      'setFlatPriceOfItemSeries',
     ]) as StoreMappedActions,
 
-    async getActiveProjects() {
+    async setPriceOfNonSeriesItem() {
+      if (this.setFlatPriceOfItemButtonDisabled) return;
       try {
         this.isLoading = true;
-        this.activeProjects = await this.getActivePartnerProjects();
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
-    async setPartnerProjectProperty() {
-      if (this.selectedPartnerProject.selectedProperty === undefined || this.selectedPartnerProject.id === undefined) return;
-      try {
-        this.isLoading = true;
-        switch (this.selectedPartnerProject.selectedProperty) {
-        case PartnerProperty.LOGO:
-          await this.setPartnerProjectLogo({
-            id: this.selectedPartnerProject.id,
-            logo: this.selectedPartnerProject.propertyStringValue
-          });
-          break;
-        case PartnerProperty.DETAILS:
-          await this.setPartnerProjectDetails({
-            id: this.selectedPartnerProject.id,
-            details: this.selectedPartnerProject.propertyStringValue
-          });
-          break;
-        case PartnerProperty.WEBSITE:
-          await this.setPartnerProjectWebsite({
-            id: this.selectedPartnerProject.id,
-            website: this.selectedPartnerProject.propertyStringValue
-          });
-          break;
-        case PartnerProperty.NOTE:
-          await this.setPartnerProjectNote({
-            id: this.selectedPartnerProject.id,
-            note: this.selectedPartnerProject.propertyStringValue
-          });
-          break;
-        case PartnerProperty.IS_ACTIVE:
-          await this.setPartnerProjectIsActive({
-            id: this.selectedPartnerProject.id,
-            isActive: this.selectedPartnerProject.propertyBooleanValue
-          });
-          break;
-        }
-        this.selectedPartnerProject.id = undefined;
-        this.selectedPartnerProject.selectedProperty = undefined;
-        this.selectedPartnerProject.propertyBooleanValue = true;
-        this.selectedPartnerProject.propertyStringValue = '';
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
-    async addNewPartnerProject() {
-      if (this.addNewPartnerProjectButtonDisabled) return;
-      try {
-        this.isLoading = true;
-        await this.addPartnerProject({partnerProject: this.newPartnerProject});
-        this.clearInputs();
+        await this.setFlatPriceOfItem({
+          itemIndex: this.selectedNonSeriesItem.id,
+          price: this.selectedNonSeriesItem.price
+        });
+        this.selectedNonSeriesItem.id = undefined;
+        this.selectedNonSeriesItem.price = undefined;
       } finally {
         this.isLoading = false;
       }
     },
 
     clearInputs() {
-      this.newPartnerProject.name = '';
-      this.newPartnerProject.tokenSymbol = '';
-      this.newPartnerProject.tokenAddress = '';
-      this.newPartnerProject.tokenSupply = undefined;
-      this.newPartnerProject.tokensClaimed = undefined;
-      this.newPartnerProject.tokenPrice = undefined;
-      this.newPartnerProject.distributionTime = undefined;
-      this.newPartnerProject.logo = '';
-      this.newPartnerProject.details = '';
-      this.newPartnerProject.website = '';
-      this.newPartnerProject.note = '';
+      this.selectedNonSeriesItem.id = undefined;
+      this.selectedNonSeriesItem.price = undefined;
     }
   },
 });
