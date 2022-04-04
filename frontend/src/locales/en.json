@@ -827,7 +827,8 @@
       "partnerVault": "Partner Vault",
       "treasury": "Treasury",
       "cryptoblades": "CryptoBlades",
-      "blacksmith": "Blacksmith"
+      "blacksmith": "Blacksmith",
+      "raid": "Raid"
     },
     "cbkLand": {
       "minter": "Minter",
@@ -986,6 +987,11 @@
         "BRONZE_BORDER": "Bronze border"
       },
       "characterCosmeticPriceInSkillOptional": "Character cosmetic price (in skill, optional)"
+    },
+    "raid": {
+      "setRaidXpRewardCurrentDefault120": "Set raid XP reward (current: {xpReward} xp, default: 120 xp)",
+      "setRaidXpReward": "Set raid XP reward",
+      "raidXpReward": "Raid XP reward"
     },
     "identifiers": "Identifiers",
     "amount": "Amount",

@@ -4324,6 +4324,22 @@ export function createStore(web3: Web3) {
         });
       },
 
+      async getRaidXpReward({state}) {
+        const {Raid1} = state.contracts();
+        if (!Raid1) return;
+
+        return +await Raid1.methods.xpReward().call(defaultCallOptions(state));
+      },
+
+      async setRaidXpReward({state}, {xp}) {
+        const {Raid1} = state.contracts();
+        if (!Raid1) return;
+
+        await Raid1.methods.setXpReward(xp).send({
+          from: state.defaultAccount,
+        });
+      },
+
       async setFlatPriceOfItem({state}, {itemIndex, price}) {
         const {Blacksmith} = state.contracts();
         if (!Blacksmith) return;

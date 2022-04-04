@@ -80,6 +80,11 @@ export default Vue.extend({
       contract: this.contracts.Blacksmith,
       component: 'BlacksmithAdmin',
     });
+    this.tabs.push({
+      title: 'raid',
+      contract: this.contracts.Raid1,
+      component: 'RaidAdmin',
+    });
   },
 });
 </script>
