@@ -155,13 +155,6 @@ export default Vue.extend({
       const amount = fromWeiEther(bnb);
       return `${toBN(amount).toFixed(4)} BNB`;
     },
-
-    onBuySkill() {
-      window.open(this.getExchangeUrl, '_blank');
-    },
-    onBuyTransak() {
-      window.open(this.getExchangeTransakUrl, '_blank');
-    },
     async onWithdrawBNB() {
       if(!this.canWithdrawBnb) return;
 
