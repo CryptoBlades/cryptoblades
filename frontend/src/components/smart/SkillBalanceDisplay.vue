@@ -4,14 +4,16 @@
       <div size="sm" class="my-2 my-sm-0 mr-3 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
         <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
           <div class="buy-skill-modal">
-            <div class="buy-skill-modal-child">
-              <img src="../../assets/apeswapbanana.png" class="img-apeswap"  tagname="buy_skill">
-              <b-button variant="primary" class="gtag-link-others" @click="onBuySkill">{{$t('skillBalanceDisplay.buyWithCrypto')}}</b-button>
-            </div>
-            <div class="buy-skill-modal-child">
-              <img src="../../assets/logoTransak.png" class="img-transak"  tagname="buy_skill_test">
-              <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">{{$t('skillBalanceDisplay.buyWithFiat')}}</b-button>
-            </div>
+            <h4 class="text-center  mt-1 mb-4"> {{ $t('skillBalanceDisplay.buyWithCrypto') }} </h4>
+            <iframe
+              class="iframe"
+              :src="getExchangeUrl"
+            />
+            <h4 class="text-center mt-4 mb-4"> {{ $t('skillBalanceDisplay.buyWithFiat') }} </h4>
+            <iframe
+              class="iframe"
+              :src="getExchangeTransakUrl"
+            />
           </div>
         </b-modal>
         <img src="../../assets/navbar-icons/skill-token.png" class="add-button gtag-link-others" :style="isMobile() ? 'width:35px':''"  tagname="buy_skill">
@@ -233,24 +235,9 @@ export default Vue.extend({
 .add-button:hover {
   cursor: pointer;
 }
-.buy-skill-modal {
-  display: flex;
-  justify-content: space-between;
-}
-.buy-skill-modal-child{
-  width: 50%;
-  height: 300px;
-  align-items: center;
-  justify-content: space-between;
-  margin: 10%;
-  display: flex;
-  flex-direction: column;
-}
-.img-apeswap, .img-transak {
-  width:100%;
-  max-width: 250px;
-  height: auto;
-  margin-bottom: 30px;
+.iframe{
+  min-height: 850px;
+  width: 100%;
 }
 
 </style>
