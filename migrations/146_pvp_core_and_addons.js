@@ -44,9 +44,8 @@ module.exports = async function (deployer, network, accounts) {
             { deployer }
         );
 
-        await pvpAddons.setPvpCoreAddress(pvpCore.address);
-
         await pvpCore.grantRole(await pvpCore.GAME_ADMIN(), accounts[0]);
+        await pvpAddons.grantRole(await pvpAddons.GAME_ADMIN(), accounts[0]);
         await pvpCore.grantRole(await pvpCore.GAME_ADMIN(), pvpAddons.address);
         await pvpAddons.grantRole(await pvpAddons.GAME_ADMIN(), pvpCore.address);
         const GAME_ADMIN = await game.GAME_ADMIN();
@@ -55,5 +54,6 @@ module.exports = async function (deployer, network, accounts) {
         await characters.grantRole(await characters.GAME_ADMIN(), pvpCore.address);
         await weapons.grantRole(await weapons.GAME_ADMIN(), pvpCore.address);
         await shields.grantRole(await shields.GAME_ADMIN(), pvpCore.address);
+        await pvpAddons.setPvpCoreAddress(pvpCore.address);
     }
 };
