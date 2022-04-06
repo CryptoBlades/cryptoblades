@@ -103,11 +103,10 @@ export default Vue.extend({
       const currentMultiplier = await this.getPartnerProjectMultiplier(this.partnerProject.id);
       this.multiplier = toBN(currentMultiplier).div(toBN(10).pow(18)).toFixed(4);
 
-      const distributionTime = await this.getPartnerProjectDistributionTime(this.partnerProject.id);
-      this.distributionTime = distributionTime;
+      this.distributionTime = await this.getPartnerProjectDistributionTime(this.partnerProject.id);
 
       const currentClaimedTokens = await this.getPartnerProjectClaimedAmount(this.partnerProject.id);
-      this.tokensClaimed = toBN(currentClaimedTokens).div(toBN(10).pow(18)).toFixed(2);
+      this.partnerProject.tokensClaimed = toBN(currentClaimedTokens).div(toBN(10).pow(18)).toFixed(2);
 
       const currentSkillToPartnerRatio = await this.getSkillToPartnerRatio(this.partnerProject.id);
       this.skillToPartnerRatio = toBN(1).dividedBy(toBN(currentSkillToPartnerRatio).dividedBy(toBN(2).exponentiatedBy(64))).toFixed(4);
