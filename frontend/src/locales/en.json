@@ -828,7 +828,8 @@
       "treasury": "Treasury",
       "cryptoblades": "CryptoBlades",
       "blacksmith": "Blacksmith",
-      "raid": "Raid"
+      "raid": "Raid",
+      "specialWeaponsManager": "Special Weapons"
     },
     "cbkLand": {
       "minter": "Minter",

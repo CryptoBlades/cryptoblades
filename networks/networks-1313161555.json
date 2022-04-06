@@ -4620,7 +4620,7 @@
     "events": {},
     "links": {},
     "address": "0x2Fd095f02Dd033bF2106186638457b3A0e157751",
-    "transactionHash": "0xb8decf3073a24ff43048e3768c8497993c008d1a80ace72aa5e6d236a06025d9"
+    "transactionHash": "0xac97083517639793a412fe21dda8bfb18f1d32a01446cf17ba97e7d5d576a391|{\"gasBurned\":13462657297622,\"tx\":\"FbY8Rc2zpJFYMaVGz8ADbLvZw4sWsoswg5LQnk6k4867\"}"
   },
   "build/contracts/WaxBridge.json": {
     "events": {

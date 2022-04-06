@@ -37,6 +37,7 @@ import TreasuryAdmin from './AdminTabs/TreasuryAdmin.vue';
 import CryptoBladesAdmin from './AdminTabs/CryptoBladesAdmin.vue';
 import BlacksmithAdmin from './AdminTabs/BlacksmithAdmin.vue';
 import RaidAdmin from './AdminTabs/RaidAdmin.vue';
+import SpecialWeaponsManagerAdmin from './AdminTabs/SpecialWeaponsManagerAdmin.vue';
 
 interface StoreMappedActions {
   userHasDefaultAdminAccess(payload: { contract: Contract<any> }): Promise<boolean>;
@@ -65,6 +66,7 @@ export default Vue.extend({
     CryptoBladesAdmin,
     BlacksmithAdmin,
     RaidAdmin,
+    SpecialWeaponsManagerAdmin,
   },
   props: {
     title: {

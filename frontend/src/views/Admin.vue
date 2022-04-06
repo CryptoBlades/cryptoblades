@@ -85,6 +85,11 @@ export default Vue.extend({
       contract: this.contracts.Raid1,
       component: 'RaidAdmin',
     });
+    this.tabs.push({
+      title: 'specialWeaponsManager',
+      contract: this.contracts.SpecialWeaponsManager,
+      component: 'SpecialWeaponsManagerAdmin',
+    });
   },
 });
 </script>
