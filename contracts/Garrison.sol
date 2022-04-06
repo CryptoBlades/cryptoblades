@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradea
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+
 import "./characters.sol";
 import "./cryptoblades.sol";
 
@@ -94,12 +95,6 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
         characters.safeTransferFrom(msg.sender, address(this), id);
 
         emit CharacterReceived(id, msg.sender);
-    }
-
-    function redirectFromGarrison(address user, uint256 id) restricted external {
-        delete characterOwner[id];
-        userGarrison[user].remove(id);
-        allCharactersInGarrison.remove(id);
     }
 
     function redirectToGarrison(address user, uint256 id) restricted external {

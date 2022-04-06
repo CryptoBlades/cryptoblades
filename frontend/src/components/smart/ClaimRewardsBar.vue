@@ -98,7 +98,7 @@
         <div class="d-flex flex-row w-100 align-items-baseline">
           <h5>{{$t('ClaimRewardsBar.payoutCurrency')}}:</h5>
           <b-form-select class="w-50 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
-            <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
+            <b-form-select-option v-for="p in getPartnerProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
           </b-form-select>
         </div>
         <div v-if="selectedPartneredProject" class="d-flex mt-2">
@@ -113,11 +113,7 @@
             <b-form-input type="number" max="100" step="0.5" v-model="slippage" class="claim-input" />
           </div>
         </div>
-        <partnered-project v-if="selectedPartneredProject"
-          :id="selectedPartneredProject.id" :name="selectedPartneredProject.name"
-          :tokenSymbol="selectedPartneredProject.tokenSymbol" :tokenSupply="selectedPartneredProject.tokenSupply"
-          :tokenPrice="selectedPartneredProject.tokenPrice" :logoFileName="getLogoFile(selectedPartneredProject.name)"
-          :tokenAddress="selectedPartneredProject.tokenAddress"/>
+        <PartneredProject v-if="selectedPartneredProject" :partnerProject="selectedPartneredProject" :key="selectedPartneredProject.id"/>
         <div class="mt-3" v-if="selectedPartneredProject && !canClaimSelectedProject">
           <h5>{{$t('ClaimRewardsBar.partnerTokenClaimed')}}</h5>
         </div>
@@ -300,25 +296,8 @@ export default Vue.extend({
       return !areAllXpsZeroOrLess;
     },
 
-    supportedProjects(): SupportedProject[] {
-      const supportedProjects = this.getPartnerProjects.map(p => {
-        return {
-          id: p.id,
-          name: p.name,
-          tokenSymbol: p.tokenSymbol,
-          tokenAddress: p.tokenAddress,
-          tokenSupply: p.tokenSupply,
-          tokensClaimed: p.tokensClaimed,
-          tokenPrice: p.tokenPrice,
-          isActive: p.isActive
-        };
-      });
-
-      return supportedProjects;
-    },
-
     selectedPartneredProject(): SupportedProject | undefined {
-      return this.supportedProjects.find(x => x.id === this.payoutCurrencyId);
+      return this.getPartnerProjects.find(partnerProject => partnerProject.id.toString() === this.payoutCurrencyId.toString());
     },
 
     isNoProjectAvailable(): boolean {
@@ -396,7 +375,7 @@ export default Vue.extend({
     },
 
     choosePayoutCurrencyIfNotChosenBefore() {
-      const supportedProjects = this.supportedProjects;
+      const supportedProjects = this.getPartnerProjects;
       if(this.payoutCurrencyId === '-1' && supportedProjects.length !== 0) {
         this.updatePayoutCurrencyId(supportedProjects[0].id);
       }

@@ -65,6 +65,11 @@ export default Vue.extend({
       contract: this.contracts.PartnerVault,
       component: 'PartnerVaultAdmin',
     });
+    this.tabs.push({
+      title: 'treasury',
+      contract: this.contracts.Treasury,
+      component: 'TreasuryAdmin',
+    });
   },
 });
 </script>
