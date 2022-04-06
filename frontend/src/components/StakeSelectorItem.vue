@@ -47,7 +47,7 @@
           <div class="stake-stats-item-value">{{currentRewardEarnedFormatted}} {{rewardTokenName}}</div>
         </div>
         <div class="claim-rewards-btns">
-          <button class="stake-button claim-reward-btn"
+          <button class="stake-button"
             @click="onClaimReward"
             :disabled="rewardClaimState !== RewardClaimState.ok"
             data-toggle="tooltip" data-placement="right" :title="claimRewardButtonLabel"
@@ -734,11 +734,8 @@ export default Vue.extend({
   justify-content: space-between;
   align-items: center;
 }
-.claim-rewards-btns{
-  margin-right:15px;
-}
 .claim-rewards-btns button{
-  width:clamp(75px,calc(50% - 5px),100%);
+  min-width: 70px;
   padding: 5px 10px;
 }
 
