@@ -145,28 +145,17 @@ import i18n from '@/i18n';
 import { TranslateResult } from 'vue-i18n';
 
 interface StoreMappedActions {
-  fetchStakeDetails(payload: {stakeType: StakeType | NftStakeType}):
-  Promise<void>;
-  stake(payload: {amount: string; stakeType: StakeType | NftStakeType}):
-  void;
-  stakeNfts(payload: {ids: string[]; stakeType: StakeType | NftStakeType}):
-  void;
-  unstake(payload: {amount: string; stakeType: StakeType | NftStakeType}):
-  void;
-  unstakeNfts(payload: {ids: string[]; stakeType: StakeType | NftStakeType}):
-  void;
-  unstakeKing(payload: {amount: string;}):
-  Promise<void>;
-  claimKingReward():
-  Promise<void>;
-  stakeUnclaimedRewards(payload: {stakeType: StakeType;}):
-  Promise<void>;
-  claimReward(payload: {stakeType: StakeType | NftStakeType;}):
-  Promise<void>;
-  getOwnedLandIdsWithTier():
-  Promise<LandIds[]>;
-  getStakedIds(payload: {stakeType: StakeType | NftStakeType;}):
-  Promise<string[]>;
+  fetchStakeDetails(payload: {stakeType: StakeType | NftStakeType}): Promise<void>;
+  stake(payload: {amount: string; stakeType: StakeType | NftStakeType}): void;
+  stakeNfts(payload: {ids: string[]; stakeType: StakeType | NftStakeType}): void;
+  unstake(payload: {amount: string; stakeType: StakeType | NftStakeType}): void;
+  unstakeNfts(payload: {ids: string[]; stakeType: StakeType | NftStakeType}): void;
+  unstakeKing(payload: {amount: string;}): Promise<void>;
+  claimKingReward(): Promise<void>;
+  stakeUnclaimedRewards(payload: {stakeType: StakeType;}): Promise<void>;
+  claimReward(payload: {stakeType: StakeType | NftStakeType;}): Promise<void>;
+  getOwnedLandIdsWithTier(): Promise<LandIds[]>;
+  getStakedIds(payload: {stakeType: StakeType | NftStakeType;}): Promise<string[]>;
 }
 
 enum CurrentState {
