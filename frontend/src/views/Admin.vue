@@ -70,6 +70,11 @@ export default Vue.extend({
       contract: this.contracts.Treasury,
       component: 'TreasuryAdmin',
     });
+    this.tabs.push({
+      title: 'specialWeaponsManager',
+      contract: this.contracts.SpecialWeaponsManager,
+      component: 'SpecialWeaponsManagerAdmin',
+    });
   },
 });
 </script>

@@ -825,7 +825,8 @@
       "weapons": "Weapons",
       "burningManager": "Burning Manager",
       "partnerVault": "Partner Vault",
-      "treasury": "Treasury"
+      "treasury": "Treasury",
+      "specialWeaponsManager": "Special Weapons"
     },
     "cbkLand": {
       "minter": "Minter",
