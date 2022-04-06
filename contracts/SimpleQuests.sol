@@ -56,7 +56,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     uint8 public constant VAR_REPUTATION_LEVEL_4 = 22;
     uint8 public constant VAR_REPUTATION_LEVEL_5 = 23;
     uint8 public constant VAR_SKIP_QUEST_STAMINA_COST = 30;
-    uint8 public constant VAR_WEEKLY_COMPLETIONS_GOAL = 31;
+    uint8 public constant VAR_WEEKLY_COMPLETIONS_GOAL = 31; //unused
     uint256 internal constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
     uint256 internal constant NFTVAR_SIMPLEQUEST_TYPE = 102;
     uint256 internal constant NFTVAR_REPUTATION = 103;
@@ -102,7 +102,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     mapping(address => mapping(uint256 => uint256)) public weeklyCompletions; //user to week to completions
     mapping(address => mapping(uint256 => bool)) public weeklyRewardClaimed;
     mapping(uint256 => Reward) public rewards;
-    mapping(uint256 => uint256) public weeklyRewards;
+    mapping(uint256 => uint256) public weeklyRewards; //unused
+    mapping(uint256 => uint256) public weeklyCompletionsGoal;
+    uint constant maxWeeksInAYear = 53;
 
     event QuestAssigned(uint256 indexed questID, uint256 indexed characterID);
     event QuestProgressed(uint256 indexed questID, uint256 indexed characterID);
@@ -173,7 +175,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function _assertCanClaimWeeklyReward(address user) internal view {
         require(weeklyRewardClaimed[user][now / 1 weeks] == false, "Reward already claimed");
-        require(weeklyCompletions[user][now / 1 weeks] >= vars[VAR_WEEKLY_COMPLETIONS_GOAL], "Not enough weekly completions");
+        require(weeklyCompletions[user][now / 1 weeks] >= weeklyCompletionsGoal[getWeekNumber()], "Not enough weekly completions");
     }
 
     // FUNCTIONS
@@ -319,7 +321,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function claimWeeklyReward() assertQuestsEnabled assertCanClaimWeeklyReward(msg.sender) public returns (uint256[] memory weeklyRewardIDs) {
-        uint256 rewardID = weeklyRewards[now / 1 weeks];
+        uint256 rewardID = getWeekNumber();
         weeklyRewardIDs = rewardWeekly(rewardID);
         weeklyRewardClaimed[msg.sender][now / 1 weeks] = true;
         emit WeeklyRewardClaimed(msg.sender, rewardID, weeklyRewardIDs);
@@ -483,6 +485,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return weeklyCompletions[user][now / 1 weeks];
     }
 
+    function getWeekNumber() public view returns (uint256) {
+        return now / 1 weeks % maxWeeksInAYear;
+    }
+
     // ADMIN
 
     function setVar(uint256 varField, uint256 value) external restricted {
@@ -517,17 +523,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function addReward(ItemType rewardType, uint256 rewardRarity, uint256 rewardAmount, address rewardExternalAddress, uint256 reputationAmount) public restricted {
-        uint256 rewardID = nextRewardID++;
-        rewards[rewardID] = Reward(rewardID, rewardType, rewardRarity, rewardAmount, rewardExternalAddress, reputationAmount);
-        emit RewardAdded(rewardID);
-    }
-
-    function setWeeklyReward(uint256 id, uint256 timestamp) public restricted {
-        require(timestamp > 0, "Missing timestamp");
-        uint256 week = timestamp / 1 weeks;
-        weeklyRewards[week] = id;
-        emit WeeklyRewardSet(id, week);
+    function setWeeklyReward(ItemType rewardType, uint256 rewardRarity, uint256 rewardAmount, address rewardExternalAddress, uint256 reputationAmount, uint256 weekNumber, uint256 completionsGoal) public restricted {
+        rewards[weekNumber] = Reward(weekNumber, rewardType, rewardRarity, rewardAmount, rewardExternalAddress, reputationAmount);
+        weeklyCompletionsGoal[weekNumber] = completionsGoal;
+        emit RewardAdded(weekNumber);
     }
 
     function deleteQuestTemplate(uint256 tier, uint256 questID) public restricted {

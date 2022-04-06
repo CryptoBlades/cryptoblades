@@ -3765,21 +3765,11 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
-
-        return await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_GOAL).call(defaultCallOptions(state));
+        const weekInSeconds = 604800;
+        return await SimpleQuests.methods.weeklyCompletionsGoal(Math.floor(Date.now() / 1000 / weekInSeconds % 53)).call(defaultCallOptions(state));
       },
 
-      async setWeeklyCompletionsGoal({state}, {newGoal}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
-
-        const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
-
-        return await SimpleQuests.methods.setVar(VAR_WEEKLY_COMPLETIONS_GOAL, newGoal).send(defaultCallOptions(state));
-      },
-
-      async addWeeklyReward({state}, {weeklyReward}) {
+      async setWeeklyReward({state}, {weeklyReward}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
@@ -3788,19 +3778,13 @@ export function createStore(web3: Web3) {
           weeklyReward.rewardExternalAddress = emptyAccount;
         }
 
-        const result =await SimpleQuests.methods.addReward(weeklyReward.rewardType,
+        const result =await SimpleQuests.methods.setWeeklyReward(weeklyReward.rewardType,
           weeklyReward.rewardRarity, weeklyReward.rewardAmount,
-          weeklyReward.rewardExternalAddress, weeklyReward.reputationAmount)
+          weeklyReward.rewardExternalAddress, weeklyReward.reputationAmount,
+          weeklyReward.weekNumber, weeklyReward.completionsGoal)
           .send(defaultCallOptions(state));
 
         return result.events.RewardAdded.returnValues.rewardID;
-      },
-
-      async setWeeklyReward({state}, {rewardID, timestamp}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
-
-        return await SimpleQuests.methods.setWeeklyReward(rewardID, timestamp).send(defaultCallOptions(state));
       },
 
       async getWeeklyReward({state}, {timestamp}) {
@@ -3808,10 +3792,9 @@ export function createStore(web3: Web3) {
         if (!SimpleQuests || !state.defaultAccount) return;
 
         const weekInSeconds = 604800;
-        const week = Math.floor(timestamp / 1000 / weekInSeconds);
+        const week = Math.floor(timestamp / 1000 / weekInSeconds % 53);
 
-        const rewardID = +await SimpleQuests.methods.weeklyRewards(week).call(defaultCallOptions(state));
-        const weeklyRewardRaw = await SimpleQuests.methods.rewards(rewardID).call(defaultCallOptions(state)) as unknown as {
+        const weeklyRewardRaw = await SimpleQuests.methods.rewards(week).call(defaultCallOptions(state)) as unknown as {
           id: string;
           rewardType: string;
           rewardRarity: string;
@@ -3819,6 +3802,8 @@ export function createStore(web3: Web3) {
           rewardExternalAddress: string;
           reputationAmount: string;
         };
+
+        const weeklyCompletionsGoal = +await SimpleQuests.methods.weeklyCompletionsGoal(week).call(defaultCallOptions(state));
         return {
           id: +weeklyRewardRaw.id,
           rewardType: +weeklyRewardRaw.rewardType as RewardType,
@@ -3826,6 +3811,7 @@ export function createStore(web3: Web3) {
           rewardAmount: +weeklyRewardRaw.rewardAmount,
           rewardExternalAddress: weeklyRewardRaw.rewardExternalAddress,
           reputationAmount: +weeklyRewardRaw.reputationAmount,
+          completionsGoal: weeklyCompletionsGoal,
         } as WeeklyReward;
       },
 
@@ -3836,7 +3822,8 @@ export function createStore(web3: Web3) {
         const weekInSeconds = 604800;
         const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
 
-        const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+        const reward = await SimpleQuests.methods.rewards(Math.floor(currentWeek % 53)).call(defaultCallOptions(state));
+        const rewardID = +reward.id;
 
         if(rewardID === 0) {
           return;
@@ -3865,7 +3852,7 @@ export function createStore(web3: Web3) {
         const weekInSeconds = 604800;
         const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
 
-        const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+        const rewardID = +await SimpleQuests.methods.rewards(Math.floor(currentWeek % 53)).call(defaultCallOptions(state));
 
         if(rewardID === 0) {
           return false;
