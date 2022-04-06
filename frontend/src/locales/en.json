@@ -824,7 +824,8 @@
       "cbkLand": "CBK Land",
       "weapons": "Weapons",
       "burningManager": "Burning Manager",
-      "partnerVault": "Partner Vault"
+      "partnerVault": "Partner Vault",
+      "treasury": "Treasury"
     },
     "cbkLand": {
       "minter": "Minter",
@@ -879,6 +880,34 @@
       "storeInPartnerVault": "Store in partner vault",
       "checkERC721Balance": "Check ERC721 balance",
       "checkERC20Balance": "Check ERC20 balance"
+    },
+    "treasury": {
+      "addNewPartnerProject": "Add new partner project",
+      "projectName": "Project name (e.g. CryptoBlades)",
+      "tokenSymbol": "Token symbol (e.g. SKILL)",
+      "tokenAddress": "Token address (valid ERC20 address)",
+      "tokenSupply": "Token supply (e.g. 1000 = 1000 tokens)",
+      "tokenPrice": "Token price (current token price in USD)",
+      "distributionTime": "Distribution time (in days)",
+      "isProjectActive": "Is project active",
+      "logoUrl": "Logo URL (logo link from IPFS)",
+      "details": "Details",
+      "websiteUrl": "Website URL",
+      "noteOptional": "Note (optional)",
+      "findActivePartnerProjects": "Find active partner projects",
+      "name": "Name",
+      "symbol": "Symbol",
+      "id": "ID",
+      "setPartnerProjectProperty": "Set partner project property",
+      "pleaseSelectProperty": "Please select property",
+      "propertyValue": "Property value",
+      "property": {
+        "LOGO": "Logo",
+        "DETAILS": "Details",
+        "WEBSITE": "Website",
+        "NOTE": "Note",
+        "IS_ACTIVE": "Is active"
+      }
     },
     "identifiers": "Identifiers",
     "amount": "Amount",
