@@ -20,13 +20,14 @@ import {mapActions, mapState} from 'vuex';
 import {Contract} from '@/interfaces';
 import {PropType} from 'vue/types/options';
 import RoleGranter from '@/components/smart/RoleGranter.vue';
-import QuestsAdmin from './AdminTabs/QuestsAdmin.vue';
+import RoleRevoker from '@/components/smart/RoleRevoker.vue';
 import Hint from '@/components/Hint.vue';
+import QuestsAdmin from './AdminTabs/QuestsAdmin.vue';
 import CBKLandAdmin from './AdminTabs/CBKLandAdmin.vue';
 import WeaponsAdmin from './AdminTabs/WeaponsAdmin.vue';
 import BurningManagerAdmin from './AdminTabs/BurningManagerAdmin.vue';
 import PartnerVaultAdmin from './AdminTabs/PartnerVaultAdmin.vue';
-import RoleRevoker from '@/components/smart/RoleRevoker.vue';
+import TreasuryAdmin from './AdminTabs/TreasuryAdmin.vue';
 
 interface StoreMappedActions {
   userHasAdminAccess(payload: { contract: Contract<any> }): Promise<boolean>;
@@ -40,7 +41,17 @@ interface Data {
 }
 
 export default Vue.extend({
-  components: {Hint, RoleGranter, RoleRevoker, QuestsAdmin, CBKLandAdmin, WeaponsAdmin, BurningManagerAdmin, PartnerVaultAdmin},
+  components: {
+    Hint,
+    RoleGranter,
+    RoleRevoker,
+    QuestsAdmin,
+    CBKLandAdmin,
+    WeaponsAdmin,
+    BurningManagerAdmin,
+    PartnerVaultAdmin,
+    TreasuryAdmin
+  },
   props: {
     title: {
       type: String as PropType<string>,
