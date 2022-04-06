@@ -18,7 +18,7 @@
         </div>
       </div>
       <div class="stake-stats-item">
-        <div class="stake-stats-item-title">{{ $t('stake.StakeSelectorItem.stakeLocked') }}</div>
+        <div class="stake-stats-item-title">{{ $t('stake.StakeSelectorItem.STAKE_LOCKED') }}</div>
         <div class="stake-stats-item-value">{{ minimumStakeTime !== 0 ? minimumStakeTimeFormatted: 'No Lock' }}</div>
       </div>
       <div class="stake-stats-item" v-if="rewardsDuration !== 0">
@@ -49,7 +49,7 @@
         <div class="claim-rewards-btns">
           <button class="stake-button"
             @click="onClaimReward"
-            :disabled="rewardClaimState !== RewardClaimState.ok"
+            :disabled="rewardClaimState !== RewardClaimState.OK"
             data-toggle="tooltip" data-placement="right" :title="claimRewardButtonLabel"
             >
             <span v-if="isLoadingClaim"><i class="fa fa-spinner fa-spin"></i></span>
@@ -86,7 +86,7 @@
     <div class="inputSection" v-if="startedStaking">
       <!-- Input for stake amount -->
       <input
-        v-if="!isNftStaking && currentState !== CurrentState.stakeLocked"
+        v-if="!isNftStaking && currentState !== CurrentState.STAKE_LOCKED"
         class="token-amount-input text-center"
         inputmode="decimal"
         :title="$t('stake.tokenAmount')"
@@ -101,7 +101,7 @@
         value=""
         v-model="textAmount"
       />
-      <div v-if="!isNftStaking && currentState !== CurrentState.stakeLocked" class="input-ratio-buttons">
+      <div v-if="!isNftStaking && currentState !== CurrentState.STAKE_LOCKED" class="input-ratio-buttons">
         <button class="stake-button ratio-button" @click="inputByRatio(0.25)">25%</button>
         <button class="stake-button ratio-button" @click="inputByRatio(0.50)">50%</button>
         <button class="stake-button ratio-button" @click="inputByRatio(0.75)">75%</button>
@@ -123,7 +123,7 @@
       </multiselect>
       <button class="stake-button stake-submit-button"
         @click="onSubmit"
-        :disabled="currentState !== CurrentState.ok">
+        :disabled="currentState !== CurrentState.OK">
         <span v-if="isLoadingStake"><i class="fa fa-spinner fa-spin"></i></span>
         <span v-else>{{ submitButtonLabel }}</span>
         </button>
@@ -170,23 +170,23 @@ interface StoreMappedActions {
 }
 
 enum CurrentState {
-  connectWallet,
-  stakeLocked,
-  contractFull,
-  amountIsTooBig,
-  waiting,
-  inputIsZero,
-  insufficientBalance,
-  notEnoughFundsInExitPool,
-  notEnoughFundsInExitPoolForFee,
-  ok,
+  CONNECT_WALLET,
+  STAKE_LOCKED,
+  CONTRACT_FULL,
+  AMOUNT_TOO_BIG,
+  WAITING,
+  INPUT_ZERO,
+  INSUFFICIENT_BALANCE,
+  NOT_ENOUGH_FUNDS_IN_EXIT_POOL,
+  NOT_ENOUGH_FUNDS_IN_EXIT_POOL_FOR_FEE,
+  OK,
 }
 
 enum RewardClaimState {
-  loading,
-  rewardLocked,
-  ok,
-  noReward,
+  LOADING,
+  REWARD_LOCKED,
+  OK,
+  NO_REWARD,
 }
 
 interface LandIds {
@@ -357,12 +357,12 @@ export default Vue.extend({
     currentState(): CurrentState {
       // no account connect / error
       if (!this.defaultAccount) {
-        return CurrentState.connectWallet;
+        return CurrentState.CONNECT_WALLET;
       }
 
       // staked funds still locked
       if (!this.isDeposit && this.unlockTimeLeftInternal > 0) {
-        return CurrentState.stakeLocked;
+        return CurrentState.STAKE_LOCKED;
       }
 
       // limit of contract reached
@@ -371,7 +371,7 @@ export default Vue.extend({
         this.remainingCapacityForDeposit.eq(0) &&
         this.isDeposit
       ) {
-        return CurrentState.contractFull;
+        return CurrentState.CONTRACT_FULL;
       }
 
       // limit of contract will be reached due to deposit
@@ -380,16 +380,16 @@ export default Vue.extend({
         this.bigNumberAmount.gt(this.remainingCapacityForDeposit) &&
         this.isDeposit
       ) {
-        return CurrentState.amountIsTooBig;
+        return CurrentState.AMOUNT_TOO_BIG;
       }
 
       // no input given
       if (isStakeType(this.stakeType) && +this.textAmount <= 0) {
-        return CurrentState.inputIsZero;
+        return CurrentState.INPUT_ZERO;
       }
 
       if (isNftStakeType(this.stakeType) && this.idsToStake.length === 0) {
-        return CurrentState.inputIsZero;
+        return CurrentState.INPUT_ZERO;
       }
 
       const hasSufficientBalance = this.isDeposit
@@ -398,12 +398,12 @@ export default Vue.extend({
 
       // not enough funds in wallet
       if (!hasSufficientBalance) {
-        return CurrentState.insufficientBalance;
+        return CurrentState.INSUFFICIENT_BALANCE;
       }
 
       // user input bigger than funds in pool
       if (this.bigNumberAmount.gt(this.contractBalance) && !this.isDeposit) {
-        return CurrentState.notEnoughFundsInExitPool;
+        return CurrentState.NOT_ENOUGH_FUNDS_IN_EXIT_POOL;
       }
 
       // user input bigger than funds in pool
@@ -411,29 +411,29 @@ export default Vue.extend({
         this.bigNumberAmount.gt(this.remainingCapacityForWithdraw) &&
         !this.isDeposit
       ) {
-        return CurrentState.notEnoughFundsInExitPool;
+        return CurrentState.NOT_ENOUGH_FUNDS_IN_EXIT_POOL;
       }
 
-      return CurrentState.ok;
+      return CurrentState.OK;
     },
 
     submitButtonLabel(): TranslateResult {
       switch (this.currentState) {
-      case CurrentState.ok:
+      case CurrentState.OK:
         return this.isDeposit ? i18n.t('stake.stakeButtonLabel') : i18n.t('stake.unstakeButtonLabel');
-      case CurrentState.contractFull:
+      case CurrentState.CONTRACT_FULL:
         return i18n.t('stake.contractIsFullButtonLabel');
-      case CurrentState.amountIsTooBig:
+      case CurrentState.AMOUNT_TOO_BIG:
         return i18n.t('stake.amountIsTooBigButtonLabel');
-      case CurrentState.waiting:
+      case CurrentState.WAITING:
         return i18n.t('stake.waitingButtonLabel');
-      case CurrentState.inputIsZero:
+      case CurrentState.INPUT_ZERO:
         return i18n.t('stake.enterAnAmountButtonLabel');
-      case CurrentState.insufficientBalance:
+      case CurrentState.INSUFFICIENT_BALANCE:
         return i18n.t('stake.insufficientBalanceButtonLabel');
-      case CurrentState.notEnoughFundsInExitPool:
+      case CurrentState.NOT_ENOUGH_FUNDS_IN_EXIT_POOL:
         return i18n.t('stake.notEnoughFundsInExitPoolButtonLabel');
-      case CurrentState.stakeLocked:
+      case CurrentState.STAKE_LOCKED:
         return i18n.t('stake.sorryStake', {estimatedUnlockTimeLeftFormatted : this.estimatedUnlockTimeLeftFormatted});
       default:
         return i18n.t('stake.connectToWalletButtonLabel');
@@ -442,22 +442,22 @@ export default Vue.extend({
 
     rewardClaimState(): RewardClaimState {
       if (this.isLoadingClaim) {
-        return RewardClaimState.loading;
+        return RewardClaimState.LOADING;
       }
       if (this.unlockTimeLeftInternal > 0) {
-        return RewardClaimState.rewardLocked;
+        return RewardClaimState.REWARD_LOCKED;
       }
       if(!toBN(this.currentRewardEarned).gt(0)){
-        return RewardClaimState.noReward;
+        return RewardClaimState.NO_REWARD;
       }
-      return RewardClaimState.ok;
+      return RewardClaimState.OK;
     },
 
     claimRewardButtonLabel(): TranslateResult {
       switch (this.rewardClaimState) {
-      case RewardClaimState.loading:
+      case RewardClaimState.LOADING:
         return i18n.t('stake.loading');
-      case RewardClaimState.rewardLocked:
+      case RewardClaimState.REWARD_LOCKED:
         return i18n.t('stake.sorryReward', {estimatedUnlockTimeLeftFormatted : this.estimatedUnlockTimeLeftFormatted});
       default:
         return i18n.t('stake.claimReward');
@@ -575,7 +575,7 @@ export default Vue.extend({
     },
 
     async onSubmit(): Promise<void> {
-      if (this.isLoadingStake || this.currentState !== CurrentState.ok) return;
+      if (this.isLoadingStake || this.currentState !== CurrentState.OK) return;
       const amount = this.bigNumberAmount.toString();
 
       try {
@@ -616,7 +616,7 @@ export default Vue.extend({
       }
     },
     async onClaimReward(): Promise<void> {
-      if (this.rewardClaimState !== RewardClaimState.ok) return;
+      if (this.rewardClaimState !== RewardClaimState.OK) return;
 
       try {
         this.isLoadingClaim = true;
