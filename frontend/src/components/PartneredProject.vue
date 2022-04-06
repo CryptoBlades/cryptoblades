@@ -23,7 +23,7 @@
       <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
            :style="[{'width': progressBarWidth, 'background-color': '#9e8a57'}]"/>
     </div>
-    <h6 class="mt-1 text-center">{{ $t('PartneredProject.claimed') }} {{ partnerProject.tokensClaimed }} / {{ partnerProject.tokenSupply }}</h6>
+    <h6 class="mt-1 text-center">{{ $t('PartneredProject.claimed') }} {{ tokensClaimed }} / {{ partnerProject.tokenSupply }}</h6>
     <div class="d-flex flex-column align-items-center w-100">
       <b-card no-body class="collapse-style" :class="detailsOpened ? 'on-top' : ''">
         <b-card-header class="d-flex flex-column align-items-center w-100 mt-1 p-0" v-b-toggle="'collapse-' + partnerProject.id"
@@ -106,7 +106,7 @@ export default Vue.extend({
       this.distributionTime = await this.getPartnerProjectDistributionTime(this.partnerProject.id);
 
       const currentClaimedTokens = await this.getPartnerProjectClaimedAmount(this.partnerProject.id);
-      this.partnerProject.tokensClaimed = toBN(currentClaimedTokens).div(toBN(10).pow(18)).toFixed(2);
+      this.tokensClaimed = toBN(currentClaimedTokens).div(toBN(10).pow(18)).toFixed(2);
 
       const currentSkillToPartnerRatio = await this.getSkillToPartnerRatio(this.partnerProject.id);
       this.skillToPartnerRatio = toBN(1).dividedBy(toBN(currentSkillToPartnerRatio).dividedBy(toBN(2).exponentiatedBy(64))).toFixed(4);
