@@ -28,6 +28,7 @@ import WeaponsAdmin from './AdminTabs/WeaponsAdmin.vue';
 import BurningManagerAdmin from './AdminTabs/BurningManagerAdmin.vue';
 import PartnerVaultAdmin from './AdminTabs/PartnerVaultAdmin.vue';
 import TreasuryAdmin from './AdminTabs/TreasuryAdmin.vue';
+import SpecialWeaponsManagerAdmin from './AdminTabs/SpecialWeaponsManagerAdmin.vue';
 
 interface StoreMappedActions {
   userHasAdminAccess(payload: { contract: Contract<any> }): Promise<boolean>;
@@ -50,7 +51,8 @@ export default Vue.extend({
     WeaponsAdmin,
     BurningManagerAdmin,
     PartnerVaultAdmin,
-    TreasuryAdmin
+    TreasuryAdmin,
+    SpecialWeaponsManagerAdmin,
   },
   props: {
     title: {
