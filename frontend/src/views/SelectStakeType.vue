@@ -1,6 +1,6 @@
 <template>
   <div class="body main-font">
-    <h1 class="text-center">Staking</h1>
+    <h1 class="text-center">{{$t('stake.staking')}}</h1>
     <ul class="stake-select-list">
       <li class="stake-select-item" v-for="e in entries" :key="e.stakeType">
         <stake-selector-item

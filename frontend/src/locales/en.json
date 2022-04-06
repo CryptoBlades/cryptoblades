@@ -891,6 +891,7 @@
     "pasteInValidWalletAddress": "Paste in valid wallet address"
   },
   "stake": {
+    "staking": "Staking",
     "unknownStakeType": "Unknown stake type, please try again.",
     "rewardsAvailable": "Rewards are available!",
     "have": "You have:",
