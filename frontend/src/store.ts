@@ -9,7 +9,6 @@ import {getConfigValue, setUpContracts} from './contracts';
 import {
   characterFromContract,
   junkFromContract,
-  partnerProjectFromContract,
   raidFromContract,
   shieldFromContract,
   targetFromContract,
@@ -45,6 +44,7 @@ import {abi as ierc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as erc20Abi} from '../../build/contracts/ERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import {SupportedProject} from '@/views/Treasury.vue';
 import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances, WeeklyReward} from '@/views/Quests.vue';
 import {abi as erc721Abi} from '../../build/contracts/IERC721.json';
 import BigNumber from 'bignumber.js';
@@ -4740,6 +4740,74 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacterCosmetic', id)
         ]);
       },
+
+      async addPartnerProject({state}, {partnerProject}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        return await Treasury.methods.addPartnerProject(
+          partnerProject.name,
+          partnerProject.tokenSymbol,
+          partnerProject.tokenAddress,
+          partnerProject.tokenSupply,
+          Web3.utils.toWei(partnerProject.tokenPrice.toString(), 'ether').toString(),
+          partnerProject.distributionTime,
+          partnerProject.isActive,
+          partnerProject.logo,
+          partnerProject.details,
+          partnerProject.website,
+          partnerProject.note,
+        ).send({from: state.defaultAccount});
+      },
+
+      async getActivePartnerProjects({state}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const ids = await Treasury.methods.getActivePartnerProjectsIds().call(defaultCallOptions(state));
+        const projects = [];
+        for(let i = 0; i < ids.length; i++) {
+          const project = await Treasury.methods.partneredProjects(ids[i]).call(defaultCallOptions(state));
+          projects.push(project);
+        }
+        return projects;
+      },
+
+      async setPartnerProjectLogo({state}, {id, logo}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setProjectLogo(id, logo).send({from: state.defaultAccount});
+      },
+
+      async setPartnerProjectDetails({state}, {id, details}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setProjectDetails(id, details).send({from: state.defaultAccount});
+      },
+
+      async setPartnerProjectWebsite({state}, {id, website}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setProjectWebsite(id, website).send({from: state.defaultAccount});
+      },
+
+      async setPartnerProjectNote({state}, {id, note}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setProjectNote(id, note).send({from: state.defaultAccount});
+      },
+
+      async setPartnerProjectIsActive({state}, {id, isActive}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setIsActive(id, isActive).send({from: state.defaultAccount});
+      },
+
       async fetchPartnerProjects({ state, dispatch }) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
@@ -4756,11 +4824,26 @@ export function createStore(web3: Web3) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        const partnerProject = partnerProjectFromContract(
-          await Treasury.methods.getPartnerProject(id).call(defaultCallOptions(state))
-        );
+        const partnerProjectRaw = await Treasury.methods.partneredProjects(id).call(defaultCallOptions(state));
+        const tokensClaimed = await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(state));
+        const data = await Treasury.methods.getProjectData(id).call(defaultCallOptions(state));
 
-        commit('updatePartnerProjectsState', { partnerProjectId: id, partnerProject });
+        const partnerProject = {
+          id: +partnerProjectRaw[0],
+          name: partnerProjectRaw[1],
+          tokenSymbol: partnerProjectRaw[2],
+          tokenAddress: partnerProjectRaw[3],
+          tokenSupply: +partnerProjectRaw[4],
+          tokensClaimed: +tokensClaimed,
+          tokenPrice: +partnerProjectRaw[5],
+          isActive: partnerProjectRaw[6],
+          logo: data[0],
+          details: data[1],
+          website: data[2],
+          note: data[3],
+        } as SupportedProject;
+
+        commit('updatePartnerProjectsState', { partnerProjectId: partnerProject.id, partnerProject });
       },
 
       async fetchDefaultSlippage({ state, commit }) {
@@ -4786,18 +4869,14 @@ export function createStore(web3: Web3) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        const distributionTime = await Treasury.methods.getProjectDistributionTime(id).call(defaultCallOptions(state));
-
-        return distributionTime;
+        return await Treasury.methods.projectDistributionTime(id).call(defaultCallOptions(state));
       },
 
       async getPartnerProjectClaimedAmount({ state }, id) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        const claimedAmount = await Treasury.methods.getProjectClaimedAmount(id).call(defaultCallOptions(state));
-
-        return claimedAmount;
+        return await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(state));
       },
 
       async getSkillToPartnerRatio({ state, commit }, id) {
