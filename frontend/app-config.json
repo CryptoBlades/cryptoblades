@@ -182,7 +182,7 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://matic-mumbai.chainstacklabs.com"],
           "blockExplorerUrls": ["https://mumbai.polygonscan.com/"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0xb7F7f993C39700d56A0e643EfB389F5356c0CE9e",
+          "exchangeUrl": "https://apeswap.finance/swap?outputCurrency=0xb7F7f993C39700d56A0e643EfB389F5356c0CE9e",
           "fightGas": "0.0095"
         },
         "AVAX": {
@@ -455,7 +455,7 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://matic-mainnet.chainstacklabs.com"],
           "blockExplorerUrls": ["https://polygonscan.com/"],
-          "exchangeUrl": "https://app.apeswap.finance/swap?outputCurrency=0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86",
+          "exchangeUrl": "https://apeswap.finance/swap?outputCurrency=0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86",
           "fightGas": "0.0095"
         },
         "AVAX": {
@@ -498,7 +498,7 @@
           "currencyDecimals": "18",
           "rpcUrls": ["https://api.avax.network/ext/bc/C/rpc"],
           "blockExplorerUrls": ["https://snowtrace.io/"],
-          "exchangeUrl": "https://app.pangolin.exchange/#/swap?inputCurrency=0x483416eb3afa601b9c6385f63cec0c82b6abf1fb&outputCurrency=0xc7198437980c041c805a1edcba50c1ce5db95118",
+          "exchangeUrl": "https://app.pangolin.exchange/#/swap?outputCurrency=0x483416eb3afa601b9c6385f63cec0c82b6abf1fb",
           "fightGas": "0.006"
         },
         "AURORA": {
