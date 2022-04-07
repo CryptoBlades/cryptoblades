@@ -9,10 +9,11 @@
               class="iframe"
               :src="getExchangeUrl"
             />
-            <h4 class="text-center mt-4 mb-4"> {{ $t('skillBalanceDisplay.buyWithFiat') }} </h4>
+            <h4 v-if="getExchangeTransakUrl" class="text-center mt-4 mb-4"> {{ $t('skillBalanceDisplay.buyWithFiat') }} </h4>
             <iframe
               class="iframe"
               :src="getExchangeTransakUrl"
+              v-if="getExchangeTransakUrl"
             />
           </div>
         </b-modal>
