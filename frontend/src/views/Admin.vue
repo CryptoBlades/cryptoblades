@@ -71,6 +71,21 @@ export default Vue.extend({
       component: 'TreasuryAdmin',
     });
     this.tabs.push({
+      title: 'cryptoblades',
+      contract: this.contracts.CryptoBlades,
+      component: 'CryptoBladesAdmin',
+    });
+    this.tabs.push({
+      title: 'blacksmith',
+      contract: this.contracts.Blacksmith,
+      component: 'BlacksmithAdmin',
+    });
+    this.tabs.push({
+      title: 'raid',
+      contract: this.contracts.Raid1,
+      component: 'RaidAdmin',
+    });
+    this.tabs.push({
       title: 'specialWeaponsManager',
       contract: this.contracts.SpecialWeaponsManager,
       component: 'SpecialWeaponsManagerAdmin',
