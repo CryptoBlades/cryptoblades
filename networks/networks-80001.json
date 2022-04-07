@@ -6132,7 +6132,7 @@
     },
     "links": {},
     "address": "0x6D781b7b8cA0637ea91394De1eB6E7ea51f5bC24",
-    "transactionHash": "0x4e504e69cde5e9ee8d4b3d28e4e62efb51b9ac13e31992ca5a7f136d0d39e0cf"
+    "transactionHash": "0x7520c06a31b1dbd00c80e61caa4d08ed97a641bf3d6c6cab0c9fb4371b8adb30"
   },
   "build/contracts/Treasury.json": {
     "events": {
