@@ -195,6 +195,23 @@ interface StakeData {
   unlockTimeLeft: number;
 }
 
+interface Data {
+  textAmount: string,
+  idsToStake: LandIds[],
+  isOpen: boolean,
+  isDeposit: boolean,
+  isLoadingClaim: boolean,
+  isLoadingStake: boolean,
+  startedStaking: boolean,
+  rewardClaimLoading: boolean,
+  stakeUnlockTimeLeftCurrentEstimate: number,
+  stakeRewardDistributionTimeLeftCurrentEstimate: number,
+  ownedLandIds: LandIds[],
+  stakedIds: string[],
+  secondsInterval: ReturnType<typeof setInterval> | null,
+  stakeRewardProgressInterval: ReturnType<typeof setInterval> | null,
+}
+
 type AllStakeTypes = StakeType | NftStakeType;
 
 export default Vue.extend({
@@ -241,23 +258,23 @@ export default Vue.extend({
   },
   data() {
     return {
-      textAmount: '' as string,
-      idsToStake: [] as LandIds[],
-      isOpen: false as boolean,
-      isDeposit: true as boolean,
-      isLoadingClaim: false as boolean,
-      isLoadingStake: false as boolean,
-      startedStaking: false as boolean,
-      rewardClaimLoading: false as boolean,
-      stakeUnlockTimeLeftCurrentEstimate: 0 as number,
-      stakeRewardDistributionTimeLeftCurrentEstimate: 0 as number,
-      ownedLandIds: [] as LandIds[],
-      stakedIds: [] as string[],
-      secondsInterval: null as ReturnType<typeof setInterval> | null,
-      stakeRewardProgressInterval: null as ReturnType<typeof setInterval> | null,
+      textAmount: '',
+      idsToStake: [],
+      isOpen: false,
+      isDeposit: true,
+      isLoadingClaim: false,
+      isLoadingStake: false,
+      startedStaking: false,
+      rewardClaimLoading: false,
+      stakeUnlockTimeLeftCurrentEstimate: 0,
+      stakeRewardDistributionTimeLeftCurrentEstimate: 0,
+      ownedLandIds: [],
+      stakedIds: [],
+      secondsInterval: null,
+      stakeRewardProgressInterval: null,
       CurrentState,
       RewardClaimState,
-    };
+    } as Data;
   },
   computed: {
     ...mapState(['staking', 'defaultAccount']),
