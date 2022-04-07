@@ -4843,13 +4843,13 @@
     },
     "links": {},
     "address": "0x7f249d9862e7fC6349965f505ff0C321058feE40",
-    "transactionHash": "0x83deab7160d0bfb05e24773485fb717498f3cbb3ffe76c79d18541fa5362cf88"
+    "transactionHash": "0xf9e9b7e3dc487baaebc18e1e37da31f097f3bcbddf9dd0fc4696778442ee6cf5"
   },
   "build/contracts/Treasury.json": {
     "events": {},
     "links": {},
     "address": "0xB4a1661a19AA4Ef3DfCD0cE11f474952bd5Ca140",
-    "transactionHash": "0x20d747ef1fca472560eb5963f0f29035bbffbf9f7187fd736de0207b64aa11e8"
+    "transactionHash": "0xd6e144c2d6cbeac33678b6d7c1755d591816ace4978987041024d71f45555dd0"
   },
   "build/contracts/WaxBridge.json": {
     "events": {
