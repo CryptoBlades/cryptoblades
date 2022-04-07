@@ -404,7 +404,7 @@ export function createStore(web3: Web3) {
         const urlCCL = 'cryptoCurrencyList=' + currencyList;
 
         //Transak is not available for Huobi & OKEX
-        if(currencyNetwork === 'Huobi' || currencyNetwork === 'OKEX') return;
+        if(currencyNetwork === 'Huobi' || currencyNetwork === 'OKEx') return;
 
         return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlCCL;
       },
