@@ -221,39 +221,50 @@ export default Vue.extend({
   props: {
     stakeTitle: {
       type: String,
+      required: true,
     },
     stakeType: {
       type: String as PropType<AllStakeTypes>,
+      required: true,
     },
     stakeTokenName: {
       type: String,
+      required: true,
     },
     rewardTokenName: {
       type: String,
+      required: true,
     },
     minimumStakeTime: {
       type: Number,
+      required: true,
     },
     estimatedYield: {
       type: BN,
+      required: true,
     },
     rewardsDuration: {
       type: Number,
+      required: true,
     },
     deprecated: {
       type: Boolean,
     },
     rewardDistributionTimeLeft: {
       type: Number,
+      required: true,
     },
     currentRewardEarned: {
       type: String,
+      required: true,
     },
     totalStaked: {
       type: String,
+      required: true,
     },
     walletBalance: {
       type: String,
+      required: true,
     },
   },
   data() {
