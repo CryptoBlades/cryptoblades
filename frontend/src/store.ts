@@ -401,10 +401,12 @@ export function createStore(web3: Web3) {
         const currencyList = getConfigValue('currencyTransak') || 'BNB,BUSD';
 
         const urlCC = 'defaultCryptoCurrency=' + currencyDefault;
-        const urlNetwork = 'network=' + currencyNetwork;
         const urlCCL = 'cryptoCurrencyList=' + currencyList;
 
-        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlNetwork + '&' + urlCCL;
+        //Transak is not available for Huobi & OKEX
+        if(currencyNetwork === 'Huobi' || currencyNetwork === 'OKEX') return;
+
+        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlCCL;
       },
       ownCharacters(state, getters) {
         return getters.charactersWithIds(state.ownedCharacterIds);
