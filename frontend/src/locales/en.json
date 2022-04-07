@@ -825,7 +825,11 @@
       "weapons": "Weapons",
       "burningManager": "Burning Manager",
       "partnerVault": "Partner Vault",
-      "treasury": "Treasury"
+      "treasury": "Treasury",
+      "cryptoblades": "CryptoBlades",
+      "blacksmith": "Blacksmith",
+      "raid": "Raid",
+      "specialWeaponsManager": "Special Weapons"
     },
     "cbkLand": {
       "minter": "Minter",
@@ -864,7 +868,10 @@
         "WATER": "Water",
         "LIGHTNING": "Lightning",
         "EARTH": "Earth"
-      }
+      },
+      "setBurnPointMultiplierCurrent": "Set burn point multiplier (current: {multiplier})",
+      "multiplier": "Multiplier",
+      "setBurnPointMultiplier": "Set burn point multiplier"
     },
     "burningManager": {
       "playerAddress": "Player address",
@@ -908,6 +915,84 @@
         "NOTE": "Note",
         "IS_ACTIVE": "Is active"
       }
+    },
+    "cryptoblades": {
+      "setCharacterMintValueCurrent": "Set character mint value (current: {cents} cents)",
+      "setWeaponMintValueCurrent": "Set weapon mint value (current: {cents} cents)",
+      "setCharacterMintValue": "Set character mint value",
+      "setWeaponMintValue": "Set weapon mint value",
+      "newValueInCents": "New value (in cents)",
+      "setFightXpGainCurrentDefault32": "Set fight XP gain (current: {xpGain} xp, default: 32 xp)",
+      "setFightXpGain": "Set fight XP gain",
+      "fightXpGain": "Fight XP gain"
+    },
+    "blacksmith": {
+      "setFlatPriceOfItem": "Set flat price of item",
+      "pleaseSelectNonSeriesItem": "Please select non-series item",
+      "nonSeriesItem": {
+        "ITEM_WEAPON_RENAME": "Weapon rename",
+        "ITEM_CHARACTER_RENAME": "Character rename",
+        "ITEM_CHARACTER_TRAITCHANGE_FIRE": "Character trait change (fire)",
+        "ITEM_CHARACTER_TRAITCHANGE_EARTH": "Character trait change (earth)",
+        "ITEM_CHARACTER_TRAITCHANGE_WATER": "Character trait change (water)",
+        "ITEM_CHARACTER_TRAITCHANGE_LIGHTNING": "Character trait change (lightning)",
+        "ITEM_SHIELD": "Shield"
+      },
+      "nonSeriesItemPrice": "Non-series item price",
+      "setFlatPriceOfItemSeries": "Set flat price of item series",
+      "pleaseSelectSeriesItem": "Please select series item",
+      "seriesItem": {
+        "ITEM_COSMETIC_WEAPON": "Weapon cosmetic",
+        "ITEM_COSMETIC_CHARACTER": "Character cosmetic"
+      },
+      "weaponCosmetic": {
+        "GRAYSCALE": "Grayscale",
+        "CONTRAST": "Contrast",
+        "SEPIA": "Sepia",
+        "INVERT": "Invert",
+        "BLUR": "Blur",
+        "FIRE_GLOW": "Fire glow",
+        "EARTH_GLOW": "Earth glow",
+        "LIGHTNING_GLOW": "Lightning glow",
+        "WATER_GLOW": "Water glow",
+        "RAINBOW_GLOW": "Rainbow glow",
+        "DARK_GLOW": "Dark glow",
+        "GHOST": "Ghost",
+        "POLICE": "Police",
+        "NEON_BORDER": "Neon border",
+        "ROTATING_NEON_BORDER": "Rotating neon border",
+        "DIAMOND_BORDER": "Diamond border",
+        "GOLD_BORDER": "Gold border",
+        "SILVER_BORDER": "Silver border",
+        "BRONZE_BORDER": "Bronze border"
+      },
+      "weaponCosmeticPriceInSkillOptional": "Weapon cosmetic price (in skill, optional)",
+      "characterCosmetic": {
+        "GRAYSCALE": "Grayscale",
+        "CONTRAST": "Contrast",
+        "SEPIA": "Sepia",
+        "INVERT": "Invert",
+        "BLUR": "Blur",
+        "FIRE_GLOW": "Fire glow",
+        "EARTH_GLOW": "Earth glow",
+        "LIGHTNING_GLOW": "Lightning glow",
+        "WATER_GLOW": "Water glow",
+        "RAINBOW_GLOW": "Rainbow glow",
+        "DARK_GLOW": "Dark glow",
+        "GHOST": "Ghost",
+        "POLICE": "Police",
+        "NEON_BORDER": "Neon border",
+        "DIAMOND_BORDER": "Diamond border",
+        "GOLD_BORDER": "Gold border",
+        "SILVER_BORDER": "Silver border",
+        "BRONZE_BORDER": "Bronze border"
+      },
+      "characterCosmeticPriceInSkillOptional": "Character cosmetic price (in skill, optional)"
+    },
+    "raid": {
+      "setRaidXpRewardCurrentDefault120": "Set raid XP reward (current: {xpReward} xp, default: 120 xp)",
+      "setRaidXpReward": "Set raid XP reward",
+      "raidXpReward": "Raid XP reward"
     },
     "identifiers": "Identifiers",
     "amount": "Amount",

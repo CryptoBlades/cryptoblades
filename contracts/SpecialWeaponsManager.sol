@@ -78,6 +78,15 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender), "NGA");
     }
 
+    modifier hasMinterRole() {
+        _hasMinterRole();
+        _;
+    }
+
+    function _hasMinterRole() internal view {
+        require(hasRole(MINTER_ROLE, msg.sender), "Not minter");
+    }
+
     modifier isValidOption(uint256 orderOption) {
         _isValidOption(orderOption);
         _;
@@ -291,8 +300,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     }
 
     // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
-    function privatePartnerOrder(address[] calldata receivers, uint256 eventId, uint256 orderOption) external isValidOption(orderOption) isEventActive(eventId) {
-        require(hasRole(MINTER_ROLE, msg.sender), "Not minter");
+    function privatePartnerOrder(address[] calldata receivers, uint256 eventId, uint256 orderOption) external hasMinterRole isValidOption(orderOption) isEventActive(eventId) {
         require(eventInfo[eventId].supply == 0 || receivers.length + eventInfo[eventId].orderedCount <= eventInfo[eventId].supply, "Not enough supply");
         for(uint i = 0; i < receivers.length; i++) {
             if(userOrderOptionForEvent[receivers[i]][eventId] != 0) continue;
@@ -303,8 +311,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     }
 
     // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
-    function privatePartnerMint(address[] calldata receivers, uint256 eventId, uint256 orderOption) external isValidOption(orderOption) isEventActive(eventId) {
-        require(hasRole(MINTER_ROLE, msg.sender), "Not minter");
+    function privatePartnerMint(address[] calldata receivers, uint256 eventId, uint256 orderOption) external hasMinterRole isValidOption(orderOption) isEventActive(eventId) {
         require(eventInfo[eventId].supply == 0 || receivers.length + eventInfo[eventId].orderedCount <= eventInfo[eventId].supply, "Not enough supply");
         for(uint i = 0; i < receivers.length; i++) {
             if(userOrderOptionForEvent[receivers[i]][eventId] != 0 || userForgedAtEvent[receivers[i]][eventId]) continue;
@@ -322,8 +329,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     }
 
     // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
-    function reserveForGiveaways(address reservingAddress, uint256 eventId, uint256 orderOption, uint256 amount) external isValidOption(orderOption) isEventActive(eventId) {
-        require(hasRole(MINTER_ROLE, msg.sender), "Not minter");
+    function reserveForGiveaways(address reservingAddress, uint256 eventId, uint256 orderOption, uint256 amount) external hasMinterRole isValidOption(orderOption) isEventActive(eventId) {
         require(eventInfo[eventId].supply == 0 || amount + eventInfo[eventId].orderedCount <= eventInfo[eventId].supply, "Not enough supply");
         for(uint i = 0; i < amount; i++) {
             eventInfo[eventId].orderedCount++;
@@ -332,6 +338,48 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
                 eventId,
                 uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), reservingAddress, i))),
                 orderOption,
+                eventInfo[eventId].weaponElement
+            );
+        }
+    }
+
+    // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
+    function createManualEvent(string calldata name, uint8 element) external restricted {
+        eventInfo[++eventCount] = EventInfo(
+            name,
+            element,
+            1, // end time 1 to differentiate from non existing events
+            0,
+            0
+        );
+    }
+
+    // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
+    function mintOrderOptionForManualEvent(address[] calldata receivers, uint256 eventId, uint256 orderOption) external hasMinterRole isValidOption(orderOption) {
+        require(eventInfo[eventId].endTime == 1, "Wrong event id");
+        for(uint i = 0; i < receivers.length; i++) {
+            eventInfo[eventId].orderedCount++;
+            mintSpecial(
+                receivers[i],
+                eventId,
+                uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), receivers[i]))),
+                orderOption,
+                eventInfo[eventId].weaponElement
+            );
+        }
+    }
+
+    // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
+    function mintStarsForManualEvent(address[] calldata receivers, uint256 eventId, uint256 stars) external hasMinterRole {
+        require(eventInfo[eventId].endTime == 1, "Wrong event id");
+        require(stars >= 2 && stars <= 4, "Wrong stars");
+        for(uint i = 0; i < receivers.length; i++) {
+            eventInfo[eventId].orderedCount++;
+            mintSpecialWeaponWithStars(
+                receivers[i],
+                eventId,
+                stars,
+                uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), receivers[i]))),
                 eventInfo[eventId].weaponElement
             );
         }
