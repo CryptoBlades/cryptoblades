@@ -65,7 +65,6 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         this.currentRaidXpReward = await this.getRaidXpReward();
-        console.log('currentRaidXpReward', this.currentRaidXpReward);
       } finally {
         this.isLoading = false;
       }
