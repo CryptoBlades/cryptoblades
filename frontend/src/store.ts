@@ -4130,12 +4130,20 @@ export function createStore(web3: Web3) {
         await contract.methods.revokeRole(role, walletAddress).send(defaultCallOptions(state));
       },
 
-      async userHasAdminAccess({state}, {contract}) {
-        if (!contract || !state.defaultAccount) return;
+      async userHasDefaultAdminAccess({state}, {contract}) {
+        if (!contract || !contract.methods.DEFAULT_ADMIN_ROLE || !state.defaultAccount) return;
 
-        const adminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const defaultAdminRole = await contract.methods.DEFAULT_ADMIN_ROLE().call(defaultCallOptions(state));
 
-        return await contract.methods.hasRole(adminRole, state.defaultAccount).call(defaultCallOptions(state));
+        return await contract.methods.hasRole(defaultAdminRole, state.defaultAccount).call(defaultCallOptions(state));
+      },
+
+      async userHasGameAdminAccess({state}, {contract}) {
+        if (!contract || !contract.methods.GAME_ADMIN || !state.defaultAccount) return;
+
+        const gameAdminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+
+        return await contract.methods.hasRole(gameAdminRole, state.defaultAccount).call(defaultCallOptions(state));
       },
 
       async userHasMinterAccess({state}, {contract}) {
@@ -4147,19 +4155,43 @@ export function createStore(web3: Web3) {
       },
 
       async fetchHasAdminAccess({state, commit}) {
-        const {SimpleQuests, CBKLand, Weapons, BurningManager} = state.contracts();
-        if (!BurningManager || !Weapons || !SimpleQuests || !CBKLand || !state.defaultAccount) return;
+        const {SimpleQuests,
+          CBKLand,
+          Weapons,
+          BurningManager,
+          PartnerVault,
+          Treasury,
+          CryptoBlades,
+          Blacksmith,
+        } = state.contracts();
+        if (!SimpleQuests
+          || !CBKLand
+          || !Weapons
+          || !BurningManager
+          || !PartnerVault
+          || !Treasury
+          || !CryptoBlades
+          || !Blacksmith
+          || !state.defaultAccount) return;
 
         const simpleQuestsAdminRole = await SimpleQuests.methods.GAME_ADMIN().call(defaultCallOptions(state));
         const cbkLandAdminRole = await CBKLand.methods.GAME_ADMIN().call(defaultCallOptions(state));
         const weaponsAdminRole = await Weapons.methods.GAME_ADMIN().call(defaultCallOptions(state));
         const burningManagerAdminRole = await BurningManager.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const partnerVaultAdminRole = await PartnerVault.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const treasuryAdminRole = await Treasury.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const cryptoBladesAdminRole = await CryptoBlades.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const blacksmithAdminRole = await Blacksmith.methods.DEFAULT_ADMIN_ROLE().call(defaultCallOptions(state));
 
         const promises: Promise<boolean>[] = [
           SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
           CBKLand.methods.hasRole(cbkLandAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
           Weapons.methods.hasRole(weaponsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
           BurningManager.methods.hasRole(burningManagerAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          PartnerVault.methods.hasRole(partnerVaultAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          Treasury.methods.hasRole(treasuryAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          CryptoBlades.methods.hasRole(cryptoBladesAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          Blacksmith.methods.hasRole(blacksmithAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         ];
 
         for (const promise of promises) {
@@ -4227,6 +4259,94 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacters', state.ownedCharacterIds),
           dispatch('fetchFightRewardXp')
         ]);
+      },
+
+      async setCharacterMintValue({state}, {cents}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        await CryptoBlades.methods.setCharacterMintValue(cents).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async setWeaponMintValue({state}, {cents}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        await CryptoBlades.methods.setWeaponMintValue(cents).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async getCharacterMintValue({state}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        const fee = +await CryptoBlades.methods.mintCharacterFee().call(defaultCallOptions(state));
+        return Number(BigInt(fee) >> BigInt(64)) * 100;
+      },
+
+      async getWeaponMintValue({state}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        const fee = +await CryptoBlades.methods.mintWeaponFee().call(defaultCallOptions(state));
+        return Number(BigInt(fee) >> BigInt(64)) * 100;
+      },
+
+      async getFightXpGain({state}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        return +await CryptoBlades.methods.fightXpGain().call(defaultCallOptions(state));
+      },
+
+      async setFightXpGain({state}, {xpGain}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        await CryptoBlades.methods.setFightXpGain(xpGain).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async getRaidXpReward({state}) {
+        const {Raid1} = state.contracts();
+        if (!Raid1) return;
+
+        return +await Raid1.methods.xpReward().call(defaultCallOptions(state));
+      },
+
+      async setRaidXpReward({state}, {xp}) {
+        const {Raid1} = state.contracts();
+        if (!Raid1) return;
+
+        await Raid1.methods.setXpReward(xp).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async setFlatPriceOfItem({state}, {itemIndex, price}) {
+        const {Blacksmith} = state.contracts();
+        if (!Blacksmith) return;
+
+        price = Web3.utils.toWei(price.toString(), 'ether').toString();
+
+        await Blacksmith.methods.setFlatPriceOfItem(itemIndex, price).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async setFlatPriceOfItemSeries({state}, {itemIndex, indices, prices}) {
+        const {Blacksmith} = state.contracts();
+        if (!Blacksmith) return;
+
+        prices = prices.map((price: number) => Web3.utils.toWei(price.toString(), 'ether').toString());
+
+        await Blacksmith.methods.setFlatPriceOfItemSeries(itemIndex, indices, prices).send({
+          from: state.defaultAccount,
+        });
       },
 
       async fetchWaxBridgeDetails({ state, commit }) {
@@ -5699,6 +5819,20 @@ export function createStore(web3: Web3) {
         if(!BurningManager || !state.defaultAccount) return;
 
         return await BurningManager.methods.vars(2).call(defaultCallOptions(state));
+      },
+
+      async getBurnPointMultiplier({ state }) {
+        const { Weapons } = state.contracts();
+        if(!Weapons || !state.defaultAccount) return;
+
+        return await Weapons.methods.burnPointMultiplier().call(defaultCallOptions(state));
+      },
+
+      async setBurnPointMultiplier({state}, {multiplier}) {
+        const { Weapons } = state.contracts();
+        if(!Weapons || !state.defaultAccount) return;
+
+        await Weapons.methods.setBurnPointMultiplier(multiplier).send({ from: state.defaultAccount });
       },
 
       async fetchSpecialWeaponEvents({ state, dispatch, commit }) {
