@@ -18,7 +18,7 @@
         </div>
       </div>
       <div class="stake-stats-item">
-        <div class="stake-stats-item-title">{{ $t('stake.StakeSelectorItem.STAKE_LOCKED') }}</div>
+        <div class="stake-stats-item-title">{{ $t('stake.StakeSelectorItem.stakeLocked') }}</div>
         <div class="stake-stats-item-value">{{ minimumStakeTime !== 0 ? minimumStakeTimeFormatted: 'No Lock' }}</div>
       </div>
       <div class="stake-stats-item" v-if="rewardsDuration !== 0">
