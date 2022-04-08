@@ -2699,7 +2699,7 @@
     },
     "links": {},
     "address": "0x5d80C7DB46a5CbaBd4Ac8f58c9fa5358E3472847",
-    "transactionHash": "0x7e6ef0afc978f88beb9155bec9943e094ccdd34898448ec950e2f3e4e40d2f77"
+    "transactionHash": "0x0e9ff1eaceeef17ab671043dce045e289c534c03b45c9da4e073b4fbb7a52266"
   },
   "build/contracts/Junk.json": {
     "events": {
@@ -4628,13 +4628,13 @@
     },
     "links": {},
     "address": "0x7d4D4D9e137A6b38EFED60862Ce0BbD57F370aAD",
-    "transactionHash": "0x092ed5098f900d1f99e56a6d1d83fb5000f6bc8a9db3b459586b0a4b9402e88d"
+    "transactionHash": "0xe1b0fbd8391a9d5cd5ab8863e611870ffa0d33949816b317ea0436e034f74313"
   },
   "build/contracts/Treasury.json": {
     "events": {},
     "links": {},
     "address": "0xC2d60EB637F1488f68aa2605c62a421B25e09247",
-    "transactionHash": "0x2cfec104da89c5beada5010b75bce4e738a1fddddff6a91bb71703b6dfd179ce"
+    "transactionHash": "0xb07147c898b85d0295234036cf268b05b81ad33fd01613778216b1ad693daed2"
   },
   "build/contracts/WaxBridge.json": {
     "events": {

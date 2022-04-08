@@ -4254,13 +4254,13 @@
     },
     "links": {},
     "address": "0x864F131e094c0dac9ffF56770Af0340C4Acd2498",
-    "transactionHash": "0x5bedbca474a2b691bb5973c489d929aa9142274ba8196d90502be569045dd45b"
+    "transactionHash": "0x14e6a3cd4d433d2fa281ae61ff2637bbe834436451e189d334eeae637ad92fe0"
   },
   "build/contracts/Treasury.json": {
     "events": {},
     "links": {},
     "address": "0x7843Bd2aDdE5E54bD6e61C28fA89009240a48C08",
-    "transactionHash": "0x7dbca581c5260635470140f31f0b673aa10fddec967d396263c12338cfbaaa1f"
+    "transactionHash": "0xa90e376268f88f894013ed42ba7faa9c9ca8bcfa6c1d76242cf161f14e5a82a2"
   },
   "build/contracts/WaxBridge.json": {
     "events": {

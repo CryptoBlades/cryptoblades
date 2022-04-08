@@ -2120,7 +2120,7 @@
     },
     "links": {},
     "address": "0x929059Fef67b88CE2F4127e59B50bEA123981998",
-    "transactionHash": "0x6b66b290f2364ce29910b5acd9bc863a580e5dbe568fb7c6d7e2e49578b694b2"
+    "transactionHash": "0x5d4449ea002461f333dec031a2b63ae3898f62995a744b7fc2e25d2b087d191b"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -2591,7 +2591,7 @@
     },
     "links": {},
     "address": "0x4D1559DF0B0724aC4bb095C713564211613683Ed",
-    "transactionHash": "0x1ac20f2e37ab6f3d7faf263bafb4150f8f2712fd771fca36b7137db7cfa2cc1e"
+    "transactionHash": "0x8922010af9d45df2b3fa5925b9cad004d1fda698243319f167e73bafc1679c03"
   },
   "build/contracts/Junk.json": {
     "events": {
@@ -5993,7 +5993,8 @@
       }
     },
     "links": {},
-    "address": "0x9679517Bdfec8f130B7eC79e92a6c16472E38Cf1"
+    "address": "0x9679517Bdfec8f130B7eC79e92a6c16472E38Cf1",
+    "transactionHash": "0xa7b6ba900ec28b24127dfc8a0788d4d87f1e1b95cfa0e29433e7db242e749925"
   },
   "build/contracts/Treasury.json": {
     "events": {
