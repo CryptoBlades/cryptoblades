@@ -239,7 +239,7 @@ export default {
     },
 
     setBgImage(){
-      return 'blacksmith-bg';
+      // return 'blacksmith-bg';
     },
 
     checkStorage() {

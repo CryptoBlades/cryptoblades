@@ -1,5 +1,111 @@
 <template>
-  <div class="body main-font">
+  <div class="body main-font blacksmith-page">
+    <div class="bg-tint"></div>
+    <Transition name="slide-fade">
+    <div class="forging-modal" v-if="showModal" v-on:click.self="closeModal()">
+      <!-- MODAL FOR FORGING A WEAPON -->
+      <div class="body-forge" v-if="modalType =='forge'">
+        <div class="row new-weapons" v-if="!spin">
+          <img src="../assets/header-line.png" alt="">
+          <h3>The Dwarves Have Forged Your Weapons</h3>
+        </div>
+        <div class="weapon-list" v-if="!spin">
+          <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="[3]" :newWeapon="true"/>
+        </div>
+        <div class="footer-close" v-if="!spin">
+          <img src="../assets/separator.png" alt="">
+          <span>Tap Anywhere To Close</span>
+          <span class="close-icon"></span>
+        </div>
+      </div>
+      <div class="body-forge" v-if="spin && modalType == 'forge'">
+        <div class="row new-weapons">
+          <h3>Forging Weapon...</h3>
+        </div>
+        <div class="forging">
+          <div class="spinning-box">
+            <div class="inner-spin"></div>
+            <div class="diamond-box"></div>
+            <span class="hammer-loading"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOR REFORGE CONFIRMATION -->
+       <div class="body-forge " v-if="modalType == 'dustReforge' || modalType == 'successReforge'">
+        <div class="forge-header" v-if="modalType == 'successReforge'">
+          <img src="../assets/header-line.png" alt="">
+          <h3>REFORGE SUCCESSFULL</h3>
+        </div>
+        <div class="header-close" v-if="modalType == 'dustReforge'">
+          <img src="../assets/separator.png" alt="">
+          <h4>Dust Reforge Confirmation</h4>
+        </div>
+        <div class="forge-content">
+          <div>
+            <span class="reforge-img" :style="`content:url('.${getWeaponArt(getWeaponToUpgrade())}')`"></span>
+          </div>
+          <div>
+            <b-row class="power-rolled">
+              <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
+                <h5>Low Star Burn</h5>
+              </b-col>
+              <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
+                <img src="../assets/arrow-right.png" alt="">
+              </b-col>
+              <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
+                <h5>{{lesserDust}}</h5>
+              </b-col>
+            </b-row>
+            <b-row class="power-rolled">
+              <b-col cols="4"  lg="5" sm="4" md="4" class="win-details">
+                <h5>Four Star Burn</h5>
+              </b-col>
+              <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
+                <img src="../assets/arrow-right.png" alt="">
+              </b-col>
+              <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
+                <h5>{{greaterDust}}</h5>
+              </b-col>
+            </b-row>
+             <b-row class="power-rolled">
+              <b-col cols="4"  lg="5" sm="4" md="4" class="win-details">
+                <h5>Five Star Burn</h5>
+              </b-col>
+              <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
+                <img src="../assets/arrow-right.png" alt="">
+              </b-col>
+              <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
+                <h5>{{powerfulDust}}</h5>
+              </b-col>
+            </b-row>
+            <b-row class="power-rolled" v-if="modalType == 'successReforge'">
+              <b-col cols="12"  lg="12" sm="12" md="12" class="win-details reforge-bonus">
+                <h5>Reforge Bonus: {{getWeaponInfo('bonusPower')}}
+                <span>(<b-icon icon="caret-up-fill" variant="danger" />{{ totalBonusPower}})</span></h5>
+              </b-col>
+            </b-row>
+          </div>
+        </div>
+         <div class="footer-close" v-if="modalType == 'dustReforge'">
+           <div class="d-flex align-items-center info">
+              <b-icon icon="exclamation-circle" variant="danger" /> &nbsp; {{$t('blacksmith.cantBeUndone')}}
+           </div>
+            <img class="mb-2" src="../assets/separator.png" alt="">
+            <button class="ml-3 mt-4 forge-btns" @click="onReforgeWeaponWithDust()">
+              <span>CONFIRM</span>
+            </button>
+        </div>
+        <div class="footer-close" v-if="modalType == 'successReforge'">
+          <img src="../assets/separator.png" alt="">
+          <span>Tap Anywhere To Close</span>
+          <span class="close-icon"></span>
+        </div>
+      </div>
+    </div>
+    </Transition>
+
+
     <b-tabs justified  style="overflow-x:auto;height:90vh">
       <b-tab>
         <div class="blank-slate" v-if="ownWeapons.length === 0">
@@ -29,14 +135,21 @@
                 </div>
               </div>
               <div class="button-div">
-                <b-button
+                <button class="ml-3 reforgeDust"
+                  v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
+                  @click="displayDustReforge()"
+                  tagname="reforge_weapon"
+                  v-tooltip="$t('blacksmith.useDust')">
+                  <span>{{$t('blacksmith.reforgeWithDust').toUpperCase()}}</span>
+                </button>
+                <!-- <b-button
                         class="ml-3"
                         v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
                         @click="displayDustReforge()"
                         tagname="reforge_weapon"
                         v-tooltip="$t('blacksmith.useDust')">
                   <span>{{$t('blacksmith.reforgeWithDust').toUpperCase()}}</span>
-                </b-button>
+                </b-button> -->
                 <!-- <b-button
                         variant="primary"
                         class="ml-3"
@@ -45,28 +158,38 @@
                         v-tooltip="$t('blacksmith.burnWeapons')">
                   {{$t('blacksmith.createDust')}}
                 </b-button> -->
-                <b-button
+                <button
+                  class="ml-3"
+                  @click="onClickSpecialForge()"
+                  :disabled="disableForge"
+                  v-tooltip="$t('blacksmith.specialForgeTooltip')">
+                <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
+                <span v-else class="gtag-link-others">
+                  <span>{{$t('blacksmith.specialForge').toUpperCase()}}</span>
+                </span>
+                </button>
+                <!-- <b-button
                         class="ml-3"
                         @click="onClickSpecialForge()"
                         :disabled="disableForge"
                         v-tooltip="$t('blacksmith.specialForgeTooltip')">
                   <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
                   <span v-else class="gtag-link-others"><span>{{$t('blacksmith.specialForge').toUpperCase()}}</span></span>
-                </b-button>
-                <b-button
-                        class="ml-3"
-                        @click="onClickForge(0)"
-                        :disabled="disableForge"
-                        v-tooltip="$t('blacksmith.forgeNew')">
+                </b-button> -->
+
+                <button
+                  class="ml-3"
+                  @click="onClickForge(0)"
+                  :disabled="disableForge"
+                  v-tooltip="$t('blacksmith.forgeNew')">
                   <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
                   <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
                     <span>{{$t('blacksmith.forge').toUpperCase()}} x1</span> <br>
                      ({{ forgeCost }} SKILL)
-                     <!-- <i class="fas fa-plus"></i> -->
                   </span>
-                </b-button>
+                </button>
 
-                <b-button
+                <button
                         class="ml-3"
                         @click="onClickForge(1)"
                         :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
@@ -75,9 +198,8 @@
                   <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
                     <span>{{$t('blacksmith.forge').toUpperCase()}} x10</span><br>
                     ({{ (forgeCost*10).toFixed(4) }} SKILL)
-                    <!-- <i class="fas fa-plus"></i> -->
                   </span>
-                </b-button>
+                </button>
 
                 <!-- FOR STAKINGGGGGG -->
                   <!-- <b-checkbox
@@ -134,7 +256,7 @@
                     </b-form-select>
                   </div>
                   <div class="row justify-content-md-center margin-top">
-                    <b-button
+                    <button
                       v-if="clickedForgeButton === 0"
                       variant="primary"
                       class="row justify-content-md-center forge-btns"
@@ -147,8 +269,8 @@
                         <span>
                           ({{Number.parseFloat(forgeCost * this.chosenElementFee).toFixed(2)}} SKILL)
                         </span>
-                    </b-button>
-                    <b-button
+                    </button>
+                    <button
                       v-if="clickedForgeButton === 1"
                       variant="primary"
                       class="row justify-content-md-center forge-btns"
@@ -161,31 +283,9 @@
                         <span>
                           ({{Number.parseFloat(forgeCost * this.chosenElementFee * 10).toFixed(2)}} SKILL)
                         </span>
-                    </b-button>
+                    </button>
                   </div>
                 </b-modal>
-
-                <!-- // Forging Modal ---------------------------------->
-                <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
-                  <template #modal-header>
-                    <div v-if="!spin" class="new-weapon-header-text text-center">
-                      <strong>{{$t('blacksmith.forgeResults')}}</strong>
-                    </div>
-                    <div v-if="spin" class="new-weapon-header-text text-center">
-                      <strong>{{$t('blacksmith.forgingSwords')}}</strong>
-                    </div>
-                  </template>
-                  <div class="text-center">
-                    <b-spinner v-if="spin" type="grow" :label="$t('blacksmith.loading')"></b-spinner>
-                    <b-spinner v-if="spin" type="grow" :label="$t('blacksmith.loading')"></b-spinner>
-                    <b-spinner v-if="spin" type="grow" :label="$t('blacksmith.loading')"></b-spinner>
-                  </div>
-                  <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true"/>
-                  <template #modal-footer></template>
-                </b-modal>
-
-
-
               </div>
             </div>
             <!-- <div class="buttons-panel">
@@ -241,7 +341,142 @@
           </div>
         </div>
 
-        <div class="row mt-3">
+
+        <!-- Reforge Dust Section -->
+        <div class="row mt-3" v-if="reforgeWeaponId">
+          <div class="col-lg-4 reforge-dust">
+             <div class="magic-circle">
+              <span class="inner" :class="magicCircleSpeed ? 'faster reverse' : 'slower reverse'"></span>
+              <span class="outer" :class="magicCircleSpeed ? 'faster' : 'slower'"></span>
+            </div>
+            <span class="weapon-img" :style="`content:url('.${getWeaponArt(getWeaponToUpgrade())}')`"></span>
+          </div>
+          <div class="col-lg-8 weapon-menu">
+            <div class="row">
+              <div class="col-lg-12">
+                <h2>{{getWeaponInfo('name')}}</h2>
+                <div class="details">
+                  <span>Battle Power: {{getWeaponInfo('stat2Value') + getWeaponInfo('stat1Value') + getWeaponInfo('stat3Value')}}</span>
+                  <span>Rarity: {{getWeaponInfo('rarity')}}</span>
+                  <span>Element: {{getWeaponInfo('element')}}</span>
+                  <!-- <span>Weapon Rank: 120,031</span> -->
+                </div>
+
+                <div class="power-status">
+                  <!-- <div>
+                    <span id="earth"></span>
+                    <span>POWER</span>
+                    <p>+311</p>
+                  </div> -->
+                  <div>
+                    <span :class="getWeaponInfo('stat1').toLowerCase() + '-icon'"></span>
+                    <span>{{getWeaponInfo('stat1')}}</span>
+                    <p>+{{getWeaponInfo('stat1Value')}}</p>
+                  </div>
+                  <div>
+                   <span :class="getWeaponInfo('stat2').toLowerCase() + '-icon'"></span>
+                    <span>{{getWeaponInfo('stat2')}}</span>
+                    <p>+{{getWeaponInfo('stat2Value')}}</p>
+                  </div>
+                  <div>
+                   <span :class="getWeaponInfo('stat3').toLowerCase() + '-icon'"></span>
+                    <span>{{getWeaponInfo('stat3')}}</span>
+                    <p>+{{getWeaponInfo('stat3Value')}}</p>
+                  </div>
+                </div>
+                <div class="row menus">
+                  <div class="col-lg-3 active-tab"> REFORGE </div>
+                  <div class="col-lg-3"> <span class="lock-icon"></span> UPGRADE </div>
+                  <div class="col-lg-3"> <span class="lock-icon"></span> ENCHANT </div>
+                  <div class="col-lg-3"> <span class="lock-icon"></span> SKINS </div>
+                </div>
+                <div class="desc-details">
+                  <span>
+                    Reforging weapons is the process of spending SKILL tokens to burn one weapon
+                    into another. The target weapon receives bonus power, and the burned weapon disappears.
+                  </span>
+                </div>
+
+                <!-- LB -->
+                <div class="dust-gauge">
+                  <div>
+                    <div class="dust-bg">
+                      <span class="dust-img-lesser"></span>
+                    </div>
+                    <div>
+                      <p class="p-0 m-0">Low Star Burn</p>
+                      <!-- <span>Req. 10/500</span> -->
+                      <span>15 power per level</span>
+                    </div>
+                  </div>
+                  <div>
+                    <input v-model="lesserDust" type="range" min="0" :max="getLesserDust()" value="0" steps="1">
+                    <div class="value right">{{lesserDust}}/{{getLesserDust()}} Bonus Damage</div>
+                  </div>
+                  <div>
+                    <span>{{lesserDust}}</span>
+                    <span class="cursor-p" @click="lesserDust = getLesserDust()">Max</span>
+                  </div>
+                </div>
+
+                <!-- 4B -->
+                <div class="dust-gauge">
+                  <div>
+                    <div class="dust-bg">
+                      <span class="dust-img-greater"></span>
+                    </div>
+                    <div>
+                      <p class="p-0 m-0">Four Star Burn</p>
+                      <!-- <span>Req. 10/500</span> -->
+                      <span>30 power per level</span>
+                    </div>
+                  </div>
+                  <div>
+                    <input v-model="greaterDust" type="range" min="0" :max="getGreaterDust()" value="0" steps="1">
+                    <div class="value right">{{greaterDust}}/{{getGreaterDust()}} Bonus Damage</div>
+                  </div>
+                  <div>
+                    <span>{{greaterDust}}</span>
+                    <span class="cursor-p" @click="greaterDust = getGreaterDust()">Max</span>
+                  </div>
+                </div>
+
+                <!-- 5B -->
+                <div class="dust-gauge">
+                  <div>
+                    <div class="dust-bg">
+                      <span class="dust-img-powerful"></span>
+                    </div>
+                    <div>
+                      <p class="p-0 m-0">Five Star Burn</p>
+                      <!-- <span>Req. 10/500</span> -->
+                      <span> 75 power per level</span>
+                    </div>
+                  </div>
+                  <div>
+                    <input v-model="powerfulDust" type="range" min="0" :max="getPowerfulDust()" value="0" steps="1">
+                    <div class="value right">{{powerfulDust}}/{{getPowerfulDust()}} Bonus Damage</div>
+                  </div>
+                  <div>
+                    <span>{{powerfulDust}}</span>
+                    <span class="cursor-p" @click="powerfulDust = getPowerfulDust()">Max</span>
+                  </div>
+                </div>
+                <div class="btn-forge">
+                  <button class="ml-3 forge-btns"
+                     tagname="confirm_forge_weapon"
+                      :class="'confirmReforge'"
+                      @click="showDustReforgeConfirmation"
+                      :disabled="lesserDust == '0' && greaterDust == '0' && powerfulDust == '0'"
+                      v-tooltip="$t('blacksmith.reforgeSelected')">
+                      <span>REFORGE</span>
+                      <span>({{ dustReforgeCost }} SKILL)</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="col-md-12" v-if="showReforge && showReforgeDust === true">
             <div>
               <div class="col-lg-12 weapon-container">
@@ -491,11 +726,15 @@
 
 <script lang='ts'>
 import BN from 'bignumber.js';
-import WeaponGrid from '../components/smart/WeaponGrid.vue';
+import WeaponGrid from '../components/smart/WeaponGridNew.vue';
 import BigButton from '../components/BigButton.vue';
+import { getWeaponArt } from '../weapon-arts-placeholder';
+import { getWeaponRarity } from '../weapon-element';
+import gsap from 'gsap';
+import { getCleanName } from '../rename-censor';
 import Vue from 'vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
-import WeaponIcon from '../components/WeaponIcon.vue';
+import WeaponIcon from '../components/WeaponIconNew.vue';
 import { BModal } from 'bootstrap-vue';
 import NftList from '@/components/smart/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
@@ -589,7 +828,11 @@ export default Vue.extend({
       targetSkin: '',
       haveWeaponCosmetic1: 0,
       haveWeaponCosmetic2: 0,
-      selectedSpecialWeaponEventId: 0
+      selectedSpecialWeaponEventId: 0,
+      showModal: false,
+      modalType: '',
+      magicCircleSpeed: false,
+      totalBonusPower: 0,
     } as Data;
   },
 
@@ -599,7 +842,7 @@ export default Vue.extend({
     ...(mapGetters([
       'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
       'getPowerfulDust', 'getGreaterDust', 'getLesserDust',
-      'stakedSkillBalanceThatCanBeSpent'
+      'stakedSkillBalanceThatCanBeSpent', 'getWeaponName',
     ]) as Accessors<StoreMappedGetters>),
 
     totalSkillBalance(): BN {
@@ -627,6 +870,14 @@ export default Vue.extend({
       if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8).multipliedBy(10))).isLessThan(0)){
         this.disableX10ForgeWithStaked = true;
       }
+    },
+    showModal(){
+      gsap.to(this, {
+        tweenValue: this.totalBonusPower,
+        onUpdate: () => {
+          this.totalBonusPower = Math.ceil(this.tweenValue);
+        }
+      });
     }
   },
 
@@ -677,6 +928,26 @@ export default Vue.extend({
       Events.$emit('show-special-forge-modal');
     },
 
+    getWeaponInfo(type: string){
+      const weaponActive  = this.ownWeapons.find(x => x.id === this.reforgeWeaponId);
+      this.totalBonusPower = Number(this.lesserDust) + Number(this.greaterDust) + Number(this.powerfulDust);
+
+      if(type === 'name') return getCleanName(this.getWeaponName(weaponActive.id, weaponActive.stars));
+      else if(type === 'rarity') return this.getWeaponRarity(weaponActive.stars);
+      else if(type === 'element') return weaponActive.element;
+      else if(type === 'stat1') return weaponActive.stat1;
+      else if(type === 'stat1Type') return weaponActive.stat1Type;
+      else if(type === 'stat1Value') return weaponActive.stat1Value;
+      else if(type === 'stat2') return weaponActive.stat2;
+      else if(type === 'stat2Type') return weaponActive.stat2Type;
+      else if(type === 'stat2Value') return weaponActive.stat2Value;
+      else if(type === 'stat3') return weaponActive.stat3;
+      else if(type === 'stat3Type') return weaponActive.stat3Type;
+      else if(type === 'stat3Value') return weaponActive.stat3Value;
+      else if(type === 'bonusPower') return weaponActive.bonusPower;
+      // eslint-disable-next-line no-var
+    },
+
     async onForgeWeapon() {
       if(this.disableForge) return;
 
@@ -698,7 +969,6 @@ export default Vue.extend({
         });
 
       } catch (e) {
-        console.error(e);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
       } finally {
         clearTimeout(failbackTimeout);
@@ -782,7 +1052,9 @@ export default Vue.extend({
     },
 
     showDustReforgeConfirmation() {
-      (this.$refs['dustreforge-confirmation-modal'] as BModal).show();
+      this.modalType = 'dustReforge';
+      this.showModal = true;
+      // (this.$refs['dustreforge-confirmation-modal'] as BModal).show();
     },
 
     showMassDustConfirmation() {
@@ -849,20 +1121,24 @@ export default Vue.extend({
 
       this.newForged.splice(0, this.ownedWeaponIds.length - offset);
 
-
       // eslint-disable-next-line no-constant-condition
+      console.log(this.newForged);
       if (this.newForged.length > 0 && !this.onError){
+        this.showModal = true;
         this.spin = true;
-        (this.$refs['new-weapons'] as BModal).show();
-
         setTimeout(() => {
           this.spin = false;
         }, 10000);
       }
-
     },
 
+    getWeaponArt,
+    getWeaponRarity,
+
     async onReforgeWeaponWithDust() {
+      this.showModal = false;
+      this.magicCircleSpeed = true;
+
       try {
         await this.reforgeWeaponWithDust({
           reforgeWeaponId: this.reforgeWeaponId,
@@ -871,13 +1147,21 @@ export default Vue.extend({
           powerfulDust:this.powerfulDust
         });
 
-        this.lesserDust = '0';
-        this.greaterDust = '0';
-        this.powerfulDust = '0';
-
+        this.modalType = 'successReforge';
+        this.showModal = true;
+        this.magicCircleSpeed = false;
       } catch (e) {
         console.error(e);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotReforge'));
+      }
+    },
+
+    closeModal(){
+      this.showModal = false;
+      if(this.modalType === 'successReforge'){
+        this.lesserDust = '0';
+        this.greaterDust = '0';
+        this.powerfulDust = '0';
       }
     },
 
@@ -902,7 +1186,7 @@ export default Vue.extend({
     WeaponIcon,
     BModal,
     NftList,
-    SpecialWeaponForgeModal
+    SpecialWeaponForgeModal,
   },
 });
 </script>
@@ -917,10 +1201,45 @@ export default Vue.extend({
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: 30px;
 }
 
 .buttons-panel > h2{
   font-family: 'Trajan', 'serif';
+}
+
+.forging-modal{
+  position: absolute;
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.685), rgba(0, 0, 0, 0.897), rgba(0, 0, 0, 0.897), rgba(0, 0, 0, 0.87), #000);
+  height:100%;
+  width: 100%;
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.weapon-list{
+  animation: revealUp 1s;
+}
+
+@keyframes revealUp {
+  0%   {bottom: 0px;}
+  25%  {bottom: 100px;}
+  50%  {bottom: 200px;}
+  75%  {bottom: 300px;}
+  100% {bottom: 500px;}
+}
+
+
+.weapon-list{
+  width: 100%;
+}
+
+.forging-modal > div{
+  width: 90%;
+  margin-top: -170px;
 }
 
 .forge-btns > span:nth-child(1){
@@ -928,6 +1247,219 @@ export default Vue.extend({
   font-size: 20px;
   color: #fff;
 }
+
+.spinning-box{
+  height: 12em;
+  width: 12em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+}
+
+.inner-spin{
+  position: absolute;
+  margin: auto;
+  height: 7em;
+  width: 7em;
+  border: 2px solid #fff;
+  -webkit-animation: rotating 2.5s linear infinite;
+  -moz-animation: rotating 2.5s linear infinite;
+  -ms-animation: rotating 2.5s linear infinite;
+  -o-animation: rotating 2.5s linear infinite;
+  animation: rotating 2.5s linear infinite;
+}
+
+.diamond-box{
+  position: absolute;
+  margin: auto;
+  height: 7em;
+  width: 7em;
+  border: 2px solid #fff;
+  transform: rotate(45deg);
+  animation: blinkingBorder 1s infinite;
+}
+
+
+/* changing color border */
+@keyframes blinkingBorder {
+  from {boder: 2px solid #e9ca7a83;}
+  to {border: 2px solid #e9ca7a10;}
+}
+
+/* rotating box */
+@-webkit-keyframes rotating /* Safari and Chrome */ {
+  from {
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotating {
+  from {
+    -ms-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -ms-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+
+
+.wep-separator{
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.wep-separator > img{
+  width: 350px;
+}
+
+.hammer-loading{
+  content: url('../assets/blacksmith/hammer.png');
+  height: 80px;
+  width: 80px;
+}
+
+.forging{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+
+.forge-header{
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  margin: auto;
+}
+
+/* .forge-header > img{
+  background-color: #9e8a57;
+} */
+
+.forge-header > h3{
+  font-family: Trajan;
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.new-weapons > h3{
+  font-family: Trajan;
+  margin-bottom: 30px;
+  font-weight: 500;
+}
+
+.new-weapons {
+  display: flex;
+  justify-content: center;
+}
+
+.footer-close {
+  margin: auto;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-close {
+  margin: auto;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.info{
+  font-family: Roboto;
+  color: rgba(255, 255, 255, 0.658);
+  font-size: 13px !important;
+  margin-bottom: 20px;
+}
+
+.reforge-bonus{
+  margin-top: 20px;
+  text-align: left !important;
+}
+
+.reforge-bonus > h5{
+  color: #fff !important;
+}
+
+.reforge-bonus > h5 > span{
+  color: #e9c97a !important;
+  transition: all 1s ease-in-out;
+}
+
+
+/* MODAL TRANSITION */
+.slide-fade-enter-active, .slide-fade-leave-active  {
+  transition: all 0.3s ease-in-out;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to {
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+
+
+.header-close > h4{
+  font-family: Trajan;
+  width: 30vw;
+  margin: auto;
+  font-weight: 600;
+  margin-top: 1.1em;
+  margin-bottom: 1.5em;
+}
+
+
+.close-icon{
+  content: url('../assets/close-btn.png');
+  height: 30px;
+  width: 30px;
+}
+
+.footer-close > span{
+  font-family: Roboto;
+  color: #fff;
+  margin-top: 20px;
+}
+
+.footer-close > h3{
+  font-family: Trajan;
+  width: 30vw;
+  margin: auto;
+  font-weight: 600;
+  margin-top: 1.1em;
+  margin-bottom: 1.5em;
+}
+
+.forge-btns > span:nth-child(2){
+  font-size: 13px;
+  color: #e9c97a;
+}
+
 
 
 .forge-btns{
@@ -949,6 +1481,10 @@ export default Vue.extend({
 }
 
 
+.btn-forge{
+  margin-top: 40px;
+}
+
 .button-div > button{
   display: flex;
   flex-direction: column;
@@ -966,6 +1502,7 @@ export default Vue.extend({
   object-fit: fill;
   border: none !important;
 }
+
 
 /* TO TEMPORARILY OVERRIDE THE PRIMARY BUTTON HOVER EFFECT */
 .button-div > button:hover, .forge-btns:hover{
@@ -998,8 +1535,20 @@ export default Vue.extend({
  color: #e9c97a;
 }
 
+.reforgeDust > span{
+  font-family: Oswald;
+  font-size: 17px;
+  color: #fff !important;
+}
+
 
 .button-div > button >span > span{
+  font-family: Oswald;
+  font-size: 20px;
+  color: #fff;
+}
+
+.button-div > button:nth-child(1) >span > span{
   font-family: Oswald;
   font-size: 20px;
   color: #fff;
@@ -1047,6 +1596,358 @@ export default Vue.extend({
 }
 
 
+/* STYLING FOR WEAPON REFORGE */
+.content .row .set-normal{
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
+
+.blacksmith-page{
+  background-image: url('../assets/blacksmith/cb-reforge-bg.jpg');
+}
+
+.reforge-dust{
+  height: 90vh;
+}
+
+.bg-tint{
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.555);
+}
+
+
+.weapon-img{
+  /* content: url('../assets/placeholder/weapon3.png'); */
+  z-index: 4;
+  height: 25em;
+  width: 25em;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+
+.weapon-menu > div > div > h2{
+  font-family: Trajan;
+  font-weight: 500;
+}
+
+.weapon-menu > div > div > .details{
+  display: flex;
+  font-family: Roboto;
+  color: #fff;
+  width: 80%;
+}
+
+
+
+.weapon-menu > div > div > .details > span{
+  border-right: 1px solid rgba(255, 255, 255, 0.445);
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+
+.weapon-menu > div > div > .details{
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.356);
+}
+
+.weapon-menu > div > div > .details > span:nth-child(1){
+  padding-left: 0px;
+}
+
+.weapon-menu > div > div > .details > span:nth-child(4){
+  border-right: none;
+}
+
+
+.magic-circle{
+  z-index: 3;
+  height: 25em;
+  width: 25em;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+
+.add-glow{
+  animation: addGlow 1s infinite linear;
+}
+
+@keyframes addGlow{
+  0%   {-webkit-filter: drop-shadow(1px 1px 20px rgba(252, 252, 252, 0.075));}
+  25%  {-webkit-filter: drop-shadow(1px 1px 20px rgba(252, 252, 252, 0.212));}
+  50%  {-webkit-filter: drop-shadow(1px 1px 20px rgba(252, 252, 252, 0.534));}
+  75%  {-webkit-filter: drop-shadow(1px 1px 20px rgba(252, 252, 252, 0.075));}
+  100% {-webkit-filter: drop-shadow(1px 1px 20px rgba(252, 252, 252, 0.39));}
+}
+
+.inner{
+  content: url('../assets/blacksmith/inner-circle.png');
+  position: absolute;
+  height: 25em;
+  width: 25em;
+}
+
+.outer{
+  content: url('../assets/blacksmith/outer-circle.png');
+  position: absolute;
+  height: 25em;
+  width: 25em;
+  animation-direction: reverse;
+}
+
+.slower{
+  animation: rotating 25s infinite linear;
+}
+
+.faster{
+  animation: rotating 5s infinite linear;
+}
+
+.reverse{
+  animation-direction: reverse;
+}
+
+.power-status{
+  margin-top: 2em;
+  display: flex;
+}
+
+.power-status > div{
+  width: 15%;
+}
+
+.lock-icon{
+  content: url('../assets/blacksmith/lock-icon.svg');
+  height: 15px;
+  width: 15px;
+  margin-right: 5px;
+}
+
+.power-status > div > span:nth-child(2), .power-status > div > p{
+  font-size: 16px;
+  font-family: Oswald;
+  color: #fff;
+}
+
+.cursor-p{
+  cursor: pointer;
+}
+
+.forge-content{
+  display: flex;
+  justify-content: center;
+}
+
+.reforge-img{
+  max-width: 10vw;
+  min-width: 10vw;
+}
+
+.forge-content > div{
+  height: max-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: auto;
+  margin-bottom: auto;
+  align-items: stretch;
+}
+
+.forge-content > div > img{
+  position: relative;
+}
+
+.body-forge .forge-header,.body-forge .forge-content{
+    width: 55%;
+    margin:auto;
+}
+
+.power-rolled{
+  border-bottom: none;
+  margin: auto;
+  width: 15vw;
+}
+
+
+
+.power-rolled .win-details:nth-child(1){
+  text-align: right;
+}
+
+.power-rolled .win-details:nth-child(2){
+  text-align: center;
+}
+
+.power-rolled .win-details:nth-child(3){
+  text-align: left;
+  flex-wrap:nowrap;
+}
+
+
+.power-status > div > span:nth-child(2){
+  padding-left: 7px;
+}
+
+.power-status > div > p{
+  font-size: 2em;
+}
+
+
+.menus{
+  margin-top: 20px;
+  width: 85%;
+}
+
+.desc-details{
+  margin-top: 20px;
+  width: 85%;
+}
+
+.desc-details > span{
+  font-family: Roboto;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.438);
+}
+
+.menus > div{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-family: Oswald;
+  color: rgba(255, 255, 255, 0.397);
+  border: 1px solid rgba(255, 255, 255, 0.39);
+  padding: 10px;
+  cursor: pointer;
+}
+
+.menus > div:nth-child(1){
+  border-radius: 5px 0px 0px 5px;
+}
+
+.menus > div:nth-child(4){
+  border-radius: 0px 5px 5px 0px;
+}
+
+.active-tab{
+  color: #fff !important;
+  background: #1168D0;
+  border: none;
+}
+
+.dust-gauge{
+  margin-top: 20px;
+  display: flex;
+}
+
+.dust-gauge > div{
+  display: flex;
+  align-items: center;
+}
+
+.dust-gauge > div:nth-child(2){
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 45%;
+}
+
+.dust-gauge > div:nth-child(2) > input{
+  width: 80%;
+}
+
+.dust-gauge > div:nth-child(2) > div{
+  font-size: 12px;
+}
+
+.dust-gauge > div:nth-child(3) > span:nth-child(1){
+  border: 1px solid rgba(255, 255, 255, 0.205);
+  padding: 5px 20px;
+  color: #fff;
+  font-family: Roboto;
+  border-radius: 5px;
+  font-size: 12px;
+  max-width: 60px;
+  min-width: 60px;
+  text-align: center;
+  margin-right: 10px;
+}
+
+.dust-gauge > div:nth-child(3) > span:nth-child(2){
+  /* background-color: rgba(255, 255, 255, 0.425); */
+  border: 1px solid rgba(255, 255, 255, 0.205);
+  padding: 5px 20px;
+  color: #fff;
+  font-family: Roboto;
+  border-radius: 5px;
+  max-width: 60px;
+  font-size: 12px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.dust-gauge > div:nth-child(2) > div{
+  font-family: Roboto;
+  color: rgba(255, 255, 255, 0.377);
+}
+
+.dust-gauge > div > div > p{
+  font-family: Roboto;
+  font-size: 17px;
+  color: #fff;
+}
+
+.dust-gauge > div > div {
+  padding-left: 15px;
+}
+
+.dust-gauge > div > div > span{
+  font-family: Roboto;
+  font-size: 15px;
+  color: #fff;
+}
+
+.dust-bg{
+  width: max-content;
+  border-radius: 5px;
+  padding: 8px 10px;
+  background-color: #000;
+  border: 1px solid rgba(255, 255, 255, 0.425);
+}
+
+.dust-img-lesser{
+  content: url('../assets/dusts/lesserDust.png');
+  height: 3em;
+  width: 3em;
+}
+
+.dust-img-greater{
+  content: url('../assets/dusts/greaterDust.png');
+  height: 3em;
+  width: 3em;
+}
+
+.dust-img-powerful{
+  content: url('../assets/dusts/powerfulDust.png');
+  height: 3em;
+  width: 3em;
+}
+
+.new-btn{
+  background-image: url('../assets/buttonOutline.svg');
+  background-position: center;
+}
+
+
+
+
+
+
 #random-border{
   background-image: url('../assets/questionmark-icon-45.png');
   background-size: 2em 2em;
@@ -1065,9 +1966,9 @@ export default Vue.extend({
   background-position: center;
   transform: rotate(45deg);
   border: 3px solid #e9c97a;
-  background-size: 2.5em 2.5em;
-  width: 3em;
-  height: 3em;
+  background-size: 2em 2em;
+  width: 2.5em;
+  height: 2.5em;
   transition: all 0.2s ease-in-out;
 }
 
@@ -1100,9 +2001,9 @@ export default Vue.extend({
   background-position: center;
   transform: rotate(45deg);
   border: 3px solid #e9c97a;
-  background-size: 2.5em 2.5em;
-  width: 3em;
-  height: 3em;
+  background-size: 2em 2em;
+  width: 2.5em;
+  height: 2.5em;
   transition: all 0.2s ease-in-out;
 }
 
@@ -1112,8 +2013,8 @@ export default Vue.extend({
   transform: rotate(45deg);
   border: 3px solid #e9c97a;
   background-size: 2.5em 2.5em;
-  width: 3em;
-  height: 3em;
+  width: 2.5em;
+  height: 2.5em;
   transition: all 0.2s ease-in-out;
 }
 
@@ -1135,9 +2036,9 @@ export default Vue.extend({
   background-position: center;
   transform: rotate(45deg);
   border: 3px solid #e9c97a;
-  background-size: 2.5em 2.5em;
-  width: 3em;
-  height: 3em;
+  background-size: 2em 2em;
+  width: 2.5em;
+  height: 2.5em;
   transition: all 0.2s ease-in-out;
 }
 
@@ -1170,9 +2071,9 @@ export default Vue.extend({
   background-position: center;
   transform: rotate(45deg);
   border: 3px solid #e9c97a;
-  background-size: 2.5em 2.5em;
-  width: 3em;
-  height: 3em;
+  background-size: 2em 2em;
+  width: 2.5em;
+  height: 2.5em;
   transition: all 0.2s ease-in-out;
 }
 
@@ -1206,9 +2107,9 @@ export default Vue.extend({
   background-position: center;
   transform: rotate(45deg);
   border: 3px solid #e9c97a;
-  background-size: 2.5em 2.5em;
-  width: 3em;
-  height: 3em;
+  background-size: 2em 2em;
+  width: 2.5em;
+  height: 2.5em;
   transition: all 0.2s ease-in-out;
 }
 
@@ -1324,6 +2225,30 @@ img.elements-modal:hover {
   display: flex;
   justify-content: flex-end;
   margin-left: auto;
+}
+
+#water{
+  content: url('../assets/elements/icon-water.svg');
+  height: 20px;
+  widows: 20px;
+}
+
+#fire{
+  content: url('../assets/elements/icon-fire.svg');
+  height: 20px;
+  widows: 20px;
+}
+
+#earth{
+  content: url('../assets/elements/icon-earth.svg');
+  height: 20px;
+  widows: 20px;
+}
+
+#lightning{
+  content: url('../assets/elements/icon-thunder.svg');
+  height: 20px;
+  widows: 20px;
 }
 
 @media (max-width: 1000px) {

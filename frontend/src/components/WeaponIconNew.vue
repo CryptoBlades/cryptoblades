@@ -17,44 +17,77 @@
       <img v-if="showPlaceholder" v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
         class="placeholder" :src="getWeaponArt(weapon)" />
 
-      <div class="trait">
-        <span :class="weapon.element.toLowerCase() + '-icon'"></span>
-        <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
+      <div class="stars-flex">
+        <b-icon v-for="s in weapon.stars+1"  :key="s" class="star-stat" icon="star-fill" variant="warning" />
       </div>
 
-      <div class="name">
-        {{ getCleanWeaponName(weapon.id, weapon.stars) }}
+      <div class="favorite">
+        <span v-if="favorite" class="favorite-weapon"></span>
       </div>
+      <!-- <div class="trait"> -->
+        <!-- <span :class="weapon.element.toLowerCase() + '-icon'"></span> -->
+        <!-- <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
+      </div> -->
+      <!-- <div class="weapon-name">
+        <div class="id-number">{{$t('weaponIcon.id')}} #{{ weapon.id }}</div>
+        <span>{{ getCleanWeaponName(weapon.id, weapon.stars) }}</span>
+      </div> -->
+      <div class="weapon-details" :style="weapon.lowStarBurnPoints > 0
+        || weapon.fourStarBurnPoints > 0
+        || weapon.fiveStarBurnPoints > 0
+        ? 'margin-top: -20px' : 'margin-top: 0px'">
+      <!-- <div class="weapon-details"> -->
+        <div class="name">
+          <div>
+            <div class="id-number">{{$t('weaponIcon.id')}}: #{{ weapon.id }}</div>
+            <span span>{{ getCleanWeaponName(weapon.id, weapon.stars).toUpperCase() }}</span>
+          </div>
+          <span class="icon-trait" :class="weapon.element.toLowerCase() + '-icon'"></span>
+          <span class="battle-p">Battle Power: 900</span>
+        </div>
+        <div>
+          <div class="small-durability-bar"
+            :style="`--durabilityReady: ${(getWeaponDurability(weapon.id)/maxDurability)*100}%;`"
+            v-tooltip.bottom="`${$t('weaponIcon.durability')} ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
+              ${$t('weaponIcon.durabilityTooltip')} ${timeUntilWeaponHasMaxDurability(weapon.id)}`">
+          </div>
+        </div>
+        <div class="bonus-pows">
+          <!-- <div>LB: 30/100</div>
+          <div>4B: 0/25</div>
+          <div>5B: 0/10</div> -->
 
-      <div class="bonus-power">
+          <div v-if="weapon.lowStarBurnPoints > 0">LB: {{ weapon.lowStarBurnPoints }}</div>
+          <div v-if="weapon.fourStarBurnPoints > 0">4B: {{ weapon.fourStarBurnPoints }}</div>
+          <div v-if="weapon.fiveStarBurnPoints > 0">5B: {{ weapon.fiveStarBurnPoints }}</div>
+        </div>
+      </div>
+      <!-- <div class="bonus-power">
         <div v-if="weapon.lowStarBurnPoints > 0"><span>{{ weapon.lowStarBurnPoints }} LB</span></div>
         <div v-if="weapon.fourStarBurnPoints > 0"><span>{{ weapon.fourStarBurnPoints }} 4B</span></div>
         <div v-if="weapon.fiveStarBurnPoints > 0"><span>{{ weapon.fiveStarBurnPoints }} 5B</span></div>
-      </div>
-
-      <div>
-        <div class="small-durability-bar"
-        :style="`--durabilityReady: ${(getWeaponDurability(weapon.id)/maxDurability)*100}%;`"
-        v-tooltip.bottom="`${$t('weaponIcon.durability')} ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
-          ${$t('weaponIcon.durabilityTooltip')} ${timeUntilWeaponHasMaxDurability(weapon.id)}`"></div>
-      </div>
-
+      </div> -->
     </div>
 
-    <div class="id">{{$t('weaponIcon.id')}} {{ weapon.id }}</div>
+    <!-- <div class="id">{{$t('weaponIcon.id')}} #{{ weapon.id }}</div> -->
+    <div class="rarity-label" :class="['rarity-' + (weapon.stars || 0)]">{{setRarity(weapon.stars)}}</div>
+
 
     <div class="stats">
       <div v-if="weapon.stat1Value">
         <span :class="weapon.stat1.toLowerCase() + '-icon'" class="mr-1 icon"></span>
-        <span :class="weapon.stat1.toLowerCase()">{{ weapon.stat1 }} +{{ weapon.stat1Value }}</span>
+        <!-- <span :class="weapon.stat1.toLowerCase()">{{ weapon.stat1 }} +{{ weapon.stat1Value }}</span> -->
+        <span :class="weapon.stat1.toLowerCase()">{{ weapon.stat1Value }}</span>
       </div>
       <div v-if="weapon.stat2Value">
         <span :class="weapon.stat2.toLowerCase() + '-icon'" class="mr-1 icon"></span>
-        <span :class="weapon.stat2.toLowerCase()">{{ weapon.stat2 }} +{{ weapon.stat2Value }}</span>
+        <!-- <span :class="weapon.stat2.toLowerCase()">{{ weapon.stat2 }} +{{ weapon.stat2Value }}</span> -->
+        <span :class="weapon.stat2.toLowerCase()">{{ weapon.stat2Value }}</span>
       </div>
       <div v-if="weapon.stat3Value">
         <span :class="weapon.stat3.toLowerCase() + '-icon'" class="mr-1 icon"></span>
-        <span :class="weapon.stat3.toLowerCase()">{{ weapon.stat3 }} +{{ weapon.stat3Value }}</span>
+        <!-- <span :class="weapon.stat3.toLowerCase()">{{ weapon.stat3 }} +{{ weapon.stat3Value }}</span> -->
+        <span :class="weapon.stat3.toLowerCase()">{{ weapon.stat3Value }}</span>
       </div>
     </div>
 
@@ -391,6 +424,14 @@ export default {
         this.loadingFinished();
       }
     },
+
+    setRarity(rarity){
+      if(rarity === 0) return 'Normal';
+      if(rarity === 1) return 'Rare';
+      if(rarity === 2) return 'Unique';
+      if(rarity === 3) return 'Legendary';
+      if(rarity === 4) return 'Mythical';
+    },
     loadingFinished() {
 
       const bladeMaterial = this.baseMaterial.clone();
@@ -463,14 +504,15 @@ export default {
 
 <style scoped>
 @import '../styles/weapon-cosmetics.css';
+
 .small-durability-bar {
   position: relative;
   top: -5px;
-  height: 10px;
-  width: 80%;
+  height: 4px;
+  width: 100%;
   margin: 0 auto;
   border-radius: 2px;
-  border: 0.5px solid rgb(216, 215, 215);
+  /* border: 0.5px solid rgb(216, 215, 215); */
   background : linear-gradient(to right, rgb(236, 75, 75) var(--durabilityReady), rgba(255, 255, 255, 0.1) 0);
 }
 
@@ -478,12 +520,26 @@ export default {
   height: 100%;
   width: 100%;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.stats > div{
+  font-size: 13px;
+  font-family: Roboto;
+}
+
+.stats > div > span:nth-child(2){
+  color: rgba(255, 255, 255, 0.719);
+  font-family: Roboto;
 }
 
 .glow-container {
   height: 100%;
   width: 100%;
+}
+
+.glow-container > img{
+  margin-top: 10px;
 }
 
 .glow-container {
@@ -505,6 +561,78 @@ export default {
   position: absolute;
 }
 
+.rarity-label{
+  color: #fff;
+  padding: 2px 15px;
+  position: absolute;
+  left: 15px;
+  top: 10px !important;
+  font-size: 12px;
+  border-radius: 3px;
+  font-family: Roboto;
+}
+
+.stars-flex{
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  top:27px;
+  right: 20px;
+}
+
+.battle-p{
+  font-family: Roboto;
+  font-size: 12px;
+  color: #ffffffc7;
+}
+
+.icon-trait{
+  font-size: 15px;
+  margin-right: 5px;
+}
+
+.bonus-pows{
+ display: flex;
+ justify-content: space-between;
+ margin-top: 8px;
+}
+
+.bonus-pows > div{
+  font-family: Roboto;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.548);
+  border: 1px solid rgba(255, 255, 255, 0.384);
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+
+.name > div{
+  display: flex;
+  flex-direction: column;
+}
+
+.name > div > div{
+  font-family: Roboto;
+}
+
+.name > div > span{
+  font-family: Oswald;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow:ellipsis;
+  font-size: 0.87vw;
+}
+
+.name{
+  margin-bottom: 10px;
+}
+
+.star-stat{
+  height: 11px;
+  width: 11px;
+  margin-left: 2px;
+}
+
 .trait {
   top: 10px;
   left: 10px;
@@ -517,13 +645,13 @@ export default {
 
 .id {
   top: 8px;
-  left: 30px;
+  left: 15px;
   font-style: italic;
 }
 
 .stats {
-  top: 35px;
-  left: 10px;
+  top: 40px;
+  left: 15px;
 }
 
 .icon {
@@ -540,33 +668,77 @@ export default {
   transform: scale(0.7);
 }
 
-.name {
+.weapon-details{
+  /* background-color: rgba(0, 0, 0, 0.363); */
+  display: flex;
+  padding: 0px 15px;
+  flex-direction: column;
+  margin-top: -20px;
+}
+
+.favorite-weapon{
+  content: url('../assets/blacksmith/favorite_icon.svg');
+  height: 25px;
+  width: 25px;
   position: absolute;
-  bottom: 15px;
+  right: -10px;
+  top: -10px;
+}
+
+.name {
+  /* position: absolute; */
+  bottom: 20px;
   left: 12%;
   right: 12%;
-  font-size: 0.9em;
-  text-align: center;
+  font-size: 0.6vw;
+  color: #fff;
+  font-family: Roboto;
+  text-align: left;
 }
 
 .glow-0 {
   animation: none;
+  border: 1px solid rgba(245, 245, 245, 0.116);
 }
 
 .glow-1 {
-  box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5);
+  /* box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5); */
+  border: 1px solid rgba(0, 162, 255);
 }
 
 .glow-2 {
-  box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5);
+  /* box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5); */
+  border: 1px solid rgba(125, 0, 125);
 }
 
 .glow-3 {
-  box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3);
+  /* box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3); */
+  border: 1px solid rgba(255, 102, 0);
 }
 
 .glow-4 {
-  box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5);
+  /* box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5); */
+  border: 1px solid rgba(125, 0, 0);
+}
+
+.rarity-0 {
+  background-color: rgb(85, 85, 85);
+}
+
+.rarity-1 {
+  background-color: rgba(0, 162, 255);
+}
+
+.rarity-2 {
+  background-color: rgba(125, 0, 125);
+}
+
+.rarity-3 {
+  background-color: rgba(255, 102, 0);
+}
+
+.rarity-4 {
+  background-color: rgba(125, 0, 0);
 }
 
 

@@ -1,22 +1,34 @@
 <template>
   <div>
-    <div class="filters row mt-2 pl-2" v-if="!newWeapon" @change="saveFilters()">
-      <div class="col-sm-6 col-md-6 col-lg-6 mb-3">
-        <strong>{{$t('weaponGrid.stars')}}</strong>
-        <select class="form-control" v-model="starFilter" >
-          <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
-        </select>
-      </div>
+    <div class="filters" v-if="!newWeapon" @change="saveFilters()">
+      <h3>{{$t('weapons')}} ({{ ownWeapons }})</h3>
+      <div class="row d-flex align-items-center" style="flex-grow:0.6">
+        <div class="col-sm-6 col-md-6 col-lg-4 d-flex">
+          <div v-if="showReforgedToggle" class="show-reforged">
+            <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
+            <strong>{{$t('weaponGrid.showReforged')}}</strong>
+          </div>
 
-      <div class="col-sm-6 col-md-6 col-lg-6 mb-3">
-        <strong>{{$t('weaponGrid.element')}}</strong>
-        <select class="form-control" v-model="elementFilter" >
-          <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
-          :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
-        </select>
-      </div>
+          <div v-if="showFavoriteToggle" class="show-reforged show-favorite">
+            <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
+            <strong>{{$t('weaponGrid.showFavorite')}}</strong>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-6 col-lg-3 mb-3">
+          <strong>{{$t('weaponGrid.stars')}}</strong>
+          <select class="form-control" v-model="starFilter" >
+            <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+          </select>
+        </div>
 
-      <template v-if="isMarket">
+        <div class="col-sm-6 col-md-6 col-lg-3 mb-3">
+          <strong>{{$t('weaponGrid.element')}}</strong>
+          <select class="form-control" v-model="elementFilter" >
+            <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+            :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+          </select>
+        </div>
+      <!--<template v-if="isMarket">
         <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
           <strong>{{$t('weaponGrid.minPrice')}}</strong>
           <input class="form-control" type="number" v-model.trim="minPriceFilter" :min="0" placeholder="Min" />
@@ -32,28 +44,21 @@
             <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || $t('weaponGrid.sorts.any') }}</option>
           </select>
         </div>
-      </template>
-
-      <div v-if="showReforgedToggle" class="show-reforged">
-        <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
-        <strong>{{$t('weaponGrid.showReforged')}}</strong>
+      </template> -->
+      <div class="col-sm-6 col-md-6 col-lg-2">
+        <b-button
+          v-if="!newWeapon"
+          variant="primary"
+          class="clear-filters-button mb-3"
+          @click="clearFilters"
+        >
+          <span>
+            <!-- {{$t('weaponGrid.clearFilters')}} -->
+            Clear
+          </span>
+        </b-button>
       </div>
-
-      <div v-if="showFavoriteToggle" class="show-reforged show-favorite">
-        <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
-        <strong>{{$t('weaponGrid.showFavorite')}}</strong>
       </div>
-
-      <b-button
-        v-if="!newWeapon"
-        variant="primary"
-        class="clear-filters-button mb-3"
-        @click="clearFilters"
-      >
-        <span>
-          {{$t('weaponGrid.clearFilters')}}
-        </span>
-      </b-button>
     </div>
 
     <ul class="weapon-grid">
@@ -108,7 +113,7 @@ import Events from '../../events';
 import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '../../interfaces';
-import WeaponIcon from '../WeaponIcon.vue';
+import WeaponIcon from '../WeaponIconNew.vue';
 import { NftOption } from '../NftOptionsDropdown.vue';
 import { BModal } from 'bootstrap-vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
@@ -224,6 +229,10 @@ export default Vue.extend({
     showNftOptions: {
       type: Boolean,
       default: false
+    },
+    ownWeapons:{
+      type: Number,
+      default: 0
     },
     starsOptions: {
       type: Array as PropType<(string | number)[]>,
@@ -515,12 +524,22 @@ export default Vue.extend({
 .filters {
    justify-content: center;
    width: 100%;
-   max-width: 900px;
+   /* max-width: 900px; */
    margin: 0 auto;
-   align-content: center;
+   align-items: center;
    border-bottom: 0.2px solid rgba(102, 80, 80, 0.1);
    margin-bottom: 20px;
 }
+
+.filters > h3{
+  font-family: Trajan;
+}
+
+.filters{
+  display: flex;
+  justify-content: space-between;
+}
+
 .weapon-grid {
   list-style-type: none;
   justify-content: center;
@@ -528,23 +547,24 @@ export default Vue.extend({
   padding: 0;
   display: grid;
   padding: 0.5em;
-  grid-template-columns: repeat(auto-fit, 14em);
-  gap: 0.5em;
+  grid-template-columns: repeat(auto-fit, 13em);
+  gap: 2em;
 }
 .weapon {
-  width: 12em;
-  background: rgba(255, 255, 255, 0.1);
+  width: 105%;
+  background: rgb(26, 24, 24);
   border-radius: 5px;
   cursor: pointer;
   position: relative;
   overflow: visible;
+  margin-bottom: 15px;
 }
 .weapon.selected {
   outline: solid currentcolor 2px;
 }
 .weapon-icon-wrapper {
-  width: 12em;
-  height: 12em;
+  width: 13.5em;
+  height: 18em;
 }
 .above-wrapper {
   padding: 0.1rem;
@@ -631,7 +651,16 @@ export default Vue.extend({
 }
 .nft-options {
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 10px;
+  top: 0px !important;
+}
+
+.id-number{
+  position: absolute;
+  right: 10px;
+  top: 10px !important;
+  font-size: 0.9em;
+  color: #fff;
+  font-family: Roboto;
 }
 </style>
