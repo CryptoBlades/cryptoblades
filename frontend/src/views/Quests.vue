@@ -279,7 +279,7 @@ export default Vue.extend({
     },
 
     weeklyGoalReached(): boolean {
-      return this.currentWeeklyCompletions >= this.weeklyReward.completionsGoal;
+      return this.currentWeeklyCompletions >= this.weeklyReward?.completionsGoal!;
     },
   },
 

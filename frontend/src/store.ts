@@ -3825,7 +3825,7 @@ export function createStore(web3: Web3) {
         const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
 
         const reward = await SimpleQuests.methods.rewards(Math.floor(currentWeek % 53)).call(defaultCallOptions(state));
-        const rewardID = +reward.id;
+        const rewardID = +reward[0];
 
         if(rewardID === 0) {
           return;
