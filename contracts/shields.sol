@@ -536,4 +536,8 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false
             && nftVars[tokenId][NFTVAR_BUSY] == 0);
     }
+
+    function setBaseURI(string memory baseUri) public restricted {
+        _setBaseURI(baseUri);
+    }
 }

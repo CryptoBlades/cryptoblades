@@ -14,6 +14,7 @@
     "abdk-libraries-solidity": "2.4.0",
     "dayjs": "^1.10.7",
     "dotenv": "^8.2.0",
+    "gsap": "^3.9.1",
     "vue-multiselect": "^2.1.6"
   },
   "devDependencies": {
@@ -50,7 +51,7 @@
     "contract:prepare": "npm run build",
     "contract:deploy": "npm run deploy",
     "build": "truffle compile",
-    "postbuild": "node scripts/generate-ts-from-abis.js",
+    "postbuild": "npm --prefix frontend/ run setup-app-config && node scripts/generate-ts-from-abis.js",
     "test": "truffle test",
     "test:local": "hardhat test",
     "deploy": "truffle migrate --reset",

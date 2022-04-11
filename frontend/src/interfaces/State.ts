@@ -158,6 +158,8 @@ export interface IState {
   currentChainSupportsMerchandise: boolean;
   currentChainSupportsPvP: boolean;
   currentChainSupportsQuests: boolean;
+  hasAdminAccess: boolean;
+  hasMinterAccess: boolean;
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;

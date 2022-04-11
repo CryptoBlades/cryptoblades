@@ -9,13 +9,14 @@ import img7 from './assets/placeholder/sword-placeholder-6.png';
 
 
 import specialImg1 from './assets/special-weapons/heco-sword.png';
-import specialImg2 from './assets/special-weapons/pluto-alliance-sword.png';
+import specialImg2 from './assets/special-weapons/blazing-mane.png';
+import specialImg3 from './assets/special-weapons/pluto-alliance-sword.png';
 
 import { IWeapon } from './interfaces';
 
 const allImages = [img1, img2, img3, img4, img5, img6, img7];
 // remove normal placeholders when adding new special event img
-const specialImage = [specialImg1, specialImg2];
+const specialImage = [specialImg1, specialImg2, specialImg3];
 
 export function getWeaponArt(weapon: IWeapon) {
   if (!weapon) {

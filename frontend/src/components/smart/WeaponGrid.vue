@@ -62,8 +62,7 @@
         :class="{ selected: highlight !== null && weapon.id === highlight }"
         v-for="weapon in nonIgnoredWeapons"
         :key="weapon.id"
-        @click=
-        "(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
+        @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
         <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
         <div class="weapon-icon-wrapper">
@@ -231,6 +230,9 @@ export default Vue.extend({
       default() {
         return ['', 1, 2, 3, 4, 5];
       },
+    },
+    chosenStarsOption: {
+      type: [String, Number],
     },
   },
   data() {
@@ -497,12 +499,11 @@ export default Vue.extend({
       this.priceSort = sessionStorage.getItem('market-weapon-price-order') || '';
       this.minPriceFilter = sessionStorage.getItem('market-weapon-price-minfilter') || '';
       this.maxPriceFilter = sessionStorage.getItem('market-weapon-price-maxfilter') || '';
+    } else if (this.chosenStarsOption !== undefined) {
+      this.starFilter = this.chosenStarsOption;
     } else {
       this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
-    }
-    if(this.starsOptions?.length === 1) {
-      this.starFilter = this.starsOptions[0];
     }
     this.haveRename = await this.fetchTotalWeaponRenameTags();
     await this.loadCosmeticsCount();

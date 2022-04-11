@@ -9,7 +9,6 @@ import {getConfigValue, setUpContracts} from './contracts';
 import {
   characterFromContract,
   junkFromContract,
-  partnerProjectFromContract,
   raidFromContract,
   shieldFromContract,
   targetFromContract,
@@ -45,6 +44,7 @@ import {abi as ierc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as erc20Abi} from '../../build/contracts/ERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import {SupportedProject} from '@/views/Treasury.vue';
 import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances, WeeklyReward} from '@/views/Quests.vue';
 import {abi as erc721Abi} from '../../build/contracts/IERC721.json';
 import BigNumber from 'bignumber.js';
@@ -141,6 +141,8 @@ export function createStore(web3: Web3) {
       currentChainSupportsMerchandise: false,
       currentChainSupportsPvP: false,
       currentChainSupportsQuests: false,
+      hasAdminAccess: false,
+      hasMinterAccess: false,
 
       characters: {},
       garrisonCharacters: {},
@@ -399,10 +401,12 @@ export function createStore(web3: Web3) {
         const currencyList = getConfigValue('currencyTransak') || 'BNB,BUSD';
 
         const urlCC = 'defaultCryptoCurrency=' + currencyDefault;
-        const urlNetwork = 'network=' + currencyNetwork;
         const urlCCL = 'cryptoCurrencyList=' + currencyList;
 
-        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlNetwork + '&' + urlCCL;
+        //Transak is not available for Huobi & OKEX
+        if(currencyNetwork === 'Huobi' || currencyNetwork === 'OKEx') return;
+
+        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlCCL;
       },
       ownCharacters(state, getters) {
         return getters.charactersWithIds(state.ownedCharacterIds);
@@ -463,6 +467,14 @@ export function createStore(web3: Web3) {
 
       getCurrentChainSupportsQuests(state) {
         return state.currentChainSupportsQuests;
+      },
+
+      getHasAdminAccess(state) {
+        return state.hasAdminAccess;
+      },
+
+      getHasMinterAccess(state) {
+        return state.hasMinterAccess;
       },
 
       ownWeapons(state, getters) {
@@ -788,6 +800,14 @@ export function createStore(web3: Web3) {
 
       updateCurrentChainSupportsQuests(state: IState) {
         state.currentChainSupportsQuests = currentChainSupportsQuests();
+      },
+
+      updateHasAdminAccess(state: IState, hasAdminAccess: boolean) {
+        state.hasAdminAccess = hasAdminAccess;
+      },
+
+      updateHasMinterAccess(state: IState, hasMinterAccess: boolean) {
+        state.hasMinterAccess = hasMinterAccess;
       },
 
       updateCharacter(state: IState, { characterId, character }) {
@@ -1164,6 +1184,9 @@ export function createStore(web3: Web3) {
         await dispatch('setupWeaponCosmetics');
 
         await dispatch('fetchSpecialWeaponEvents');
+
+        await dispatch('fetchHasAdminAccess');
+        await dispatch('fetchHasMinterAccess');
       },
 
       async pollAccountsAndNetwork({ state, dispatch, commit }) {
@@ -1884,8 +1907,9 @@ export function createStore(web3: Web3) {
           commit('updateCharacterCosmetic', { characterId, characterCosmetic });
         }
       },
-      async mintCharacter({ state, dispatch }) {
+      async mintCharacter({ state, dispatch }, approveMintSlippage: boolean) {
         if(featureFlagStakeOnly || !state.defaultAccount) return;
+        const slippageMultiplier = approveMintSlippage ? 1.05 : 1;
 
         await approveFee(
           state.contracts().CryptoBlades!,
@@ -1894,8 +1918,8 @@ export function createStore(web3: Web3) {
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee(),
-          { allowInGameOnlyFunds: false }
+          cryptoBladesMethods => cryptoBladesMethods.getMintCharacterFee(),
+          { feeMultiplier: slippageMultiplier, allowInGameOnlyFunds: false }
         );
 
         await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
@@ -1907,11 +1931,12 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement, eventId = 0 }:
-      { num: any, useStakedSkillOnly?: boolean, chosenElement: any, eventId: any }) {
+      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
+      { num: any, useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
         const chosenElementFee = chosenElement === 100 ? 1 : 2;
+        const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
@@ -1926,8 +1951,8 @@ export function createStore(web3: Web3) {
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-            { feeMultiplier: num * 4 * chosenElementFee, allowInGameOnlyFunds: true }
+            cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
+            { feeMultiplier: num * 4 * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
           );
 
           await CryptoBlades.methods.mintWeaponN(num, chosenElement, eventId).send({ from: state.defaultAccount, gas: '5000000' });
@@ -1942,11 +1967,12 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement, eventId = 0 }:
-      { useStakedSkillOnly?: boolean, chosenElement: any, eventId: any }) {
+      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
+      { useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
         const chosenElementFee = chosenElement === 100 ? 1 : 2;
+        const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
@@ -1961,8 +1987,8 @@ export function createStore(web3: Web3) {
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-            { feeMultiplier: chosenElementFee, allowInGameOnlyFunds: true }
+            cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
+            { feeMultiplier: chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
           );
 
           await CryptoBlades.methods.mintWeapon(chosenElement, eventId).send({ from: state.defaultAccount });
@@ -2066,49 +2092,6 @@ export function createStore(web3: Web3) {
               lesserDust,
               greaterDust,
               powerfulDust
-            )
-            .send({
-              from: state.defaultAccount,
-            });
-        }
-
-        await Promise.all([
-          dispatch('fetchSkillBalance'),
-          dispatch('updateWeaponIds'),
-          dispatch('fetchFightRewardSkill'),
-          dispatch('fetchFightRewardXp'),
-          dispatch('fetchDustBalance')
-        ]);
-      },
-
-      async burnWeapon({ state, dispatch }, { burnWeaponId, useStakedSkillOnly }: { burnWeaponId: any, useStakedSkillOnly?: boolean }) {
-        const { CryptoBlades, SkillToken, BurningManager } = state.contracts();
-        if(!CryptoBlades || !BurningManager || !state.defaultAccount) return;
-
-        if(useStakedSkillOnly) {
-          await BurningManager.methods
-            .burnWeaponsUsingStakedSkill(
-              [burnWeaponId]
-            )
-            .send({
-              from: state.defaultAccount,
-            });
-        }
-        else {
-          await approveFeeFromAnyContract(
-            CryptoBlades,
-            BurningManager,
-            SkillToken,
-            state.defaultAccount,
-            state.skillRewards,
-            defaultCallOptions(state),
-            defaultCallOptions(state),
-            burningManagerMethods => burningManagerMethods.burnWeaponFee()
-          );
-
-          await BurningManager.methods
-            .burnWeapons(
-              [burnWeaponId]
             )
             .send({
               from: state.defaultAccount,
@@ -3787,21 +3770,11 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
-
-        return await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_GOAL).call(defaultCallOptions(state));
+        const weekInSeconds = 604800;
+        return await SimpleQuests.methods.weeklyCompletionsGoal(Math.floor(Date.now() / 1000 / weekInSeconds % 53)).call(defaultCallOptions(state));
       },
 
-      async setWeeklyCompletionsGoal({state}, {newGoal}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
-
-        const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
-
-        return await SimpleQuests.methods.setVar(VAR_WEEKLY_COMPLETIONS_GOAL, newGoal).send(defaultCallOptions(state));
-      },
-
-      async addWeeklyReward({state}, {weeklyReward}) {
+      async setWeeklyReward({state}, {weeklyReward}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
@@ -3810,19 +3783,13 @@ export function createStore(web3: Web3) {
           weeklyReward.rewardExternalAddress = emptyAccount;
         }
 
-        const result =await SimpleQuests.methods.addReward(weeklyReward.rewardType,
+        const result =await SimpleQuests.methods.setWeeklyReward(weeklyReward.rewardType,
           weeklyReward.rewardRarity, weeklyReward.rewardAmount,
-          weeklyReward.rewardExternalAddress, weeklyReward.reputationAmount)
+          weeklyReward.rewardExternalAddress, weeklyReward.reputationAmount,
+          weeklyReward.weekNumber, weeklyReward.completionsGoal)
           .send(defaultCallOptions(state));
 
         return result.events.RewardAdded.returnValues.rewardID;
-      },
-
-      async setWeeklyReward({state}, {rewardID, timestamp}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
-
-        return await SimpleQuests.methods.setWeeklyReward(rewardID, timestamp).send(defaultCallOptions(state));
       },
 
       async getWeeklyReward({state}, {timestamp}) {
@@ -3830,10 +3797,9 @@ export function createStore(web3: Web3) {
         if (!SimpleQuests || !state.defaultAccount) return;
 
         const weekInSeconds = 604800;
-        const week = Math.floor(timestamp / 1000 / weekInSeconds);
+        const week = Math.floor(timestamp / 1000 / weekInSeconds % 53) + 1;
 
-        const rewardID = +await SimpleQuests.methods.weeklyRewards(week).call(defaultCallOptions(state));
-        const weeklyRewardRaw = await SimpleQuests.methods.rewards(rewardID).call(defaultCallOptions(state)) as unknown as {
+        const weeklyRewardRaw = await SimpleQuests.methods.rewards(week).call(defaultCallOptions(state)) as unknown as {
           id: string;
           rewardType: string;
           rewardRarity: string;
@@ -3841,6 +3807,8 @@ export function createStore(web3: Web3) {
           rewardExternalAddress: string;
           reputationAmount: string;
         };
+
+        const weeklyCompletionsGoal = +await SimpleQuests.methods.weeklyCompletionsGoal(week).call(defaultCallOptions(state));
         return {
           id: +weeklyRewardRaw.id,
           rewardType: +weeklyRewardRaw.rewardType as RewardType,
@@ -3848,6 +3816,7 @@ export function createStore(web3: Web3) {
           rewardAmount: +weeklyRewardRaw.rewardAmount,
           rewardExternalAddress: weeklyRewardRaw.rewardExternalAddress,
           reputationAmount: +weeklyRewardRaw.reputationAmount,
+          completionsGoal: weeklyCompletionsGoal,
         } as WeeklyReward;
       },
 
@@ -3858,7 +3827,8 @@ export function createStore(web3: Web3) {
         const weekInSeconds = 604800;
         const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
 
-        const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+        const reward = await SimpleQuests.methods.rewards(Math.floor(currentWeek % 53) + 1).call(defaultCallOptions(state));
+        const rewardID = +reward[0];
 
         if(rewardID === 0) {
           return;
@@ -3887,7 +3857,7 @@ export function createStore(web3: Web3) {
         const weekInSeconds = 604800;
         const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
 
-        const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+        const rewardID = +await SimpleQuests.methods.rewards(Math.floor(currentWeek % 53)).call(defaultCallOptions(state));
 
         if(rewardID === 0) {
           return false;
@@ -4165,12 +4135,20 @@ export function createStore(web3: Web3) {
         await contract.methods.revokeRole(role, walletAddress).send(defaultCallOptions(state));
       },
 
-      async userHasAdminAccess({state}, {contract}) {
-        if (!contract || !state.defaultAccount) return;
+      async userHasDefaultAdminAccess({state}, {contract}) {
+        if (!contract || !contract.methods.DEFAULT_ADMIN_ROLE || !state.defaultAccount) return;
 
-        const adminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const defaultAdminRole = await contract.methods.DEFAULT_ADMIN_ROLE().call(defaultCallOptions(state));
 
-        return await contract.methods.hasRole(adminRole, state.defaultAccount).call(defaultCallOptions(state));
+        return await contract.methods.hasRole(defaultAdminRole, state.defaultAccount).call(defaultCallOptions(state));
+      },
+
+      async userHasGameAdminAccess({state}, {contract}) {
+        if (!contract || !contract.methods.GAME_ADMIN || !state.defaultAccount) return;
+
+        const gameAdminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+
+        return await contract.methods.hasRole(gameAdminRole, state.defaultAccount).call(defaultCallOptions(state));
       },
 
       async userHasMinterAccess({state}, {contract}) {
@@ -4181,29 +4159,53 @@ export function createStore(web3: Web3) {
         return await contract.methods.hasRole(minterRole, state.defaultAccount).call(defaultCallOptions(state));
       },
 
-      async userHasAnyAdminAccess({state}) {
-        const {SimpleQuests, CBKLand, Weapons, BurningManager} = state.contracts();
-        if (!BurningManager || !Weapons || !SimpleQuests || !CBKLand || !state.defaultAccount) return;
+      async fetchHasAdminAccess({state, commit}) {
+        const {SimpleQuests,
+          CBKLand,
+          Weapons,
+          BurningManager,
+          PartnerVault,
+          Treasury,
+          CryptoBlades,
+          Blacksmith,
+        } = state.contracts();
+        if (!SimpleQuests
+          || !CBKLand
+          || !Weapons
+          || !BurningManager
+          || !PartnerVault
+          || !Treasury
+          || !CryptoBlades
+          || !Blacksmith
+          || !state.defaultAccount) return;
 
         const simpleQuestsAdminRole = await SimpleQuests.methods.GAME_ADMIN().call(defaultCallOptions(state));
         const cbkLandAdminRole = await CBKLand.methods.GAME_ADMIN().call(defaultCallOptions(state));
         const weaponsAdminRole = await Weapons.methods.GAME_ADMIN().call(defaultCallOptions(state));
         const burningManagerAdminRole = await BurningManager.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const partnerVaultAdminRole = await PartnerVault.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const treasuryAdminRole = await Treasury.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const cryptoBladesAdminRole = await CryptoBlades.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const blacksmithAdminRole = await Blacksmith.methods.DEFAULT_ADMIN_ROLE().call(defaultCallOptions(state));
 
         const promises: Promise<boolean>[] = [
           SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
           CBKLand.methods.hasRole(cbkLandAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
           Weapons.methods.hasRole(weaponsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
           BurningManager.methods.hasRole(burningManagerAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          PartnerVault.methods.hasRole(partnerVaultAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          Treasury.methods.hasRole(treasuryAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          CryptoBlades.methods.hasRole(cryptoBladesAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          Blacksmith.methods.hasRole(blacksmithAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         ];
 
         for (const promise of promises) {
-          if (await promise) return true;
+          if (await promise) return commit('updateHasAdminAccess', true);
         }
-        return false;
+        return commit('updateHasAdminAccess', false);
       },
 
-      async userHasAnyMinterAccess({state}) {
+      async fetchHasMinterAccess({state, commit}) {
         const {Weapons, Characters} = state.contracts();
         if (!Weapons || !Characters || !state.defaultAccount) return;
 
@@ -4216,9 +4218,9 @@ export function createStore(web3: Web3) {
         ];
 
         for (const promise of promises) {
-          if (await promise) return true;
+          if (await promise) return commit('updateHasMinterAccess', true);
         }
-        return false;
+        return commit('updateHasMinterAccess', false);
       },
 
       async canUserAfford({ state }, {payingAmount}) {
@@ -4262,6 +4264,94 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacters', state.ownedCharacterIds),
           dispatch('fetchFightRewardXp')
         ]);
+      },
+
+      async setCharacterMintValue({state}, {cents}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        await CryptoBlades.methods.setCharacterMintValue(cents).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async setWeaponMintValue({state}, {cents}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        await CryptoBlades.methods.setWeaponMintValue(cents).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async getCharacterMintValue({state}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        const fee = +await CryptoBlades.methods.mintCharacterFee().call(defaultCallOptions(state));
+        return Number(BigInt(fee) >> BigInt(64)) * 100;
+      },
+
+      async getWeaponMintValue({state}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        const fee = +await CryptoBlades.methods.mintWeaponFee().call(defaultCallOptions(state));
+        return Number(BigInt(fee) >> BigInt(64)) * 100;
+      },
+
+      async getFightXpGain({state}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        return +await CryptoBlades.methods.fightXpGain().call(defaultCallOptions(state));
+      },
+
+      async setFightXpGain({state}, {xpGain}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        await CryptoBlades.methods.setFightXpGain(xpGain).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async getRaidXpReward({state}) {
+        const {Raid1} = state.contracts();
+        if (!Raid1) return;
+
+        return +await Raid1.methods.xpReward().call(defaultCallOptions(state));
+      },
+
+      async setRaidXpReward({state}, {xp}) {
+        const {Raid1} = state.contracts();
+        if (!Raid1) return;
+
+        await Raid1.methods.setXpReward(xp).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async setFlatPriceOfItem({state}, {itemIndex, price}) {
+        const {Blacksmith} = state.contracts();
+        if (!Blacksmith) return;
+
+        price = Web3.utils.toWei(price.toString(), 'ether').toString();
+
+        await Blacksmith.methods.setFlatPriceOfItem(itemIndex, price).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async setFlatPriceOfItemSeries({state}, {itemIndex, indices, prices}) {
+        const {Blacksmith} = state.contracts();
+        if (!Blacksmith) return;
+
+        prices = prices.map((price: number) => Web3.utils.toWei(price.toString(), 'ether').toString());
+
+        await Blacksmith.methods.setFlatPriceOfItemSeries(itemIndex, indices, prices).send({
+          from: state.defaultAccount,
+        });
       },
 
       async fetchWaxBridgeDetails({ state, commit }) {
@@ -4775,6 +4865,74 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacterCosmetic', id)
         ]);
       },
+
+      async addPartnerProject({state}, {partnerProject}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        return await Treasury.methods.addPartnerProject(
+          partnerProject.name,
+          partnerProject.tokenSymbol,
+          partnerProject.tokenAddress,
+          partnerProject.tokenSupply,
+          Web3.utils.toWei(partnerProject.tokenPrice.toString(), 'ether').toString(),
+          partnerProject.distributionTime,
+          partnerProject.isActive,
+          partnerProject.logo,
+          partnerProject.details,
+          partnerProject.website,
+          partnerProject.note,
+        ).send({from: state.defaultAccount});
+      },
+
+      async getActivePartnerProjects({state}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const ids = await Treasury.methods.getActivePartnerProjectsIds().call(defaultCallOptions(state));
+        const projects = [];
+        for(let i = 0; i < ids.length; i++) {
+          const project = await Treasury.methods.partneredProjects(ids[i]).call(defaultCallOptions(state));
+          projects.push(project);
+        }
+        return projects;
+      },
+
+      async setPartnerProjectLogo({state}, {id, logo}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setProjectLogo(id, logo).send({from: state.defaultAccount});
+      },
+
+      async setPartnerProjectDetails({state}, {id, details}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setProjectDetails(id, details).send({from: state.defaultAccount});
+      },
+
+      async setPartnerProjectWebsite({state}, {id, website}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setProjectWebsite(id, website).send({from: state.defaultAccount});
+      },
+
+      async setPartnerProjectNote({state}, {id, note}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setProjectNote(id, note).send({from: state.defaultAccount});
+      },
+
+      async setPartnerProjectIsActive({state}, {id, isActive}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setIsActive(id, isActive).send({from: state.defaultAccount});
+      },
+
       async fetchPartnerProjects({ state, dispatch }) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
@@ -4791,11 +4949,26 @@ export function createStore(web3: Web3) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        const partnerProject = partnerProjectFromContract(
-          await Treasury.methods.getPartnerProject(id).call(defaultCallOptions(state))
-        );
+        const partnerProjectRaw = await Treasury.methods.partneredProjects(id).call(defaultCallOptions(state));
+        const tokensClaimed = await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(state));
+        const data = await Treasury.methods.getProjectData(id).call(defaultCallOptions(state));
 
-        commit('updatePartnerProjectsState', { partnerProjectId: id, partnerProject });
+        const partnerProject = {
+          id: +partnerProjectRaw[0],
+          name: partnerProjectRaw[1],
+          tokenSymbol: partnerProjectRaw[2],
+          tokenAddress: partnerProjectRaw[3],
+          tokenSupply: +partnerProjectRaw[4],
+          tokensClaimed: +tokensClaimed,
+          tokenPrice: +partnerProjectRaw[5],
+          isActive: partnerProjectRaw[6],
+          logo: data[0],
+          details: data[1],
+          website: data[2],
+          note: data[3],
+        } as SupportedProject;
+
+        commit('updatePartnerProjectsState', { partnerProjectId: partnerProject.id, partnerProject });
       },
 
       async fetchDefaultSlippage({ state, commit }) {
@@ -4821,18 +4994,14 @@ export function createStore(web3: Web3) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        const distributionTime = await Treasury.methods.getProjectDistributionTime(id).call(defaultCallOptions(state));
-
-        return distributionTime;
+        return await Treasury.methods.projectDistributionTime(id).call(defaultCallOptions(state));
       },
 
       async getPartnerProjectClaimedAmount({ state }, id) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        const claimedAmount = await Treasury.methods.getProjectClaimedAmount(id).call(defaultCallOptions(state));
-
-        return claimedAmount;
+        return await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(state));
       },
 
       async getSkillToPartnerRatio({ state, commit }, id) {
@@ -5673,6 +5842,20 @@ export function createStore(web3: Web3) {
         return await BurningManager.methods.vars(2).call(defaultCallOptions(state));
       },
 
+      async getBurnPointMultiplier({ state }) {
+        const { Weapons } = state.contracts();
+        if(!Weapons || !state.defaultAccount) return;
+
+        return await Weapons.methods.burnPointMultiplier().call(defaultCallOptions(state));
+      },
+
+      async setBurnPointMultiplier({state}, {multiplier}) {
+        const { Weapons } = state.contracts();
+        if(!Weapons || !state.defaultAccount) return;
+
+        await Weapons.methods.setBurnPointMultiplier(multiplier).send({ from: state.defaultAccount });
+      },
+
       async fetchSpecialWeaponEvents({ state, dispatch, commit }) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;
@@ -5819,8 +6002,84 @@ export function createStore(web3: Web3) {
         const { PvpCore } = state.contracts();
         if(!PvpCore || !state.defaultAccount) return;
 
-        return await PvpCore.methods.specialWeaponRerollTimestamp(weaponId).call(defaultCallOptions(state));
-      }
+        return await PvpArena.methods.specialWeaponRerollTimestamp(weaponId).call(defaultCallOptions(state));
+      },
+
+      async fetchMintWeaponPriceDecreasePerSecond({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const decreaseRaw = await CryptoBlades.methods.vars(19).call(defaultCallOptions(state));
+        const decreaseBN = new BigNumber(decreaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const decreaseInSkill = await CryptoBlades.methods.usdToSkill(decreaseBN).call(defaultCallOptions(state));
+        return new BigNumber(decreaseInSkill).div(1e18);
+      },
+
+      async fetchMintCharacterPriceDecreasePerSecond({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const decreaseRaw = await CryptoBlades.methods.vars(20).call(defaultCallOptions(state));
+        const decreaseBN = new BigNumber(decreaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const decreaseInSkill = await CryptoBlades.methods.usdToSkill(decreaseBN).call(defaultCallOptions(state));
+        return new BigNumber(decreaseInSkill).div(1e18);
+      },
+
+      async fetchWeaponMintIncreasePrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const increaseRaw = await CryptoBlades.methods.vars(21).call(defaultCallOptions(state));
+        const increaseBN = new BigNumber(increaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const increaseInSkill = await CryptoBlades.methods.usdToSkill(increaseBN).call(defaultCallOptions(state));
+        return new BigNumber(increaseInSkill).div(1e18);
+      },
+
+      async fetchCharacterMintIncreasePrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const increaseRaw = await CryptoBlades.methods.vars(22).call(defaultCallOptions(state));
+        const increaseBN = new BigNumber(increaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const increaseInSkill = await CryptoBlades.methods.usdToSkill(increaseBN).call(defaultCallOptions(state));
+        return new BigNumber(increaseInSkill).div(1e18);
+      },
+
+      async fetchMintWeaponMinPrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const priceInUsdRaw = await CryptoBlades.methods.vars(23).call(defaultCallOptions(state));
+        const priceInUsd = new BigNumber(priceInUsdRaw).multipliedBy(new BigNumber(2).pow(64)).div(100).toString();
+        return await CryptoBlades.methods.usdToSkill(priceInUsd).call(defaultCallOptions(state));
+      },
+
+      async fetchMintCharacterMinPrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const priceInUsdRaw = await CryptoBlades.methods.vars(24).call(defaultCallOptions(state));
+        const priceInUsd = new BigNumber(priceInUsdRaw).multipliedBy(new BigNumber(2).pow(64)).div(100).toString();
+        return await CryptoBlades.methods.usdToSkill(priceInUsd).call(defaultCallOptions(state));
+      },
+
+      async fetchMintWeaponFee({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        return CryptoBlades.methods.getMintWeaponFee().call(defaultCallOptions(state));
+      },
+
+      async fetchMintCharacterFee({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        return CryptoBlades.methods.getMintCharacterFee().call(defaultCallOptions(state));
+      },
     }
   });
 }

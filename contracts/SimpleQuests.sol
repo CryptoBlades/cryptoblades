@@ -2,6 +2,7 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./cryptoblades.sol";
 import "./characters.sol";
 import "./weapons.sol";
@@ -18,6 +19,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     using ABDKMath64x64 for int128;
     using ABDKMath64x64 for uint256;
+    using SafeMath for uint256;
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     uint256 internal constant SEED_RANDOM_QUEST = uint(keccak256("SEED_RANDOM_QUEST"));
@@ -54,7 +56,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     uint8 public constant VAR_REPUTATION_LEVEL_4 = 22;
     uint8 public constant VAR_REPUTATION_LEVEL_5 = 23;
     uint8 public constant VAR_SKIP_QUEST_STAMINA_COST = 30;
-    uint8 public constant VAR_WEEKLY_COMPLETIONS_GOAL = 31;
+//    uint8 public constant VAR_WEEKLY_COMPLETIONS_GOAL = 31;
     uint256 internal constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
     uint256 internal constant NFTVAR_SIMPLEQUEST_TYPE = 102;
     uint256 internal constant NFTVAR_REPUTATION = 103;
@@ -100,7 +102,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     mapping(address => mapping(uint256 => uint256)) public weeklyCompletions; //user to week to completions
     mapping(address => mapping(uint256 => bool)) public weeklyRewardClaimed;
     mapping(uint256 => Reward) public rewards;
-    mapping(uint256 => uint256) public weeklyRewards;
+    mapping(uint256 => uint256) public weeklyRewards; //unused
+    mapping(uint256 => uint256) public weeklyCompletionsGoal;
+    uint constant maxWeeksInAYear = 53;
 
     event QuestAssigned(uint256 indexed questID, uint256 indexed characterID);
     event QuestProgressed(uint256 indexed questID, uint256 indexed characterID);
@@ -171,7 +175,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function _assertCanClaimWeeklyReward(address user) internal view {
         require(weeklyRewardClaimed[user][now / 1 weeks] == false, "Reward already claimed");
-        require(weeklyCompletions[user][now / 1 weeks] >= vars[VAR_WEEKLY_COMPLETIONS_GOAL], "Not enough weekly completions");
+        require(getWeeklyCompletions(user) >= weeklyCompletionsGoal[getWeekNumber()], "Not enough weekly completions");
     }
 
     // FUNCTIONS
@@ -268,8 +272,14 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         assignNewQuest(characterID);
     }
 
-    function generateRewardQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) public {
-        safeRandoms.requestSingleSeed(address(this), RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID));
+    function generateRewardQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) assertOnQuest(characterID, true) public {
+        uint256[] memory questData = getCharacterQuestData(characterID);
+        require(questData[0] >= quests[characterQuest[characterID]].requirementAmount);
+        _generateRewardQuestSeed(characterID, false);
+    }
+
+    function _generateRewardQuestSeed(uint256 characterID, bool forced) internal {
+        safeRandoms.requestSingleSeed(address(this), RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID), forced);
     }
 
     function rewardQuest(uint256 questID, uint256 characterID) private returns (uint256[] memory) {
@@ -311,7 +321,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function claimWeeklyReward() assertQuestsEnabled assertCanClaimWeeklyReward(msg.sender) public returns (uint256[] memory weeklyRewardIDs) {
-        uint256 rewardID = weeklyRewards[now / 1 weeks];
+        uint256 rewardID = getWeekNumber();
         weeklyRewardIDs = rewardWeekly(rewardID);
         weeklyRewardClaimed[msg.sender][now / 1 weeks] = true;
         emit WeeklyRewardClaimed(msg.sender, rewardID, weeklyRewardIDs);
@@ -359,28 +369,28 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(weapons.ownerOf(tokenID) == msg.sender, "Not weapon owner");
-                require(weapons.getStars(tokenID) == quest.requirementRarity, "Wrong weapon rarity");
+                require(weapons.getStars(tokenID) >= quest.requirementRarity, "Wrong weapon rarity");
             }
             weapons.burnWithoutDust(tokenIds);
         } else if (quest.requirementType == ItemType.JUNK) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(junk.ownerOf(tokenID) == msg.sender, "Not junk owner");
-                require(junk.tokenStars(tokenID) == quest.requirementRarity, "Wrong junk rarity");
+                require(junk.tokenStars(tokenID) >= quest.requirementRarity, "Wrong junk rarity");
             }
             junk.burn(tokenIds);
         } else if (quest.requirementType == ItemType.TRINKET) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(trinket.ownerOf(tokenID) == msg.sender, "Not trinket owner");
-                require(trinket.tokenStars(tokenID) == quest.requirementRarity, "Wrong trinket rarity");
+                require(trinket.tokenStars(tokenID) >= quest.requirementRarity, "Wrong trinket rarity");
             }
             trinket.burn(tokenIds);
         } else if (quest.requirementType == ItemType.SHIELD) {
             for (uint256 i = 0; i < tokenIds.length; i++) {
                 uint256 tokenID = tokenIds[i];
                 require(shields.ownerOf(tokenID) == msg.sender, "Not shield owner");
-                require(shields.getStars(tokenID) == quest.requirementRarity, "Wrong shield rarity");
+                require(shields.getStars(tokenID) >= quest.requirementRarity, "Wrong shield rarity");
             }
             shields.burn(tokenIds);
         } else if (quest.requirementType == ItemType.EXTERNAL) {
@@ -412,11 +422,12 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function incrementQuestProgress(uint256 characterID, uint256 questID, uint256 progress) private {
-        uint currentProgress = characters.getNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS);
-        characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS, currentProgress + progress);
+        require(progress > 0);
+        uint totalProgress = characters.getNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS) + progress;
+        characters.setNftVar(characterID, NFTVAR_SIMPLEQUEST_PROGRESS, totalProgress);
         emit QuestProgressed(questID, characterID);
-        if (quests[characterQuest[characterID]].requirementAmount <= currentProgress + progress) {
-            generateRewardQuestSeed(characterID);
+        if (quests[characterQuest[characterID]].requirementAmount.sub(totalProgress) == 0) {
+            _generateRewardQuestSeed(characterID, true);
         }
     }
 
@@ -474,6 +485,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return weeklyCompletions[user][now / 1 weeks];
     }
 
+    function getWeekNumber() public view returns (uint256) {
+        return now / 1 weeks % maxWeeksInAYear + 1;
+    }
+
     // ADMIN
 
     function setVar(uint256 varField, uint256 value) external restricted {
@@ -508,17 +523,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function addReward(ItemType rewardType, uint256 rewardRarity, uint256 rewardAmount, address rewardExternalAddress, uint256 reputationAmount) public restricted {
-        uint256 rewardID = nextRewardID++;
-        rewards[rewardID] = Reward(rewardID, rewardType, rewardRarity, rewardAmount, rewardExternalAddress, reputationAmount);
-        emit RewardAdded(rewardID);
-    }
-
-    function setWeeklyReward(uint256 id, uint256 timestamp) public restricted {
-        require(timestamp > 0, "Missing timestamp");
-        uint256 week = timestamp / 1 weeks;
-        weeklyRewards[week] = id;
-        emit WeeklyRewardSet(id, week);
+    function setWeeklyReward(ItemType rewardType, uint256 rewardRarity, uint256 rewardAmount, address rewardExternalAddress, uint256 reputationAmount, uint256 weekNumber, uint256 completionsGoal) public restricted {
+        rewards[weekNumber] = Reward(weekNumber, rewardType, rewardRarity, rewardAmount, rewardExternalAddress, reputationAmount);
+        weeklyCompletionsGoal[weekNumber] = completionsGoal;
+        emit RewardAdded(weekNumber);
     }
 
     function deleteQuestTemplate(uint256 tier, uint256 questID) public restricted {
