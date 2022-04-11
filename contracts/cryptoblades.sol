@@ -49,13 +49,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_PARAM_HOURLY_MAX_POWER_PERCENT = 16;
     uint256 public constant VAR_PARAM_SIGNIFICANT_HOUR_FIGHTS = 17;
     uint256 public constant VAR_PARAM_HOURLY_PAY_ALLOWANCE = 18;
-    uint256 public constant VAR_MINT_FEE_DECREASE_SPEED = 19;
-    uint256 public constant VAR_WEAPON_FEE_INCREASE = 20;
-    uint256 public constant VAR_CHARACTER_FEE_INCREASE = 21;
-    uint256 public constant VAR_MIN_WEAPON_FEE = 22;
-    uint256 public constant VAR_MIN_CHARACTER_FEE = 23;
-    uint256 public constant VAR_WEAPON_MINT_TIMESTAMP = 24;
-    uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 25;
+    uint256 public constant VAR_MINT_WEAPON_FEE_DECREASE_SPEED = 19;
+    uint256 public constant VAR_MINT_CHARACTER_FEE_DECREASE_SPEED = 20;
+    uint256 public constant VAR_WEAPON_FEE_INCREASE = 21;
+    uint256 public constant VAR_CHARACTER_FEE_INCREASE = 22;
+    uint256 public constant VAR_MIN_WEAPON_FEE = 23;
+    uint256 public constant VAR_MIN_CHARACTER_FEE = 24;
+    uint256 public constant VAR_WEAPON_MINT_TIMESTAMP = 25;
+    uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 26;
 
 
     // Mapped user variable(userVars[]) keys, one value per wallet
@@ -1021,7 +1022,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function getMintWeaponFee() public view returns (int128) {
-        int128 decrease = ABDKMath64x64.divu(block.timestamp.sub(vars[VAR_WEAPON_MINT_TIMESTAMP]).mul(vars[VAR_MINT_FEE_DECREASE_SPEED]), 1e18);
+        int128 decrease = ABDKMath64x64.divu(block.timestamp.sub(vars[VAR_WEAPON_MINT_TIMESTAMP]).mul(vars[VAR_MINT_WEAPON_FEE_DECREASE_SPEED]), 1e18);
         int128 weaponFeeMin = ABDKMath64x64.divu(vars[VAR_MIN_WEAPON_FEE], 100);
         if(decrease > mintWeaponFee) {
             return weaponFeeMin;
@@ -1033,7 +1034,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function getMintCharacterFee() public view returns (int128) {
-        int128 decrease = ABDKMath64x64.divu(block.timestamp.sub(vars[VAR_CHARACTER_MINT_TIMESTAMP]).mul(vars[VAR_MINT_FEE_DECREASE_SPEED]), 1e18);
+        int128 decrease = ABDKMath64x64.divu(block.timestamp.sub(vars[VAR_CHARACTER_MINT_TIMESTAMP]).mul(vars[VAR_MINT_CHARACTER_FEE_DECREASE_SPEED]), 1e18);
         int128 characterFeeMin = ABDKMath64x64.divu(vars[VAR_MIN_CHARACTER_FEE], 100);
         if(decrease > mintCharacterFee) {
             return characterFeeMin;
