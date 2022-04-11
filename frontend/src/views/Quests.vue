@@ -316,6 +316,7 @@ export default Vue.extend({
           this.showWeeklyClaimedModal = true;
         }
       } finally {
+        await this.refreshQuestData();
         this.isLoading = false;
       }
     },

@@ -434,7 +434,7 @@ export default Vue.extend({
   computed: {
     currentWeekNumber(): number {
       const weekInSeconds = 604800;
-      return Math.floor(Date.now() / 1000 / weekInSeconds % 53);
+      return Math.floor(Date.now() / 1000 / weekInSeconds % 53) + 1;
     },
   },
 

@@ -175,7 +175,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
 
     function _assertCanClaimWeeklyReward(address user) internal view {
         require(weeklyRewardClaimed[user][now / 1 weeks] == false, "Reward already claimed");
-        require(weeklyCompletions[user][now / 1 weeks] >= weeklyCompletionsGoal[getWeekNumber()], "Not enough weekly completions");
+        require(getWeeklyCompletions(user) >= weeklyCompletionsGoal[getWeekNumber()], "Not enough weekly completions");
     }
 
     // FUNCTIONS
@@ -486,7 +486,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function getWeekNumber() public view returns (uint256) {
-        return now / 1 weeks % maxWeeksInAYear;
+        return now / 1 weeks % maxWeeksInAYear + 1;
     }
 
     // ADMIN
