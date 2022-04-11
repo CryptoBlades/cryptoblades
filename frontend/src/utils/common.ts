@@ -114,12 +114,9 @@ export const isValidWeb3Address = (walletAddress: string) => {
 };
 
 export const currentChainSupportsMerchandise = () => {
-  const currentChain = localStorage.getItem('currentChain') || 'BSC';
-  const merchandiseSupportedChains = config.merchandiseSupportedChains;
-  if (!currentChain || !merchandiseSupportedChains) {
-    return false;
-  }
-  return merchandiseSupportedChains.includes(currentChain);
+  const supportedFeatures = getConfigValue('featureSupport');
+
+  return supportedFeatures.merch;
 };
 
 export const currentChainSupportsPvP = () => {

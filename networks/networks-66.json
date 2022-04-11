@@ -4256,7 +4256,7 @@
     },
     "links": {},
     "address": "0x5a61ae603Af252dBa80c1005502Fe5A7C590FD4D",
-    "transactionHash": "0x9ba0e2557caabd81cdc13ccc2775959822540a688842c19dce7f8c3fc738d0a8"
+    "transactionHash": "0x36ae5e1f0e57b78fdd9c6aeace3b33393230f07462910640bb97e8878f459c46"
   },
   "build/contracts/Treasury.json": {
     "events": {},
