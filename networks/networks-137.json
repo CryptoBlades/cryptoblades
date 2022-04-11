@@ -5994,7 +5994,7 @@
     },
     "links": {},
     "address": "0x9679517Bdfec8f130B7eC79e92a6c16472E38Cf1",
-    "transactionHash": "0x65ffbbeda2c1f3f6a0a985a04e3c905ec66c89643255ed67e90441219a81a2a4"
+    "transactionHash": "0xa7b6ba900ec28b24127dfc8a0788d4d87f1e1b95cfa0e29433e7db242e749925"
   },
   "build/contracts/Treasury.json": {
     "events": {
