@@ -7,6 +7,8 @@
     @mouseleave="hover = !isMobile()"
   >
 
+      <!-- :style="selected ? 'border:5px solid #fff' : ''" -->
+
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
     </div>
@@ -24,14 +26,6 @@
       <div class="favorite">
         <span v-if="favorite" class="favorite-weapon"></span>
       </div>
-      <!-- <div class="trait"> -->
-        <!-- <span :class="weapon.element.toLowerCase() + '-icon'"></span> -->
-        <!-- <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
-      </div> -->
-      <!-- <div class="weapon-name">
-        <div class="id-number">{{$t('weaponIcon.id')}} #{{ weapon.id }}</div>
-        <span>{{ getCleanWeaponName(weapon.id, weapon.stars) }}</span>
-      </div> -->
       <div class="weapon-details" :style="weapon.lowStarBurnPoints > 0
         || weapon.fourStarBurnPoints > 0
         || weapon.fiveStarBurnPoints > 0
@@ -43,7 +37,7 @@
             <span span>{{ getCleanWeaponName(weapon.id, weapon.stars).toUpperCase() }}</span>
           </div>
           <span class="icon-trait" :class="weapon.element.toLowerCase() + '-icon'"></span>
-          <span class="battle-p">Battle Power: 900</span>
+          <span class="battle-p">Battle Power: {{weapon.stat1Value + weapon.stat2Value + weapon.stat3Value}}</span>
         </div>
         <div>
           <div class="small-durability-bar"
@@ -53,20 +47,12 @@
           </div>
         </div>
         <div class="bonus-pows">
-          <!-- <div>LB: 30/100</div>
-          <div>4B: 0/25</div>
-          <div>5B: 0/10</div> -->
 
           <div v-if="weapon.lowStarBurnPoints > 0">LB: {{ weapon.lowStarBurnPoints }}</div>
           <div v-if="weapon.fourStarBurnPoints > 0">4B: {{ weapon.fourStarBurnPoints }}</div>
           <div v-if="weapon.fiveStarBurnPoints > 0">5B: {{ weapon.fiveStarBurnPoints }}</div>
         </div>
       </div>
-      <!-- <div class="bonus-power">
-        <div v-if="weapon.lowStarBurnPoints > 0"><span>{{ weapon.lowStarBurnPoints }} LB</span></div>
-        <div v-if="weapon.fourStarBurnPoints > 0"><span>{{ weapon.fourStarBurnPoints }} 4B</span></div>
-        <div v-if="weapon.fiveStarBurnPoints > 0"><span>{{ weapon.fiveStarBurnPoints }} 5B</span></div>
-      </div> -->
     </div>
 
     <!-- <div class="id">{{$t('weaponIcon.id')}} #{{ weapon.id }}</div> -->
@@ -131,8 +117,7 @@ function transformModel(model, y) {
 }
 
 export default {
-  props: ['weapon', 'favorite'],
-
+  props: ['weapon', 'favorite', 'selected'],
   computed: {
     ...mapState(['maxDurability']),
     ...mapGetters([

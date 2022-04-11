@@ -4,10 +4,10 @@
       <h3>{{$t('weapons')}} ({{ ownWeapons }})</h3>
       <div class="row d-flex align-items-center" style="flex-grow:0.6">
         <div class="col-sm-6 col-md-6 col-lg-4 d-flex">
-          <div v-if="showReforgedToggle" class="show-reforged">
+          <!-- <div v-if="showReforgedToggle" class="show-reforged">
             <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
             <strong>{{$t('weaponGrid.showReforged')}}</strong>
-          </div>
+          </div> -->
 
           <div v-if="showFavoriteToggle" class="show-reforged show-favorite">
             <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
@@ -28,23 +28,6 @@
             :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
-      <!--<template v-if="isMarket">
-        <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>{{$t('weaponGrid.minPrice')}}</strong>
-          <input class="form-control" type="number" v-model.trim="minPriceFilter" :min="0" placeholder="Min" />
-        </div>
-        <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>{{$t('weaponGrid.maxPrice')}}</strong>
-          <input class="form-control" type="number" v-model.trim="maxPriceFilter" :min="0" placeholder="Max" />
-        </div>
-
-        <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>{{$t('weaponGrid.sort')}}</strong>
-          <select class="form-control" v-model="priceSort" >
-            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || $t('weaponGrid.sorts.any') }}</option>
-          </select>
-        </div>
-      </template> -->
       <div class="col-sm-6 col-md-6 col-lg-2">
         <b-button
           v-if="!newWeapon"
@@ -53,7 +36,6 @@
           @click="clearFilters"
         >
           <span>
-            <!-- {{$t('weaponGrid.clearFilters')}} -->
             Clear
           </span>
         </b-button>
@@ -63,7 +45,7 @@
 
     <ul class="weapon-grid">
       <li
-        class="weapon"
+        class="weapon" :style="setBorderSelected(weapon.id) ? 'border: 2px solid #fff' : ''"
         :class="{ selected: highlight !== null && weapon.id === highlight }"
         v-for="weapon in nonIgnoredWeapons"
         :key="weapon.id"
@@ -71,7 +53,7 @@
         @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
         <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
         <div class="weapon-icon-wrapper">
-          <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" />
+          <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)"/>
         </div>
         <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :weapon="weapon"></slot>
@@ -307,9 +289,9 @@ export default Vue.extend({
       let items: IWeapon[] = [];
       this.displayWeapons.forEach((x) => items.push(x));
       const allIgnore: string[] = [];
-      if (this.ignore) {
-        allIgnore.push((this.ignore || '').toString());
-      }
+      // if (this.ignore) {
+      //   allIgnore.push((this.ignore || '').toString());
+      // }
       if (!this.showFavoriteWeapons) {
         for (const key in this.favorites) {
           allIgnore.push(key);
@@ -405,6 +387,18 @@ export default Vue.extend({
     },
     isFavorite(weaponId: number): boolean {
       return this.favorites[weaponId];
+    },
+    setBorderSelected(weaponId: number){
+      let bols = false;
+      if(this.ignore){
+        this.ignore.forEach((x: any) => {
+          if(Number(x) === weaponId){
+            bols = true;
+          }
+        });
+        // return this.ignore[String(weaponId)];
+      }
+      return bols;
     },
     clearFilters() {
       if(this.isMarket) {

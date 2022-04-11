@@ -10,7 +10,7 @@
           <h3>The Dwarves Have Forged Your Weapons</h3>
         </div>
         <div class="weapon-list" v-if="!spin">
-          <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="[3]" :newWeapon="true"/>
+          <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true"/>
         </div>
         <div class="footer-close" v-if="!spin">
           <img src="../assets/separator.png" alt="">
@@ -18,7 +18,7 @@
           <span class="close-icon"></span>
         </div>
       </div>
-      <div class="body-forge" v-if="spin && modalType == 'forge'">
+      <div class="forge-loading" v-if="spin && modalType == 'forge'">
         <div class="row new-weapons">
           <h3>Forging Weapon...</h3>
         </div>
@@ -118,11 +118,12 @@
             @click="onForgeWeapon"
           />
         </div>
+        <transition name="slide-fade">
         <div class="row mt-3" v-if="ownWeapons.length > 0 && !showReforge">
           <div class="col">
             <div class="weapon-header">
               <div class="nav-icons">
-                <div class="forge-btn">
+                <div class="forge-btn" @click="displayBlacksmith()">
                   <span id="forge"></span>
                   <span>Forge</span>
                 </div>
@@ -142,22 +143,6 @@
                   v-tooltip="$t('blacksmith.useDust')">
                   <span>{{$t('blacksmith.reforgeWithDust').toUpperCase()}}</span>
                 </button>
-                <!-- <b-button
-                        class="ml-3"
-                        v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
-                        @click="displayDustReforge()"
-                        tagname="reforge_weapon"
-                        v-tooltip="$t('blacksmith.useDust')">
-                  <span>{{$t('blacksmith.reforgeWithDust').toUpperCase()}}</span>
-                </b-button> -->
-                <!-- <b-button
-                        variant="primary"
-                        class="ml-3"
-                        @click="displayDustCreation()"
-                        tagname="reforge_weapon"
-                        v-tooltip="$t('blacksmith.burnWeapons')">
-                  {{$t('blacksmith.createDust')}}
-                </b-button> -->
                 <button
                   class="ml-3"
                   @click="onClickSpecialForge()"
@@ -168,15 +153,6 @@
                   <span>{{$t('blacksmith.specialForge').toUpperCase()}}</span>
                 </span>
                 </button>
-                <!-- <b-button
-                        class="ml-3"
-                        @click="onClickSpecialForge()"
-                        :disabled="disableForge"
-                        v-tooltip="$t('blacksmith.specialForgeTooltip')">
-                  <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                  <span v-else class="gtag-link-others"><span>{{$t('blacksmith.specialForge').toUpperCase()}}</span></span>
-                </b-button> -->
-
                 <button
                   class="ml-3"
                   @click="onClickForge(0)"
@@ -296,54 +272,11 @@
             </div>
           </div>
         </div>
-
-        <div class="row mt-3" v-if="showReforge && !showReforgeDust">
-          <div class="weapon-header">
-              <div class="nav-icons">
-                <div class="forge-btn">
-                  <span id="forge"></span>
-                  <span>Forge</span>
-                </div>
-                <div>
-                  <div class="line"></div>
-                </div>
-                <div class="salvage-btn">
-                  <span id="salvage"></span>
-                  <span>Create Dust</span>
-                </div>
-              </div>
-            </div>
-          <div class="col">
-            <div class="d-flex justify-content-space-between">
-              <h1>{{$t('blacksmith.createDust')}}</h1>
-              <div class="d-flex justify-content-flex-end ml-auto">
-                <b-button
-                        variant="primary"
-                        tagname="confirm_forge_weapon"
-                        class="confirmReforge ml-3"
-                        @click="showMassDustConfirmation"
-                        v-tooltip="$t('blacksmith.burnSelected')"
-                        :disabled="burnWeaponIds.length === 0">
-                  {{$t('blacksmith.createDust')}}: {{burnWeaponIds.length}} {{$t('weapons')}}
-                  <br>
-                  ({{burnCost * burnWeaponIds.length }} SKILL)
-                </b-button>
-                <b-button
-                        variant="primary"
-                        tagname="confirm_forge_weapon"
-                        class="confirmReforge ml-3"
-                        @click="cancelReforge()"
-                        v-tooltip="$t('blacksmith.cancelWeaponDusting')">
-                        {{$t('blacksmith.cancelDusting')}}
-                </b-button>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        </transition>
 
         <!-- Reforge Dust Section -->
-        <div class="row mt-3" v-if="reforgeWeaponId">
+        <transition name="slide-fade">
+        <div class="row mt-3" v-if="reforgeWeaponId && showReforge && showReforgeDust === true">
           <div class="col-lg-4 reforge-dust">
              <div class="magic-circle">
               <span class="inner" :class="magicCircleSpeed ? 'faster reverse' : 'slower reverse'"></span>
@@ -368,17 +301,17 @@
                     <span>POWER</span>
                     <p>+311</p>
                   </div> -->
-                  <div>
+                  <div v-if="getWeaponInfo('stat1Value') > 0">
                     <span :class="getWeaponInfo('stat1').toLowerCase() + '-icon'"></span>
                     <span>{{getWeaponInfo('stat1')}}</span>
                     <p>+{{getWeaponInfo('stat1Value')}}</p>
                   </div>
-                  <div>
+                  <div v-if="getWeaponInfo('stat2Value') > 0">
                    <span :class="getWeaponInfo('stat2').toLowerCase() + '-icon'"></span>
                     <span>{{getWeaponInfo('stat2')}}</span>
                     <p>+{{getWeaponInfo('stat2Value')}}</p>
                   </div>
-                  <div>
+                  <div v-if="getWeaponInfo('stat3Value') > 0">
                    <span :class="getWeaponInfo('stat3').toLowerCase() + '-icon'"></span>
                     <span>{{getWeaponInfo('stat3')}}</span>
                     <p>+{{getWeaponInfo('stat3Value')}}</p>
@@ -404,7 +337,7 @@
                       <span class="dust-img-lesser"></span>
                     </div>
                     <div>
-                      <p class="p-0 m-0">Low Star Burn</p>
+                      <p class="p-0 m-0">(LB) Low Star Burn</p>
                       <!-- <span>Req. 10/500</span> -->
                       <span>15 power per level</span>
                     </div>
@@ -426,7 +359,7 @@
                       <span class="dust-img-greater"></span>
                     </div>
                     <div>
-                      <p class="p-0 m-0">Four Star Burn</p>
+                      <p class="p-0 m-0">(4B) Four Star Burn</p>
                       <!-- <span>Req. 10/500</span> -->
                       <span>30 power per level</span>
                     </div>
@@ -448,7 +381,7 @@
                       <span class="dust-img-powerful"></span>
                     </div>
                     <div>
-                      <p class="p-0 m-0">Five Star Burn</p>
+                      <p class="p-0 m-0">(5B) Five Star Burn</p>
                       <!-- <span>Req. 10/500</span> -->
                       <span> 75 power per level</span>
                     </div>
@@ -472,129 +405,112 @@
                       <span>REFORGE</span>
                       <span>({{ dustReforgeCost }} SKILL)</span>
                   </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-12" v-if="showReforge && showReforgeDust === true">
-            <div>
-              <div class="col-lg-12 weapon-container">
-                <div class="col-lg-12">
-                  <h1 class="text-center">{{$t('blacksmith.selectDustAmount')}}</h1>
-                </div>
-                <div class="row">
-                  <div class="col-lg-2"></div>
-                  <div class="col-lg-2 dust-container" align="center">
-                    <div class="dust">
-                      LB: <span class="text-warning">15 {{$t('blacksmith.powerPerLevel')}}</span>
-                      <div class="dust-image1"></div>
-                    </div>
-                    <h2 class="text-center">{{$t('blacksmith.lesser')}}</h2>
-                    <div class="boxed">
-                      <h2>{{lesserDust}}/{{getLesserDust()}}</h2>
-                    </div>
-                    <div class="range">
-                      <div class="sliderValue">
-                        <span>100</span>
-                      </div>
-                      <div class="field">
-                        <div class="value left">0</div>
-                        <input v-model="lesserDust" type="range" min="0" :max="getLesserDust()" value="0" steps="1">
-                        <div class="value right">{{getLesserDust()}}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-2 dust-container" align="center">
-                    <div class="dust">
-                      4B: <span class="text-warning">30 {{$t('blacksmith.powerPerLevel')}}</span>
-                      <div class="dust-image2"></div>
-                    </div>
-                    <h2 class="text-center">{{$t('blacksmith.greater')}}</h2>
-                    <div class="boxed">
-                      <h2>{{greaterDust}}/{{getGreaterDust()}}</h2>
-                    </div>
-                    <div class="range">
-                      <div class="sliderValue">
-                        <span>100</span>
-                      </div>
-                      <div class="field">
-                        <div class="value left">0</div>
-                        <input v-model="greaterDust" type="range" min="0" :max="getGreaterDust()" value="0" steps="1">
-                        <div class="value right">{{getGreaterDust()}}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-2 weapon-container dust-container" align="center">
-                    <div class="dust">
-                      5B: <span class="text-warning">75 {{$t('blacksmith.powerPerLevel')}}</span>
-                      <div class="dust-image3"></div>
-                    </div>
-                    <h2 class="text-center">{{$t('blacksmith.powerful')}}</h2>
-                    <div class="boxed">
-                      <h2>{{powerfulDust}}/{{getPowerfulDust()}}</h2>
-                    </div>
-                    <div class="range">
-                      <div class="sliderValue">
-                        <span>0</span>
-                      </div>
-                      <div class="field">
-                        <div class="value left">0</div>
-                        <input v-model="powerfulDust" type="range" min="0" :max="getPowerfulDust()" value="0" steps="1">
-                        <div class="value right">{{getPowerfulDust()}}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-3">
-                    <div v-if="showReforge && showDustForge === false">
-                      <div class="confirmReforge">
-                        <div class="weapon" :hidden="reforgeWeaponId === null">
-                          <div v-if="$slots.above || $scopedSlots.above">
-                            <slot name="above" :weapon="getWeaponToUpgrade()"></slot>
-                          </div>
-                          <div class="weapon-icon-wrapper">
-                            <weapon-icon v-if="getWeaponToUpgrade()" class="weapon-icon" :weapon="getWeaponToUpgrade()" />
-                          </div>
-                          <div class="text-center" :hidden="burnWeaponId === 0"></div>
-                        </div>
-                        <b-button
-                                variant="primary"
-                                tagname="confirm_forge_weapon"
-                                class="confirmReforge"
-                                @click="showDustReforgeConfirmation"
-                                :disabled="lesserDust == '0' && greaterDust == '0' && powerfulDust == '0'"
-                                v-tooltip="$t('blacksmith.reforgeSelected')">
-                          {{$t('blacksmith.confirmReforge')}}
-                          <br>
-                          <br>
-                          {{$t('blacksmith.use')}}: {{lesserDust}} {{$t('blacksmith.lesser')}}
-                          <br>
-                          {{$t('blacksmith.use')}}: {{greaterDust}} {{$t('blacksmith.greater')}}
-                          <br>
-                          {{$t('blacksmith.use')}}: {{powerfulDust}} {{$t('blacksmith.powerful')}}
-                          <br>
-                          ({{ dustReforgeCost }} SKILL)
-                        </b-button>
-                        <b-button
-                                variant="primary"
-                                tagname="confirm_forge_weapon"
-                                class="confirmReforge"
-                                @click="displayBlacksmith()"
-                                v-tooltip="$t('blacksmith.cancelReforge')">
-                          {{$t('blacksmith.cancelReforge')}}
-                        </b-button>
-                      </div>
-                    </div>
+                  <div class="back-btn" @click="displayBlacksmith()">
+                    <span class="menu-btn"></span>
+                    <span>CHANGE EQUIPMENT</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        </transition>
+      <!-- @click="displayBlacksmith()" -->
 
-        <div class="row mt-3">
-          <div class="col-md-12" v-if="showReforge && showReforgeDust === false">
-            <div>
+        <!-- <div class="col">
+            <div class="d-flex justify-content-space-between">
+              <h1>{{$t('blacksmith.createDust')}}</h1>
+              <div class="d-flex justify-content-flex-end ml-auto">
+                <b-button
+                        variant="primary"
+                        tagname="confirm_forge_weapon"
+                        class="confirmReforge ml-3"
+                        @click="showMassDustConfirmation"
+                        v-tooltip="$t('blacksmith.burnSelected')"
+                        :disabled="burnWeaponIds.length === 0">
+                  {{$t('blacksmith.createDust')}}: {{burnWeaponIds.length}} {{$t('weapons')}}
+                  <br>
+                  ({{burnCost * burnWeaponIds.length }} SKILL)
+                </b-button>
+                <b-button
+                        variant="primary"
+                        tagname="confirm_forge_weapon"
+                        class="confirmReforge ml-3"
+                        @click="cancelReforge()"
+                        v-tooltip="$t('blacksmith.cancelWeaponDusting')">
+                        {{$t('blacksmith.cancelDusting')}}
+                </b-button>
+              </div>
+            </div>
+          </div> -->
+
+        <div class="row mt-3" v-if="showReforge && showReforgeDust === false">
+          <div class="col-md-9">
+              <div class="row mt-3 ml-2" v-if="showReforge && !showReforgeDust">
+                <div class="weapon-header">
+                  <div class="nav-icons" @click="displayBlacksmith()">
+                    <div class="forge-btn">
+                      <span id="forge"></span>
+                      <span>Forge</span>
+                    </div>
+                    <div>
+                      <div class="line"></div>
+                    </div>
+                    <div class="salvage-btn">
+                      <span id="salvage"></span>
+                      <span>Create Dust</span>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <div class="weapon-content">
+              <weapon-grid v-model="burnWeaponId" :ignore="burnWeaponIds"
+                      :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon"  />
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="dust-content">
+              <h4>YOU WILL RECEIVE</h4>
+              <div class="create-dust flex-column">
+                <div>
+                  <div class="dust-bg">
+                    <span class="dust-img-powerful"></span>
+                  </div>
+                  <div>
+                    <p class="p-0 m-0">Powerful Dust</p>
+                    <span> x{{powerful}}</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="dust-bg">
+                    <span class="dust-img-greater"></span>
+                  </div>
+                  <div>
+                    <p class="p-0 m-0">Greater Dust</p>
+                    <span> x{{greater}}</span>
+                  </div>
+                </div>
+                <div>
+                  <div class="dust-bg">
+                    <span class="dust-img-lesser"></span>
+                  </div>
+                  <div>
+                    <p class="p-0 m-0">Lesser Dust</p>
+                    <span> x{{lesser}}</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <button class="forge-btns"
+                @click="showMassDustConfirmation"
+                >
+                  <span>SALVAGE</span>
+                  <span>({{burnCost * burnWeaponIds.length }} SKILL)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+            <!-- <div>
               <div class="col-md-12">
                 <div class="row mobile-flip">
                   <div class="col-md-5 weapon-container" align="center">
@@ -638,9 +554,9 @@
               </div>
             </div>
           </div>
+        </div> -->
         </div>
-          </div>
-        </div>
+
       </b-tab>
       <b-tab>
         <div class="row mt-3">
@@ -663,9 +579,11 @@
         </div>
       </b-tab>
     </b-tabs>
-    <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
-             :title="$t('blacksmith.dustReforgeConfirmation')" @ok="onReforgeWeaponWithDust">
+    <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal" @ok="onReforgeWeaponWithDust">
       <div class="row">
+        <div>
+          {{$t('blacksmith.reforgeConfirmation')}}
+        </div>
         <div class="headings">
           <h2 class="text-center">{{$t('blacksmith.upgrade')}}</h2>
           <div class="weapon" v-if="reforgeWeaponId">
@@ -692,15 +610,25 @@
       </div>
     </b-modal>
 
-    <b-modal class="centered-modal text-center" ref="mass-dust-confirmation-modal" :title="$t('blacksmith.reforgeConfirmation')" @ok="onMassBurnWeapons">
-      <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" />
+    <b-modal class="centered-modal text-center" size="lg" ref="mass-dust-confirmation-modal" hide-footer hide-header>
+      <div class="dust-confirm">
+        <h4>CREATE DUST CONFIRMATION</h4>
+        <b-icon icon="exclamation-circle" variant="warning" />
         {{ $t('blacksmith.burnWarning', { weaponAmount: burnWeaponIds.length })}}
-        {{ $t('blacksmith.cantBeUndone')}}
+        {{ $t('blacksmith.cantBeUndone')}} <br>
+        <b-icon icon="exclamation-circle" variant="warning" /> {{ $t('blacksmith.noRefunds')}}
+        <button
+          variant="primary"
+          class="row justify-content-md-center forge-btns"
+          @click="onMassBurnWeapons">
+            <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+              CONFIRM
+            </span>
+        </button>
       </div>
-      <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" /> {{ $t('blacksmith.noRefunds')}}
-      </div>
+      <!-- <div class="text-center">
+      </div> -->
+
     </b-modal>
 
     <b-modal class="centered-text-modal" ref="reforge-bonuses-modal" :title="$t('blacksmith.reforgeBonuses')">
@@ -730,7 +658,6 @@ import WeaponGrid from '../components/smart/WeaponGridNew.vue';
 import BigButton from '../components/BigButton.vue';
 import { getWeaponArt } from '../weapon-arts-placeholder';
 import { getWeaponRarity } from '../weapon-element';
-import gsap from 'gsap';
 import { getCleanName } from '../rename-censor';
 import Vue from 'vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
@@ -790,6 +717,13 @@ interface Data {
   haveWeaponCosmetic1: number;
   haveWeaponCosmetic2: number;
   selectedSpecialWeaponEventId: number;
+  showModal: boolean;
+  modalType: string;
+  magicCircleSpeed: boolean;
+  totalBonusPower: number;
+  lesser: number;
+  greater: number;
+  powerful: number;
 }
 
 export default Vue.extend({
@@ -833,6 +767,9 @@ export default Vue.extend({
       modalType: '',
       magicCircleSpeed: false,
       totalBonusPower: 0,
+      lesser: 0,
+      greater: 0,
+      powerful: 0
     } as Data;
   },
 
@@ -871,14 +808,6 @@ export default Vue.extend({
         this.disableX10ForgeWithStaked = true;
       }
     },
-    showModal(){
-      gsap.to(this, {
-        tweenValue: this.totalBonusPower,
-        onUpdate: () => {
-          this.totalBonusPower = Math.ceil(this.tweenValue);
-        }
-      });
-    }
   },
 
   async created() {
@@ -945,7 +874,6 @@ export default Vue.extend({
       else if(type === 'stat3Type') return weaponActive.stat3Type;
       else if(type === 'stat3Value') return weaponActive.stat3Value;
       else if(type === 'bonusPower') return weaponActive.bonusPower;
-      // eslint-disable-next-line no-var
     },
 
     async onForgeWeapon() {
@@ -1020,6 +948,38 @@ export default Vue.extend({
       }
     },
 
+    computeDust(operator: string,star: number, lesser: number,greater: number,powerful: number){
+      if(operator === 'add'){
+        if(star <= 3) this.lesser = this.lesser + (star * 2);
+        else if (star === 4) this.greater = this.greater + 1;
+        else if (star === 5) this.powerful = this.powerful + 1;
+
+        if(lesser > 0){
+          this.lesser = this.lesser + Math.floor(lesser/2);
+        }
+        if(greater > 0){
+          this.greater = this.greater + Math.floor(greater/2);
+        }
+        if(powerful > 0){
+          this.powerful = this.powerful + Math.floor(powerful/2);
+        }
+      }else{
+        if(star <= 3) this.lesser = this.lesser - (star * 2);
+        else if (star === 4) this.greater = this.greater - 1;
+        else if (star === 5) this.powerful = this.powerful - 1;
+
+        if(lesser > 0){
+          this.lesser = this.lesser - Math.floor(lesser/2);
+        }
+        if(greater > 0){
+          this.greater = this.greater - Math.floor(greater/2);
+        }
+        if(powerful > 0){
+          this.powerful = this.powerful - Math.floor(powerful/2);
+        }
+      }
+    },
+
     onShowForgeDetails() {
       (this.$refs['forge-details-modal'] as BModal).show();
     },
@@ -1082,6 +1042,11 @@ export default Vue.extend({
       this.showBlacksmith = true;
       this.showDustForge = false;
       this.showReforgeDust = false;
+      this.lesser = 0;
+      this.greater = 0;
+      this.powerful = 0;
+      this.burnWeaponIds = [];
+
     },
     cancelReforge() {
       this.showReforge = false;
@@ -1103,8 +1068,15 @@ export default Vue.extend({
     },
 
     addBurnWeapon(id: number){
-      this.burnWeaponIds.push(id.toString());
-      this.hideWeapons = this.hideWeapons.filter(val => !this.burnWeaponIds.includes(val.toString()));
+      if(this.burnWeaponIds.includes(id.toString())){
+        this.burnWeaponIds = this.burnWeaponIds.filter(val => val !==  id.toString());
+        const weaponDetails = this.ownWeapons.find(y => y.id === id);
+        this.computeDust('subs',(weaponDetails.stars + 1), weaponDetails.lowStarBurnPoints, weaponDetails.fourStarBurnPoints, weaponDetails.fiveStarBurnPoints);
+      }else{
+        this.burnWeaponIds.push(id.toString());
+        const weaponDetails = this.ownWeapons.find(y => y.id === id);
+        this.computeDust('add',(weaponDetails.stars + 1), weaponDetails.lowStarBurnPoints, weaponDetails.fourStarBurnPoints, weaponDetails.fiveStarBurnPoints);
+      }
       this.burnWeaponId = null;
     },
 
@@ -1125,6 +1097,7 @@ export default Vue.extend({
       console.log(this.newForged);
       if (this.newForged.length > 0 && !this.onError){
         this.showModal = true;
+        this.modalType = 'forge';
         this.spin = true;
         setTimeout(() => {
           this.spin = false;
@@ -1202,6 +1175,7 @@ export default Vue.extend({
   justify-content: space-between;
   align-items: center;
   margin-top: 30px;
+  z-index: 99;
 }
 
 .buttons-panel > h2{
@@ -1218,6 +1192,7 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  flex-direction: column
 }
 
 .weapon-list{
@@ -1237,8 +1212,13 @@ export default Vue.extend({
   width: 100%;
 }
 
-.forging-modal > div{
+.forging-modal > .body-forge{
   width: 90%;
+  margin-top: -170px;
+}
+
+.forging-modal > .forge-loading{
+  width:fit-content;
   margin-top: -170px;
 }
 
@@ -1339,6 +1319,7 @@ export default Vue.extend({
   width: 100%;
   display: flex;
   justify-content: center;
+  margin: auto;
 }
 
 
@@ -1483,6 +1464,28 @@ export default Vue.extend({
 
 .btn-forge{
   margin-top: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.btn-forge > div > span {
+  font-family: Oswald;
+  color: #6b6969;
+  font-size: 16px;
+}
+
+.btn-forge > div {
+  margin-left: 20px;
+  border-bottom: 1px solid #6b6969;
+  padding-bottom: 10px;
+  cursor: pointer;
+}
+
+.menu-btn{
+  content: url('../assets/blacksmith/menu.svg');
+  height: 15px;
+  width: 15px;
+  margin-right: 10px;
 }
 
 .button-div > button{
@@ -1645,6 +1648,7 @@ export default Vue.extend({
 .weapon-menu > div > div > .details > span{
   border-right: 1px solid rgba(255, 255, 255, 0.445);
   padding-left: 30px;
+  font-family: Roboto;
   padding-right: 30px;
 }
 
@@ -1658,7 +1662,7 @@ export default Vue.extend({
   padding-left: 0px;
 }
 
-.weapon-menu > div > div > .details > span:nth-child(4){
+.weapon-menu > div > div > .details > span:nth-child(3){
   border-right: none;
 }
 
@@ -1716,6 +1720,24 @@ export default Vue.extend({
   display: flex;
 }
 
+.dust-confirm > h4{
+  text-align: center;
+  font-family: Trajan;
+  color: #e9c97a;
+  padding: 10px 0px 20px 0px;
+}
+
+.dust-confirm{
+  font-family: Roboto;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.349);
+}
+
+.dust-confirm > button{
+  margin: auto;
+  margin-top: 50px;
+}
+
 .power-status > div{
   width: 15%;
 }
@@ -1764,6 +1786,11 @@ export default Vue.extend({
 .body-forge .forge-header,.body-forge .forge-content{
     width: 55%;
     margin:auto;
+}
+
+
+.forge-loading{
+  width: auto;
 }
 
 .power-rolled{
@@ -1825,6 +1852,11 @@ export default Vue.extend({
   cursor: pointer;
 }
 
+.menus > div:nth-child(2), .menus > div:nth-child(3), .menus > div:nth-child(4){
+  cursor: not-allowed;
+
+}
+
 .menus > div:nth-child(1){
   border-radius: 5px 0px 0px 5px;
 }
@@ -1837,6 +1869,38 @@ export default Vue.extend({
   color: #fff !important;
   background: #1168D0;
   border: none;
+}
+
+.create-dust > div {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dust-content{
+  padding: 20px;
+}
+
+.dust-content > div:nth-child(3){
+  border-top: 1px solid rgba(255, 255, 255, 0.322);
+  padding-top: 30px;
+}
+
+.dust-content > h4{
+  font-family: Trajan;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.322);
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  margin-top: 50px;
+}
+
+.create-dust > div > div:nth-child(2) {
+  padding-left: 20px;
+}
+
+.create-dust > div > div > span, .create-dust > div > div > p {
+  font-family: Roboto;
+  color: #fff;
 }
 
 .dust-gauge{
@@ -2134,7 +2198,7 @@ export default Vue.extend({
 }
 
 .confirmReforge{
-  margin: 1em auto 2em;
+  /* margin: 1em auto 2em; */
   border-radius:0.15em;
   text-decoration:none;
   font-weight:400;
@@ -2154,6 +2218,10 @@ export default Vue.extend({
   border-radius: 5px;
   cursor: pointer;
   margin-bottom: 2em;
+}
+
+ul.weapon-grid li.active{
+  border: 2px solid #e9c97a;
 }
 
 .multiForging {
