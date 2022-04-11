@@ -6002,7 +6002,7 @@ export function createStore(web3: Web3) {
         const { PvpCore } = state.contracts();
         if(!PvpCore || !state.defaultAccount) return;
 
-        return await PvpArena.methods.specialWeaponRerollTimestamp(weaponId).call(defaultCallOptions(state));
+        return await PvpCore.methods.specialWeaponRerollTimestamp(weaponId).call(defaultCallOptions(state));
       },
 
       async fetchMintWeaponPriceDecreasePerSecond({state}) {
