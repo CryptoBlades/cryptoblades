@@ -22,7 +22,7 @@
           <!-- below use of weapon.id is for test purpose, should be replaced with getWeaponCosmetic(weapon.id) -->
           <img v-if="showPlaceholder" v-bind:class="showCosmetics ? ' weapon-cosmetic-applied-'
           + getWeaponCosmetic(weapon.id) : ''"
-            class="placeholder" :src="getWeaponArt(weapon)" />
+            class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponLogos[weapon.weaponType] : getWeaponArt(weapon)" />
           <!-- element icon -->
           <span :class="weapon.element.toLowerCase() + '-icon'"></span>
         </div>
@@ -35,7 +35,7 @@
         <div :class="'weapon-img-desktop frame-'+ (weapon.stars || 0)">
             <!-- WEAPON ID -->
           <div class="id">{{$t('weaponIcon.id')}} {{ weapon.id }}</div>
-          <img v-if="showPlaceholder" class="placeholder" :src="getWeaponArt(weapon)" />
+          <img v-if="showPlaceholder" class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponLogos[weapon.weaponType] : getWeaponArt(weapon)" />
         </div>
         <div class="weapon-details">
 
@@ -96,7 +96,7 @@
         <div :class="'weapon-img frame-'+ (weapon.stars || 0)">
             <!-- WEAPON ID -->
           <div class="id">{{$t('weaponIcon.id')}} {{ weapon.id }}</div>
-          <img v-if="showPlaceholder" class="placeholder" :src="getWeaponArt(weapon)" />
+          <img v-if="showPlaceholder" class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponLogos[weapon.weaponType] : getWeaponArt(weapon)" />
         </div>
         <div class="weapon-details">
 
@@ -167,7 +167,7 @@ export default {
   props: ['weapon', 'favorite', 'displayType'],
 
   computed: {
-    ...mapState(['maxDurability']),
+    ...mapState(['maxDurability', 'specialWeaponLogos']),
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',

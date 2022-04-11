@@ -215,6 +215,7 @@ export interface IState {
   inactiveSpecialWeaponEventsIds: number[];
   specialWeaponEvents: Record<number, ISpecialWeaponEvent>;
   specialWeaponEventId: string;
+  specialWeaponLogos: string[];
   shardsSupply: Record<number, number>;
 
   itemPrices: IItemPrices;
