@@ -5787,7 +5787,7 @@ export function createStore(web3: Web3) {
         return await PvpArena.methods.specialWeaponRerollTimestamp(weaponId).call(defaultCallOptions(state));
       },
 
-      async fetchMintPriceDecreasePerSecond({state}) {
+      async fetchMintWeaponPriceDecreasePerSecond({state}) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades || !state.defaultAccount) return;
 
@@ -5798,18 +5798,18 @@ export function createStore(web3: Web3) {
         return new BigNumber(decreaseInSkill).div(1e18);
       },
 
-      async fetchWeaponMintIncreasePrice({state}) {
+      async fetchMintCharacterPriceDecreasePerSecond({state}) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades || !state.defaultAccount) return;
 
-        const increaseRaw = await CryptoBlades.methods.vars(20).call(defaultCallOptions(state));
-        const increaseBN = new BigNumber(increaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+        const decreaseRaw = await CryptoBlades.methods.vars(20).call(defaultCallOptions(state));
+        const decreaseBN = new BigNumber(decreaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
 
-        const increaseInSkill = await CryptoBlades.methods.usdToSkill(increaseBN).call(defaultCallOptions(state));
-        return new BigNumber(increaseInSkill).div(1e18);
+        const decreaseInSkill = await CryptoBlades.methods.usdToSkill(decreaseBN).call(defaultCallOptions(state));
+        return new BigNumber(decreaseInSkill).div(1e18);
       },
 
-      async fetchCharacterMintIncreasePrice({state}) {
+      async fetchWeaponMintIncreasePrice({state}) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades || !state.defaultAccount) return;
 
@@ -5820,11 +5820,22 @@ export function createStore(web3: Web3) {
         return new BigNumber(increaseInSkill).div(1e18);
       },
 
+      async fetchCharacterMintIncreasePrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const increaseRaw = await CryptoBlades.methods.vars(22).call(defaultCallOptions(state));
+        const increaseBN = new BigNumber(increaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const increaseInSkill = await CryptoBlades.methods.usdToSkill(increaseBN).call(defaultCallOptions(state));
+        return new BigNumber(increaseInSkill).div(1e18);
+      },
+
       async fetchMintWeaponMinPrice({state}) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades || !state.defaultAccount) return;
 
-        const priceInUsdRaw = await CryptoBlades.methods.vars(22).call(defaultCallOptions(state));
+        const priceInUsdRaw = await CryptoBlades.methods.vars(23).call(defaultCallOptions(state));
         const priceInUsd = new BigNumber(priceInUsdRaw).multipliedBy(new BigNumber(2).pow(64)).div(100).toString();
         return await CryptoBlades.methods.usdToSkill(priceInUsd).call(defaultCallOptions(state));
       },
@@ -5833,7 +5844,7 @@ export function createStore(web3: Web3) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades || !state.defaultAccount) return;
 
-        const priceInUsdRaw = await CryptoBlades.methods.vars(23).call(defaultCallOptions(state));
+        const priceInUsdRaw = await CryptoBlades.methods.vars(24).call(defaultCallOptions(state));
         const priceInUsd = new BigNumber(priceInUsdRaw).multipliedBy(new BigNumber(2).pow(64)).div(100).toString();
         return await CryptoBlades.methods.usdToSkill(priceInUsd).call(defaultCallOptions(state));
       },

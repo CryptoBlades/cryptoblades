@@ -647,7 +647,7 @@ export default Vue.extend({
     if(window.location.href.split('&').find(x => x === 'showSpecialForge')) {
       Events.$emit('show-special-forge-modal');
     }
-    this.mintPriceDecreasePerHour = new BN(await this.fetchMintPriceDecreasePerSecond()).div(new BN(10).pow(18)).multipliedBy(60*60).toFixed(6);
+    this.mintPriceDecreasePerHour = new BN(await this.fetchMintWeaponPriceDecreasePerSecond()).div(new BN(10).pow(18)).multipliedBy(60*60).toFixed(6);
     this.mintWeaponPriceIncrease = new BN(await this.fetchWeaponMintIncreasePrice()).div(new BN(10).pow(18)).toFixed(6);
     this.mintWeaponMinPrice = new BN(await this.fetchMintWeaponMinPrice()).div(new BN(10).pow(18)).toFixed(4);
   },
@@ -661,7 +661,7 @@ export default Vue.extend({
   methods: {
     ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN',
       'reforgeWeaponWithDust', 'massBurnWeapons', 'fetchSpecialWeaponEvents',
-      'fetchMintPriceDecreasePerSecond', 'fetchWeaponMintIncreasePrice',
+      'fetchMintWeaponPriceDecreasePerSecond', 'fetchWeaponMintIncreasePrice',
       'fetchMintWeaponMinPrice', 'fetchMintWeaponFee']),
     ...mapMutations(['updateSpecialWeaponEventId']),
 

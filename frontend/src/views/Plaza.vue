@@ -453,7 +453,7 @@ export default Vue.extend({
   },
 
   async created() {
-    this.mintPriceDecreasePerHour = new BN(await this.fetchMintPriceDecreasePerSecond()).div(new BN(10).pow(18)).multipliedBy(60*60).toFixed(6);
+    this.mintPriceDecreasePerHour = new BN(await this.fetchMintCharacterPriceDecreasePerSecond()).div(new BN(10).pow(18)).multipliedBy(60*60).toFixed(6);
     this.mintCharacterPriceIncrease = new BN(await this.fetchCharacterMintIncreasePrice()).div(new BN(10).pow(18)).toFixed(6);
     this.mintCharacterMinPrice = new BN(await this.fetchMintCharacterMinPrice()).div(new BN(10).pow(18)).toFixed(4);
     this.updateMintCharacterFee();
@@ -502,7 +502,7 @@ export default Vue.extend({
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
       'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'claimGarrisonXp', 'fetchBurnPowerMultiplier',
-      'transferSoul', 'fetchMintPriceDecreasePerSecond', 'fetchCharacterMintIncreasePrice',
+      'transferSoul', 'fetchMintCharacterPriceDecreasePerSecond', 'fetchCharacterMintIncreasePrice',
       'fetchMintCharacterMinPrice', 'fetchMintCharacterFee']),
     ...mapGetters(['getExchangeTransakUrl']),
 
