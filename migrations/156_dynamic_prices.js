@@ -1,7 +1,6 @@
 const { upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 
 const CryptoBlades = artifacts.require('CryptoBlades');
-const Blacksmith = artifacts.require("Blacksmith");
 
 module.exports = async function (deployer, network) {
   if (network === "development"
@@ -15,7 +14,6 @@ module.exports = async function (deployer, network) {
     || network === 'avaxtestnet-fork'
     || network === 'auroratestnet') {
     const game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
-    await upgradeProxy(Blacksmith.address, Blacksmith, { deployer });
 
     // VAR_MINT_WEAPON_FEE_DECREASE_SPEED = 19
     // VAR_MINT_CHARACTER_FEE_DECREASE_SPEED = 20
