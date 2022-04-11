@@ -56,7 +56,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     uint8 public constant VAR_REPUTATION_LEVEL_4 = 22;
     uint8 public constant VAR_REPUTATION_LEVEL_5 = 23;
     uint8 public constant VAR_SKIP_QUEST_STAMINA_COST = 30;
-    uint8 public constant VAR_WEEKLY_COMPLETIONS_GOAL = 31; //unused
+//    uint8 public constant VAR_WEEKLY_COMPLETIONS_GOAL = 31;
     uint256 internal constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
     uint256 internal constant NFTVAR_SIMPLEQUEST_TYPE = 102;
     uint256 internal constant NFTVAR_REPUTATION = 103;
