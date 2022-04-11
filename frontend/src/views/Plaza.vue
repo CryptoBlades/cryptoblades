@@ -195,8 +195,7 @@
                     :disabled="!haveCharacters"
                     variant="primary"
                     class="ml-3 gtag-link-others"
-                    @click="toggleSoulCreation"
-                    v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+                    @click="toggleSoulCreation">
                     {{$t('plaza.burn')}} / {{$t('plaza.upgrade')}} / {{$t('plaza.transfer')}}
                   </b-button>
                   <b-button
@@ -207,6 +206,14 @@
                     v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
                     {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
                   </b-button>
+                  <b-checkbox
+                    variant="primary"
+                    class="mx-3 my-auto"
+                    v-model="mintSlippageApproved">
+                    <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
+                    <b-icon-question-circle class="ml-1 centered-icon" v-tooltip.bottom="$t('plaza.dynamicPricesDetails',
+                      { decreaseAmount: mintPriceDecreasePerHour, increaseAmount: mintCharacterPriceIncrease, minimumPrice: mintCharacterMinPrice})"/>
+                  </b-checkbox>
                 </div>
               </div>
 
@@ -256,6 +263,15 @@
                     v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
                     {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
                   </b-button>
+                  <b-checkbox
+                    v-if="ownCharacters.length === 4"
+                    variant="primary"
+                    class="mx-3 my-auto"
+                    v-model="mintSlippageApproved">
+                    <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
+                    <b-icon-question-circle class="ml-1 centered-icon" v-tooltip.bottom="$t('plaza.dynamicPricesDetails',
+                      { decreaseAmount: mintPriceDecreasePerHour, increaseAmount: mintCharacterPriceIncrease, minimumPrice: mintCharacterMinPrice})"/>
+                  </b-checkbox>
                 </div>
               </div>
 
@@ -356,6 +372,11 @@ interface Data {
   isBurnInProgress: boolean;
   isUpgradeInProgress: boolean;
   isTransferInProgress: boolean;
+  updateInterval: ReturnType<typeof setInterval> | null;
+  mintSlippageApproved: boolean;
+  mintPriceDecreasePerHour: string;
+  mintCharacterPriceIncrease: string;
+  mintCharacterMinPrice: string;
 }
 
 export default Vue.extend({
@@ -432,9 +453,17 @@ export default Vue.extend({
   },
 
   async created() {
-    const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
-    const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
-    this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
+    this.mintPriceDecreasePerHour = new BN(await this.fetchMintCharacterPriceDecreasePerSecond()).div(new BN(10).pow(18)).multipliedBy(60*60).toFixed(6);
+    this.mintCharacterPriceIncrease = new BN(await this.fetchCharacterMintIncreasePrice()).div(new BN(10).pow(18)).toFixed(6);
+    this.mintCharacterMinPrice = new BN(await this.fetchMintCharacterMinPrice()).div(new BN(10).pow(18)).toFixed(4);
+    this.updateMintCharacterFee();
+    this.updateInterval = setInterval(async () => { await this.updateMintCharacterFee(); }, 2000);
+  },
+
+  destroyed() {
+    if(this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
   },
 
   data() {
@@ -460,7 +489,12 @@ export default Vue.extend({
       isBurnInProgress: false,
       isUpgradeInProgress: false,
       isTransferInProgress: false,
-      isValidWeb3Address
+      isValidWeb3Address,
+      updateInterval: null as ReturnType<typeof setInterval> | null,
+      mintSlippageApproved: false,
+      mintPriceDecreasePerHour: '0',
+      mintCharacterPriceIncrease: '0',
+      mintCharacterMinPrice: '0',
     } as Data;
   },
 
@@ -468,12 +502,13 @@ export default Vue.extend({
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
       'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'claimGarrisonXp', 'fetchBurnPowerMultiplier',
-      'transferSoul']),
+      'transferSoul', 'fetchMintCharacterPriceDecreasePerSecond', 'fetchCharacterMintIncreasePrice',
+      'fetchMintCharacterMinPrice', 'fetchMintCharacterFee']),
     ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
       try {
-        await this.mintCharacter();
+        await this.mintCharacter(this.mintSlippageApproved);
       } catch (e) {
         (this as any).$dialog.notify.error(i18n.t('plaza.couldNotMint'));
       }
@@ -614,6 +649,12 @@ export default Vue.extend({
       } else {
         this.soulAmount = this.remainingPowerLimit > this.soulBalance * 10 ? this.soulBalance : this.remainingPowerLimit / 10;
       }
+    },
+
+    async updateMintCharacterFee() {
+      const recruitCost = await this.fetchMintCharacterFee();
+      const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
+      this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
     }
   },
 
