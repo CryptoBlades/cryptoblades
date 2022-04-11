@@ -194,7 +194,6 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         randoms = IRandoms(randomsContract);
         pvprankings = PvpRankings(pvpRankingsContract);
 
-        // TODO: Tweak these values
         _baseWagerUSD = ABDKMath64x64.divu(500, 100); // $5
         _tierWagerUSD = ABDKMath64x64.divu(50, 100); // $0.5
         wageringFactor = 3;
