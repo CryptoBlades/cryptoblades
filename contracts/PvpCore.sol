@@ -11,7 +11,7 @@ import "./characters.sol";
 import "./weapons.sol";
 import "./shields.sol";
 import "./common.sol";
-import "./PvpAddons.sol";
+import "./PvpRankings.sol";
 
 contract PvpCore is Initializable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -60,7 +60,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     Shields public shields;
     IERC20 public skillToken;
     IRandoms public randoms;
-    PvpAddons public pvpaddons;
+    PvpRankings public pvprankings;
 
     /// @dev the base amount wagered per duel in dollars
     int128 private _baseWagerUSD;
@@ -181,7 +181,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         address gameContract,
         address shieldsContract,
         address randomsContract,
-        address pvpAddonsContract
+        address pvpRankingsContract
     ) public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -192,7 +192,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         shields = Shields(shieldsContract);
         skillToken = IERC20(game.skillToken());
         randoms = IRandoms(randomsContract);
-        pvpaddons = PvpAddons(pvpAddonsContract);
+        pvprankings = PvpRankings(pvpRankingsContract);
 
         // TODO: Tweak these values
         _baseWagerUSD = ABDKMath64x64.divu(500, 100); // $5
@@ -241,10 +241,10 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         }
 
         if (previousTierByCharacter[characterID] != tier) {
-            pvpaddons.changeRankingPoints(characterID, 0);
+            pvprankings.changeRankingPoints(characterID, 0);
         }
 
-        pvpaddons.handleEnterArena(characterID, tier);
+        pvprankings.handleEnterArena(characterID, tier);
 
         isCharacterInArena[characterID] = true;
         characters.setNftVar(characterID, 1, 1);
@@ -391,9 +391,9 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
         uint256 defenderID = getOpponent(attackerID);
 
-        pvpaddons.handlePrepareDuel(attackerID);
+        pvprankings.handlePrepareDuel(attackerID);
 
-        pvpaddons.handlePrepareDuel(defenderID);
+        pvprankings.handlePrepareDuel(defenderID);
 
         isDefending[defenderID] = true;
 
@@ -510,7 +510,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
             (
                 uint256 reward,
                 uint256 poolTax
-            ) = pvpaddons.getDuelBountyDistribution(duel.cost);
+            ) = pvprankings.getDuelBountyDistribution(duel.cost);
 
             fighterByCharacter[winnerID].wager = fighterByCharacter[winnerID]
                 .wager
@@ -552,7 +552,9 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
             _matchableCharactersByTier[duel.tier].add(winnerID);
 
-            pvpaddons.handlePerformDuel(winnerID, loserID, duel.bonusRank, duel.tier, poolTax);
+            pvprankings.handlePerformDuel(winnerID, loserID, duel.bonusRank, duel.tier, poolTax);
+
+            skillToken.safeTransfer(address(pvprankings), poolTax);
 
             _duelQueue.remove(duel.attacker.ID);
         }
@@ -600,7 +602,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev gets the amount of SKILL required to enter the arena by tier
-    function getEntryWagerByTier(uint8 tier) internal view returns (uint256) {
+    function getEntryWagerByTier(uint8 tier) public view returns (uint256) {
         return getDuelCostByTier(tier).mul(wageringFactor);
     }
 

@@ -7,7 +7,7 @@ const SkillStakingRewardsUpgradeable = artifacts.require('SkillStakingRewardsUpg
 const LPStakingRewardsUpgradeable = artifacts.require('LPStakingRewardsUpgradeable');
 const LP2StakingRewardsUpgradeable = artifacts.require('LP2StakingRewardsUpgradeable');
 const PvpCore = artifacts.require('PvpCore');
-const PvpAddons = artifacts.require('PvpAddons');
+const PvpRankings = artifacts.require('PvpRankings');
 const BasicPriceOracle = artifacts.require('BasicPriceOracle');
 const DummyRandoms = artifacts.require('DummyRandoms');
 const Characters = artifacts.require('Characters');
@@ -33,7 +33,7 @@ async function prepareContracts(accounts) {
   const weapons = await Weapons.new();
   const shields = await Shields.new();
   const pvpCore = await PvpCore.new();
-  const pvpAddons = await PvpAddons.new();
+  const pvpRankings = await PvpRankings.new();
   const priceOracle = await BasicPriceOracle.new();
   const randoms = await DummyRandoms.new();
   const expToken = await ExperimentToken.new();
@@ -66,14 +66,14 @@ async function prepareContracts(accounts) {
   await raid.initialize(game.address);
   await nftMarket.initialize(skillToken.address, game.address);
   await raid1.initialize(game.address);
-  await pvpCore.initialize(game.address, shields.address, randoms.address, pvpAddons.address);
-  await pvpAddons.initialize(game.address, pvpCore.address);
+  await pvpCore.initialize(game.address, shields.address, randoms.address, pvpRankings.address);
+  await pvpRankings.initialize(game.address, pvpCore.address);
   await promos.initialize();
   await weaponRenameTagConsumables.initialize(weapons.address);
   await randoms.initialize();
 
   await skillToken.transferFrom(skillToken.address, accounts[0], web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
-  await skillToken.transferFrom(skillToken.address, pvpAddons.address, web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
+  await skillToken.transferFrom(skillToken.address, pvpRankings.address, web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
   await expToken.transferFrom(expToken.address, accounts[0], web3.utils.toWei('599', 'ether'));
   await expToken2.transferFrom(expToken2.address, accounts[0], web3.utils.toWei('699', 'ether'));
 
@@ -96,17 +96,17 @@ async function prepareContracts(accounts) {
   characterLightningTraitChangeConsumables.initialize(characters.address);
 
   const pvpCore_GAME_ADMIN = await pvpCore.GAME_ADMIN();
-  const pvpAddons_GAME_ADMIN = await pvpAddons.GAME_ADMIN();
+  const pvpRankings_GAME_ADMIN = await pvpRankings.GAME_ADMIN();
   const promos_GAME_ADMIN = await promos.GAME_ADMIN();
 
   await pvpCore.grantRole(pvpCore_GAME_ADMIN, game.address);
   await pvpCore.grantRole(pvpCore_GAME_ADMIN, characters.address);
-  await pvpCore.grantRole(pvpCore_GAME_ADMIN, pvpAddons.address);
-  await pvpAddons.grantRole(pvpAddons_GAME_ADMIN, game.address);
-  await pvpAddons.grantRole(pvpAddons_GAME_ADMIN, pvpCore.address);
+  await pvpCore.grantRole(pvpCore_GAME_ADMIN, pvpRankings.address);
+  await pvpRankings.grantRole(pvpRankings_GAME_ADMIN, game.address);
+  await pvpRankings.grantRole(pvpRankings_GAME_ADMIN, pvpCore.address);
   await characters.grantRole(charas_GAME_ADMIN, game.address);
   await characters.grantRole(charas_GAME_ADMIN, pvpCore.address);
-  await characters.grantRole(charas_GAME_ADMIN, pvpAddons.address);
+  await characters.grantRole(charas_GAME_ADMIN, pvpRankings.address);
 
   await weapons.grantRole(weps_GAME_ADMIN, game.address);
   await weapons.grantRole(weps_GAME_ADMIN, pvpCore.address);
@@ -150,7 +150,7 @@ async function prepareContracts(accounts) {
     weapons,
     shields,
     pvpCore,
-    pvpAddons,
+    pvpRankings,
     priceOracle,
     randoms,
     expToken,

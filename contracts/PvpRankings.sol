@@ -11,7 +11,7 @@ import "./characters.sol";
 import "./common.sol";
 import "./PvpCore.sol";
 
-contract PvpAddons is Initializable, AccessControlUpgradeable {
+contract PvpRankings is Initializable, AccessControlUpgradeable {
     using SafeMath for uint8;
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -326,10 +326,17 @@ contract PvpAddons is Initializable, AccessControlUpgradeable {
 
     // TODO: Rethink name
     function handleEnterArena(uint256 characterID, uint8 tier) external restricted {
+        bool isCharacterInTopRanks;
+    
+        for (uint i = 0; i < _topRankingCharactersByTier[tier].length; i++) {
+            if (characterID == _topRankingCharactersByTier[tier][i]) {
+                isCharacterInTopRanks = true;
+            }
+        }
+
         if (
             _topRankingCharactersByTier[tier].length <
-            _maxTopCharactersPerTier &&
-            seasonByCharacter[characterID] != currentRankedSeason
+            _maxTopCharactersPerTier && !isCharacterInTopRanks
         ) {
             _topRankingCharactersByTier[tier].push(characterID);
         }

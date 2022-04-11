@@ -2,7 +2,7 @@ const { deployProxy, upgradeProxy } = require("@openzeppelin/truffle-upgrades");
 
 const CryptoBlades = artifacts.require("CryptoBlades");
 const PvpCore = artifacts.require("PvpCore");
-const PvpAddons = artifacts.require("PvpAddons");
+const PvpRankings = artifacts.require("PvpRankings");
 const Characters = artifacts.require("Characters");
 const Weapons = artifacts.require("Weapons");
 const Shields = artifacts.require("Shields");
@@ -32,28 +32,28 @@ module.exports = async function (deployer, network, accounts) {
             randoms = await ChainlinkRandoms.deployed();
         }
 
-        const pvpAddons = await deployProxy(
-            PvpAddons,
+        const pvpRankings = await deployProxy(
+            PvpRankings,
             [game.address],
             { deployer }
         );
 
         const pvpCore = await deployProxy(
             PvpCore,
-            [game.address, shields.address, randoms.address, pvpAddons.address],
+            [game.address, shields.address, randoms.address, pvpRankings.address],
             { deployer }
         );
 
         await pvpCore.grantRole(await pvpCore.GAME_ADMIN(), accounts[0]);
-        await pvpAddons.grantRole(await pvpAddons.GAME_ADMIN(), accounts[0]);
-        await pvpCore.grantRole(await pvpCore.GAME_ADMIN(), pvpAddons.address);
-        await pvpAddons.grantRole(await pvpAddons.GAME_ADMIN(), pvpCore.address);
+        await pvpRankings.grantRole(await pvpRankings.GAME_ADMIN(), accounts[0]);
+        await pvpCore.grantRole(await pvpCore.GAME_ADMIN(), pvpRankings.address);
+        await pvpRankings.grantRole(await pvpRankings.GAME_ADMIN(), pvpCore.address);
         const GAME_ADMIN = await game.GAME_ADMIN();
         await game.grantRole(GAME_ADMIN, pvpCore.address);
-        await game.grantRole(GAME_ADMIN, pvpAddons.address);
+        await game.grantRole(GAME_ADMIN, pvpRankings.address);
         await characters.grantRole(await characters.GAME_ADMIN(), pvpCore.address);
         await weapons.grantRole(await weapons.GAME_ADMIN(), pvpCore.address);
         await shields.grantRole(await shields.GAME_ADMIN(), pvpCore.address);
-        await pvpAddons.setPvpCoreAddress(pvpCore.address);
+        await pvpRankings.setPvpCoreAddress(pvpCore.address);
     }
 };

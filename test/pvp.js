@@ -8,7 +8,7 @@ const helpers = require("./helpers");
 const { BN, toBN, fromWei } = web3.utils;
 
 contract("PvpCore", (accounts) => {
-  let pvpCore, pvpAddons, characters, weapons, shields, priceOracle, randoms, raid1;
+  let pvpCore, pvpRankings, characters, weapons, shields, priceOracle, randoms, raid1;
 
   async function createCharacterInPvpTier(
     account,
@@ -52,7 +52,7 @@ contract("PvpCore", (accounts) => {
     randoms = contracts.randoms;
     priceOracle = contracts.priceOracle;
     pvpCore = contracts.pvpCore;
-    pvpAddons = contracts.pvpAddons;
+    pvpRankings = contracts.pvpRankings;
     raid1 = contracts.raid1;
 
     await priceOracle.setCurrentPrice(web3.utils.toWei("1", "ether")); // 1/5 SKILL per USD, AKA 5 USD per SKILL
@@ -79,7 +79,7 @@ contract("PvpCore", (accounts) => {
     );
 
     await pvpCore.grantRole(await pvpCore.GAME_ADMIN(), accounts[0]);
-    await pvpAddons.grantRole(await pvpAddons.GAME_ADMIN(), accounts[0]);
+    await pvpRankings.grantRole(await pvpRankings.GAME_ADMIN(), accounts[0]);
     await characters.grantRole(await characters.GAME_ADMIN(), accounts[0]);
     await characters.grantRole(await characters.NO_OWNED_LIMIT(), accounts[1]);
     await characters.grantRole(await characters.NO_OWNED_LIMIT(), accounts[2]);
@@ -161,12 +161,12 @@ contract("PvpCore", (accounts) => {
       });
 
       it("should place character in current season if it had never entered PVP before", async () => {
-        const currentSeason = (await pvpAddons.currentRankedSeason()).toString();
+        const currentSeason = (await pvpRankings.currentRankedSeason()).toString();
 
         character1ID = await createCharacterInPvpTier(accounts[1], 2);
 
         expect(
-          (await pvpAddons.seasonByCharacter(character1ID)).toString()
+          (await pvpRankings.seasonByCharacter(character1ID)).toString()
         ).to.equal(currentSeason);
       });
 
@@ -222,7 +222,7 @@ contract("PvpCore", (accounts) => {
 
         expect(
           (
-            await pvpAddons.rankingPointsByCharacter(character1ID, {
+            await pvpRankings.rankingPointsByCharacter(character1ID, {
               from: accounts[1],
             })
           ).toString()
@@ -238,7 +238,7 @@ contract("PvpCore", (accounts) => {
 
         expect(
           (
-            await pvpAddons.rankingPointsByCharacter(character1ID, {
+            await pvpRankings.rankingPointsByCharacter(character1ID, {
               from: accounts[1],
             })
           ).toString()
@@ -296,7 +296,7 @@ contract("PvpCore", (accounts) => {
           from: accounts[0],
         });
 
-        const previousLeaderBoard = await pvpAddons.getTierTopCharacters(
+        const previousLeaderBoard = await pvpRankings.getTierTopCharacters(
           await pvpCore.getArenaTier(character1ID)
         );
 
@@ -304,7 +304,7 @@ contract("PvpCore", (accounts) => {
 
         const isCharacter1RankingGreaterThanZero =
           (
-            await pvpAddons.rankingPointsByCharacter(character1ID, {
+            await pvpRankings.rankingPointsByCharacter(character1ID, {
               from: accounts[1],
             })
           ).toString() > 0;
@@ -313,7 +313,7 @@ contract("PvpCore", (accounts) => {
 
         await pvpCore.withdrawFromArena(character1ID, { from: accounts[1] });
 
-        await pvpAddons.restartRankedSeason();
+        await pvpRankings.restartRankedSeason();
         
         await pvpCore.enterArena(character1ID, weapon1ID, 0, false, false, {
           from: accounts[1],
@@ -321,16 +321,16 @@ contract("PvpCore", (accounts) => {
 
         expect(
           (
-            await pvpAddons.rankingPointsByCharacter(character1ID, {
+            await pvpRankings.rankingPointsByCharacter(character1ID, {
               from: accounts[1],
             })
           ).toString()
         ).to.equal("0");
 
-        const currentSeason = (await pvpAddons.currentRankedSeason()).toString();
+        const currentSeason = (await pvpRankings.currentRankedSeason()).toString();
 
         expect(
-          (await pvpAddons.seasonByCharacter(character1ID)).toString()
+          (await pvpRankings.seasonByCharacter(character1ID)).toString()
         ).to.equal(currentSeason);
       });
 
@@ -1404,7 +1404,7 @@ contract("PvpCore", (accounts) => {
           const tier = await pvpCore.getArenaTier(character1ID, {
             from: accounts[1],
           });
-          const rewardsInPool = await pvpAddons.rankingsPoolByTier(tier, {
+          const rewardsInPool = await pvpRankings.rankingsPoolByTier(tier, {
             from: accounts[1],
           });
 
@@ -1798,7 +1798,7 @@ contract("PvpCore", (accounts) => {
         character4ID = await createCharacterInPvpTier(accounts[2], 2, "222");
         character5ID = await createCharacterInPvpTier(accounts[2], 2, "222");
         character6ID = await createCharacterInPvpTier(accounts[1], 2, "222");
-        const characterTier = await pvpAddons.getTierTopCharacters(await pvpCore.getArenaTier(character1ID), {
+        const characterTier = await pvpRankings.getTierTopCharacters(await pvpCore.getArenaTier(character1ID), {
           from: accounts[1],
         });
         expect(characterTier[0].toString()).to.equal(character1ID.toString());
@@ -1814,14 +1814,14 @@ contract("PvpCore", (accounts) => {
           weapons,
         });
 
-        await pvpAddons.changeRankingPoints(character1ID, 35, {
+        await pvpRankings.changeRankingPoints(character1ID, 35, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character2ID, 34, {
+        await pvpRankings.changeRankingPoints(character2ID, 34, {
           from: accounts[0],
         });
 
-        const previousRankingPoints = await pvpAddons.rankingPointsByCharacter(
+        const previousRankingPoints = await pvpRankings.rankingPointsByCharacter(
           character2ID
         );
         await helpers.levelUpTo(character2ID, 30, { characters });
@@ -1829,7 +1829,7 @@ contract("PvpCore", (accounts) => {
         await pvpCore.withdrawFromArena(character2ID, {from: accounts[1] });
         await pvpCore.enterArena(character2ID, weapon2ID, 0, false, false, { from: accounts[1] });
 
-        const postRankingPoints = await pvpAddons.rankingPointsByCharacter(
+        const postRankingPoints = await pvpRankings.rankingPointsByCharacter(
           character2ID
         );
         expect(previousRankingPoints.toString()).to.equal("34");
@@ -1843,13 +1843,13 @@ contract("PvpCore", (accounts) => {
           weapons,
         });
 
-        await pvpAddons.changeRankingPoints(character1ID, 35, {
+        await pvpRankings.changeRankingPoints(character1ID, 35, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character2ID, 34, {
+        await pvpRankings.changeRankingPoints(character2ID, 34, {
           from: accounts[0],
         });
-        const previousRankingPoints = await pvpAddons.rankingPointsByCharacter(
+        const previousRankingPoints = await pvpRankings.rankingPointsByCharacter(
           character2ID
         );
         await helpers.levelUpTo(character2ID, 8, { characters });
@@ -1857,7 +1857,7 @@ contract("PvpCore", (accounts) => {
         await pvpCore.withdrawFromArena(character2ID, {from: accounts[1] });
         await pvpCore.enterArena(character2ID, weapon2ID, 0, false, false, { from: accounts[1] });
 
-        const postRankingPoints = await pvpAddons.rankingPointsByCharacter(
+        const postRankingPoints = await pvpRankings.rankingPointsByCharacter(
           character2ID
         );
         expect(previousRankingPoints.toString()).to.equal("34");
@@ -1867,8 +1867,8 @@ contract("PvpCore", (accounts) => {
 
     describe("after the fight", () => {
       it("update the ranks of both the winner and the loser and add/subtract points respectively", async () => {
-        const winningPoints = await pvpAddons.winningPoints();
-        const losingPoints = await pvpAddons.losingPoints();
+        const winningPoints = await pvpRankings.winningPoints();
+        const losingPoints = await pvpRankings.losingPoints();
         weapon1ID = await helpers.createWeapon(
           accounts[2],
           "100",
@@ -1906,23 +1906,23 @@ contract("PvpCore", (accounts) => {
           from: accounts[0],
         });
         // we set the ranking points to determine the tier, char2 being the first, followed by char 1 and then char3
-        await pvpAddons.changeRankingPoints(character1ID, 35, {
+        await pvpRankings.changeRankingPoints(character1ID, 35, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character2ID, 34, {
+        await pvpRankings.changeRankingPoints(character2ID, 34, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character3ID, 33, {
+        await pvpRankings.changeRankingPoints(character3ID, 33, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character4ID, 32, {
+        await pvpRankings.changeRankingPoints(character4ID, 32, {
           from: accounts[0],
         });
 
         const winnerPreviousRankPoints =
-          await pvpAddons.rankingPointsByCharacter(character4ID);
+          await pvpRankings.rankingPointsByCharacter(character4ID);
         const loserPreviousRankPoints =
-          await pvpAddons.rankingPointsByCharacter(character1ID);
+          await pvpRankings.rankingPointsByCharacter(character1ID);
 
         await time.increase(await pvpCore.decisionSeconds());
         await pvpCore.findOpponent(character4ID, {
@@ -1938,15 +1938,15 @@ contract("PvpCore", (accounts) => {
           from: accounts[0],
         });
 
-        const winnerPostRankPoints = await pvpAddons.rankingPointsByCharacter(
+        const winnerPostRankPoints = await pvpRankings.rankingPointsByCharacter(
           character4ID
         );
-        const loserPostRankPoints = await pvpAddons.rankingPointsByCharacter(
+        const loserPostRankPoints = await pvpRankings.rankingPointsByCharacter(
           character1ID
         );
 
         // get the post  duel ranking points
-        const playerTier = await pvpAddons.getTierTopCharacters(await pvpCore.getArenaTier(character1ID), {
+        const playerTier = await pvpRankings.getTierTopCharacters(await pvpCore.getArenaTier(character1ID), {
           from: accounts[1],
         });
         // expect the last player to be the first and the former first player to not be in the ranks
@@ -2002,22 +2002,22 @@ contract("PvpCore", (accounts) => {
           from: accounts[0],
         });
 
-        await pvpAddons.changeRankingPoints(character1ID, 35, {
+        await pvpRankings.changeRankingPoints(character1ID, 35, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character2ID, 34, {
+        await pvpRankings.changeRankingPoints(character2ID, 34, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character3ID, 33, {
+        await pvpRankings.changeRankingPoints(character3ID, 33, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character4ID, 32, {
+        await pvpRankings.changeRankingPoints(character4ID, 32, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character5ID, 31, {
+        await pvpRankings.changeRankingPoints(character5ID, 31, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character6ID, 30, {
+        await pvpRankings.changeRankingPoints(character6ID, 30, {
           from: accounts[0],
         });
         await time.increase(await pvpCore.decisionSeconds());
@@ -2033,7 +2033,7 @@ contract("PvpCore", (accounts) => {
         await pvpCore.performDuels(duelQueue, {
           from: accounts[0],
         });
-        const playerTier = await pvpAddons.getTierTopCharacters(await pvpCore.getArenaTier(character6ID));
+        const playerTier = await pvpRankings.getTierTopCharacters(await pvpCore.getArenaTier(character6ID));
         // expect the last character to be the first one, climibing through the entire ladder
         expect(playerTier[0].toString()).to.equal(character6ID).toString();
       });
@@ -2073,10 +2073,10 @@ contract("PvpCore", (accounts) => {
         await characters.setTrait(character1ID, helpers.elements.fire, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character1ID, 15, {
+        await pvpRankings.changeRankingPoints(character1ID, 15, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character2ID, 13, {
+        await pvpRankings.changeRankingPoints(character2ID, 13, {
           from: accounts[0],
         });
 
@@ -2094,7 +2094,7 @@ contract("PvpCore", (accounts) => {
           from: accounts[0],
         });
 
-        const playerTier = await pvpAddons.getTierTopCharacters(await pvpCore.getArenaTier(character1ID));
+        const playerTier = await pvpRankings.getTierTopCharacters(await pvpCore.getArenaTier(character1ID));
 
         expect(playerTier[0].toString()).to.equal(character2ID).toString();
         expect(playerTier[1].toString()).to.equal(character1ID).toString();
@@ -2143,19 +2143,19 @@ contract("PvpCore", (accounts) => {
           from: accounts[0],
         });
         // we set the ranking points to determine the tier, char1 being the first, followed by char 2 and then char4
-        await pvpAddons.changeRankingPoints(character1ID, 35, {
+        await pvpRankings.changeRankingPoints(character1ID, 35, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character2ID, 34, {
+        await pvpRankings.changeRankingPoints(character2ID, 34, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character3ID, 33, {
+        await pvpRankings.changeRankingPoints(character3ID, 33, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character4ID, 32, {
+        await pvpRankings.changeRankingPoints(character4ID, 32, {
           from: accounts[0],
         });
-        await pvpAddons.changeRankingPoints(character5ID, 10, {
+        await pvpRankings.changeRankingPoints(character5ID, 10, {
           from: accounts[0],
         });
 
@@ -2173,7 +2173,7 @@ contract("PvpCore", (accounts) => {
         });
 
         // get the post  duel ranking points
-        const playerTier = await pvpAddons.getTierTopCharacters(await pvpCore.getArenaTier(character1ID), {
+        const playerTier = await pvpRankings.getTierTopCharacters(await pvpCore.getArenaTier(character1ID), {
           from: accounts[1],
         });
 
@@ -2189,22 +2189,22 @@ contract("PvpCore", (accounts) => {
 
   describe("#increaseRankingsPool", async () => {
     it('increases the ranking pool of a certain tier', async () => {
-      const previousPool = (await pvpAddons.rankingsPoolByTier(1)).toString();
+      const previousPool = (await pvpRankings.rankingsPoolByTier(1)).toString();
       expect(previousPool).to.equal('0');
 
-      await pvpAddons.increaseRankingsPool(1, 1000);
+      await pvpRankings.increaseRankingsPool(1, 1000);
 
-      const newPool = (await pvpAddons.rankingsPoolByTier(1)).toString();
+      const newPool = (await pvpRankings.rankingsPoolByTier(1)).toString();
       expect(newPool).to.equal('1000');
     })
 
     it("doesn't increase other tier's pools", async () => {
-      const previousPool = (await pvpAddons.rankingsPoolByTier(1)).toString();
+      const previousPool = (await pvpRankings.rankingsPoolByTier(1)).toString();
       expect(previousPool).to.equal('0');
 
-      await pvpAddons.increaseRankingsPool(2, 1000);
+      await pvpRankings.increaseRankingsPool(2, 1000);
 
-      const newPool = (await pvpAddons.rankingsPoolByTier(1)).toString();
+      const newPool = (await pvpRankings.rankingsPoolByTier(1)).toString();
       expect(newPool).to.equal('0');
     })
   });
@@ -2215,10 +2215,10 @@ contract("PvpCore", (accounts) => {
       character1ID = await createCharacterInPvpTier(accounts[1], 1);
       character2ID = await createCharacterInPvpTier(accounts[2], 1);
 
-      await pvpAddons.changeRankingPoints(character1ID, 100, {
+      await pvpRankings.changeRankingPoints(character1ID, 100, {
         from: accounts[0],
       });
-      await pvpAddons.changeRankingPoints(character2ID, 80, {
+      await pvpRankings.changeRankingPoints(character2ID, 80, {
         from: accounts[0],
       });
 
@@ -2240,18 +2240,18 @@ contract("PvpCore", (accounts) => {
 
     it("distributes rewards correctly to top characters' owners", async () => {
       const prizePercentages = [
-        await pvpAddons.prizePercentages(0), 
-        await pvpAddons.prizePercentages(1), 
-        await pvpAddons.prizePercentages(2)
+        await pvpRankings.prizePercentages(0), 
+        await pvpRankings.prizePercentages(1), 
+        await pvpRankings.prizePercentages(2)
       ];
 
       const character3ID = await createCharacterInPvpTier(accounts[3], 1);
       const character4ID = await createCharacterInPvpTier(accounts[4], 1);
 
-      await pvpAddons.changeRankingPoints(character3ID, 60, {
+      await pvpRankings.changeRankingPoints(character3ID, 60, {
         from: accounts[0],
       });
-      await pvpAddons.changeRankingPoints(character4ID, 40, {
+      await pvpRankings.changeRankingPoints(character4ID, 40, {
         from: accounts[0],
       });
 
@@ -2260,11 +2260,11 @@ contract("PvpCore", (accounts) => {
       const balanceThree = await skillToken.balanceOf(accounts[3]);
       const balanceFour = await skillToken.balanceOf(accounts[4]);
 
-      await pvpAddons.restartRankedSeason({ from: accounts[0] });
-      await pvpAddons.withdrawRankedRewards({ from: accounts[1] });
-      await pvpAddons.withdrawRankedRewards({ from: accounts[2] });
-      await pvpAddons.withdrawRankedRewards({ from: accounts[3] });
-      await pvpAddons.withdrawRankedRewards({ from: accounts[4] });
+      await pvpRankings.restartRankedSeason({ from: accounts[0] });
+      await pvpRankings.withdrawRankedRewards({ from: accounts[1] });
+      await pvpRankings.withdrawRankedRewards({ from: accounts[2] });
+      await pvpRankings.withdrawRankedRewards({ from: accounts[3] });
+      await pvpRankings.withdrawRankedRewards({ from: accounts[4] });
 
       const newBalanceOne = await skillToken.balanceOf(accounts[1]);
       const newBalanceTwo = await skillToken.balanceOf(accounts[2]);
@@ -2318,18 +2318,18 @@ contract("PvpCore", (accounts) => {
 
     it("gives excess rewards to top 1 player if there are less players than the amount of top slots", async () => {
       const prizePercentages = [
-        await pvpAddons.prizePercentages(0), 
-        await pvpAddons.prizePercentages(1), 
-        await pvpAddons.prizePercentages(2)
+        await pvpRankings.prizePercentages(0), 
+        await pvpRankings.prizePercentages(1), 
+        await pvpRankings.prizePercentages(2)
       ];
 
       const balanceOne = await skillToken.balanceOf(accounts[1]);
       const balanceTwo = await skillToken.balanceOf(accounts[2]);
 
-      await pvpAddons.restartRankedSeason({ from: accounts[0] });
+      await pvpRankings.restartRankedSeason({ from: accounts[0] });
 
-      await pvpAddons.withdrawRankedRewards({ from: accounts[1] });
-      await pvpAddons.withdrawRankedRewards({ from: accounts[2] });
+      await pvpRankings.withdrawRankedRewards({ from: accounts[1] });
+      await pvpRankings.withdrawRankedRewards({ from: accounts[2] });
 
       const newBalanceOne = await skillToken.balanceOf(accounts[1]);
       const newBalanceTwo = await skillToken.balanceOf(accounts[2]);
@@ -2372,34 +2372,34 @@ contract("PvpCore", (accounts) => {
       const balanceTwo = await skillToken.balanceOf(accounts[2]);
 
       const firstSeasonStartedAt = +(
-        await pvpAddons.seasonStartedAt()
+        await pvpRankings.seasonStartedAt()
       ).toString();
 
-      expect((await pvpAddons.currentRankedSeason()).toString()).to.equal("1");
+      expect((await pvpRankings.currentRankedSeason()).toString()).to.equal("1");
 
-      await pvpAddons.restartRankedSeason({ from: accounts[0] });
+      await pvpRankings.restartRankedSeason({ from: accounts[0] });
 
       const secondSeasonStartedAt = +(
-        await pvpAddons.seasonStartedAt()
+        await pvpRankings.seasonStartedAt()
       ).toString();
 
       expect(secondSeasonStartedAt > firstSeasonStartedAt).to.equal(true);
-      expect((await pvpAddons.currentRankedSeason()).toString()).to.equal("2");
+      expect((await pvpRankings.currentRankedSeason()).toString()).to.equal("2");
 
-      await pvpAddons.withdrawRankedRewards({ from: accounts[1] });
-      await pvpAddons.withdrawRankedRewards({ from: accounts[2] });
+      await pvpRankings.withdrawRankedRewards({ from: accounts[1] });
+      await pvpRankings.withdrawRankedRewards({ from: accounts[2] });
 
       const newerBalanceOne = await skillToken.balanceOf(accounts[1]);
       const newerBalanceTwo = await skillToken.balanceOf(accounts[2]);
 
-      await pvpAddons.restartRankedSeason({ from: accounts[0] });
+      await pvpRankings.restartRankedSeason({ from: accounts[0] });
 
       const thirdSeasonStartedAt = +(
-        await pvpAddons.seasonStartedAt()
+        await pvpRankings.seasonStartedAt()
       ).toString();
 
       expect(thirdSeasonStartedAt > secondSeasonStartedAt).to.equal(true);
-      expect((await pvpAddons.currentRankedSeason()).toString()).to.equal("3");
+      expect((await pvpRankings.currentRankedSeason()).toString()).to.equal("3");
 
       const newestBalanceOne = await skillToken.balanceOf(accounts[1]);
       const newestBalanceTwo = await skillToken.balanceOf(accounts[2]);
