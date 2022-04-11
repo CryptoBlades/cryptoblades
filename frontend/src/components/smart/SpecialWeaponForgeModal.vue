@@ -19,7 +19,7 @@
             <div v-if="selectedSpecialWeaponEventId">
               <div v-if="!isForging" class="d-flex mt-3 info-div">
                 <div class="d-flex flex-column justify-items-center w-50 mb-3">
-                  <img :src="eventWeaponImgPath" class="weapon-img"/>
+                  <img :src="eventLogo" class="weapon-img"/>
                   <div class="d-flex mt-3 align-items-center">
                     <h5 class="mb-0">{{$t('blacksmith.availableElements')}}</h5>
                     <h5 v-if="availableElement === 100 || availableElement === 0" class="fire-icon ml-2 mb-0" />
@@ -226,7 +226,6 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import weaponEvents from '../../../special-weapons.json';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
@@ -237,10 +236,6 @@ import generalShard from '../../assets/special-weapons/generalShard.png';
 import forgingGif from '../../assets/special-weapons/forging.gif';
 import WeaponIcon from '../WeaponIcon.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
-
-interface SpecialWeaponEventInfo {
-  eventsDetails: Record<string, Record<string, any>>;
-}
 
 type StoreMappedState = Pick<IState,'activeSpecialWeaponEventsIds' | 'inactiveSpecialWeaponEventsIds' |
 'specialWeaponEvents' | 'specialWeaponEventId' | 'shardsSupply' | 'ownedWeaponIds' |'skillBalance' | 'skillRewards'>;
@@ -333,23 +328,22 @@ export default Vue.extend({
 
     eventDetails(): string {
       if(!this.specialWeaponEvents[this.selectedSpecialWeaponEventId]) return '';
-      return (weaponEvents as SpecialWeaponEventInfo).eventsDetails[this.specialWeaponEvents[this.selectedSpecialWeaponEventId].name].details;
+      return this.specialWeaponEvents[this.selectedSpecialWeaponEventId].details;
     },
 
     eventPartnerWebsite(): string {
       if(!this.specialWeaponEvents[this.selectedSpecialWeaponEventId]) return '';
-      return (weaponEvents as SpecialWeaponEventInfo).eventsDetails[this.specialWeaponEvents[this.selectedSpecialWeaponEventId].name].website;
+      return this.specialWeaponEvents[this.selectedSpecialWeaponEventId].website;
     },
 
     eventNote(): string {
       if(!this.specialWeaponEvents[this.selectedSpecialWeaponEventId]) return '';
-      return (weaponEvents as SpecialWeaponEventInfo).eventsDetails[this.specialWeaponEvents[this.selectedSpecialWeaponEventId].name].note;
+      return this.specialWeaponEvents[this.selectedSpecialWeaponEventId].note;
     },
 
-    eventWeaponImgPath(): string {
+    eventLogo(): string {
       if(!this.specialWeaponEvents[this.selectedSpecialWeaponEventId]) return '';
-      const fileName = (weaponEvents as SpecialWeaponEventInfo).eventsDetails[this.specialWeaponEvents[this.selectedSpecialWeaponEventId].name].logo;
-      return this.imgPath(fileName);
+      return this.specialWeaponEvents[this.selectedSpecialWeaponEventId].logo;
     },
 
     forgeCostShards(): number {

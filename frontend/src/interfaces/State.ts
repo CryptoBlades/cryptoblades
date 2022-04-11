@@ -79,6 +79,10 @@ export interface ISpecialWeaponEvent {
   orderedCount: string;
   ordered: boolean;
   forged: boolean;
+  logo: string;
+  details: string;
+  website: string;
+  note: string;
 }
 
 export interface IItemPrices {

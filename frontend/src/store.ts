@@ -5864,6 +5864,7 @@ export function createStore(web3: Web3) {
           const eventInfoRaw = await SpecialWeaponsManager.methods.getEventInfo(eventId).call(defaultCallOptions(state));
           const ordered = +await SpecialWeaponsManager.methods.userOrderOptionForEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state)) > 0;
           const forged = await SpecialWeaponsManager.methods.userForgedAtEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state));
+          const eventData = await SpecialWeaponsManager.methods.getSpecialWeaponData(eventId).call(defaultCallOptions(state));
           const eventInfo = {
             name: eventInfoRaw[0],
             weaponElement: eventInfoRaw[1],
@@ -5871,7 +5872,11 @@ export function createStore(web3: Web3) {
             supply: eventInfoRaw[3],
             orderedCount: eventInfoRaw[4],
             ordered,
-            forged
+            forged,
+            logo: eventData[0],
+            details: eventData[1],
+            website: eventData[2],
+            notes: eventData[3]
           };
 
           commit('updateSpecialWeaponEventsInfo', { eventId, eventInfo });
