@@ -210,7 +210,6 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         uint256 weaponID,
         uint256 shieldID,
         bool useShield,
-        // TODO: Test tierless everything
         bool tierless
     ) external {
         require(
@@ -608,7 +607,6 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
     /// @dev gets the amount of SKILL that is risked per duel
     function getDuelCost(uint256 characterID) public view returns (uint256) {
-        // TODO: Test
         if (previousTierByCharacter[characterID] == 20) {
             return  game.usdToSkill(_baseWagerUSD);
         }
@@ -622,7 +620,6 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
     /// @dev gets the amount of SKILL that is risked per duel by tier
     function getDuelCostByTier(uint8 tier) internal view returns (uint256) {
-        // TODO: Test
         if (tier == 20) {
             return game.usdToSkill(_baseWagerUSD);
         }

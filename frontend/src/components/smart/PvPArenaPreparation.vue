@@ -676,7 +676,6 @@ p, li, span {
   }
   .bottomList {
     flex-direction: row;
-    // height: 8rem;
     ul {
       flex-direction: column;
       padding-left: 2rem;

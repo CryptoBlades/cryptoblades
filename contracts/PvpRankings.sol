@@ -5,10 +5,8 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "./interfaces/IRandoms.sol";
 import "./cryptoblades.sol";
 import "./characters.sol";
-import "./common.sol";
 import "./PvpCore.sol";
 
 contract PvpRankings is Initializable, AccessControlUpgradeable {
@@ -315,7 +313,6 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
         gameCofferTaxDue = 0;
     }
 
-    // TODO: TEST
     function increaseRankingsPool(uint8 tier, uint256 amount) external restricted {
         rankingsPoolByTier[tier] = rankingsPoolByTier[tier].add(amount);
     }
@@ -324,7 +321,6 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
         rankingPointsByCharacter[characterID] = points;
     }
 
-    // TODO: Rethink name
     function handleEnterArena(uint256 characterID, uint8 tier) external restricted {
         bool isCharacterInTopRanks;
     
@@ -347,7 +343,6 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
         }
     }
 
-    // TODO: Rethink name
     function handlePrepareDuel(uint256 characterID) external restricted {
         if (seasonByCharacter[characterID] != currentRankedSeason) {
             rankingPointsByCharacter[characterID] = 0;
@@ -355,7 +350,6 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
         }
     }
 
-    // TODO: Rethink name
     function handlePerformDuel(uint256 winnerID, uint256 loserID, uint256 bonusRank, uint8 tier, uint256 poolTax) external restricted {
         rankingPointsByCharacter[winnerID] = rankingPointsByCharacter[
                 winnerID
