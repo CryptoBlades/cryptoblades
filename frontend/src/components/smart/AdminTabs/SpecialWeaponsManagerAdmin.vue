@@ -401,25 +401,25 @@ export default Vue.extend({
         switch (this.selectedSpecialWeaponsEvent.selectedProperty) {
         case SpecialWeaponsEventProperty.ART:
           await this.setSpecialWeaponArt({
-            eventId: this.selectedSpecialWeaponsEvent.id,
+            eventId: this.selectedSpecialWeaponsEvent.id!,
             art: this.selectedSpecialWeaponsEvent.value,
           });
           break;
         case SpecialWeaponsEventProperty.DETAILS:
           await this.setSpecialWeaponDetails({
-            eventId: this.selectedSpecialWeaponsEvent.id,
+            eventId: this.selectedSpecialWeaponsEvent.id!,
             details: this.selectedSpecialWeaponsEvent.value,
           });
           break;
         case SpecialWeaponsEventProperty.WEBSITE:
           await this.setSpecialWeaponWebsite({
-            eventId: this.selectedSpecialWeaponsEvent.id,
+            eventId: this.selectedSpecialWeaponsEvent.id!,
             website: this.selectedSpecialWeaponsEvent.value,
           });
           break;
         case SpecialWeaponsEventProperty.NOTE:
           await this.setSpecialWeaponNote({
-            eventId: this.selectedSpecialWeaponsEvent.id,
+            eventId: this.selectedSpecialWeaponsEvent.id!,
             note: this.selectedSpecialWeaponsEvent.value,
           });
           break;
@@ -439,8 +439,8 @@ export default Vue.extend({
       try {
         await this.addShards({
           user: this.newAddShardsUser.user,
-          eventId: this.newAddShardsUser.eventId,
-          shardsAmount: this.newAddShardsUser.shardsAmount,
+          eventId: this.newAddShardsUser.eventId!,
+          shardsAmount: this.newAddShardsUser.shardsAmount!,
         });
         this.newAddShardsUser = {
           user: '',
@@ -457,8 +457,8 @@ export default Vue.extend({
       try {
         await this.privatePartnerOrder({
           receivers: this.newPrivatePartnerOrder.receivers.split(',').map(receiver => receiver.trim()),
-          eventId: this.newPrivatePartnerOrder.eventId,
-          orderOption: this.newPrivatePartnerOrder.orderOption,
+          eventId: this.newPrivatePartnerOrder.eventId!,
+          orderOption: this.newPrivatePartnerOrder.orderOption!,
         });
         this.newPrivatePartnerOrder = {
           receivers: '',
@@ -475,8 +475,8 @@ export default Vue.extend({
       try {
         await this.privatePartnerMint({
           receivers: this.newPrivatePartnerMint.receivers.split(',').map(receiver => receiver.trim()),
-          eventId: this.newPrivatePartnerMint.eventId,
-          orderOption: this.newPrivatePartnerMint.orderOption,
+          eventId: this.newPrivatePartnerMint.eventId!,
+          orderOption: this.newPrivatePartnerMint.orderOption!,
         });
         this.newPrivatePartnerMint = {
           receivers: '',
@@ -493,9 +493,9 @@ export default Vue.extend({
       try {
         await this.reserveForGiveaways({
           reservingAddress: this.newReserveForGiveaways.reservingAddress,
-          eventId: this.newReserveForGiveaways.eventId,
-          orderOption: this.newReserveForGiveaways.orderOption,
-          amount: this.newReserveForGiveaways.amount,
+          eventId: this.newReserveForGiveaways.eventId!,
+          orderOption: this.newReserveForGiveaways.orderOption!,
+          amount: this.newReserveForGiveaways.amount!,
         });
         this.newReserveForGiveaways = {
           reservingAddress: '',
