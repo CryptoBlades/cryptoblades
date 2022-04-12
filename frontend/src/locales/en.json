@@ -1016,7 +1016,19 @@
       "artUrl": "Art URL (art link from IPFS)",
       "details": "Details",
       "website": "Website",
-      "noteOptional": "Note (optional)"
+      "noteOptional": "Note (optional)",
+      "setSpecialWeaponsEventProperty": "Set special weapons event property",
+      "id": "Event ID",
+      "findActiveSpecialWeaponsEvents": "Find active special weapons events",
+      "pleaseSelectProperty": "Please select property",
+      "propertyValue": "Property value",
+      "property": {
+        "ART": "Art",
+        "DETAILS": "Details",
+        "WEBSITE": "Website",
+        "NOTE": "Note",
+        "IS_ACTIVE": "Is active"
+      }
     },
     "identifiers": "Identifiers",
     "amount": "Amount",

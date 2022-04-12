@@ -24,6 +24,27 @@
         {{ $t('admin.specialWeaponsManager.startNewEvent') }}
       </b-button>
     </div>
+    <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.findActiveSpecialWeaponsEvents') }}</h2>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <b-button @click="getActiveEvents()" :disabled="isLoading" variant="primary"
+                class="text-nowrap">
+        {{ $t('admin.specialWeaponsManager.findActiveSpecialWeaponsEvents') }}
+      </b-button>
+      <table class="table text-white" v-if="activeSpecialWeaponsEvents.length">
+        <thead>
+        <tr>
+          <th>{{ $t('admin.specialWeaponsManager.name') }}</th>
+          <th>{{ $t('admin.specialWeaponsManager.id') }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="activeSpecialWeaponsEvent in activeSpecialWeaponsEvents" :key="activeSpecialWeaponsEvent.id">
+          <td>{{ activeSpecialWeaponsEvent.name }}</td>
+          <td>{{ activeSpecialWeaponsEvent.id }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
     <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.setSpecialWeaponsEventProperty') }}</h2>
     <div class="d-flex align-items-center gap-3">
       <b-form-input v-model="selectedSpecialWeaponsEvent.id" :placeholder="$t('admin.specialWeaponsManager.id')"/>
@@ -52,6 +73,16 @@ import {mapActions} from 'vuex';
 
 interface StoreMappedActions {
   startNewEvent(payload: { event: SpecialWeaponsEvent }): Promise<void>;
+
+  getActiveSpecialWeaponsEvents(): Promise<SpecialWeaponsEvent[]>;
+
+  setSpecialWeaponArt(payload: { eventId: number, art: string }): Promise<void>;
+
+  setSpecialWeaponDetails(payload: { eventId: number, details: string }): Promise<void>;
+
+  setSpecialWeaponWebsite(payload: { eventId: number, website: string }): Promise<void>;
+
+  setSpecialWeaponNote(payload: { eventId: number, note: string }): Promise<void>;
 }
 
 enum SpecialWeaponsEventProperty {
@@ -73,6 +104,7 @@ enum Element {
 }
 
 interface SpecialWeaponsEvent {
+  id?: number;
   name?: string;
   element?: Element;
   period?: number;
@@ -86,6 +118,7 @@ interface SpecialWeaponsEvent {
 interface Data {
   newEvent: SpecialWeaponsEvent;
   selectedSpecialWeaponsEvent: SelectedSpecialWeaponsEvent;
+  activeSpecialWeaponsEvents: SpecialWeaponsEvent[];
   isLoading: boolean;
 }
 
@@ -114,6 +147,7 @@ export default Vue.extend({
         selectedProperty: undefined,
         value: '',
       },
+      activeSpecialWeaponsEvents: [],
       isLoading: false,
       Element,
       SpecialWeaponsEventProperty,
@@ -142,7 +176,23 @@ export default Vue.extend({
   methods: {
     ...mapActions([
       'startNewEvent',
+      'getActiveSpecialWeaponsEvents',
+      'setSpecialWeaponArt',
+      'setSpecialWeaponDetails',
+      'setSpecialWeaponWebsite',
+      'setSpecialWeaponNote',
     ]) as StoreMappedActions,
+
+    async getActiveEvents() {
+      try {
+        this.isLoading = true;
+        this.activeSpecialWeaponsEvents = await this.getActiveSpecialWeaponsEvents();
+        console.log(this.activeSpecialWeaponsEvents);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     async startNewSpecialWeaponsEvent() {
       this.isLoading = true;
       try {
@@ -160,7 +210,46 @@ export default Vue.extend({
       } finally {
         this.isLoading = false;
       }
-    }
+    },
+
+    async setSpecialWeaponsEventProperty() {
+      this.isLoading = true;
+      try {
+        switch (this.selectedSpecialWeaponsEvent.selectedProperty) {
+        case SpecialWeaponsEventProperty.ART:
+          await this.setSpecialWeaponArt({
+            eventId: this.selectedSpecialWeaponsEvent.id,
+            art: this.selectedSpecialWeaponsEvent.value,
+          });
+          break;
+        case SpecialWeaponsEventProperty.DETAILS:
+          await this.setSpecialWeaponDetails({
+            eventId: this.selectedSpecialWeaponsEvent.id,
+            details: this.selectedSpecialWeaponsEvent.value,
+          });
+          break;
+        case SpecialWeaponsEventProperty.WEBSITE:
+          await this.setSpecialWeaponWebsite({
+            eventId: this.selectedSpecialWeaponsEvent.id,
+            website: this.selectedSpecialWeaponsEvent.value,
+          });
+          break;
+        case SpecialWeaponsEventProperty.NOTE:
+          await this.setSpecialWeaponNote({
+            eventId: this.selectedSpecialWeaponsEvent.id,
+            note: this.selectedSpecialWeaponsEvent.value,
+          });
+          break;
+        }
+        this.selectedSpecialWeaponsEvent = {
+          id: undefined,
+          selectedProperty: undefined,
+          value: '',
+        };
+      } finally {
+        this.isLoading = false;
+      }
+    },
   }
 
 });

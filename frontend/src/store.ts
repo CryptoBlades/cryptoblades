@@ -5846,12 +5846,61 @@ export function createStore(web3: Web3) {
         await Weapons.methods.setBurnPointMultiplier(multiplier).send({ from: state.defaultAccount });
       },
 
+      async getActiveSpecialWeaponsEvents({state}) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        const ids = await SpecialWeaponsManager.methods.getActiveEventsIds().call(defaultCallOptions(state));
+        const events = [];
+        for(let i = 0; i < ids.length; i++) {
+          const project = await SpecialWeaponsManager.methods.eventInfo(ids[i]).call(defaultCallOptions(state));
+          events.push({id: ids[i], ...project});
+        }
+        return events;
+      },
+
       async startNewEvent({state}, {event}) {
         const {SpecialWeaponsManager} = state.contracts();
         if (!SpecialWeaponsManager || !state.defaultAccount) return;
 
         await SpecialWeaponsManager.methods
           .startNewEvent(event.name, event.element, event.period, event.supply, event.art, event.details, event.website, event.note)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponArt({state}, {eventId, art}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponArt(eventId, art)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponDetails({state}, {eventId, details}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponDetails(eventId, details)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponWebsite({state}, {eventId, website}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponWebsite(eventId, website)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponNote({state}, {eventId, note}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponNote(eventId, note)
           .send({from: state.defaultAccount});
       },
 
