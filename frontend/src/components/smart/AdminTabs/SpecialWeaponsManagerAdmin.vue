@@ -15,7 +15,7 @@
                     :placeholder="$t('admin.specialWeaponsManager.periodInSeconds')"/>
       <b-form-input v-model="newEvent.supply" type="number" number min="0"
                     :placeholder="$t('admin.specialWeaponsManager.supply0Unlimited')"/>
-      <b-form-input v-model="newEvent.logo" :placeholder="$t('admin.specialWeaponsManager.logoUrl')"/>
+      <b-form-input v-model="newEvent.art" :placeholder="$t('admin.specialWeaponsManager.artUrl')"/>
       <b-form-input v-model="newEvent.details" :placeholder="$t('admin.specialWeaponsManager.details')"/>
       <b-form-input v-model="newEvent.website" :placeholder="$t('admin.specialWeaponsManager.website')"/>
       <b-form-input v-model="newEvent.note" :placeholder="$t('admin.specialWeaponsManager.noteOptional')"/>
@@ -24,23 +24,25 @@
         {{ $t('admin.specialWeaponsManager.startNewEvent') }}
       </b-button>
     </div>
-    <!--    <h2 class="mt-3">{{ $t('admin.cryptoblades.setWeaponMintValueCurrent', {cents: currentWeaponMintValue}) }}</h2>-->
-    <!--    <div class="d-flex align-items-center gap-3 flex-wrap">-->
-    <!--      <b-form-input v-model="newWeaponMintValue" type="number" number-->
-    <!--                    :placeholder="$t('admin.cryptoblades.newValueInCents')"/>-->
-    <!--      <b-button @click="setNewWeaponMintValue()" :disabled="setWeaponMintValueButtonDisabled" variant="primary"-->
-    <!--                class="text-nowrap">-->
-    <!--        {{ $t('admin.cryptoblades.setWeaponMintValue') }}-->
-    <!--      </b-button>-->
-    <!--    </div>-->
-    <!--    <h2 class="mt-2">{{ $t('admin.cryptoblades.setFightXpGainCurrentDefault32', {xpGain: currentFightXpGain}) }}</h2>-->
-    <!--    <div class="d-flex align-items-center gap-3">-->
-    <!--      <b-form-input v-model="newFightXpGain" :placeholder="$t('admin.cryptoblades.fightXpGain')" number type="number"/>-->
-    <!--      <b-button @click="setNewFightXpGain()" :disabled="setNewFightXpGainButtonDisabled"-->
-    <!--                variant="primary" class="text-nowrap">-->
-    <!--        {{ $t('admin.cryptoblades.setFightXpGain') }}-->
-    <!--      </b-button>-->
-    <!--    </div>-->
+    <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.setSpecialWeaponsEventProperty') }}</h2>
+    <div class="d-flex align-items-center gap-3">
+      <b-form-input v-model="selectedSpecialWeaponsEvent.id" :placeholder="$t('admin.specialWeaponsManager.id')"/>
+      <b-form-select class="mt-2 mb-2"
+                     v-model="selectedSpecialWeaponsEvent.selectedProperty">
+        <b-form-select-option :value="undefined" disabled>
+          {{ $t('admin.specialWeaponsManager.pleaseSelectProperty') }}
+        </b-form-select-option>
+        <b-form-select-option v-for="property in specialWeaponsEventProperties" :key="property" :value="property">
+          {{ $t(`admin.specialWeaponsManager.property.${SpecialWeaponsEventProperty[property]}`) }}
+        </b-form-select-option>
+      </b-form-select>
+      <b-form-input v-model="selectedSpecialWeaponsEvent.value"
+                    :placeholder="$t('admin.specialWeaponsManager.propertyValue')"/>
+      <b-button @click="setSpecialWeaponsEventProperty()" :disabled="setSpecialWeaponsEventPropertyButtonDisabled"
+                variant="primary" class="text-nowrap">
+        {{ $t('admin.specialWeaponsManager.setSpecialWeaponsEventProperty') }}
+      </b-button>
+    </div>
   </div>
 </template>
 
@@ -50,6 +52,16 @@ import {mapActions} from 'vuex';
 
 interface StoreMappedActions {
   startNewEvent(payload: { event: SpecialWeaponsEvent }): Promise<void>;
+}
+
+enum SpecialWeaponsEventProperty {
+  ART, DETAILS, WEBSITE, NOTE
+}
+
+interface SelectedSpecialWeaponsEvent {
+  id?: number;
+  selectedProperty?: SpecialWeaponsEventProperty;
+  value: string;
 }
 
 enum Element {
@@ -65,7 +77,7 @@ interface SpecialWeaponsEvent {
   element?: Element;
   period?: number;
   supply?: number;
-  logo?: string;
+  art?: string;
   details?: string;
   website?: string;
   note?: string;
@@ -73,6 +85,7 @@ interface SpecialWeaponsEvent {
 
 interface Data {
   newEvent: SpecialWeaponsEvent;
+  selectedSpecialWeaponsEvent: SelectedSpecialWeaponsEvent;
   isLoading: boolean;
 }
 
@@ -84,14 +97,26 @@ export default Vue.extend({
         element: undefined,
         period: undefined,
         supply: undefined,
-        logo: '',
+        art: '',
         details: '',
         website: '',
         note: '',
       },
       elements: [Element.ALL, Element.FIRE, Element.WATER, Element.EARTH, Element.LIGHTNING],
+      specialWeaponsEventProperties: [
+        SpecialWeaponsEventProperty.ART,
+        SpecialWeaponsEventProperty.DETAILS,
+        SpecialWeaponsEventProperty.WEBSITE,
+        SpecialWeaponsEventProperty.NOTE,
+      ],
+      selectedSpecialWeaponsEvent: {
+        id: undefined,
+        selectedProperty: undefined,
+        value: '',
+      },
       isLoading: false,
       Element,
+      SpecialWeaponsEventProperty,
     } as Data;
   },
 
@@ -101,11 +126,17 @@ export default Vue.extend({
         || this.newEvent.element === undefined
         || this.newEvent.period === undefined
         || this.newEvent.supply === undefined
-        || !this.newEvent.logo
+        || !this.newEvent.art
         || !this.newEvent.details
         || !this.newEvent.website
         || this.isLoading;
-    }
+    },
+    setSpecialWeaponsEventPropertyButtonDisabled(): boolean {
+      return this.selectedSpecialWeaponsEvent.id === undefined
+        || this.selectedSpecialWeaponsEvent.selectedProperty === undefined
+        || !this.selectedSpecialWeaponsEvent.value
+        || this.isLoading;
+    },
   },
 
   methods: {
@@ -121,7 +152,7 @@ export default Vue.extend({
           element: undefined,
           period: undefined,
           supply: undefined,
-          logo: '',
+          art: '',
           details: '',
           website: '',
           note: '',

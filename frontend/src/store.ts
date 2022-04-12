@@ -228,7 +228,7 @@ export function createStore(web3: Web3) {
       activeSpecialWeaponEventsIds: [],
       inactiveSpecialWeaponEventsIds: [],
       specialWeaponEvents: {},
-      specialWeaponLogos: [],
+      specialWeaponArts: [],
       specialWeaponEventId: localStorage.getItem('specialWeaponEventId') || '0',
       shardsSupply: {},
 
@@ -1142,8 +1142,8 @@ export function createStore(web3: Web3) {
         Vue.set(state.specialWeaponEvents, eventId, eventInfo);
       },
 
-      updateSpecialWeaponLogo(state: IState, {eventId, logo}) {
-        Vue.set(state.specialWeaponLogos, eventId, logo);
+      updateSpecialWeaponArt(state: IState, {eventId, art}) {
+        Vue.set(state.specialWeaponArts, eventId, art);
       },
 
       updateActiveSpecialWeaponEventsIds(state: IState, eventsIds) {
@@ -1189,7 +1189,7 @@ export function createStore(web3: Web3) {
         await dispatch('setupWeaponCosmetics');
 
         await dispatch('fetchSpecialWeaponEvents');
-        await dispatch('fetchSpecialWeaponLogos');
+        await dispatch('fetchSpecialWeaponArts');
 
         await dispatch('fetchHasAdminAccess');
         await dispatch('fetchHasMinterAccess');
@@ -5851,7 +5851,7 @@ export function createStore(web3: Web3) {
         if (!SpecialWeaponsManager || !state.defaultAccount) return;
 
         await SpecialWeaponsManager.methods
-          .startNewEvent(event.name, event.element, event.period, event.supply, event.logo, event.details, event.website, event.note)
+          .startNewEvent(event.name, event.element, event.period, event.supply, event.art, event.details, event.website, event.note)
           .send({from: state.defaultAccount});
       },
 
@@ -5871,15 +5871,15 @@ export function createStore(web3: Web3) {
         await dispatch('fetchShardsSupply');
       },
 
-      async fetchSpecialWeaponLogos({ state, commit }) {
+      async fetchSpecialWeaponArts({ state, commit }) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;
 
         const allSpecialWeaponEventsIds = state.activeSpecialWeaponEventsIds.concat(state.inactiveSpecialWeaponEventsIds);
         for (let i = 0; i < allSpecialWeaponEventsIds.length; i++) {
           const eventId = allSpecialWeaponEventsIds[i];
-          const logo = await SpecialWeaponsManager.methods.specialWeaponLogo(eventId).call(defaultCallOptions(state));
-          commit('updateSpecialWeaponLogo', { eventId, logo });
+          const art = await SpecialWeaponsManager.methods.specialWeaponArt(eventId).call(defaultCallOptions(state));
+          commit('updateSpecialWeaponArt', { eventId, art });
         }
       },
 
@@ -5900,7 +5900,7 @@ export function createStore(web3: Web3) {
             orderedCount: eventInfoRaw[4],
             ordered,
             forged,
-            logo: eventData[0],
+            art: eventData[0],
             details: eventData[1],
             website: eventData[2],
             notes: eventData[3]

@@ -10,7 +10,7 @@
         />
       </div>
       <div class="weaponWrapper">
-        <img :src="weapon.weaponType > 0 ? specialWeaponLogos[weapon.weaponType] : getWeaponArt(weapon)" alt="weapon image">
+        <img :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)" alt="weapon image">
         <b-popover v-if="hasInfoPopover" :target="`${weaponId}-info-w`" variant="dark"
         triggers="hover" data-trigger="focus" placement="top right" custom-class="customPopover">
           <div v-if="weaponId" class="weapon-icon-wrapper">
@@ -63,7 +63,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['specialWeaponLogos']),
+    ...mapState(['specialWeaponArts']),
     getElementImageUrl() {
       if (this.weapon.element === 'Fire') {
         return fire;

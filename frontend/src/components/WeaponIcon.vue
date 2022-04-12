@@ -15,7 +15,7 @@
       <!-- below use of weapon.id is for test purpose, should be replaced with getWeaponCosmetic(weapon.id) -->
       <div class="animation" v-bind:class="showCosmetics ? 'weapon-animation-applied-' + getWeaponCosmetic(weapon.id) : ''"/>
       <img v-if="showPlaceholder" v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
-           class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponLogos[weapon.weaponType] : getWeaponArt(weapon)" />
+           class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)" />
 
       <div class="trait">
         <span :class="weapon.element.toLowerCase() + '-icon'"></span>
@@ -101,7 +101,10 @@ export default {
   props: ['weapon', 'favorite'],
 
   computed: {
-    ...mapState(['maxDurability', 'specialWeaponLogos']),
+    ...mapState([
+      'maxDurability',
+      'specialWeaponArts',
+    ]),
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',

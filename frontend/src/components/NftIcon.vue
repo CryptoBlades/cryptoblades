@@ -78,7 +78,7 @@
         <span v-if="nft.type === 'claimT3Land'" class="nft-supply">Lands to claim: {{ totalT3LandsToClaim }}</span>
       </div>
       <div v-if="nft.type === 'weapon' || nft.type === 'WeaponCosmetic'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
-          <img v-if="!isShop" class="placeholder-weapon" :src="nft.weaponType > 0 ? specialWeaponLogos[nft.weaponType] : getWeaponArt(nft)" />
+          <img v-if="!isShop" class="placeholder-weapon" :src="nft.weaponType > 0 ? specialWeaponArts[nft.weaponType] : getWeaponArt(nft)" />
           <div v-if="isShop" class="animation" v-bind:class="'weapon-animation-applied-' + nft.id" />
           <img v-if="isShop" class="placeholder-weapon" v-bind:class="'weapon-cosmetic-applied-' + nft.id"
             src="../assets/placeholder/sword-placeholder-0.png" />
@@ -179,7 +179,7 @@ export default {
 
   },
   computed: {
-    ...mapState(['specialWeaponLogos']),
+    ...mapState(['specialWeaponArts']),
     ...mapGetters(['getWeaponName', 'currentCharacter',]),
     tooltipHtml() {
       if(!this.nft) return '';

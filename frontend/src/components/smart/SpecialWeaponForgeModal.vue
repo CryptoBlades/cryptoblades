@@ -19,7 +19,7 @@
             <div v-if="selectedSpecialWeaponEventId">
               <div v-if="!isForging" class="d-flex mt-3 info-div">
                 <div class="d-flex flex-column justify-items-center w-50 mb-3">
-                  <img :src="eventLogo" class="weapon-img"/>
+                  <img :src="eventArt" class="weapon-img"/>
                   <div class="d-flex mt-3 align-items-center">
                     <h5 class="mb-0">{{$t('blacksmith.availableElements')}}</h5>
                     <h5 v-if="availableElement === 100 || availableElement === 0" class="fire-icon ml-2 mb-0" />
@@ -341,9 +341,9 @@ export default Vue.extend({
       return this.specialWeaponEvents[this.selectedSpecialWeaponEventId].note;
     },
 
-    eventLogo(): string {
+    eventArt(): string {
       if(!this.specialWeaponEvents[this.selectedSpecialWeaponEventId]) return '';
-      return this.specialWeaponEvents[this.selectedSpecialWeaponEventId].logo;
+      return this.specialWeaponEvents[this.selectedSpecialWeaponEventId].art;
     },
 
     forgeCostShards(): number {

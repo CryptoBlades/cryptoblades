@@ -1013,7 +1013,7 @@
       },
       "periodInSeconds": "Period (in seconds)",
       "supply0Unlimited": "Supply (0 === unlimited)",
-      "logoUrl": "Logo URL (logo link from IPFS)",
+      "artUrl": "Art URL (art link from IPFS)",
       "details": "Details",
       "website": "Website",
       "noteOptional": "Note (optional)"

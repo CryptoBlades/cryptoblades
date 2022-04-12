@@ -49,7 +49,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     mapping(address => uint256) userStakedSkill;
     mapping(address => uint256) userStakedSkillUpdatedTimestamp;
     mapping(address => uint256) userSkillStakingShardsRewards;
-    mapping(uint256 => string) public specialWeaponLogo;
+    mapping(uint256 => string) public specialWeaponArt;
     mapping(uint256 => string) public specialWeaponDetails;
     mapping(uint256 => string) public specialWeaponWebsite;
     mapping(uint256 => string) public specialWeaponNote;
@@ -197,13 +197,13 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
     }
 
     function getSpecialWeaponData(uint256 eventId) public view returns (string memory, string memory, string memory, string memory) {
-        return (specialWeaponLogo[eventId], specialWeaponDetails[eventId], specialWeaponWebsite[eventId], specialWeaponNote[eventId]);
+        return (specialWeaponArt[eventId], specialWeaponDetails[eventId], specialWeaponWebsite[eventId], specialWeaponNote[eventId]);
     }
 
     // FUNCTIONS
 
     // supply 0 = unlimited
-    function startNewEvent(string calldata name, uint8 element, uint256 period, uint256 supply, string calldata logo, string calldata details, string calldata website, string calldata note) external restricted {
+    function startNewEvent(string calldata name, uint8 element, uint256 period, uint256 supply, string calldata art, string calldata details, string calldata website, string calldata note) external restricted {
         uint eventId = ++eventCount;
         eventInfo[eventId] = EventInfo(
             name,
@@ -212,7 +212,7 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
             supply,
             0
         );
-        specialWeaponLogo[eventId] = logo;
+        specialWeaponArt[eventId] = art;
         specialWeaponDetails[eventId] = details;
         specialWeaponWebsite[eventId] = website;
         specialWeaponNote[eventId] = note;
@@ -400,8 +400,8 @@ contract SpecialWeaponsManager is Initializable, AccessControlUpgradeable {
 
     // SETTERS
 
-    function setSpecialWeaponLogo(uint256 eventId, string calldata logo) external restricted {
-        specialWeaponLogo[eventId] = logo;
+    function setSpecialWeaponArt(uint256 eventId, string calldata art) external restricted {
+        specialWeaponArt[eventId] = art;
     }
 
     function setSpecialWeaponDetails(uint256 eventId, string calldata details) external restricted {
