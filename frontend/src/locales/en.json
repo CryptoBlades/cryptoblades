@@ -1032,6 +1032,17 @@
       "addShards": "Add shards",
       "user": "User",
       "shardsAmount": "Shards amount",
+      "privatePartnerOrder": "Private partner order",
+      "privatePartnerMint": "Private partner mint",
+      "reserveForGiveaways": "Reserve for giveaways",
+      "reservingAddress": "Reserving address",
+      "receiversCommaSeparated": "Receivers (comma separated)",
+      "pleaseSelectOrderOption": "Please select order option",
+      "orderOption": {
+        "THREE_FIVE": "3-5 stars",
+        "FOUR_FIVE": "4-5 stars",
+        "FIVE": "5 stars"
+      },
       "incrementEventCountBeCareful": "Increment event count (be careful)",
       "incrementEventCount": "Increment event count",
       "areYouSure": "Are you sure?",

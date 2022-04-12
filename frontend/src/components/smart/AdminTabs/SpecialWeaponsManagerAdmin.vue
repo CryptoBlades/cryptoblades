@@ -48,8 +48,7 @@
     <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.setSpecialWeaponsEventProperty') }}</h2>
     <div class="d-flex align-items-center gap-3">
       <b-form-input v-model="selectedSpecialWeaponsEvent.id" :placeholder="$t('admin.specialWeaponsManager.id')"/>
-      <b-form-select class="mt-2 mb-2"
-                     v-model="selectedSpecialWeaponsEvent.selectedProperty">
+      <b-form-select class="mt-2 mb-2" v-model="selectedSpecialWeaponsEvent.selectedProperty">
         <b-form-select-option :value="undefined" disabled>
           {{ $t('admin.specialWeaponsManager.pleaseSelectProperty') }}
         </b-form-select-option>
@@ -74,6 +73,65 @@
       <b-button @click="addShardsForUser()" :disabled="addShardsForUserButtonDisabled"
                 variant="primary" class="text-nowrap">
         {{ $t('admin.specialWeaponsManager.addShards') }}
+      </b-button>
+    </div>
+    <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.privatePartnerOrder') }}</h2>
+    <div class="d-flex align-items-center gap-3">
+      <b-form-input v-model="newPrivatePartnerOrder.receivers"
+                    :placeholder="$t('admin.specialWeaponsManager.receiversCommaSeparated')"/>
+      <b-form-input v-model="newPrivatePartnerOrder.eventId" type="number" number min="0"
+                    :placeholder="$t('admin.specialWeaponsManager.id')"/>
+      <b-form-select class="mt-2 mb-2" v-model="newPrivatePartnerOrder.orderOption">
+        <b-form-select-option :value="undefined" disabled>
+          {{ $t('admin.specialWeaponsManager.pleaseSelectOrderOption') }}
+        </b-form-select-option>
+        <b-form-select-option v-for="orderOption in orderOptions" :key="orderOption" :value="orderOption">
+          {{ $t(`admin.specialWeaponsManager.orderOption.${OrderOption[orderOption]}`) }}
+        </b-form-select-option>
+      </b-form-select>
+      <b-button @click="onNewPrivatePartnerOrder()" :disabled="onNewPrivatePartnerOrderButtonDisabled"
+                variant="primary" class="text-nowrap">
+        {{ $t('admin.specialWeaponsManager.privatePartnerOrder') }}
+      </b-button>
+    </div>
+    <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.privatePartnerMint') }}</h2>
+    <div class="d-flex align-items-center gap-3">
+      <b-form-input v-model="newPrivatePartnerMint.receivers"
+                    :placeholder="$t('admin.specialWeaponsManager.receiversCommaSeparated')"/>
+      <b-form-input v-model="newPrivatePartnerMint.eventId" type="number" number min="0"
+                    :placeholder="$t('admin.specialWeaponsManager.id')"/>
+      <b-form-select class="mt-2 mb-2" v-model="newPrivatePartnerMint.orderOption">
+        <b-form-select-option :value="undefined" disabled>
+          {{ $t('admin.specialWeaponsManager.pleaseSelectOrderOption') }}
+        </b-form-select-option>
+        <b-form-select-option v-for="orderOption in orderOptions" :key="orderOption" :value="orderOption">
+          {{ $t(`admin.specialWeaponsManager.orderOption.${OrderOption[orderOption]}`) }}
+        </b-form-select-option>
+      </b-form-select>
+      <b-button @click="onNewPrivatePartnerMint()" :disabled="onNewPrivatePartnerMintButtonDisabled"
+                variant="primary" class="text-nowrap">
+        {{ $t('admin.specialWeaponsManager.privatePartnerMint') }}
+      </b-button>
+    </div>
+    <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.reserveForGiveaways') }}</h2>
+    <div class="d-flex align-items-center gap-3">
+      <b-form-input v-model="newReserveForGiveaways.reservingAddress"
+                    :placeholder="$t('admin.specialWeaponsManager.reservingAddress')"/>
+      <b-form-input v-model="newReserveForGiveaways.eventId" type="number" number min="0"
+                    :placeholder="$t('admin.specialWeaponsManager.id')"/>
+      <b-form-select class="mt-2 mb-2" v-model="newReserveForGiveaways.orderOption">
+        <b-form-select-option :value="undefined" disabled>
+          {{ $t('admin.specialWeaponsManager.pleaseSelectOrderOption') }}
+        </b-form-select-option>
+        <b-form-select-option v-for="orderOption in orderOptions" :key="orderOption" :value="orderOption">
+          {{ $t(`admin.specialWeaponsManager.orderOption.${OrderOption[orderOption]}`) }}
+        </b-form-select-option>
+      </b-form-select>
+      <b-form-input v-model="newReserveForGiveaways.amount" type="number" number min="0"
+                    :placeholder="$t('admin.amount')"/>
+      <b-button @click="onNewReserveForGiveaways()" :disabled="onNewReserveForGiveawaysButtonDisabled"
+                variant="primary" class="text-nowrap">
+        {{ $t('admin.specialWeaponsManager.reserveForGiveaways') }}
       </b-button>
     </div>
     <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.incrementEventCountBeCareful') }}</h2>
@@ -111,6 +169,12 @@ interface StoreMappedActions {
   incrementEventCount(): Promise<void>;
 
   addShards(payload: { user: string, eventId: number, shardsAmount: number }): Promise<void>;
+
+  privatePartnerOrder(payload: { receivers: string[], eventId: number, orderOption: OrderOption }): Promise<void>;
+
+  privatePartnerMint(payload: { receivers: string[], eventId: number, orderOption: OrderOption }): Promise<void>;
+
+  reserveForGiveaways(payload: { reservingAddress: string, eventId: number, orderOption: OrderOption, amount: number }): Promise<void>;
 }
 
 interface AddShards {
@@ -127,6 +191,25 @@ interface SelectedSpecialWeaponsEvent {
   id?: number;
   selectedProperty?: SpecialWeaponsEventProperty;
   value: string;
+}
+
+enum OrderOption {
+  THREE_FIVE = 1,
+  FOUR_FIVE = 2,
+  FIVE = 3,
+}
+
+interface PrivatePartner {
+  receivers: string;
+  eventId?: number;
+  orderOption?: OrderOption;
+}
+
+interface ReserveForGiveaways {
+  reservingAddress: string;
+  eventId?: number;
+  orderOption?: OrderOption;
+  amount?: number;
 }
 
 enum Element {
@@ -153,8 +236,14 @@ interface Data {
   newEvent: SpecialWeaponsEvent;
   selectedSpecialWeaponsEvent: SelectedSpecialWeaponsEvent;
   activeSpecialWeaponsEvents: SpecialWeaponsEvent[];
+  specialWeaponsEventProperties: SpecialWeaponsEventProperty[];
+  orderOptions: OrderOption[];
+  elements: Element[];
   incrementEventCountModal: boolean;
   newAddShardsUser: AddShards;
+  newPrivatePartnerOrder: PrivatePartner;
+  newPrivatePartnerMint: PrivatePartner;
+  newReserveForGiveaways: ReserveForGiveaways;
   isLoading: boolean;
 }
 
@@ -190,9 +279,31 @@ export default Vue.extend({
         eventId: undefined,
         shardsAmount: undefined,
       },
+      orderOptions: [
+        OrderOption.THREE_FIVE,
+        OrderOption.FOUR_FIVE,
+        OrderOption.FIVE,
+      ],
+      newPrivatePartnerOrder: {
+        receivers: '',
+        eventId: undefined,
+        orderOption: undefined,
+      },
+      newPrivatePartnerMint: {
+        receivers: '',
+        eventId: undefined,
+        orderOption: undefined,
+      },
+      newReserveForGiveaways: {
+        reservingAddress: '',
+        eventId: undefined,
+        orderOption: undefined,
+        amount: undefined,
+      },
       isLoading: false,
       Element,
       SpecialWeaponsEventProperty,
+      OrderOption,
     } as Data;
   },
 
@@ -219,6 +330,25 @@ export default Vue.extend({
         || this.newAddShardsUser.shardsAmount === undefined
         || this.isLoading;
     },
+    onNewPrivatePartnerOrderButtonDisabled(): boolean {
+      return !this.newPrivatePartnerOrder.receivers
+        || this.newPrivatePartnerOrder.eventId === undefined
+        || this.newPrivatePartnerOrder.orderOption === undefined
+        || this.isLoading;
+    },
+    onNewPrivatePartnerMintButtonDisabled(): boolean {
+      return !this.newPrivatePartnerMint.receivers
+        || this.newPrivatePartnerMint.eventId === undefined
+        || this.newPrivatePartnerMint.orderOption === undefined
+        || this.isLoading;
+    },
+    onNewReserveForGiveawaysButtonDisabled(): boolean {
+      return !isValidWeb3Address(this.newReserveForGiveaways.reservingAddress)
+        || this.newReserveForGiveaways.eventId === undefined
+        || this.newReserveForGiveaways.orderOption === undefined
+        || this.newReserveForGiveaways.amount === undefined
+        || this.isLoading;
+    },
   },
 
   methods: {
@@ -231,6 +361,9 @@ export default Vue.extend({
       'setSpecialWeaponNote',
       'incrementEventCount',
       'addShards',
+      'privatePartnerOrder',
+      'privatePartnerMint',
+      'reserveForGiveaways',
     ]) as StoreMappedActions,
 
     async getActiveEvents() {
@@ -313,6 +446,62 @@ export default Vue.extend({
           user: '',
           eventId: undefined,
           shardsAmount: undefined,
+        };
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async onNewPrivatePartnerOrder() {
+      this.isLoading = true;
+      try {
+        await this.privatePartnerOrder({
+          receivers: this.newPrivatePartnerOrder.receivers.split(',').map(receiver => receiver.trim()),
+          eventId: this.newPrivatePartnerOrder.eventId,
+          orderOption: this.newPrivatePartnerOrder.orderOption,
+        });
+        this.newPrivatePartnerOrder = {
+          receivers: '',
+          eventId: undefined,
+          orderOption: undefined,
+        };
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async onNewPrivatePartnerMint() {
+      this.isLoading = true;
+      try {
+        await this.privatePartnerMint({
+          receivers: this.newPrivatePartnerMint.receivers.split(',').map(receiver => receiver.trim()),
+          eventId: this.newPrivatePartnerMint.eventId,
+          orderOption: this.newPrivatePartnerMint.orderOption,
+        });
+        this.newPrivatePartnerMint = {
+          receivers: '',
+          eventId: undefined,
+          orderOption: undefined,
+        };
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async onNewReserveForGiveaways() {
+      this.isLoading = true;
+      try {
+        await this.reserveForGiveaways({
+          reservingAddress: this.newReserveForGiveaways.reservingAddress,
+          eventId: this.newReserveForGiveaways.eventId,
+          orderOption: this.newReserveForGiveaways.orderOption,
+          amount: this.newReserveForGiveaways.amount,
+        });
+        this.newReserveForGiveaways = {
+          reservingAddress: '',
+          eventId: undefined,
+          orderOption: undefined,
+          amount: undefined,
         };
       } finally {
         this.isLoading = false;

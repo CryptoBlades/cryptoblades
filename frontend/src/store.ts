@@ -5922,6 +5922,33 @@ export function createStore(web3: Web3) {
           .send({from: state.defaultAccount});
       },
 
+      async privatePartnerOrder({state}, {receivers, eventId, orderOption}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .privatePartnerOrder(receivers, eventId, orderOption)
+          .send({from: state.defaultAccount});
+      },
+
+      async privatePartnerMint({state}, {receivers, eventId, orderOption}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .privatePartnerMint(receivers, eventId, orderOption)
+          .send({from: state.defaultAccount});
+      },
+
+      async reserveForGiveaways({state}, {reservingAddress, eventId, orderOption, amount}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .reserveForGiveaways(reservingAddress, eventId, orderOption, amount)
+          .send({from: state.defaultAccount});
+      },
+
       async fetchSpecialWeaponEvents({ state, dispatch, commit }) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;
