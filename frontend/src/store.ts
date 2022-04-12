@@ -5846,6 +5846,15 @@ export function createStore(web3: Web3) {
         await Weapons.methods.setBurnPointMultiplier(multiplier).send({ from: state.defaultAccount });
       },
 
+      async startNewEvent({state}, {event}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .startNewEvent(event.name, event.element, event.period, event.supply, event.logo, event.details, event.website, event.note)
+          .send({from: state.defaultAccount});
+      },
+
       async fetchSpecialWeaponEvents({ state, dispatch, commit }) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;

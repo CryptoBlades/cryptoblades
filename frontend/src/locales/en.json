@@ -1000,6 +1000,24 @@
       "setRaidXpReward": "Set raid XP reward",
       "raidXpReward": "Raid XP reward"
     },
+    "specialWeaponsManager": {
+      "startNewEvent": "Start new event",
+      "name": "Name",
+      "pleaseSelectElement": "Please select element",
+      "elements" : {
+        "ALL": "All",
+        "FIRE": "Fire",
+        "WATER": "Water",
+        "LIGHTNING": "Lightning",
+        "EARTH": "Earth"
+      },
+      "periodInSeconds": "Period (in seconds)",
+      "supply0Unlimited": "Supply (0 === unlimited)",
+      "logoUrl": "Logo URL (logo link from IPFS)",
+      "details": "Details",
+      "website": "Website",
+      "noteOptional": "Note (optional)"
+    },
     "identifiers": "Identifiers",
     "amount": "Amount",
     "symbol": "Symbol",
