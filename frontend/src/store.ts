@@ -5904,6 +5904,15 @@ export function createStore(web3: Web3) {
           .send({from: state.defaultAccount});
       },
 
+      async incrementEventCount({state}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .incrementEventCount()
+          .send({from: state.defaultAccount});
+      },
+
       async fetchSpecialWeaponEvents({ state, dispatch, commit }) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;

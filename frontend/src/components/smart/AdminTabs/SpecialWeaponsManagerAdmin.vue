@@ -64,6 +64,17 @@
         {{ $t('admin.specialWeaponsManager.setSpecialWeaponsEventProperty') }}
       </b-button>
     </div>
+    <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.incrementEventCountBeCareful') }}</h2>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <b-button @click="incrementEventCountModal = !incrementEventCountModal" :disabled="isLoading" variant="primary"
+                class="text-nowrap">
+        {{ $t('admin.specialWeaponsManager.incrementEventCount') }}
+      </b-button>
+      <b-modal v-model="incrementEventCountModal" @ok.prevent="onIncrementEventCount" :ok-disabled="isLoading"
+               :title="$t('admin.specialWeaponsManager.areYouSure')">
+        {{ $t('admin.specialWeaponsManager.eventIncrementationIrreversibleInfo') }}
+      </b-modal>
+    </div>
   </div>
 </template>
 
@@ -83,6 +94,8 @@ interface StoreMappedActions {
   setSpecialWeaponWebsite(payload: { eventId: number, website: string }): Promise<void>;
 
   setSpecialWeaponNote(payload: { eventId: number, note: string }): Promise<void>;
+
+  incrementEventCount(): Promise<void>;
 }
 
 enum SpecialWeaponsEventProperty {
@@ -119,6 +132,7 @@ interface Data {
   newEvent: SpecialWeaponsEvent;
   selectedSpecialWeaponsEvent: SelectedSpecialWeaponsEvent;
   activeSpecialWeaponsEvents: SpecialWeaponsEvent[];
+  incrementEventCountModal: boolean;
   isLoading: boolean;
 }
 
@@ -148,6 +162,7 @@ export default Vue.extend({
         value: '',
       },
       activeSpecialWeaponsEvents: [],
+      incrementEventCountModal: false,
       isLoading: false,
       Element,
       SpecialWeaponsEventProperty,
@@ -181,6 +196,7 @@ export default Vue.extend({
       'setSpecialWeaponDetails',
       'setSpecialWeaponWebsite',
       'setSpecialWeaponNote',
+      'incrementEventCount',
     ]) as StoreMappedActions,
 
     async getActiveEvents() {
@@ -246,6 +262,15 @@ export default Vue.extend({
           selectedProperty: undefined,
           value: '',
         };
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async onIncrementEventCount() {
+      this.isLoading = true;
+      try {
+        await this.incrementEventCount();
       } finally {
         this.isLoading = false;
       }

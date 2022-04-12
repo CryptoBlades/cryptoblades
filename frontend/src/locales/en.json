@@ -1028,7 +1028,11 @@
         "WEBSITE": "Website",
         "NOTE": "Note",
         "IS_ACTIVE": "Is active"
-      }
+      },
+      "incrementEventCountBeCareful": "Increment event count (be careful)",
+      "incrementEventCount": "Increment event count",
+      "areYouSure": "Are you sure?",
+      "eventIncrementationIrreversibleInfo": "Event incrementation is irreversible. Are you sure you know what you're doing?"
     },
     "identifiers": "Identifiers",
     "amount": "Amount",
