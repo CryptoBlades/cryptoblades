@@ -1029,6 +1029,9 @@
         "NOTE": "Note",
         "IS_ACTIVE": "Is active"
       },
+      "addShards": "Add shards",
+      "user": "User",
+      "shardsAmount": "Shards amount",
       "incrementEventCountBeCareful": "Increment event count (be careful)",
       "incrementEventCount": "Increment event count",
       "areYouSure": "Are you sure?",

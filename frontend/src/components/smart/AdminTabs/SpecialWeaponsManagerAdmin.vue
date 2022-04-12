@@ -64,6 +64,18 @@
         {{ $t('admin.specialWeaponsManager.setSpecialWeaponsEventProperty') }}
       </b-button>
     </div>
+    <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.addShards') }}</h2>
+    <div class="d-flex align-items-center gap-3">
+      <b-form-input v-model="newAddShardsUser.user" :placeholder="$t('admin.specialWeaponsManager.user')"/>
+      <b-form-input v-model="newAddShardsUser.eventId" type="number" number min="0"
+                    :placeholder="$t('admin.specialWeaponsManager.id')"/>
+      <b-form-input v-model="newAddShardsUser.shardsAmount" type="number" number min="0"
+                    :placeholder="$t('admin.specialWeaponsManager.shardsAmount')"/>
+      <b-button @click="addShardsForUser()" :disabled="addShardsForUserButtonDisabled"
+                variant="primary" class="text-nowrap">
+        {{ $t('admin.specialWeaponsManager.addShards') }}
+      </b-button>
+    </div>
     <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.incrementEventCountBeCareful') }}</h2>
     <div class="d-flex align-items-center gap-3 flex-wrap">
       <b-button @click="incrementEventCountModal = !incrementEventCountModal" :disabled="isLoading" variant="primary"
@@ -81,6 +93,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
+import {isValidWeb3Address} from '../../../utils/common';
 
 interface StoreMappedActions {
   startNewEvent(payload: { event: SpecialWeaponsEvent }): Promise<void>;
@@ -96,6 +109,14 @@ interface StoreMappedActions {
   setSpecialWeaponNote(payload: { eventId: number, note: string }): Promise<void>;
 
   incrementEventCount(): Promise<void>;
+
+  addShards(payload: { user: string, eventId: number, shardsAmount: number }): Promise<void>;
+}
+
+interface AddShards {
+  user: string;
+  eventId?: number;
+  shardsAmount?: number;
 }
 
 enum SpecialWeaponsEventProperty {
@@ -133,6 +154,7 @@ interface Data {
   selectedSpecialWeaponsEvent: SelectedSpecialWeaponsEvent;
   activeSpecialWeaponsEvents: SpecialWeaponsEvent[];
   incrementEventCountModal: boolean;
+  newAddShardsUser: AddShards;
   isLoading: boolean;
 }
 
@@ -163,6 +185,11 @@ export default Vue.extend({
       },
       activeSpecialWeaponsEvents: [],
       incrementEventCountModal: false,
+      newAddShardsUser: {
+        user: '',
+        eventId: undefined,
+        shardsAmount: undefined,
+      },
       isLoading: false,
       Element,
       SpecialWeaponsEventProperty,
@@ -186,6 +213,12 @@ export default Vue.extend({
         || !this.selectedSpecialWeaponsEvent.value
         || this.isLoading;
     },
+    addShardsForUserButtonDisabled(): boolean {
+      return !isValidWeb3Address(this.newAddShardsUser.user)
+        || this.newAddShardsUser.eventId === undefined
+        || this.newAddShardsUser.shardsAmount === undefined
+        || this.isLoading;
+    },
   },
 
   methods: {
@@ -197,6 +230,7 @@ export default Vue.extend({
       'setSpecialWeaponWebsite',
       'setSpecialWeaponNote',
       'incrementEventCount',
+      'addShards',
     ]) as StoreMappedActions,
 
     async getActiveEvents() {
@@ -261,6 +295,24 @@ export default Vue.extend({
           id: undefined,
           selectedProperty: undefined,
           value: '',
+        };
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async addShardsForUser() {
+      this.isLoading = true;
+      try {
+        await this.addShards({
+          user: this.newAddShardsUser.user,
+          eventId: this.newAddShardsUser.eventId,
+          shardsAmount: this.newAddShardsUser.shardsAmount,
+        });
+        this.newAddShardsUser = {
+          user: '',
+          eventId: undefined,
+          shardsAmount: undefined,
         };
       } finally {
         this.isLoading = false;
