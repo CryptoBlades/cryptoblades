@@ -4,7 +4,6 @@ const Treasury = artifacts.require('Treasury');
 
 module.exports = async function (deployer, network) {
   const treasury = await upgradeProxy(Treasury.address, Treasury, {deployer});
-  //https://gateway.ipfs.io/ipfs/QmZpqpqBooKp1cFNi2LcbdcE1FBtE44mr8wTQpwP2LWVuC/seedify.png
   if (network === 'bscmainnet' || network === 'bscmainnet-fork') {
     await treasury.setProjectLogo(0, 'https://gateway.ipfs.io/ipfs/QmZpqpqBooKp1cFNi2LcbdcE1FBtE44mr8wTQpwP2LWVuC/oasis.png');
     await treasury.setProjectDetails(0, 'The OASIS Metaverse welcomes all nature-loving blockchain gamers to create, own, play, earn and interact with like-minded natives in its virtual world of lush greeneries and natural beauty.');
