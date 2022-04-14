@@ -2484,7 +2484,7 @@
     },
     "links": {},
     "address": "0xf055e7F7cbed74821A857D80Dd0E5b45576a41BD",
-    "transactionHash": "0x8cf88f7de274350064b98646c60b3d209d9b92a26e4ff0b0e9b7a1141cbec7e0"
+    "transactionHash": "0x532b1266808afb9f2d28efaeee411816ac7d6b6501679819cc2661b278bd76a3"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -5797,7 +5797,7 @@
     },
     "links": {},
     "address": "0x7907c3345a645A494d5fF4924CDc89e5d892c800",
-    "transactionHash": "0xf2e4411e6c51d836752d1ae66e146b3f1a14d0cef781a1072a2e5c86ffc9a6c2"
+    "transactionHash": "0xc7b2db85cc6d30b64d7a541277471156e6e2ad2e66e27989e63c17ccc17f2986"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {
