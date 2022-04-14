@@ -484,6 +484,15 @@ export default Vue.extend({
         });
       } finally {
         this.isLoading = false;
+        this.weeklyReward = {
+          rewardType: undefined,
+          rewardRarity: undefined,
+          rewardAmount: 0,
+          rewardExternalAddress: '',
+          reputationAmount: 0,
+          weekNumber: 0,
+          completionsGoal: 0
+        };
       }
     },
 
