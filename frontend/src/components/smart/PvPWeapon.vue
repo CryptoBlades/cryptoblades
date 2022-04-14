@@ -10,7 +10,7 @@
         />
       </div>
       <div class="weaponWrapper">
-        <img :src="getWeaponArt(weapon)" alt="weapon image">
+        <img :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)" alt="weapon image">
         <b-popover v-if="hasInfoPopover" :target="`${weaponId}-info-w`" variant="dark"
         triggers="hover" data-trigger="focus" placement="top right" custom-class="customPopover">
           <div v-if="weaponId" class="weapon-icon-wrapper">
@@ -39,6 +39,7 @@ import earth from '../../assets/elements/earth.png';
 import lightning from '../../assets/elements/lightning.png';
 import { getWeaponArt } from '../../weapon-arts-placeholder';
 import { BPopover } from 'bootstrap-vue';
+import {mapState} from 'vuex';
 
 export default {
   components: {
@@ -62,6 +63,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(['specialWeaponArts']),
     getElementImageUrl() {
       if (this.weapon.element === 'Fire') {
         return fire;

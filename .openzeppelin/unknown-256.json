@@ -56308,6 +56308,283 @@
           }
         }
       }
+    },
+    "6545ce5a56a8a4ae04447e982e90b1bd25f7dd13512a35d3eaa959e4b4440319": {
+      "address": "0x1aC141D518D433A134B0a55Ba7FF6787BD756f40",
+      "txHash": "0x5a7ed721d34d1a199dfb1a24850643526483453c6ab3bd81e6578466f83adce4",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)49108_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "promos",
+            "type": "t_contract(Promos)16843",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:20"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "weapons",
+            "type": "t_contract(Weapons)48661",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:21"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "safeRandoms",
+            "type": "t_contract(SafeRandoms)21217",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:22"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "game",
+            "type": "t_contract(CryptoBlades)34387",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:23"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "priceOracleSkillPerUsd",
+            "type": "t_contract(IPriceOracle)34439",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:24"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "userEventShardSupply",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:34"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "vars",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:35"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "eventCount",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:44"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "eventInfo",
+            "type": "t_mapping(t_uint256,t_struct(EventInfo)24603_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:46"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "userForgedAtEvent",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_bool))",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:47"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "userOrderOptionForEvent",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:48"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "userStakedSkill",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:49"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "userStakedSkillUpdatedTimestamp",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:50"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "userSkillStakingShardsRewards",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:51"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "specialWeaponArt",
+            "type": "t_mapping(t_uint256,t_string_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:52"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "specialWeaponDetails",
+            "type": "t_mapping(t_uint256,t_string_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:53"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "specialWeaponWebsite",
+            "type": "t_mapping(t_uint256,t_string_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:54"
+          },
+          {
+            "contract": "SpecialWeaponsManager",
+            "label": "specialWeaponNote",
+            "type": "t_mapping(t_uint256,t_string_storage)",
+            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SpecialWeaponsManager.sol:55"
+          }
+        ],
+        "types": {
+          "t_contract(Promos)16843": {
+            "label": "contract Promos"
+          },
+          "t_contract(Weapons)48661": {
+            "label": "contract Weapons"
+          },
+          "t_contract(SafeRandoms)21217": {
+            "label": "contract SafeRandoms"
+          },
+          "t_contract(CryptoBlades)34387": {
+            "label": "contract CryptoBlades"
+          },
+          "t_contract(IPriceOracle)34439": {
+            "label": "contract IPriceOracle"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_uint256,t_struct(EventInfo)24603_storage)": {
+            "label": "mapping(uint256 => struct SpecialWeaponsManager.EventInfo)"
+          },
+          "t_struct(EventInfo)24603_storage": {
+            "label": "struct SpecialWeaponsManager.EventInfo",
+            "members": [
+              {
+                "label": "name",
+                "type": "t_string_storage"
+              },
+              {
+                "label": "weaponElement",
+                "type": "t_uint8"
+              },
+              {
+                "label": "endTime",
+                "type": "t_uint256"
+              },
+              {
+                "label": "supply",
+                "type": "t_uint256"
+              },
+              {
+                "label": "orderedCount",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_string_storage": {
+            "label": "string"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_bool))": {
+            "label": "mapping(address => mapping(uint256 => bool))"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_mapping(t_uint256,t_string_storage)": {
+            "label": "mapping(uint256 => string)"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)49108_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(RoleData)49108_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)52303_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)52303_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)52038_storage"
+              }
+            ]
+          },
+          "t_struct(Set)52038_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
     }
   }
 }

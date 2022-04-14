@@ -228,6 +228,7 @@ export function createStore(web3: Web3) {
       activeSpecialWeaponEventsIds: [],
       inactiveSpecialWeaponEventsIds: [],
       specialWeaponEvents: {},
+      specialWeaponArts: [],
       specialWeaponEventId: localStorage.getItem('specialWeaponEventId') || '0',
       shardsSupply: {},
 
@@ -1141,6 +1142,10 @@ export function createStore(web3: Web3) {
         Vue.set(state.specialWeaponEvents, eventId, eventInfo);
       },
 
+      updateSpecialWeaponArt(state: IState, {eventId, art}) {
+        Vue.set(state.specialWeaponArts, eventId, art);
+      },
+
       updateActiveSpecialWeaponEventsIds(state: IState, eventsIds) {
         Vue.set(state, 'activeSpecialWeaponEventsIds', eventsIds);
         if(!eventsIds.find((id: { toString: () => string; }) => id.toString() === state.specialWeaponEventId)) {
@@ -1184,6 +1189,7 @@ export function createStore(web3: Web3) {
         await dispatch('setupWeaponCosmetics');
 
         await dispatch('fetchSpecialWeaponEvents');
+        await dispatch('fetchSpecialWeaponArts');
 
         await dispatch('fetchHasAdminAccess');
         await dispatch('fetchHasMinterAccess');
@@ -5840,6 +5846,109 @@ export function createStore(web3: Web3) {
         await Weapons.methods.setBurnPointMultiplier(multiplier).send({ from: state.defaultAccount });
       },
 
+      async getActiveSpecialWeaponsEvents({state}) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        const ids = await SpecialWeaponsManager.methods.getActiveEventsIds().call(defaultCallOptions(state));
+        const events = [];
+        for(let i = 0; i < ids.length; i++) {
+          const project = await SpecialWeaponsManager.methods.eventInfo(ids[i]).call(defaultCallOptions(state));
+          events.push({id: ids[i], ...project});
+        }
+        return events;
+      },
+
+      async startNewEvent({state}, {event}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .startNewEvent(event.name, event.element, event.period, event.supply, event.art, event.details, event.website, event.note)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponArt({state}, {eventId, art}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponArt(eventId, art)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponDetails({state}, {eventId, details}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponDetails(eventId, details)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponWebsite({state}, {eventId, website}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponWebsite(eventId, website)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponNote({state}, {eventId, note}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponNote(eventId, note)
+          .send({from: state.defaultAccount});
+      },
+
+      async incrementEventCount({state}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .incrementEventCount()
+          .send({from: state.defaultAccount});
+      },
+
+      async addShards({state}, {user, eventId, shardsAmount}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .addShards(user, eventId, shardsAmount)
+          .send({from: state.defaultAccount});
+      },
+
+      async privatePartnerOrder({state}, {receivers, eventId, orderOption}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .privatePartnerOrder(receivers, eventId, orderOption)
+          .send({from: state.defaultAccount});
+      },
+
+      async privatePartnerMint({state}, {receivers, eventId, orderOption}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .privatePartnerMint(receivers, eventId, orderOption)
+          .send({from: state.defaultAccount});
+      },
+
+      async reserveForGiveaways({state}, {reservingAddress, eventId, orderOption, amount}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .reserveForGiveaways(reservingAddress, eventId, orderOption, amount)
+          .send({from: state.defaultAccount});
+      },
+
       async fetchSpecialWeaponEvents({ state, dispatch, commit }) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;
@@ -5856,6 +5965,18 @@ export function createStore(web3: Web3) {
         await dispatch('fetchShardsSupply');
       },
 
+      async fetchSpecialWeaponArts({ state, commit }) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        const allSpecialWeaponEventsIds = state.activeSpecialWeaponEventsIds.concat(state.inactiveSpecialWeaponEventsIds);
+        for (let i = 0; i < allSpecialWeaponEventsIds.length; i++) {
+          const eventId = allSpecialWeaponEventsIds[i];
+          const art = await SpecialWeaponsManager.methods.specialWeaponArt(eventId).call(defaultCallOptions(state));
+          commit('updateSpecialWeaponArt', { eventId, art });
+        }
+      },
+
       async fetchSpecialWeaponEventsInfo({ state, commit }, eventsIds) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;
@@ -5864,6 +5985,7 @@ export function createStore(web3: Web3) {
           const eventInfoRaw = await SpecialWeaponsManager.methods.getEventInfo(eventId).call(defaultCallOptions(state));
           const ordered = +await SpecialWeaponsManager.methods.userOrderOptionForEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state)) > 0;
           const forged = await SpecialWeaponsManager.methods.userForgedAtEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state));
+          const eventData = await SpecialWeaponsManager.methods.getSpecialWeaponData(eventId).call(defaultCallOptions(state));
           const eventInfo = {
             name: eventInfoRaw[0],
             weaponElement: eventInfoRaw[1],
@@ -5871,7 +5993,11 @@ export function createStore(web3: Web3) {
             supply: eventInfoRaw[3],
             orderedCount: eventInfoRaw[4],
             ordered,
-            forged
+            forged,
+            art: eventData[0],
+            details: eventData[1],
+            website: eventData[2],
+            notes: eventData[3]
           };
 
           commit('updateSpecialWeaponEventsInfo', { eventId, eventInfo });
