@@ -2,32 +2,70 @@
   <div @click="close" class="modalWrapper">
     <div class="modalInnerWrapper">
       <img src="../../assets/separatorTop.svg" alt="Top separator">
-      <div v-if="attackerRoll > defenderRoll" class="modalTitle">You have won the duel!</div>
-      <div v-else class="modalTitle"> You have lost the duel!</div>
+      <div v-if="result === 'win'" class="modalTitle">
+        {{$t('pvp.wonDuel')}}
+      </div>
+      <div v-else class="modalTitle">
+        {{$t('pvp.lostDuel')}}
+      </div>
       <ul>
         <li>
-          <span>You Rolled</span>
+          <span>
+            {{$t('pvp.youRolled')}}
+          </span>
           <span class="chevron">></span>
-          <span>{{ attackerRoll }}</span>
+          <span>{{attackerRoll}}</span>
         </li>
+        <li>
+          <span>
+            {{$t('pvp.attackerPower')}}
+          </span>
+          <span class="chevron">></span>
+          <span>{{attackerPower}}</span>
+        </li>
+
         <pvp-separator />
         <li>
-          <span>Opponent rolled</span>
+          <span>
+            {{$t('pvp.opponentRolled')}}
+          </span>
           <span class="chevron">></span>
           <span>{{ defenderRoll }}</span>
         </li>
+        <li>
+          <span>
+            {{$t('pvp.opponentPower')}}
+          </span>
+          <span class="chevron">></span>
+          <span>{{ defenderPower }}</span>
+        </li>
         <pvp-separator />
       </ul>
-      <div class="earnWrapper">You {{ result === 'win' ? 'earned' : 'lost'}}: {{ skillEarned }} $SKILL</div>
+      <div class="earnWrapper">
+        <span v-if="result === 'win'">
+          {{$t('pvp.youEarned', {skillEarned})}}
+        </span>
+        <span v-else>
+          {{$t('pvp.youLost', {skillEarned})}}
+        </span>
+      </div>
       <div class="rankWrapper">
-        <span>Updated rank: </span>
-        <span>{{ userCurrentRank }}</span>
-        <span>({{ rankVariation }} Rank)</span>
+        <span>
+          {{$t('pvp.updatedRank')}}
+        </span>
+        <span>
+          {{ userCurrentRank }}
+        </span>
+        <span>({{ rankVariation }}
+          {{$t('pvp.rank')}})
+        </span>
       </div>
       <img src="../../assets/separatorBottom.svg" alt="Bottom separator">
     </div>
     <div class="closeWrapper">
-      <p>Tap anywhere to close</p>
+      <p>
+        {{$t('pvp.tapAnywhere')}}
+      </p>
       <button @click="close">
         <img src="../../assets/closeModal.svg" alt="Bottom separator">
       </button>
@@ -45,7 +83,7 @@ export default {
 
   props: {
     result: {
-      default: ''
+      required: true
     },
     attackerRoll: {
       default: null
@@ -60,6 +98,12 @@ export default {
       default: null
     },
     userCurrentRank: {
+      default: null
+    },
+    attackerPower: {
+      default: null
+    },
+    defenderPower: {
       default: null
     }
   },
@@ -173,6 +217,9 @@ export default {
       list-style-type: none;
       li {
         display: flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
         text-align: center;
         padding: 0.5rem 0;
         span {

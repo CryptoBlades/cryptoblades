@@ -24,6 +24,7 @@ const CharacterEarthTraitChangeConsumables = artifacts.require('CharacterEarthTr
 const CharacterWaterTraitChangeConsumables = artifacts.require('CharacterWaterTraitChangeConsumables');
 const CharacterLightningTraitChangeConsumables = artifacts.require('CharacterLightningTraitChangeConsumables');
 const Raid1 = artifacts.require('Raid1');
+const experienceTable = require('../../experience-table')
 
 async function prepareContracts(accounts) {
   const skillToken = await SkillToken.new();
@@ -74,6 +75,7 @@ async function prepareContracts(accounts) {
 
   const charas_GAME_ADMIN = await characters.GAME_ADMIN();
   const weps_GAME_ADMIN = await weapons.GAME_ADMIN();
+  const shields_GAME_ADMIN = await shields.GAME_ADMIN();
   const GAME_ADMIN = await game.GAME_ADMIN();
 
   if (typeof randoms.setMain === 'function') {
@@ -99,6 +101,7 @@ async function prepareContracts(accounts) {
 
   await weapons.grantRole(weps_GAME_ADMIN, game.address);
   await weapons.grantRole(weps_GAME_ADMIN, pvpArena.address);
+  await shields.grantRole(shields_GAME_ADMIN, pvpArena.address);
   await promos.grantRole(promos_GAME_ADMIN, game.address);
   await promos.grantRole(promos_GAME_ADMIN, characters.address);
   await game.grantRole(GAME_ADMIN, raid.address);
@@ -109,7 +112,7 @@ async function prepareContracts(accounts) {
   await weapons.migrateTo_951a020();
   await weapons.migrateTo_surprise(promos.address);
 
-  await characters.migrateTo_1ee400a();
+  await characters.migrateTo_1ee400a(experienceTable.values);
   await characters.migrateTo_951a020();
   await characters.migrateTo_ef994e2(promos.address);
   await characters.migrateTo_b627f23();

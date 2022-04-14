@@ -4,7 +4,7 @@
       <div class="col-sm-6 col-md-6 col-lg-6 mb-3">
         <strong>{{$t('weaponGrid.stars')}}</strong>
         <select class="form-control" v-model="starFilter" >
-          <option v-for="x in ['', 1, 2, 3, 4, 5]" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+          <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
         </select>
       </div>
 
@@ -62,11 +62,9 @@
         :class="{ selected: highlight !== null && weapon.id === highlight }"
         v-for="weapon in nonIgnoredWeapons"
         :key="weapon.id"
-        @click=
-        "(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
-        @contextmenu="canFavorite && toggleFavorite($event, weapon.id)"
-      >
-        <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" class="nft-options"/>
+        @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
+        @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
+        <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
         <div class="weapon-icon-wrapper">
           <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" />
         </div>
@@ -130,7 +128,7 @@ interface StoreMappedActions {
   removeWeaponCosmetic(arg: { id: number }): Promise<void>;
 }
 interface Data {
-  starFilter: string;
+  starFilter: string | number;
   elementFilter: string;
   minPriceFilter: string;
   maxPriceFilter: string;
@@ -226,11 +224,20 @@ export default Vue.extend({
     showNftOptions: {
       type: Boolean,
       default: false
-    }
+    },
+    starsOptions: {
+      type: Array as PropType<(string | number)[]>,
+      default() {
+        return ['', 1, 2, 3, 4, 5];
+      },
+    },
+    chosenStarsOption: {
+      type: [String, Number],
+    },
   },
   data() {
     return {
-      starFilter: '',
+      starFilter: this.starsOptions?.length === 1 ? this.starsOptions[0] : '',
       elementFilter: '',
       minPriceFilter:'',
       maxPriceFilter:'',
@@ -355,13 +362,13 @@ export default Vue.extend({
     ...(mapMutations(['setCurrentWeapon'])),
     saveFilters() {
       if(this.isMarket) {
-        sessionStorage.setItem('market-weapon-starfilter', this.starFilter);
+        sessionStorage.setItem('market-weapon-starfilter', this.starFilter.toString());
         sessionStorage.setItem('market-weapon-elementfilter', this.elementFilter);
         sessionStorage.setItem('market-weapon-price-order', this.priceSort);
         sessionStorage.setItem('market-weapon-price-minfilter', this.minPriceFilter?''+this.minPriceFilter:'');
         sessionStorage.setItem('market-weapon-price-maxfilter', this.maxPriceFilter?''+this.maxPriceFilter:'');
       } else {
-        sessionStorage.setItem('weapon-starfilter', this.starFilter);
+        sessionStorage.setItem('weapon-starfilter', this.starFilter.toString());
         sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
       }
       this.$emit('weapon-filters-changed');
@@ -402,7 +409,7 @@ export default Vue.extend({
         sessionStorage.removeItem('weapon-elementfilter');
       }
       this.elementFilter = '';
-      this.starFilter = '';
+      this.starFilter = this.starsOptions?.length === 1 ? this.starsOptions[0] : '';
       this.priceSort = '';
       this.minPriceFilter= '';
       this.maxPriceFilter= '';
@@ -492,6 +499,8 @@ export default Vue.extend({
       this.priceSort = sessionStorage.getItem('market-weapon-price-order') || '';
       this.minPriceFilter = sessionStorage.getItem('market-weapon-price-minfilter') || '';
       this.maxPriceFilter = sessionStorage.getItem('market-weapon-price-maxfilter') || '';
+    } else if (this.chosenStarsOption !== undefined) {
+      this.starFilter = this.chosenStarsOption;
     } else {
       this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
       this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';

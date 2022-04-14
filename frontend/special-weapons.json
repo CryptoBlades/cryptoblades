@@ -1,0 +1,28 @@
+{
+  "eventsDetails": {
+    "Pluto Alliance": {
+      "logo": "pluto-alliance-sword.png",
+      "details": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      "website": "https://www.plutoalliance.com/"
+    },
+    "Project X": {
+      "logo": "pluto-alliance.png",
+      "details": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      "website": "https://www.plutoalliance.com/"
+    },
+    "Project Y": {
+      "logo": "pluto-alliance.png",
+      "details": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      "website": "https://www.plutoalliance.com/"
+    },
+    "HECO Master Blade": {
+      "logo": "heco-sword.png",
+      "details": "Blessed be the Gods! We have been victorious in our quest to conquer the Heco Master Builders Competition. In celebration a mighty weapon has been crafted. Trade in your shards to lay claim to this illustrious blade. Limited quantities available."
+    },
+    "Blazing Mane": {
+      "logo": "blazing-mane.png",
+      "details": "The searing blade of Emberhearth can only be wielded by those found to be worthy of its power.  Passed on to the leader of the Faisar Fire Knights, it is said to be forged from an aether stone in the blazing inferno of L'kah, an ancient volcanic dragon lost long ago.\n\nLay claim to this limited, regal weapon celebrating the first teaser and alpha test of CryptoBlades: Kingdoms.",
+      "website": "https://cryptobladeskingdoms.io/"
+    }
+  }
+}

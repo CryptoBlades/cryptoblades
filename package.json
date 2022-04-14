@@ -13,7 +13,9 @@
     "@truffle/hdwallet-provider": "^1.5.0",
     "abdk-libraries-solidity": "2.4.0",
     "dayjs": "^1.10.7",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "gsap": "^3.9.1",
+    "vue-multiselect": "^2.1.6"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
@@ -38,6 +40,7 @@
     "truffle-contract-size": "^2.0.1",
     "truffle-export-abi": "^1.0.1",
     "truffle-plugin-verify": "^0.5.17",
+    "vue-script2": "^2.1.0",
     "yargs": "^17.0.1"
   },
   "scripts": {
@@ -61,7 +64,9 @@
     "deploy-polygontestnet": "truffle migrate --network polygontestnet",
     "postdeploy-polygontestnet": "run-s \"backup-networks 80001\" \"verify-contracts -- --network polygontestnet\"",
     "deploy-avaxtestnet": "truffle migrate --network avaxtestnet",
-    "postdeploy-avaxtestnet": "run-s \"backup-networks-to-file 1 43113\" \"verify-contracts -- --network avaxtestnet\"",
+    "postdeploy-avaxtestnet": "run-s \"backup-networks 43113\" \"verify-contracts -- --network avaxtestnet\"",
+    "deploy-auroratestnet": "truffle migrate --network auroratestnet",
+    "postdeploy-auroratestnet": "run-s \"backup-networks 1313161555\" \"verify-contracts -- --network auroratestnet\"",
     "deploy-mainnet-warning-be-careful-this-is-prod": "truffle migrate --network bscmainnet",
     "postdeploy-mainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 56\" \"verify-contracts -- --network bscmainnet\"",
     "deploy-hecomainnet-warning-be-careful-this-is-prod": "truffle migrate --network hecomainnet",
@@ -71,7 +76,9 @@
     "deploy-polygonmainnet-warning-be-careful-this-is-prod": "truffle migrate --network polygonmainnet",
     "postdeploy-polygonmainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 137\" \"verify-contracts -- --network polygonmainnet\"",
     "deploy-avaxmainnet-warning-be-careful-this-is-prod": "truffle migrate --network avaxmainnet",
-    "postdeploy-avaxmainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks-to-file 1 43114\" \"verify-contracts -- --network avaxmainnet\"",
+    "postdeploy-avaxmainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 43114\" \"verify-contracts -- --network avaxmainnet\"",
+    "deploy-auroramainnet-warning-be-careful-this-is-prod": "truffle migrate --network auroramainnet",
+    "postdeploy-auroramainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 1313161554 \" \"verify-contracts -- --network auroramainnet\"",
     "deploy-mainnet-dry-run": "truffle migrate --network bscmainnet --dry-run",
     "backup-networks": "node scripts/manage-networks.js backup",
     "backup-networks-to-file": "node scripts/manage-networks.js backupToFile",

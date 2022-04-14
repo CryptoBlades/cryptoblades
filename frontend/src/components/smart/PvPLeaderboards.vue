@@ -1,92 +1,109 @@
 <template>
   <div class="leaderboardWrapper">
-    <span>Leaderboards coming soon!</span>
-    <!-- <h1 class="leaderboardTitle">ARENA LEADERBOARD</h1>
+    <h1 class="leaderboardTitle">{{$t("pvp.leaderboard").toUpperCase()}}</h1>
     <div class="filtersWrapper">
       <div class="selectWrapper">
-        <label for="tier">Tier: </label>
-        <select name="tier" id="tier">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-        </select>
-      </div>
-      <div class="selectWrapper">
-        <label for="element">Element: </label>
-        <select name="element" id="element">
-          <option value="1">Fire</option>
-          <option value="2">Earth</option>
-          <option value="3">Lightning</option>
-          <option value="4">Water</option>
-        </select>
-      </div>
-      <div class="selectWrapper">
-        <label for="numberOfListings">Listings per page: </label>
-        <select name="numberOfListings" id="numberOfListings">
-          <option value="1">10</option>
-          <option value="2">20</option>
-          <option value="3">30</option>
-          <option value="4">40</option>
+        <label for="tier">{{$t("pvp.tier")}} </label>
+        <select v-model="tierFilter" name="tier" id="tier">
+          <option v-for="tierFilterOption in tierFilterOptions"
+           :value="tierFilterOption.value" :key="tierFilterOption.value">
+            {{ tierFilterOption.text }}
+          </option>
         </select>
       </div>
     </div>
     <div class="listWrapper">
       <ul class="playerList">
         <li>
-          <span>Rank</span>
-          <span>Name</span>
-          <span>Level</span>
-          <span>Element</span>
-          <span>Earned SKILLs</span>
+          <span>{{$t('pvp.rank')}}</span>
+          <span>{{$t('pvp.name')}}</span>
+          <span>{{$t('pvp.level')}}</span>
+          <span>{{$t('characterList.element')}}</span>
+          <span>{{$t('pvp.rankingPoints')}}</span>
         </li>
         <li>
           <span>1</span>
-          <span>Player 1</span>
-          <span>11</span>
-          <span>Fire</span>
-          <span>4</span>
+          <span>{{tierTopRankers[0] && tierTopRankers[0].name ||'-'}}</span>
+          <span>{{tierTopRankers[0] && tierTopRankers[0].level ||'-'}}</span>
+          <span>{{tierTopRankers[0] && tierTopRankers[0].element||'-'}}</span>
+          <span>{{tierTopRankers[0] && tierTopRankers[0].rank|| '-'}}</span>
         </li>
         <li>
           <span>2</span>
-          <span>Player 2</span>
-          <span>12</span>
-          <span>Earth</span>
+          <span>{{tierTopRankers[1] && tierTopRankers[1].name ||'-'}}</span>
+          <span>{{tierTopRankers[1] && tierTopRankers[1].level ||'-'}}</span>
+          <span>{{tierTopRankers[1] && tierTopRankers[1].element ||'-'}}</span>
+          <span>{{tierTopRankers[1] && tierTopRankers[1].rank ||'-'}}</span>
+        </li>
+        <li>
           <span>3</span>
+          <span>{{tierTopRankers[2] && tierTopRankers[2].name ||'-'}}</span>
+          <span>{{tierTopRankers[2] && tierTopRankers[2].level ||'-'}}</span>
+          <span>{{tierTopRankers[2] && tierTopRankers[2].element ||'-'}}</span>
+          <span>{{tierTopRankers[2] && tierTopRankers[2].rank ||'-'}}</span>
         </li>
       </ul>
-    </div> -->
+    </div>
   </div>
 </template>
 
 <script>
+
+import { characterFromContract as formatCharacter } from '../../contract-models';
+import { mapActions, mapGetters } from 'vuex';
 export default {
   data() {
     return {
-      players: [
-        // {
-        //   name: 'Player1',
-        //   rank: 1,
-        //   level: 55,
-        //   element: 'fire',
-        //   earnedSkill: 21
-        // },
-        // {
-        //   name: 'Player2',
-        //   rank: 2,
-        //   level: 48,
-        //   element: 'fire',
-        //   earnedSkill: 20
-        // },
-        // {
-        //   name: 'Player3',
-        //   rank: 3,
-        //   level: 13,
-        //   element: 'earth',
-        //   earnedSkill: 19
-        // }
-      ]
+      tierTopRankers: [],
+      tierFilterOptions: [
+        { text: '1', value: 0 },
+        { text: '2', value: 1 },
+        { text: '3', value: 2 },
+        { text: '4', value: 3 },
+        { text: '5', value: 4 },
+        { text: '6', value: 5 },
+        { text: '7', value: 6 },
+        { text: '8', value: 7 },
+        { text: '9', value: 8 },
+        { text: '10', value: 9 },
+      ],
+      tierFilter: 0,
     };
+  },
+  computed: {
+    ...mapGetters(['getCharacterName'])
+  },
+  methods: {
+    ...mapActions([
+      'getCharacter',
+      'getCharacterLevel',
+      'getRankingPointsByCharacter',
+      'getTierTopCharacters',
+      'getRename'
+    ]),
+    async getPlayers(){
+      const tierTopRankersIds = await this.getTierTopCharacters(this.tierFilter);
+      this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+        const rename = await this.getRename(rankerId);
+
+        return {
+          rankerId,
+          name: rename ? rename : this.getCharacterName(rankerId),
+          level: Number(await this.getCharacterLevel(rankerId)) + 1,
+          rank: await this.getRankingPointsByCharacter(rankerId),
+          element: formatCharacter(rankerId, await this.getCharacter(rankerId)).traitName
+        };
+      }));
+    }
+  },
+  async created(){
+    //TODO: Leaderboards will be improved, for now they will only show top 3 rankers of each tier
+    this.getPlayers();
+  },
+  watch: {
+    async tierFilter() {
+      this.getPlayers();
+    }
   }
 };
 </script>

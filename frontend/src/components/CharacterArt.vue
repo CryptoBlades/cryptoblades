@@ -6,6 +6,15 @@
 
     <div class="placeholder d-flex align-items-start justify-content-center p-1"
       >
+      <div class="character-power">
+        {{totalCharacterPower}} PWR
+        <b-icon-question-circle v-if="burningManager" class="centered-icon" scale="0.8"
+          v-tooltip.bottom="$t('CharacterArt.powerTooltip', {
+            basePower: baseCharacterPower,
+            bonusPower: totalCharacterPower - baseCharacterPower,
+            maxPower: 3 * baseCharacterPower
+          })"/>
+      </div>
       <div class="w-100" :style="{
         'background-image': 'url(' + getCharacterArt(character) + ')',
       }"
@@ -26,7 +35,7 @@
       <div class="name black-outline" v-if="!portrait">{{ getCleanCharacterName(character.id) }} </div>
       <div v-if="!portrait">Lv.<span class="white">{{ character.level + 1 }}</span></div>
     </div>
-    <div class="score-id-container">
+    <div class="score-id-container" :class="hideIdContainer ? 'visibility: hidden' : undefined">
     <div class="black-outline" v-if="!portrait">{{$t('CharacterArt.id')}} <span class="white">{{ character.id }}</span></div>
     <div class="black-outline" v-if="!portrait">
       {{$t('CharacterArt.score')}} <span class="white">{{ heroScore.toLocaleString() }}</span>
@@ -34,13 +43,13 @@
     </div>
     </div>
 
-    <div v-if="!portrait && isMarket" class="small-stamina-char"
-      :style="`--staminaReady: ${(timestampToStamina(character.staminaTimestamp)/maxStamina)*100}%;`"
+    <div v-if="!portrait && (isMarket || isGarrison)" class="small-stamina-char"
+      :style="`--staminaReady: ${(characterStamina/maxStamina)*100}%;`"
       v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
-      <div class="stamina-text black-outline">{{$t('CharacterArt.staminaShort')}} {{ timestampToStamina(character.staminaTimestamp) }} / 200</div>
+      <div class="stamina-text black-outline">{{$t('CharacterArt.staminaShort')}} {{ characterStamina }} / 200</div>
     </div>
 
-    <div class="xp" v-if="!portrait">
+    <div class="xp" v-if="!portrait" :class="hideXpBar ? 'visibility: hidden' : undefined">
       <b-progress :max="RequiredXp(character.level)" variant="success"
       v-tooltip.bottom="` ${$t('CharacterArt.claimableXP')} ${this.getCharacterUnclaimedXp(character.id)}`">
         <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} {{$t('CharacterArt.xp')}}</strong>
@@ -63,6 +72,8 @@ import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
 import { mapGetters, mapState } from 'vuex';
 import { getCleanName } from '../rename-censor';
+import { CharacterPower } from '@/interfaces';
+import { burningManager } from './../feature-flags';
 //import SmallButton from './SmallButton.vue';
 
 const headCount = 13;
@@ -81,7 +92,7 @@ function transformModel(model) {
 }
 
 export default {
-  props: ['character', 'portrait', 'isMarket'],
+  props: ['character', 'portrait', 'isMarket', 'isGarrison', 'hideXpBar', 'hideIdContainer'],
   components: {
     //SmallButton,
   },
@@ -107,22 +118,39 @@ export default {
       body: null,
       trait: this.characterTrait,
       showPlaceholder: false,
-      heroScore: 0
+      heroScore: 0,
+      CharacterPower,
+      burningManager
     };
   },
 
   computed: {
-    ...mapState(['maxStamina']),
+    ...mapState(['maxStamina', 'characterStaminas']),
     ...mapGetters([
       'getCharacterName',
       'getCharacterUnclaimedXp',
       'timeUntilCharacterHasMaxStamina',
       'charactersWithIds',
+      'garrisonCharactersWithIds',
+      'getCharacterPower'
     ]),
 
     characterTrait() {
-      const characterWithId = this.charactersWithIds && this.charactersWithIds([this.character.id]);
-      return characterWithId && CharacterTrait[characterWithId[0].trait] || CharacterTrait[this.character.trait];
+      const characterWithId = this.charactersWithIds &&
+        this.isGarrison ? this.garrisonCharactersWithIds([this.character.id])[0] : this.charactersWithIds([this.character.id])[0];
+      return characterWithId && CharacterTrait[characterWithId.trait] || CharacterTrait[this.character.trait];
+    },
+
+    characterStamina() {
+      return this.isGarrison ? this.characterStaminas[this.character.id] : this.timestampToStamina(this.character.staminaTimestamp);
+    },
+
+    totalCharacterPower() {
+      return this.getCharacterPower(this.character.id);
+    },
+
+    baseCharacterPower() {
+      return CharacterPower(this.character.level);
     }
   },
 
@@ -534,10 +562,6 @@ export default {
   flex-direction: column;
 }
 
-.xp {
-  position: absolute;
-}
-
 .trait {
   top: -30px;
   justify-self: center;
@@ -567,6 +591,7 @@ export default {
 }
 
 .xp {
+  position: absolute;
   bottom: -30px;
   left: 30px;
   width: 150px;
@@ -632,5 +657,12 @@ export default {
   right: 0;
   text-align: center;
   color: #fff;
+}
+
+.character-power {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  font-size: 0.82em;
 }
 </style>

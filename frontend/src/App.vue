@@ -1,20 +1,31 @@
 <template>
   <div class="app">
-    <nav-bar />
-    <character-bar v-if="!featureFlagStakeOnly && currentCharacterId !== null" />
+    <nav-bar :isToggled="toggleSideBar"/>
     <div class="content dark-bg-text">
-      <router-view v-if="canShowApp" />
+      <b-row>
+        <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
+        <b-col :class="renderPageDisplay()">
+          <router-view v-if="canShowApp" />
+        </b-col>
+        <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
+      </b-row>
     </div>
     <div class="content dark-bg-text" v-if="!canShowApp">
       {{$t('app.cantView')}}
     </div>
     <div class="fullscreen-warning" v-if="!hideWalletWarning && (showMetamaskWarning || showNetworkError)">
       <div class="starter-panel">
+        <div class="tob-bg-img promotion-decoration">
+          <img class="vertical-decoration bottom" src="./assets/border-element.png">
+        </div>
         <span class="starter-panel-heading">{{ $t('app.warning.title') }}</span>
         <div class="center">
-          <big-button class="button" :mainText="$t('app.warning.buttons.addMetamask')" @click="startOnboarding" v-if="showMetamaskWarning" />
-          <big-button class="button" :mainText="$t('app.warning.buttons.network')" @click="configureMetamask" v-if="showNetworkError" />
-          <small-button class="button" @click="toggleHideWalletWarning" :text="$t('app.buttons.hide')" />
+          <big-button class="button common-width-button"
+          :mainText="$t('app.warning.buttons.addMetamask')" @click="startOnboarding" v-if="showMetamaskWarning" />
+          <big-button class="button common-width-button"
+          :mainText="$t('app.warning.buttons.network')" @click="configureMetamask" v-if="showNetworkError" />
+          <big-button class="button common-width-button"
+          :mainText="$t('app.warning.buttons.hide')" @click="toggleHideWalletWarning" />
         </div>
       </div>
     </div>
@@ -33,41 +44,39 @@
         </div>
         <div class="seperator"></div>
         <div class="instructions-list">
-          <p>{{ $t('app.warning.message.instructions', {recruitCost: this.recruitCost}) }}</p>
+          <p>{{ $t('app.warning.message.' + currentChain + '.instructions', {recruitCost: this.recruitCost}) }}</p>
           <ul class="unstyled-list">
             <li>
-              1. {{ $t('app.warning.message.inst1') }}
-              <a href="https://youtu.be/6-sUDUE2RPA" target="_blank" rel="noopener noreferrer">{{$t('app.warning.message.watchVideo')}}</a>
-              {{$t('app.warning.message.or')}}
-              <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer">{{$t('app.warning.message.buyWithTransak')}}</a>
+              <span v-html="$t('app.warning.message.' + currentChain + '.inst1', {link1: getExchangeTransakUrl()})"></span>
             </li>
             <li>
-              2. {{ $t('app.warning.message.inst2') }}<br />
-              <a v-bind:href="`${getExchangeUrl}`" target="_blank">{{ $t('trade') }} SKILL/BNB</a>
+              <span v-html="$t('app.warning.message.' + currentChain + '.inst2', {link1: getExchangeUrl})"></span>
             </li>
             <li>
-              3. {{ $t('app.warning.message.inst3') }} <a href="https://youtu.be/_zitrvJ7Hl4" target="_blank" rel="noopener noreferrer">{{ $t('app.warning.message.watchVideo', {name:''}) }}</a>
+              <span v-html="$t('app.warning.message.' + currentChain + '.inst3')"></span>
             </li>
             <li>
-              4. {{ $t('app.warning.message.inst4') }} (<a href="https://youtu.be/ZcNq0jCa28c" target="_blank" rel="noopener noreferrer">{{ $t('app.warning.message.watchGettingStartedVideo', {name:"'Getting Started' "}) }}</a>)
+              <span v-html="$t('app.warning.message.' + currentChain + '.inst4')"></span>
             </li>
           </ul>
           <p>
-            {{ $t('app.warning.message.questionDiscord') }}
-            <a href="https://discord.gg/cryptoblades" target="_blank" rel="noopener noreferrer">https://discord.gg/cryptoblades</a>
+            {{ $t('app.warning.message.happyEarning') }}
           </p>
         </div>
         <div class="seperator"></div>
-        <small-button class="button" @click="toggleHideWalletWarning" :text="$t('app.warning.buttons.hide')" />
+        <small-button class="button mm-button" @click="toggleHideWalletWarning" :text="$t('app.warning.buttons.hide')" />
       </div>
-      <div class="ad-container">
-        <Adsense v-if="showAds && !isMobile()"
-          data-ad-client="ca-pub-6717992096530538"
-          data-ad-slot="5115599573"
-          data-ad-format="auto"
-          data-full-width-responsive="yes"
-          >
-        </Adsense>
+      <div v-if="showAds && !isMobile()" class="ad-container">
+      <script2 src="https://coinzillatag.com/lib/display.js"></script2>
+        <div class="coinzilla" data-zone="C-541621de2f7bb717603"></div>
+          <script2>
+                window.coinzilla_display = window.coinzilla_display || [];
+                var c_display_preferences = {};
+                c_display_preferences.zone = "541621de2f7bb717603";
+                c_display_preferences.width = "728";
+                c_display_preferences.height = "90";
+                coinzilla_display.push(c_display_preferences);
+          </script2>
       </div>
     </div>
   </div>
@@ -76,7 +85,7 @@
 <script>
 import BN from 'bignumber.js';
 
-import { mapState, mapActions, mapGetters } from 'vuex';
+import {mapState, mapActions, mapGetters, mapMutations} from 'vuex';
 import _ from 'lodash';
 import Vue from 'vue';
 import Events from './events';
@@ -85,10 +94,13 @@ import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
+import WeaponRowGrid from './components/smart/WeaponRowGrid.vue';
 import { apiUrl } from './utils/common';
 import i18n from './i18n';
 import { getConfigValue } from './contracts';
 import '@/mixins/general';
+import config from '../app-config.json';
+import { addChainToRouter } from '@/utils/common';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -101,6 +113,7 @@ export default {
     CharacterBar,
     BigButton,
     SmallButton,
+    WeaponRowGrid
   },
 
   data: () => ({
@@ -110,11 +123,16 @@ export default {
     isConnecting: false,
     recruitCost: '',
     isOptions: false,
+    showWeapon: false,
+    currentWeaponId: null,
+    weaponId: null,
+    toggleSideBar: false
   }),
 
   computed: {
     ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
-    ...mapGetters(['contracts', 'ownCharacters', 'getExchangeUrl', 'availableStakeTypes', 'hasStakedBalance']),
+    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl',
+      'availableStakeTypes', 'availableNftStakeTypes', 'hasStakedBalance']),
 
     canShowApp() {
       return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
@@ -127,6 +145,9 @@ export default {
     showNetworkError() {
       return this.expectedNetworkId && this.currentNetworkId !== null && this.currentNetworkId !== this.expectedNetworkId;
     },
+    currentChain(){
+      return localStorage.getItem('currentChain');
+    }
   },
 
   watch: {
@@ -139,6 +160,7 @@ export default {
     },
     $route(to) {
       // react to route changes
+      this.checkChainAndParams();
       if(to.path === '/options') {
         return this.isOptions = true;
       } else this.isOptions = false;
@@ -166,7 +188,32 @@ export default {
     ...mapGetters([
       'getExchangeTransakUrl'
     ]),
+    ...mapMutations(['updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP', 'updateCurrentChainSupportsQuests']),
+    async checkChainAndParams(){
+      const currentChain = localStorage.getItem('currentChain') || 'BSC';
+      const paramChain = this.$router.currentRoute.query.chain;
+      const supportedChains = config.supportedChains;
 
+      if(!paramChain){
+        localStorage.setItem('currentChain', currentChain);
+        addChainToRouter(currentChain);
+      }
+
+      //add chain as query param if chain unchanged
+      if(currentChain === paramChain || !paramChain){
+        localStorage.setItem('currentChain', currentChain);
+        addChainToRouter(currentChain);
+      }
+
+      //set chain in localStorage & MM from query param; check if supported
+      else if (currentChain !== paramChain && supportedChains.includes(paramChain)){
+        localStorage.setItem('currentChain', paramChain);
+        await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
+      }
+      this.updateCurrentChainSupportsMerchandise();
+      this.updateCurrentChainSupportsPvP();
+      this.updateCurrentChainSupportsQuests();
+    },
     async updateCharacterStamina(id) {
       if (this.featureFlagStakeOnly) return;
 
@@ -175,9 +222,26 @@ export default {
       }
     },
 
+    renderPageDisplay(){
+      let toDisplay;
+
+      if(!this.featureFlagStakeOnly && this.currentCharacterId !== null){
+        if(this.toggleSideBar){
+          toDisplay = 'can-show-app';
+        }else{
+          toDisplay = 'col-xl-9 col-lg-8 col-md-8 col-sm-10 cols-11 set-normal';
+        }
+      }else{
+        toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
+      }
+
+      return toDisplay;
+    },
+
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
-      this.showAds =  localStorage.getItem('show-ads') === 'true';
+      if (process.env.NODE_ENV === 'development') this.showAds = false;
+      else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
     async initializeRecruitCost() {
       const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
@@ -279,6 +343,24 @@ export default {
     Events.$on('setting:hideRewards', () => this.checkStorage());
     Events.$on('setting:useGraphics', () => this.checkStorage());
     Events.$on('setting:hideWalletWarning', () => this.checkStorage());
+    // Events.$on('garrison:characterReceived', (e) => {
+    //   this.$dialog.notify.warning(`${i18n.t('app.warning.message.newCharacter')} ID: ${e.id} ${i18n.t('app.warning.message.inGarrison')}!`,
+    //     {
+    //       timeout: 5000,
+    //     },
+    //   );
+    // });
+    Events.$on('weapon-inventory', (bol) =>{
+      this.showWeapon = bol;
+    });
+
+    Events.$on('chooseweapon', (id) =>{
+      this.weaponId = id;
+    });
+
+    Events.$on('toggle-sideBar', (bol) =>{
+      this.toggleSideBar = bol;
+    });
 
     document.body.addEventListener('click', (e) => {
       const tagname = e.target.getAttribute('tagname');
@@ -305,6 +387,7 @@ export default {
   },
 
   async created() {
+    this.checkChainAndParams();
     try {
       await this.initializeStore();
     } catch (e) {
@@ -317,13 +400,20 @@ export default {
       throw e;
     }
 
-    this.pollCharactersStaminaIntervalId = setInterval(async () => {
+    this.pollCharacterStaminaIntervalId = setInterval(async () => {
       this.ownCharacters.forEach(async (c) => {
+        await this.updateCharacterStamina(c.id);
+      });
+      this.ownGarrisonCharacters.forEach(async (c) => {
         await this.updateCharacterStamina(c.id);
       });
     }, 3000);
 
     this.availableStakeTypes.forEach((item) => {
+      this.fetchStakeDetails({ stakeType: item });
+    });
+
+    this.availableNftStakeTypes.forEach((item) => {
       this.fetchStakeDetails({ stakeType: item });
     });
 
@@ -368,17 +458,43 @@ export default {
 </script>
 
 <style>
+
+@font-face {
+    font-family: 'Trajan';
+    src: url('./assets/fonts/Trajan.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
+
+
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
   font-weight: 600;
   text-align: center;
 }
+
+.app{
+  width: auto;
+}
+
+
+.set-normal{
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  transition: 1s all;
+}
+
+
 hr.hr-divider {
   border-top: 1px solid #9e8a57;
   margin-bottom: 0.5rem !important;
 }
 body {
   margin: 0;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, #242720 100%);
 }
 
 .no-margin {
@@ -408,7 +524,12 @@ body {
 }
 
 .body {
-  max-height: calc(100vh - 56px - 160px);
+  padding-top: 15px 35px;
+  /* max-height: calc(100vh - 56px - 160px); */
+}
+
+.body  > div{
+  padding-left: 20px;
 }
 
 button,
@@ -453,10 +574,14 @@ button,
   color: yellow;
 }
 
-.fire-icon,
-.str-icon {
+.summary-text {
+  font-size: 0.8em;
+  color: grey;
+}
+
+.fire-icon,.str-icon {
   color: red;
-  content: url('assets/elements/fire.png');
+  content: url('assets/elements/icon-fire.png');
   width: 1em;
   height: 1em;
 }
@@ -464,7 +589,7 @@ button,
 .earth-icon,
 .dex-icon {
   color: green;
-  content: url('assets/elements/earth.png');
+  content: url('assets/elements/icon-earth.png');
   width: 1em;
   height: 1em;
 }
@@ -472,7 +597,7 @@ button,
 .water-icon,
 .int-icon {
   color: cyan;
-  content: url('assets/elements/water.png');
+  content: url('assets/elements/icon-water.png');
   width: 1em;
   height: 1em;
 }
@@ -480,7 +605,7 @@ button,
 .lightning-icon,
 .cha-icon {
   color: yellow;
-  content: url('assets/elements/lightning.png');
+  content: url('assets/elements/icon-thunder.png');
   width: 1em;
   height: 1em;
 }
@@ -501,15 +626,22 @@ button.close {
   color: #9e8a57 !important;
 }
 
-.mm-button {
+.mm-button{
   margin: 5px;
-  margin-left: 5px;
-  margin-right: 5px;
+  font-size: clamp(24px, 2vw, 40px);
+}
+.mm-button > h1 {
+   font-size: clamp(24px, 2vw, 40px);
 }
 
 .btn {
   border: 2px solid #6c5f38 !important;
   border-radius: 0.1em !important;
+}
+
+.common-width-button {
+  margin: 0.8rem;
+  width: 22%;
 }
 
 .btn.disabled,
@@ -652,7 +784,8 @@ div.bg-success {
 
 .starter-panel-heading {
   margin-left: 15px;
-  font-size: 45px;
+  font-size: clamp(18px, 2vw, 45px);
+  color: #9e8a57;
 }
 
 .starter-msg {
@@ -661,11 +794,12 @@ div.bg-success {
 .instructions-list {
   text-align: start;
   padding: 15px;
-  font-size: 0.5em;
+  font-size: clamp(18px, 2vw, 24px);
 }
 
 .unstyled-list {
   list-style-type: none;
+  padding-left: clamp(10px,2vw,40px);
 }
 .seperator {
   border: 1px solid #9e8a57;
@@ -674,9 +808,12 @@ div.bg-success {
 }
 
 .mini-icon-starter {
-  height: 1.2em;
-  width: 1.2em;
+  width: clamp(50px, 4vw, 100px);
   margin: 5px;
+}
+
+.vertical-decoration {
+  width: 50%;
 }
 
 .center {
@@ -689,11 +826,36 @@ div.bg-success {
   border: 1px solid #9e8a57;
 }
 
+.bg-image{
+  background: url('./assets/combat-bg.png');
+  background-repeat: no-repeat;
+  background-size:cover;
+  border-radius:0px;
+}
+
+
+.can-show-app{
+  width: 100%;
+  padding-top: 40px;
+}
+
+
+
+@media all and (max-width: 600px) {
+  .can-show-app{
+    overflow-y: hidden ;
+  }
+}
+
 @media all and (max-width: 767.98px) {
   .content {
     padding: 10px;
+    padding-top: 0px;
   }
   .dark-bg-text {
+    width: 100%;
+  }
+  .vertical-decoration {
     width: 100%;
   }
 }

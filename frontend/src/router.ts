@@ -1,4 +1,4 @@
-import VueRouter, { RouteConfig } from 'vue-router';
+import VueRouter from 'vue-router';
 
 import Plaza from './views/Plaza.vue';
 import Blacksmith from './views/Blacksmith.vue';
@@ -11,66 +11,90 @@ import Leaderboard from './views/Leaderboard.vue';
 import Portal from './views/Portal.vue';
 import Options from './views/Options.vue';
 import PvP from './views/PvP.vue';
+import Quests from './views/Quests.vue';
+import Admin from './views/Admin.vue';
 import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
+import PlayToEarn from './views/PlayToEarn.vue';
 
-import {
-  raid as featureFlagRaid,
-  stakeOnly as featureFlagStakeOnly,
-  market as featureFlagMarket,
-  portal as featureFlagPortal,
-  pvp as featureFlagPvP
-} from './feature-flags';
+import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from './feature-flags';
+import Merchandise from '@/components/smart/Merchandise.vue';
+import {currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
-function createRouter() {
-  if (featureFlagStakeOnly) {
+export default function createRouter() {
+  if (stakeOnly) {
     return new VueRouter({
       routes: [
-        { path: '/', redirect: 'stake' },
-        { path: '/stake', name: 'select-stake-type', component: SelectStakeType },
-        { path: '/stake/:stakeType', name: 'stake', component: Stake, props: true },
+        {path: '/', redirect: 'stake'},
+        {path: '/stake', name: 'select-stake-type', component: SelectStakeType},
+        {path: '/stake/:stakeType', name: 'stake', component: Stake, props: true},
       ]
     });
   }
 
-  let marketRoutes: RouteConfig[] = [];
-  if(featureFlagMarket) {
-    marketRoutes = [
-      { path: '/market', name: 'market', component: Market }
-    ];
-  }
-
   const router = new VueRouter({
     routes: [
-      { path: '/', name: 'plaza', component: Plaza },
-      { path: '/blacksmith', name: 'blacksmith', component: Blacksmith },
-      { path: '/combat', name: 'combat', component: Combat },
-      { path: '/leaderboard', name: 'leaderboard', component: Leaderboard },
-      ...marketRoutes,
-      { path: '/stake', name: 'select-stake-type', component: SelectStakeType },
-      { path: '/stake/:stakeType', name: 'stake', component: Stake, props: true },
-      { path: '/options', name: 'options', component: Options },
-      { path: '/nft-display', name: 'nft-display', component: NftDisplay },
-      { path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true },
-      { path: '/bridge', name:'bridge', component: Bridge },
-      { path: '/treasury', name: 'treasury', component: Treasury },
+      {path: '/', name: 'plaza', component: Plaza},
+      {path: '/blacksmith', name: 'blacksmith', component: Blacksmith},
+      {path: '/combat', name: 'combat', component: Combat},
+      {path: '/leaderboard', name: 'leaderboard', component: Leaderboard},
+      {path: '/stake', name: 'select-stake-type', component: SelectStakeType},
+      {path: '/stake/:stakeType', name: 'stake', component: Stake, props: true},
+      {path: '/options', name: 'options', component: Options},
+      {path: '/nft-display', name: 'nft-display', component: NftDisplay},
+      {path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true},
+      {path: '/bridge', name: 'bridge', component: Bridge},
+      {path: '/treasury', name: 'treasury', component: Treasury},
+      {path: '/admin', name: 'admin', component: Admin},
+      {path: '/play-to-earn', name: 'play-to-earn', component: PlayToEarn},
     ]
   });
 
-  if(featureFlagRaid) {
-    router.addRoute({ path: '/raid/', name: 'raid', component: Raid });
+  if (market) {
+    router.addRoute({path: '/market', name: 'market', component: Market});
   }
 
-  if(featureFlagPortal) {
-    router.addRoute({ path: '/portal', name: 'portal', component: Portal });
+  if (raid) {
+    router.addRoute({path: '/raid', name: 'raid', component: Raid});
   }
 
-  if(featureFlagPvP){
-    router.addRoute({ path: '/pvp', name: 'pvp', component:PvP});
+  if (portal) {
+    router.addRoute({path: '/portal', name: 'portal', component: Portal});
+  }
+
+  if (quests) {
+    const questsRoute = {
+      path: '/quests', name: 'quests', component: Quests,
+      beforeEnter: (to: any, from: any, next: any) => {
+        if (to.name === 'quests' && !currentChainSupportsQuests()) next(from);
+        else next();
+      }
+    };
+    router.addRoute(questsRoute);
+  }
+
+  if (pvp) {
+    const pvpRoute = {
+      path: '/pvp', name: 'pvp', component: PvP,
+      beforeEnter: (to: any, from: any, next: any) => {
+        if (to.name === 'pvp' && !currentChainSupportsPvP()) next(from);
+        else next();
+      }
+    };
+    router.addRoute(pvpRoute);
+  }
+
+  if (merchandise) {
+    const merchandiseRoute = {
+      path: '/merchandise', name: 'merchandise', component: Merchandise,
+      beforeEnter: (to: any, from: any, next: any) => {
+        if (to.name === 'merchandise' && !currentChainSupportsMerchandise()) next(from);
+        else next();
+      }
+    };
+    router.addRoute(merchandiseRoute);
   }
 
   return router;
 }
-
-export default createRouter;

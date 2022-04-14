@@ -1,8 +1,13 @@
 <template>
   <div class="container">
-    <div class="stake-icon-wrapper">
-      <img src="https://seiyria.com/gameicons-font/svg/two-coins.svg" alt="" class="stake-type-icon">
-    </div>
+    <span class="stake-header">
+      <b-icon-exclamation-circle scale="0.8"
+      :class="exclamationMark"
+      v-tooltip="rewardTooltip"/>
+      <div class="stake-icon-wrapper">
+        <img src="https://seiyria.com/gameicons-font/svg/two-coins.svg" alt="" class="stake-type-icon">
+      </div>
+    </span>
     <h1 class="stake-type-title">{{ stakeTitle }}</h1>
     <div class="table-wrapper">
       <table class="stake-data-table">
@@ -24,10 +29,12 @@
         </tr>
         <tr v-if="estimatedYield" :title="$t('stake.StakeSelectorItem.yieldTooltip')">
           <th class="bold">
-            {{$t('stake.StakeSelectorItem.apy')}}
+            {{ isNftStaking ? $t('stake.StakeSelectorItem.yield') : $t('stake.StakeSelectorItem.apy') }}
+            <b-icon-question-circle v-if="isNftStaking" v-tooltip="$t('stake.StakeSelectorItem.yieldTooltip')"/>
           </th>
           <td class="align-right">
-            {{ estimatedYield.multipliedBy(100).toFixed(2) }}%
+            {{ isNftStaking ? estimatedYield.toFixed(2) : estimatedYield.multipliedBy(100).toFixed(2) }}
+            {{ isNftStaking ? '/NFT' : '%' }}
           </td>
         </tr>
         <tr v-if="minimumStakeTime !== 0">
@@ -36,6 +43,14 @@
           </th>
           <td class="align-right">
             {{ minimumStakeTimeFormatted }}
+          </td>
+        </tr>
+        <tr v-if="rewardsDuration !== 0">
+          <th class="bold">
+            {{$t('stake.StakeSelectorItem.rewardsDuration')}}
+          </th>
+          <td class="align-right">
+            {{ rewardsDurationFormatted }}
           </td>
         </tr>
       </table>
@@ -54,15 +69,58 @@
 
 <script>
 import { formatDurationFromSeconds } from '../utils/date-time';
+import { isNftStakeType } from '../interfaces/State';
 
 export default {
-  props: ['stakeTitle', 'stakeTokenName', 'rewardTokenName', 'stakeType', 'minimumStakeTime', 'estimatedYield', 'deprecated'],
-
+  props: [
+    'stakeTitle',
+    'stakeTokenName',
+    'rewardTokenName',
+    'stakeType',
+    'minimumStakeTime',
+    'estimatedYield',
+    'rewardsDuration',
+    'deprecated',
+    'rewardDistributionTimeLeft',
+    'currentRewardEarned'
+  ],
   computed: {
     minimumStakeTimeFormatted() {
       return formatDurationFromSeconds(this.minimumStakeTime);
-    }
-  }
+    },
+    isNftStaking() {
+      return isNftStakeType(this.stakeType);
+    },
+    rewardsDurationFormatted() {
+      return formatDurationFromSeconds(this.rewardsDuration);
+    },
+    exclamationMark() {
+      let exclamationMark = '';
+
+      if (this.rewardDistributionTimeLeft > 0) {
+        exclamationMark += 'green-exclamation-mark ';
+      } else {
+        exclamationMark += 'red-exclamation-mark ';
+      }
+
+      if (this.currentRewardEarned > 0) {
+        exclamationMark += 'gold-background';
+      }
+      return exclamationMark;
+    },
+    rewardTooltip() {
+      if(this.rewardDistributionTimeLeft > 0) {
+        if (this.currentRewardEarned > 0) {
+          return this.$t('stake.StakeSelectorItem.rewardsAvailableEarnedTooltip');
+        }
+        return this.$t('stake.StakeSelectorItem.rewardsAvailableTooltip');
+      }
+      if (this.currentRewardEarned > 0) {
+        return this.$t('stake.StakeSelectorItem.rewardsDepletedEarnedTooltip');
+      }
+      return this.$t('stake.StakeSelectorItem.rewardsDepletedTooltip');
+    },
+  },
 };
 </script>
 
@@ -80,7 +138,8 @@ export default {
   width: 5rem;
   height: 5rem;
   padding: 0.5rem;
-  box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .stake-type-icon {
@@ -134,5 +193,25 @@ export default {
   background-color: rgba(255, 255, 255, 0.1);
   border-color: currentColor;
   cursor: pointer;
+}
+
+.green-exclamation-mark {
+  float: right;
+  color: rgb(41, 107, 28);
+}
+
+.red-exclamation-mark {
+  float: right;
+  color: rgb(153, 29, 29);
+}
+
+.gold-background {
+  background: #9e8a57;
+  border-radius: 50%;
+}
+
+.stake-header {
+  width: 100%;
+  font-size : 1.9em;
 }
 </style>

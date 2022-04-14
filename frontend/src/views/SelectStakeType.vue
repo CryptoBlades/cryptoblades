@@ -9,7 +9,10 @@
           :stakeType="e.stakeType"
           :minimumStakeTime="stakeOverviews[e.stakeType].minimumStakeTime"
           :estimatedYield="estimatedYields[e.stakeType]"
-          :deprecated="e.deprecated" />
+          :rewardsDuration="stakeOverviews[e.stakeType].rewardsDuration"
+          :deprecated="e.deprecated"
+          :rewardDistributionTimeLeft="stakeOverviews[e.stakeType].rewardDistributionTimeLeft"
+          :currentRewardEarned="staking[e.stakeType].currentRewardEarned"/>
       </li>
     </ul>
     <div class="loading-indicator" v-else>
@@ -26,7 +29,8 @@ BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 import StakeSelectorItem from '../components/StakeSelectorItem.vue';
 
-import { humanReadableDetailsForStakeTypes } from '../stake-types';
+import { humanReadableDetailsForStakeTypes, humanReadableDetailsForNftStakeTypes } from '../stake-types';
+import { isNftStakeType } from '@/interfaces';
 
 export default {
   components: {
@@ -34,13 +38,17 @@ export default {
   },
 
   computed: {
-    ...mapState(['stakeOverviews']),
-    ...mapGetters(['availableStakeTypes']),
+    ...mapState(['stakeOverviews', 'staking']),
+    ...mapGetters(['availableStakeTypes', 'availableNftStakeTypes']),
 
     entries() {
-      return this.availableStakeTypes.map(stakeType => ({
+      const entries = this.availableStakeTypes.map(stakeType => ({
         stakeType, ...humanReadableDetailsForStakeTypes[stakeType]
       }));
+      const nftEntires = this.availableNftStakeTypes.map(stakeType => ({
+        stakeType, ...humanReadableDetailsForNftStakeTypes[stakeType]
+      }));
+      return entries.concat(nftEntires);
     },
 
     estimatedYields() {
@@ -48,7 +56,10 @@ export default {
         this.availableStakeTypes.map(stakeType => [
           stakeType,
           this.calculateEstimatedYield(stakeType)
-        ])
+        ]).concat(
+          this.availableNftStakeTypes.map(stakeType => [
+            stakeType,
+            this.calculateEstimatedYield(stakeType)]))
       );
     },
   },
@@ -59,7 +70,6 @@ export default {
     calculateEstimatedYield(stakeType) {
       const rewardRate = this.stakeOverviews[stakeType].rewardRate;
       const totalStaked = this.stakeOverviews[stakeType].totalSupply;
-
       const rewardsPerDay = BN(rewardRate).multipliedBy(365.24 * 24 * 60 * 60);
 
       const totalSupply = BN(totalStaked);
@@ -68,6 +78,10 @@ export default {
 
       if(stakeType === 'lp' || stakeType === 'lp2') {
         return estYield.multipliedBy(0.102); // temporary, fetch from pancakeswap instead in the future
+      }
+
+      if(isNftStakeType(stakeType)) {
+        return estYield.dividedBy(BN(10).pow(18));
       }
 
       return estYield;

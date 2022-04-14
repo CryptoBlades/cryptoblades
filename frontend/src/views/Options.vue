@@ -58,8 +58,7 @@
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>Payout Currency</h4>
               <b-form-select size="lg" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
-                <b-form-select-option :value="'-1'">SKILL</b-form-select-option>
-                <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">
+                <b-form-select-option v-for="p in getPartnerProjects" :key="p.id" :value="p.id">
                   {{p.tokenSymbol}} ({{p.name}})
                 </b-form-select-option>
               </b-form-select>
@@ -92,20 +91,22 @@
 
 <script lang="ts">
 import Events from '../events';
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
+import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import BigNumber from 'bignumber.js';
-import { Accessors } from 'vue/types/options';
+import {Accessors} from 'vue/types/options';
 import Vue from 'vue';
-import { toBN, fromWeiEther } from '../utils/common';
+import {fromWeiEther, toBN} from '../utils/common';
 import i18n from '../i18n';
-import { getConfigValue } from '@/contracts';
+import {getConfigValue} from '@/contracts';
 import config from '../../app-config.json';
-import { SupportedProject } from './Treasury.vue';
+import {SupportedProject} from './Treasury.vue';
+import {addChainToRouter} from '@/utils/common';
 
 interface StoreMappedState {
   skillRewards: string;
   directStakeBonusPercent: number;
   payoutCurrencyId: string;
+  currentNetworkId: number;
 }
 
 interface StoreMappedActions {
@@ -173,8 +174,8 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['skillRewards', 'directStakeBonusPercent', 'payoutCurrencyId']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
+    ...mapState(['skillRewards', 'directStakeBonusPercent', 'payoutCurrencyId', 'currentNetworkId']) as Accessors<StoreMappedState>,
+    ...mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>,
 
     formattedSkillReward(): string {
       const skillRewards = fromWeiEther(this.skillRewards);
@@ -199,22 +200,6 @@ export default Vue.extend({
       }
       return true;
     },
-    supportedProjects(): SupportedProject[] {
-      const supportedProjects = this.getPartnerProjects.map(p => {
-        return {
-          id: p.id,
-          name: p.name,
-          tokenSymbol: p.tokenSymbol,
-          tokenAddress: p.tokenAddress,
-          tokenSupply: p.tokenSupply,
-          tokensClaimed: p.tokensClaimed,
-          tokenPrice: p.tokenPrice,
-          isActive: p.isActive
-        };
-      });
-
-      return supportedProjects;
-    },
 
     languages(): { [key: string]: string } {
       const rObj: { [key: string]: string } = {};
@@ -227,8 +212,20 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['claimTokenRewards','setUpContracts','initialize','configureMetaMask','fetchPartnerProjects']) as StoreMappedActions),
-    ...mapMutations(['setNetworkId','updatePayoutCurrencyId']),
+    ...(mapActions([
+      'claimTokenRewards',
+      'setUpContracts',
+      'initialize',
+      'configureMetaMask',
+      'fetchPartnerProjects',
+    ]) as StoreMappedActions),
+    ...mapMutations([
+      'setNetworkId',
+      'updatePayoutCurrencyId',
+      'updateCurrentChainSupportsMerchandise',
+      'updateCurrentChainSupportsPvP',
+      'updateCurrentChainSupportsQuests',
+    ]),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
       if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
@@ -301,7 +298,11 @@ export default Vue.extend({
 
     async setCurrentChain() {
       localStorage.setItem('currentChain', this.currentChain);
+      this.updateCurrentChainSupportsMerchandise();
+      this.updateCurrentChainSupportsPvP();
+      this.updateCurrentChainSupportsQuests();
       Events.$emit('setting:currentChain', { value: this.currentChain });
+      addChainToRouter(this.currentChain);
       await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
   },

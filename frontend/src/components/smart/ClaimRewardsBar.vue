@@ -1,6 +1,7 @@
 <template>
   <div class="body main-font">
-    <b-navbar v-if="isBar">
+
+    <b-navbar v-if="isBar" class="claim-xp-bar">
       <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
       variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="$t('ClaimRewardsBar.readyToClaim')"/>
 
@@ -8,9 +9,9 @@
 
       <b-nav-item
         class="ml-3 bar"
-        @click="claimSkill(ClaimStage.Summary)"><!-- moved gtag-link below b-nav-item -->
+        @click="claimSkill(ClaimStage.Summary)">
         <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
-          <strong>SKILL</strong> {{ formattedSkillReward }}
+          <strong>SKILL </strong>{{ formattedSkillReward }}
         </span>
       </b-nav-item>
 
@@ -18,7 +19,7 @@
         class="ml-3 bar"
         :disabled="!canClaimXp"
         @click="onClaimXp">
-          <div class="gtag-link-others" v-html="`<strong>XP</strong> ${formattedXpRewardsBar}`"></div>
+          <div class="gtag-link-others" v-html="`<strong>XP </strong>${formattedXpRewardsBar}`"></div>
       </b-nav-item>
     </b-navbar>
 
@@ -34,8 +35,7 @@
         <b-dropdown-item
           @click="claimSkill(ClaimStage.Summary)" class="rewards-info gtag-link-others" tagname="claim_skill"
            v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
-            SKILL
-            <div class="pl-3">{{ formattedSkillReward }}</div>
+            SKILL<div class="pl-3">{{ formattedSkillReward }}</div>
         </b-dropdown-item>
 
         <b-dropdown-item
@@ -98,8 +98,7 @@
         <div class="d-flex flex-row w-100 align-items-baseline">
           <h5>{{$t('ClaimRewardsBar.payoutCurrency')}}:</h5>
           <b-form-select class="w-50 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
-            <b-form-select-option :value="'-1'">SKILL</b-form-select-option>
-            <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
+            <b-form-select-option v-for="p in getPartnerProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
           </b-form-select>
         </div>
         <div v-if="selectedPartneredProject" class="d-flex mt-2">
@@ -114,17 +113,22 @@
             <b-form-input type="number" max="100" step="0.5" v-model="slippage" class="claim-input" />
           </div>
         </div>
-        <partnered-project v-if="selectedPartneredProject"
-          :id="selectedPartneredProject.id" :name="selectedPartneredProject.name"
-          :tokenSymbol="selectedPartneredProject.tokenSymbol" :tokenSupply="selectedPartneredProject.tokenSupply"
-          :tokenPrice="selectedPartneredProject.tokenPrice" :logoFileName="getLogoFile(selectedPartneredProject.name)"
-          :tokenAddress="selectedPartneredProject.tokenAddress"/>
+        <PartneredProject v-if="selectedPartneredProject" :partnerProject="selectedPartneredProject" :key="selectedPartneredProject.id"/>
         <div class="mt-3" v-if="selectedPartneredProject && !canClaimSelectedProject">
           <h5>{{$t('ClaimRewardsBar.partnerTokenClaimed')}}</h5>
         </div>
-        <div class="mt-3" v-if="!selectedPartneredProject">
-          <h5>{{withdrawalInfoText}}</h5>
-          <h6>{{$t('ClaimRewardsBar.earlyWithdrawTax')}}: {{ formattedRewardsClaimTax }} {{$t('ClaimRewardsBar.taxReduce')}} {{getTaxTimerNextTick}}</h6>
+        <div v-if="selectedPartneredProject && canClaimSelectedProject" class="mt-3">
+          <h6 v-if="formattedMultiplier < 0.5" class="very-low-multiplier">{{$t('ClaimRewardsBar.lowMultiplier', {currentMultiplier})}}</h6>
+          <h6 >{{
+              $t('ClaimRewardsBar.realWithdrawValueClaimable', {
+                actualAmount: (skillAmount / nonFormattedRatio * formattedMultiplier).toFixed(4),
+                tokenSymbol: selectedPartneredProject.tokenSymbol,
+                skillAmount: (+skillAmount).toFixed(4)
+              })
+            }}</h6>
+        </div>
+        <div class="mt-3" v-if="isNoProjectAvailable">
+          <h5>{{$t('ClaimRewardsBar.noProjects')}}</h5>
         </div>
       </div>
     </b-modal>
@@ -133,15 +137,14 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { Accessors } from 'vue/types/options';
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
+import {Accessors} from 'vue/types/options';
+import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import BigNumber from 'bignumber.js';
-import { RequiredXp } from '../../interfaces';
-import { ICharacter } from '@/interfaces';
-import { toBN, fromWeiEther } from '../../utils/common';
-import { secondsToDDHHMMSS } from '../../utils/date-time';
-import { getCleanName } from '../../rename-censor';
-import { SupportedProject } from '@/views/Treasury.vue';
+import {RequiredXp} from '../../interfaces';
+import {ICharacter} from '@/interfaces';
+import {fromWeiEther, toBN} from '../../utils/common';
+import {getCleanName} from '../../rename-censor';
+import {SupportedProject} from '@/views/Treasury.vue';
 import PartneredProject from '../PartneredProject.vue';
 import i18n from '@/i18n';
 
@@ -152,6 +155,9 @@ interface StoreMappedState {
   directStakeBonusPercent: number;
   payoutCurrencyId: string;
   defaultSlippage: string;
+  currentNetworkId: number;
+  partnerProjectMultipliers: Record<number, string>;
+  partnerProjectRatios: Record<number, string>;
 }
 
 interface StoreMappedGetters {
@@ -179,6 +185,7 @@ interface StoreMappedActions {
   fetchRemainingTokenClaimAmountPreTax(): Promise<string>;
   fetchPartnerProjects(): Promise<void>;
   getPartnerProjectMultiplier(id: number): Promise<string>;
+  getSkillToPartnerRatio(id: number): Promise<string>;
 }
 
 export default Vue.extend({
@@ -196,16 +203,26 @@ export default Vue.extend({
       ClaimStage,
       remainingTokenClaimAmountPreTax: '0',
       skillAmount: 0,
-      slippage: 0
+      slippage: 0,
+      updateInterval: null as ReturnType<typeof setInterval> | null,
     };
   },
 
   computed: {
     ...(mapState(['skillRewards', 'xpRewards', 'ownedCharacterIds', 'directStakeBonusPercent',
-      'payoutCurrencyId', 'defaultSlippage']) as Accessors<StoreMappedState>),
+      'payoutCurrencyId', 'defaultSlippage', 'currentNetworkId', 'partnerProjectMultipliers', 'partnerProjectRatios']) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'ownCharacters', 'currentCharacter', 'maxRewardsClaimTaxAsFactorBN', 'rewardsClaimTaxAsFactorBN', 'getCharacterName', 'getPartnerProjects'
     ]) as Accessors<StoreMappedGetters>),
+
+    formattedMultiplier(): number {
+      return this.selectedPartneredProject && +toBN(this.partnerProjectMultipliers[+this.selectedPartneredProject.id]).div(toBN(10).pow(18)).toFixed(4) || 1;
+    },
+
+    nonFormattedRatio(): number {
+      return this.selectedPartneredProject &&
+        +toBN(1).dividedBy(toBN(this.partnerProjectRatios[+this.selectedPartneredProject.id]).dividedBy(toBN(2).exponentiatedBy(64))) || 1;
+    },
 
     formattedSkillReward(): string {
       const skillRewards = fromWeiEther(this.skillRewards);
@@ -236,34 +253,12 @@ export default Vue.extend({
       return `${frac.multipliedBy(100).decimalPlaces(0, BigNumber.ROUND_HALF_UP)}%`;
     },
 
-    getTaxTimerNextTick(): string {
-      let frac: BigNumber;
-
-      // if has no skill rewards do not display timer next tick.
-      // or if tax is zero also do not display timer next tick.
-      if (this.skillRewards === '0' || this.rewardsClaimTaxAsFactorBN.toString() === '0') {
-        return '';
-      } else {
-        frac = this.rewardsClaimTaxAsFactorBN;
-      }
-
-      // get 2 decimal values
-      const decVal = toBN(frac.multipliedBy(100).decimalPlaces(2).toString().split('.')[1]);
-      // convert to seconds
-      const toSec = decVal.dividedBy(100).multipliedBy(24).multipliedBy(60).multipliedBy(60);
-      // return message
-      return ` Next -1% reduction happens in ${secondsToDDHHMMSS(toSec.toNumber())}.`;
+    currentMultiplier(): string {
+      return (this.formattedMultiplier*100).toFixed(2) + '%';
     },
 
     skillRewardNumber(): number {
-      return +toBN(fromWeiEther(this.skillRewards)).toFixed(17);
-    },
-
-    withdrawalInfoText(): string {
-      if(this.skillRewardNumber >= 1) {
-        return `${i18n.t('ClaimRewardsBar.withdrawalInfoText1')} ${this.formattedRemainingClaimableSkill}`;
-      }
-      return `${i18n.t('ClaimRewardsBar.withdrawalInfoText2')} ${this.formattedRemainingClaimableSkill}`;
+      return +toBN(fromWeiEther(this.skillRewards.substr(0, this.skillRewards.length - 3) + '000'));
     },
 
     xpRewardsForOwnedCharacters(): string[] {
@@ -291,41 +286,23 @@ export default Vue.extend({
     },
 
     canClaimTokens(): boolean {
-      if(toBN(this.skillRewards).lte(0) || toBN(this.remainingTokenClaimAmountPreTax).lte(0)) {
-        return false;
-      }
-
-      return true;
+      const areSkillRewardsZeroOrLess = toBN(this.skillRewards).lte(0);
+      const isRemainingTokenClaimAmountPreTaxZeroOrLess = toBN(this.remainingTokenClaimAmountPreTax).lte(0);
+      return !(areSkillRewardsZeroOrLess || isRemainingTokenClaimAmountPreTaxZeroOrLess);
     },
 
     canClaimXp(): boolean {
-      const allXpsAreZeroOrLess = this.xpRewardsForOwnedCharacters.every(xp => toBN(xp).lte(0));
-      if(allXpsAreZeroOrLess) {
-        return false;
-      }
-
-      return true;
-    },
-
-    supportedProjects(): SupportedProject[] {
-      const supportedProjects = this.getPartnerProjects.map(p => {
-        return {
-          id: p.id,
-          name: p.name,
-          tokenSymbol: p.tokenSymbol,
-          tokenAddress: p.tokenAddress,
-          tokenSupply: p.tokenSupply,
-          tokensClaimed: p.tokensClaimed,
-          tokenPrice: p.tokenPrice,
-          isActive: p.isActive
-        };
-      });
-
-      return supportedProjects;
+      const areAllXpsZeroOrLess = this.xpRewardsForOwnedCharacters.every(xp => toBN(xp).lte(0));
+      return !areAllXpsZeroOrLess;
     },
 
     selectedPartneredProject(): SupportedProject | undefined {
-      return this.supportedProjects.find(x => x.id === this.payoutCurrencyId);
+      return this.getPartnerProjects.find(partnerProject => partnerProject.id.toString() === this.payoutCurrencyId.toString());
+    },
+
+    isNoProjectAvailable(): boolean {
+      this.choosePayoutCurrencyIfNotChosenBefore();
+      return this.payoutCurrencyId === '-1';
     },
 
     canClaimSelectedProject(): boolean {
@@ -343,7 +320,7 @@ export default Vue.extend({
 
   methods: {
     ...(mapActions(['addMoreSkill', 'claimTokenRewards', 'claimPartnerToken', 'claimXpRewards', 'fetchRemainingTokenClaimAmountPreTax',
-      'fetchPartnerProjects', 'getPartnerProjectMultiplier']) as StoreMappedActions),
+      'fetchPartnerProjects', 'getPartnerProjectMultiplier', 'getSkillToPartnerRatio']) as StoreMappedActions),
     ...mapMutations(['updatePayoutCurrencyId']),
 
     async onClaimTokens() {
@@ -397,6 +374,13 @@ export default Vue.extend({
       this.remainingTokenClaimAmountPreTax = await this.fetchRemainingTokenClaimAmountPreTax();
     },
 
+    choosePayoutCurrencyIfNotChosenBefore() {
+      const supportedProjects = this.getPartnerProjects;
+      if(this.payoutCurrencyId === '-1' && supportedProjects.length !== 0) {
+        this.updatePayoutCurrencyId(supportedProjects[0].id);
+      }
+    },
+
     getCleanCharacterName(id: number): string {
       return getCleanName(this.getCharacterName(id));
     },
@@ -411,7 +395,13 @@ export default Vue.extend({
   },
 
   async mounted() {
-    setInterval(async () => await this.getRemainingTokenClaimAmountPreTax(), 3000);
+    this.updateInterval = setInterval(async () => await this.getRemainingTokenClaimAmountPreTax(), 3000);
+  },
+
+  beforeDestroy() {
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
   }
 });
 </script>
@@ -420,7 +410,10 @@ export default Vue.extend({
 
 .navbar {
   background: rgb(20,20,20);
-  background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
+}
+
+.claim-xp-bar {
+  gap: 0.5rem;
 }
 
 .nav-item.bar {
@@ -448,5 +441,9 @@ export default Vue.extend({
 
 .invalid-amount {
   border: 2px solid red;
+}
+
+.very-low-multiplier {
+  color: rgb(223, 17, 17);
 }
 </style>

@@ -3,28 +3,41 @@
     <nav class="defaultNav">
       <button @click="setTab(0)" :class="tabNumber === 0 && 'active'">
         <img src="../../assets/swordsIcon.svg"/>
-        <span>Arena</span>
+        <span>
+          {{$t('pvp.arena')}}
+        </span>
       </button>
       <button @click="setTab(1)" :class="tabNumber === 1 && 'active'">
         <img src="../../assets/crownIcon.svg" />
-        <span>Leaderboard</span>
+        <span>
+          {{$t('pvp.leaderboard')}}
+        </span>
       </button>
       <button @click="setTab(2)" :class="tabNumber === 2 && 'active'">
         <img src="../../assets/crownIcon.svg" />
-        <span>Rewards</span>
+        <div class="rewardsButtonInner">
+          {{$t('pvp.rewards')}}
+          <BIcon icon="exclamation-circle-fill" v-if="hasRewards" class="rewardsIcon"/>
+        </div>
       </button>
     </nav>
   </div>
 </template>
 
 <script>
+import { BIcon } from 'bootstrap-vue';
 export default {
+  components: {
+    BIcon,
+  },
   props: {
     tabNumber: {
       default: 0
+    },
+    hasRewards: {
+      default: false,
     }
   },
-
   methods: {
     setTab(tabNumber) {
       this.$emit('changeTab', tabNumber);
@@ -40,6 +53,16 @@ export default {
   border-bottom: 1px solid #363636;
   .defaultNav {
     display: flex;
+    .rewardsButtonInner {
+      display: flex;
+      font-family: 'Roboto';
+      .rewardsIcon {
+        display: flex;
+        margin-left: .5rem;
+        color: #edcd90;
+        font-size: 1.1rem;
+      }
+    }
   }
   button {
     display: flex;
@@ -47,6 +70,7 @@ export default {
     padding-bottom: 0.5rem;
     align-items: center;
     vertical-align: middle;
+    justify-items: center;
     color: #b4b0a7;
     font-size: 0.875rem;
     line-height: 1.25rem;
@@ -61,6 +85,7 @@ export default {
       margin-right: 0.5rem;
     }
     span {
+      display: flex;
       font-family: 'Roboto';
     }
     :hover {

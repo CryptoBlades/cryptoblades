@@ -1,0 +1,16 @@
+{
+  "questItems": {
+    "0x4a5f6447A96ebC76E0D1628e3FfB2153a62D3dB8": {
+      "name": "SKILL",
+      "description": "SKILL is the native token of the CryptoBlades ecosystem, used for crafting character and weapon NFTs, trading on our NFT marketplace, utilizing our Bridge, or even purchasing merchandise. As CryptoBlades continues to grow in product offerings, SKILL token will grow with it!",
+      "image": "SKILL.png",
+      "website": "https://www.cryptoblades.io/"
+    },
+    "0xB63F5847d0E9F1107B590D063F0D584d485C8d23": {
+      "name": "Cakemonster NFT",
+      "description": "Cake Monster is a ultra-deflationary, automated dividend yield, and meme token. It offers a multitude of unique DeFi features aimed at building a flexible and multifaceted reward system for all participants without compromising the sustainability or security of the protocol ecosystem.",
+      "image": "cakemonster.png",
+      "website": "https://cake.monster/"
+    }
+  }
+}

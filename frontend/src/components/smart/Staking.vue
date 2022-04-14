@@ -44,10 +44,11 @@
         </div>
       </div>
       <div class="stakePage medium-dark-bg">
-        <div class="sPElement input">
-          <div class="inputBody">
-            <div class="flex_row">
+        <div class="sPElement input overflow">
+          <div class="inputBody overflow">
+            <div :class="isNftStaking ? 'd-flex align-items-center w-100 overflow' : 'flex_row'">
               <input
+                v-if="!isNftStaking"
                 class="token-amount-input"
                 inputmode="decimal"
                 :title="$t('stake.tokenAmount')"
@@ -62,9 +63,19 @@
                 value=""
                 v-model="textAmount"
               />
-              <div class="ant-col">{{ stakingTokenName }}</div>
+              <div v-if="isNftStaking" class="mr-2 ml-3">ID(s):</div>
+              <multiselect v-if="isNftStaking" class="overflow" v-model="idsToStake"
+                :options="(isDeposit ? ownedLandIds : stakedIds).filter(x => +x.tier === +tier || !tier) || []"
+                :max="10" :multiple="true" :close-on-select="false" :clear-on-select="false" :placeholder="$t('stake.pickId')"
+                :custom-label="idWithTier" track-by="id"
+              >
+                <template slot="selection" :slot-scope="{ idsToStake }">
+                  <span class="multiselect__single" v-if="idsToStake && idsToStake.length">{{ idsToStake.length }} {{$t('stake.idsSelected')}}</span>
+                </template>
+              </multiselect>
+              <div :class="isNftStaking ? 'ml-2 mr-3' : 'ant-col'">{{ stakingTokenName }}</div>
             </div>
-            <div class="balance" id="balance" @click="onMAX">
+            <div class="balance" id="balance" @click="!isNftStaking && onMAX">
               {{$t('stake.wallet')}} {{ inputSideBalance }}
             </div>
           </div>
@@ -94,7 +105,7 @@
                 {{ stakingTokenName }}
               </div>
             </div>
-            <div class="balance" id="balance" @click="onMAX">
+            <div class="balance" id="balance" @click="!isNftStaking && onMAX">
               {{$t('stake.wallet')}} {{ outputSideBalance }}
             </div>
           </div>
@@ -150,24 +161,36 @@
 <script>
 import { toBN } from '../../utils/common';
 import { mapActions, mapState } from 'vuex';
+import Vue from 'vue';
 
 import { formatDurationFromSeconds, secondsToDDHHMMSS } from '../../utils/date-time';
-import { isStakeType } from '../../interfaces/State';
+import { isStakeType, isNftStakeType } from '../../interfaces/State';
+import Multiselect from 'vue-multiselect';
 
 
-export default {
+export default Vue.extend({
   props: {
     stakeType: {
       type: String,
       validator(type) {
-        return isStakeType(type);
+        return isStakeType(type) || isNftStakeType(type);
       }
+    },
+    tier: {
+      type: Number,
+      default: 0
     }
+  },
+
+  components: {
+    Multiselect
   },
 
   data() {
     return {
       textAmount: '',
+      idsToStake: [],
+      isOpen: false,
       isDeposit: true,
       loading: false,
       errorWhenUpdating: null,
@@ -175,10 +198,16 @@ export default {
 
       stakeUnlockTimeLeftCurrentEstimate: 0,
       stakeRewardDistributionTimeLeftCurrentEstimate: 0,
+      ownedLandIds: [],
+      stakedIds: []
     };
   },
   async mounted() {
     await this.fetchData();
+
+    if(this.stakeType.startsWith('cbkLand')) {
+      await this.updateOwnedLands();
+    }
 
     this.stakeUnlockTimeLeftCurrentEstimate = this.unlockTimeLeftInternal;
     this.stakeRewardDistributionTimeLeftCurrentEstimate = this.rewardDistributionTimeLeftInternal;
@@ -193,6 +222,7 @@ export default {
   },
   beforeDestroy() {
     clearInterval(this.stakeRewardProgressInterval);
+    clearInterval(this.secondsInterval);
   },
   computed: {
     ...mapState(['defaultAccount', 'staking', 'skillRewards']),
@@ -208,19 +238,27 @@ export default {
       switch(this.stakeType) {
       case 'skill':
       case 'skill2':
+      case 'skill90':
+      case 'skill180':
         return 'SKILL';
       case 'king':
+      case 'king90':
+      case 'king180':
         return 'KING';
       case 'lp':
       case 'lp2':
         return 'SKILL-WBNB';
+      case 'cbkLandT1':
+      case 'cbkLandT2':
+      case 'cbkLandT3':
+        return 'CBKL';
       default:
         return 'unknown';
       }
     },
 
     stakingRewardsName() {
-      if(this.stakeType === 'king') return 'KING';
+      if(this.stakeType.startsWith('king') || this.stakeType.startsWith('cbkLand')) return 'KING';
       return 'SKILL';
     },
 
@@ -274,12 +312,12 @@ export default {
 
     inputSideBalance() {
       const b = this.isDeposit ? this.walletBalance : this.stakedBalance;
-      return b.dividedBy(1e18).toFixed(6);
+      return this.isNftStaking ? b : b.dividedBy(1e18).toFixed(6);
     },
 
     outputSideBalance() {
       const b = this.isDeposit ? this.stakedBalance : this.walletBalance;
-      return b.dividedBy(1e18).toFixed(6);
+      return this.isNftStaking ? b : b.dividedBy(1e18).toFixed(6);
     },
 
     currentState() {
@@ -311,7 +349,11 @@ export default {
         return 'waiting';
       }
 
-      if (this.textAmount <= 0) {
+      if (isStakeType(this.stakeType) && this.textAmount <= 0) {
+        return 'inputIsZero';
+      }
+
+      if (isNftStakeType(this.stakeType) && this.idsToStake.length === 0) {
         return 'inputIsZero';
       }
 
@@ -412,17 +454,29 @@ export default {
       const b = toBN(this.skillRewards);
       return b.dividedBy(1e18).toFixed(4);
     },
+
+    isNftStaking() {
+      return isNftStakeType(this.stakeType);
+    }
   },
   methods: {
     ...mapActions([
       'fetchStakeDetails',
       'stake',
+      'stakeNfts',
       'unstake',
+      'unstakeNfts',
       'unstakeKing',
       'claimKingReward',
       'stakeUnclaimedRewards',
       'claimReward',
+      'getOwnedLandIdsWithTier',
+      'getStakedIds'
     ]),
+
+    idWithTier({ id, tier }) {
+      return `${id} (${this.$t('stake.tier')} ${tier})`;
+    },
 
     updateEstimates() {
       if (this.stakeUnlockTimeLeftCurrentEstimate > 0) {
@@ -465,22 +519,35 @@ export default {
     },
     async onSubmit() {
       if (this.loading || this.currentState !== 'ok') return;
-
       const amount = this.bigNumberAmount.toString();
 
       try {
         this.loading = true;
 
         if (this.isDeposit) {
-          await this.stake({ amount, stakeType: this.stakeType });
+          if(this.isNftStaking) {
+            await this.stakeNfts({ ids: this.idsToStake.map(x => x.id), stakeType: this.stakeType });
+          }
+          else {
+            await this.stake({ amount, stakeType: this.stakeType });
+          }
         } else {
           //unstake
           if(this.stakeType === 'king') {
             await this.unstakeKing({ amount });
           }
           else {
-            await this.unstake({ amount, stakeType: this.stakeType });
+            if(this.isNftStaking) {
+              await this.unstakeNfts({ ids: this.idsToStake.map(x => x.id), stakeType: this.stakeType });
+            }
+            else {
+              await this.unstake({ amount, stakeType: this.stakeType });
+            }
           }
+        }
+        if(isNftStakeType(this.stakeType)) {
+          await this.updateOwnedLands();
+          this.idsToStake = [];
         }
       } catch (e) {
         console.error(e);
@@ -533,6 +600,11 @@ export default {
         this.loading = false;
       }
     },
+
+    async updateOwnedLands() {
+      this.ownedLandIds = await this.getOwnedLandIdsWithTier();
+      this.stakedIds = await this.getStakedIds(this.stakeType);
+    }
   },
   watch: {
     rewardDistributionTimeLeftInternal(newValue, oldValue) {
@@ -574,6 +646,7 @@ export default {
     },
     isDeposit() {
       this.textAmount = '';
+      this.idsToStake = [];
     },
     async defaultAccount(newVal) {
       if (newVal) {
@@ -581,8 +654,10 @@ export default {
       }
     },
   },
-};
+});
 </script>
+
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style scoped>
 .stake {
@@ -847,6 +922,10 @@ export default {
 
 .gold-text {
   color: #9e8a57;
+}
+
+.overflow {
+  overflow: visible;
 }
 
 </style>

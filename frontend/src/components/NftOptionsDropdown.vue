@@ -6,15 +6,15 @@
       @click="nftType ? option.handler(nftId, nftType) : option.handler(nftId)">
         {{option.name}} <span v-if="!option.noAmount">({{option.amount}} {{$t('nftOptionsDropdown.left')}})</span>
       </b-dropdown-item>
-      <b-dropdown-item @click="resultMsg = ''; $refs['character-transfer-modal'].show()">
-        Transfer
+      <b-dropdown-item v-if="showTransfer" @click="resultMsg = ''; $refs['character-transfer-modal'].show()">
+        {{$t('nft.transferMenuItem')}}
       </b-dropdown-item>
     </b-dropdown>
 
     <b-modal
       class="centered-modal"
       ref="character-transfer-modal"
-      ok-title="Transfer!"
+      :ok-title="$t('nft.transferOkButton')"
       @ok="transfer"
       :ok-disabled="!isValidAddress || receiverAddress === ''  || isSending"
       :cancel-disabled="isSending"
@@ -72,7 +72,11 @@ export default Vue.extend({
     nftType: {
       type: String,
       default: '',
-    }
+    },
+    showTransfer: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: () => ({
     receiverAddress: '' as string,

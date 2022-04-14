@@ -6,6 +6,9 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./Promos.sol";
 import "./util.sol";
+import "./Garrison.sol";
+import "./common.sol";
+
 contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     using SafeMath for uint16;
@@ -13,9 +16,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     bytes32 public constant NO_OWNED_LIMIT = keccak256("NO_OWNED_LIMIT");
-    bytes32 public constant RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP = keccak256("RECEIVE_DOES_NOT_SET_TRANSFER_TIMESTAMP");
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
+    // Copied from promos.sol, to avoid paying 5k gas to query a constant.
+    uint256 private constant BIT_FIRST_CHARACTER = 1;
 
     function initialize () public initializer {
         __ERC721_init("CryptoBlades character", "CBC");
@@ -24,36 +29,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function migrateTo_1ee400a() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
-
-        experienceTable = [
-            16, 17, 18, 19, 20, 22, 24, 26, 28, 30, 33, 36, 39, 42, 46, 50, 55, 60, 66
-            , 72, 79, 86, 94, 103, 113, 124, 136, 149, 163, 178, 194, 211, 229, 248, 268
-            , 289, 311, 334, 358, 383, 409, 436, 464, 493, 523, 554, 586, 619, 653, 688
-            , 724, 761, 799, 838, 878, 919, 961, 1004, 1048, 1093, 1139, 1186, 1234, 1283
-            , 1333, 1384, 1436, 1489, 1543, 1598, 1654, 1711, 1769, 1828, 1888, 1949, 2011
-            , 2074, 2138, 2203, 2269, 2336, 2404, 2473, 2543, 2614, 2686, 2759, 2833, 2908
-            , 2984, 3061, 3139, 3218, 3298, 3379, 3461, 3544, 3628, 3713, 3799, 3886, 3974
-            , 4063, 4153, 4244, 4336, 4429, 4523, 4618, 4714, 4811, 4909, 5008, 5108, 5209
-            , 5311, 5414, 5518, 5623, 5729, 5836, 5944, 6053, 6163, 6274, 6386, 6499, 6613
-            , 6728, 6844, 6961, 7079, 7198, 7318, 7439, 7561, 7684, 7808, 7933, 8059, 8186
-            , 8314, 8443, 8573, 8704, 8836, 8969, 9103, 9238, 9374, 9511, 9649, 9788, 9928
-            , 10069, 10211, 10354, 10498, 10643, 10789, 10936, 11084, 11233, 11383, 11534
-            , 11686, 11839, 11993, 12148, 12304, 12461, 12619, 12778, 12938, 13099, 13261
-            , 13424, 13588, 13753, 13919, 14086, 14254, 14423, 14593, 14764, 14936, 15109
-            , 15283, 15458, 15634, 15811, 15989, 16168, 16348, 16529, 16711, 16894, 17078
-            , 17263, 17449, 17636, 17824, 18013, 18203, 18394, 18586, 18779, 18973, 19168
-            , 19364, 19561, 19759, 19958, 20158, 20359, 20561, 20764, 20968, 21173, 21379
-            , 21586, 21794, 22003, 22213, 22424, 22636, 22849, 23063, 23278, 23494, 23711
-            , 23929, 24148, 24368, 24589, 24811, 25034, 25258, 25483, 25709, 25936, 26164
-            , 26393, 26623, 26854, 27086, 27319, 27553, 27788, 28024, 28261, 28499, 28738
-            , 28978
-        ];
+    function migrateTo_1ee400a(uint256[255] memory _experienceTable) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+        experienceTable = _experienceTable;
     }
 
     function migrateTo_951a020() public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         // Apparently ERC165 interfaces cannot be removed in this version of the OpenZeppelin library.
         // But if we remove the registration, then while local deployments would not register the interface ID,
@@ -64,15 +46,21 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         promos = _promos;
     }
 
     function migrateTo_b627f23() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
         characterLimit = 4;
+    }
+
+    function migrateTo_1a19cbb(Garrison _garrison) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+
+        garrison = _garrison;
     }
 
     /*
@@ -113,11 +101,22 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     mapping(uint256 => uint256) public raidsDone;
     mapping(uint256 => uint256) public raidsWon;
 
-    mapping(uint256 => mapping(uint256 => uint256)) public nftVars;//KEYS: NFTID, VARID
+    uint256 public constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
+    uint256 public constant NFTVAR_SIMPLEQUEST_TYPE = 102;
+    uint256 public constant NFTVAR_REPUTATION = 103;
+
+    uint256 public constant SIMPLEQUEST_TYPE_RAID = 8;
+
+    mapping(uint256 => mapping(uint256 => uint256)) public nftVars; // nftID, fieldID, value
     uint256 public constant NFTVAR_BUSY = 1; // value bitflags: 1 (pvp) | 2 (raid) | 4 (TBD)..
+
+    Garrison public garrison;
+
+    uint256 public constant NFTVAR_BONUS_POWER = 2;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
+    event Burned(address indexed owner, uint256 indexed id);
 
     modifier restricted() {
         _restricted();
@@ -125,7 +124,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function _restricted() internal view {
-        require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+        require(hasRole(GAME_ADMIN, msg.sender), "NA");
     }
 
     modifier noFreshLookup(uint256 id) {
@@ -168,6 +167,14 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return cc.seed;
     }
 
+    function getSoulForBurns(uint256[] calldata burnIds) external view returns (uint256) {
+        uint256 soulAmount = 0;
+        for(uint i = 0; i < burnIds.length; i++) {
+            soulAmount += getTotalPower(burnIds[i]).div(10);
+        }
+        return soulAmount;
+    }
+
     function mint(address minter, uint256 seed) public restricted {
         uint256 tokenID = tokens.length;
 
@@ -182,11 +189,19 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
         tokens.push(Character(xp, level, trait, staminaTimestamp));
         cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
-        _mint(minter, tokenID);
-        emit NewCharacter(tokenID, minter);
+        address receiver = minter;
+        if(minter != address(0) && minter != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, minter) && balanceOf(minter) >= characterLimit) {
+            receiver = address(garrison);
+            garrison.redirectToGarrison(minter, tokenID);
+            _mint(address(garrison), tokenID);
+        }
+        else {
+            _mint(minter, tokenID);
+        }
+        emit NewCharacter(tokenID, receiver);
     }
 
-    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID) minterOnly public returns (uint256) {
+    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID, uint24 bonusPower, uint16 reputation) minterOnly public returns (uint256) {
         uint64 staminaTimestamp = uint64(now); // 0 on purpose to avoid chain jumping abuse
 
         if(tokenID == 0){
@@ -198,8 +213,16 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
             tokens.push(Character(xp, level, trait, staminaTimestamp));
             cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
-            _mint(minter, tokenID);
-            emit NewCharacter(tokenID, minter);
+            address receiver = minter;
+            if(minter != address(0) && minter != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, minter) && balanceOf(minter) >= characterLimit) {
+                receiver = address(garrison);
+                garrison.redirectToGarrison(minter, tokenID);
+                _mint(address(garrison), tokenID);
+            }
+            else {
+                _mint(minter, tokenID);
+            }
+            emit NewCharacter(tokenID, receiver);
         }
         else {
             Character storage ch = tokens[tokenID];
@@ -211,8 +234,53 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             CharacterCosmetics storage cc = cosmetics[tokenID];
             cc.seed = seed;
         }
-        
+
+        nftVars[tokenID][NFTVAR_BONUS_POWER] = bonusPower;
+        nftVars[tokenID][NFTVAR_REPUTATION] = reputation;
+
         return tokenID;
+    }
+
+    function burnIntoCharacter(uint256[] calldata burnIds, uint256 targetCharId, uint256 burnPowerMultiplier) external restricted {
+        uint256 burnPower = 0;
+        for(uint i = 0; i < burnIds.length; i++) {
+            burnPower += nftVars[burnIds[i]][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[burnIds[i]].level));
+            address burnOwner = ownerOf(burnIds[i]);
+            if(burnOwner == address(garrison)) {
+                burnOwner = garrison.characterOwner(burnIds[i]);
+                garrison.updateOnBurn(burnOwner, burnIds[i]);
+            }
+            _burn(burnIds[i]);
+
+            emit Burned(
+                burnOwner,
+                burnIds[i]
+            );
+        }
+        require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
+        nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.mul(burnPowerMultiplier).div(1e18).add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
+    }
+
+    function burnIntoSoul(uint256[] calldata burnIds) external restricted {
+        for(uint i = 0; i < burnIds.length; i++) {
+            address burnOwner = ownerOf(burnIds[i]);
+            if(burnOwner == address(garrison)) {
+                burnOwner = garrison.characterOwner(burnIds[i]);
+                garrison.updateOnBurn(burnOwner, burnIds[i]);
+            }
+            _burn(burnIds[i]);
+
+            emit Burned(
+                burnOwner,
+                burnIds[i]
+            );
+        }
+    }
+
+    function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount) external restricted {
+        uint256 burnPower = soulAmount.mul(10);
+        require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
+        nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
     }
 
     function getLevel(uint256 id) public view noFreshLookup(id) returns (uint8) {
@@ -227,19 +295,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return getPowerAtLevel(tokens[id].level);
     }
 
+    function getTotalPower(uint256 id) public view noFreshLookup(id) returns (uint256) {
+        return nftVars[id][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[id].level));
+    }
+
     function getPowerAtLevel(uint8 level) public pure returns (uint24) {
-        // does not use fixed points since the numbers are simple
-        // the breakpoints every 10 levels are floored as expected
-        // level starts at 0 (visually 1)
-        // 1000 at lvl 1
-        // 9000 at lvl 51 (~3months)
-        // 22440 at lvl 105 (~3 years)
-        // 92300 at lvl 255 (heat death of the universe)
-        return uint24(
-            uint256(1000)
-                .add(level.mul(10))
-                .mul(level.div(10).add(1))
-        );
+        return Common.getPowerAtLevel(level);
     }
 
     function getTrait(uint256 id) public view noFreshLookup(id) returns (uint8) {
@@ -330,7 +391,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
         }
         // bitwise magic to avoid stacking limitations later on
-        return uint96(char.trait | (getPowerAtLevel(char.level) << 8) | (preTimestamp << 32));
+        return uint96(char.trait | (getTotalPower(id) << 8) | (preTimestamp << 32));
     }
 
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {
@@ -339,6 +400,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         require(nftVars[id][NFTVAR_BUSY] == 0); // raids do not apply busy flag for now
         //nftVars[id][NFTVAR_BUSY] = 0;
         _gainXp(id, xp);
+        if (getNftVar(id, NFTVAR_SIMPLEQUEST_TYPE) == SIMPLEQUEST_TYPE_RAID) {
+            uint currentProgress = getNftVar(id, NFTVAR_SIMPLEQUEST_PROGRESS);
+            setNftVar(id, NFTVAR_SIMPLEQUEST_PROGRESS, ++currentProgress);
+        }
     }
 
     function getCharactersOwnedBy(address wallet) public view returns(uint256[] memory chars) {
@@ -360,14 +425,33 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
                 chars[--ready] = owned[i];
     }
 
+    function setNFTVars(uint256 id, uint256[] memory fields, uint256[] memory values) public restricted {
+        for(uint i = 0; i < fields.length; i++)
+            nftVars[id][fields[i]] = values[i];
+    }
+
+    function getNFTVars(uint256 id, uint256[] memory fields) public view returns(uint256[] memory values) {
+        values = new uint256[](fields.length);
+        for(uint i = 0; i < fields.length; i++)
+            values[i] = nftVars[id][fields[i]];
+    }
+
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(nftVars[tokenId][NFTVAR_BUSY] == 0);
-        if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to)) {
-            require(balanceOf(to) < characterLimit, "Recv has too many characters");
-        }
+        address[] memory users = new address[](2);
+        users[0] = from;
+        users[1] = to;
+        promos.setBits(users, BIT_FIRST_CHARACTER);
+    }
 
-        promos.setBit(from, promos.BIT_FIRST_CHARACTER());
-        promos.setBit(to, promos.BIT_FIRST_CHARACTER());
+    function safeTransferFrom(address from, address to, uint256 tokenId) override public {
+        if(to != address(0) && to != address(0x000000000000000000000000000000000000dEaD) && !hasRole(NO_OWNED_LIMIT, to) && balanceOf(to) >= characterLimit) {
+            garrison.redirectToGarrison(to, tokenId);
+            super.safeTransferFrom(from, address(garrison), tokenId);
+        }
+        else {
+            super.safeTransferFrom(from, to, tokenId);
+        }
     }
 
     function setCharacterLimit(uint256 max) public restricted {
@@ -379,5 +463,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
     function setNftVar(uint256 characterID, uint256 nftVar, uint256 value) public restricted {
         nftVars[characterID][nftVar] = value;
+    }
+
+    function setBaseURI(string memory baseUri) public restricted {
+        _setBaseURI(baseUri);
     }
 }

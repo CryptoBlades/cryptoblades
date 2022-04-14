@@ -6,11 +6,18 @@ import { Nft } from './Nft';
 import { IShield } from './Shield';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 
-export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'king';
-export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2', 'king'];
+export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'king' | 'skill90' | 'skill180' | 'king90' | 'king180';
+export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2', 'king', 'skill90', 'skill180', 'king90', 'king180'];
+export type NftStakeType = 'cbkLandT1' | 'cbkLandT2' | 'cbkLandT3';
+export const allNftStakeTypes: NftStakeType[] = ['cbkLandT1', 'cbkLandT2', 'cbkLandT3'];
+
 
 export function isStakeType(stakeType: string): stakeType is StakeType {
   return allStakeTypes.includes(stakeType as StakeType);
+}
+
+export function isNftStakeType(stakeType: string): stakeType is NftStakeType {
+  return allNftStakeTypes.includes(stakeType as NftStakeType);
 }
 
 export interface IWeb3EventSubscription {
@@ -34,6 +41,7 @@ export interface IStakeOverviewState {
   rewardsDuration: number;
   totalSupply: string;
   minimumStakeTime: number;
+  rewardDistributionTimeLeft: number;
 }
 
 export interface IRaidState {
@@ -61,6 +69,16 @@ export interface IPartnerProject {
   tokensClaimed: string;
   tokenPrice: string;
   isActive: boolean;
+}
+
+export interface ISpecialWeaponEvent {
+  name: string;
+  weaponElement: string;
+  endTime: string;
+  supply: string;
+  orderedCount: string;
+  ordered: boolean;
+  forged: boolean;
 }
 
 export interface IItemPrices {
@@ -128,6 +146,7 @@ export interface IState {
   inGameOnlyFunds: string;
   directStakeBonusPercent: number;
   ownedCharacterIds: number[];
+  ownedGarrisonCharacterIds: number[];
   ownedWeaponIds: number[];
   ownedShieldIds: number[];
   ownedTrinketIds: number[];
@@ -136,10 +155,18 @@ export interface IState {
   maxStamina: number;
   ownedDust: string[];
   cartEntries: CartEntry[];
+  currentChainSupportsMerchandise: boolean;
+  currentChainSupportsPvP: boolean;
+  currentChainSupportsQuests: boolean;
+  hasAdminAccess: boolean;
+  hasMinterAccess: boolean;
 
   currentCharacterId: number | null;
   characters: Record<number, ICharacter>;
+  garrisonCharacters: Record<number, ICharacter>;
   characterStaminas: Record<number, number>;
+  characterPowers: Record<number, number>;
+  characterIsInArena: Record<number, boolean>;
   characterRenames: Record<number, string>;
   characterCosmetics: Record<number, string>;
 
@@ -154,8 +181,8 @@ export interface IState {
   currentNftType: string | null;
   currentNftId: number | null;
 
-  staking: Record<StakeType, IStakeState>;
-  stakeOverviews: Record<StakeType, IStakeOverviewState>;
+  staking: Record<StakeType | NftStakeType, IStakeState>;
+  stakeOverviews: Record<StakeType | NftStakeType, IStakeOverviewState>;
 
   raid: IRaidState;
 
@@ -175,8 +202,16 @@ export interface IState {
   nfts: Record<string, Record<number | string, Nft>>;
 
   partnerProjects: Record<number, IPartnerProject>;
+  partnerProjectMultipliers: Record<number, string>;
+  partnerProjectRatios: Record<number, string>;
   payoutCurrencyId: string;
   defaultSlippage: string;
+
+  activeSpecialWeaponEventsIds: number[];
+  inactiveSpecialWeaponEventsIds: number[];
+  specialWeaponEvents: Record<number, ISpecialWeaponEvent>;
+  specialWeaponEventId: string;
+  shardsSupply: Record<number, number>;
 
   itemPrices: IItemPrices;
 }

@@ -7,7 +7,6 @@
       <p>{{ $t('market.merchandise.thankYouForShopping') }}</p>
       <span>{{ $t('market.merchandise.yourShippingMethod') }}: </span>
       <p class="font-weight-bold">{{ shipping }}</p>
-      <p>{{ $t('market.merchandise.checkYourEmail') }}</p>
     </b-modal>
     <b-modal ref="order-error-modal" ok-only no-close-on-backdrop hide-header-close
              :title="$t('market.merchandise.orderError')">

@@ -1,10 +1,10 @@
 <template>
   <div class="pvpWrapper">
     <div class="noCharacter" v-if="!currentCharacterId && currentCharacterId !== 0">
-      You need at least one character to enter PvP!
+      {{$t('pvp.atLeastOneChar')}}
     </div>
     <div v-else>
-      <pvp-nav-bar :tabNumber="tab" @changeTab="onChangeTab" v-if="!isCharacterMatchMaking" />
+      <pvp-nav-bar :tabNumber="tab" :hasRewards="hasRewards" @changeTab="onChangeTab" v-if="!isCharacterMatchMaking" />
       <pvp-arena
         v-if="tab === 0"
         @enterMatchMaking="handleEnterMatchMaking"
@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import PvPNavBar from '../components/smart/PvPNavBar.vue';
 import PvPLeaderboards from '../components/smart/PvPLeaderboards.vue';
 import PvPRewards from '../components/smart/PvPRewards.vue';
@@ -34,15 +34,20 @@ export default {
   data() {
     return {
       tab: 0,
-      isCharacterMatchMaking: false
+      isCharacterMatchMaking: false,
+      hasRewards: false,
     };
   },
 
   computed: {
-    ...mapState(['currentCharacterId']),
+    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount']),
   },
 
   methods: {
+    ...mapActions([
+      'getPlayerPrizePoolRewards'
+    ]),
+
     // TODO: Use router for this.
     onChangeTab(tabNumber) {
       this.tab = tabNumber;
@@ -55,6 +60,17 @@ export default {
     handleLeaveMatchMaking() {
       this.isCharacterMatchMaking = false;
     }
+  },
+
+  async created() {
+    const playerRewards = await this.getPlayerPrizePoolRewards();
+    this.hasRewards = !!+playerRewards;
+  },
+
+  async updated() {
+    const playerRewards = await this.getPlayerPrizePoolRewards();
+
+    this.hasRewards = !!+playerRewards;
   }
 };
 </script>
