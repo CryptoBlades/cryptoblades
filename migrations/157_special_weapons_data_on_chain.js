@@ -7,6 +7,8 @@ module.exports = async function (deployer, network) {
 
   if (network === 'bscmainnet'
     || network === 'bscmainnet-fork'
+    || network === 'bsctestnet'
+    || network === 'bsctestnet-fork'
     || network === 'hecomainnet'
     || network === 'avaxmainnet'
     || network === 'avaxmainnet-fork'
