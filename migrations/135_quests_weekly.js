@@ -29,7 +29,7 @@ module.exports = async function (deployer, network) {
   const VAR_REPUTATION_LEVEL_4 = await simpleQuests.VAR_REPUTATION_LEVEL_4();
   const VAR_REPUTATION_LEVEL_5 = await simpleQuests.VAR_REPUTATION_LEVEL_5();
   const VAR_SKIP_QUEST_STAMINA_COST = await simpleQuests.VAR_SKIP_QUEST_STAMINA_COST();
-  const VAR_WEEKLY_COMPLETIONS_GOAL = await simpleQuests.VAR_WEEKLY_COMPLETIONS_GOAL();
+  // const VAR_WEEKLY_COMPLETIONS_GOAL = await simpleQuests.VAR_WEEKLY_COMPLETIONS_GOAL();
   const VAR_CONTRACT_ENABLED = await simpleQuests.VAR_CONTRACT_ENABLED();
   //Leaving this as a comment, because it's 0 by default
   await simpleQuests.setVars([
@@ -43,7 +43,7 @@ module.exports = async function (deployer, network) {
     VAR_REPUTATION_LEVEL_4,
     VAR_REPUTATION_LEVEL_5,
     VAR_SKIP_QUEST_STAMINA_COST,
-    VAR_WEEKLY_COMPLETIONS_GOAL,
+    // VAR_WEEKLY_COMPLETIONS_GOAL,
     VAR_CONTRACT_ENABLED
   ], [
     // 0,
