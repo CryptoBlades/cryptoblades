@@ -10,7 +10,7 @@ import img7 from './assets/placeholder/sword-placeholder-6.png';
 
 import specialImg1 from './assets/special-weapons/heco-sword.png';
 import specialImg2 from './assets/special-weapons/blazing-mane.png';
-import specialImg3 from './assets/special-weapons/pluto-alliance-sword.png';
+import specialImg3 from './assets/special-weapons/silverfang.png';
 
 import { IWeapon } from './interfaces';
 
