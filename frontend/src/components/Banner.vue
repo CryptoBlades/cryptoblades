@@ -3,9 +3,9 @@
     <div v-if="!hidden" class="banner">
         <span class="text">{{text}}</span>
         <a :href="link" class="link" target="_blank" rel="noopener noreferrer">
-          <button class="button" @click="hidden=true">{{linkText}}</button>
+          <button class="button">{{linkText}}</button>
         </a>
-        <svg @click="hidden=true" class="closeBtn" width="27.667" height="27.667" viewBox="0 0 27.667 27.667">
+        <svg @click="hide" class="closeBtn" width="27.667" height="27.667" viewBox="0 0 27.667 27.667">
             <g id="Group_831" data-name="Group 831" transform="translate(-293 -654)">
               <rect id="Rectangle_904" data-name="Rectangle 904" width="1.043" height="6.777" rx="0.521" transform="translate(300.248 661.878) rotate(-45)"/>
               <rect id="Rectangle_905" data-name="Rectangle 905" width="1.043" height="7.771" rx="0.521" transform="translate(306.171 667.8) rotate(-45)"/>
@@ -27,6 +27,17 @@ export default {
     return {
       hidden: false,
     };
+  },
+  created() {
+    if(localStorage.getItem('bannerHidden') === 'true'){
+      this.hidden = true;
+    }
+  },
+  methods: {
+    hide() {
+      localStorage.setItem('bannerHidden', 'true');
+      this.hidden = true;
+    },
   },
 };
 
