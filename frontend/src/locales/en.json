@@ -356,7 +356,15 @@
     "live": "Live",
     "ended": "Ended",
     "stakingRewardsTooltip": "You can earn shards rewards for staking SKILL. These rewards can be claimed into specific shard of your choice. Only full shards can be claimed.",
-    "or": "or"
+    "or": "or",
+    "weapon": "Weapons",
+    "weaponDesc": "Forge Weapons and Create Dust",
+    "equipment":"Equipment",
+    "equipmentDesc": "Shields, Trinkets and Armor",
+    "dustStorageDesc": "Forge your weapons with dust",
+    "land": "Land",
+    "landDesc": "Own land and conquer",
+    "regenerate": "Regenerates 1 point every 5 minutes, stamina bar will be full at: " 
   },
   "dustBalanceDisplay": {
     "availableDust": "Available Dust",
