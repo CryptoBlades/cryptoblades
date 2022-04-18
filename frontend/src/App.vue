@@ -231,11 +231,7 @@ export default {
         if(this.toggleSideBar){
           toDisplay = 'can-show-app';
         }else{
-          if(this.currentPath === '/blacksmith'){
-            toDisplay = 'col-xl-10 col-lg-9 col-md-9 col-sm-10 cols-11 set-normal';
-          }else{
-            toDisplay = 'col-xl-9 col-lg-8 col-md-8 col-sm-10 cols-11 set-normal';
-          }
+          toDisplay = 'col-xl-10 col-lg-9 col-md-9 col-sm-10 cols-11 set-normal';
         }
       }else{
         toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';

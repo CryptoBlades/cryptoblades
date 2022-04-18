@@ -42,31 +42,31 @@
                 </div>
           </b-col>
           <b-col class="character-list centered-list" v-else>
-                <div v-for="s in sideBarBlacksmith"
-                  :key="s.id"
-                  :class="s.status === 'active' ? 'character-highlight' : 'character'"
-                  @click="setActiveTab(s)"
+                <div v-for="sidebarItem in sideBarBlacksmith"
+                  :key="sidebarItem.id"
+                  :class="sidebarItem.status === 'active' ? 'character-highlight' : 'character'"
+                  @click="setActiveTab(sidebarItem)"
                 >
                 <div class="character-element">
                   <div class="element-frame">
                       <div>
-                        <span :id="`${s.iconName}`"/>
+                        <span :id="`${sidebarItem.iconName}`"/>
                       </div>
                   </div>
                   <div class="element-frame-active">
                      <div>
                         <span
-                          :id="`${s.iconName}`"/>
+                          :id="`${sidebarItem.iconName}`"/>
                       </div>
                   </div>
                 </div>
                 <div class="character-details">
                   <div class="name-list">
-                    {{ s.title }}
+                    {{ sidebarItem.title }}
                   </div>
                   <div class="nav-line"></div>
                   <div class="char-level">
-                      {{ s.desc }}
+                      {{ sidebarItem.desc }}
                   </div>
                 </div>
                 </div>
@@ -405,8 +405,7 @@ li.character-highlight{
   text-transform: uppercase;
   font-weight: 700;
   margin: auto;
-  font-size: 1vw;
-  white-space: nowrap;
+  font-size: 0.8vw;
   text-align: left;
   color: #9e8a57;
 }

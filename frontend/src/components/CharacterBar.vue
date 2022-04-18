@@ -46,11 +46,7 @@ export default Vue.extend({
       if(this.isToggled){
         toDisplay = 'sideBorder';
       }else{
-        if(this.currentPath === '/blacksmith'){
-          toDisplay = 'col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1';
-        }else{
-          toDisplay = 'col-xl-3 col-lg-4 col-md-4 col-sm-2 cols-1';
-        }
+        toDisplay = 'col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1';
       }
       return toDisplay;
     },
