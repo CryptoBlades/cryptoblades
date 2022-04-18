@@ -738,4 +738,22 @@ export default {
   font-size: 0.6em;
   text-align: right;
 }
+
+@media (max-width: 576px) {
+  .name > div > span{
+    font-family: Oswald;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    font-size: 7em;
+  }
+
+  .name > div > div{
+    font-size: 5em;
+    color: rgba(255, 255, 255, 0.445);
+  }
+
+}
+
+
 </style>

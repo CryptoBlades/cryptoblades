@@ -1,74 +1,91 @@
 <template>
   <div>
     <div class="filters" v-if="!newWeapon" @change="saveFilters()">
-      <h3>{{$t('weapons')}} ({{ ownWeapons }})</h3>
-      <div class="row d-flex align-items-center" style="flex-grow:0.6">
-        <div class="col-sm-6 col-md-6 col-lg-4 d-flex">
+      <h3 v-if="!noTitle">{{$t('weapons')}} ({{ ownWeapons }})</h3>
+      <h3 v-if="noTitle">Selected ({{ ignore.length }})</h3>
+      <span class="filter-icon" @click="showFilter"></span>
+      <div class="row d-flex align-items-center none-mobile" style="flex-grow:0.6" >
+        <div class="col-sm-12 col-md-6 col-lg-4 d-flex none-mobile">
           <!-- <div v-if="showReforgedToggle" class="show-reforged">
-            <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
-            <strong>{{$t('weaponGrid.showReforged')}}</strong>
-          </div> -->
+              <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
+              <strong>{{$t('weaponGrid.showReforged')}}</strong>
+            </div> -->
 
-          <div v-if="showFavoriteToggle" class="show-reforged show-favorite">
-            <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
-            <strong>{{$t('weaponGrid.showFavorite')}}</strong>
+            <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
+              <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
+              <strong>{{$t('weaponGrid.showFavorite')}}</strong>
+            </div>
           </div>
-        </div>
-        <div class="col-sm-6 col-md-6 col-lg-3 mb-3">
-          <strong>{{$t('weaponGrid.stars')}}</strong>
-          <select class="form-control" v-model="starFilter" >
-            <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
-          </select>
-        </div>
+          <div class="col-sm-6 col-md-6 col-lg-3 mb-3 none-mobile">
+            <strong>{{$t('weaponGrid.stars')}}</strong>
+            <select class="form-control" v-model="starFilter" >
+              <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+            </select>
+          </div>
 
-        <div class="col-sm-6 col-md-6 col-lg-3 mb-3">
-          <strong>{{$t('weaponGrid.element')}}</strong>
-          <select class="form-control" v-model="elementFilter" >
-            <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
-            :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
-          </select>
+          <div class="col-sm-6 col-md-6 col-lg-3 mb-3 none-mobile">
+            <strong>{{$t('weaponGrid.element')}}</strong>
+            <select class="form-control" v-model="elementFilter" >
+              <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+              :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+            </select>
+          </div>
+        <div class="col-sm-12 col-md-6 col-lg-2 none-mobile">
+          <b-button
+            v-if="!newWeapon"
+            variant="primary"
+            class="clear-filters-button mb-3"
+            @click="clearFilters"
+          >
+            <span>
+              Clear
+            </span>
+          </b-button>
         </div>
-      <div class="col-sm-6 col-md-6 col-lg-2">
-        <b-button
-          v-if="!newWeapon"
-          variant="primary"
-          class="clear-filters-button mb-3"
-          @click="clearFilters"
-        >
-          <span>
-            Clear
-          </span>
-        </b-button>
-      </div>
       </div>
     </div>
 
-    <ul class="weapon-grid">
-      <li
-        class="weapon" :style="setBorderSelected(weapon.id) ? 'border: 2px solid #fff' : ''"
-        :class="{ selected: highlight !== null && weapon.id === highlight }"
-        v-for="weapon in nonIgnoredWeapons"
-        :key="weapon.id"
-        @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
-        @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
-        <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
-        <div class="weapon-icon-wrapper">
-          <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)"/>
-        </div>
-        <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
-          <slot name="above" :weapon="weapon"></slot>
-        </div>
-        <slot name="sold" :weapon="weapon"></slot>
-      </li>
-    </ul>
+    <!-- <ul class="weapon-grid"> -->
+      <transition-group
+        appear @before-enter="beforeEnter" @enter="enter"
+        class="weapon-grid" tag="ul" name="list"
+        >
+        <li
+          class="weapon" :style="setBorderSelected(weapon.id) ? 'border: 2px solid #fff' : ''"
+          :class="{ selected: highlight !== null && weapon.id === highlight }"
+          v-for="(weapon, i) in nonIgnoredWeapons.slice(((this.activePage*10)-10),((this.activePage*10)))"
+          :key="weapon.id" :data-index="i"
+          @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
+          @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
+          <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
+          <div class="weapon-icon-wrapper">
+            <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)"/>
+          </div>
+          <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
+            <slot name="above" :weapon="weapon"></slot>
+          </div>
+          <slot name="sold" :weapon="weapon"></slot>
+        </li>
+      </transition-group>
+    <!-- </ul> -->
+
+    <div class="pagination" v-if="!noPagination">
+      <div v-if="startList()" @click="createPagination(1)">1</div>
+      <div v-if="startList()" class="more-pagination">...</div>
+      <div v-for="page in pageSet" :key="page+1" @click="createPagination(page)"
+        :class="page == activePage ? 'active-page' : ''">{{page}}</div>
+      <div v-if="endList()" class="more-pagination">...</div>
+      <div v-if="endList()" @click="createPagination(noOfPages)">{{noOfPages}}</div>
+    </div>
+
 
     <b-modal class="centered-modal" ref="weapon-rename-modal"
-                  @ok="renameWeaponCall()">
-                  <template #modal-title>
-                    {{$t('weaponGrid.renameWeapon')}}
-                  </template>
-                  <b-form-input type="string"
-                    class="modal-input" v-model="weaponRename" :placeholder="$t('weaponGrid.renamePlaceholder')" />
+      @ok="renameWeaponCall()">
+      <template #modal-title>
+        {{$t('weaponGrid.renameWeapon')}}
+      </template>
+      <b-form-input type="string"
+        class="modal-input" v-model="weaponRename" :placeholder="$t('weaponGrid.renamePlaceholder')" />
       <span v-if="isRenameProfanish">
         {{$t('weaponGrid.isProfanish')}} <em>{{cleanRename}}</em>
       </span>
@@ -86,12 +103,53 @@
         <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
       </select>
     </b-modal>
+    <b-modal ref="open-filter" id="open-filter" hide-footer hide-header>
+       <div class="row d-flex align-items-center modal-filter" style="flex-grow:0.6" >
+         <h4>Filter Weapon</h4>
+          <div class="col-sm-6 col-md-6 col-lg-3 mb-3">
+            <strong>{{$t('weaponGrid.stars')}}</strong>
+            <select class="form-control" v-model="starFilter" >
+              <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+            </select>
+          </div>
+
+          <div class="col-sm-6 col-md-6 col-lg-3 mb-3">
+            <strong>{{$t('weaponGrid.element')}}</strong>
+            <select class="form-control" v-model="elementFilter" >
+              <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+              :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+            </select>
+          </div>
+           <div class="col-sm-12 col-md-6 col-lg-4 d-flex">
+            <div v-if="showReforgedToggle" class="show-reforged">
+              <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
+              <strong>{{$t('weaponGrid.showReforged')}}</strong>
+            </div>
+            <div v-if="showFavoriteToggle" class="show-reforged show-favorite">
+              <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
+              <strong>{{$t('weaponGrid.showFavorite')}}</strong>
+            </div>
+          </div>
+        <div class="col-sm-12 col-md-6 col-lg-2 d-flex">
+          <button
+            v-if="!newWeapon"
+            @click="clearFilters"
+            class="forge-btn">
+            <span>CLEAR FILTER</span>
+          </button>
+          <button class="forge-btn" @click="$bvModal.hide('open-filter')">
+            <span>DONE</span>
+          </button>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import Events from '../../events';
+import gasp from 'gsap';
 import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '../../interfaces';
@@ -130,6 +188,9 @@ interface Data {
   targetSkin: string;
   currentWeaponId: number | string | null;
   weaponCosmeticsNames: string[];
+  activePage: number;
+  pageSet: number[];
+  noOfPages: number;
 }
 const sorts = [
   { name: i18n.t('weaponGrid.sorts.any'), dir: '' },
@@ -162,7 +223,21 @@ export default Vue.extend({
       },
       default: null,
     },
+    noPagination: {
+      // this forces Typescript to consider a prop a certain type
+      // without us specifying a "type" property;
+      // Vue's "type" property is not as flexible as we need it here
+      validator(x: boolean | number | null) {
+        void x;
+        return true;
+      },
+      default: null,
+    },
     showGivenWeaponIds: {
+      type: Boolean,
+      default: false,
+    },
+    noTitle: {
       type: Boolean,
       default: false,
     },
@@ -263,7 +338,11 @@ export default Vue.extend({
         i18n.t('market.nftList.weaponGoldborder'),
         i18n.t('market.nftList.weaponSilverborder'),
         i18n.t('market.nftList.weaponBronzeborder')
-      ]
+      ],
+      // data for paginations
+      activePage: 1,
+      pageSet: [],
+      noOfPages: 0
     } as Data;
   },
   components: {
@@ -433,6 +512,9 @@ export default Vue.extend({
       this.currentWeaponId = id;
       (this.$refs['weapon-rename-modal'] as BModal).show();
     },
+    showFilter(){
+      (this.$refs['open-filter'] as BModal).show();
+    },
     async renameWeaponCall() {
       if(!this.currentWeaponId) return;
       await this.renameWeapon({id: +this.currentWeaponId, name: this.weaponRename});
@@ -492,6 +574,53 @@ export default Vue.extend({
         ];
       }
     },
+    createPagination(activePage: number){
+      const noOfItems = this.nonIgnoredWeapons.length;
+      this.activePage = activePage;
+      this.noOfPages = Math.ceil(noOfItems/10);
+      this.pageSet = [];
+      if(this.noOfPages > 5){
+        if(activePage > 3){
+          if(this.noOfPages - this.activePage < 3){
+            for (let a = 3; a >= 0; a--) {
+              this.pageSet.push(this.noOfPages - a);
+            }
+          }else{
+            this.pageSet.push(activePage - 1);
+            this.pageSet.push(activePage);
+            this.pageSet.push(activePage + 1);
+          }
+        }else{
+          for (let a = 1; a < 5; a++) {
+            this.pageSet.push(a);
+          }
+        }
+      }else{
+        for (let x = 1; x < this.noOfPages; x++) {
+          this.pageSet.push(x);
+        }
+      }
+    },
+    startList(){
+      return ((this.noOfPages > 6 && this.activePage > 3 ) || ((this.noOfPages > 5) && (this.noOfPages - this.activePage < 3)));
+    },
+    endList(){
+      return ((this.noOfPages > 6 && (this.noOfPages - this.activePage > 2)) || (this.noOfPages > 5) && (this.activePage < 4));
+    },
+
+    enter(el, done) {
+      gasp.to(el, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        onComplete: done,
+        delay: el.dataset.index * 0.1
+      });
+    },
+    beforeEnter(el){
+      el.style.opacity = 0;
+      el.style.transform = 'translateY(100px)';
+    },
   },
   async mounted() {
     this.checkStorageFavorite();
@@ -510,6 +639,7 @@ export default Vue.extend({
     }
     this.haveRename = await this.fetchTotalWeaponRenameTags();
     await this.loadCosmeticsCount();
+    this.createPagination(this.activePage);
   },
 });
 </script>
@@ -584,16 +714,104 @@ export default Vue.extend({
   align-self: flex-end;
   margin:0 15px;
 }
+
+.pagination{
+  display: flex;
+  justify-content: center;
+}
+
+.pagination > div {
+  font-family: Roboto;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.39);
+  padding: 5px 10px;
+  margin-right: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.pagination > div:hover{
+  border: 1px solid #fff;
+}
+
+.pagination > .active-page{
+  border: 1px solid #fff;
+}
+
+
+
+.pagination > .more-pagination{
+  border: none;
+  padding-bottom: 0px;
+}
+
 @media (max-width: 576px) {
   .weapon-grid {
     justify-content: center;
     margin-top: 10px;
   }
+
+  .weapon-content > div > .weapon-grid{
+    padding-left: 0px;
+  }
+
   .show-reforged {
     width: 100%;
     justify-content: center;
     margin-bottom: 15px;
   }
+
+.forge-btn{
+  display: flex;
+  flex-direction: column;
+  border: none;
+  width: 200px;
+  height: 50px;
+  align-items: center;
+  vertical-align: middle;
+  justify-content: center;
+  background-image: url('../../assets/buttonOutline.svg');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  -o-object-fit: fill;
+  object-fit: fill;
+  border: none !important;
+}
+
+.forge-btn > span{
+  font-family: Oswald;
+  color:#fff;
+}
+
+.modal-filter > h4{
+  font-family: Trajan;
+  padding: 10px 20px ;
+}
+
+
+  .none-mobile{
+    display: none;
+  }
+
+  .filters > h3{
+    font-size: 5.5vw;
+  }
+
+  .pagination{
+    margin-top: 2em;
+  }
+
+  .pagination > div {
+    font-size: 11px;
+  }
+
+  .pagination > .more-pagination {
+      padding-bottom: 0px;
+      padding-right: 0px;
+      padding-left: 0px;
+  }
+
   .clear-filters-button {
     width: 100%;
     text-align: center;
@@ -601,6 +819,16 @@ export default Vue.extend({
   }
   .ml-3 {
     margin-left: 0 !important;
+  }
+
+  .filters {
+    flex-direction: row;
+  }
+
+  .filter-icon{
+    content: url('../../assets/blacksmith/filter.svg');
+    height: 30px;
+    width: 30px;
   }
 }
 /* Needed to adjust weapon list */

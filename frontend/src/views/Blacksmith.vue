@@ -1,47 +1,79 @@
 <template>
   <div class="body main-font blacksmith-page">
-    <div class="bg-tint"></div>
-    <Transition name="slide-fade">
-    <div class="forging-modal" v-if="showModal" v-on:click.self="closeModal()">
-      <!-- MODAL FOR FORGING A WEAPON -->
-      <div class="body-forge" v-if="modalType =='forge'">
-        <div class="row new-weapons" v-if="!spin">
-          <img src="../assets/header-line.png" alt="">
-          <h3>The Dwarves Have Forged Your Weapons</h3>
-        </div>
-        <div class="weapon-list" v-if="!spin">
-          <weapon-grid v-if="!spin" :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true"/>
-        </div>
-        <div class="footer-close" v-if="!spin">
-          <img src="../assets/separator.png" alt="">
-          <span>Tap Anywhere To Close</span>
-          <span class="close-icon"></span>
-        </div>
+    <div class="mobile-menu">
+      <span :class="activeTab == 'forge' ? 'active' : ''" @click="displayBlacksmith()"><span id="forge"></span> Forge</span>
+      <span :class="activeTab == 'salvage' ? 'active' : ''" @click="displayDustCreation()"><span id="salvage"></span>Salvage</span>
+    </div>
+    <right-menu :activeTab="activeTab" :dusts="{lesser: lesser,greater: greater, powerful: powerful}"  :key="ctr" :showReforgeDust="showReforgeDust" />
+
+    <!-- MODAL NEW UI -->
+    <b-modal class="" ref="confirm-reforge" hide-footer hide-header>
+      <div class="header-close">
+            <img src="../assets/separator.png" alt="">
+            <h4>Dust Reforge Confirmation</h4>
       </div>
-      <div class="forge-loading" v-if="spin && modalType == 'forge'">
-        <div class="row new-weapons">
-          <h3>Forging Weapon...</h3>
-        </div>
-        <div class="forging">
-          <div class="spinning-box">
-            <div class="inner-spin"></div>
-            <div class="diamond-box"></div>
-            <span class="hammer-loading"></span>
+      <div class="forge-content">
+          <div>
+            <span class="reforge-img" :style="`content:url('.${getWeaponArt(getWeaponToUpgrade())}')`"></span>
+          </div>
+          <div>
+            <b-row class="power-rolled">
+              <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
+                <h5>Low Star Burn</h5>
+              </b-col>
+              <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
+                <img src="../assets/arrow-right.png" alt="">
+              </b-col>
+              <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
+                <h5>{{lesserDust}}</h5>
+              </b-col>
+            </b-row>
+            <b-row class="power-rolled">
+              <b-col cols="4"  lg="5" sm="4" md="4" class="win-details">
+                <h5>Four Star Burn</h5>
+              </b-col>
+              <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
+                <img src="../assets/arrow-right.png" alt="">
+              </b-col>
+              <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
+                <h5>{{greaterDust}}</h5>
+              </b-col>
+            </b-row>
+             <b-row class="power-rolled">
+              <b-col cols="4"  lg="5" sm="4" md="4" class="win-details">
+                <h5>Five Star Burn</h5>
+              </b-col>
+              <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
+                <img src="../assets/arrow-right.png" alt="">
+              </b-col>
+              <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
+                <h5>{{powerfulDust}}</h5>
+              </b-col>
+            </b-row>
+            <!-- <b-row class="power-rolled" v-if="modalType == 'successReforge'">
+              <b-col cols="12"  lg="12" sm="12" md="12" class="win-details reforge-bonus">
+                <h5>Reforge Bonus: {{getWeaponInfo('bonusPower')}}
+                <span>(<b-icon icon="caret-up-fill" variant="danger" />{{ totalBonusPower}})</span></h5>
+              </b-col>
+            </b-row> -->
           </div>
         </div>
+         <div class="footer-close">
+           <div class="d-flex align-items-center info">
+              <b-icon icon="exclamation-circle" variant="danger" /> &nbsp; {{$t('blacksmith.cantBeUndone')}}
+           </div>
+            <img class="mb-2" src="../assets/separator.png" alt="">
+            <button class="ml-3 mt-4 forge-btns" @click="onReforgeWeaponWithDust()">
+              <span>CONFIRM</span>
+            </button>
+        </div>
+    </b-modal>
+    <b-modal ref="succesful-reforge" hide-footer hide-header @hide="clearDust">
+      <div class="forge-header" v-if="modalType == 'successReforge'">
+        <img src="../assets/header-line.png" alt="">
+        <h3>REFORGE SUCCESSFULL</h3>
       </div>
-
-      <!-- FOR REFORGE CONFIRMATION -->
-       <div class="body-forge " v-if="modalType == 'dustReforge' || modalType == 'successReforge'">
-        <div class="forge-header" v-if="modalType == 'successReforge'">
-          <img src="../assets/header-line.png" alt="">
-          <h3>REFORGE SUCCESSFULL</h3>
-        </div>
-        <div class="header-close" v-if="modalType == 'dustReforge'">
-          <img src="../assets/separator.png" alt="">
-          <h4>Dust Reforge Confirmation</h4>
-        </div>
-        <div class="forge-content">
+      <div class="forge-content">
           <div>
             <span class="reforge-img" :style="`content:url('.${getWeaponArt(getWeaponToUpgrade())}')`"></span>
           </div>
@@ -87,25 +119,31 @@
             </b-row>
           </div>
         </div>
-         <div class="footer-close" v-if="modalType == 'dustReforge'">
-           <div class="d-flex align-items-center info">
-              <b-icon icon="exclamation-circle" variant="danger" /> &nbsp; {{$t('blacksmith.cantBeUndone')}}
-           </div>
-            <img class="mb-2" src="../assets/separator.png" alt="">
-            <button class="ml-3 mt-4 forge-btns" @click="onReforgeWeaponWithDust()">
-              <span>CONFIRM</span>
-            </button>
-        </div>
         <div class="footer-close" v-if="modalType == 'successReforge'">
           <img src="../assets/separator.png" alt="">
           <span>Tap Anywhere To Close</span>
           <span class="close-icon"></span>
         </div>
+    </b-modal>
+
+    <Transition name="slide-fade">
+      <div class="forging-modal" v-if="showModal" v-on:click.self="closeModal()">
+        <div class="forge-loading" v-if="spin && modalType == 'forge'">
+          <div class="row new-weapons">
+            <h3>Forging Weapon...</h3>
+          </div>
+          <div class="forging">
+            <div class="spinning-box">
+              <div class="inner-spin"></div>
+              <div class="diamond-box"></div>
+              <span class="hammer-loading"></span>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
     </Transition>
 
-
+    <div class="bg-tint"></div>
     <b-tabs justified  style="overflow-x:auto;height:90vh">
       <b-tab>
         <div class="blank-slate" v-if="ownWeapons.length === 0">
@@ -121,7 +159,7 @@
         <transition name="slide-fade">
         <div class="row mt-3" v-if="ownWeapons.length > 0 && !showReforge">
           <div class="col">
-            <div class="weapon-header">
+            <div class="weapon-header none-mobile">
               <div class="nav-icons">
                 <div class="forge-btn" @click="displayBlacksmith()">
                   <span id="forge"></span>
@@ -135,7 +173,7 @@
                   <span>Create Dust</span>
                 </div>
               </div>
-              <div class="button-div">
+              <div class="button-div none-mobile">
                 <button class="ml-3 reforgeDust"
                   v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
                   @click="displayDustReforge()"
@@ -206,6 +244,21 @@
                   </div>
                 </b-modal>
 
+                <b-modal size="lg" hide-footer hide-header ref="new-forge-weapon">
+                  <div class="row new-weapons">
+                    <img src="../assets/header-line.png" alt="">
+                    <h3>The Dwarves Have Forged Your Weapons</h3>
+                  </div>
+                  <div class="weapon-list">
+                    <weapon-grid :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true" :noPagination="true"/>
+                  </div>
+                  <div class="footer-close">
+                    <img src="../assets/separator.png" alt="">
+                    <span>Tap Anywhere To Close</span>
+                    <span class="close-icon"></span>
+                  </div>
+                </b-modal>
+
                 <b-modal size="lg" hide-footer hide-header ref="forge-element-selector-modal">
                   <div class="row justify-content-center">
                     <h4 class="select-el">Select an Element</h4>
@@ -231,7 +284,7 @@
                       </b-form-select-option>
                     </b-form-select>
                   </div>
-                  <div class="row justify-content-md-center margin-top">
+                  <div class="row justify-content-center  margin-top">
                     <button
                       v-if="clickedForgeButton === 0"
                       variant="primary"
@@ -264,9 +317,6 @@
                 </b-modal>
               </div>
             </div>
-            <!-- <div class="buttons-panel">
-              <h2>{{$t('weapons')}} ({{ ownWeapons.length }})</h2>
-            </div> -->
             <div class="weapon-content" v-if="showBlacksmith">
               <weapon-grid :showNftOptions="true" :ownWeapons="ownWeapons.length" v-model="reforgeWeaponId" />
             </div>
@@ -289,9 +339,17 @@
               <div class="col-lg-12">
                 <h2>{{getWeaponInfo('name')}}</h2>
                 <div class="details">
-                  <span>Battle Power: {{getWeaponInfo('stat2Value') + getWeaponInfo('stat1Value') + getWeaponInfo('stat3Value')}}</span>
-                  <span>Rarity: {{getWeaponInfo('rarity')}}</span>
-                  <span>Element: {{getWeaponInfo('element')}}</span>
+                  <span>
+                    Battle Power:
+                    <span>{{getWeaponInfo('stat2Value') + getWeaponInfo('stat1Value') + getWeaponInfo('stat3Value')}}</span>
+                  </span>
+                  <span>
+                    Rarity:
+                    <span>{{getWeaponInfo('rarity')}}</span>
+                  </span>
+                  <span>Element:
+                    <span>{{getWeaponInfo('element')}}</span>
+                  </span>
                   <!-- <span>Weapon Rank: 120,031</span> -->
                 </div>
 
@@ -317,11 +375,17 @@
                     <p>+{{getWeaponInfo('stat3Value')}}</p>
                   </div>
                 </div>
-                <div class="row menus">
-                  <div class="col-lg-3 active-tab"> REFORGE </div>
-                  <div class="col-lg-3"> <span class="lock-icon"></span> UPGRADE </div>
-                  <div class="col-lg-3"> <span class="lock-icon"></span> ENCHANT </div>
-                  <div class="col-lg-3"> <span class="lock-icon"></span> SKINS </div>
+                <div class="row menus desktop">
+                  <div class="col-lg-3 col-sm-3 active-tab"> REFORGE </div>
+                  <div class="col-lg-3 col-sm-3"> <span class="lock-icon"></span> UPGRADE </div>
+                  <div class="col-lg-3 col-sm-3"> <span class="lock-icon"></span> ENCHANT </div>
+                  <div class="col-lg-3 col-sm-3"> <span class="lock-icon"></span> SKINS </div>
+                </div>
+                <div class="mobile">
+                  <div class="active-tab"> <span class="forge-icons"></span></div>
+                  <div> <span class="enchant-icons"></span></div>
+                  <div> <span class="skin-icons"></span></div>
+                  <div> <span class="upgrade-icons"></span></div>
                 </div>
                 <div class="desc-details">
                   <span>
@@ -398,6 +462,7 @@
                 <div class="btn-forge">
                   <button class="ml-3 forge-btns"
                      tagname="confirm_forge_weapon"
+                      :style="lesserDust == '0' && greaterDust == '0' && powerfulDust == '0' ? 'opacity:0.5' : 'opacity:1'"
                       :class="'confirmReforge'"
                       @click="showDustReforgeConfirmation"
                       :disabled="lesserDust == '0' && greaterDust == '0' && powerfulDust == '0'"
@@ -445,9 +510,9 @@
           </div> -->
 
         <div class="row mt-3" v-if="showReforge && showReforgeDust === false">
-          <div class="col-md-9">
+          <div class="col-md-9 col-xl-8 col-lg-7">
               <div class="row mt-3 ml-2" v-if="showReforge && !showReforgeDust">
-                <div class="weapon-header">
+                <div class="weapon-header none-mobile">
                   <div class="nav-icons" @click="displayBlacksmith()">
                     <div class="forge-btn">
                       <span id="forge"></span>
@@ -464,11 +529,11 @@
                 </div>
             </div>
             <div class="weapon-content">
-              <weapon-grid v-model="burnWeaponId" :ignore="burnWeaponIds"
+              <weapon-grid v-model="burnWeaponId" :ignore="burnWeaponIds" :noTitle="true"
                       :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon"  />
             </div>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3 col-xl-4 col-lg-5 none-mobile">
             <div class="dust-content">
               <h4>YOU WILL RECEIVE</h4>
               <div class="create-dust flex-column">
@@ -622,7 +687,8 @@
           class="row justify-content-md-center forge-btns"
           @click="onMassBurnWeapons">
             <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-              CONFIRM
+               CONFIRM <br>
+              <p class="dust-cost">({{burnCost * burnWeaponIds.length }} SKILL)</p>
             </span>
         </button>
       </div>
@@ -655,6 +721,7 @@
 <script lang='ts'>
 import BN from 'bignumber.js';
 import WeaponGrid from '../components/smart/WeaponGridNew.vue';
+import RightMenu from '../components/RightMenu.vue';
 import BigButton from '../components/BigButton.vue';
 import { getWeaponArt } from '../weapon-arts-placeholder';
 import { getWeaponRarity } from '../weapon-element';
@@ -724,6 +791,7 @@ interface Data {
   lesser: number;
   greater: number;
   powerful: number;
+  activeTab: string;
 }
 
 export default Vue.extend({
@@ -769,7 +837,9 @@ export default Vue.extend({
       totalBonusPower: 0,
       lesser: 0,
       greater: 0,
-      powerful: 0
+      powerful: 0,
+      activeTab: 'forge',
+      ctr: 0,
     } as Data;
   },
 
@@ -795,6 +865,7 @@ export default Vue.extend({
 
   watch: {
     reforgeWeaponId() {
+      Events.$emit('hasSelected');
       this.showReforge = false;
       this.burnWeaponId = null;
     },
@@ -840,6 +911,27 @@ export default Vue.extend({
     if(window.location.href.split('&').find(x => x === 'showSpecialForge')) {
       Events.$emit('show-special-forge-modal');
     }
+  },
+
+  mounted(){
+    Events.$on('forge-weapon', (id: number) =>{
+      console.log(id);
+      if(id === 0){
+        this.onClickForge(id);
+        (this.$refs['forge-element-selector-modal']as BModal).show();
+      }else if(id === 1){
+        this.onClickForge(id);
+        (this.$refs['forge-element-selector-modal']as BModal).show();
+      }else if(id===2){
+        Events.$emit('show-special-forge-modal');
+      }else{
+        this.displayDustReforge();
+      }
+    });
+
+    Events.$on('create-dust', () =>{
+      this.showMassDustConfirmation();
+    });
   },
 
   methods: {
@@ -1012,9 +1104,11 @@ export default Vue.extend({
     },
 
     showDustReforgeConfirmation() {
-      this.modalType = 'dustReforge';
-      this.showModal = true;
-      // (this.$refs['dustreforge-confirmation-modal'] as BModal).show();
+      if(this.lesserDust === '0' && this.greaterDust === '0' && this.powerfulDust === '0'){
+        (this as any).$dialog.notify.error('No Dust Allocated');
+      }else{
+        (this.$refs['confirm-reforge'] as BModal).show();
+      }
     },
 
     showMassDustConfirmation() {
@@ -1031,6 +1125,7 @@ export default Vue.extend({
       this.powerfulDust = '0';
     },
     displayDustCreation(){
+      this.activeTab = 'salvage';
       return this.showReforge = true,
       this.showBlacksmith = false,
       this.showDustForge = true,
@@ -1038,6 +1133,7 @@ export default Vue.extend({
       this.hideWeapons = this.ownedWeaponIds;
     },
     displayBlacksmith(){
+      this.activeTab = 'forge';
       this.showReforge = false;
       this.showBlacksmith = true;
       this.showDustForge = false;
@@ -1064,10 +1160,13 @@ export default Vue.extend({
       this.hideWeapons = this.ownedWeaponIds;
     },
     getWeaponToUpgrade() {
-      return this.ownWeapons.find(x => x.id === this.reforgeWeaponId);
+      if(this.reforgeWeaponId){
+        return this.ownWeapons.find(x => x.id === this.reforgeWeaponId);
+      }
     },
 
     addBurnWeapon(id: number){
+      this.ctr += 1;
       if(this.burnWeaponIds.includes(id.toString())){
         this.burnWeaponIds = this.burnWeaponIds.filter(val => val !==  id.toString());
         const weaponDetails = this.ownWeapons.find(y => y.id === id);
@@ -1094,12 +1193,13 @@ export default Vue.extend({
       this.newForged.splice(0, this.ownedWeaponIds.length - offset);
 
       // eslint-disable-next-line no-constant-condition
-      console.log(this.newForged);
       if (this.newForged.length > 0 && !this.onError){
         this.showModal = true;
         this.modalType = 'forge';
         this.spin = true;
         setTimeout(() => {
+          this.showModal = false;
+          (this.$refs['new-forge-weapon'] as BModal).show();
           this.spin = false;
         }, 10000);
       }
@@ -1110,6 +1210,7 @@ export default Vue.extend({
 
     async onReforgeWeaponWithDust() {
       this.showModal = false;
+      (this.$refs['confirm-reforge'] as BModal).hide();
       this.magicCircleSpeed = true;
 
       try {
@@ -1121,7 +1222,8 @@ export default Vue.extend({
         });
 
         this.modalType = 'successReforge';
-        this.showModal = true;
+        (this.$refs['succesful-reforge'] as BModal).show();
+        // this.showModal = true;
         this.magicCircleSpeed = false;
       } catch (e) {
         console.error(e);
@@ -1129,7 +1231,7 @@ export default Vue.extend({
       }
     },
 
-    closeModal(){
+    clearDust(){
       this.showModal = false;
       if(this.modalType === 'successReforge'){
         this.lesserDust = '0';
@@ -1155,6 +1257,7 @@ export default Vue.extend({
   components: {
     DustBalanceDisplay,
     WeaponGrid,
+    RightMenu,
     BigButton,
     WeaponIcon,
     BModal,
@@ -1195,6 +1298,14 @@ export default Vue.extend({
   flex-direction: column
 }
 
+.mobile-menu{
+  display: none;
+}
+
+.mobile-right-menu{
+  display: none;
+}
+
 .weapon-list{
   animation: revealUp 1s;
 }
@@ -1216,6 +1327,7 @@ export default Vue.extend({
   width: 90%;
   margin-top: -170px;
 }
+
 
 .forging-modal > .forge-loading{
   width:fit-content;
@@ -1326,7 +1438,7 @@ export default Vue.extend({
 .forge-header{
   display: flex;
   flex-direction: column;
-  width: 50%;
+  width: 100%;
   margin: auto;
 }
 
@@ -1354,7 +1466,7 @@ export default Vue.extend({
 
 .footer-close {
   margin: auto;
-  width: 400px;
+  /* width: 400px; */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -2008,10 +2120,6 @@ export default Vue.extend({
 }
 
 
-
-
-
-
 #random-border{
   background-image: url('../assets/questionmark-icon-45.png');
   background-size: 2em 2em;
@@ -2041,9 +2149,9 @@ export default Vue.extend({
   background-position: center;
   transform: rotate(45deg);
   border: 3px solid #e9c97a;
-  background-size: 2.5em 2.5em;
-  width: 3em;
-  height: 3em;
+  background-size: 2em 2em;
+  width: 2.5em;
+  height: 2.5em;
   transition: all 0.2s ease-in-out;
 }
 
@@ -2076,7 +2184,7 @@ export default Vue.extend({
   background-position: center;
   transform: rotate(45deg);
   border: 3px solid #e9c97a;
-  background-size: 2.5em 2.5em;
+  background-size: 2em 2em;
   width: 2.5em;
   height: 2.5em;
   transition: all 0.2s ease-in-out;
@@ -2111,9 +2219,9 @@ export default Vue.extend({
   background-position: center;
   transform: rotate(45deg);
   border: 3px solid #e9c97a;
-  background-size: 2.5em 2.5em;
-  width: 3em;
-  height: 3em;
+  background-size: 2em 2em;
+  width: 2.5em;
+  height: 2.5em;
   transition: all 0.2s ease-in-out;
 }
 
@@ -2146,9 +2254,9 @@ export default Vue.extend({
   background-position: center;
   transform: rotate(45deg);
   border: 3px solid #e9c97a;
-  background-size: 2.5em 2.5em;
-  width: 3em;
-  height: 3em;
+  background-size: 2em 2em;
+  width: 2.5em;
+  height: 2.5em;
   transition: all 0.2s ease-in-out;
 }
 
@@ -2182,9 +2290,9 @@ export default Vue.extend({
   background-position: center;
   transform: rotate(45deg);
   border: 3px solid #e9c97a;
-  background-size: 2.5em 2.5em;
-  width: 3em;
-  height: 3em;
+  background-size: 2em 2em;
+  width: 2.5em;
+  height: 2.5em;
   transition: all 0.2s ease-in-out;
 }
 
@@ -2326,6 +2434,10 @@ img.elements-modal:hover {
   }
 }
 
+ .dust-cost{
+    display: none;
+  }
+
 @media (max-width: 576px) {
   .button-div {
     justify-content: center;
@@ -2333,6 +2445,426 @@ img.elements-modal:hover {
   .buttons-panel {
     flex-direction: column;
   }
+
+  .magic-circle{
+    width: 100%;
+  }
+
+
+  .header-close > h4{
+    font-family: Trajan;
+    width: 100%;
+    margin: auto;
+    font-weight: 600;
+    margin-top: 1.1em;
+    text-align: center;
+    margin-bottom: 1.5em;
+  }
+
+  .reforge-bonus > h5{
+    text-align: center;
+  }
+
+  .reforge-img{
+    max-width: 50%;
+    min-width: 50%;
+    align-self: center;
+  }
+
+  .power-rolled{
+    width: 100%;
+  }
+
+  .forge-content{
+    flex-direction: column;
+  }
+
+  .header-close > img{
+    width: 100%;
+  }
+
+  .header-close{
+    width: 100%;
+  }
+
+  .dust-cost{
+    display:inline-block;
+    font-size: 16px;
+    color: #e9c97a;
+    margin: 0px;
+    line-height: 0px;
+  }
+
+  .none-mobile{
+    display: none;
+  }
+
+  .footer-close{
+    width: '';
+  }
+
+  .footer-close > img, .new-weapons > img{
+    width: 90vw;
+  }
+
+  .new-weapons  > h3{
+    justify-content: center;
+    text-align: center;
+    font-size: 23px;
+  }
+
+  .mobile-right-menu{
+      display: inline;
+    }
+
+    .body-forge > div > div > ul{
+    height: 40vh;
+    overflow-y: auto;
+  }
+
+
+
+  .mobile-menu{
+    display: flex;
+    justify-content: space-evenly;
+    padding: 10px 0px;
+    align-items: center;
+    background-color: rgba(20, 20, 20);
+    border-top: 1px solid rgba(255, 255, 255, 0.404);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.418);
+  }
+
+  .mobile-menu > span{
+    font-family: Trajan;
+    color: rgba(255, 255, 255, 0.459);
+    display: flex;
+    align-items: center;
+  }
+
+  .mobile-menu > span.active{
+    font-family: Trajan;
+    color: #fff;
+    display: flex;
+    align-items: center;
+  }
+
+  #salvage {
+    content: url("../assets/blacksmith/salvage.png");
+    height: 25px;
+    width: 25px;
+    background: rgba(0, 0, 0, 0.076);
+  }
+
+  #forge {
+    content: url("../assets/blacksmith/forge.png");
+    height: 25px;
+    width: 25px;
+    background: rgba(0, 0, 0, 0.076);
+  }
+
+  .weapon-content{
+    padding: 10px 20px;
+    margin-top: 20px;
+  }
+
+  .nav-icons > div:nth-child(1),.nav-icons > div:nth-child(3){
+    flex-direction: column;
+  }
+
+  .reforge-dust{
+    position: relative;
+    height: 37vh;
+  }
+
+  .weapon-menu > div > div > h2{
+    font-size: 2em;
+  }
+
+  .weapon-menu > div > div > .details{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+   .weapon-menu > div > div > .details > span{
+     padding-right: 0px;
+  }
+
+  .mobile{
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .mobile > div.active-tab{
+    opacity: 1;
+  }
+
+  .forge-icons{
+    content: url('../assets/blacksmith/reforge.svg');
+    height: 1.5em;
+    width: 1.5em;
+  }
+
+  .enchant-icons{
+    content: url('../assets/blacksmith/enchant.svg');
+    height: 1.5em;
+    width: 1.5em;
+  }
+
+  .desc-details > span{
+    font-size: 0.5m;
+  }
+
+  .dust-gauge > div:nth-child(2) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    padding: 10px 0px;
+  }
+  .dust-gauge{
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .skin-icons{
+    content: url('../assets/blacksmith/skin.svg');
+    height: 1.5em;
+    width: 1.5em;
+  }
+
+  .upgrade-icons{
+    content: url('../assets/blacksmith/upgrade.svg');
+    height: 1.5em;
+    width: 1.5em;
+  }
+
+  .menus.desktop{
+    display: none;
+  }
+
+  .menus.mobile{
+    display: inline-block;
+  }
+
+  .mobile > div{
+    border: 1px solid rgba(255, 255, 255, 0.322);
+    width: 100%;
+    text-align: center;
+    padding: 7px 0px;
+    opacity: 0.5;
+  }
+
+  .mobile > div:nth-child(1){
+    border-radius: 5px 0px 0px 5px;
+  }
+
+  .mobile > div:nth-child(4){
+    border-radius: 0px 5px 5px 0px;
+  }
+
+
+
+  .details > span{
+    font-size: 0.8em;
+    word-break: normal;
+    padding: 0px;
+    /* white-space: nowrap; */
+  }
+
+  .details > span > span{
+    font-size: 1.2em;
+    color:#e9c97a;
+  }
+
+
+  .weapon-img{
+    margin-top: 15px;
+    height: 62vw;
+    width: 62vw;
+  }
+
+  .magic-circle > span{
+    height: 68vw;
+    width: 68vw;
+  }
+
+  #random-border{
+  background-image: url('../assets/questionmark-icon-45.png');
+  background-size: 1.5em 1.5em;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: 1px solid white;
+  width: 2em;
+  height: 2em;
+  margin-left: 1em;
+  margin-right: 1em;
+  transform: rotate(45deg);
+}
+
+#random-border:hover{
+  background-image: url('../assets/questionmark-icon-45.png');
+  background-position: center;
+  transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  transition: all 0.2s ease-in-out;
+}
+
+#random-border.done {
+  background-image: url('../assets/questionmark-icon-45.png');
+  background-position: center;
+  transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  transition: all 0.2s ease-in-out;
+}
+
+#fire-border{
+  background-image: url('../assets/elements/fire-45.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  margin-left: 1em;
+  margin-right: 1em;
+  border: 1px solid white;
+  transform: rotate(45deg);
+}
+
+#fire-border:hover{
+  background-image: url('../assets/elements/fire-45.png');
+  background-position: center;
+  transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  transition: all 0.2s ease-in-out;
+}
+
+#fire-border.done {
+  background-image: url('../assets/elements/fire-45.png');
+  background-position: center;
+  transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  transition: all 0.2s ease-in-out;
+}
+
+#earth-border{
+  background-image: url('../assets/elements/earth-45.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  margin-left: 1em;
+  margin-right: 1em;
+  border: 1px solid white;
+  transform: rotate(45deg);
+}
+
+#earth-border:hover{
+  background-image: url('../assets/elements/earth-45.png');
+  background-position: center;
+  transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  transition: all 0.2s ease-in-out;
+}
+
+#earth-border.done {
+  background-image: url('../assets/elements/earth-45.png');
+  background-position: center;
+  transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  transition: all 0.2s ease-in-out;
+}
+
+#lightning-border{
+  background-image: url('../assets/elements/lightning-45.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  margin-left: 1em;
+  margin-right: 1em;
+  border: 1px solid white;
+  transform: rotate(45deg);
+}
+
+#lightning-border:hover{
+  background-image: url('../assets/elements/lightning-45.png');
+  background-position: center;
+  transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  transition: all 0.2s ease-in-out;
+}
+
+#lightning-border.done {
+  background-image: url('../assets/elements/lightning-45.png');
+  background-position: center;
+  transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  transition: all 0.2s ease-in-out;
+}
+
+#water-border{
+  background-image: url('../assets/elements/water-45.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  padding: 10px;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  margin-left: 1em;
+  margin-right: 1em;
+  border: 1px solid white;
+  transform: rotate(45deg);
+}
+
+#water-border:hover{
+  background-image: url('../assets/elements/water-45.png');
+  background-position: center;
+  transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  transition: all 0.2s ease-in-out;
+}
+
+#water-border.done {
+  background-image: url('../assets/elements/water-45.png');
+  background-position: center;
+  transform: rotate(45deg);
+  border: 3px solid #e9c97a;
+  background-size: 1.5em 1.5em;
+  width: 2em;
+  height: 2em;
+  transition: all 0.2s ease-in-out;
+}
 }
 
 </style>

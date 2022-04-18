@@ -485,10 +485,11 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
 
 
 .set-normal{
-  margin-top: 20px;
+  /* margin-top: 20px; */
   margin-left: auto;
   margin-right: auto;
   transition: 1s all;
+  padding: 0px;
 }
 
 
@@ -851,7 +852,8 @@ div.bg-success {
 
 .can-show-app{
   width: 100%;
-  padding-top: 40px;
+  padding: 0px;
+  /* padding-top: 40px; */
 }
 
 
