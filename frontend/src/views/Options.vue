@@ -58,7 +58,7 @@
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>Payout Currency</h4>
               <b-form-select size="lg" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
-                <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">
+                <b-form-select-option v-for="p in getPartnerProjects" :key="p.id" :value="p.id">
                   {{p.tokenSymbol}} ({{p.name}})
                 </b-form-select-option>
               </b-form-select>
@@ -174,8 +174,8 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['skillRewards', 'directStakeBonusPercent', 'payoutCurrencyId', 'currentNetworkId']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
+    ...mapState(['skillRewards', 'directStakeBonusPercent', 'payoutCurrencyId', 'currentNetworkId']) as Accessors<StoreMappedState>,
+    ...mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>,
 
     formattedSkillReward(): string {
       const skillRewards = fromWeiEther(this.skillRewards);
@@ -199,22 +199,6 @@ export default Vue.extend({
         return false;
       }
       return true;
-    },
-    supportedProjects(): SupportedProject[] {
-      const supportedProjects = this.getPartnerProjects.map(p => {
-        return {
-          id: p.id,
-          name: p.name,
-          tokenSymbol: p.tokenSymbol,
-          tokenAddress: p.tokenAddress,
-          tokenSupply: p.tokenSupply,
-          tokensClaimed: p.tokensClaimed,
-          tokenPrice: p.tokenPrice,
-          isActive: p.isActive
-        };
-      });
-
-      return supportedProjects;
     },
 
     languages(): { [key: string]: string } {

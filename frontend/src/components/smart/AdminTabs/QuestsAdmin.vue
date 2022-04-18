@@ -125,9 +125,9 @@
       </b-button>
     </b-form>
     <QuestTemplatesDisplay :promoQuestTemplates="promoQuestTemplates"/>
-    <h2>{{ $t('quests.createNewWeeklyReward') }}</h2>
+    <h2 class="mt-2">{{ $t('quests.setWeeklyRewardCurrent', {weekNumber: currentWeekNumber}) }}</h2>
     <b-form class="d-flex flex-column gap-3">
-      <div class="grid-container">
+      <div class="grid-container gap-3">
         <label class="m-0 align-self-center">{{ $t('quests.reward') }}</label>
         <div class="d-flex align-items-center gap-3">
           <b-form-select class="mt-2 mb-2" v-model="weeklyReward.rewardType">
@@ -167,6 +167,14 @@
           </b-form-select>
           <b-form-input v-model="weeklyReward.rewardAmount" type="number" number :min="0"/>
         </div>
+        <label class="m-0 align-self-center">{{ $t('quests.weekNumber') }}</label>
+        <div class="d-flex align-items-center gap-3">
+          <b-form-input v-model="weeklyReward.weekNumber" type="number" number :min="0"/>
+        </div>
+        <label class="m-0 align-self-center">{{ $t('quests.completionsGoal') }}</label>
+        <div class="d-flex align-items-center gap-3">
+          <b-form-input v-model="weeklyReward.completionsGoal" type="number" number :min="0"/>
+        </div>
         <!--        Temporarly hide the reputation fields, as they are not used -->
         <label style="display: none;" class="m-0 align-self-center">{{ $t('quests.reputation') }}</label>
         <div style="display: none;" v-if="false" class="d-flex align-items-center gap-3">
@@ -176,21 +184,6 @@
       <b-button variant="primary" @click="addReward"
                 :disabled="addNewWeeklyRewardDisabled()">
         {{ $t('quests.addNewWeeklyReward') }}
-      </b-button>
-      <span v-if="addedWeeklyRewardId">{{ $t('quests.addedWeeklyRewardID') }}: {{ addedWeeklyRewardId }}</span>
-    </b-form>
-    <h2 class="mt-2">{{ $t('quests.setWeeklyReward') }}</h2>
-    <b-form class="d-flex flex-column gap-3">
-      <div class="d-flex align-items-center gap-3 mt-2">
-        <b-form-input v-model="rewardID" type="number" number :placeholder="$t('quests.rewardID')" :min="0"/>
-        <i id="unix-timestamp-hint2" class="far fa-question-circle hint"/>
-        <b-tooltip target="unix-timestamp-hint2">
-          {{ $t('quests.unixTimestampHint') }} <a href="https://www.unixtimestamp.com/" target="_blank">https://www.unixtimestamp.com/</a>
-        </b-tooltip>
-        <b-form-input v-model="week" type="number" number :placeholder="$t('quests.timestamp')" :min="0"/>
-      </div>
-      <b-button variant="primary" @click="setReward">
-        {{ $t('quests.setWeeklyReward') }}
       </b-button>
     </b-form>
     <b-form v-if="reputationLevelRequirements" class="d-flex flex-column gap-3">
@@ -218,17 +211,6 @@
       <b-button variant="primary" @click="updateStaminaCost"
                 :disabled="isLoading || showTemplateConfirmationModal || showPromoToggleConfirmationModal">
         {{ $t('quests.updateStaminaCost') }}
-      </b-button>
-    </b-form>
-    <b-form class="d-flex flex-column gap-3">
-      <h2 class="pt-3">{{ $t('quests.updateWeeklyQuestsCompletionsGoal') }}</h2>
-      <div class="requirements-grid-container gap-3">
-        <label class="m-0 align-self-center">{{ $t('quests.weeklyCompletionsGoal') }}</label>
-        <b-form-input type="number" number :min="0" v-model="weeklyCompletionsGoal"/>
-      </div>
-      <b-button variant="primary" @click="updateWeeklyCompletionsGoal"
-                :disabled="isLoading || showTemplateConfirmationModal || showPromoToggleConfirmationModal">
-        {{ $t('quests.updateWeeklyCompletionsGoal') }}
       </b-button>
     </b-form>
     <b-form class="d-flex flex-column gap-3">
@@ -349,10 +331,6 @@ interface StoreMappedActions {
 
   getSkipQuestStaminaCost(): Promise<number>;
 
-  setWeeklyCompletionsGoal(payload: { newGoal: number }): Promise<void>;
-
-  getWeeklyCompletionsGoal(): Promise<number>;
-
   getQuestTierChances(payload: { tier: number }): Promise<TierChances>;
 
   setQuestTierChances(payload: { tier: number, tierChances: TierChances }): Promise<void>;
@@ -361,9 +339,7 @@ interface StoreMappedActions {
 
   toggleUsePromoQuests(): Promise<void>;
 
-  addWeeklyReward(payload: { weeklyReward: WeeklyReward }): Promise<number>;
-
-  setWeeklyReward(payload: { rewardID: number, timestamp: number }): Promise<void>;
+  setWeeklyReward(payload: { weeklyReward: WeeklyReward }): Promise<void>;
 }
 
 interface WeeklyReward {
@@ -372,7 +348,8 @@ interface WeeklyReward {
   rewardAmount?: number;
   rewardExternalAddress: string;
   reputationAmount?: number;
-  timestamp?: number;
+  weekNumber?: number;
+  completionsGoal?: number;
 }
 
 interface Data {
@@ -385,14 +362,12 @@ interface Data {
   weeklyRewardTypes: RewardType[];
   promoQuestTemplates: boolean;
   rewardID?: number;
-  addedWeeklyRewardId?: number;
   week?: number;
   isLoading: boolean;
   showTemplateConfirmationModal: boolean;
   showPromoToggleConfirmationModal: boolean;
   reputationLevelRequirements?: ReputationLevelRequirements;
   staminaCost: number;
-  weeklyCompletionsGoal: number;
   tierChances: TierChances[];
   usePromoQuests: boolean;
   supply?: number;
@@ -419,8 +394,9 @@ export default Vue.extend({
         rewardAmount: 0,
         rewardExternalAddress: '',
         reputationAmount: 0,
+        weekNumber: 0,
+        completionsGoal: 0,
       },
-      addedWeeklyRewardId: undefined,
       week: undefined,
       rewardID: undefined,
       rarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
@@ -444,7 +420,6 @@ export default Vue.extend({
       showPromoToggleConfirmationModal: false,
       reputationLevelRequirements: undefined,
       staminaCost: 0,
-      weeklyCompletionsGoal: 0,
       tierChances: [] as TierChances[],
       usePromoQuests: false,
       supply: undefined,
@@ -456,6 +431,13 @@ export default Vue.extend({
     } as Data;
   },
 
+  computed: {
+    currentWeekNumber(): number {
+      const weekInSeconds = 604800;
+      return Math.floor(Date.now() / 1000 / weekInSeconds % 53) + 1;
+    },
+  },
+
   methods: {
     ...mapActions([
       'addQuestTemplate',
@@ -463,13 +445,10 @@ export default Vue.extend({
       'setReputationLevelRequirements',
       'setSkipQuestStaminaCost',
       'getSkipQuestStaminaCost',
-      'getWeeklyCompletionsGoal',
-      'setWeeklyCompletionsGoal',
       'getQuestTierChances',
       'setQuestTierChances',
       'isUsingPromoQuests',
       'toggleUsePromoQuests',
-      'addWeeklyReward',
       'setWeeklyReward',
     ]) as StoreMappedActions,
 
@@ -500,24 +479,20 @@ export default Vue.extend({
       }
       try {
         this.isLoading = true;
-        this.addedWeeklyRewardId = await this.addWeeklyReward({
+        await this.setWeeklyReward({
           weeklyReward: this.weeklyReward,
         });
       } finally {
         this.isLoading = false;
-      }
-    },
-
-    async setReward() {
-      if (!this.rewardID || !this.week) return;
-      try {
-        this.isLoading = true;
-        await this.setWeeklyReward({
-          rewardID: this.rewardID,
-          timestamp: this.week,
-        });
-      } finally {
-        this.isLoading = false;
+        this.weeklyReward = {
+          rewardType: undefined,
+          rewardRarity: undefined,
+          rewardAmount: 0,
+          rewardExternalAddress: '',
+          reputationAmount: 0,
+          weekNumber: 0,
+          completionsGoal: 0
+        };
       }
     },
 
@@ -555,16 +530,6 @@ export default Vue.extend({
         this.isLoading = true;
         await this.setSkipQuestStaminaCost({staminaCost: this.staminaCost});
         this.staminaCost = await this.getSkipQuestStaminaCost();
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
-    async updateWeeklyCompletionsGoal() {
-      try {
-        this.isLoading = true;
-        await this.setWeeklyCompletionsGoal({newGoal: this.weeklyCompletionsGoal});
-        this.weeklyCompletionsGoal = await this.getWeeklyCompletionsGoal();
       } finally {
         this.isLoading = false;
       }
@@ -633,6 +598,8 @@ export default Vue.extend({
         || !this.weeklyReward.rewardAmount
         || (this.weeklyReward.rewardType === QuestItemType.EXTERNAL
           && !isValidWeb3Address(this.weeklyReward.rewardExternalAddress))
+        || !this.weeklyReward.weekNumber
+        || !this.weeklyReward.completionsGoal
         || this.showTemplateConfirmationModal || this.isLoading;
     },
 
@@ -670,7 +637,6 @@ export default Vue.extend({
       this.refreshQuestTemplates();
       this.reputationLevelRequirements = await this.getReputationLevelRequirements();
       this.staminaCost = await this.getSkipQuestStaminaCost();
-      this.weeklyCompletionsGoal = await this.getWeeklyCompletionsGoal();
       this.usePromoQuests = await this.isUsingPromoQuests();
       await this.refreshTierChances();
     } finally {

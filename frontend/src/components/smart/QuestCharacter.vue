@@ -17,9 +17,9 @@
       <span class="gray-text">{{ $t('quests.reputationPoints') }}: <span class="gold-text">{{
           quest.reputation.toLocaleString()
         }}</span></span>
-      <span class="gray-text">{{ $t('quests.nextReputationTierOn') }}: <span
+      <span v-if="getReputationBreakpoint(quest.reputation)" class="gray-text">{{ $t('quests.nextReputationTierOn') }}: <span
         class="gold-text">{{ getReputationBreakpoint(quest.reputation).toLocaleString() }}</span></span>
-      <div class="quest-progress">
+      <div v-if="getReputationBreakpoint(quest.reputation)" class="quest-progress">
         <div class="quest-progress-bar" role="progressbar"
              :style="`width: calc(${quest.reputation/getReputationBreakpoint(quest.reputation)*100}% - 8px);`"
              :aria-valuenow="quest.reputation"

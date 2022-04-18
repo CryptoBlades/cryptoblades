@@ -118,6 +118,15 @@
                       </b-form-select-option>
                     </b-form-select>
                   </div>
+                  <div class="row justify-content-md-center align-items-baseline mt-4">
+                    <b-checkbox
+                      variant="primary"
+                      class="my-auto"
+                      v-model="mintSlippageApproved">
+                      <span><b>{{$t('blacksmith.approveMintSlippage')}}</b></span>
+                    </b-checkbox>
+                    <b-icon-question-circle class="centered-icon" v-tooltip.bottom="$t('blacksmith.mintSlippageDetails')"/>
+                  </div>
                   <div class="row justify-content-md-center margin-top">
                     <b-button
                       v-if="clickedForgeButton === 0"
@@ -130,6 +139,9 @@
                           {{$t('blacksmith.forge')}} ({{Number.parseFloat(forgeCost * this.chosenElementFee).toFixed(2)}} SKILL)
                         </span>
                     </b-button>
+                    <b-icon-question-circle v-if="clickedForgeButton === 0"
+                      class="ml-4 centered-icon" v-tooltip.bottom="$t('blacksmith.dynamicPricesDetails',
+                        { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
                     <b-button
                       v-if="clickedForgeButton === 1"
                       variant="primary"
@@ -141,6 +153,9 @@
                           {{$t('blacksmith.forge')}} ({{Number.parseFloat(forgeCost * this.chosenElementFee * 10).toFixed(2)}} SKILL)
                         </span>
                     </b-button>
+                    <b-icon-question-circle v-if="clickedForgeButton === 1"
+                      class="ml-4 centered-icon" v-tooltip.bottom="$t('blacksmith.dynamicPricesDetails',
+                        { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
                   </div>
                 </b-modal>
                 <b-modal size="xl" class="centered-modal " ref="new-weapons" ok-only>
@@ -509,6 +524,11 @@ interface Data {
   haveWeaponCosmetic1: number;
   haveWeaponCosmetic2: number;
   selectedSpecialWeaponEventId: number;
+  updateInterval: ReturnType<typeof setInterval> | null;
+  mintSlippageApproved: boolean;
+  mintPriceDecreasePerHour: string;
+  mintWeaponPriceIncrease: string;
+  mintWeaponMinPrice: string;
 }
 
 export default Vue.extend({
@@ -548,6 +568,11 @@ export default Vue.extend({
       haveWeaponCosmetic1: 0,
       haveWeaponCosmetic2: 0,
       selectedSpecialWeaponEventId: 0,
+      updateInterval: null as ReturnType<typeof setInterval> | null,
+      mintSlippageApproved: false,
+      mintPriceDecreasePerHour: '0',
+      mintWeaponPriceIncrease: '0',
+      mintWeaponMinPrice: '0',
     } as Data;
   },
 
@@ -596,11 +621,9 @@ export default Vue.extend({
     await this.fetchSpecialWeaponEvents();
     this.selectedSpecialWeaponEventId = +this.specialWeaponEventId;
     if(!this.contracts.CryptoBlades || !this.contracts.BurningManager) return;
-    const forgeCost = await this.contracts.CryptoBlades.methods.mintWeaponFee().call({ from: this.defaultAccount });
-    const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
-    this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
+    await this.updateMintWeaponFee();
+    this.updateInterval = setInterval(async () => { await this.updateMintWeaponFee(); }, 2000);
     const stakedSkillBalanceThatCanBeSpentBN: BN = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18));
-    this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
 
     if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8))).isLessThan(0)) {
       this.disableUseStakedForForge = true;
@@ -622,11 +645,23 @@ export default Vue.extend({
     if(window.location.href.split('&').find(x => x === 'showSpecialForge')) {
       Events.$emit('show-special-forge-modal');
     }
+    this.mintPriceDecreasePerHour = new BN(await this.fetchMintWeaponPriceDecreasePerSecond()).div(new BN(10).pow(18)).multipliedBy(60*60).toFixed(6);
+    this.mintWeaponPriceIncrease = new BN(await this.fetchWeaponMintIncreasePrice()).div(new BN(10).pow(18)).toFixed(6);
+    this.mintWeaponMinPrice = new BN(await this.fetchMintWeaponMinPrice()).div(new BN(10).pow(18)).toFixed(4);
+  },
+
+  destroyed() {
+    if(this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
   },
 
   methods: {
     ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN',
-      'burnWeapon', 'reforgeWeaponWithDust', 'massBurnWeapons', 'fetchSpecialWeaponEvents']),
+      'burnWeapon', 'massBurnWeapons', 'fetchSpecialWeaponEvents',
+      'reforgeWeaponWithDust', 'massBurnWeapons', 'fetchSpecialWeaponEvents',
+      'fetchMintWeaponPriceDecreasePerSecond', 'fetchWeaponMintIncreasePrice',
+      'fetchMintWeaponMinPrice', 'fetchMintWeaponFee']),
     ...mapMutations(['updateSpecialWeaponEventId']),
 
     toggleCheckbox() {
@@ -656,7 +691,8 @@ export default Vue.extend({
         await this.mintWeapon({
           useStakedSkillOnly: this.useStakedForForge,
           chosenElement: this.selectedElement || 100,
-          eventId: this.selectedSpecialWeaponEventId
+          eventId: this.selectedSpecialWeaponEventId,
+          mintSlippageApproved: this.mintSlippageApproved
         });
 
       } catch (e) {
@@ -688,7 +724,8 @@ export default Vue.extend({
           num: forgeMultiplier,
           useStakedSkillOnly: this.useStakedForForge,
           chosenElement: this.selectedElement,
-          eventId: this.selectedSpecialWeaponEventId
+          eventId: this.selectedSpecialWeaponEventId,
+          mintSlippageApproved: this.mintSlippageApproved
         });
 
       } catch (e) {
@@ -855,6 +892,14 @@ export default Vue.extend({
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotBurn'));
       }
     },
+
+    async updateMintWeaponFee() {
+      if(!this.contracts.CryptoBlades) return;
+      const forgeCost = await this.fetchMintWeaponFee();
+      const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
+      this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
+      this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
+    }
   },
 
   components: {

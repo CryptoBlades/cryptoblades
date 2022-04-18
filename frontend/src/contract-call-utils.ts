@@ -97,7 +97,7 @@ export async function approveFeeFromAnyContract<T extends Contract<unknown>>(
   );
 
   if(feeMultiplier !== undefined) {
-    feeInSkill = feeInSkill.times(feeMultiplier);
+    feeInSkill = feeInSkill.times(feeMultiplier).integerValue(BigNumber.ROUND_CEIL);
   }
 
   if(allowSkillRewards) {
