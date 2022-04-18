@@ -84,6 +84,7 @@ import { RequiredXp } from '../../interfaces';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../../utils/common';
 import { getCleanName } from '../../rename-censor';
+import i18n from '@/i18n';
 
 export default Vue.extend({
   props:['toggled','currentPath'],
@@ -123,32 +124,32 @@ export default Vue.extend({
       sideBarBlacksmith: [
         {
           id: 0,
-          title: 'Weapon',
-          desc: 'Forge Weapon and Create Dust',
+          title: i18n.t('blacksmith.weapon'),
+          desc: i18n.t('blacksmith.weaponDesc'),
           iconName: 'icon-weapon',
           status: 'active',
           route: 'weapon'
         },
         {
           id: 1,
-          title: 'Equipment',
-          desc: 'Shield, Trinket and Armor',
+          title: i18n.t('blacksmith.equipment'),
+          desc: i18n.t('blacksmith.equipmentDesc'),
           iconName: 'icon-equipment',
           status: '',
           route: 'equipment'
         },
         {
           id: 2,
-          title: 'Dust Storage',
-          desc: 'Forge your weapon with dust',
+          title:  i18n.t('blacksmith.dustStorage'),
+          desc: i18n.t('blacksmith.dustStorageDesc'),
           iconName: 'icon-dust',
           status: '',
           route: 'dust'
         },
         {
           id: 3,
-          title: 'Land',
-          desc: 'Own a land and conquer',
+          title: i18n.t('blacksmith.land'),
+          desc: i18n.t('blacksmith.landDesc'),
           iconName: 'icon-land',
           status: '',
           route: 'land'
@@ -180,7 +181,7 @@ export default Vue.extend({
     },
 
     toolTipHtml(time: string): string {
-      return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + time;
+      return i18n.t('blacksmith.regenerate') + time;
     },
 
     setSelectedCharacter(id: any){
