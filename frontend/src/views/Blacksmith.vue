@@ -597,7 +597,7 @@ export default Vue.extend({
   },
 
   mounted(){
-    this.$router.push({ path: 'blacksmith', query: { tab: 'weapon' }});
+    (this as any).$router.push({ path: 'blacksmith', query: { tab: 'weapon' }});
   },
 
   watch: {
