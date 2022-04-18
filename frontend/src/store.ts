@@ -5578,6 +5578,18 @@ export function createStore(web3: Web3) {
         return isCharacterInArena;
       },
 
+      async getIsCharacterInOldArena({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+
+        if (!PvpArena || !state.defaultAccount) {
+          return;
+        }
+
+        const isCharacterInOldArena = await PvpArena.methods.isCharacterInArena(characterId).call({ from: state.defaultAccount });
+
+        return isCharacterInOldArena;
+      },
+
       async getIsCharacterUnderAttack({ state }, characterId) {
         const { PvpCore } = state.contracts();
         if (!PvpCore || !state.defaultAccount) return;
@@ -5677,6 +5689,17 @@ export function createStore(web3: Web3) {
         const res = await PvpCore.methods.withdrawFromArena(characterId).send({ from: state.defaultAccount });
 
         await dispatch('getIsCharacterInArena', characterId);
+
+        return res;
+      },
+
+      async withdrawFromOldArena({ state }, characterId) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) {
+          return;
+        }
+
+        const res = await PvpArena.methods.withdrawFromArena(characterId).send({ from: state.defaultAccount });
 
         return res;
       },
