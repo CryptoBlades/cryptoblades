@@ -154,7 +154,7 @@ export default Vue.extend({
           status: '',
           route: 'land'
         },
-      ]
+      ],
     };
   },
   methods: {
@@ -173,7 +173,7 @@ export default Vue.extend({
     },
 
     setActiveTab(tab: any){
-      this.$router.push({ path: 'blacksmith', query: { tab: tab.route }});
+      (this as any).$router.push({ path: 'blacksmith', query: { tab: tab.route }});
       this.sideBarBlacksmith.forEach(x => {
         if(x.id === tab.id) x.status = 'active';
         else x.status = '';
