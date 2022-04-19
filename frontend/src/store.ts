@@ -5650,6 +5650,15 @@ export function createStore(web3: Web3) {
         return playerPrizePoolRewards;
       },
 
+      async getPlayerPrizePoolRewardsOldContract({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const playerPrizePoolRewards = await PvpArena.methods.getPlayerPrizePoolRewards().call({ from: state.defaultAccount });
+
+        return playerPrizePoolRewards;
+      },
+
       async getDuelOffsetCost({ state }) {
         const { PvpCore } = state.contracts();
         if (!PvpCore || !state.defaultAccount) return;
@@ -5713,6 +5722,15 @@ export function createStore(web3: Web3) {
         if (!PvpRankings || !state.defaultAccount) return;
 
         const res = await PvpRankings.methods.withdrawRankedRewards().send({ from: state.defaultAccount });
+
+        return res;
+      },
+
+      async withdrawRankedRewardsOldContract({ state }) {
+        const { PvpArena } = state.contracts();
+        if (!PvpArena || !state.defaultAccount) return;
+
+        const res = await PvpArena.methods.withdrawRankedRewards().send({ from: state.defaultAccount });
 
         return res;
       },

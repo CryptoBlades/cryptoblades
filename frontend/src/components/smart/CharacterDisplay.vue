@@ -4,7 +4,7 @@
           <div class="btn-trigger" @click="hideSideBar(!toggled)">
             <img :class="!toggled ? 'rotateLeft' : 'rotateRight'" src="../../assets/left-arrow.png" alt="">
           </div>
-          <b-col class="character-list"
+          <b-col class="character-list" v-if="currentPath != '/blacksmith'"
               v-bind:class="[getIsInCombat ? 'disabled-li' : '', getIsCharacterViewExpanded ? '' : 'centered-list']">
                 <div
                   :class="`${setListClassForSelChar(c.id, currentCharacterId)}`"
@@ -13,32 +13,60 @@
                   :key="c.id"
                   @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
                 >
+                  <div class="character-element">
+                    <div class="element-frame">
+                        <div>
+                          <span :id="`${setIdForElement(c.trait, c.isSelected)}`"/>
+                        </div>
+                    </div>
+                    <div class="element-frame-active">
+                      <div>
+                          <span
+                            :id="`${setIdForElement(c.trait, c.isSelected)}`"
+                          />
+                        </div>
+                    </div>
+                  </div>
+                  <div class="character-details">
+                    <div class="name-list">
+                      {{ getCleanCharacterName(c.id) }}
+                    </div>
+                    <div class="small-stamina-char"
+                      :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
+                      v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))">
+                    </div>
+                    <div class="char-level">
+                        {{$t('PlayToEarn.level')}} {{ c.level + 1}} <span> (STA {{ getCharacterStamina(c.id) }} / 200)</span>
+                    </div>
+                  </div>
+                </div>
+          </b-col>
+          <b-col class="character-list centered-list" v-else>
+                <div v-for="sidebarItem in sideBarBlacksmith"
+                  :key="sidebarItem.id"
+                  :class="sidebarItem.status === 'active' ? 'character-highlight' : 'character'"
+                  @click="setActiveTab(sidebarItem)"
+                >
                 <div class="character-element">
                   <div class="element-frame">
                       <div>
-                        <span
-                          :id="`${setIdForElement(c.trait, c.isSelected)}`"
-                        />
+                        <span :id="`${sidebarItem.iconName}`"/>
                       </div>
                   </div>
                   <div class="element-frame-active">
                      <div>
                         <span
-                          :id="`${setIdForElement(c.trait, c.isSelected)}`"
-                        />
+                          :id="`${sidebarItem.iconName}`"/>
                       </div>
                   </div>
                 </div>
                 <div class="character-details">
                   <div class="name-list">
-                    {{ getCleanCharacterName(c.id) }}
+                    {{ sidebarItem.title }}
                   </div>
-                  <div class="small-stamina-char"
-                    :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
-                    v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))">
-                  </div>
+                  <div class="nav-line"></div>
                   <div class="char-level">
-                      {{$t('PlayToEarn.level')}} {{ c.level + 1}} <span> (STA {{ getCharacterStamina(c.id) }} / 200)</span>
+                      {{ sidebarItem.desc }}
                   </div>
                 </div>
                 </div>
@@ -56,9 +84,10 @@ import { RequiredXp } from '../../interfaces';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../../utils/common';
 import { getCleanName } from '../../rename-censor';
+import i18n from '@/i18n';
 
 export default Vue.extend({
-  props:['toggled'],
+  props:['toggled','currentPath'],
   computed: {
     ...mapState(['maxStamina', 'currentCharacterId', 'ownedCharacterIds']),
     ...mapGetters([
@@ -91,7 +120,41 @@ export default Vue.extend({
   data() {
     return {
       traits: CharacterTrait,
-      isPlaza : false
+      isPlaza : false,
+      sideBarBlacksmith: [
+        {
+          id: 0,
+          title: i18n.t('blacksmith.weapon'),
+          desc: i18n.t('blacksmith.weaponDesc'),
+          iconName: 'icon-weapon',
+          status: 'active',
+          route: 'weapon'
+        },
+        {
+          id: 1,
+          title: i18n.t('blacksmith.equipment'),
+          desc: i18n.t('blacksmith.equipmentDesc'),
+          iconName: 'icon-equipment',
+          status: '',
+          route: 'equipment'
+        },
+        {
+          id: 2,
+          title:  i18n.t('blacksmith.dustStorage'),
+          desc: i18n.t('blacksmith.dustStorageDesc'),
+          iconName: 'icon-dust',
+          status: '',
+          route: 'dust'
+        },
+        {
+          id: 3,
+          title: i18n.t('blacksmith.land'),
+          desc: i18n.t('blacksmith.landDesc'),
+          iconName: 'icon-land',
+          status: '',
+          route: 'land'
+        },
+      ],
     };
   },
   methods: {
@@ -109,8 +172,16 @@ export default Vue.extend({
       else return 'character';
     },
 
+    setActiveTab(tab: any){
+      (this as any).$router.push({ path: 'blacksmith', query: { tab: tab.route }});
+      this.sideBarBlacksmith.forEach(x => {
+        if(x.id === tab.id) x.status = 'active';
+        else x.status = '';
+      });
+    },
+
     toolTipHtml(time: string): string {
-      return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + time;
+      return i18n.t('blacksmith.regenerate') + time;
     },
 
     setSelectedCharacter(id: any){
@@ -334,8 +405,7 @@ li.character-highlight{
   text-transform: uppercase;
   font-weight: 700;
   margin: auto;
-  font-size: 1vw;
-  white-space: nowrap;
+  font-size: 0.8vw;
   text-align: left;
   color: #9e8a57;
 }
@@ -421,6 +491,15 @@ li.character-highlight{
   height :2.5px;
   margin: 5px 0px 5px 0px;
   background : linear-gradient(to right, rgb(236, 75, 75) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+}
+
+.nav-line {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height :1px;
+  margin: 5px 0px 5px 0px;
+  background : rgba(255, 255, 255, 0.075);
 }
 
 .stamina-text {
@@ -629,4 +708,35 @@ li.character-highlight{
   width: 30px;
   background: rgba(0, 0, 0, 0.076);
 }
+
+
+/* FOR BLACKSMITH SIDEBAR */
+#icon-weapon {
+  content: url("../../assets/raid-sidebar/icon-sword.png");
+  height: 30px;
+  width: 30px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
+#icon-equipment {
+  content: url("../../assets/raid-sidebar/icon-shield.png");
+  height: 30px;
+  width: 30px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
+#icon-land {
+  content: url("../../assets/raid-sidebar/icon-map.png");
+  height: 30px;
+  width: 30px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
+#icon-dust {
+  content: url("../../assets/raid-sidebar/icon-dust.png");
+  height: 30px;
+  width: 30px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
 </style>

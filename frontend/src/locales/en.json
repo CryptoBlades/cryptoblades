@@ -356,7 +356,15 @@
     "live": "Live",
     "ended": "Ended",
     "stakingRewardsTooltip": "You can earn shards rewards for staking SKILL. These rewards can be claimed into specific shard of your choice. Only full shards can be claimed.",
-    "or": "or"
+    "or": "or",
+    "weapon": "Weapons",
+    "weaponDesc": "Forge Weapons and Create Dust",
+    "equipment":"Equipment",
+    "equipmentDesc": "Shields, Trinkets and Armor",
+    "dustStorageDesc": "Forge your weapons with dust",
+    "land": "Land",
+    "landDesc": "Own land and conquer",
+    "regenerate": "Regenerates 1 point every 5 minutes, stamina bar will be full at: " 
   },
   "dustBalanceDisplay": {
     "availableDust": "Available Dust",
@@ -1228,7 +1236,7 @@
     "noShields": "You have no shields.",
     "enterTheArena": "Enter the Arena",
     "enterArenaWillCost": " Tiered arena entrance is {formattedEntryWager} $SKILL.",
-    "enterUntieredArenaWillCost": " Untiered arena entrance is {formattedUntieredEntryWager} $SKILL.",
+    "enterUntieredArenaWillCost": " Free for all arena entrance is {formattedUntieredEntryWager} $SKILL.",
     "playersCanAttackYou": " Players can attack you while you are in the Arena.",
     "leavingWillCost": " Leaving the Arena will cost you {leavingArenaCost} $SKILL.",
     "iUnderstand": "I understand.",
@@ -1304,9 +1312,9 @@
     "rankToEarn": "Ranking points you will earn if victorious",
     "goodLuck": "Good luck!",
     "tieredArena": "Tiered: Face players of similar levels",
-    "untieredArena": "Untiered: Fight players of any level!",
+    "untieredArena": "Free for All: Fight players of any level!",
     "tiered": "Tiered",
-    "untiered": "Untiered"
+    "untiered": "Free for All"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
