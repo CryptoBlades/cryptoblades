@@ -167,9 +167,9 @@
           <div class="enterArenaButtonWrapper">
             <pvp-button
               class="pvpButton"
-              @click="handleEnterArenaClick(false)"
+              @click="handleEnterArenaClick(true)"
               :buttonText="$t('pvp.enterArena')"
-              :buttonsubText="$t('pvp.tiered')"
+              :buttonsubText="$t('pvp.untiered')"
               :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
               secondary
             />
@@ -177,9 +177,9 @@
           <div class="enterArenaButtonWrapper">
             <pvp-button
               class="pvpButton"
-              @click="handleEnterArenaClick(true)"
+              @click="handleEnterArenaClick(false)"
               :buttonText="$t('pvp.enterArena')"
-              :buttonsubText="$t('pvp.untiered')"
+              :buttonsubText="$t('pvp.tiered')"
               :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
               secondary
             />

@@ -1,8 +1,8 @@
 <template>
   <div class="body main-font">
-    <b-tabs justified>
-      <b-tab :title="$t('weapons')">
-        <div class="blank-slate" v-if="ownWeapons.length === 0">
+    <b-row>
+      <b-col xl="12 weapon-body" v-if="$route.query.tab === 'weapon'">
+         <div class="blank-slate" v-if="ownWeapons.length === 0">
           <span v-html="$t('blacksmith.noWeapons')"/>
           <br>
           <br>
@@ -12,6 +12,8 @@
             @click="onForgeWeapon"
           />
         </div>
+
+        <!-- weapon component -->
         <div class="row mt-3" v-if="ownWeapons.length > 0 && !showReforge">
           <div class="col">
             <div class="buttons-panel">
@@ -375,38 +377,30 @@
         </div>
           </div>
         </div>
-      </b-tab>
-      <b-tab>
-        <template #title>
-          {{$t('equipment')}} <b-icon-question-circle class="centered-icon" scale="0.8"
-            v-tooltip.bottom="$t('blacksmith.buyShield')"/>
-        </template>
-        <div class="row mt-3">
-          <div class="col">
+      </b-col>
+      <b-col cols="12" v-if="$route.query.tab === 'equipment'">
+        <div class="row equipment-body">
+          <div class="col-xl-12 col-lg-12">
             <div class="d-flex justify-content-space-between">
               <h1>{{$t('equipment')}} ({{ nftsCount }})</h1>
             </div>
             <nft-list :showNftOptions="true" v-if="nftsCount > 0" v-model="selectedNft"/>
           </div>
         </div>
-      </b-tab>
-      <b-tab>
-        <template #title>
-          {{$t('blacksmith.dustStorage')}} <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="$t('blacksmith.dustGained')"/>
-        </template>
-        <dust-balance-display/>
-      </b-tab>
-      <b-tab>
-        <template #title>
-          {{$t('blacksmith.lands')}} <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="$t('blacksmith.landsAvailable')"/>
-        </template>
-        <div class="row mt-3">
-          <div class="col">
+      </b-col>
+      <b-col cols="12" v-if="$route.query.tab === 'dust'">
+        <b-row class="dust-body">
+          <dust-balance-display/>
+        </b-row>
+      </b-col>
+      <b-col cols="12" v-if="$route.query.tab === 'land'">
+        <div class="row mt-3 land-body">
+          <div class="col-xl-12 col-lg-12">
             <nft-list :isLandTab="true" :showLimit="30" />
           </div>
         </div>
-      </b-tab>
-    </b-tabs>
+      </b-col>
+    </b-row>
     <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
              :title="$t('blacksmith.dustReforgeConfirmation')" @ok="onReforgeWeaponWithDust">
       <div class="row">
@@ -602,6 +596,10 @@ export default Vue.extend({
     }
   },
 
+  mounted(){
+    (this as any).$router.push({ path: 'blacksmith', query: { tab: 'weapon' }});
+  },
+
   watch: {
     reforgeWeaponId() {
       this.showReforge = false;
@@ -660,6 +658,7 @@ export default Vue.extend({
 
   methods: {
     ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN',
+      'burnWeapon', 'massBurnWeapons', 'fetchSpecialWeaponEvents',
       'reforgeWeaponWithDust', 'massBurnWeapons', 'fetchSpecialWeaponEvents',
       'fetchMintWeaponPriceDecreasePerSecond', 'fetchWeaponMintIncreasePrice',
       'fetchMintWeaponMinPrice', 'fetchMintWeaponFee']),
@@ -916,6 +915,25 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+
+
+.weapon-body{
+  height: 90vh;
+  overflow: auto;
+}
+
+.equipment-body{
+  height: 90vh;
+}
+
+.dust-body{
+  height: 90vh;
+}
+
+.land-body{
+  height: 90vh;
+}
+
 
 
 #random-border{
