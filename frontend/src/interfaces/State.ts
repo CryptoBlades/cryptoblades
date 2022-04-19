@@ -5,7 +5,7 @@ import { Contracts } from './Contracts';
 import { Nft } from './Nft';
 import { IShield } from './Shield';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
-
+import Web3 from 'web3';
 export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'king' | 'skill90' | 'skill180' | 'king90' | 'king180';
 export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2', 'king', 'skill90', 'skill180', 'king90', 'king180'];
 export type NftStakeType = 'cbkLandT1' | 'cbkLandT2' | 'cbkLandT3';
@@ -132,6 +132,7 @@ export interface IItemPrices {
 }
 
 export interface IState {
+  web3: Web3;
   contracts: () => Contracts;
   eventSubscriptions: () => IWeb3EventSubscription[];
   accounts: string[];
