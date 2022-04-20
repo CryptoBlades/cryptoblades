@@ -117,25 +117,25 @@ const quests = {
         questTemplate.rewardExternalAddress = emptyAccount;
       }
 
-      let requirementAmount = questTemplate.requirementAmount;
+      let requirementAmount: string | number = questTemplate.requirementAmount;
 
       if(questTemplate.requirementType === RequirementType.EXTERNAL){
         const contract = new rootState.web3.eth.Contract(erc20Abi as any[], questTemplate.requirementExternalAddress);
         try {
           const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(rootState));
-          requirementAmount = rootState.web3.utils.toBN(requirementAmount * 10 ** currencyDecimals);
+          requirementAmount = rootState.web3.utils.toBN(requirementAmount * 10 ** currencyDecimals).toString();
         } catch {
           // Contract does not support decimals
         }
       }
 
-      let rewardAmount = questTemplate.rewardAmount;
+      let rewardAmount: number | string = questTemplate.rewardAmount;
 
       if(questTemplate.rewardType === RewardType.EXTERNAL){
         const contract = new rootState.web3.eth.Contract(erc20Abi as any[], questTemplate.rewardExternalAddress);
         try {
           const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(rootState));
-          rewardAmount = rootState.web3.utils.toBN(rewardAmount * 10 ** currencyDecimals);
+          rewardAmount = rootState.web3.utils.toBN(rewardAmount * 10 ** currencyDecimals).toString();
         } catch {
           // Contract does not support decimals
         }
@@ -143,12 +143,12 @@ const quests = {
 
       let tier = questTemplate.tier;
       if (isPromo) {
-        tier += 10;
+        tier! += 10;
       }
 
-      return await SimpleQuests.methods.addNewQuestTemplate(tier,
-        questTemplate.requirementType, questTemplate.requirementRarity, requirementAmount, questTemplate.requirementExternalAddress,
-        questTemplate.rewardType, questTemplate.rewardRarity, rewardAmount, questTemplate.rewardExternalAddress,
+      return await SimpleQuests.methods.addNewQuestTemplate(tier!,
+        questTemplate.requirementType!, questTemplate.requirementRarity!, requirementAmount, questTemplate.requirementExternalAddress,
+        questTemplate.rewardType!, questTemplate.rewardRarity!, rewardAmount, questTemplate.rewardExternalAddress,
         questTemplate.reputationAmount, supply, deadline).send(defaultCallOptions(rootState));
     },
 
@@ -282,7 +282,7 @@ const quests = {
       if (!SimpleQuests || !rootState.defaultAccount) return;
 
       const emptyAccount = '0x0000000000000000000000000000000000000000';
-      if (weeklyReward.rewardExternalAddress === '') {
+      if (!weeklyReward.rewardExternalAddress) {
         weeklyReward.rewardExternalAddress = emptyAccount;
       }
 
