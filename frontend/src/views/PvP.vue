@@ -45,8 +45,7 @@ export default {
 
   methods: {
     ...mapActions([
-      'getPlayerPrizePoolRewards',
-      'getPlayerPrizePoolRewardsOldContract'
+      'getPlayerPrizePoolRewards'
     ]),
 
     // TODO: Use router for this.
@@ -64,12 +63,12 @@ export default {
   },
 
   async created() {
-    const playerRewards = +(await this.getPlayerPrizePoolRewards()) + +(await this.getPlayerPrizePoolRewardsOldContract());
+    const playerRewards = await this.getPlayerPrizePoolRewards();
     this.hasRewards = !!+playerRewards;
   },
 
   async updated() {
-    const playerRewards = +(await this.getPlayerPrizePoolRewards()) + +(await this.getPlayerPrizePoolRewardsOldContract());
+    const playerRewards = await this.getPlayerPrizePoolRewards();
 
     this.hasRewards = !!+playerRewards;
   }
