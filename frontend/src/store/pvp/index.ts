@@ -214,6 +214,15 @@ const pvp = {
       return playerPrizePoolRewards;
     },
 
+    async getPlayerPrizePoolRewardsOldContract({ rootState }: {rootState: IState}) {
+      const { PvpArena } = rootState.contracts();
+      if (!PvpArena || !rootState.defaultAccount) return;
+
+      const playerPrizePoolRewards = await PvpArena.methods.getPlayerPrizePoolRewards().call({ from: rootState.defaultAccount });
+
+      return playerPrizePoolRewards;
+    },
+
     async getDuelOffsetCost({ rootState }: {rootState: IState}) {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
@@ -280,6 +289,15 @@ const pvp = {
       if (!PvpRankings || !rootState.defaultAccount) return;
 
       const res = await PvpRankings.methods.withdrawRankedRewards().send({ from: rootState.defaultAccount });
+
+      return res;
+    },
+
+    async withdrawRankedRewardsOldContract({ rootState }: {rootState: IState}) {
+      const { PvpArena } = rootState.contracts();
+      if (!PvpArena || !rootState.defaultAccount) return;
+
+      const res = await PvpArena.methods.withdrawRankedRewards().send({ from: rootState.defaultAccount });
 
       return res;
     },
