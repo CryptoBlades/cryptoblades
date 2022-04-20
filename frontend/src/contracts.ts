@@ -42,8 +42,6 @@ import { abi as simpleQuestsAbi, networks as simpleQuestsNetworks } from '../../
 import { abi as partnerVaultAbi} from '../../build/contracts/PartnerVault.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
 import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/PvpArena.json';
-import { abi as pvpCoreAbi, networks as pvpCoreNetworks } from '../../build/contracts/PvpCore.json';
-import { abi as pvpRankingsAbi, networks as pvpRankingsNetworks } from '../../build/contracts/PvpRankings.json';
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
 import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
@@ -76,8 +74,6 @@ interface RaidContracts {
 
 interface PvPContracts {
   PvpArena?: Contracts['PvpArena'];
-  PvpCore?: Contracts['PvpCore'];
-  PvpRankings?: Contracts['PvpRankings'];
 }
 
 interface MarketContracts {
@@ -364,15 +360,8 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   if(pvp && currentChainSupportsPvP()){
     const pvpContractAddr = process.env.VUE_APP_PVP_CONTRACT_ADDRESS ||
     getConfigValue('VUE_APP_PVP_CONTRACT_ADDRESS') || (pvpNetworks as Networks)[networkId]!.address;
+
     pvpContracts.PvpArena = new web3.eth.Contract(pvpAbi as Abi, pvpContractAddr);
-
-    const pvpCoreContractAddr = process.env.VUE_APP_PVP_CORE_CONTRACT_ADDRESS ||
-    getConfigValue('VUE_APP_PVP_CORE_CONTRACT_ADDRESS') || (pvpCoreNetworks as Networks)[networkId]!.address;
-    pvpContracts.PvpCore = new web3.eth.Contract(pvpCoreAbi as Abi, pvpCoreContractAddr);
-
-    const pvpRankingsContractAddr = process.env.VUE_APP_PVP_RANKINGS_CONTRACT_ADDRESS ||
-    getConfigValue('VUE_APP_PVP_RANKINGS_CONTRACT_ADDRESS') || (pvpRankingsNetworks as Networks)[networkId]!.address;
-    pvpContracts.PvpRankings = new web3.eth.Contract(pvpRankingsAbi as Abi, pvpRankingsContractAddr);
   }
 
   const waxBridgeContractAddr = getConfigValue('VUE_APP_WAX_BRIDGE_CONTRACT_ADDRESS') || (waxBridgeNetworks as Networks)[networkId]!.address;
