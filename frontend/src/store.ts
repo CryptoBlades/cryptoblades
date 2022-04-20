@@ -9,7 +9,6 @@ import {getConfigValue, setUpContracts} from './contracts';
 import {
   characterFromContract,
   junkFromContract,
-  partnerProjectFromContract,
   raidFromContract,
   shieldFromContract,
   targetFromContract,
@@ -45,6 +44,7 @@ import {abi as ierc20Abi} from '../../build/contracts/IERC20.json';
 import {abi as erc20Abi} from '../../build/contracts/ERC20.json';
 import {abi as priceOracleAbi} from '../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import {SupportedProject} from '@/views/Treasury.vue';
 import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances, WeeklyReward} from '@/views/Quests.vue';
 import {abi as erc721Abi} from '../../build/contracts/IERC721.json';
 import BigNumber from 'bignumber.js';
@@ -228,6 +228,7 @@ export function createStore(web3: Web3) {
       activeSpecialWeaponEventsIds: [],
       inactiveSpecialWeaponEventsIds: [],
       specialWeaponEvents: {},
+      specialWeaponArts: [],
       specialWeaponEventId: localStorage.getItem('specialWeaponEventId') || '0',
       shardsSupply: {},
 
@@ -401,10 +402,12 @@ export function createStore(web3: Web3) {
         const currencyList = getConfigValue('currencyTransak') || 'BNB,BUSD';
 
         const urlCC = 'defaultCryptoCurrency=' + currencyDefault;
-        const urlNetwork = 'network=' + currencyNetwork;
         const urlCCL = 'cryptoCurrencyList=' + currencyList;
 
-        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlNetwork + '&' + urlCCL;
+        //Transak is not available for Huobi & OKEX
+        if(currencyNetwork === 'Huobi' || currencyNetwork === 'OKEx') return;
+
+        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlCCL;
       },
       ownCharacters(state, getters) {
         return getters.charactersWithIds(state.ownedCharacterIds);
@@ -1139,6 +1142,10 @@ export function createStore(web3: Web3) {
         Vue.set(state.specialWeaponEvents, eventId, eventInfo);
       },
 
+      updateSpecialWeaponArt(state: IState, {eventId, art}) {
+        Vue.set(state.specialWeaponArts, eventId, art);
+      },
+
       updateActiveSpecialWeaponEventsIds(state: IState, eventsIds) {
         Vue.set(state, 'activeSpecialWeaponEventsIds', eventsIds);
         if(!eventsIds.find((id: { toString: () => string; }) => id.toString() === state.specialWeaponEventId)) {
@@ -1182,6 +1189,7 @@ export function createStore(web3: Web3) {
         await dispatch('setupWeaponCosmetics');
 
         await dispatch('fetchSpecialWeaponEvents');
+        await dispatch('fetchSpecialWeaponArts');
 
         await dispatch('fetchHasAdminAccess');
         await dispatch('fetchHasMinterAccess');
@@ -1905,8 +1913,9 @@ export function createStore(web3: Web3) {
           commit('updateCharacterCosmetic', { characterId, characterCosmetic });
         }
       },
-      async mintCharacter({ state, dispatch }) {
+      async mintCharacter({ state, dispatch }, approveMintSlippage: boolean) {
         if(featureFlagStakeOnly || !state.defaultAccount) return;
+        const slippageMultiplier = approveMintSlippage ? 1.05 : 1;
 
         await approveFee(
           state.contracts().CryptoBlades!,
@@ -1915,8 +1924,8 @@ export function createStore(web3: Web3) {
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee(),
-          { allowInGameOnlyFunds: false }
+          cryptoBladesMethods => cryptoBladesMethods.getMintCharacterFee(),
+          { feeMultiplier: slippageMultiplier, allowInGameOnlyFunds: false }
         );
 
         await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
@@ -1928,11 +1937,12 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement, eventId = 0 }:
-      { num: any, useStakedSkillOnly?: boolean, chosenElement: any, eventId: any }) {
+      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
+      { num: any, useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
         const chosenElementFee = chosenElement === 100 ? 1 : 2;
+        const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
@@ -1947,8 +1957,8 @@ export function createStore(web3: Web3) {
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-            { feeMultiplier: num * 4 * chosenElementFee, allowInGameOnlyFunds: true }
+            cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
+            { feeMultiplier: num * 4 * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
           );
 
           await CryptoBlades.methods.mintWeaponN(num, chosenElement, eventId).send({ from: state.defaultAccount, gas: '5000000' });
@@ -1963,11 +1973,12 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement, eventId = 0 }:
-      { useStakedSkillOnly?: boolean, chosenElement: any, eventId: any }) {
+      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
+      { useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
         const chosenElementFee = chosenElement === 100 ? 1 : 2;
+        const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
@@ -1982,8 +1993,8 @@ export function createStore(web3: Web3) {
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-            { feeMultiplier: chosenElementFee, allowInGameOnlyFunds: true }
+            cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
+            { feeMultiplier: chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
           );
 
           await CryptoBlades.methods.mintWeapon(chosenElement, eventId).send({ from: state.defaultAccount });
@@ -3765,21 +3776,11 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
-
-        return await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_GOAL).call(defaultCallOptions(state));
+        const weekInSeconds = 604800;
+        return await SimpleQuests.methods.weeklyCompletionsGoal(Math.floor(Date.now() / 1000 / weekInSeconds % 53)).call(defaultCallOptions(state));
       },
 
-      async setWeeklyCompletionsGoal({state}, {newGoal}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
-
-        const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
-
-        return await SimpleQuests.methods.setVar(VAR_WEEKLY_COMPLETIONS_GOAL, newGoal).send(defaultCallOptions(state));
-      },
-
-      async addWeeklyReward({state}, {weeklyReward}) {
+      async setWeeklyReward({state}, {weeklyReward}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
@@ -3788,19 +3789,13 @@ export function createStore(web3: Web3) {
           weeklyReward.rewardExternalAddress = emptyAccount;
         }
 
-        const result =await SimpleQuests.methods.addReward(weeklyReward.rewardType,
+        const result =await SimpleQuests.methods.setWeeklyReward(weeklyReward.rewardType,
           weeklyReward.rewardRarity, weeklyReward.rewardAmount,
-          weeklyReward.rewardExternalAddress, weeklyReward.reputationAmount)
+          weeklyReward.rewardExternalAddress, weeklyReward.reputationAmount,
+          weeklyReward.weekNumber, weeklyReward.completionsGoal)
           .send(defaultCallOptions(state));
 
         return result.events.RewardAdded.returnValues.rewardID;
-      },
-
-      async setWeeklyReward({state}, {rewardID, timestamp}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
-
-        return await SimpleQuests.methods.setWeeklyReward(rewardID, timestamp).send(defaultCallOptions(state));
       },
 
       async getWeeklyReward({state}, {timestamp}) {
@@ -3808,10 +3803,9 @@ export function createStore(web3: Web3) {
         if (!SimpleQuests || !state.defaultAccount) return;
 
         const weekInSeconds = 604800;
-        const week = Math.floor(timestamp / 1000 / weekInSeconds);
+        const week = Math.floor(timestamp / 1000 / weekInSeconds % 53) + 1;
 
-        const rewardID = +await SimpleQuests.methods.weeklyRewards(week).call(defaultCallOptions(state));
-        const weeklyRewardRaw = await SimpleQuests.methods.rewards(rewardID).call(defaultCallOptions(state)) as unknown as {
+        const weeklyRewardRaw = await SimpleQuests.methods.rewards(week).call(defaultCallOptions(state)) as unknown as {
           id: string;
           rewardType: string;
           rewardRarity: string;
@@ -3819,6 +3813,8 @@ export function createStore(web3: Web3) {
           rewardExternalAddress: string;
           reputationAmount: string;
         };
+
+        const weeklyCompletionsGoal = +await SimpleQuests.methods.weeklyCompletionsGoal(week).call(defaultCallOptions(state));
         return {
           id: +weeklyRewardRaw.id,
           rewardType: +weeklyRewardRaw.rewardType as RewardType,
@@ -3826,6 +3822,7 @@ export function createStore(web3: Web3) {
           rewardAmount: +weeklyRewardRaw.rewardAmount,
           rewardExternalAddress: weeklyRewardRaw.rewardExternalAddress,
           reputationAmount: +weeklyRewardRaw.reputationAmount,
+          completionsGoal: weeklyCompletionsGoal,
         } as WeeklyReward;
       },
 
@@ -3836,7 +3833,8 @@ export function createStore(web3: Web3) {
         const weekInSeconds = 604800;
         const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
 
-        const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+        const reward = await SimpleQuests.methods.rewards(Math.floor(currentWeek % 53) + 1).call(defaultCallOptions(state));
+        const rewardID = +reward[0];
 
         if(rewardID === 0) {
           return;
@@ -3865,7 +3863,7 @@ export function createStore(web3: Web3) {
         const weekInSeconds = 604800;
         const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
 
-        const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+        const rewardID = +await SimpleQuests.methods.rewards(Math.floor(currentWeek % 53)).call(defaultCallOptions(state));
 
         if(rewardID === 0) {
           return false;
@@ -4143,12 +4141,20 @@ export function createStore(web3: Web3) {
         await contract.methods.revokeRole(role, walletAddress).send(defaultCallOptions(state));
       },
 
-      async userHasAdminAccess({state}, {contract}) {
-        if (!contract || !state.defaultAccount) return;
+      async userHasDefaultAdminAccess({state}, {contract}) {
+        if (!contract || !contract.methods.DEFAULT_ADMIN_ROLE || !state.defaultAccount) return;
 
-        const adminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const defaultAdminRole = await contract.methods.DEFAULT_ADMIN_ROLE().call(defaultCallOptions(state));
 
-        return await contract.methods.hasRole(adminRole, state.defaultAccount).call(defaultCallOptions(state));
+        return await contract.methods.hasRole(defaultAdminRole, state.defaultAccount).call(defaultCallOptions(state));
+      },
+
+      async userHasGameAdminAccess({state}, {contract}) {
+        if (!contract || !contract.methods.GAME_ADMIN || !state.defaultAccount) return;
+
+        const gameAdminRole = await contract.methods.GAME_ADMIN().call(defaultCallOptions(state));
+
+        return await contract.methods.hasRole(gameAdminRole, state.defaultAccount).call(defaultCallOptions(state));
       },
 
       async userHasMinterAccess({state}, {contract}) {
@@ -4160,19 +4166,43 @@ export function createStore(web3: Web3) {
       },
 
       async fetchHasAdminAccess({state, commit}) {
-        const {SimpleQuests, CBKLand, Weapons, BurningManager} = state.contracts();
-        if (!BurningManager || !Weapons || !SimpleQuests || !CBKLand || !state.defaultAccount) return;
+        const {SimpleQuests,
+          CBKLand,
+          Weapons,
+          BurningManager,
+          PartnerVault,
+          Treasury,
+          CryptoBlades,
+          Blacksmith,
+        } = state.contracts();
+        if (!SimpleQuests
+          || !CBKLand
+          || !Weapons
+          || !BurningManager
+          || !PartnerVault
+          || !Treasury
+          || !CryptoBlades
+          || !Blacksmith
+          || !state.defaultAccount) return;
 
         const simpleQuestsAdminRole = await SimpleQuests.methods.GAME_ADMIN().call(defaultCallOptions(state));
         const cbkLandAdminRole = await CBKLand.methods.GAME_ADMIN().call(defaultCallOptions(state));
         const weaponsAdminRole = await Weapons.methods.GAME_ADMIN().call(defaultCallOptions(state));
         const burningManagerAdminRole = await BurningManager.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const partnerVaultAdminRole = await PartnerVault.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const treasuryAdminRole = await Treasury.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const cryptoBladesAdminRole = await CryptoBlades.methods.GAME_ADMIN().call(defaultCallOptions(state));
+        const blacksmithAdminRole = await Blacksmith.methods.DEFAULT_ADMIN_ROLE().call(defaultCallOptions(state));
 
         const promises: Promise<boolean>[] = [
           SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
           CBKLand.methods.hasRole(cbkLandAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
           Weapons.methods.hasRole(weaponsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
           BurningManager.methods.hasRole(burningManagerAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          PartnerVault.methods.hasRole(partnerVaultAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          Treasury.methods.hasRole(treasuryAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          CryptoBlades.methods.hasRole(cryptoBladesAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+          Blacksmith.methods.hasRole(blacksmithAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         ];
 
         for (const promise of promises) {
@@ -4240,6 +4270,94 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacters', state.ownedCharacterIds),
           dispatch('fetchFightRewardXp')
         ]);
+      },
+
+      async setCharacterMintValue({state}, {cents}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        await CryptoBlades.methods.setCharacterMintValue(cents).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async setWeaponMintValue({state}, {cents}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        await CryptoBlades.methods.setWeaponMintValue(cents).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async getCharacterMintValue({state}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        const fee = +await CryptoBlades.methods.mintCharacterFee().call(defaultCallOptions(state));
+        return Number(BigInt(fee) >> BigInt(64)) * 100;
+      },
+
+      async getWeaponMintValue({state}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        const fee = +await CryptoBlades.methods.mintWeaponFee().call(defaultCallOptions(state));
+        return Number(BigInt(fee) >> BigInt(64)) * 100;
+      },
+
+      async getFightXpGain({state}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        return +await CryptoBlades.methods.fightXpGain().call(defaultCallOptions(state));
+      },
+
+      async setFightXpGain({state}, {xpGain}) {
+        const {CryptoBlades} = state.contracts();
+        if (!CryptoBlades) return;
+
+        await CryptoBlades.methods.setFightXpGain(xpGain).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async getRaidXpReward({state}) {
+        const {Raid1} = state.contracts();
+        if (!Raid1) return;
+
+        return +await Raid1.methods.xpReward().call(defaultCallOptions(state));
+      },
+
+      async setRaidXpReward({state}, {xp}) {
+        const {Raid1} = state.contracts();
+        if (!Raid1) return;
+
+        await Raid1.methods.setXpReward(xp).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async setFlatPriceOfItem({state}, {itemIndex, price}) {
+        const {Blacksmith} = state.contracts();
+        if (!Blacksmith) return;
+
+        price = Web3.utils.toWei(price.toString(), 'ether').toString();
+
+        await Blacksmith.methods.setFlatPriceOfItem(itemIndex, price).send({
+          from: state.defaultAccount,
+        });
+      },
+
+      async setFlatPriceOfItemSeries({state}, {itemIndex, indices, prices}) {
+        const {Blacksmith} = state.contracts();
+        if (!Blacksmith) return;
+
+        prices = prices.map((price: number) => Web3.utils.toWei(price.toString(), 'ether').toString());
+
+        await Blacksmith.methods.setFlatPriceOfItemSeries(itemIndex, indices, prices).send({
+          from: state.defaultAccount,
+        });
       },
 
       async fetchWaxBridgeDetails({ state, commit }) {
@@ -4753,6 +4871,74 @@ export function createStore(web3: Web3) {
           dispatch('fetchCharacterCosmetic', id)
         ]);
       },
+
+      async addPartnerProject({state}, {partnerProject}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        return await Treasury.methods.addPartnerProject(
+          partnerProject.name,
+          partnerProject.tokenSymbol,
+          partnerProject.tokenAddress,
+          partnerProject.tokenSupply,
+          Web3.utils.toWei(partnerProject.tokenPrice.toString(), 'ether').toString(),
+          partnerProject.distributionTime,
+          partnerProject.isActive,
+          partnerProject.logo,
+          partnerProject.details,
+          partnerProject.website,
+          partnerProject.note,
+        ).send({from: state.defaultAccount});
+      },
+
+      async getActivePartnerProjects({state}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        const ids = await Treasury.methods.getActivePartnerProjectsIds().call(defaultCallOptions(state));
+        const projects = [];
+        for(let i = 0; i < ids.length; i++) {
+          const project = await Treasury.methods.partneredProjects(ids[i]).call(defaultCallOptions(state));
+          projects.push(project);
+        }
+        return projects;
+      },
+
+      async setPartnerProjectLogo({state}, {id, logo}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setProjectLogo(id, logo).send({from: state.defaultAccount});
+      },
+
+      async setPartnerProjectDetails({state}, {id, details}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setProjectDetails(id, details).send({from: state.defaultAccount});
+      },
+
+      async setPartnerProjectWebsite({state}, {id, website}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setProjectWebsite(id, website).send({from: state.defaultAccount});
+      },
+
+      async setPartnerProjectNote({state}, {id, note}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setProjectNote(id, note).send({from: state.defaultAccount});
+      },
+
+      async setPartnerProjectIsActive({state}, {id, isActive}) {
+        const { Treasury } = state.contracts();
+        if(!Treasury || !state.defaultAccount) return;
+
+        await Treasury.methods.setIsActive(id, isActive).send({from: state.defaultAccount});
+      },
+
       async fetchPartnerProjects({ state, dispatch }) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
@@ -4769,11 +4955,26 @@ export function createStore(web3: Web3) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        const partnerProject = partnerProjectFromContract(
-          await Treasury.methods.getPartnerProject(id).call(defaultCallOptions(state))
-        );
+        const partnerProjectRaw = await Treasury.methods.partneredProjects(id).call(defaultCallOptions(state));
+        const tokensClaimed = await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(state));
+        const data = await Treasury.methods.getProjectData(id).call(defaultCallOptions(state));
 
-        commit('updatePartnerProjectsState', { partnerProjectId: id, partnerProject });
+        const partnerProject = {
+          id: +partnerProjectRaw[0],
+          name: partnerProjectRaw[1],
+          tokenSymbol: partnerProjectRaw[2],
+          tokenAddress: partnerProjectRaw[3],
+          tokenSupply: +partnerProjectRaw[4],
+          tokensClaimed: +tokensClaimed,
+          tokenPrice: +partnerProjectRaw[5],
+          isActive: partnerProjectRaw[6],
+          logo: data[0],
+          details: data[1],
+          website: data[2],
+          note: data[3],
+        } as SupportedProject;
+
+        commit('updatePartnerProjectsState', { partnerProjectId: partnerProject.id, partnerProject });
       },
 
       async fetchDefaultSlippage({ state, commit }) {
@@ -4799,18 +5000,14 @@ export function createStore(web3: Web3) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        const distributionTime = await Treasury.methods.getProjectDistributionTime(id).call(defaultCallOptions(state));
-
-        return distributionTime;
+        return await Treasury.methods.projectDistributionTime(id).call(defaultCallOptions(state));
       },
 
       async getPartnerProjectClaimedAmount({ state }, id) {
         const { Treasury } = state.contracts();
         if(!Treasury || !state.defaultAccount) return;
 
-        const claimedAmount = await Treasury.methods.getProjectClaimedAmount(id).call(defaultCallOptions(state));
-
-        return claimedAmount;
+        return await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(state));
       },
 
       async getSkillToPartnerRatio({ state, commit }, id) {
@@ -5229,37 +5426,37 @@ export function createStore(web3: Web3) {
       },
 
       async getFighterByCharacter({ state }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const fighter = await PvpArena.methods.fighterByCharacter(characterId).call({ from: state.defaultAccount });
+        const fighter = await PvpCore.methods.fighterByCharacter(characterId).call({ from: state.defaultAccount });
 
         return fighter;
       },
 
       async getCurrentRankedSeason({ state }) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpRankings } = state.contracts();
+        if (!PvpRankings || !state.defaultAccount) return;
 
-        const currentRankedSeason = await PvpArena.methods.currentRankedSeason().call({ from: state.defaultAccount });
+        const currentRankedSeason = await PvpRankings.methods.currentRankedSeason().call({ from: state.defaultAccount });
 
         return currentRankedSeason;
       },
 
       async getSeasonStartedAt({ state }) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpRankings } = state.contracts();
+        if (!PvpRankings || !state.defaultAccount) return;
 
-        const seasonStartedAt = await PvpArena.methods.seasonStartedAt().call({ from: state.defaultAccount });
+        const seasonStartedAt = await PvpRankings.methods.seasonStartedAt().call({ from: state.defaultAccount });
 
         return seasonStartedAt;
       },
 
       async getSeasonDuration({ state }) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpRankings } = state.contracts();
+        if (!PvpRankings || !state.defaultAccount) return;
 
-        const seasonDuration = await PvpArena.methods.seasonDuration().call({ from: state.defaultAccount });
+        const seasonDuration = await PvpRankings.methods.seasonDuration().call({ from: state.defaultAccount });
 
         return seasonDuration;
       },
@@ -5292,172 +5489,181 @@ export function createStore(web3: Web3) {
       },
 
       async getCharacterFullPower({ state }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const characterFullPower = await PvpArena.methods.getCharacterPower(characterId).call({ from: state.defaultAccount });
+        const characterFullPower = await PvpCore.methods.getCharacterPower(characterId).call({ from: state.defaultAccount });
 
         return characterFullPower;
       },
 
       async getRankingPointsByCharacter({ state }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpRankings } = state.contracts();
+        if (!PvpRankings || !state.defaultAccount) return;
 
-        const rankingPointsByCharacter = await PvpArena.methods.rankingPointsByCharacter(characterId).call({ from: state.defaultAccount });
+        const rankingPointsByCharacter = await PvpRankings.methods.rankingPointsByCharacter(characterId).call({ from: state.defaultAccount });
 
         return rankingPointsByCharacter;
       },
 
       async getRankingsPoolByTier({ state }, tier) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpRankings } = state.contracts();
+        if (!PvpRankings || !state.defaultAccount) return;
 
-        const rankingsPoolByTier = await PvpArena.methods.rankingsPoolByTier(tier).call({ from: state.defaultAccount });
+        const rankingsPoolByTier = await PvpRankings.methods.rankingsPoolByTier(tier).call({ from: state.defaultAccount });
 
         return rankingsPoolByTier;
       },
 
       async getTierTopCharacters({ state }, tier) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpRankings } = state.contracts();
+        if (!PvpRankings || !state.defaultAccount) return;
 
-        const tierTopCharacters = await PvpArena.methods.getTierTopCharacters(tier).call({ from: state.defaultAccount });
+        const tierTopCharacters = await PvpRankings.methods.getTierTopCharacters(tier).call({ from: state.defaultAccount });
 
         return tierTopCharacters;
       },
 
       async getArenaTier({ state }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const arenaTier = await PvpArena.methods.getArenaTier(characterId).call({ from: state.defaultAccount });
+        const arenaTier = await PvpCore.methods.getArenaTier(characterId).call({ from: state.defaultAccount });
 
         return arenaTier;
       },
 
-      async getEntryWager({ state }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+      async getPreviousTierByCharacter({ state }, characterId) {
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const entryWager = await PvpArena.methods.getEntryWager(characterId).call({ from: state.defaultAccount });
+        const arenaTier = await PvpCore.methods.previousTierByCharacter(characterId).call({ from: state.defaultAccount });
+
+        return arenaTier;
+      },
+
+      async getEntryWagerByTier({ state }, tier) {
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
+
+        const entryWager = await PvpCore.methods.getEntryWagerByTier(tier).call({ from: state.defaultAccount });
 
         return entryWager;
       },
 
       async getIsWeaponInArena({ state }, weaponId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const isWeaponInArena = await PvpArena.methods.isWeaponInArena(weaponId).call({ from: state.defaultAccount });
+        const isWeaponInArena = await PvpCore.methods.isWeaponInArena(weaponId).call({ from: state.defaultAccount });
 
         return isWeaponInArena;
       },
 
       async getIsShieldInArena({ state }, shieldId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const isShieldInArena = await PvpArena.methods.isShieldInArena(shieldId).call({ from: state.defaultAccount });
+        const isShieldInArena = await PvpCore.methods.isShieldInArena(shieldId).call({ from: state.defaultAccount });
 
         return isShieldInArena;
       },
 
       async getIsCharacterInArena({ state, commit }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
-        const isCharacterInArena = await PvpArena.methods.isCharacterInArena(characterId).call({ from: state.defaultAccount });
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
+        const isCharacterInArena = await PvpCore.methods.isCharacterInArena(characterId).call({ from: state.defaultAccount });
         commit('updateCharacterInArena', { characterId, isCharacterInArena });
 
         return isCharacterInArena;
       },
 
       async getIsCharacterUnderAttack({ state }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const isCharacterUnderAttack = await PvpArena.methods.isCharacterUnderAttack(characterId).call({ from: state.defaultAccount });
+        const isCharacterUnderAttack = await PvpCore.methods.isCharacterUnderAttack(characterId).call({ from: state.defaultAccount });
 
         return isCharacterUnderAttack;
       },
 
       async getMatchByFinder({ state }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const matchByFinder = await PvpArena.methods.matchByFinder(characterId).call({ from: state.defaultAccount });
+        const matchByFinder = await PvpCore.methods.matchByFinder(characterId).call({ from: state.defaultAccount });
 
         return matchByFinder;
       },
 
       async getDuelQueue({ state }) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const matchByFinder = await PvpArena.methods.getDuelQueue().call({ from: state.defaultAccount });
+        const matchByFinder = await PvpCore.methods.getDuelQueue().call({ from: state.defaultAccount });
 
         return matchByFinder;
       },
 
       async getDuelCost({ state }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const matchByFinder = await PvpArena.methods.getDuelCost(characterId).call({ from: state.defaultAccount });
+        const matchByFinder = await PvpCore.methods.getDuelCost(characterId).call({ from: state.defaultAccount });
 
         return matchByFinder;
       },
 
       async getMatchablePlayerCount({ state }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const matchablePlayerCount = await PvpArena.methods.getMatchablePlayerCount(characterId).call({ from: state.defaultAccount });
+        const matchablePlayerCount = await PvpCore.methods.getMatchablePlayerCount(characterId).call({ from: state.defaultAccount });
 
         return matchablePlayerCount;
       },
 
       async getDecisionSeconds({ state }) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const decisionSeconds = await PvpArena.methods.decisionSeconds().call({ from: state.defaultAccount });
+        const decisionSeconds = await PvpCore.methods.decisionSeconds().call({ from: state.defaultAccount });
 
         return decisionSeconds;
       },
 
       async getReRollFeePercent({ state }) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const reRollFeePercent = await PvpArena.methods.reRollFeePercent().call({ from: state.defaultAccount });
+        const reRollFeePercent = await PvpCore.methods.reRollFeePercent().call({ from: state.defaultAccount });
 
         return reRollFeePercent;
       },
 
       async getPlayerPrizePoolRewards({ state }) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpRankings } = state.contracts();
+        if (!PvpRankings || !state.defaultAccount) return;
 
-        const playerPrizePoolRewards = await PvpArena.methods.getPlayerPrizePoolRewards().call({ from: state.defaultAccount });
+        const playerPrizePoolRewards = await PvpRankings.methods.getPlayerPrizePoolRewards().call({ from: state.defaultAccount });
 
         return playerPrizePoolRewards;
       },
 
       async getDuelOffsetCost({ state }) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const duelOffsetCost = await PvpArena.methods.duelOffsetCost().call({ from: state.defaultAccount });
+        const duelOffsetCost = await PvpCore.methods.duelOffsetCost().call({ from: state.defaultAccount });
 
         return duelOffsetCost;
       },
 
-      async enterArena({ state, dispatch }, {characterId, weaponId, shieldId, useShield}) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+      async enterArena({ state, dispatch }, {characterId, weaponId, shieldId, useShield, tierless}) {
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const res = await PvpArena.methods.enterArena(characterId, weaponId, shieldId, useShield).send({ from: state.defaultAccount });
+        const res = await PvpCore.methods.enterArena(characterId, weaponId, shieldId, useShield, tierless).send({ from: state.defaultAccount });
 
         await dispatch('getIsCharacterInArena', characterId);
 
@@ -5465,10 +5671,10 @@ export function createStore(web3: Web3) {
       },
 
       async withdrawFromArena({ state, dispatch }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const res = await PvpArena.methods.withdrawFromArena(characterId).send({ from: state.defaultAccount });
+        const res = await PvpCore.methods.withdrawFromArena(characterId).send({ from: state.defaultAccount });
 
         await dispatch('getIsCharacterInArena', characterId);
 
@@ -5476,54 +5682,61 @@ export function createStore(web3: Web3) {
       },
 
       async findOpponent({ state }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const res = await PvpArena.methods.findOpponent(characterId).send({ from: state.defaultAccount });
+        const res = await PvpCore.methods.findOpponent(characterId).send({ from: state.defaultAccount });
 
         return res;
       },
 
       async reRollOpponent({ state }, characterId) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const res = await PvpArena.methods.reRollOpponent(characterId).send({ from: state.defaultAccount });
+        const res = await PvpCore.methods.reRollOpponent(characterId).send({ from: state.defaultAccount });
 
         return res;
       },
 
       async prepareDuel({ state }, { characterId, duelOffsetCost }) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        const res = await PvpArena.methods.prepareDuel(characterId).send({ from: state.defaultAccount, value: duelOffsetCost });
+        const res = await PvpCore.methods.prepareDuel(characterId).send({ from: state.defaultAccount, value: duelOffsetCost });
 
         return res;
       },
 
       async withdrawRankedRewards({ state }) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+        const { PvpRankings } = state.contracts();
+        if (!PvpRankings || !state.defaultAccount) return;
 
-        const res = await PvpArena.methods.withdrawRankedRewards().send({ from: state.defaultAccount });
+        const res = await PvpRankings.methods.withdrawRankedRewards().send({ from: state.defaultAccount });
 
         return res;
       },
 
-      async getPvpContract({state}) {
-        const { PvpArena } = state.contracts();
-        if (!PvpArena || !state.defaultAccount) return;
+      async getPvpCoreContract({state}) {
+        const { PvpCore } = state.contracts();
+        if (!PvpCore || !state.defaultAccount) return;
 
-        return PvpArena;
+        return PvpCore;
+      },
+
+      async getPvpRankingsContract({state}) {
+        const { PvpRankings } = state.contracts();
+        if (!PvpRankings || !state.defaultAccount) return;
+
+        return PvpRankings;
       },
 
       async approvePvpSkillSpending({state}, amount) {
-        const { PvpArena, SkillToken } = state.contracts();
-        if (!PvpArena || !SkillToken || !state.defaultAccount) return;
+        const { PvpCore, SkillToken } = state.contracts();
+        if (!PvpCore || !SkillToken || !state.defaultAccount) return;
 
         return await approveFeeFromAnyContractSimple(
-          PvpArena,
+          PvpCore,
           SkillToken,
           state.defaultAccount,
           defaultCallOptions(state),
@@ -5635,6 +5848,123 @@ export function createStore(web3: Web3) {
         return await BurningManager.methods.vars(2).call(defaultCallOptions(state));
       },
 
+      async getBurnPointMultiplier({ state }) {
+        const { Weapons } = state.contracts();
+        if(!Weapons || !state.defaultAccount) return;
+
+        return await Weapons.methods.burnPointMultiplier().call(defaultCallOptions(state));
+      },
+
+      async setBurnPointMultiplier({state}, {multiplier}) {
+        const { Weapons } = state.contracts();
+        if(!Weapons || !state.defaultAccount) return;
+
+        await Weapons.methods.setBurnPointMultiplier(multiplier).send({ from: state.defaultAccount });
+      },
+
+      async getActiveSpecialWeaponsEvents({state}) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        const ids = await SpecialWeaponsManager.methods.getActiveEventsIds().call(defaultCallOptions(state));
+        const events = [];
+        for(let i = 0; i < ids.length; i++) {
+          const project = await SpecialWeaponsManager.methods.eventInfo(ids[i]).call(defaultCallOptions(state));
+          events.push({id: ids[i], ...project});
+        }
+        return events;
+      },
+
+      async startNewEvent({state}, {event}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .startNewEvent(event.name, event.element, event.period, event.supply, event.art, event.details, event.website, event.note)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponArt({state}, {eventId, art}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponArt(eventId, art)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponDetails({state}, {eventId, details}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponDetails(eventId, details)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponWebsite({state}, {eventId, website}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponWebsite(eventId, website)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponNote({state}, {eventId, note}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponNote(eventId, note)
+          .send({from: state.defaultAccount});
+      },
+
+      async incrementEventCount({state}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .incrementEventCount()
+          .send({from: state.defaultAccount});
+      },
+
+      async addShards({state}, {user, eventId, shardsAmount}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .addShards(user, eventId, shardsAmount)
+          .send({from: state.defaultAccount});
+      },
+
+      async privatePartnerOrder({state}, {receivers, eventId, orderOption}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .privatePartnerOrder(receivers, eventId, orderOption)
+          .send({from: state.defaultAccount});
+      },
+
+      async privatePartnerMint({state}, {receivers, eventId, orderOption}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .privatePartnerMint(receivers, eventId, orderOption)
+          .send({from: state.defaultAccount});
+      },
+
+      async reserveForGiveaways({state}, {reservingAddress, eventId, orderOption, amount}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .reserveForGiveaways(reservingAddress, eventId, orderOption, amount)
+          .send({from: state.defaultAccount});
+      },
+
       async fetchSpecialWeaponEvents({ state, dispatch, commit }) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;
@@ -5651,6 +5981,18 @@ export function createStore(web3: Web3) {
         await dispatch('fetchShardsSupply');
       },
 
+      async fetchSpecialWeaponArts({ state, commit }) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        const allSpecialWeaponEventsIds = state.activeSpecialWeaponEventsIds.concat(state.inactiveSpecialWeaponEventsIds);
+        for (let i = 0; i < allSpecialWeaponEventsIds.length; i++) {
+          const eventId = allSpecialWeaponEventsIds[i];
+          const art = await SpecialWeaponsManager.methods.specialWeaponArt(eventId).call(defaultCallOptions(state));
+          commit('updateSpecialWeaponArt', { eventId, art });
+        }
+      },
+
       async fetchSpecialWeaponEventsInfo({ state, commit }, eventsIds) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;
@@ -5659,6 +6001,7 @@ export function createStore(web3: Web3) {
           const eventInfoRaw = await SpecialWeaponsManager.methods.getEventInfo(eventId).call(defaultCallOptions(state));
           const ordered = +await SpecialWeaponsManager.methods.userOrderOptionForEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state)) > 0;
           const forged = await SpecialWeaponsManager.methods.userForgedAtEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state));
+          const eventData = await SpecialWeaponsManager.methods.getSpecialWeaponData(eventId).call(defaultCallOptions(state));
           const eventInfo = {
             name: eventInfoRaw[0],
             weaponElement: eventInfoRaw[1],
@@ -5666,7 +6009,11 @@ export function createStore(web3: Web3) {
             supply: eventInfoRaw[3],
             orderedCount: eventInfoRaw[4],
             ordered,
-            forged
+            forged,
+            art: eventData[0],
+            details: eventData[1],
+            website: eventData[2],
+            notes: eventData[3]
           };
 
           commit('updateSpecialWeaponEventsInfo', { eventId, eventInfo });
@@ -5778,11 +6125,87 @@ export function createStore(web3: Web3) {
       },
 
       async fetchFreeOpponentRerollTimestamp({ state }, weaponId) {
-        const { PvpArena } = state.contracts();
-        if(!PvpArena || !state.defaultAccount) return;
+        const { PvpCore } = state.contracts();
+        if(!PvpCore || !state.defaultAccount) return;
 
-        return await PvpArena.methods.specialWeaponRerollTimestamp(weaponId).call(defaultCallOptions(state));
-      }
+        return await PvpCore.methods.specialWeaponRerollTimestamp(weaponId).call(defaultCallOptions(state));
+      },
+
+      async fetchMintWeaponPriceDecreasePerSecond({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const decreaseRaw = await CryptoBlades.methods.vars(19).call(defaultCallOptions(state));
+        const decreaseBN = new BigNumber(decreaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const decreaseInSkill = await CryptoBlades.methods.usdToSkill(decreaseBN).call(defaultCallOptions(state));
+        return new BigNumber(decreaseInSkill).div(1e18);
+      },
+
+      async fetchMintCharacterPriceDecreasePerSecond({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const decreaseRaw = await CryptoBlades.methods.vars(20).call(defaultCallOptions(state));
+        const decreaseBN = new BigNumber(decreaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const decreaseInSkill = await CryptoBlades.methods.usdToSkill(decreaseBN).call(defaultCallOptions(state));
+        return new BigNumber(decreaseInSkill).div(1e18);
+      },
+
+      async fetchWeaponMintIncreasePrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const increaseRaw = await CryptoBlades.methods.vars(21).call(defaultCallOptions(state));
+        const increaseBN = new BigNumber(increaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const increaseInSkill = await CryptoBlades.methods.usdToSkill(increaseBN).call(defaultCallOptions(state));
+        return new BigNumber(increaseInSkill).div(1e18);
+      },
+
+      async fetchCharacterMintIncreasePrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const increaseRaw = await CryptoBlades.methods.vars(22).call(defaultCallOptions(state));
+        const increaseBN = new BigNumber(increaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const increaseInSkill = await CryptoBlades.methods.usdToSkill(increaseBN).call(defaultCallOptions(state));
+        return new BigNumber(increaseInSkill).div(1e18);
+      },
+
+      async fetchMintWeaponMinPrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const priceInUsdRaw = await CryptoBlades.methods.vars(23).call(defaultCallOptions(state));
+        const priceInUsd = new BigNumber(priceInUsdRaw).multipliedBy(new BigNumber(2).pow(64)).div(100).toString();
+        return await CryptoBlades.methods.usdToSkill(priceInUsd).call(defaultCallOptions(state));
+      },
+
+      async fetchMintCharacterMinPrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const priceInUsdRaw = await CryptoBlades.methods.vars(24).call(defaultCallOptions(state));
+        const priceInUsd = new BigNumber(priceInUsdRaw).multipliedBy(new BigNumber(2).pow(64)).div(100).toString();
+        return await CryptoBlades.methods.usdToSkill(priceInUsd).call(defaultCallOptions(state));
+      },
+
+      async fetchMintWeaponFee({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        return CryptoBlades.methods.getMintWeaponFee().call(defaultCallOptions(state));
+      },
+
+      async fetchMintCharacterFee({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        return CryptoBlades.methods.getMintCharacterFee().call(defaultCallOptions(state));
+      },
     }
   });
 }

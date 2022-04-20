@@ -1,5 +1,10 @@
 <template>
   <div class="app">
+    <Banner
+      text="GIVEAWAY: Win 1 of 10 Level 70+ Characters"
+      link="https://gleam.io/uswdy/cryptoblades-70-character-giveaway"
+      linkText="Enter here"
+    />
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content dark-bg-text">
       <b-row>
@@ -101,6 +106,7 @@ import { getConfigValue } from './contracts';
 import '@/mixins/general';
 import config from '../app-config.json';
 import { addChainToRouter } from '@/utils/common';
+import Banner from './components/Banner.vue';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -113,7 +119,8 @@ export default {
     CharacterBar,
     BigButton,
     SmallButton,
-    WeaponRowGrid
+    WeaponRowGrid,
+    Banner
   },
 
   data: () => ({
@@ -126,7 +133,8 @@ export default {
     showWeapon: false,
     currentWeaponId: null,
     weaponId: null,
-    toggleSideBar: false
+    toggleSideBar: false,
+    currentPath: '',
   }),
 
   computed: {
@@ -160,6 +168,7 @@ export default {
     },
     $route(to) {
       // react to route changes
+      this.currentPath = to.path;
       this.checkChainAndParams();
       if(to.path === '/options') {
         return this.isOptions = true;
@@ -229,7 +238,7 @@ export default {
         if(this.toggleSideBar){
           toDisplay = 'can-show-app';
         }else{
-          toDisplay = 'col-xl-9 col-lg-8 col-md-8 col-sm-10 cols-11 set-normal';
+          toDisplay = 'col-xl-10 col-lg-9 col-md-9 col-sm-10 cols-11 set-normal';
         }
       }else{
         toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
@@ -248,7 +257,7 @@ export default {
       else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
     async initializeRecruitCost() {
-      const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
+      const recruitCost = await this.contracts.CryptoBlades.methods.getMintCharacterFee().call({ from: this.defaultAccount });
       const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
       this.recruitCost = BN(skillRecruitCost)
         .div(BN(10).pow(18))
