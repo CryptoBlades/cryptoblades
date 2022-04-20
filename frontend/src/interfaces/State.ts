@@ -79,6 +79,10 @@ export interface ISpecialWeaponEvent {
   orderedCount: string;
   ordered: boolean;
   forged: boolean;
+  art: string;
+  details: string;
+  website: string;
+  note: string;
 }
 
 export interface IItemPrices {
@@ -211,6 +215,7 @@ export interface IState {
   inactiveSpecialWeaponEventsIds: number[];
   specialWeaponEvents: Record<number, ISpecialWeaponEvent>;
   specialWeaponEventId: string;
+  specialWeaponArts: string[];
   shardsSupply: Record<number, number>;
 
   itemPrices: IItemPrices;

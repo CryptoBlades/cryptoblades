@@ -228,6 +228,7 @@ export function createStore(web3: Web3) {
       activeSpecialWeaponEventsIds: [],
       inactiveSpecialWeaponEventsIds: [],
       specialWeaponEvents: {},
+      specialWeaponArts: [],
       specialWeaponEventId: localStorage.getItem('specialWeaponEventId') || '0',
       shardsSupply: {},
 
@@ -401,10 +402,12 @@ export function createStore(web3: Web3) {
         const currencyList = getConfigValue('currencyTransak') || 'BNB,BUSD';
 
         const urlCC = 'defaultCryptoCurrency=' + currencyDefault;
-        const urlNetwork = 'network=' + currencyNetwork;
         const urlCCL = 'cryptoCurrencyList=' + currencyList;
 
-        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlNetwork + '&' + urlCCL;
+        //Transak is not available for Huobi & OKEX
+        if(currencyNetwork === 'Huobi' || currencyNetwork === 'OKEx') return;
+
+        return transakAPIURL + '/?apiKey=' + transakAPIKey + '&' + urlCC + '&' + urlCCL;
       },
       ownCharacters(state, getters) {
         return getters.charactersWithIds(state.ownedCharacterIds);
@@ -1139,6 +1142,10 @@ export function createStore(web3: Web3) {
         Vue.set(state.specialWeaponEvents, eventId, eventInfo);
       },
 
+      updateSpecialWeaponArt(state: IState, {eventId, art}) {
+        Vue.set(state.specialWeaponArts, eventId, art);
+      },
+
       updateActiveSpecialWeaponEventsIds(state: IState, eventsIds) {
         Vue.set(state, 'activeSpecialWeaponEventsIds', eventsIds);
         if(!eventsIds.find((id: { toString: () => string; }) => id.toString() === state.specialWeaponEventId)) {
@@ -1182,6 +1189,7 @@ export function createStore(web3: Web3) {
         await dispatch('setupWeaponCosmetics');
 
         await dispatch('fetchSpecialWeaponEvents');
+        await dispatch('fetchSpecialWeaponArts');
 
         await dispatch('fetchHasAdminAccess');
         await dispatch('fetchHasMinterAccess');
@@ -1905,8 +1913,9 @@ export function createStore(web3: Web3) {
           commit('updateCharacterCosmetic', { characterId, characterCosmetic });
         }
       },
-      async mintCharacter({ state, dispatch }) {
+      async mintCharacter({ state, dispatch }, approveMintSlippage: boolean) {
         if(featureFlagStakeOnly || !state.defaultAccount) return;
+        const slippageMultiplier = approveMintSlippage ? 1.05 : 1;
 
         await approveFee(
           state.contracts().CryptoBlades!,
@@ -1915,8 +1924,8 @@ export function createStore(web3: Web3) {
           state.skillRewards,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.mintCharacterFee(),
-          { allowInGameOnlyFunds: false }
+          cryptoBladesMethods => cryptoBladesMethods.getMintCharacterFee(),
+          { feeMultiplier: slippageMultiplier, allowInGameOnlyFunds: false }
         );
 
         await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
@@ -1928,11 +1937,12 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement, eventId = 0 }:
-      { num: any, useStakedSkillOnly?: boolean, chosenElement: any, eventId: any }) {
+      async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
+      { num: any, useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
         const chosenElementFee = chosenElement === 100 ? 1 : 2;
+        const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
@@ -1947,8 +1957,8 @@ export function createStore(web3: Web3) {
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-            { feeMultiplier: num * 4 * chosenElementFee, allowInGameOnlyFunds: true }
+            cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
+            { feeMultiplier: num * 4 * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
           );
 
           await CryptoBlades.methods.mintWeaponN(num, chosenElement, eventId).send({ from: state.defaultAccount, gas: '5000000' });
@@ -1963,11 +1973,12 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement, eventId = 0 }:
-      { useStakedSkillOnly?: boolean, chosenElement: any, eventId: any }) {
+      async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
+      { useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
         const { CryptoBlades, SkillToken, Weapons } = state.contracts();
         if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
         const chosenElementFee = chosenElement === 100 ? 1 : 2;
+        const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
         if(useStakedSkillOnly) {
           await CryptoBlades.methods
@@ -1982,8 +1993,8 @@ export function createStore(web3: Web3) {
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            cryptoBladesMethods => cryptoBladesMethods.mintWeaponFee(),
-            { feeMultiplier: chosenElementFee, allowInGameOnlyFunds: true }
+            cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
+            { feeMultiplier: chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
           );
 
           await CryptoBlades.methods.mintWeapon(chosenElement, eventId).send({ from: state.defaultAccount });
@@ -3765,21 +3776,11 @@ export function createStore(web3: Web3) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
-        const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
-
-        return await SimpleQuests.methods.vars(VAR_WEEKLY_COMPLETIONS_GOAL).call(defaultCallOptions(state));
+        const weekInSeconds = 604800;
+        return await SimpleQuests.methods.weeklyCompletionsGoal(Math.floor(Date.now() / 1000 / weekInSeconds % 53)).call(defaultCallOptions(state));
       },
 
-      async setWeeklyCompletionsGoal({state}, {newGoal}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
-
-        const VAR_WEEKLY_COMPLETIONS_GOAL = await SimpleQuests.methods.VAR_WEEKLY_COMPLETIONS_GOAL().call(defaultCallOptions(state));
-
-        return await SimpleQuests.methods.setVar(VAR_WEEKLY_COMPLETIONS_GOAL, newGoal).send(defaultCallOptions(state));
-      },
-
-      async addWeeklyReward({state}, {weeklyReward}) {
+      async setWeeklyReward({state}, {weeklyReward}) {
         const {SimpleQuests} = state.contracts();
         if (!SimpleQuests || !state.defaultAccount) return;
 
@@ -3788,19 +3789,13 @@ export function createStore(web3: Web3) {
           weeklyReward.rewardExternalAddress = emptyAccount;
         }
 
-        const result =await SimpleQuests.methods.addReward(weeklyReward.rewardType,
+        const result =await SimpleQuests.methods.setWeeklyReward(weeklyReward.rewardType,
           weeklyReward.rewardRarity, weeklyReward.rewardAmount,
-          weeklyReward.rewardExternalAddress, weeklyReward.reputationAmount)
+          weeklyReward.rewardExternalAddress, weeklyReward.reputationAmount,
+          weeklyReward.weekNumber, weeklyReward.completionsGoal)
           .send(defaultCallOptions(state));
 
         return result.events.RewardAdded.returnValues.rewardID;
-      },
-
-      async setWeeklyReward({state}, {rewardID, timestamp}) {
-        const {SimpleQuests} = state.contracts();
-        if (!SimpleQuests || !state.defaultAccount) return;
-
-        return await SimpleQuests.methods.setWeeklyReward(rewardID, timestamp).send(defaultCallOptions(state));
       },
 
       async getWeeklyReward({state}, {timestamp}) {
@@ -3808,10 +3803,9 @@ export function createStore(web3: Web3) {
         if (!SimpleQuests || !state.defaultAccount) return;
 
         const weekInSeconds = 604800;
-        const week = Math.floor(timestamp / 1000 / weekInSeconds);
+        const week = Math.floor(timestamp / 1000 / weekInSeconds % 53) + 1;
 
-        const rewardID = +await SimpleQuests.methods.weeklyRewards(week).call(defaultCallOptions(state));
-        const weeklyRewardRaw = await SimpleQuests.methods.rewards(rewardID).call(defaultCallOptions(state)) as unknown as {
+        const weeklyRewardRaw = await SimpleQuests.methods.rewards(week).call(defaultCallOptions(state)) as unknown as {
           id: string;
           rewardType: string;
           rewardRarity: string;
@@ -3819,6 +3813,8 @@ export function createStore(web3: Web3) {
           rewardExternalAddress: string;
           reputationAmount: string;
         };
+
+        const weeklyCompletionsGoal = +await SimpleQuests.methods.weeklyCompletionsGoal(week).call(defaultCallOptions(state));
         return {
           id: +weeklyRewardRaw.id,
           rewardType: +weeklyRewardRaw.rewardType as RewardType,
@@ -3826,6 +3822,7 @@ export function createStore(web3: Web3) {
           rewardAmount: +weeklyRewardRaw.rewardAmount,
           rewardExternalAddress: weeklyRewardRaw.rewardExternalAddress,
           reputationAmount: +weeklyRewardRaw.reputationAmount,
+          completionsGoal: weeklyCompletionsGoal,
         } as WeeklyReward;
       },
 
@@ -3836,7 +3833,8 @@ export function createStore(web3: Web3) {
         const weekInSeconds = 604800;
         const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
 
-        const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+        const reward = await SimpleQuests.methods.rewards(Math.floor(currentWeek % 53) + 1).call(defaultCallOptions(state));
+        const rewardID = +reward[0];
 
         if(rewardID === 0) {
           return;
@@ -3865,7 +3863,7 @@ export function createStore(web3: Web3) {
         const weekInSeconds = 604800;
         const currentWeek = Math.floor(Date.now() / 1000 / weekInSeconds);
 
-        const rewardID = +await SimpleQuests.methods.weeklyRewards(currentWeek).call(defaultCallOptions(state));
+        const rewardID = +await SimpleQuests.methods.rewards(Math.floor(currentWeek % 53)).call(defaultCallOptions(state));
 
         if(rewardID === 0) {
           return false;
@@ -5848,6 +5846,109 @@ export function createStore(web3: Web3) {
         await Weapons.methods.setBurnPointMultiplier(multiplier).send({ from: state.defaultAccount });
       },
 
+      async getActiveSpecialWeaponsEvents({state}) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        const ids = await SpecialWeaponsManager.methods.getActiveEventsIds().call(defaultCallOptions(state));
+        const events = [];
+        for(let i = 0; i < ids.length; i++) {
+          const project = await SpecialWeaponsManager.methods.eventInfo(ids[i]).call(defaultCallOptions(state));
+          events.push({id: ids[i], ...project});
+        }
+        return events;
+      },
+
+      async startNewEvent({state}, {event}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .startNewEvent(event.name, event.element, event.period, event.supply, event.art, event.details, event.website, event.note)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponArt({state}, {eventId, art}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponArt(eventId, art)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponDetails({state}, {eventId, details}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponDetails(eventId, details)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponWebsite({state}, {eventId, website}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponWebsite(eventId, website)
+          .send({from: state.defaultAccount});
+      },
+
+      async setSpecialWeaponNote({state}, {eventId, note}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .setSpecialWeaponNote(eventId, note)
+          .send({from: state.defaultAccount});
+      },
+
+      async incrementEventCount({state}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .incrementEventCount()
+          .send({from: state.defaultAccount});
+      },
+
+      async addShards({state}, {user, eventId, shardsAmount}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .addShards(user, eventId, shardsAmount)
+          .send({from: state.defaultAccount});
+      },
+
+      async privatePartnerOrder({state}, {receivers, eventId, orderOption}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .privatePartnerOrder(receivers, eventId, orderOption)
+          .send({from: state.defaultAccount});
+      },
+
+      async privatePartnerMint({state}, {receivers, eventId, orderOption}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .privatePartnerMint(receivers, eventId, orderOption)
+          .send({from: state.defaultAccount});
+      },
+
+      async reserveForGiveaways({state}, {reservingAddress, eventId, orderOption, amount}) {
+        const {SpecialWeaponsManager} = state.contracts();
+        if (!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        await SpecialWeaponsManager.methods
+          .reserveForGiveaways(reservingAddress, eventId, orderOption, amount)
+          .send({from: state.defaultAccount});
+      },
+
       async fetchSpecialWeaponEvents({ state, dispatch, commit }) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;
@@ -5864,6 +5965,18 @@ export function createStore(web3: Web3) {
         await dispatch('fetchShardsSupply');
       },
 
+      async fetchSpecialWeaponArts({ state, commit }) {
+        const { SpecialWeaponsManager } = state.contracts();
+        if(!SpecialWeaponsManager || !state.defaultAccount) return;
+
+        const allSpecialWeaponEventsIds = state.activeSpecialWeaponEventsIds.concat(state.inactiveSpecialWeaponEventsIds);
+        for (let i = 0; i < allSpecialWeaponEventsIds.length; i++) {
+          const eventId = allSpecialWeaponEventsIds[i];
+          const art = await SpecialWeaponsManager.methods.specialWeaponArt(eventId).call(defaultCallOptions(state));
+          commit('updateSpecialWeaponArt', { eventId, art });
+        }
+      },
+
       async fetchSpecialWeaponEventsInfo({ state, commit }, eventsIds) {
         const { SpecialWeaponsManager } = state.contracts();
         if(!SpecialWeaponsManager || !state.defaultAccount) return;
@@ -5872,6 +5985,7 @@ export function createStore(web3: Web3) {
           const eventInfoRaw = await SpecialWeaponsManager.methods.getEventInfo(eventId).call(defaultCallOptions(state));
           const ordered = +await SpecialWeaponsManager.methods.userOrderOptionForEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state)) > 0;
           const forged = await SpecialWeaponsManager.methods.userForgedAtEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state));
+          const eventData = await SpecialWeaponsManager.methods.getSpecialWeaponData(eventId).call(defaultCallOptions(state));
           const eventInfo = {
             name: eventInfoRaw[0],
             weaponElement: eventInfoRaw[1],
@@ -5879,7 +5993,11 @@ export function createStore(web3: Web3) {
             supply: eventInfoRaw[3],
             orderedCount: eventInfoRaw[4],
             ordered,
-            forged
+            forged,
+            art: eventData[0],
+            details: eventData[1],
+            website: eventData[2],
+            notes: eventData[3]
           };
 
           commit('updateSpecialWeaponEventsInfo', { eventId, eventInfo });
@@ -5995,7 +6113,83 @@ export function createStore(web3: Web3) {
         if(!PvpArena || !state.defaultAccount) return;
 
         return await PvpArena.methods.specialWeaponRerollTimestamp(weaponId).call(defaultCallOptions(state));
-      }
+      },
+
+      async fetchMintWeaponPriceDecreasePerSecond({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const decreaseRaw = await CryptoBlades.methods.vars(19).call(defaultCallOptions(state));
+        const decreaseBN = new BigNumber(decreaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const decreaseInSkill = await CryptoBlades.methods.usdToSkill(decreaseBN).call(defaultCallOptions(state));
+        return new BigNumber(decreaseInSkill).div(1e18);
+      },
+
+      async fetchMintCharacterPriceDecreasePerSecond({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const decreaseRaw = await CryptoBlades.methods.vars(20).call(defaultCallOptions(state));
+        const decreaseBN = new BigNumber(decreaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const decreaseInSkill = await CryptoBlades.methods.usdToSkill(decreaseBN).call(defaultCallOptions(state));
+        return new BigNumber(decreaseInSkill).div(1e18);
+      },
+
+      async fetchWeaponMintIncreasePrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const increaseRaw = await CryptoBlades.methods.vars(21).call(defaultCallOptions(state));
+        const increaseBN = new BigNumber(increaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const increaseInSkill = await CryptoBlades.methods.usdToSkill(increaseBN).call(defaultCallOptions(state));
+        return new BigNumber(increaseInSkill).div(1e18);
+      },
+
+      async fetchCharacterMintIncreasePrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const increaseRaw = await CryptoBlades.methods.vars(22).call(defaultCallOptions(state));
+        const increaseBN = new BigNumber(increaseRaw).multipliedBy(new BigNumber(2).pow(64)).toString();
+
+        const increaseInSkill = await CryptoBlades.methods.usdToSkill(increaseBN).call(defaultCallOptions(state));
+        return new BigNumber(increaseInSkill).div(1e18);
+      },
+
+      async fetchMintWeaponMinPrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const priceInUsdRaw = await CryptoBlades.methods.vars(23).call(defaultCallOptions(state));
+        const priceInUsd = new BigNumber(priceInUsdRaw).multipliedBy(new BigNumber(2).pow(64)).div(100).toString();
+        return await CryptoBlades.methods.usdToSkill(priceInUsd).call(defaultCallOptions(state));
+      },
+
+      async fetchMintCharacterMinPrice({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const priceInUsdRaw = await CryptoBlades.methods.vars(24).call(defaultCallOptions(state));
+        const priceInUsd = new BigNumber(priceInUsdRaw).multipliedBy(new BigNumber(2).pow(64)).div(100).toString();
+        return await CryptoBlades.methods.usdToSkill(priceInUsd).call(defaultCallOptions(state));
+      },
+
+      async fetchMintWeaponFee({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        return CryptoBlades.methods.getMintWeaponFee().call(defaultCallOptions(state));
+      },
+
+      async fetchMintCharacterFee({state}) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        return CryptoBlades.methods.getMintCharacterFee().call(defaultCallOptions(state));
+      },
     }
   });
 }
