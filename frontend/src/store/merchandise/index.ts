@@ -8,6 +8,11 @@ import {abi as priceOracleAbi} from '@/../../build/contracts/IPriceOracle.json';
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
 
 const merchandise = {
+  getters:{
+    getCartEntries(state) {
+      return state.cartEntries;
+    }
+  },
   actions: {
     async currentSkillPrice({ state }) {
       const { Merchandise } = state.contracts();

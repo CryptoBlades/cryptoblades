@@ -464,10 +464,6 @@ export function createStore(web3: Web3) {
         };
       },
 
-      getCartEntries(state) {
-        return state.cartEntries;
-      },
-
       getCurrentChainSupportsMerchandise(state) {
         return state.currentChainSupportsMerchandise;
       },
