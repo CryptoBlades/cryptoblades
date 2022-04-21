@@ -151,11 +151,6 @@ interface StoreMappedActions {
     nftContractAddr: string;
     tokenId: string | number;
   }): Promise<string>;
-  purchaseMarketListing(payload: {
-    nftContractAddr: string;
-    tokenId: string;
-    maxPrice: string;
-  }): Promise<{ seller: string; nftID: string; price: string }>;
 }
 
 export default Vue.extend({
