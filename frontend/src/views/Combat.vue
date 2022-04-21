@@ -611,6 +611,11 @@ h5{
   justify-content: center;
 }
 
+.content > div > div > div{
+  padding: 20px 40px;
+}
+
+
 .frame-line > img{
   animation-name: resizeUp;
   animation-duration: 0.5s;

@@ -368,9 +368,6 @@ export default Vue.extend({
       let items: IWeapon[] = [];
       this.displayWeapons.forEach((x) => items.push(x));
       const allIgnore: string[] = [];
-      // if (this.ignore) {
-      //   allIgnore.push((this.ignore || '').toString());
-      // }
       if (!this.showFavoriteWeapons) {
         for (const key in this.favorites) {
           allIgnore.push(key);
@@ -475,7 +472,6 @@ export default Vue.extend({
             bols = true;
           }
         });
-        // return this.ignore[String(weaponId)];
       }
       return bols;
     },
@@ -608,7 +604,7 @@ export default Vue.extend({
       return ((this.noOfPages > 6 && (this.noOfPages - this.activePage > 2)) || (this.noOfPages > 5) && (this.activePage < 4));
     },
 
-    enter(el, done) {
+    enter(el: any, done: any) {
       gasp.to(el, {
         opacity: 1,
         y: 0,
@@ -617,7 +613,7 @@ export default Vue.extend({
         delay: el.dataset.index * 0.1
       });
     },
-    beforeEnter(el){
+    beforeEnter(el: any){
       el.style.opacity = 0;
       el.style.transform = 'translateY(100px)';
     },

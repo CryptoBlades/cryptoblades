@@ -1,8 +1,10 @@
 <template>
   <div class="body main-font blacksmith-page">
     <div class="mobile-menu">
-      <span :class="activeTab == 'forge' ? 'active' : ''" @click="displayBlacksmith()"><span id="forge"></span> Forge</span>
-      <span :class="activeTab == 'salvage' ? 'active' : ''" @click="displayDustCreation()"><span id="salvage"></span>Salvage</span>
+      <span :class="activeTab == 'forge' ? 'active' : ''"
+      @click="displayBlacksmith()"><span id="forge"></span> {{$t('blacksmith.forge').toUpperCase()}}</span>
+      <span :class="activeTab == 'salvage' ? 'active' : ''"
+      @click="displayDustCreation()"><span id="salvage"></span>{{$t('blacksmith.salvage').toUpperCase()}}</span>
     </div>
     <right-menu :activeTab="activeTab" :dusts="{lesser: lesser,greater: greater, powerful: powerful}"  :key="ctr" :showReforgeDust="showReforgeDust" />
 
@@ -10,7 +12,7 @@
     <b-modal class="" ref="confirm-reforge" hide-footer hide-header>
       <div class="header-close">
         <img src="../assets/separator.png" alt="">
-        <h4>Dust Reforge Confirmation</h4>
+        <h4>{{$t('blacksmith.dustConfirm')}}</h4>
       </div>
       <div class="forge-content">
         <div>
@@ -19,7 +21,7 @@
           <div>
             <b-row class="power-rolled">
               <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
-                <h5>Low Star Burn</h5>
+                <h5>{{$t('blacksmith.lb')}}</h5>
               </b-col>
               <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
                 <img src="../assets/arrow-right.png" alt="">
@@ -30,7 +32,7 @@
             </b-row>
             <b-row class="power-rolled">
               <b-col cols="4"  lg="5" sm="4" md="4" class="win-details">
-                <h5>Four Star Burn</h5>
+                <h5>{{$t('blacksmith.4b')}}</h5>
               </b-col>
               <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
                 <img src="../assets/arrow-right.png" alt="">
@@ -41,7 +43,7 @@
             </b-row>
             <b-row class="power-rolled">
               <b-col cols="4"  lg="5" sm="4" md="4" class="win-details">
-                <h5>Five Star Burn</h5>
+                <h5>{{$t('blacksmith.5b')}}</h5>
               </b-col>
               <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
                 <img src="../assets/arrow-right.png" alt="">
@@ -64,7 +66,7 @@
           </div>
           <img class="mb-2" src="../assets/separator.png" alt="">
           <button class="ml-3 mt-4 forge-btns" @click="onReforgeWeaponWithDust()">
-            <span>CONFIRM</span>
+            <span>{{$t('blacksmith.confirm')}}</span>
           </button>
       </div>
     </b-modal>
@@ -73,7 +75,7 @@
     <b-modal ref="succesful-reforge" hide-footer hide-header @hide="clearDust">
       <div class="forge-header" v-if="modalType == 'successReforge'">
         <img src="../assets/header-line.png" alt="">
-        <h3>REFORGE SUCCESSFULL</h3>
+        <h3>{{$t('blacksmith.reforgeSuccess')}}</h3>
       </div>
       <div class="forge-content">
           <div>
@@ -82,7 +84,7 @@
           <div>
             <b-row class="power-rolled">
               <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
-                <h5>Low Star Burn</h5>
+                <h5>{{$t('blacksmith.lb')}}</h5>
               </b-col>
               <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
                 <img src="../assets/arrow-right.png" alt="">
@@ -93,7 +95,7 @@
             </b-row>
             <b-row class="power-rolled">
               <b-col cols="4"  lg="5" sm="4" md="4" class="win-details">
-                <h5>Four Star Burn</h5>
+                <h5>{{$t('blacksmith.4b')}}</h5>
               </b-col>
               <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
                 <img src="../assets/arrow-right.png" alt="">
@@ -104,7 +106,7 @@
             </b-row>
              <b-row class="power-rolled">
               <b-col cols="4"  lg="5" sm="4" md="4" class="win-details">
-                <h5>Five Star Burn</h5>
+                <h5>{{$t('blacksmith.5b')}}</h5>
               </b-col>
               <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
                 <img src="../assets/arrow-right.png" alt="">
@@ -115,7 +117,7 @@
             </b-row>
             <b-row class="power-rolled" v-if="modalType == 'successReforge'">
               <b-col cols="12"  lg="12" sm="12" md="12" class="win-details reforge-bonus">
-                <h5>Reforge Bonus: {{getWeaponInfo('bonusPower')}}
+                <h5>{{$t('blacksmith.reforgeBonus')}}: {{getWeaponInfo('bonusPower')}}
                 <span>(<b-icon icon="caret-up-fill" variant="danger" />{{ totalBonusPower}})</span></h5>
               </b-col>
             </b-row>
@@ -123,7 +125,7 @@
       </div>
       <div class="footer-close" v-if="modalType == 'successReforge'">
         <img src="../assets/separator.png" alt="">
-        <span>Tap Anywhere To Close</span>
+        <span>{{$t('blacksmith.tapAnyWhere')}}</span>
         <span class="close-icon"></span>
       </div>
     </b-modal>
@@ -132,7 +134,7 @@
       <div class="forging-modal" v-if="showModal" v-on:click.self="closeModal()">
         <div class="forge-loading" v-if="spin && modalType == 'forge'">
           <div class="row new-weapons">
-            <h3>Forging Weapon...</h3>
+            <h3>{{$t('blacksmith.forging')}}</h3>
           </div>
           <div class="forging">
             <div class="spinning-box">
@@ -158,182 +160,183 @@
               @click="onForgeWeapon"
             />
           </div>
-        <transition name="slide-fade">
-        <div class="row mt-3" v-if="ownWeapons.length > 0 && !showReforge">
-          <div class="col">
-            <div class="weapon-header none-mobile">
-              <div class="nav-icons">
-                <div class="forge-btn" @click="displayBlacksmith()">
-                  <span id="forge"></span>
-                  <span>Forge</span>
+          <transition name="slide-fade">
+          <div class="row mt-3" v-if="ownWeapons.length > 0 && !showReforge">
+            <div class="col">
+              <div class="weapon-header none-mobile">
+                <div class="nav-icons">
+                  <div class="forge-btn" @click="displayBlacksmith()">
+                    <span id="forge"></span>
+                    <span>{{$t('blacksmith.forge')}}</span>
+                  </div>
+                  <div>
+                    <div class="line"></div>
+                  </div>
+                  <div class="salvage-btn" @click="displayDustCreation()">
+                    <span id="salvage"></span>
+                    <span>{{$t('blacksmith.salvage')}}</span>
+                  </div>
                 </div>
-                <div>
-                  <div class="line"></div>
-                </div>
-                <div class="salvage-btn" @click="displayDustCreation()">
-                  <span id="salvage"></span>
-                  <span>Create Dust</span>
-                </div>
-              </div>
-              <div class="button-div none-mobile">
-                <button class="ml-3 reforgeDust"
-                  v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
-                  @click="displayDustReforge()"
-                  tagname="reforge_weapon"
-                  v-tooltip="$t('blacksmith.useDust')">
-                  <span>{{$t('blacksmith.reforgeWithDust').toUpperCase()}}</span>
-                </button>
-                <button
-                  class="ml-3"
-                  @click="onClickSpecialForge()"
-                  :disabled="disableForge"
-                  v-tooltip="$t('blacksmith.specialForgeTooltip')">
-                <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                <span v-else class="gtag-link-others">
-                  <span>{{$t('blacksmith.specialForge').toUpperCase()}}</span>
-                </span>
-                </button>
-                <button
-                  class="ml-3"
-                  @click="onClickForge(0)"
-                  :disabled="disableForge"
-                  v-tooltip="$t('blacksmith.forgeNew')">
+                <div class="button-div none-mobile">
+                  <button class="ml-3 reforgeDust"
+                    v-if="reforgeWeaponId !== null && ownWeapons.length > 0"
+                    @click="displayDustReforge()"
+                    tagname="reforge_weapon"
+                    v-tooltip="$t('blacksmith.useDust')">
+                    <span>{{$t('blacksmith.reforgeWithDust').toUpperCase()}}</span>
+                  </button>
+                  <button
+                    class="ml-3"
+                    @click="onClickSpecialForge()"
+                    :disabled="disableForge"
+                    v-tooltip="$t('blacksmith.specialForgeTooltip')">
                   <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                    <span>{{$t('blacksmith.forge').toUpperCase()}} x1</span> <br>
-                     ({{ forgeCost }} SKILL)
+                  <span v-else class="gtag-link-others">
+                    <span>{{$t('blacksmith.specialForge').toUpperCase()}}</span>
                   </span>
-                </button>
+                  </button>
+                  <button
+                    class="ml-3"
+                    @click="onClickForge(0)"
+                    :disabled="disableForge"
+                    v-tooltip="$t('blacksmith.forgeNew')">
+                    <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
+                    <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                      <span>{{$t('blacksmith.forge').toUpperCase()}} x1</span> <br>
+                      ({{ forgeCost }} SKILL)
+                    </span>
+                  </button>
 
-                <button
-                        class="ml-3"
-                        @click="onClickForge(1)"
-                        :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
-                        v-tooltip="$t('blacksmith.forge10New')">
-                  <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                  <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                    <span>{{$t('blacksmith.forge').toUpperCase()}} x10</span><br>
-                    ({{ (forgeCost*10).toFixed(4) }} SKILL)
-                  </span>
-                </button>
+                  <button
+                          class="ml-3"
+                          @click="onClickForge(1)"
+                          :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
+                          v-tooltip="$t('blacksmith.forge10New')">
+                    <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
+                    <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                      <span>{{$t('blacksmith.forge').toUpperCase()}} x10</span><br>
+                      ({{ (forgeCost*10).toFixed(4) }} SKILL)
+                    </span>
+                  </button>
 
-                <!-- FOR STAKINGGGGGG -->
-                  <!-- <b-checkbox
-                    class="mx-3 my-auto"
-                    :disabled="disableUseStakedForForge"
-                    v-model="useStakedForForge">
-                    <span v-if="disableUseStakedForForge"> <b>{{$t('blacksmith.notEnoughStakedSkill')}}<br></b></span>
-                    <span v-html="$t('blacksmith.spendStakedFunds')"></span>
-                  </b-checkbox> -->
-                <b-icon-question-circle class="centered-icon" scale="1.5"
-                  v-on:click="onShowForgeDetails" v-tooltip.bottom="$t('blacksmith.clickForForgePercentages')"/>
-
-                <b-modal hide-footer ref="forge-details-modal" :title="$t('blacksmith.forgePercentages')">
-                  <div>
-                    {{$t('blacksmith.forgePercentage.5star')}} {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
-                  </div>
-                  <div>
-                    {{$t('blacksmith.forgePercentage.4star')}} {{Number.parseFloat(forgeCost * (1/0.06)).toFixed(2)}} SKILL.
-                  </div>
-                  <div>
-                    {{$t('blacksmith.forgePercentage.3star')}} {{Number.parseFloat(forgeCost * (1/0.21)).toFixed(2)}} SKILL.
-                  </div>
-                  <div>
-                    {{$t('blacksmith.forgePercentage.2star')}} {{Number.parseFloat(forgeCost * (1/0.56)).toFixed(2)}} SKILL.
-                  </div>
-                  <div>
-                    {{$t('blacksmith.forgePercentage.1star')}}
-                  </div>
-                </b-modal>
-
-                <b-modal size="lg" hide-footer hide-header ref="new-forge-weapon">
-                  <div class="row new-weapons">
-                    <img src="../assets/header-line.png" alt="">
-                    <h3>The Dwarves Have Forged Your Weapons</h3>
-                  </div>
-                  <div class="weapon-list">
-                    <weapon-grid :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true" :noPagination="true"/>
-                  </div>
-                  <div class="footer-close">
-                    <img src="../assets/separator.png" alt="">
-                    <span>Tap Anywhere To Close</span>
-                    <span class="close-icon"></span>
-                  </div>
-                </b-modal>
-
-                <b-modal size="lg" hide-footer hide-header ref="forge-element-selector-modal">
-                  <div class="row justify-content-center">
-                    <h4 class="select-el">Select an Element</h4>
-                  </div>
-                  <div class="row justify-content-md-center select-elements-container">
-                    <div id="random-border" v-on:click="setChosenElement($event, 100)"> </div>
-                    <div class="line-sep"></div>
-                    <div id="fire-border" v-on:click="setChosenElement($event, 0)"> </div>
-                    <div class="line-sep"></div>
-                    <div id="earth-border" v-on:click="setChosenElement($event, 1)"> </div>
-                    <div class="line-sep"></div>
-                    <div id="lightning-border" v-on:click="setChosenElement($event, 2)"> </div>
-                    <div class="line-sep"></div>
-                    <div id="water-border" v-on:click="setChosenElement($event, 3)"> </div>
-                  </div>
-                  <div v-if="activeSpecialWeaponEventsIds.length > 0" class="row justify-content-md-center select-elements-container align-items-baseline mt-4">
-                    <h5>{{$t('blacksmith.pickSpecialEvent')}}:</h5>
-                    <h6 class="mt-2">{{$t('blacksmith.specialEvent')}}:</h6>
-                    <b-form-select class="w-50 ml-1" size="sm" v-model="selectedSpecialWeaponEventId"
-                      :value="selectedSpecialWeaponEventId" @change="updateSpecialWeaponEventId($event)">
-                      <b-form-select-option v-for="id in activeSpecialWeaponEventsIds" :key="id" :value="id">
-                        {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
-                      </b-form-select-option>
-                    </b-form-select>
-                  </div>
-                  <div class="row justify-content-md-center align-items-baseline mt-4">
+                  <!-- FOR STAKINGGGGGG -->
                     <b-checkbox
-                      variant="primary"
-                      class="my-auto"
-                      v-model="mintSlippageApproved">
-                      <span><b>{{$t('blacksmith.approveMintSlippage')}}</b></span>
+                      class="mx-3 my-auto"
+                      :disabled="disableUseStakedForForge"
+                      v-model="useStakedForForge">
+                      <span v-if="disableUseStakedForForge"> <b>{{$t('blacksmith.notEnoughStakedSkill')}}<br></b></span>
+                      <span v-html="$t('blacksmith.spendStakedFunds')"></span>
                     </b-checkbox>
-                    <b-icon-question-circle class="centered-icon" v-tooltip.bottom="$t('blacksmith.mintSlippageDetails')"/>
-                  </div>
-                  <div class="row justify-content-md-center margin-top">
-                    <button
-                      v-if="clickedForgeButton === 0"
-                      variant="primary"
-                      class="row justify-content-md-center forge-btns"
-                      @click="onForgeWeapon"
-                      :disabled="disableConfirmButton"
-                      v-tooltip="$t('blacksmith.forgeNew')">
-                        <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                          {{$t('blacksmith.forge').toUpperCase()}}
-                        </span>
-                    <button>
-                    <b-icon-question-circle v-if="clickedForgeButton === 0"
-                      class="ml-4 centered-icon" v-tooltip.bottom="$t('blacksmith.dynamicPricesDetails',
-                        { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
-                    <button
-                      v-if="clickedForgeButton === 1"
-                      variant="primary"
-                      class="row justify-content-md-center forge-btns"
-                      @click="onForgeWeaponx10"
-                      :disabled="disableConfirmButton"
-                      v-tooltip="$t('blacksmith.forge10New')">
-                        <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-                          {{$t('blacksmith.forge').toUpperCase()}}
-                        </span>
-                    </button>
-                    <b-icon-question-circle v-if="clickedForgeButton === 1"
-                      class="ml-4 centered-icon" v-tooltip.bottom="$t('blacksmith.dynamicPricesDetails',
-                        { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
-                  </div>
-                </b-modal>
+                  <b-icon-question-circle class="centered-icon" scale="1.5"
+                    v-on:click="onShowForgeDetails" v-tooltip.bottom="$t('blacksmith.clickForForgePercentages')"/>
+
+                  <b-modal hide-footer ref="forge-details-modal" :title="$t('blacksmith.forgePercentages')">
+                    <div>
+                      {{$t('blacksmith.forgePercentage.5star')}} {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
+                    </div>
+                    <div>
+                      {{$t('blacksmith.forgePercentage.4star')}} {{Number.parseFloat(forgeCost * (1/0.06)).toFixed(2)}} SKILL.
+                    </div>
+                    <div>
+                      {{$t('blacksmith.forgePercentage.3star')}} {{Number.parseFloat(forgeCost * (1/0.21)).toFixed(2)}} SKILL.
+                    </div>
+                    <div>
+                      {{$t('blacksmith.forgePercentage.2star')}} {{Number.parseFloat(forgeCost * (1/0.56)).toFixed(2)}} SKILL.
+                    </div>
+                    <div>
+                      {{$t('blacksmith.forgePercentage.1star')}}
+                    </div>
+                  </b-modal>
+
+                  <b-modal size="lg" hide-footer hide-header ref="new-forge-weapon">
+                    <div class="row new-weapons">
+                      <img src="../assets/header-line.png" alt="">
+                      <h3>{{$t('blacksmith.dwarvesForge')}}</h3>
+                    </div>
+                    <div class="weapon-list">
+                      <weapon-grid :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true" :noPagination="true"/>
+                    </div>
+                    <div class="footer-close">
+                      <img src="../assets/separator.png" alt="">
+                      <span>{{$t('blacksmith.tapAnyWhere')}}</span>
+                      <span class="close-icon"></span>
+                    </div>
+                  </b-modal>
+
+                  <b-modal size="lg" hide-footer hide-header ref="forge-element-selector-modal">
+                    <div class="row justify-content-center">
+                      <h4 class="select-el">{{$t('blacksmith.selectElement')}}</h4>
+                    </div>
+                    <div class="row justify-content-md-center select-elements-container">
+                      <div id="random-border" v-on:click="setChosenElement($event, 100)"> </div>
+                      <div class="line-sep"></div>
+                      <div id="fire-border" v-on:click="setChosenElement($event, 0)"> </div>
+                      <div class="line-sep"></div>
+                      <div id="earth-border" v-on:click="setChosenElement($event, 1)"> </div>
+                      <div class="line-sep"></div>
+                      <div id="lightning-border" v-on:click="setChosenElement($event, 2)"> </div>
+                      <div class="line-sep"></div>
+                      <div id="water-border" v-on:click="setChosenElement($event, 3)"> </div>
+                    </div>
+                    <div v-if="activeSpecialWeaponEventsIds.length > 0"
+                      class="row justify-content-md-center select-elements-container align-items-baseline mt-4">
+                      <h5>{{$t('blacksmith.pickSpecialEvent')}}:</h5>
+                      <h6 class="mt-2">{{$t('blacksmith.specialEvent')}}:</h6>
+                      <b-form-select class="w-50 ml-1" size="sm" v-model="selectedSpecialWeaponEventId"
+                        :value="selectedSpecialWeaponEventId" @change="updateSpecialWeaponEventId($event)">
+                        <b-form-select-option v-for="id in activeSpecialWeaponEventsIds" :key="id" :value="id">
+                          {{specialWeaponEvents[id] && specialWeaponEvents[id].name}}
+                        </b-form-select-option>
+                      </b-form-select>
+                    </div>
+                    <div class="row justify-content-md-center align-items-baseline mt-4">
+                      <b-checkbox
+                        variant="primary"
+                        class="my-auto"
+                        v-model="mintSlippageApproved">
+                        <span><b>{{$t('blacksmith.approveMintSlippage')}}</b></span>
+                      </b-checkbox>
+                      <b-icon-question-circle class="centered-icon" v-tooltip.bottom="$t('blacksmith.mintSlippageDetails')"/>
+                    </div>
+                    <div class="row justify-content-md-center margin-top">
+                      <button
+                        v-if="clickedForgeButton === 0"
+                        variant="primary"
+                        class="row justify-content-md-center forge-btns"
+                        @click="onForgeWeapon"
+                        :disabled="disableConfirmButton"
+                        v-tooltip="$t('blacksmith.forgeNew')">
+                          <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                            {{$t('blacksmith.forge').toUpperCase()}}
+                          </span>
+                      </button>
+                      <b-icon-question-circle v-if="clickedForgeButton === 0"
+                        class="ml-4 centered-icon" v-tooltip.bottom="$t('blacksmith.dynamicPricesDetails',
+                          { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
+                      <button
+                        v-if="clickedForgeButton === 1"
+                        variant="primary"
+                        class="row justify-content-md-center forge-btns"
+                        @click="onForgeWeaponx10"
+                        :disabled="disableConfirmButton"
+                        v-tooltip="$t('blacksmith.forge10New')">
+                          <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                            {{$t('blacksmith.forge').toUpperCase()}}
+                          </span>
+                      </button>
+                      <b-icon-question-circle v-if="clickedForgeButton === 1"
+                        class="ml-4 centered-icon" v-tooltip.bottom="$t('blacksmith.dynamicPricesDetails',
+                          { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
+                    </div>
+                  </b-modal>
+                </div>
               </div>
-            </div>
-            <div class="weapon-content" v-if="showBlacksmith">
-              <weapon-grid :showNftOptions="true" :ownWeapons="ownWeapons.length" v-model="reforgeWeaponId" />
+              <div class="weapon-content" v-if="showBlacksmith">
+                <weapon-grid :showNftOptions="true" :ownWeapons="ownWeapons.length" v-model="reforgeWeaponId" />
+              </div>
             </div>
           </div>
-        </div>
-        </transition>
+          </transition>
 
         <!-- Reforge Dust Section -->
         <transition name="slide-fade">
@@ -387,10 +390,10 @@
                   </div>
                 </div>
                 <div class="row menus desktop">
-                  <div class="col-lg-3 col-sm-3 active-tab"> REFORGE </div>
-                  <div class="col-lg-3 col-sm-3"> <span class="lock-icon"></span> UPGRADE </div>
-                  <div class="col-lg-3 col-sm-3"> <span class="lock-icon"></span> ENCHANT </div>
-                  <div class="col-lg-3 col-sm-3"> <span class="lock-icon"></span> SKINS </div>
+                  <div class="col-lg-3 col-sm-3 active-tab"> {{$t('blacksmith.reforge').toUpperCase()}} </div>
+                  <div class="col-lg-3 col-sm-3"> <span class="lock-icon"></span>{{$t('blacksmith.upgrade').toUpperCase()}}</div>
+                  <div class="col-lg-3 col-sm-3"> <span class="lock-icon"></span> {{$t('blacksmith.enchant').toUpperCase()}} </div>
+                  <div class="col-lg-3 col-sm-3"> <span class="lock-icon"></span> {{$t('blacksmith.skin')}} </div>
                 </div>
                 <div class="mobile">
                   <div class="active-tab"> <span class="forge-icons"></span></div>
@@ -400,8 +403,7 @@
                 </div>
                 <div class="desc-details">
                   <span>
-                    Reforging weapons is the process of spending SKILL tokens to burn one weapon
-                    into another. The target weapon receives bonus power, and the burned weapon disappears.
+                    {{$t('blacksmith.reforgeNote')}}
                   </span>
                 </div>
 
@@ -412,18 +414,18 @@
                       <span class="dust-img-lesser"></span>
                     </div>
                     <div>
-                      <p class="p-0 m-0">(LB) Low Star Burn</p>
+                      <p class="p-0 m-0">(LB) {{$t('blacksmith.lb')}}</p>
                       <!-- <span>Req. 10/500</span> -->
-                      <span>15 power per level</span>
+                      <span>{{$t('blacksmith.15power')}}</span>
                     </div>
                   </div>
                   <div>
                     <input v-model="lesserDust" type="range" min="0" :max="getLesserDust()" value="0" steps="1">
-                    <div class="value right">{{lesserDust}}/{{getLesserDust()}} Bonus Damage</div>
+                    <div class="value right">{{lesserDust}}/{{getLesserDust()}} {{$t('blacksmith.bonusDamage')}}</div>
                   </div>
                   <div>
                     <span>{{lesserDust}}</span>
-                    <span class="cursor-p" @click="lesserDust = getLesserDust()">Max</span>
+                    <span class="cursor-p" @click="lesserDust = getLesserDust()">{{$t('blacksmith.max')}}</span>
                   </div>
                 </div>
 
@@ -434,18 +436,18 @@
                       <span class="dust-img-greater"></span>
                     </div>
                     <div>
-                      <p class="p-0 m-0">(4B) Four Star Burn</p>
+                      <p class="p-0 m-0">(4B) {{$t('blacksmith.4b')}}</p>
                       <!-- <span>Req. 10/500</span> -->
-                      <span>30 power per level</span>
+                      <span>{{$t('blacksmith.30power')}}</span>
                     </div>
                   </div>
                   <div>
                     <input v-model="greaterDust" type="range" min="0" :max="getGreaterDust()" value="0" steps="1">
-                    <div class="value right">{{greaterDust}}/{{getGreaterDust()}} Bonus Damage</div>
+                    <div class="value right">{{greaterDust}}/{{getGreaterDust()}} {{$t('blacksmith.bonusDamage')}}</div>
                   </div>
                   <div>
                     <span>{{greaterDust}}</span>
-                    <span class="cursor-p" @click="greaterDust = getGreaterDust()">Max</span>
+                    <span class="cursor-p" @click="greaterDust = getGreaterDust()">{{$t('blacksmith.max')}}</span>
                   </div>
                 </div>
 
@@ -456,18 +458,18 @@
                       <span class="dust-img-powerful"></span>
                     </div>
                     <div>
-                      <p class="p-0 m-0">(5B) Five Star Burn</p>
+                      <p class="p-0 m-0">(5B) {{$t('blacksmith.5b')}}</p>
                       <!-- <span>Req. 10/500</span> -->
-                      <span> 75 power per level</span>
+                      <span>{{$t('blacksmith.75power')}}</span>
                     </div>
                   </div>
                   <div>
                     <input v-model="powerfulDust" type="range" min="0" :max="getPowerfulDust()" value="0" steps="1">
-                    <div class="value right">{{powerfulDust}}/{{getPowerfulDust()}} Bonus Damage</div>
+                    <div class="value right">{{powerfulDust}}/{{getPowerfulDust()}} {{$t('blacksmith.bonusDamage')}}</div>
                   </div>
                   <div>
                     <span>{{powerfulDust}}</span>
-                    <span class="cursor-p" @click="powerfulDust = getPowerfulDust()">Max</span>
+                    <span class="cursor-p" @click="powerfulDust = getPowerfulDust()">{{$t('blacksmith.max')}}</span>
                   </div>
                 </div>
                 <div class="btn-forge">
@@ -478,12 +480,12 @@
                       @click="showDustReforgeConfirmation"
                       :disabled="lesserDust == '0' && greaterDust == '0' && powerfulDust == '0'"
                       v-tooltip="$t('blacksmith.reforgeSelected')">
-                      <span>REFORGE</span>
+                      <span>{{$t('blacksmith.reforge').toUpperCase()}}</span>
                       <span>({{ dustReforgeCost }} SKILL)</span>
                   </button>
                   <div class="back-btn" @click="displayBlacksmith()">
                     <span class="menu-btn"></span>
-                    <span>CHANGE EQUIPMENT</span>
+                    <span>{{$t('blacksmith.changeEquipment').toUpperCase()}}</span>
                   </div>
                 </div>
               </div>
@@ -491,7 +493,7 @@
           </div>
         </div>
         </transition>
-      <!-- @click="displayBlacksmith()" -->
+        <!-- @click="displayBlacksmith()" -->
 
         <!-- <div class="col">
             <div class="d-flex justify-content-space-between">
@@ -527,14 +529,14 @@
                   <div class="nav-icons" @click="displayBlacksmith()">
                     <div class="forge-btn">
                       <span id="forge"></span>
-                      <span>Forge</span>
+                      <span>{{$t('blacksmith.forge').toUpperCase()}}</span>
                     </div>
                     <div>
                       <div class="line"></div>
                     </div>
                     <div class="salvage-btn">
                       <span id="salvage"></span>
-                      <span>Create Dust</span>
+                      <span>{{$t('blacksmith.salvage')}}</span>
                     </div>
                   </div>
                 </div>
@@ -546,14 +548,14 @@
           </div>
           <div class="col-md-3 col-xl-4 col-lg-5 none-mobile">
             <div class="dust-content">
-              <h4>YOU WILL RECEIVE</h4>
+              <h4>{{$t('blacksmith.youWill').toUpperCase()}}</h4>
               <div class="create-dust flex-column">
                 <div>
                   <div class="dust-bg">
                     <span class="dust-img-powerful"></span>
                   </div>
                   <div>
-                    <p class="p-0 m-0">Powerful Dust</p>
+                    <p class="p-0 m-0">{{$t('blacksmith.powerfulDust')}}</p>
                     <span> x{{powerful}}</span>
                   </div>
                 </div>
@@ -562,7 +564,7 @@
                     <span class="dust-img-greater"></span>
                   </div>
                   <div>
-                    <p class="p-0 m-0">Greater Dust</p>
+                    <p class="p-0 m-0">{{$t('blacksmith.greaterDust')}}</p>
                     <span> x{{greater}}</span>
                   </div>
                 </div>
@@ -571,7 +573,7 @@
                     <span class="dust-img-lesser"></span>
                   </div>
                   <div>
-                    <p class="p-0 m-0">Lesser Dust</p>
+                    <p class="p-0 m-0">{{$t('blacksmith.lowerDust')}}</p>
                     <span> x{{lesser}}</span>
                   </div>
                 </div>
@@ -580,7 +582,7 @@
                 <button class="forge-btns"
                 @click="showMassDustConfirmation"
                 >
-                  <span>SALVAGE</span>
+                  <span>{{$t('blacksmith.salvage').toUpperCase()}}</span>
                   <span>({{burnCost * burnWeaponIds.length }} SKILL)</span>
                 </button>
               </div>
@@ -690,7 +692,7 @@
 
     <b-modal class="centered-modal text-center" size="lg" ref="mass-dust-confirmation-modal" hide-footer hide-header>
       <div class="dust-confirm">
-        <h4>CREATE DUST CONFIRMATION</h4>
+        <h4>{{$t('blacksmith.createDustConfirm')}}</h4>
         <b-icon icon="exclamation-circle" variant="warning" />
         {{ $t('blacksmith.burnWarning', { weaponAmount: burnWeaponIds.length })}}
         {{ $t('blacksmith.cantBeUndone')}} <br>
@@ -700,7 +702,7 @@
           class="row justify-content-md-center forge-btns"
           @click="onMassBurnWeapons">
             <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
-               CONFIRM <br>
+               {{$t('blacksmith.confirm')}} <br>
               <p class="dust-cost">({{burnCost * burnWeaponIds.length }} SKILL)</p>
             </span>
         </button>
@@ -983,7 +985,7 @@ export default Vue.extend({
       Events.$emit('show-special-forge-modal');
     },
 
-    getWeaponInfo(type: string){
+    getWeaponInfo(type: string): any{
       const weaponActive  = this.ownWeapons.find(x => x.id === this.reforgeWeaponId);
       this.totalBonusPower = Number(this.lesserDust) + Number(this.greaterDust) + Number(this.powerfulDust);
 
@@ -1141,7 +1143,7 @@ export default Vue.extend({
 
     showDustReforgeConfirmation() {
       if(this.lesserDust === '0' && this.greaterDust === '0' && this.powerfulDust === '0'){
-        (this as any).$dialog.notify.error('No Dust Allocated');
+        (this as any).$dialog.notify.error('No Dust Selected');
       }else{
         (this.$refs['confirm-reforge'] as BModal).show();
       }
@@ -1322,6 +1324,7 @@ export default Vue.extend({
   justify-content: space-between;
   align-items: center;
   margin-top: 30px;
+  flex-wrap: wrap;
   z-index: 99;
 }
 
@@ -1681,6 +1684,20 @@ export default Vue.extend({
   border: 0px !important;
 }
 
+@media (max-width: 1200px) {
+  .weapon-header > .button-div{
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .button-div > button{
+    margin-top: 30px;
+  }
+
+  .button-div > button:hover, .forge-btns:hover{
+    margin-top: 30px;
+  }
+}
 
 .weapon-content{
   background-color: rgba(0, 0, 0, 0.5);
@@ -1763,6 +1780,9 @@ export default Vue.extend({
 
 .blacksmith-page{
   background-image: url('../assets/blacksmith/cb-reforge-bg.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 .reforge-dust{
@@ -1780,8 +1800,8 @@ export default Vue.extend({
 .weapon-img{
   /* content: url('../assets/placeholder/weapon3.png'); */
   z-index: 4;
-  height: 25em;
-  width: 25em;
+  height: 23vw;
+  width: 23vw;
   position: absolute;
   top: 20px;
   left: 20px;
@@ -1847,15 +1867,15 @@ export default Vue.extend({
 .inner{
   content: url('../assets/blacksmith/inner-circle.png');
   position: absolute;
-  height: 25em;
-  width: 25em;
+  height: 23vw;
+  width: 23vw;
 }
 
 .outer{
   content: url('../assets/blacksmith/outer-circle.png');
   position: absolute;
-  height: 25em;
-  width: 25em;
+  height: 23vw;
+  width: 23vw;
   animation-direction: reverse;
 }
 
@@ -2496,6 +2516,13 @@ img.elements-modal:hover {
     flex-flow: column-reverse;
   }
 }
+
+@media (max-width: 992px) {
+  .reforge-dust{
+    height: auto;
+  }
+}
+
 
  .dust-cost{
     display: none;
