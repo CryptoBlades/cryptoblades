@@ -1344,22 +1344,6 @@ export function createStore(web3: Web3) {
               ]);
             })
           );
-
-          const { NFTMarket } = state.contracts();
-
-          if(NFTMarket) {
-            subscriptions.push(
-              NFTMarket.events.PurchasedListing({ filter: { seller: state.defaultAccount } }, async (err: Error, data: any) => {
-                if (err) {
-                  console.error(err, data);
-                  return;
-                }
-
-                await dispatch('fetchSkillBalance');
-              })
-            );
-          }
-
         }
 
         function setupStakingEvents(stakeType: StakeType, StakingRewards: StakingRewardsAlias | NftStakingRewardsAlias) {
