@@ -26,26 +26,24 @@
     </div>
 
     <div v-if="!isDefault" class="nft-icon"
-      v-tooltip="!isShop && { content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
+      v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
       @mouseover="hover = !isMobile() || true"
       @mouseleave="hover = !isMobile()"
     >
       <!-- show nft with id: nftId of type: nftfType (contract address?)
         either load properties here or wherever the list of nfts is created and pass in nft object-->
       <div v-if="nft.type === 'shield'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
-        <img class="placeholder-shield" src="../assets/shield1.png" v-if="!isShop && nft.id < 10000" />
-        <img class="placeholder-shield" src="../assets/shield2.png" v-if="!isShop && nft.id >= 10000 && nft.id < 25000" />
-        <img class="placeholder-shield" src="../assets/shield2.png" v-if="isShop" />
+        <img class="placeholder-shield" src="../assets/shield1.png" v-if="nft.id < 10000" />
+        <img class="placeholder-shield" src="../assets/shield2.png" v-if="nft.id >= 10000 && nft.id < 25000" />
 
-        <div v-if="!isShop" class="trait">
+        <div class="trait">
           <span :class="nft.element.toLowerCase() + '-icon'"></span>
           <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
         </div>
 
-        <span v-if="isShop" class="nft-supply">{{$t('nftIcon.supplyLeft')}} {{totalShieldSupply}}</span>
-        <div v-if="!isShop" class="id">{{$t('nftIcon.id')}} {{ nft.id }}</div>
+        <div class="id">{{$t('nftIcon.id')}} {{ nft.id }}</div>
 
-        <div v-if="!isShop" class="stats">
+        <div class="stats">
           <div v-if="nft.stat1Value">
             <span :class="nft.stat1.toLowerCase() + '-icon'" class="mr-1 icon"></span>
             <span :class="nft.stat1.toLowerCase()">{{ nft.stat1 }} +{{ nft.stat1Value }}</span>
@@ -70,32 +68,25 @@
         <img class="placeholder-land" src="../assets/t2-frame.png" v-if="nft.type === 'claimT2Land'" />
         <img class="placeholder-land" src="../assets/t3-frame.png" v-if="nft.type === 'claimT3Land'" />
 
-        <span v-if="nft.type === 't1land' && isShop" class="nft-supply">Supply left: {{totalT1LandSupply}}</span>
-        <span v-if="nft.type === 't2land' && isShop" class="nft-supply">Supply left: {{totalT2LandSupply}}</span>
-        <span v-if="nft.type === 't3land' && isShop" class="nft-supply">Supply left: {{totalT3LandSupply}}</span>
-        <span v-if="!isShop" class="nft-supply">Chunk Id: {{nft.chunkId}}</span>
+        <span class="nft-supply">Chunk Id: {{nft.chunkId}}</span>
         <span v-if="nft.type === 'claimT2Land'" class="nft-supply">Lands to claim: {{ totalT2LandsToClaim }} </span>
         <span v-if="nft.type === 'claimT3Land'" class="nft-supply">Lands to claim: {{ totalT3LandsToClaim }}</span>
       </div>
       <div v-if="nft.type === 'weapon' || nft.type === 'WeaponCosmetic'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
-          <img v-if="!isShop" class="placeholder-weapon" :src="nft.weaponType > 0 ? specialWeaponArts[nft.weaponType] : getWeaponArt(nft)" />
-          <div v-if="isShop" class="animation" v-bind:class="'weapon-animation-applied-' + nft.id" />
-          <img v-if="isShop" class="placeholder-weapon" v-bind:class="'weapon-cosmetic-applied-' + nft.id"
-            src="../assets/placeholder/sword-placeholder-0.png" />
+          <img class="placeholder-weapon" :src="nft.weaponType > 0 ? specialWeaponArts[nft.weaponType] : getWeaponArt(nft)" />
 
-          <span v-if="isShop" class="nft-supply">{{$t('nftIcon.owned')}} {{this.quantityOwned}}</span>
-          <div v-if="!isShop" class="trait">
+          <div class="trait">
             <span :class="nft.element.toLowerCase() + '-icon'"></span>
             <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
           </div>
 
-          <div v-if="!isShop" class="name">
+          <div class="name">
             {{ getCleanWeaponName(nft.id, nft.stars) }}
           </div>
 
-          <div v-if="!isShop" class="id">{{$t('nftIcon.id')}} {{ nft.id }}</div>
+          <div class="id">{{$t('nftIcon.id')}} {{ nft.id }}</div>
 
-          <div v-if="!isShop" class="stats">
+          <div class="stats">
           <div v-if="nft.stat1Value">
             <span :class="nft.stat1.toLowerCase() + '-icon'" class="mr-1 icon"></span>
             <span :class="nft.stat1.toLowerCase()">{{ nft.stat1 }} +{{ nft.stat1Value }}</span>
@@ -115,42 +106,41 @@
         v-bind:class="['character-cosmetic-applied-' + nft.id, 'character-animation-applied-' + nft.id]">
         <div class="animation" />
         <img class="placeholder" src="../assets/placeholder/chara-0.png" />
-        <span v-if="isShop" class="nft-supply">{{$t('nftIcon.owned')}} {{this.quantityOwned}}</span>
       </div>
 
       <div v-if="nft.type === 'dustLb'" class="nft-details">
         <img class="placeholder-dust" src="../assets/dusts/lesserDust.png" />
-        <div v-if="!isShop" class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
+        <div class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
       </div>
 
       <div v-if="nft.type === 'dust4b'" class="nft-details">
         <img class="placeholder-dust" src="../assets/dusts/greaterDust.png" />
-        <div v-if="!isShop" class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
+        <div class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
       </div>
 
       <div v-if="nft.type === 'dust5b'" class="nft-details">
         <img class="placeholder-dust" src="../assets/dusts/powerfulDust.png" />
-        <div v-if="!isShop" class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
+        <div class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
       </div>
 
       <div v-if="nft.type === 'soul'" class="nft-details">
         <img class="placeholder-dust" src="../assets/dusts/soulDust.png" />
-        <div v-if="!isShop" class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
+        <div class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
       </div>
 
       <div v-if="nft.type === 'trinket'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
         <img class="placeholder-trinket" :src="getTrinketArt(nft.id)" />
-        <div v-if="!isShop" class="id">{{$t('nftIcon.id')}} {{ nft.id }}</div>
+        <div class="id">{{$t('nftIcon.id')}} {{ nft.id }}</div>
       </div>
 
       <div v-if="nft.type === 'junk'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
         <img class="placeholder-junk" :src="getJunkArt(nft.id)" />
-        <div v-if="!isShop" class="id">{{$t('nftIcon.id')}} {{ nft.id }}</div>
+        <div class="id">{{$t('nftIcon.id')}} {{ nft.id }}</div>
       </div>
 
       <div v-if="nft.type === 'keybox'" class="nft-details">
         <img class="placeholder-keybox" src="../assets/bounty.png" />
-        <div v-if="!isShop" class="id">{{$t('nftIcon.id')}} {{ nft.id }}</div>
+        <div class="id">{{$t('nftIcon.id')}} {{ nft.id }}</div>
       </div>
 
       <div v-if="nft.type !== 'shield' && nft.type !== 'trinket' && nft.type !== 'junk' && nft.type !== 'keybox' && nft.type !== 'weapon'
@@ -159,14 +149,13 @@
         && nft.type !== 'claimT2Land' && nft.type !== 'claimT3Land'"
         class="nft-details">
         <img v-if="nft.image" class="placeholder-consumable" :src="nft.image.startsWith('http') ? nft.image : imgPath(nft.image)"/>
-        <span v-if="isShop" class="nft-supply">{{$t('nftIcon.owned')}} {{this.quantityOwned}}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import {mapActions, mapGetters, mapState} from 'vuex';
+import {mapGetters, mapState} from 'vuex';
 import { getJunkArt } from '../junk-arts-placeholder';
 import { getTrinketArt } from '../trinket-arts-placeholder';
 import { getCleanName } from '../rename-censor';
@@ -174,7 +163,7 @@ import { getWeaponArt } from '../weapon-arts-placeholder';
 import { Stat1PercentForChar, Stat2PercentForChar, Stat3PercentForChar } from '../interfaces';
 
 export default {
-  props: ['nft', 'isDefault', 'isShop', 'favorite', 'stars'],
+  props: ['nft', 'isDefault', 'favorite', 'stars'],
   async created() {
 
   },
@@ -277,11 +266,6 @@ export default {
     getWeaponArt,
     getJunkArt,
     getTrinketArt,
-    ...mapActions(['fetchTotalShieldSupply', 'fetchTotalRenameTags', 'fetchTotalWeaponRenameTags',
-      'fetchTotalCharacterFireTraitChanges', 'fetchTotalCharacterEarthTraitChanges',
-      'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
-      'fetchOwnedWeaponCosmetics', 'fetchOwnedCharacterCosmetics', 'getAvailableLand',
-      'getPlayerReservedLand']),
 
     imgPath(img) {
       return this.images('./' + img);
@@ -291,85 +275,6 @@ export default {
       return getCleanName(this.getWeaponName(id, stars));
     }
   },
-
-  async mounted() {
-    if(this.nft.type === 'shield') {
-      this.totalShieldSupply = 25000 - (await this.fetchTotalShieldSupply());
-      this.fetchSupplyInterval = setInterval(async () => {
-        this.totalShieldSupply = 25000 - (await this.fetchTotalShieldSupply());
-      }, 3000);
-    } else if(this.nft.type === 'CharacterRenameTag' || this.nft.type === 'CharacterRenameTagDeal') {
-      this.quantityOwned = await this.fetchTotalRenameTags();
-      this.fetchSupplyInterval = setInterval(async () => {
-        this.quantityOwned = await this.fetchTotalRenameTags();
-      }, 3000);
-    } else if(this.nft.type === 'WeaponRenameTag' || this.nft.type === 'WeaponRenameTagDeal') {
-      this.quantityOwned = await this.fetchTotalWeaponRenameTags();
-      this.fetchSupplyInterval = setInterval(async () => {
-        this.quantityOwned = await this.fetchTotalWeaponRenameTags();
-      }, 3000);
-    } else if(this.nft.type === 'CharacterFireTraitChange') {
-      this.quantityOwned = await this.fetchTotalCharacterFireTraitChanges();
-      this.fetchSupplyInterval = setInterval(async () => {
-        this.quantityOwned = await this.fetchTotalCharacterFireTraitChanges();
-      }, 3000);
-    } else if(this.nft.type === 'CharacterEarthTraitChange') {
-      this.quantityOwned = await this.fetchTotalCharacterEarthTraitChanges();
-      this.fetchSupplyInterval = setInterval(async () => {
-        this.quantityOwned = await this.fetchTotalCharacterEarthTraitChanges();
-      }, 3000);
-    } else if(this.nft.type === 'CharacterWaterTraitChange') {
-      this.quantityOwned = await this.fetchTotalCharacterWaterTraitChanges();
-      this.fetchSupplyInterval = setInterval(async () => {
-        this.quantityOwned = await this.fetchTotalCharacterWaterTraitChanges();
-      }, 3000);
-    } else if(this.nft.type === 'CharacterLightningTraitChange') {
-      this.quantityOwned = await this.fetchTotalCharacterLightningTraitChanges();
-      this.fetchSupplyInterval = setInterval(async () => {
-        this.quantityOwned = await this.fetchTotalCharacterLightningTraitChanges();
-      }, 3000);
-    } else if(this.nft.type === 'WeaponCosmetic') {
-      this.quantityOwned = await this.fetchOwnedWeaponCosmetics({ cosmetic: +this.nft.id });
-      this.fetchSupplyInterval = setInterval(async () => {
-        this.quantityOwned = await this.fetchOwnedWeaponCosmetics({ cosmetic: +this.nft.id });
-      }, 3000);
-    } else if(this.nft.type === 'CharacterCosmetic') {
-      this.quantityOwned = await this.fetchOwnedCharacterCosmetics({cosmetic: +this.nft.id});
-      this.fetchSupplyInterval = setInterval(async () => {
-        this.quantityOwned = await this.fetchOwnedCharacterCosmetics({cosmetic: +this.nft.id});
-      }, 3000);
-    } else if(this.nft.type === 't1land' || this.nft.type === 't2land' || this.nft.type === 't3land') {
-      const {t1Land, t2Land, t3Land} = await this.getAvailableLand();
-      this.totalT1LandSupply = t1Land;
-      this.totalT2LandSupply = t2Land;
-      this.totalT3LandSupply = t3Land;
-      this.fetchSupplyInterval = setInterval(async () => {
-        const {t1Land, t2Land, t3Land} = await this.getAvailableLand();
-        this.totalT1LandSupply = t1Land;
-        this.totalT2LandSupply = t2Land;
-        this.totalT3LandSupply = t3Land;
-      }, 3000);
-    } else if(this.nft.type === 'claimT2Land' || this.nft.type === 'claimT3Land') {
-      const playerReservedLand = await this.getPlayerReservedLand();
-      if(playerReservedLand) {
-        const {t2Reservations, t3Reservations} = playerReservedLand;
-        this.totalT2LandsToClaim = t2Reservations.length;
-        this.totalT3LandsToClaim = t3Reservations.length;
-      }
-      this.fetchSupplyInterval = setInterval(async () => {
-        const playerReservedLand = await this.getPlayerReservedLand();
-        if(playerReservedLand) {
-          const {t2Reservations, t3Reservations} = playerReservedLand;
-          this.totalT2LandsToClaim = t2Reservations.length;
-          this.totalT3LandsToClaim = t3Reservations.length;
-        }
-      }, 3000);
-    }
-  },
-
-  beforeDestroy() {
-    clearInterval(this.fetchSupplyInterval);
-  }
 };
 </script>
 
