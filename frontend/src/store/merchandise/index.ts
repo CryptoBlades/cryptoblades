@@ -13,6 +13,24 @@ const merchandise = {
       return state.cartEntries;
     }
   },
+  mutations:{
+    addCartEntry(state: IState, cartEntry: CartEntry) {
+      const duplicatedEntry = state.cartEntries.find(entry => entry.variant.id === cartEntry.variant.id);
+      if (duplicatedEntry) {
+        const entryIndex = state.cartEntries.indexOf(duplicatedEntry);
+        state.cartEntries.splice(entryIndex, 1);
+      }
+      state.cartEntries.push(cartEntry);
+    },
+
+    removeCartEntry(state: IState, cartEntry: CartEntry) {
+      state.cartEntries.splice(state.cartEntries.indexOf(cartEntry), 1);
+    },
+
+    clearCartEntries(state: IState) {
+      state.cartEntries = [];
+    },
+  },
   actions: {
     async currentSkillPrice({ state }) {
       const { Merchandise } = state.contracts();
