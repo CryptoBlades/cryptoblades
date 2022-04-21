@@ -297,7 +297,7 @@ export default {
       'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater',
       'fetchTotalCharacterFireTraitChanges','fetchTotalCharacterEarthTraitChanges',
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
-      'fetchOwnedCharacterCosmetics','changeCharacterCosmetic','removeCharacterCosmetic','restoreFromGarrison', 'sendToGarrison', 'purchaseBurnCharacter']),
+      'fetchOwnedCharacterCosmetics','changeCharacterCosmetic','removeCharacterCosmetic','restoreFromGarrison', 'sendToGarrison']),
 
     getCharacterArt,
 

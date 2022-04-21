@@ -4347,38 +4347,6 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async purchaseBurnCharacter({ state, dispatch }, {charId, maxPrice}) {
-        const { NFTMarket, BurningManager, SkillToken, CryptoBlades } = state.contracts();
-        if(!CryptoBlades || !BurningManager || !SkillToken || !NFTMarket || !state.defaultAccount) return;
-
-        await approveFeeFromAnyContractSimple(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          maxPrice
-        );
-
-        const burnCost = await BurningManager.methods.burnCharacterFee(charId).call(defaultCallOptions(state));
-        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
-          from: state.defaultAccount
-        });
-
-        const res = await NFTMarket.methods.purchaseBurnCharacter(charId, maxPrice).send({ from: state.defaultAccount });
-        const {
-          seller,
-          nftID,
-          price
-        } = res.events.PurchasedListing.returnValues;
-
-        await Promise.all([
-          dispatch('fetchSkillBalance')
-        ]);
-
-        return { seller, nftID, price } as { seller: string, nftID: string, price: string };
-      },
-
       async upgradeCharacterWithSoul({ state, dispatch }, {charId, soulAmount}) {
         const { BurningManager } = state.contracts();
         if(!BurningManager || !state.defaultAccount) return;
