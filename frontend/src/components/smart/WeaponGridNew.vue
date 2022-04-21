@@ -6,11 +6,6 @@
       <span class="filter-icon" @click="showFilter"></span>
       <div class="row d-flex align-items-center none-mobile" style="flex-grow:0.6" >
         <div class="col-sm-12 col-md-6 col-lg-4 d-flex none-mobile">
-          <!-- <div v-if="showReforgedToggle" class="show-reforged">
-              <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
-              <strong>{{$t('weaponGrid.showReforged')}}</strong>
-            </div> -->
-
             <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
               <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
               <strong>{{$t('weaponGrid.showFavorite')}}</strong>
@@ -45,7 +40,7 @@
       </div>
     </div>
 
-    <!-- <ul class="weapon-grid"> -->
+
       <transition-group
         appear @before-enter="beforeEnter" @enter="enter"
         class="weapon-grid" tag="ul" name="list"
@@ -67,7 +62,6 @@
           <slot name="sold" :weapon="weapon"></slot>
         </li>
       </transition-group>
-    <!-- </ul> -->
 
     <div class="pagination" v-if="!noPagination">
       <div v-if="startList()" @click="createPagination(1)">1</div>

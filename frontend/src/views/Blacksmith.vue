@@ -359,7 +359,7 @@
                     <span>{{getWeaponInfo('element')}}</span>
                   </span>
 
-                  <!-- COMMENT FOR NOW IT'S THE RANK FOR WEAPON -->
+                  <!-- COMMENTED FOR NOW IT'S THE RANK FOR WEAPON -->
                   <!-- <span>Weapon Rank: 120,031</span> -->
                 </div>
 
