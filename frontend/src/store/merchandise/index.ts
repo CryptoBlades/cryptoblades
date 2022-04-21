@@ -3,18 +3,28 @@ import {
 } from '@/interfaces';
 import {approveFeeFromAnyContractSimple} from '@/contract-call-utils';
 import {abi as priceOracleAbi} from '@/../../build/contracts/IPriceOracle.json';
+import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
+import BigNumber from 'bignumber.js';
+import {Dispatch} from 'vuex';
 
 
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
 
+interface IStateMerchandise {
+  cartEntries: CartEntry[];
+}
+
 const merchandise = {
-  getters:{
-    getCartEntries(state) {
+  state: {
+    cartEntries: [],
+  } as IStateMerchandise,
+  getters: {
+    getCartEntries(state: IStateMerchandise) {
       return state.cartEntries;
     }
   },
-  mutations:{
-    addCartEntry(state: IState, cartEntry: CartEntry) {
+  mutations: {
+    addCartEntry(state: IStateMerchandise, cartEntry: CartEntry) {
       const duplicatedEntry = state.cartEntries.find(entry => entry.variant.id === cartEntry.variant.id);
       if (duplicatedEntry) {
         const entryIndex = state.cartEntries.indexOf(duplicatedEntry);
@@ -23,45 +33,47 @@ const merchandise = {
       state.cartEntries.push(cartEntry);
     },
 
-    removeCartEntry(state: IState, cartEntry: CartEntry) {
+    removeCartEntry(state: IStateMerchandise, cartEntry: CartEntry) {
       state.cartEntries.splice(state.cartEntries.indexOf(cartEntry), 1);
     },
 
-    clearCartEntries(state: IState) {
+    clearCartEntries(state: IStateMerchandise) {
       state.cartEntries = [];
     },
   },
   actions: {
-    async currentSkillPrice({ state }) {
-      const { Merchandise } = state.contracts();
-      if(!Merchandise || !state.defaultAccount) return;
+    async currentSkillPrice({ rootState }: {rootState: IState}) {
+      const { Merchandise } = rootState.contracts();
+      if(!Merchandise || !rootState.defaultAccount) return;
 
-      const skillOracle = await Merchandise.methods.skillOracle().call(defaultCallOptions(state));
-      return await new web3.eth.Contract(priceOracleAbi as any[], skillOracle).methods
-        .currentPrice().call(defaultCallOptions(state));
+      const skillOracle = await Merchandise.methods.skillOracle().call(defaultCallOptions(rootState));
+      return await new rootState.web3.eth.Contract(priceOracleAbi as any[], skillOracle).methods
+        .currentPrice().call(defaultCallOptions(rootState));
     },
 
-    async createOrder({ state, dispatch }, {orderNumber, payingAmount}) {
-      const { CryptoBlades, SkillToken, Merchandise } = state.contracts();
-      if(!CryptoBlades || !SkillToken || !Merchandise || !state.defaultAccount) return;
+    async createOrder(
+      { rootState, dispatch }: {rootState: IState, dispatch: Dispatch},
+      { orderNumber, payingAmount }: {orderNumber: number, payingAmount: string | number}) {
+      const { CryptoBlades, SkillToken, Merchandise } = rootState.contracts();
+      if(!CryptoBlades || !SkillToken || !Merchandise || !rootState.defaultAccount) return;
 
       const skillNeeded = await CryptoBlades.methods
-        .getSkillNeededFromUserWallet(state.defaultAccount, payingAmount, true)
-        .call(defaultCallOptions(state));
+        .getSkillNeededFromUserWallet(rootState.defaultAccount, payingAmount, true)
+        .call(defaultCallOptions(rootState));
 
       await approveFeeFromAnyContractSimple(
         CryptoBlades,
         SkillToken,
-        state.defaultAccount,
-        defaultCallOptions(state),
-        defaultCallOptions(state),
+        rootState.defaultAccount,
+        defaultCallOptions(rootState),
+        defaultCallOptions(rootState),
         new BigNumber(skillNeeded)
       );
 
       await Merchandise.methods
         .createOrder(orderNumber, payingAmount)
         .send({
-          from: state.defaultAccount
+          from: rootState.defaultAccount
         });
 
       dispatch('fetchSkillBalance');
