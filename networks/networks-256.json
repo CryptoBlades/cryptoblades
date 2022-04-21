@@ -2825,7 +2825,89 @@
     },
     "links": {},
     "address": "0x1cEA3132240B066385749309a16aD237c8280C84",
-    "transactionHash": "0x045210c751ef22cbea6dbd0cfd5b8788858b3ed130fd161613187a6b8f32c20d"
+    "transactionHash": "0x2306e9b3ee5ce3b943861864cd4f9f8ba6804375616e1274a96f5bf9ff6f304a"
+  },
+  "build/contracts/JunkBridgeProxyContract.json": {
+    "events": {
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0x3BAA7f1F0DEd1FC9d71177331155aB438cB7C4dD",
+    "transactionHash": "0x3518e60003ec49919938fa201d5fc1e9dc8c8145548f711f23f5715520a8eedf"
   },
   "build/contracts/KeyLootbox.json": {
     "events": {
