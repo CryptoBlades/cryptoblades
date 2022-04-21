@@ -42,7 +42,6 @@ import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
 import {abi as ierc20Abi} from '@/../../build/contracts/IERC20.json';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';
-import {abi as priceOracleAbi} from '@/../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {SupportedProject} from '@/views/Treasury.vue';
 import {abi as erc721Abi} from '@/../../build/contracts/IERC721.json';
@@ -108,6 +107,7 @@ const defaultStakeOverviewState: IStakeOverviewState = {
 import bridge from './bridge';
 import pvp from './pvp';
 import quests from './quests';
+import merchandise from './merchandise';
 
 export function createStore(web3: Web3) {
   return new Vuex.Store<IState>({
@@ -115,6 +115,7 @@ export function createStore(web3: Web3) {
       bridge,
       pvp,
       quests,
+      merchandise
     },
     state: {
       web3,
@@ -3424,41 +3425,6 @@ export function createStore(web3: Web3) {
           dispatch('fetchTotalShieldSupply'),
           dispatch('updateShieldIds'),
         ]);
-      },
-
-      async currentSkillPrice({ state }) {
-        const { Merchandise } = state.contracts();
-        if(!Merchandise || !state.defaultAccount) return;
-
-        const skillOracle = await Merchandise.methods.skillOracle().call(defaultCallOptions(state));
-        return await new web3.eth.Contract(priceOracleAbi as any[], skillOracle).methods
-          .currentPrice().call(defaultCallOptions(state));
-      },
-
-      async createOrder({ state, dispatch }, {orderNumber, payingAmount}) {
-        const { CryptoBlades, SkillToken, Merchandise } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !Merchandise || !state.defaultAccount) return;
-
-        const skillNeeded = await CryptoBlades.methods
-          .getSkillNeededFromUserWallet(state.defaultAccount, payingAmount, true)
-          .call(defaultCallOptions(state));
-
-        await approveFeeFromAnyContractSimple(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(skillNeeded)
-        );
-
-        await Merchandise.methods
-          .createOrder(orderNumber, payingAmount)
-          .send({
-            from: state.defaultAccount
-          });
-
-        dispatch('fetchSkillBalance');
       },
 
       async storeNftsToPartnerVault({state}, {tokenAddress, tokenIds}) {
