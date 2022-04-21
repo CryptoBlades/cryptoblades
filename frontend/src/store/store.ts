@@ -42,7 +42,6 @@ import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
 import {abi as ierc20Abi} from '@/../../build/contracts/IERC20.json';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';
-import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {SupportedProject} from '@/views/Treasury.vue';
 import {abi as erc721Abi} from '@/../../build/contracts/IERC721.json';
 import BigNumber from 'bignumber.js';
@@ -147,7 +146,6 @@ export function createStore(web3: Web3) {
       maxStamina: 0,
       currentCharacterId: null,
       ownedDust: [],
-      cartEntries: [],
       currentChainSupportsMerchandise: false,
       currentChainSupportsPvP: false,
       currentChainSupportsQuests: false,
