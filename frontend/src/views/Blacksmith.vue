@@ -52,12 +52,6 @@
                 <h5>{{powerfulDust}}</h5>
               </b-col>
             </b-row>
-            <!-- <b-row class="power-rolled" v-if="modalType == 'successReforge'">
-              <b-col cols="12"  lg="12" sm="12" md="12" class="win-details reforge-bonus">
-                <h5>Reforge Bonus: {{getWeaponInfo('bonusPower')}}
-                <span>(<b-icon icon="caret-up-fill" variant="danger" />{{ totalBonusPower}})</span></h5>
-              </b-col>
-            </b-row> -->
          </div>
       </div>
       <div class="footer-close">
@@ -75,7 +69,7 @@
     <b-modal ref="succesful-reforge" hide-footer hide-header @hide="clearDust">
       <div class="forge-header" v-if="modalType == 'successReforge'">
         <img src="../assets/header-line.png" alt="">
-        <h3>{{$t('blacksmith.reforgeSuccess')}}</h3>
+        <h3>{{$t('blacksmith.reforgeSucces')}}</h3>
       </div>
       <div class="forge-content">
           <div>
@@ -117,7 +111,7 @@
             </b-row>
             <b-row class="power-rolled" v-if="modalType == 'successReforge'">
               <b-col cols="12"  lg="12" sm="12" md="12" class="win-details reforge-bonus">
-                <h5>{{$t('blacksmith.reforgeBonus')}}: {{getWeaponInfo('bonusPower')}}
+                <h5>{{$t('blacksmith.bonusOfReforge')}}: {{getWeaponInfo('bonusPower')}}
                 <span>(<b-icon icon="caret-up-fill" variant="danger" />{{ totalBonusPower}})</span></h5>
               </b-col>
             </b-row>
@@ -267,7 +261,7 @@
                     <div class="row justify-content-center">
                       <h4 class="select-el">{{$t('blacksmith.selectElement')}}</h4>
                     </div>
-                    <div class="row justify-content-md-center select-elements-container">
+                    <div class="row justify-content-center select-elements-container">
                       <div id="random-border" v-on:click="setChosenElement($event, 100)"> </div>
                       <div class="line-sep"></div>
                       <div id="fire-border" v-on:click="setChosenElement($event, 0)"> </div>
@@ -279,7 +273,7 @@
                       <div id="water-border" v-on:click="setChosenElement($event, 3)"> </div>
                     </div>
                     <div v-if="activeSpecialWeaponEventsIds.length > 0"
-                      class="row justify-content-md-center select-elements-container align-items-baseline mt-4">
+                      class="row justify-content-center select-elements-container align-items-baseline mt-4">
                       <h5>{{$t('blacksmith.pickSpecialEvent')}}:</h5>
                       <h6 class="mt-2">{{$t('blacksmith.specialEvent')}}:</h6>
                       <b-form-select class="w-50 ml-1" size="sm" v-model="selectedSpecialWeaponEventId"
@@ -289,7 +283,7 @@
                         </b-form-select-option>
                       </b-form-select>
                     </div>
-                    <div class="row justify-content-md-center align-items-baseline mt-4">
+                    <div class="row justify-content-center align-items-baseline mt-4">
                       <b-checkbox
                         variant="primary"
                         class="my-auto"
@@ -298,11 +292,11 @@
                       </b-checkbox>
                       <b-icon-question-circle class="centered-icon" v-tooltip.bottom="$t('blacksmith.mintSlippageDetails')"/>
                     </div>
-                    <div class="row justify-content-md-center margin-top">
+                    <div class="row justify-content-center margin-top">
                       <button
                         v-if="clickedForgeButton === 0"
                         variant="primary"
-                        class="row justify-content-md-center forge-btns"
+                        class="row justify-content-center forge-btns"
                         @click="onForgeWeapon"
                         :disabled="disableConfirmButton"
                         v-tooltip="$t('blacksmith.forgeNew')">
@@ -316,7 +310,7 @@
                       <button
                         v-if="clickedForgeButton === 1"
                         variant="primary"
-                        class="row justify-content-md-center forge-btns"
+                        class="row justify-content-center forge-btns"
                         @click="onForgeWeaponx10"
                         :disabled="disableConfirmButton"
                         v-tooltip="$t('blacksmith.forge10New')">
@@ -364,15 +358,12 @@
                   <span>Element:
                     <span>{{getWeaponInfo('element')}}</span>
                   </span>
+
+                  <!-- COMMENT FOR NOW IT'S THE RANK FOR WEAPON -->
                   <!-- <span>Weapon Rank: 120,031</span> -->
                 </div>
 
                 <div class="power-status">
-                  <!-- <div>
-                    <span id="earth"></span>
-                    <span>POWER</span>
-                    <p>+311</p>
-                  </div> -->
                   <div v-if="getWeaponInfo('stat1Value') > 0">
                     <span :class="getWeaponInfo('stat1').toLowerCase() + '-icon'"></span>
                     <span>{{getWeaponInfo('stat1')}}</span>
@@ -493,35 +484,6 @@
           </div>
         </div>
         </transition>
-        <!-- @click="displayBlacksmith()" -->
-
-        <!-- <div class="col">
-            <div class="d-flex justify-content-space-between">
-              <h1>{{$t('blacksmith.createDust')}}</h1>
-              <div class="d-flex justify-content-flex-end ml-auto">
-                <b-button
-                        variant="primary"
-                        tagname="confirm_forge_weapon"
-                        class="confirmReforge ml-3"
-                        @click="showMassDustConfirmation"
-                        v-tooltip="$t('blacksmith.burnSelected')"
-                        :disabled="burnWeaponIds.length === 0">
-                  {{$t('blacksmith.createDust')}}: {{burnWeaponIds.length}} {{$t('weapons')}}
-                  <br>
-                  ({{burnCost * burnWeaponIds.length }} SKILL)
-                </b-button>
-                <b-button
-                        variant="primary"
-                        tagname="confirm_forge_weapon"
-                        class="confirmReforge ml-3"
-                        @click="cancelReforge()"
-                        v-tooltip="$t('blacksmith.cancelWeaponDusting')">
-                        {{$t('blacksmith.cancelDusting')}}
-                </b-button>
-              </div>
-            </div>
-          </div> -->
-
         <div class="row mt-3" v-if="showReforge && showReforgeDust === false">
           <div class="col-md-9 col-xl-8 col-lg-7">
               <div class="row mt-3 ml-2" v-if="showReforge && !showReforgeDust">
@@ -588,51 +550,6 @@
               </div>
             </div>
           </div>
-            <!-- <div>
-              <div class="col-md-12">
-                <div class="row mobile-flip">
-                  <div class="col-md-5 weapon-container" align="center">
-                    <h1 class="text-center">{{$t('blacksmith.selectBurnWeapon')}}</h1>
-                    <weapon-grid v-model="burnWeaponId" :ignore="burnWeaponIds"
-                      :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon" />
-                  </div>
-                  <div class="col-md-4 weapon-container">
-                    <div v-if="showReforge && showDustForge === true">
-                      <h1 class="text-center">
-                        <b-button
-                                variant="primary"
-                                tagname="confirm_forge_weapon"
-                                class="multiForging"
-                                @click="clearAllMassBurn()"
-                                v-tooltip="$t('blacksmith.clearAll')"
-                                :disabled="burnWeaponIds === []">
-                          {{$t('blacksmith.clearAll')}}
-                        </b-button>
-                      </h1>
-                      <div class="weapon-grid-container">
-                        <weapon-grid :showGivenWeaponIds="true" :weaponIds="burnWeaponIds" @chooseweapon="removeBurnWeapon" />
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-3 upgrade-container">
-                <div v-if="showReforge && showDustForge === true">
-                  <div class="confirmReforge">
-                    <h2 class="text-center">{{$t('blacksmith.createDust')}}</h2>
-                        <div class="dust-image1"></div>
-                      <h2 class="text-center">{{$t('blacksmith.lesser')}}</h2>
-                        <h2>{{getLesserDust()}}</h2>
-                        <div class="dust-image2"></div>
-                      <h2 class="text-center">{{$t('blacksmith.greater')}}</h2>
-                        <h2>{{getGreaterDust()}}</h2>
-                        <div class="dust-image3"></div>
-                      <h2 class="text-center">{{$t('blacksmith.powerful')}}</h2>
-                        <h2>{{getPowerfulDust()}}</h2>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> -->
         </div>
       </b-col>
       <b-col cols="12" v-if="$route.query.tab === 'equipment'">
@@ -701,15 +618,15 @@
           variant="primary"
           class="row justify-content-md-center forge-btns"
           @click="onMassBurnWeapons">
-            <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+            <span v-if="!disableForge && !cooling" class="gtag-link-others" tagname="forge_weapon">
                {{$t('blacksmith.confirm')}} <br>
               <p class="dust-cost">({{burnCost * burnWeaponIds.length }} SKILL)</p>
             </span>
+            <span v-if="!disableForge && cooling" class="gtag-link-others" tagname="forge_weapon">
+               {{$t('blacksmith.loading')}}
+            </span>
         </button>
       </div>
-      <!-- <div class="text-center">
-      </div> -->
-
     </b-modal>
 
     <b-modal class="centered-text-modal" ref="reforge-bonuses-modal" :title="$t('blacksmith.reforgeBonuses')">
@@ -813,6 +730,7 @@ interface Data {
   mintPriceDecreasePerHour: string;
   mintWeaponPriceIncrease: string;
   mintWeaponMinPrice: string;
+  cooling: boolean;
 }
 
 export default Vue.extend({
@@ -866,6 +784,7 @@ export default Vue.extend({
       mintPriceDecreasePerHour: '0',
       mintWeaponPriceIncrease: '0',
       mintWeaponMinPrice: '0',
+      cooling: false
     } as Data;
   },
 
@@ -1279,15 +1198,20 @@ export default Vue.extend({
     },
 
     async onMassBurnWeapons() {
+      this.cooling = true;
+
       try {
         await this.massBurnWeapons({
           burnWeaponIds: this.burnWeaponIds,
         });
         this.burnWeaponIds = [];
         this.burnWeaponId = null;
+        (this.$refs['mass-dust-confirmation-modal'] as BModal).hide();
+        this.cooling = false;
       } catch (e) {
         console.error(e);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotBurn'));
+        this.cooling = false;
       }
     },
 
@@ -2464,6 +2388,7 @@ img.elements-modal:hover {
 .margin-top{
   margin-top: 4em;
 }
+
 .select-elements-container {
   margin-top: 0.7em;
   align-items: center;

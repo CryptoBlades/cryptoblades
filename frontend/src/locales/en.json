@@ -315,6 +315,7 @@
     "burnWarning": "Please confirm you want to burn these {weaponAmount} weapon(s) to Dust.",
     "noRefunds": "No refunds will be given for accidentally burned items!",
     "reforgeBonuses": "Reforge Bonuses",
+    "bonusOfReforge": "Reforge Bonus",
     "reforgeBonus": {
       "5star": "5* Burn: 1 5B (75 Bonus Power | 600 Max).",
       "4star": "4* Burn: 1 4B (30 Bonus Power | 750 Max).",
