@@ -25,14 +25,13 @@ module.exports = async function (deployer, network) {
     let junkProxyGM = await junkProxy.GAME_ADMIN();
     
     await junk.grantRole(junkGM, junkProxy.address);
-  
+
     await junkProxy.grantRole(junkProxyGM, storage.address);
     
+    await storage.allowToken(junk.address);
 	
-	await storage.allowToken(junk.address);
-	
-	//await junkProxy.setEnabled(true); // on both testnet heco and testnet bsc
+    //await junkProxy.setEnabled(true); // on both testnet heco and testnet bsc
     //await storage.setChainSupportedForNFT(junk.address, [97], true); on testnet heco
-	//await storage.setChainSupportedForNFT(junk.address, [256], true); on testnet bsc
+    //await storage.setChainSupportedForNFT(junk.address, [256], true); on testnet bsc
   }
 };
