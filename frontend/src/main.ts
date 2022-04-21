@@ -11,7 +11,7 @@ import VTooltip from 'v-tooltip';
 
 import Web3 from 'web3';
 
-import { createStore } from './store';
+import { createStore } from './store/store';
 import createRouter from './router';
 
 import App from './App.vue';
