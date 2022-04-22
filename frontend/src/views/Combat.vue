@@ -586,7 +586,7 @@ h5{
 }
 
 .encounter img {
-  max-width: 200px;
+  max-width: 140px;
   transition: 1s all;
 }
 
@@ -606,12 +606,12 @@ h5{
 
 .frame-line{
   position: absolute;
-  width: 100%;
   display: flex;
   justify-content: center;
 }
 
 .frame-line > img{
+  max-width: 112%;
   animation-name: resizeUp;
   animation-duration: 0.5s;
 }
@@ -619,7 +619,7 @@ h5{
 
 @keyframes resizeUp {
   0%   {
-    width: 100%;
+    width: 90%;
     opacity: 0;
   }
   100%  {
@@ -629,9 +629,9 @@ h5{
 }
 
 
-.frame-line > img{
+/* .frame-line > img{
   width: 100%;
-}
+} */
 
 .combat-hints {
   margin: auto;
@@ -1081,7 +1081,7 @@ h1 {
     background-image: url('../assets/combat-bg.png');
   }
   .encounter img {
-    width: calc(100% - 60px);
+    max-width: 140px;
   }
 
   .frame-line {
