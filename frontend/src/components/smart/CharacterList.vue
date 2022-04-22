@@ -143,9 +143,6 @@ export default {
     return {
       levelFilter: '',
       elementFilter: '',
-      minPriceFilter:'',
-      maxPriceFilter:'',
-      priceSort: '',
       sorts,
       haveRename: 0,
       characterRename: '',
@@ -292,9 +289,6 @@ export default {
 
       this.elementFilter = '';
       this.levelFilter = '';
-      this.priceSort = '';
-      this.minPriceFilter = '';
-      this.maxPriceFilter = '';
 
       this.$emit('character-filters-changed');
     },
