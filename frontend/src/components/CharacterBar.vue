@@ -12,7 +12,7 @@
           custom-class="exp-popover"
         >
           <div>
-            <claim-rewards-bar/>
+            <claim-rewards-bar isFor="claimExp"/>
           </div>
         </b-popover>
       </div>
@@ -31,7 +31,7 @@
           custom-class="exp-popover"
         >
           <div>
-            <claim-rewards-bar/>
+            <claim-rewards-bar isFor="claimExp"/>
           </div>
         </b-popover>
       </div>

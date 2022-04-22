@@ -10,6 +10,7 @@
       <b-row>
         <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
         <b-col :class="renderPageDisplay()">
+          <claim-rewards-bar isFor="claimSkill"/>
           <router-view v-if="canShowApp" />
         </b-col>
         <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
@@ -94,6 +95,7 @@ import {mapState, mapActions, mapGetters, mapMutations} from 'vuex';
 import _ from 'lodash';
 import Vue from 'vue';
 import Events from './events';
+import ClaimRewardsBar from './components/smart/ClaimRewardsBar.vue';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
@@ -120,6 +122,7 @@ export default {
     BigButton,
     SmallButton,
     WeaponRowGrid,
+    ClaimRewardsBar,
     Banner
   },
 

@@ -1,27 +1,23 @@
 <template>
   <div class="body main-font">
-
-    <b-navbar class="claim-xp-bar">
+    <b-navbar class="claim-xp-bar claim-skill" v-if="isFor == 'claimSkill'">
+       <b-nav-item
+        class="bar text-right pt-2 pb-2"
+        @click="claimSkill(ClaimStage.Summary)">
+        <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
+        <span class="btn-claim" v-if="canClaimTokens">CLAIM</span>
+        <span class="skill-label">REWARDS | </span>
+        <span class="exp-label">SKILL : </span>{{ formattedSkillReward }}
+        </span>
+      </b-nav-item>
+    </b-navbar>
+    <b-navbar class="claim-xp-bar" v-if="isFor == 'claimExp'">
       <b-nav-item class="bar d-flex flex-column" disabled>
         <strong>
-          <span class="reward-title">{{$t('ClaimRewardsBar.rewards')}}</span>
+          <span class="reward-title">{{$t('blacksmith.claimExp')}}</span>
         </strong>
         <p class="note">&#10070; {{$t('ClaimRewardsBar.clickDetailsExp')}}</p>
       </b-nav-item>
-
-      <b-nav-item class="bar d-flex flex-column" disabled v-if="!canClaimXp && !canClaimTokens">
-        <p class="note-warning">{{$t('ClaimRewardsBar.readyToClaim')}}</p>
-      </b-nav-item>
-
-      <b-nav-item
-        class="bar"
-        @click="claimSkill(ClaimStage.Summary)">
-        <p class="exp-label">SKILL</p>
-        <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
-         <span class="diamond">&#9830;</span>  {{ formattedSkillReward }}
-        </span>
-      </b-nav-item>
-
       <b-nav-item
         class="bar"
         :disabled="!canClaimXp"
@@ -180,6 +176,10 @@ export default Vue.extend({
     isBar: {
       type: Boolean,
       default: true
+    },
+    isFor: {
+      type: String,
+      default: null
     }
   },
 
@@ -453,9 +453,33 @@ export default Vue.extend({
   width: 100%;
 }
 
+.navbar.claim-skill{
+  background-color: rgba(0, 0, 0, 0.281);
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
 .exp-label{
   font-family: Trajan;
   color: #EDCD90;
+  margin-bottom: 2px;
+  font-size: 15px;
+  margin-top: 15px;
+}
+
+.btn-claim{
+  color: #EDCD90;
+  border: 1px solid #EDCD90;
+  padding: 5px 30px;
+  margin-right: 20px;
+  font-family: Roboto;
+  border-radius: 5px;
+  font-size: 13px;
+}
+
+.skill-label{
+  font-family: Trajan;
+  color: #ffffff;
   margin-bottom: 2px;
   font-size: 15px;
   margin-top: 15px;
