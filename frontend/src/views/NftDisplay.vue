@@ -87,20 +87,14 @@
                 <strong>Price</strong>:
                 <CurrencyConverter :skill="nftPriceInSkill()" />
               </span>
-            <!--
-
-              ***TODO: Add link to bazaar here***
-
-              <big-button
-              @click="
-                selectedNftId = id;
-              "
-              variant="primary"
-              class="purchase-button"
-              :mainText="`Buy on Bazaar!`"
-            >
-            </big-button>
-            -->
+              <a :href="marketLink" target="_blank" rel="noopener noreferrer">
+                <big-button
+                variant="primary"
+                class="purchase-button"
+                :mainText="`Buy on Bazaar!`"
+                >
+              </big-button>
+            </a>
           </div>
           <big-button
             v-if="ownerAddress"
@@ -187,6 +181,10 @@ export default Vue.extend({
       'charactersWithIds',
       'ownCharacters',
     ]) as Accessors<StoreMappedGetters>),
+
+    marketLink(): string{
+      return `https://bazaar.market/buy/${this.nftType}?id=${this.nftId}`;
+    },
 
     isKnownNftType(): boolean {
       return isNftType(this.nftType);
