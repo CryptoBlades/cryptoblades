@@ -54,7 +54,6 @@
             class="character-list"
             :characterIds="[this.character.id]"
             :showGivenCharacterIds="true"
-            :isMarket="nftPrice && nftPrice !== '0'"
             :nftDisplay="true"
           >
           </character-list>
