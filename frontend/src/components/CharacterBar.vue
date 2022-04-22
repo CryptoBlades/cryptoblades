@@ -2,6 +2,39 @@
   <b-col :class="renderPageDisplay()" class="animates">
     <div class="character-bar">
       <character-display :toggled="isToggled" :currentPath="currentPath" :key="componentKey"/>
+      <div class="claim-reward" v-if="!isToggled">
+        <p id="popover-1-claim">{{$t('ClaimRewardsBar.cliamExp')}}</p>
+        <p @click="gotoGarison">{{$t('ClaimRewardsBar.visitGarison')}}</p>
+        <b-popover
+          target="popover-1-claim"
+          :placement="placement"
+          triggers="hover focus click"
+          custom-class="exp-popover"
+        >
+          <div>
+            <claim-rewards-bar/>
+          </div>
+        </b-popover>
+      </div>
+      <div v-if="isToggled">
+        <hr class="boundary">
+        <p class="btn-diamond-border" id="popover-1-claim">
+          <span class="exp-icon"></span>
+        </p>
+        <p class="btn-diamond-border">
+          <span class="garisson-icon"></span>
+        </p>
+        <b-popover
+          target="popover-1-claim"
+          :placement="placement"
+          triggers="hover focus click"
+          custom-class="exp-popover"
+        >
+          <div>
+            <claim-rewards-bar/>
+          </div>
+        </b-popover>
+      </div>
       <div v-if="showAds && !isMobile()" class="ad-container">
         <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
           <div class="coinzilla" data-zone="C-541621de2f7bb717603"></div>
@@ -22,11 +55,14 @@
 import Vue from 'vue';
 import CharacterDisplay from './smart/CharacterDisplay.vue';
 import '@/mixins/general';
+import ClaimRewardsBar from './smart/ClaimRewardsBar.vue';
+
 
 export default Vue.extend({
   props: ['isToggled', 'sidebarType'],
   components: {
     CharacterDisplay,
+    ClaimRewardsBar
   },
   data() {
     return {
@@ -50,6 +86,9 @@ export default Vue.extend({
       }
       return toDisplay;
     },
+    gotoGarison(){
+      (this as any).$router.push({ name: 'plaza'});
+    }
   },
   computed:{
     isTablet() {
@@ -86,6 +125,75 @@ export default Vue.extend({
   transition: all 0.7s ease-in-out;
 }
 
+.claim-reward{
+  display: flex;
+  flex-direction: column;
+}
+
+.exp-popover{
+  background-color: #000;
+}
+
+.popover.bottom .arrow {visibility:hidden;}
+
+.claim-reward > p {
+  font-family: Roboto;
+  color: #EDCD90;
+  width: 100%;
+  display: flex;
+  font-size: 14px;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #EDCD90;
+  cursor: pointer;
+}
+
+.boundary{
+  border: 1px solid rgba(255, 255, 255, 0.411);
+  margin-bottom: 50px;
+}
+
+.exp-icon{
+  content: url('../assets/exp.png');
+  height: 60px;
+  widows: 60px;
+}
+
+.garisson-icon{
+  content: url('../assets/garisson.png');
+  height: 60px;
+  widows: 60px;
+}
+
+.claim-reward > p:hover {
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  transition: 0.3s all ease-in-out;
+}
+
+.btn-diamond-border {
+  border: 1px solid #dabf75;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(45deg);
+  height: 50px;
+  width: 50px;
+  margin-bottom: 50px;
+  cursor: pointer;
+  transition: 0.3s all ease-in-out;
+  transition-delay: 1s;
+}
+
+.btn-diamond-border > span{
+  padding: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-45deg);
+}
+
 .sideBar{
   max-width: 100px;
   min-width: 100px;
@@ -101,6 +209,7 @@ export default Vue.extend({
 }
 
 .character-bar {
+  height: 88vh;
   padding: 0.5em 0.8em;
 }
 

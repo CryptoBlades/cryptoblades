@@ -1,54 +1,39 @@
 <template>
   <div class="body main-font">
 
-    <b-navbar v-if="isBar" class="claim-xp-bar">
-      <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
-      variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="$t('ClaimRewardsBar.readyToClaim')"/>
+    <b-navbar class="claim-xp-bar">
+      <b-nav-item class="bar d-flex flex-column" disabled>
+        <strong>
+          <span class="reward-title">{{$t('ClaimRewardsBar.rewards')}}</span>
+        </strong>
+        <p class="note">&#10070; {{$t('ClaimRewardsBar.clickDetailsExp')}}</p>
+      </b-nav-item>
 
-      <b-nav-item class="bar" disabled><strong>{{$t('ClaimRewardsBar.rewards')}}</strong></b-nav-item>
+      <b-nav-item class="bar d-flex flex-column" disabled v-if="!canClaimXp && !canClaimTokens">
+        <p class="note-warning">{{$t('ClaimRewardsBar.readyToClaim')}}</p>
+      </b-nav-item>
 
       <b-nav-item
-        class="ml-3 bar"
+        class="bar"
         @click="claimSkill(ClaimStage.Summary)">
+        <p class="exp-label">SKILL</p>
         <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
-          <strong>SKILL </strong>{{ formattedSkillReward }}
+         <span class="diamond">&#9830;</span>  {{ formattedSkillReward }}
         </span>
       </b-nav-item>
 
       <b-nav-item
-        class="ml-3 bar"
+        class="bar"
         :disabled="!canClaimXp"
         @click="onClaimXp">
-          <div class="gtag-link-others" v-html="`<strong>XP </strong>${formattedXpRewardsBar}`"></div>
+        <p class="exp-label">EXP</p>
+        <p class="chars gtag-link-others" v-for="(reward, index) in formattedXpRewards" :key="index"><span class="diamond">&#9830;</span> {{reward}}</p>
       </b-nav-item>
     </b-navbar>
 
-    <b-navbar-nav v-if="!isBar">
-      <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
-      variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="'Rewards ready to claim!'" />
-
-      <b-nav-item-dropdown right>
-        <template #button-content>
-          {{$t('ClaimRewardsBar.rewards')}}
-        </template>
-
-        <b-dropdown-item
-          @click="claimSkill(ClaimStage.Summary)" class="rewards-info gtag-link-others" tagname="claim_skill"
-           v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
-            SKILL<div class="pl-3">{{ formattedSkillReward }}</div>
-        </b-dropdown-item>
-
-        <b-dropdown-item
-          :disabled="!canClaimXp"
-          @click="onClaimXp" class="gtag-link-others" tagname="claim_xp">
-            XP <div class="pl-3" v-for="(reward, index) in formattedXpRewards" :key="index">{{ reward }}</div>
-        </b-dropdown-item>
-      </b-nav-item-dropdown>
-    </b-navbar-nav>
-
     <b-modal class="centered-modal" ref="need-gas-modal" title="Need Withdraw?"
       @ok="claimSkill(ClaimStage.Stake)" ok-title="Next" @cancel="$router.push({ name: 'portal' })" cancel-title="Go to WAX Portal" >
-        Need Withdraw? Try our WAX Portal, which will pay you .5% under market rate to sell your WAX for BNB!
+        {{$t('needGasModal.newToWithdraw')}}
         <div class="text-center">
           <hr class="hr-divider">
           {{$t('needGasModal.holdReminder')}}<br>
@@ -409,11 +394,13 @@ export default Vue.extend({
 <style scoped>
 
 .navbar {
-  background: rgb(20,20,20);
+  background: rgb(0, 0, 0);
 }
 
 .claim-xp-bar {
-  gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .nav-item.bar {
@@ -427,6 +414,51 @@ export default Vue.extend({
 .rewards-claimable-icon {
   margin-right: 5px;
   align-self: center;
+}
+
+.chars{
+  margin-bottom: 0px;
+  font-family: Roboto;
+}
+
+.diamond{
+  color: #EDCD90;
+  margin-right: 8px;
+}
+
+.note{
+  color: rgba(255, 255, 255, 0.438);
+  padding-top: 5px;
+  font-size: 13px;
+}
+
+.note-warning{
+  background-color: #EDCD90;
+  padding: 5px;
+  border-radius: 3px;
+  color: rgb(0, 0, 0);
+  text-align: center;
+}
+
+.reward-title{
+  font-family: Trajan;
+  color: #fff;
+  font-size: 15px;
+}
+
+.nav-item.bar{
+  margin-top: 0px;
+  list-style-type: none;
+  text-align: left;
+  width: 100%;
+}
+
+.exp-label{
+  font-family: Trajan;
+  color: #EDCD90;
+  margin-bottom: 2px;
+  font-size: 15px;
+  margin-top: 15px;
 }
 
 .claim-input {

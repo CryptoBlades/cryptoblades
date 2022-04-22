@@ -28,7 +28,7 @@
                     </div>
                   </div>
                   <div class="character-details">
-                    <div class="name-list">
+                    <div class="name-list" :style="toggled ? 'white-space: nowrap': ''">
                       {{ getCleanCharacterName(c.id) }}
                     </div>
                     <div class="small-stamina-char"
@@ -298,7 +298,6 @@ export default Vue.extend({
 
 .character-display-container {
   margin-top: -20px;
-  height: 90vh;
 }
 
 
