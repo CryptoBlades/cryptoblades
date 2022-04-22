@@ -89,19 +89,19 @@
               </span>
               <a :href="marketLink" target="_blank" rel="noopener noreferrer">
                 <big-button
+                class="encounter-button btn-styled purchase-button"
                 variant="primary"
-                class="purchase-button"
                 :mainText="`Buy on Bazaar!`"
                 >
               </big-button>
             </a>
+            <big-button
+              v-if="ownerAddress"
+              class="encounter-button btn-styled copy-url-button"
+              :mainText="`Copy URL`"
+              @click="copyNftUrl"
+            />
           </div>
-          <big-button
-            v-if="ownerAddress"
-            class="encounter-button btn-styled copy-url-button"
-            :mainText="`Copy URL`"
-            @click="copyNftUrl"
-          />
           </div>
         </div>
       </div>
@@ -380,7 +380,14 @@ export default Vue.extend({
   padding: 40px 0;
   margin: 10px 0;
 }
+/deep/ .nft-list {
+  padding: 40px 0;
+  margin: 10px 0;
+}
 .search-button {
+  width: 22em;
+}
+.purchase-section * {
   width: 100%;
 }
 
@@ -396,11 +403,6 @@ export default Vue.extend({
 
 .copy-url-button{
   margin-top: 10px;
-}
-
-.copy-url-button,
-.purchase-button {
-  width: 100%;
 }
 
 .btn-section{
@@ -452,7 +454,7 @@ export default Vue.extend({
   .nft-list,
   .weapon-grid,
   .character-list {
-    transform: scale(1);
+    transform: scale(1.25);
   }
 
   .nft-list,
