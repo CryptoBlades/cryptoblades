@@ -42,8 +42,6 @@ import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
 import {abi as ierc20Abi} from '@/../../build/contracts/IERC20.json';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';
-import {abi as priceOracleAbi} from '@/../../build/contracts/IPriceOracle.json';
-import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import {SupportedProject} from '@/views/Treasury.vue';
 import {abi as erc721Abi} from '@/../../build/contracts/IERC721.json';
 import BigNumber from 'bignumber.js';
@@ -108,6 +106,7 @@ const defaultStakeOverviewState: IStakeOverviewState = {
 import bridge from './bridge';
 import pvp from './pvp';
 import quests from './quests';
+import merchandise from './merchandise';
 
 export function createStore(web3: Web3) {
   return new Vuex.Store<IState>({
@@ -115,6 +114,7 @@ export function createStore(web3: Web3) {
       bridge,
       pvp,
       quests,
+      merchandise
     },
     state: {
       web3,
@@ -146,7 +146,6 @@ export function createStore(web3: Web3) {
       maxStamina: 0,
       currentCharacterId: null,
       ownedDust: [],
-      cartEntries: [],
       currentChainSupportsMerchandise: false,
       currentChainSupportsPvP: false,
       currentChainSupportsQuests: false,
@@ -463,10 +462,6 @@ export function createStore(web3: Web3) {
         };
       },
 
-      getCartEntries(state) {
-        return state.cartEntries;
-      },
-
       getCurrentChainSupportsMerchandise(state) {
         return state.currentChainSupportsMerchandise;
       },
@@ -781,23 +776,6 @@ export function createStore(web3: Web3) {
         if (!state.ownedShieldIds.includes(shieldId)) {
           state.ownedShieldIds.push(shieldId);
         }
-      },
-
-      addCartEntry(state: IState, cartEntry: CartEntry) {
-        const duplicatedEntry = state.cartEntries.find(entry => entry.variant.id === cartEntry.variant.id);
-        if (duplicatedEntry) {
-          const entryIndex = state.cartEntries.indexOf(duplicatedEntry);
-          state.cartEntries.splice(entryIndex, 1);
-        }
-        state.cartEntries.push(cartEntry);
-      },
-
-      removeCartEntry(state: IState, cartEntry: CartEntry) {
-        state.cartEntries.splice(state.cartEntries.indexOf(cartEntry), 1);
-      },
-
-      clearCartEntries(state: IState) {
-        state.cartEntries = [];
       },
 
       updateCurrentChainSupportsMerchandise(state: IState) {
@@ -1366,22 +1344,6 @@ export function createStore(web3: Web3) {
               ]);
             })
           );
-
-          const { NFTMarket } = state.contracts();
-
-          if(NFTMarket) {
-            subscriptions.push(
-              NFTMarket.events.PurchasedListing({ filter: { seller: state.defaultAccount } }, async (err: Error, data: any) => {
-                if (err) {
-                  console.error(err, data);
-                  return;
-                }
-
-                await dispatch('fetchSkillBalance');
-              })
-            );
-          }
-
         }
 
         function setupStakingEvents(stakeType: StakeType, StakingRewards: StakingRewardsAlias | NftStakingRewardsAlias) {
@@ -2955,133 +2917,6 @@ export function createStore(web3: Web3) {
         return await BurningManager.methods.giveAwaySoul(user, soulAmount).send({from: state.defaultAccount});
       },
 
-      async fetchAllMarketNftIds({ state }, { nftContractAddr }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
-
-        // returns an array of bignumbers (these are nft IDs)
-        return await NFTMarket.methods
-          .getListingIDs(
-            nftContractAddr
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchNumberOfWeaponListings({ state }, { nftContractAddr, trait, stars }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
-
-        // returns an array of bignumbers (these are nft IDs)
-        return await NFTMarket.methods
-          .getNumberOfWeaponListings(
-            nftContractAddr,
-            trait,
-            stars
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchNumberOfCharacterListings({ state }, { nftContractAddr, trait, minLevel, maxLevel }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
-
-        // returns an array of bignumbers (these are nft IDs)
-        return await NFTMarket.methods
-          .getNumberOfCharacterListings(
-            nftContractAddr,
-            trait,
-            minLevel,
-            maxLevel
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchNumberOfShieldListings({ state }, { nftContractAddr, trait, stars }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
-
-        // returns an array of bignumbers (these are nft IDs)
-        //console.log('NOTE: trait '+trait+' and stars '+stars+' ignored until a contract filter exists');
-        void trait;
-        void stars;
-        return await NFTMarket.methods
-          .getNumberOfListingsForToken(
-            nftContractAddr
-            // TODO add contract function and filtering params
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchAllMarketCharacterNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, minLevel, maxLevel }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
-
-        return await NFTMarket.methods
-          .getCharacterListingIDsPage(
-            nftContractAddr,
-            limit,
-            pageNumber,
-            trait,
-            minLevel,
-            maxLevel
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchAllMarketWeaponNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, stars }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
-
-        return await NFTMarket.methods
-          .getWeaponListingIDsPage(
-            nftContractAddr,
-            limit,
-            pageNumber,
-            trait,
-            stars
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchAllMarketShieldNftIdsPage({ state }, { nftContractAddr, limit, pageNumber, trait, stars }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
-
-        //console.log('NOTE: trait '+trait+' and stars '+stars+' ignored until a contract filter exists');
-        void trait;
-        void stars;
-        const res = await NFTMarket.methods
-          .getListingSlice(
-            nftContractAddr,
-            pageNumber*limit, // startIndex
-            limit // length
-          )
-          .call(defaultCallOptions(state));
-        // returned values are: uint256 returnedCount, uint256[] ids, address[] sellers, uint256[] prices
-        // res[1][] refers to ids, which is what we're looking for
-        // this slice function returns the full length even if there are no items on that index
-        // we must cull the nonexistant items
-        const ids = [];
-        for(let i = 0; i < res[1].length; i++) {
-          if(res[1][i] !== '0' || res[3][i] !== '0') // id and price both 0, it's invalid
-            ids.push(res[1][i]);
-        }
-        return ids;
-      },
-
-      async fetchMarketNftIdsBySeller({ state }, { nftContractAddr, sellerAddr }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
-
-        // returns an array of bignumbers (these are nft IDs)
-        return await NFTMarket.methods
-          .getListingIDsBySeller(
-            nftContractAddr,
-            sellerAddr
-          )
-          .call(defaultCallOptions(state));
-      },
-
       async fetchMarketNftPrice({ state }, { nftContractAddr, tokenId }) {
         const { NFTMarket } = state.contracts();
         if(!NFTMarket) return;
@@ -3091,31 +2926,6 @@ export function createStore(web3: Web3) {
           .getFinalPrice(
             nftContractAddr,
             tokenId
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchMarketNftTargetBuyer({ state }, { nftContractAddr, tokenId }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
-
-        // returns the listing's target buyer address
-        return await NFTMarket.methods
-          .getTargetBuyer(
-            nftContractAddr,
-            tokenId
-          )
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchMarketTax({ state }, { nftContractAddr }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
-
-        // returns the tax on the nfts at the address in 64x64 fixed point
-        return await NFTMarket.methods
-          .tax(
-            nftContractAddr
           )
           .call(defaultCallOptions(state));
       },
@@ -3132,172 +2942,6 @@ export function createStore(web3: Web3) {
         return await NFTContract.methods
           .ownerOf(tokenId)
           .call(defaultCallOptions(state));
-      },
-
-      async addMarketListing({ state, dispatch }, { nftContractAddr, tokenId, price, targetBuyer }:
-      { nftContractAddr: string, tokenId: string, price: string, targetBuyer: string }) {
-        const { CryptoBlades, SkillToken, NFTMarket, Weapons, Characters, Shields } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !NFTMarket || !Weapons || !Characters || !Shields || !state.defaultAccount) return;
-
-        const NFTContract: Contract<IERC721> =
-          nftContractAddr === Weapons.options.address
-            ? Weapons : nftContractAddr === Characters.options.address
-              ? Characters : Shields;
-
-        await NFTContract.methods
-          .approve(NFTMarket.options.address, tokenId)
-          .send(defaultCallOptions(state));
-
-        await approveFeeFromAnyContract(
-          CryptoBlades,
-          NFTMarket,
-          SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          nftMarketFuctions => nftMarketFuctions.addFee(),
-          { allowInGameOnlyFunds: false, allowSkillRewards: false },
-        );
-
-        const res = await NFTMarket.methods
-          .addListing(nftContractAddr, tokenId, price, targetBuyer)
-          .send({
-            from: state.defaultAccount,
-          });
-
-        if(nftContractAddr === Weapons.options.address)
-          await dispatch('updateWeaponIds');
-        else if(nftContractAddr === Characters.options.address)
-          await dispatch('updateCharacterIds');
-        else if(nftContractAddr === Shields.options.address) {
-          await dispatch('updateShieldIds');
-        }
-
-        const {
-          seller,
-          nftID
-        } = res.events.NewListing.returnValues;
-
-        return { seller, nftID, price } as { seller: string, nftID: string, price: string };
-      },
-
-      async changeMarketListingPrice({ state }, { nftContractAddr, tokenId, newPrice }: { nftContractAddr: string, tokenId: string, newPrice: string }) {
-        const { CryptoBlades, SkillToken, NFTMarket } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !NFTMarket || !state.defaultAccount) return;
-
-        await approveFeeFromAnyContract(
-          CryptoBlades,
-          NFTMarket,
-          SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          nftMarketFuctions => nftMarketFuctions.changeFee(),
-          { allowInGameOnlyFunds: false, allowSkillRewards: false },
-        );
-
-        const res = await NFTMarket.methods
-          .changeListingPrice(nftContractAddr, tokenId, newPrice)
-          .send({
-            from: state.defaultAccount,
-          });
-
-        const {
-          seller,
-          nftID
-        } = res.events.ListingPriceChange.returnValues;
-
-        return { seller, nftID, newPrice } as { seller: string, nftID: string, newPrice: string };
-      },
-
-      async changeMarketListingTargetBuyer({ state }, { nftContractAddr, tokenId, newTargetBuyer }:
-      { nftContractAddr: string, tokenId: string, newTargetBuyer: string }) {
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
-
-        const res = await NFTMarket.methods
-          .changeListingTargetBuyer(nftContractAddr, tokenId, newTargetBuyer)
-          .send({
-            from: state.defaultAccount,
-          });
-
-        const {
-          seller,
-          nftID
-        } = res.events.ListingTargetBuyerChange.returnValues;
-
-        return { seller, nftID, newTargetBuyer } as { seller: string, nftID: string, newTargetBuyer: string };
-      },
-
-      async cancelMarketListing({ state, dispatch }, { nftContractAddr, tokenId }: { nftContractAddr: string, tokenId: string }) {
-        const { NFTMarket, Weapons, Characters, Shields } = state.contracts();
-        if(!NFTMarket || !Weapons || !Characters || !Shields) return;
-
-        const res = await NFTMarket.methods
-          .cancelListing(nftContractAddr, tokenId)
-          .send({
-            from: state.defaultAccount,
-          });
-
-        if(nftContractAddr === Weapons.options.address)
-          await dispatch('updateWeaponIds');
-        else if(nftContractAddr === Characters.options.address)
-          await dispatch('updateCharacterIds');
-        else if(nftContractAddr === Shields.options.address) {
-          await dispatch('updateShieldIds');
-        }
-
-        const {
-          seller,
-          nftID
-        } = res.events.CancelledListing.returnValues;
-
-        return { seller, nftID } as { seller: string, nftID: string };
-      },
-
-      async purchaseMarketListing({ state, dispatch }, { nftContractAddr, tokenId, maxPrice }: { nftContractAddr: string, tokenId: string, maxPrice: string }) {
-        const { SkillToken, NFTMarket, Weapons, Characters, Shields } = state.contracts();
-        if(!NFTMarket || !Weapons || !Characters || !Shields) return;
-
-        await SkillToken.methods
-          .approve(NFTMarket.options.address, maxPrice)
-          .send(defaultCallOptions(state));
-
-        const res = await NFTMarket.methods
-          .purchaseListing(nftContractAddr, tokenId, maxPrice)
-          .send({
-            from: state.defaultAccount,
-          });
-
-        if(nftContractAddr === Weapons.options.address)
-          await dispatch('updateWeaponIds');
-        else if(nftContractAddr === Characters.options.address)
-          await dispatch('updateCharacterIds');
-        else if(nftContractAddr === Shields.options.address) {
-          await dispatch('updateShieldIds');
-        }
-
-        const {
-          seller,
-          nftID,
-          price
-        } = res.events.PurchasedListing.returnValues;
-
-        return { seller, nftID, price } as { seller: string, nftID: string, price: string };
-      },
-
-      async fetchSellerOfNft({ state }, { nftContractAddr, tokenId }: { nftContractAddr: string, tokenId: string }) {
-        // getSellerOfNftID
-        const { NFTMarket } = state.contracts();
-        if(!NFTMarket) return;
-
-        const sellerAddr = await NFTMarket.methods
-          .getSellerOfNftID(nftContractAddr, tokenId)
-          .call(defaultCallOptions(state));
-
-        return sellerAddr;
       },
 
       async fetchFightGasOffset({ state, commit }) {
@@ -3424,41 +3068,6 @@ export function createStore(web3: Web3) {
           dispatch('fetchTotalShieldSupply'),
           dispatch('updateShieldIds'),
         ]);
-      },
-
-      async currentSkillPrice({ state }) {
-        const { Merchandise } = state.contracts();
-        if(!Merchandise || !state.defaultAccount) return;
-
-        const skillOracle = await Merchandise.methods.skillOracle().call(defaultCallOptions(state));
-        return await new web3.eth.Contract(priceOracleAbi as any[], skillOracle).methods
-          .currentPrice().call(defaultCallOptions(state));
-      },
-
-      async createOrder({ state, dispatch }, {orderNumber, payingAmount}) {
-        const { CryptoBlades, SkillToken, Merchandise } = state.contracts();
-        if(!CryptoBlades || !SkillToken || !Merchandise || !state.defaultAccount) return;
-
-        const skillNeeded = await CryptoBlades.methods
-          .getSkillNeededFromUserWallet(state.defaultAccount, payingAmount, true)
-          .call(defaultCallOptions(state));
-
-        await approveFeeFromAnyContractSimple(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(skillNeeded)
-        );
-
-        await Merchandise.methods
-          .createOrder(orderNumber, payingAmount)
-          .send({
-            from: state.defaultAccount
-          });
-
-        dispatch('fetchSkillBalance');
       },
 
       async storeNftsToPartnerVault({state}, {tokenAddress, tokenIds}) {
@@ -4736,38 +4345,6 @@ export function createStore(web3: Web3) {
           dispatch('updateCharacterIds'),
           dispatch('fetchSkillBalance')
         ]);
-      },
-
-      async purchaseBurnCharacter({ state, dispatch }, {charId, maxPrice}) {
-        const { NFTMarket, BurningManager, SkillToken, CryptoBlades } = state.contracts();
-        if(!CryptoBlades || !BurningManager || !SkillToken || !NFTMarket || !state.defaultAccount) return;
-
-        await approveFeeFromAnyContractSimple(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          maxPrice
-        );
-
-        const burnCost = await BurningManager.methods.burnCharacterFee(charId).call(defaultCallOptions(state));
-        await SkillToken.methods.approve(CryptoBlades.options.address, burnCost).send({
-          from: state.defaultAccount
-        });
-
-        const res = await NFTMarket.methods.purchaseBurnCharacter(charId, maxPrice).send({ from: state.defaultAccount });
-        const {
-          seller,
-          nftID,
-          price
-        } = res.events.PurchasedListing.returnValues;
-
-        await Promise.all([
-          dispatch('fetchSkillBalance')
-        ]);
-
-        return { seller, nftID, price } as { seller: string, nftID: string, price: string };
       },
 
       async upgradeCharacterWithSoul({ state, dispatch }, {charId, soulAmount}) {
