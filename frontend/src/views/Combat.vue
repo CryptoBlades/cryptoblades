@@ -629,10 +629,6 @@ h5{
 }
 
 
-/* .frame-line > img{
-  width: 100%;
-} */
-
 .combat-hints {
   margin: auto;
   text-align: center;
