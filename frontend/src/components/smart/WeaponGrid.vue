@@ -112,10 +112,7 @@ interface StoreMappedActions {
 interface Data {
   starFilter: string | number;
   elementFilter: string;
-  minPriceFilter: string;
-  maxPriceFilter: string;
   favorites: Record<number, boolean>;
-  priceSort: string;
   showReforgedWeapons: boolean;
   showFavoriteWeapons: boolean;
   options: NftOption[];
@@ -217,10 +214,7 @@ export default Vue.extend({
     return {
       starFilter: this.starsOptions?.length === 1 ? this.starsOptions[0] : '',
       elementFilter: '',
-      minPriceFilter:'',
-      maxPriceFilter:'',
       favorites: {},
-      priceSort: '',
       sorts,
       showReforgedWeapons: this.showReforgedWeaponsDefVal,
       showFavoriteWeapons: this.showFavoriteWeaponsDefVal,
@@ -372,9 +366,6 @@ export default Vue.extend({
       sessionStorage.removeItem('weapon-elementfilter');
       this.elementFilter = '';
       this.starFilter = this.starsOptions?.length === 1 ? this.starsOptions[0] : '';
-      this.priceSort = '';
-      this.minPriceFilter= '';
-      this.maxPriceFilter= '';
       this.$emit('weapon-filters-changed');
     },
     onWeaponClick(id: number) {
