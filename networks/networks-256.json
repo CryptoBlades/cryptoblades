@@ -4152,7 +4152,7 @@
     },
     "links": {},
     "address": "0x0f1dC323DcC8FE8e67CFeE4d4726793B6428Ad39",
-    "transactionHash": "0x948a11404f068607997f51b1c96820bac4d70f9b46822f022b4868d0b19a7f82"
+    "transactionHash": "0x3511976ab43c0ec5b1bec0c3eade08e590e7e0a569dbdada252a4655d0722434"
   },
   "build/contracts/PvpCore.json": {
     "events": {
@@ -4409,7 +4409,7 @@
     },
     "links": {},
     "address": "0xEaFc2720137C24C9e87f90C16A0e64Ce5b64c653",
-    "transactionHash": "0xabc56e620e6bfa25bc704a8b17fdd64d0296b583fecc8816218f7006ca67f8e8"
+    "transactionHash": "0x0dc4bf4b4d44c010d348a85a9ebfa1e6894043f8db4a1b8468743fe6f9e91aa3"
   },
   "build/contracts/Raid1.json": {
     "events": {},
