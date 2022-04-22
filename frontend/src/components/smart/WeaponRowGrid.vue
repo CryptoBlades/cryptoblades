@@ -140,6 +140,7 @@ interface Data {
   targetSkin: string;
   currentWeaponId: number | string | null;
   weaponCosmeticsNames: string[];
+  hoveredWeapon: string [];
 }
 const sorts = [
   { name: i18n.t('weaponGrid.sorts.any'), dir: '' },
@@ -246,6 +247,7 @@ export default Vue.extend({
       haveWeaponCosmetics: [],
       targetSkin: '',
       currentWeaponId: null,
+      hoveredWeapon: [],
       weaponCosmeticsNames: [
         i18n.t('market.nftList.weaponGrayscale'),
         i18n.t('market.nftList.weaponContrast'),
