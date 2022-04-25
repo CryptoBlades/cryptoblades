@@ -81,9 +81,69 @@
 
             <!-- WEAPON STATS -->
             <div class="bonus-power">
-              <div v-if="weapon.lowStarBurnPoints > 0"><span>{{ weapon.lowStarBurnPoints }} LB</span></div>
-              <div v-if="weapon.fourStarBurnPoints > 0"><span>{{ weapon.fourStarBurnPoints }} 4B</span></div>
-              <div v-if="weapon.fiveStarBurnPoints > 0"><span>{{ weapon.fiveStarBurnPoints }} 5B</span></div>
+              <div v-if="weapon.lowStarBurnPoints > 0"><span>LB : {{ weapon.lowStarBurnPoints }} </span></div>
+              <div v-if="weapon.fourStarBurnPoints > 0"><span>4B: {{ weapon.fourStarBurnPoints }}</span></div>
+              <div v-if="weapon.fiveStarBurnPoints > 0"><span>5B: {{ weapon.fiveStarBurnPoints }}</span></div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- raid selected weapon display  (DESKTOP VIEW)-->
+    <div v-if="displayType === 'raid'" class="glow-container" ref="el">
+      <div class="weapon-flex">
+        <div :class="'weapon-img-desktop frame-'+ (weapon.stars || 0)" style="border-radius:5px">
+            <!-- WEAPON ID -->
+          <div class="id">{{$t('weaponIcon.id')}} {{ weapon.id }}</div>
+          <img v-if="showPlaceholder" class="placeholder" :src="getWeaponArt(weapon)"  />
+        </div>
+        <div class="weapon-details">
+
+            <!-- FAVORITE -->
+            <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
+
+            <!-- WEAPON NAME -->
+            <div class="name-desktop raid-weapon">
+              {{ (getCleanWeaponName(weapon.id, weapon.stars)).toUpperCase()}}
+            </div>
+
+            <!-- DURABILITY BAR -->
+            <div class="mt-1 mb-1">
+              <div class="small-durability-bar"
+              :style="`--durabilityReady: ${(getWeaponDurability(weapon.id)/maxDurability)*100}%;`"
+              v-tooltip.bottom="`${$t('weaponIcon.durability')} ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
+                ${$t('weaponIcon.durabilityTooltip')} ${timeUntilWeaponHasMaxDurability(weapon.id)}`"></div>
+            </div>
+
+            <!-- STAR -->
+            <div class="trait">
+              <div class="d-flex align-items-center traits">
+                <span :class="weapon.element.toLowerCase() + '-icon'"></span>
+                <span class="trait-name">{{weapon.element.toUpperCase()}}</span>
+              </div>
+              <div>
+                <div class="stats">
+                  <div v-if="weapon.stat1Value">
+                    <span :class="weapon.stat1.toLowerCase() + '-icon'" class="mr-1 icon"></span>
+                    <span :class="weapon.stat1.toLowerCase()">{{ weapon.stat1 }} +{{ weapon.stat1Value }}</span>
+                  </div>
+                  <div v-if="weapon.stat2Value">
+                    <span :class="weapon.stat2.toLowerCase() + '-icon'" class="mr-1 icon"></span>
+                    <span :class="weapon.stat2.toLowerCase()">{{ weapon.stat2 }} +{{ weapon.stat2Value }}</span>
+                  </div>
+                  <div v-if="weapon.stat3Value">
+                    <span :class="weapon.stat3.toLowerCase() + '-icon'" class="mr-1 icon"></span>
+                    <span :class="weapon.stat3.toLowerCase()">{{ weapon.stat3 }} +{{ weapon.stat3Value }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- WEAPON STATS -->
+            <div class="bonus-power">
+              <div v-if="weapon.lowStarBurnPoints > 0"><span>LB: {{ weapon.lowStarBurnPoints }}</span></div>
+              <div v-if="weapon.fourStarBurnPoints > 0"><span>4B: {{ weapon.fourStarBurnPoints }}</span></div>
+              <div v-if="weapon.fiveStarBurnPoints > 0"><span>5B: {{ weapon.fiveStarBurnPoints }}</span></div>
             </div>
         </div>
       </div>
@@ -142,9 +202,9 @@
 
             <!-- WEAPON STATS -->
             <div class="bonus-power">
-              <div v-if="weapon.lowStarBurnPoints > 0"><span>{{ weapon.lowStarBurnPoints }} LB</span></div>
-              <div v-if="weapon.fourStarBurnPoints > 0"><span>{{ weapon.fourStarBurnPoints }} 4B</span></div>
-              <div v-if="weapon.fiveStarBurnPoints > 0"><span>{{ weapon.fiveStarBurnPoints }} 5B</span></div>
+              <div v-if="weapon.lowStarBurnPoints > 0"><span>LB: {{ weapon.lowStarBurnPoints }}</span></div>
+              <div v-if="weapon.fourStarBurnPoints > 0"><span>4B: {{ weapon.fourStarBurnPoints }}</span></div>
+              <div v-if="weapon.fiveStarBurnPoints > 0"><span>5B: {{ weapon.fiveStarBurnPoints }}</span></div>
             </div>
         </div>
       </div>
@@ -333,7 +393,6 @@ export default {
   max-height: 180px;
   margin: auto;
   display: block;
-
   transform: scale(0.7);
 }
 
@@ -473,6 +532,18 @@ export default {
 .bonus-power {
   font-size: 0.6em;
   text-align: right;
+  display: flex;
+  margin-top: 5px;
+}
+
+.bonus-power > div{
+  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.397);
+  padding: 0px 10px;
+  border-radius: 3px;
+  font-size: 1.2em;
+  color: #fff;
+  margin-right: 7px;
 }
 
 .small-durability-bar {

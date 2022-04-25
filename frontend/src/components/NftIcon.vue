@@ -291,7 +291,7 @@ export default {
   height: 100%;
   width: 100%;
   position: relative;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(4, 4, 4, 0.022);
   border: 2px solid #9e8a57;
 }
 
@@ -308,13 +308,13 @@ export default {
   height: 12em;
 }
 .default-icon-wrapper {
-  width: 8em;
-  height: 8em;
+  width: 5em;
+  height: 5em;
   margin: 5px;
 }
 .default-placeholder {
-  max-width: 100px;
-  max-height: 100px;
+  max-width: 50px;
+  max-height: 50px;
   margin-left: 12px;
   margin-top: 8px;
   transform: scale(1);
@@ -327,20 +327,20 @@ export default {
   margin-top: -9px;
 }
 .default-dust-placeholder {
-  max-width: 125px;
-  max-height: 125px;
+  max-width: 70px;
+  max-height: 70px;
   margin-left: 7px;
 }
 .default-trinket-placeholder{
-  max-width: 100px;
-  max-height: 100px;
+  max-width: 65px;
+  max-height: 65px;
   margin-left: 12px;
   margin-top: 8px;
   transform: scale(1.75);
 }
 .default-junk-placeholder{
-  max-width: 100px;
-  max-height: 100px;
+  max-width: 50px;
+  max-height: 50px;
   margin-left: 12px;
   margin-top: 12px;
   transform: scale(1.6);

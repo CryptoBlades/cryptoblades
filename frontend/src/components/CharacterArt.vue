@@ -164,9 +164,7 @@ export default {
       return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
     },
 
-    getCharacterArt,
-
-    init() {
+    getCharacterArt,init() {
       const container = this.$refs.el;
 
       this.camera = new Three.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 0.01, 1000);

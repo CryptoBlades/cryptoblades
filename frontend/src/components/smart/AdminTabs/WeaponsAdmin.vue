@@ -81,9 +81,9 @@ enum Rarity {
 enum Element {
   RANDOM = 100,
   FIRE = 0,
-  EARTH = 1,
-  LIGHTNING = 2,
-  WATER = 3,
+  WATER = 1,
+  EARTH = 2,
+  LIGHTNING = 3,
 }
 
 interface GiveawayWeaponMint {

@@ -39,7 +39,7 @@
           :class="{ selected: highlight !== null && weapon.id === highlight }"
           v-for="weapon in nonIgnoredWeapons"
           :key="weapon.id"
-          @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
+          @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon)"
           @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
           <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" showTransfer class="nft-options"/>
           <div class="weapon-icon-wrapper">
@@ -363,12 +363,12 @@ export default Vue.extend({
       this.starFilter = this.starsOptions?.length === 1 ? this.starsOptions[0] : '';
       this.$emit('weapon-filters-changed');
     },
-    onWeaponClick(id: number) {
-      this.setCurrentWeapon(id);
-      this.$emit('chooseweapon', id);
-      this.$emit('choose-weapon', id);
+    onWeaponClick(weapon: any) {
+      this.setCurrentWeapon(weapon.id);
+      Events.$emit('chooseweapon', weapon.id);
+      this.$emit('choose-weapon', weapon.id);
       Events.$emit('weapon-inventory', false);
-      Events.$emit('chooseweapon', id);
+      Events.$emit('setActiveWeapon', weapon);
     },
     checkStorageFavorite() {
       const favoritesFromStorage = localStorage.getItem('favorites');
@@ -468,6 +468,12 @@ export default Vue.extend({
   grid-template-columns: repeat(auto-fit, 14em);
   gap: 0.5em;
 }
+
+.scroll-weapon{
+  overflow-x:auto;
+  height: 80vh;
+}
+
 .weapon {
   width: 25em;
   border-radius: 5px;
