@@ -192,7 +192,7 @@ export default {
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
-      'configureMetaMask'
+      'configureMetaMask',
     ]),
     ...mapGetters([
       'getExchangeTransakUrl'
@@ -229,22 +229,6 @@ export default {
       if (id !== null) {
         await this.fetchCharacterStamina(id);
       }
-    },
-
-    renderPageDisplay(){
-      let toDisplay;
-
-      if(!this.featureFlagStakeOnly && this.currentCharacterId !== null){
-        if(this.toggleSideBar){
-          toDisplay = 'can-show-app';
-        }else{
-          toDisplay = 'col-xl-10 col-lg-9 col-md-9 col-sm-10 cols-11 set-normal';
-        }
-      }else{
-        toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
-      }
-
-      return toDisplay;
     },
 
     checkStorage() {
@@ -315,6 +299,23 @@ export default {
         );
       }
     },
+
+    renderPageDisplay(){
+      let toDisplay;
+
+      if(!this.featureFlagStakeOnly && this.currentCharacterId !== null){
+        if(this.toggleSideBar){
+          toDisplay = 'can-show-app';
+        }else{
+          toDisplay = 'col-xl-10 col-lg-9 col-md-9 col-sm-10 cols-11 set-normal';
+        }
+      }else{
+        toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
+      }
+
+      return toDisplay;
+    },
+
 
     async checkNotifications() {
       const response = await fetch(apiUrl('static/notifications'));
@@ -463,6 +464,7 @@ export default {
     clearInterval(this.pollCharacterStaminaIntervalId);
     clearInterval(this.slowPollIntervalId);
   },
+
 };
 </script>
 
@@ -749,6 +751,29 @@ div.bg-success {
   border: 2px solid #9e8a57 !important;
   background: rgb(61, 61, 64);
   background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
+}
+
+.multiselect *{
+  background: transparent;
+  color:#fff;
+}
+.multiselect__tags, .multiselect__content-wrapper{
+  border:1px solid #404857;
+}
+.multiselect--above .multiselect__content-wrapper{
+  border-top:none;
+}
+
+.multiselect__option--selected.multiselect__option--highlight,
+.multiselect__option--selected.multiselect__option--highlight::after{
+  background: #9E8A57;
+}
+
+.multiselect__option--selected,
+.multiselect__option--selected::after,
+.multiselect__option--highlight,
+.multiselect__option--highlight::after{
+  background: #404857;
 }
 </style>
 <style scoped>

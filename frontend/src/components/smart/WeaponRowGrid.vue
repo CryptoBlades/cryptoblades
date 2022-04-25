@@ -20,24 +20,6 @@
           </select>
         </div>
 
-        <template v-if="isMarket">
-          <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-            <strong>{{$t('weaponGrid.minPrice')}}</strong>
-            <input class="form-control" type="number" v-model.trim="minPriceFilter" :min="0" placeholder="Min" />
-          </div>
-          <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-            <strong>{{$t('weaponGrid.maxPrice')}}</strong>
-            <input class="form-control" type="number" v-model.trim="maxPriceFilter" :min="0" placeholder="Max" />
-          </div>
-
-          <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-            <strong>{{$t('weaponGrid.sort')}}</strong>
-            <select class="form-control" v-model="priceSort" >
-              <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || $t('weaponGrid.sorts.any') }}</option>
-            </select>
-          </div>
-        </template>
-
         <!-- Select Box -->
         <div v-if="showReforgedToggle" class="show-reforged col-sm-6 col-md-6 col-lg-6">
           <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
@@ -57,9 +39,9 @@
           :class="{ selected: highlight !== null && weapon.id === highlight }"
           v-for="weapon in nonIgnoredWeapons"
           :key="weapon.id"
-          @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
+          @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon)"
           @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
-          <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
+          <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" showTransfer class="nft-options"/>
           <div class="weapon-icon-wrapper">
             <weapon-inventory class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" :displayType="'inventory'"/>
           </div>
@@ -111,7 +93,7 @@ import { BModal } from 'bootstrap-vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
 import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 import i18n from '@/i18n';
-import { copyNftUrl } from '@/utils/common';
+
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
 interface StoreMappedGetters {
   weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
@@ -127,10 +109,7 @@ interface StoreMappedActions {
 interface Data {
   starFilter: string | number;
   elementFilter: string;
-  minPriceFilter: string;
-  maxPriceFilter: string;
   favorites: Record<number, boolean>;
-  priceSort: string;
   showReforgedWeapons: boolean;
   showFavoriteWeapons: boolean;
   options: NftOption[];
@@ -206,10 +185,6 @@ export default Vue.extend({
       type: Boolean,
       default: true,
     },
-    isMarket: {
-      type: Boolean,
-      default: false
-    },
     checkForDurability: {
       type: Boolean,
       default: false,
@@ -233,10 +208,7 @@ export default Vue.extend({
     return {
       starFilter: this.starsOptions?.length === 1 ? this.starsOptions[0] : '',
       elementFilter: '',
-      minPriceFilter:'',
-      maxPriceFilter:'',
       favorites: {},
-      priceSort: '',
       sorts,
       showReforgedWeapons: this.showReforgedWeaponsDefVal,
       showFavoriteWeapons: this.showFavoriteWeaponsDefVal,
@@ -356,16 +328,8 @@ export default Vue.extend({
       'fetchOwnedWeaponCosmetics','changeWeaponCosmetic','removeWeaponCosmetic']) as StoreMappedActions),
     ...(mapMutations(['setCurrentWeapon'])),
     saveFilters() {
-      if(this.isMarket) {
-        sessionStorage.setItem('market-weapon-starfilter', this.starFilter.toString());
-        sessionStorage.setItem('market-weapon-elementfilter', this.elementFilter);
-        sessionStorage.setItem('market-weapon-price-order', this.priceSort);
-        sessionStorage.setItem('market-weapon-price-minfilter', this.minPriceFilter?''+this.minPriceFilter:'');
-        sessionStorage.setItem('market-weapon-price-maxfilter', this.maxPriceFilter?''+this.maxPriceFilter:'');
-      } else {
-        sessionStorage.setItem('weapon-starfilter', this.starFilter.toString());
-        sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
-      }
+      sessionStorage.setItem('weapon-starfilter', this.starFilter.toString());
+      sessionStorage.setItem('weapon-elementfilter', this.elementFilter);
       this.$emit('weapon-filters-changed');
     },
     toggleFavorite(e: Event, weaponId: number) {
@@ -393,29 +357,18 @@ export default Vue.extend({
       return this.favorites[weaponId];
     },
     clearFilters() {
-      if(this.isMarket) {
-        sessionStorage.removeItem('market-weapon-starfilter');
-        sessionStorage.removeItem('market-weapon-elementfilter');
-        sessionStorage.removeItem('market-weapon-price-order');
-        sessionStorage.removeItem('market-weapon-price-minfilter');
-        sessionStorage.removeItem('market-weapon-price-maxfilter');
-      } else {
-        sessionStorage.removeItem('weapon-starfilter');
-        sessionStorage.removeItem('weapon-elementfilter');
-      }
+      sessionStorage.removeItem('weapon-starfilter');
+      sessionStorage.removeItem('weapon-elementfilter');
       this.elementFilter = '';
       this.starFilter = this.starsOptions?.length === 1 ? this.starsOptions[0] : '';
-      this.priceSort = '';
-      this.minPriceFilter= '';
-      this.maxPriceFilter= '';
       this.$emit('weapon-filters-changed');
     },
-    onWeaponClick(id: number) {
-      this.setCurrentWeapon(id);
-      this.$emit('chooseweapon', id);
-      this.$emit('choose-weapon', id);
+    onWeaponClick(weapon: any) {
+      this.setCurrentWeapon(weapon.id);
+      Events.$emit('chooseweapon', weapon.id);
+      this.$emit('choose-weapon', weapon.id);
       Events.$emit('weapon-inventory', false);
-      Events.$emit('chooseweapon', id);
+      Events.$emit('setActiveWeapon', weapon);
     },
     checkStorageFavorite() {
       const favoritesFromStorage = localStorage.getItem('favorites');
@@ -460,31 +413,19 @@ export default Vue.extend({
       this.updateOptions();
     },
     updateOptions() {
-      if(!this.isMarket) {
-        this.options = [
-          {
-            name: i18n.t('characterList.rename').toString(),
-            amount: this.haveRename,
-            handler: this.openRenameWeapon
-          },
-          {
-            name: i18n.t('characterList.changeSkin').toString(),
-            amount: this.totalCosmeticChanges,
-            handler: this.openChangeSkin,
-            hasDefaultOption: true
-          },
-        ];
-      } else {
-        this.options = [
-          {
-            name: i18n.t('copyLink').toString(),
-            amount: 0,
-            handler: copyNftUrl,
-            hasDefaultOption: true,
-            noAmount: true
-          },
-        ];
-      }
+      this.options = [
+        {
+          name: i18n.t('characterList.rename').toString(),
+          amount: this.haveRename,
+          handler: this.openRenameWeapon
+        },
+        {
+          name: i18n.t('characterList.changeSkin').toString(),
+          amount: this.totalCosmeticChanges,
+          handler: this.openChangeSkin,
+          hasDefaultOption: true
+        },
+      ];
     },
     closeInventory(bol: any){
       Events.$emit('weapon-inventory', bol);
@@ -493,16 +434,8 @@ export default Vue.extend({
   async mounted() {
     this.checkStorageFavorite();
     Events.$on('weapon:newFavorite', () => this.checkStorageFavorite());
-    if(this.isMarket) {
-      this.starFilter = sessionStorage.getItem('market-weapon-starfilter') || '';
-      this.elementFilter = sessionStorage.getItem('market-weapon-elementfilter') || '';
-      this.priceSort = sessionStorage.getItem('market-weapon-price-order') || '';
-      this.minPriceFilter = sessionStorage.getItem('market-weapon-price-minfilter') || '';
-      this.maxPriceFilter = sessionStorage.getItem('market-weapon-price-maxfilter') || '';
-    } else {
-      this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
-      this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
-    }
+    this.starFilter = sessionStorage.getItem('weapon-starfilter') || '';
+    this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
     if(this.starsOptions?.length === 1) {
       this.starFilter = this.starsOptions[0];
     }
@@ -535,6 +468,12 @@ export default Vue.extend({
   grid-template-columns: repeat(auto-fit, 14em);
   gap: 0.5em;
 }
+
+.scroll-weapon{
+  overflow-x:auto;
+  height: 80vh;
+}
+
 .weapon {
   width: 25em;
   border-radius: 5px;

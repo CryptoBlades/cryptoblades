@@ -55,7 +55,7 @@
       </router-link>
     </li>
 
-    <li v-if="!stakeOnly && market" class="top-nav-links">
+    <li v-if="!stakeOnly" class="top-nav-links">
       <a href="https://bazaar.market/" class="nav-link" target="_blank">
         <div class="icon"><img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar"></div>
         <div class="link-text">{{ $t("viewLink.bazaar") }}
@@ -75,7 +75,7 @@
 </template>
 
 <script>
-import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
+import {merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
 import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
 import Hint from '@/components/Hint';
@@ -86,7 +86,6 @@ export default Vue.extend({
     return {
       stakeOnly,
       raid,
-      market,
       portal,
       pvp,
       quests,

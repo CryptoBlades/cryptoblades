@@ -5,44 +5,48 @@
             <img :class="!toggled ? 'rotateLeft' : 'rotateRight'" src="../../assets/left-arrow.png" alt="">
           </div>
           <b-col class="character-list" v-if="currentPath != '/blacksmith'"
-              v-bind:class="[getIsInCombat ? 'disabled-li' : '', getIsCharacterViewExpanded ? '' : 'centered-list']">
-                <div
-                  :class="`${setListClassForSelChar(c.id, currentCharacterId)}`"
-                  :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
-                  v-for="c in filteredCharactersForList"
-                  :key="c.id"
-                  @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
-                >
-                  <div class="character-element">
-                    <div class="element-frame">
-                        <div>
-                          <span :id="`${setIdForElement(c.trait, c.isSelected)}`"/>
-                        </div>
-                    </div>
-                    <div class="element-frame-active">
-                      <div>
-                          <span
-                            :id="`${setIdForElement(c.trait, c.isSelected)}`"
-                          />
-                        </div>
-                    </div>
+            v-bind:class="[getIsInCombat ? 'disabled-li' : '', getIsCharacterViewExpanded ? '' : 'centered-list']">
+              <div
+                :class="`${setListClassForSelChar(c.id, currentCharacterId)}`"
+                :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
+                v-for="c in filteredCharactersForList"
+                :key="c.id"
+                @click="(!getIfCharacterIsInRaid(c.id) || !c.pvpStatus === 'IN_ARENA' || !getIsInCombat) && setCurrentCharacter(c.id) && alert(c.id) ">
+                <!--------  IN RAID ----------------IN ARENA ---------------------IN COMBAT ------------>
+              <div class="character-element">
+                <div class="element-frame">
+                    <div>
+                      <span
+                        :id="`${setIdForElement(c.trait, c.isSelected)}`"
+                      />
+                      <span v-if="toggled && getIfCharacterIsInRaid(c.id)" class="raid-indicator"></span>
+                      <span v-if="toggled && c.pvpStatus === 'IN_ARENA'" class="pvp-indicator"></span>
+                      </div>
                   </div>
-                  <div class="character-details">
-                    <div class="name-list">
-                      {{ getCleanCharacterName(c.id) }}
-                    </div>
-                    <div class="small-stamina-char"
-                      :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
-                      v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))">
-                    </div>
-                    <div class="char-level">
-                        {{$t('PlayToEarn.level')}} {{ c.level + 1}} <span> (STA {{ getCharacterStamina(c.id) }} / 200)</span>
-                    </div>
+                  <div class="element-frame-active">
+                    <div>
+                        <span
+                          :id="`${setIdForElement(c.trait, c.isSelected)}`"
+                        />
+                      </div>
                   </div>
                 </div>
+                <div class="character-details">
+                  <div class="name-list">
+                    {{ getCleanCharacterName(c.id) }}
+                  </div>
+                  <div class="small-stamina-char"
+                    :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
+                    v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))">
+                  </div>
+                  <div class="char-level">
+                      {{$t('PlayToEarn.level')}} {{ c.level + 1}} <span> (STA {{ getCharacterStamina(c.id) }} / 200)</span>
+                  </div>
+                </div>
+              </div>
           </b-col>
           <b-col class="character-list centered-list" v-else>
-                <div v-for="sidebarItem in sideBarBlacksmith"
+            <div v-for="sidebarItem in sideBarBlacksmith"
                   :key="sidebarItem.id"
                   :class="sidebarItem.status === 'active' ? 'character-highlight' : 'character'"
                   @click="setActiveTab(sidebarItem)"
@@ -62,21 +66,37 @@
                 </div>
                 <div class="character-details">
                   <div class="name-list">
+                    {{ getCleanCharacterName(c.id) }}{{getNftStatus(c)}}
+                  </div>
+                  <div class="small-stamina-char"
+                    :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
+                    v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))">
                     {{ sidebarItem.title }}
                   </div>
                   <div class="nav-line"></div>
                   <div class="char-level">
+                      {{$t('PlayToEarn.level')}} {{ c.level + 1}} <span> (STA {{ getCharacterStamina(c.id) }} / 200)</span>
+                      <div>
+                        <p class="raid-label" v-if="getIfCharacterIsInRaid(c.id)">
+                          <img class="pr-2" src="../../assets/navbar-icons/raid-icon.png" alt="">
+                          {{getIfCharacterIsInRaid(c.id) ? ($t('sideBar.bringingDown')).toUpperCase() : ''}}
+                        </p>
+                        <p class="raid-label" v-if="c.pvpStatus === 'IN_ARENA'">
+                          <img class="pr-2" src="../../assets/navbar-icons/arena-icon.png" alt="">
+                          {{($t('sideBar.fightingArena')).toUpperCase()}}
+                        </p>
+                      </div>
                       {{ sidebarItem.desc }}
                   </div>
                 </div>
-                </div>
+              </div>
           </b-col>
         </div>
   </div>
 </template>
 
 <script lang="ts">
-import { mapGetters, mapState, mapMutations } from 'vuex';
+import {mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import Events from '../../events';
 import { CharacterPower, CharacterTrait } from '../../interfaces';
@@ -84,11 +104,34 @@ import { RequiredXp } from '../../interfaces';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../../utils/common';
 import { getCleanName } from '../../rename-censor';
+import {Nft, NftStatus} from '../../interfaces/Nft';
+import {Accessors} from 'vue/types/options';
+
+
+interface Data {
+  isLoading: boolean;
+  character?: Nft;
+  charOnRaid: string [],
+  sideBarBlacksmith: []
+}
+
+interface RaidMappedActions {
+  fetchIsCharacterRaiding(payload: { characterID: string }): Promise<boolean>;
+}
+
+interface StoreMappedGetters {
+  charactersWithIds(ids: (string | number)[]): Nft[];
+}
+
+interface StoreMappedActions {
+  getCharacterBusyStatus(payload: { characterId: string | number }): Promise<number>;
+}
 import i18n from '@/i18n';
 
 export default Vue.extend({
   props:['toggled','currentPath'],
   computed: {
+    ...mapGetters(['charactersWithIds']) as Accessors<StoreMappedGetters>,
     ...mapState(['maxStamina', 'currentCharacterId', 'ownedCharacterIds']),
     ...mapGetters([
       'currentCharacter',
@@ -101,6 +144,7 @@ export default Vue.extend({
       'getIsInCombat',
       'getIsCharacterViewExpanded',
       'fightGasOffset',
+      'getCharacterIsInArena',
       'fightBaseline',
       'getCharacterPower'
     ]),
@@ -112,6 +156,7 @@ export default Vue.extend({
       const items: any  = this.ownCharacters;
       for(const x of items){
         x.isSelected = false;
+        this.setCharacterOnRaid(x.id);
       }
       return items;
     },
@@ -155,13 +200,25 @@ export default Vue.extend({
           route: 'land'
         },
       ],
-    };
+      charOnRaid: [],
+      charOnPvp: [],
+      character: undefined,
+      NftStatus
+    } as unknown as Data;
   },
   methods: {
+    ...mapActions([
+      'getCharacterBusyStatus',
+    ]) as StoreMappedActions,
+    ...(mapActions(['fetchIsCharacterRaiding']) as RaidMappedActions),
     ...mapMutations(['setCurrentCharacter']),
     getCharacterArt,
     CharacterPower,
     RequiredXp,
+
+    async isCharacterAlreadyRaiding(characterID: string)  {
+      return await this.fetchIsCharacterRaiding({characterID});
+    },
 
     setListClassForSelChar(id: string, currentCharId: string): any {
       if (id === currentCharId){
@@ -172,11 +229,56 @@ export default Vue.extend({
       else return 'character';
     },
 
+    getNftStatus(activeCharacter: any){
+      this.composeCharacterData(activeCharacter.id).then(data => {
+        if (data.status !== undefined && data.status in NftStatus) {
+          for(const character of this.filteredCharactersForList){
+            if(character.id === activeCharacter.id){
+              character.pvpStatus = NftStatus[data.status];
+            }
+          }
+        } else {
+          for(const character of this.filteredCharactersForList){
+            if(character.id === activeCharacter.id){
+              character.pvpStatus = 'BUSY';
+            }
+          }
+        }
+      });
+    },
+
+
+    async composeCharacterData(id: any){
+      let characterStatus;
+      // eslint-disable-next-line prefer-const
+      characterStatus = await this.charactersWithIds([id]).filter(Boolean)[0];
+      characterStatus.status = + await this.getCharacterBusyStatus({characterId: id});
+      return characterStatus;
+    },
+
+    async setCharacterOnRaid(id: any){
+      const charId = id;
+      if(await this.isCharacterAlreadyRaiding(id)){
+        this.charOnRaid.push(charId);
+      }
+    },
+
+    getIfCharacterIsInRaid(id: any){
+      let toReturnWarning;
+      this.charOnRaid.forEach((characterOnRaid: any) => {
+        if(id === characterOnRaid){
+          toReturnWarning = true;
+        }
+      });
+
+      return toReturnWarning;
+    },
+
     setActiveTab(tab: any){
       (this as any).$router.push({ path: 'blacksmith', query: { tab: tab.route }});
-      this.sideBarBlacksmith.forEach(x => {
-        if(x.id === tab.id) x.status = 'active';
-        else x.status = '';
+      this.sideBarBlacksmith.forEach((sidebarTab: { id: any; status: string; }) => {
+        if(sidebarTab.id === tab.id) sidebarTab.status = 'active';
+        else sidebarTab.status = '';
       });
     },
 
@@ -193,6 +295,7 @@ export default Vue.extend({
         }
       }
     },
+
 
     //toggle the sidebar
     hideSideBar(bol: any){
@@ -339,6 +442,24 @@ div.character-list{
   overflow-y: visible;
 }
 
+.raid-indicator{
+  content: url('../../assets/navbar-icons/arena-icon.png');
+  height: 15px;
+  width: 15px;
+  position: absolute;
+  margin-bottom: -80px;
+  right: 0;
+}
+
+.pvp-indicator{
+  content: url('../../assets/navbar-icons/arena-icon.png');
+  height: 15px;
+  width: 15px;
+  position: absolute;
+  margin-bottom: -80px;
+  right: 0;
+}
+
 
 
 div.character-list .character .character-element .element-frame-active{
@@ -348,7 +469,7 @@ div.character-list .character .character-element .element-frame-active{
 div.character-list .character, div.character-list .character-highlight{
   display: flex;
   align-items: center;
-  margin-bottom: 50px;
+  margin-bottom: 40px;
   cursor: pointer;
 }
 
@@ -452,6 +573,7 @@ li.character-highlight{
 .disabled-li {
   pointer-events: none;
   opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .trait-icon {
@@ -482,6 +604,33 @@ li.character-highlight{
   color: rgb(230, 230, 230);
   font-size: 1.1em;
   margin-right: 2px;
+}
+
+.raid-label{
+  margin-top: 6px;
+  font-family: Roboto;
+  color: #dabf75;
+  border: 1px solid #9e8a57;
+  padding: 2px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  background-color:rgba(0, 0, 0, 0.582);
+}
+
+.char-level > div > p{
+  display: flex;
+}
+
+
+.char-level > div > p{
+  margin-right: 10px;
+}
+
+.raid-label > img{
+  width: 25px;
 }
 
 .small-stamina-char {
