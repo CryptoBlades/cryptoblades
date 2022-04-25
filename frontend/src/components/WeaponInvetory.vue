@@ -1,12 +1,8 @@
 <template>
   <div class="weapon-icon"
-    :id="'weapon-'+weapon.id"
+    :id="'weapon-details'"
     :key="weapon.id"
     v-bind:class="[(getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '')]"
-    v-tooltip="{
-      content: tooltipHtml ,
-      trigger: (isMobile() ? 'click' : 'hover')
-    }"
     @mouseover="hover = !isMobile() || true"
     @mouseleave="hover = !isMobile()"
   >
@@ -71,9 +67,9 @@
 
             <!-- WEAPON STATS -->
             <div class="bonus-power">
-              <div><span>LB: {{ weapon.lowStarBurnPoints }}</span></div>
-              <div><span>4B: {{ weapon.fourStarBurnPoints }}</span></div>
-              <div><span>5B: {{ weapon.fiveStarBurnPoints }}</span></div>
+              <div v-if="weapon.lowStarBurnPoints > 0"><span>LB: {{ weapon.lowStarBurnPoints }}</span></div>
+              <div v-if="weapon.fourStarBurnPoints > 0"><span>4B: {{ weapon.fourStarBurnPoints }}</span></div>
+              <div v-if="weapon.fiveStarBurnPoints > 0"><span>5B: {{ weapon.fiveStarBurnPoints }}</span></div>
             </div>
         </div>
       </div>
@@ -104,6 +100,7 @@
               <div class="d-flex align-items-center traits">
                 <span :class="weapon.element.toLowerCase() + '-icon'"></span>
                 <span class="trait-name">Battle Power: {{ weapon.stat1Value + weapon.stat2Value + weapon.stat3Value}}</span>
+                <span class="mobile-info" :id="'weapon-'+weapon.id" @click.stop="''"></span>
               </div>
             </div>
 
@@ -117,20 +114,13 @@
 
             <!-- WEAPON STATS -->
             <div class="bonus-power">
-              <div><span>LB: {{ weapon.lowStarBurnPoints }}</span></div>
-              <div><span>4B: {{ weapon.fourStarBurnPoints }}</span></div>
-              <div><span>5B: {{ weapon.fiveStarBurnPoints }}</span></div>
+              <div v-if="weapon.lowStarBurnPoints > 0"><span>LB: {{ weapon.lowStarBurnPoints }}</span></div>
+              <div v-if="weapon.fourStarBurnPoints > 0"><span>4B: {{ weapon.fourStarBurnPoints }}</span></div>
+              <div v-if="weapon.fiveStarBurnPoints > 0"><span>5B: {{ weapon.fiveStarBurnPoints }}</span></div>
             </div>
         </div>
       </div>
     </div>
-    <b-popover
-      :target="'weapon-'+weapon.id"
-      :placement="'left'"
-      triggers="hover focus"
-    >
-    <div>Hellloooo</div>
-    </b-popover>
 </div>
 </template>
 
@@ -327,6 +317,10 @@ export default {
     animation: none;
 }
 
+.mobile-info{
+  display: none;
+}
+
 .favorite-star{
   position: absolute;
   right: 50px;
@@ -508,6 +502,13 @@ export default {
 }
 
 
+
+
+#weapon-details{
+  overflow: visible;
+}
+
+
 @media all and (max-width: 600px) {
   .img-adventure > img{
     max-width: 70px;
@@ -516,6 +517,11 @@ export default {
     max-height: 70px;
   }
 
+  .mobile-info{
+    display: inline-block;
+    content: url('../assets/hint.png');
+    height: 20px;
+  }
   .img-adventure > span{
     position: absolute;
     bottom:10px;

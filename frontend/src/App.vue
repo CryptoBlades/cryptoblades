@@ -588,6 +588,16 @@ button,
   color: grey;
 }
 
+
+.tooltip{
+  z-index: 6;
+}
+
+.popover .arrow{
+  display: none;
+}
+
+
 .fire-icon,.str-icon {
   color: red;
   content: url('assets/elements/icon-fire.png');
@@ -618,6 +628,20 @@ button,
   width: 1em;
   height: 1em;
 }
+.pwr-icon {
+  color: yellow;
+  content: url('assets/elements/power-icon.svg');
+  width: 0.9em;
+  height: 0.9em;
+}
+
+.bonus-power-icon {
+  content: url('assets/navbar-icons/blacksmith-icon.png');
+  width: 0.8em;
+  height: 0.8em;
+  padding-left: 1px;
+}
+
 
 .loading-container {
   position: absolute;

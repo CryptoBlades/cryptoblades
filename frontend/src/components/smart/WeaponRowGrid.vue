@@ -3,8 +3,10 @@
     <div class="cw-content">
       <div class="filters row mt-2" v-if="!newWeapon" @change="saveFilters()">
         <div class="col-sm-12 d-flex justify-content-between">
-            <h4>INVENTORY</h4>
-            <a @click="closeInventory(false)">Close</a>
+            <h4>{{$t('blacksmith.selectWeapon').toUpperCase()}}</h4>
+            <a @click="closeInventory(false)">
+              <span class="close-icon"></span>
+            </a>
         </div>
         <div class="col-sm-6 col-md-6 col-lg-6 mb-3">
           <strong>{{$t('weaponGrid.stars')}}</strong>
@@ -59,9 +61,11 @@
           :key="weapon.id"
           @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
           @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
-          <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
+          <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'"
+          :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
           <div class="weapon-icon-wrapper">
-            <weapon-inventory class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" :displayType="'inventory'"/>
+            <weapon-inventory class="weapon-icon" :id="'weapon-'+weapon.id" :weapon="weapon" :favorite="isFavorite(weapon.id)" :displayType="'inventory'"/>
+            <weapon-popover :weapon="weapon"/>
           </div>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
             <slot name="above" :weapon="weapon"></slot>
@@ -106,6 +110,7 @@ import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '../../interfaces';
 import WeaponInventory from '../WeaponInvetory.vue';
+import WeaponPopover from '../WeaponPopover.vue';
 import { NftOption } from '../NftOptionsDropdown.vue';
 import { BModal } from 'bootstrap-vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
@@ -274,7 +279,8 @@ export default Vue.extend({
   components: {
     // WeaponIcon,
     NftOptionsDropdown,
-    WeaponInventory
+    WeaponInventory,
+    WeaponPopover
   },
   computed: {
     ...(mapState(['ownedWeaponIds']) as Accessors<StoreMappedState>),
@@ -526,7 +532,7 @@ export default Vue.extend({
    margin-bottom: 20px;
 }
 .weapon-grid {
-  overflow-x: scroll;
+  overflow-y: auto;
   height: 80vh;
   list-style-type: none;
   justify-content: left;
@@ -538,7 +544,7 @@ export default Vue.extend({
   gap: 0.5em;
 }
 .weapon {
-  width: 25em;
+  width: 23.2em;
   border-radius: 5px;
   margin-bottom: 15px;
   cursor: pointer;
@@ -554,6 +560,18 @@ export default Vue.extend({
 .toggle-button {
   align-self: stretch;
 }
+
+.cw-content{
+  border: 1px solid #ffffff52;
+}
+
+.close-icon{
+  content: url('../../assets/close-btn.png');
+  height: 30px;
+  width: 30px;
+  cursor: pointer;
+}
+
 .show-reforged {
   display: flex;
   flex-direction: row;
@@ -562,6 +580,23 @@ export default Vue.extend({
 .show-favorite {
     margin-left: 0px !important;
 }
+
+.change-weapon{
+  animation: fadeInLeft 0.5s ease-in-out;
+}
+
+@keyframes fadeInLeft {
+    0%{
+      right: -200px;
+      opacity: 0;
+    }
+    100%{
+      right: 0;
+      opacity: 1;
+    }
+  }
+
+
 .clear-filters-button {
   height: fit-content;
   display: flex;
@@ -621,7 +656,7 @@ export default Vue.extend({
   top: 0;
   height: 100vh;
   width: 450px;
-  z-index: 9999;
+  z-index: 5;
   background-color: rgb(27, 29, 24);
 }
 

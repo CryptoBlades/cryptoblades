@@ -1153,7 +1153,7 @@ h1 {
   right: 0;
   height: 100vh;
   width: 30%;
-  z-index: 9999;
+  z-index: 5;
   background-color: #212529;
 }
 
@@ -1162,8 +1162,10 @@ h1 {
     text-transform: capitalize;
 }
 
+
 .cw-content{
   padding: 40px;
+  border: 1px solid #ffffff52;
 }
 /* --------------------------------- */
 .ct-btn{
