@@ -7,40 +7,41 @@
           <b-col class="character-list" v-if="currentPath != '/blacksmith'"
             v-bind:class="[getIsInCombat ? 'disabled-li' : '', getIsCharacterViewExpanded ? '' : 'centered-list']">
               <div
-                :class="`${setListClassForSelChar(c.id, currentCharacterId)}`"
-                :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
-                v-for="c in filteredCharactersForList"
-                :key="c.id"
-                @click="(!getIfCharacterIsInRaid(c.id) || !c.pvpStatus === 'IN_ARENA' || !getIsInCombat) && setCurrentCharacter(c.id) && alert(c.id) ">
+                :class="`${setListClassForSelChar(filteredCharacter.id, currentCharacterId)}`"
+                :style="`--staminaReady: ${(getCharacterStamina(filteredCharacter.id)/maxStamina)*100}%;`"
+                v-for="filteredCharacter in filteredCharactersForList"
+                :key="filteredCharacter.id"
+                @click="(!getIfCharacterIsInRaid(filteredCharacter.id) || !filteredCharacter.pvpStatus === 'IN_ARENA'
+                || !getIsInCombat) && setCurrentCharacter(filteredCharacter.id) && alert(filteredCharacter.id) ">
                 <!--------  IN RAID ----------------IN ARENA ---------------------IN COMBAT ------------>
               <div class="character-element">
                 <div class="element-frame">
                     <div>
                       <span
-                        :id="`${setIdForElement(c.trait, c.isSelected)}`"
+                        :id="`${setIdForElement(filteredCharacter.trait, filteredCharacter.isSelected)}`"
                       />
-                      <span v-if="toggled && getIfCharacterIsInRaid(c.id)" class="raid-indicator"></span>
-                      <span v-if="toggled && c.pvpStatus === 'IN_ARENA'" class="pvp-indicator"></span>
+                      <span v-if="toggled && getIfCharacterIsInRaid(filteredCharacter.id)" class="raid-indicator"></span>
+                      <span v-if="toggled && filteredCharacter.pvpStatus === 'IN_ARENA'" class="pvp-indicator"></span>
                       </div>
                   </div>
                   <div class="element-frame-active">
                     <div>
                         <span
-                          :id="`${setIdForElement(c.trait, c.isSelected)}`"
+                          :id="`${setIdForElement(filteredCharacter.trait, filteredCharacter.isSelected)}`"
                         />
                       </div>
                   </div>
                 </div>
                 <div class="character-details">
                   <div class="name-list">
-                    {{ getCleanCharacterName(c.id) }}
+                    {{ getCleanCharacterName(filteredCharacter.id) }}
                   </div>
                   <div class="small-stamina-char"
-                    :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
-                    v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))">
+                    :style="`--staminaReady: ${(getCharacterStamina(filteredCharacter.id)/maxStamina)*100}%;`"
+                    v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(filteredCharacter.id))">
                   </div>
                   <div class="char-level">
-                      {{$t('PlayToEarn.level')}} {{ c.level + 1}} <span> (STA {{ getCharacterStamina(c.id) }} / 200)</span>
+                      {{$t('PlayToEarn.level')}} {{ filteredCharacter.level + 1}} <span> (STA {{ getCharacterStamina(filteredCharacter.id) }} / 200)</span>
                   </div>
                 </div>
               </div>
@@ -66,27 +67,11 @@
                 </div>
                 <div class="character-details">
                   <div class="name-list">
-                    {{ getCleanCharacterName(c.id) }}{{getNftStatus(c)}}
-                  </div>
-                  <div class="small-stamina-char"
-                    :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
-                    v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))">
                     {{ sidebarItem.title }}
                   </div>
                   <div class="nav-line"></div>
                   <div class="char-level">
-                      {{$t('PlayToEarn.level')}} {{ c.level + 1}} <span> (STA {{ getCharacterStamina(c.id) }} / 200)</span>
-                      <div>
-                        <p class="raid-label" v-if="getIfCharacterIsInRaid(c.id)">
-                          <img class="pr-2" src="../../assets/navbar-icons/raid-icon.png" alt="">
-                          {{getIfCharacterIsInRaid(c.id) ? ($t('sideBar.bringingDown')).toUpperCase() : ''}}
-                        </p>
-                        <p class="raid-label" v-if="c.pvpStatus === 'IN_ARENA'">
-                          <img class="pr-2" src="../../assets/navbar-icons/arena-icon.png" alt="">
-                          {{($t('sideBar.fightingArena')).toUpperCase()}}
-                        </p>
-                      </div>
-                      {{ sidebarItem.desc }}
+                    {{ sidebarItem.desc }}
                   </div>
                 </div>
               </div>
@@ -343,6 +328,9 @@ export default Vue.extend({
       else return '';
     },
   },
+  mounted(){
+    console.log(this.currentPath);
+  }
 });
 </script>
 

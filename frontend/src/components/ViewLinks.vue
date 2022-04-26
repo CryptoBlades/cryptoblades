@@ -13,7 +13,7 @@
     </li>
 
     <li v-if="!stakeOnly" class="top-nav-links">
-      <router-link :to="{ name: 'blacksmith' }" exact class="nav-link">
+      <router-link :to="{ name: 'blacksmith', query: {tab: 'weapon'} }" exact class="nav-link">
         <div class="icon"><img src="../assets/navbar-icons/blacksmith-icon.png" class="ui-link-icon" alt="Blacksmith">
         </div>
         <div class="link-text">{{ $t("viewLink.blacksmith") }}</div>
@@ -54,6 +54,7 @@
 import {merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
 import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
+
 import Hint from '@/components/Hint';
 
 
@@ -91,7 +92,6 @@ export default Vue.extend({
       return this.getHasAdminAccess || this.getHasMinterAccess;
     },
   },
-
   components: {
     Hint,
   },
