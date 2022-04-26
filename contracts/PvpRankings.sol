@@ -355,13 +355,14 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
                 winnerID
         ].add(winningPoints.add(bonusRank));
 
-        if (rankingPointsByCharacter[loserID] <= losingPoints) {
-            rankingPointsByCharacter[loserID] = 0;
-        } else {
-            rankingPointsByCharacter[loserID] = rankingPointsByCharacter[
-                loserID
-            ].sub(losingPoints);
-        }
+        // Mute the ranking loss from users in pvpRankings
+        // if (rankingPointsByCharacter[loserID] <= losingPoints) {
+        //     rankingPointsByCharacter[loserID] = 0;
+        // } else {
+        //     rankingPointsByCharacter[loserID] = rankingPointsByCharacter[
+        //         loserID
+        //     ].sub(losingPoints);
+        // }
 
         _processWinner(winnerID, tier);
         _processLoser(loserID, tier);

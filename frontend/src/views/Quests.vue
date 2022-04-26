@@ -103,6 +103,7 @@ export interface WeeklyReward {
   rewardExternalAddress?: string;
   reputationAmount: number;
   completionsGoal: number;
+  weekNumber: number;
 }
 
 export interface Quest {

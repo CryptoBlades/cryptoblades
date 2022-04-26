@@ -1,5 +1,6 @@
 <template>
   <div class="body main-font">
+    <div class="blind-background"></div>
     <div>
       <div class="row">
           <div class="col-lg-6 col-sm-12 adventure">
@@ -15,24 +16,25 @@
                   <p>{{$t('PlayToEarn.adventureDesc')}}</p>
                   <div class="btn-join">{{$t('PlayToEarn.btnCombat')}}</div>
                 </div>
+                <card-frame v-if="!isMobile()"/>
             </router-link>
 
-            <!-- change this to raid route -->
-            <router-link v-if="!stakeOnly" :to="{ name: 'combat' }" exact class="raid navs">
+            <router-link v-if="!stakeOnly" :to="{ name: 'raid' }" exact class="raid navs">
                 <div>
                   <h4>{{$t('PlayToEarn.raid')}}</h4>
                   <p>{{$t('PlayToEarn.raidDesc')}}</p>
                   <div class="btn-join">{{$t('PlayToEarn.btnJoin')}}</div>
                 </div>
+                <card-frame v-if="!isMobile()"/>
             </router-link>
 
-            <!-- change this to arena route -->
-            <router-link v-if="!stakeOnly" :to="{ name: 'combat' }" exact class="arena navs">
+            <router-link v-if="!stakeOnly" :to="{ name: 'pvp' }" exact class="arena navs">
                 <div>
                   <h4>{{$t('PlayToEarn.arena')}}</h4>
                   <p>{{$t('PlayToEarn.arenaDesc')}}</p>
                   <div class="btn-join">{{$t('PlayToEarn.btnPvp')}}</div>
                 </div>
+                <card-frame v-if="!isMobile()"/>
             </router-link>
           </div>
       </div>
@@ -44,8 +46,7 @@
 
 import {stakeOnly} from '@/feature-flags';
 import Events from '../events';
-// import gasp from 'gsap'; // for enemy card animaton
-
+import CardFrame from '../components/CardFrame.vue';
 export default {
   data() {
     return {
@@ -61,6 +62,7 @@ export default {
   methods: {
   },
   components: {
+    CardFrame
   },
 };
 </script>
@@ -82,8 +84,9 @@ h5{
 
 .play-to-earn > .navs{
   border: 1px solid #9e8a57;
-  height: 30em;
+  height: 30vw;
   display: flex;
+  width: 25%;
   align-items: center;
   flex-direction: column;
   justify-content: flex-end;
@@ -96,32 +99,60 @@ h5{
   background-image: url('../assets/combat-bg.png');
   background-position: 0 0;
   background-size: cover;
+  height: 90vh;
+}
+
+
+.main-font > div:nth-child(1){
+  background-color: rgb(0, 0, 0);
+  opacity: 0.7;
+  height: 100%;
+  width: 99%;
+  position: absolute;
+  padding: 30px;
+}
+
+
+.main-font > div:nth-child(2){
+  padding-top: 20px;
 }
 
 .play-to-earn > .navs:hover{
-  margin-top: -20px;
   transition: all 0.4s ease-in-out;
+  animation: movingBg 4s ease-in-out;
+  background-repeat: no-repeat;
+}
+
+
+@keyframes movingBg {
+  0%{
+    background-size: 110%;
+  }
+  25%{
+    background-size: 120%;
+  }
 }
 
 .play-to-earn > .navs > div{
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
   justify-content: center;
   text-align: center;
-  background-image: linear-gradient(to top, rgb(0, 0, 0),rgba(0, 0, 0, 0.542), rgba(0, 0, 0, 0.042));
-  padding: 30px 50px 40px 50px;
+  background-image: linear-gradient(to top, rgb(0, 0, 0),rgba(0, 0, 0, 0.692), rgba(0, 0, 0, 0.042));
+  padding: 200px 50px 40px 50px;
 }
 
 .play-to-earn > .navs > div > p{
   font-family: Roboto;
-  color: aliceblue;
-  font-size: 13px;
+  color: #fff;
+  font-size: 15px;
 }
 
 .play-to-earn > .navs > div > h4{
   font-family: Trajan;
-  font-weight: 800;
+  font-weight: 500;
   color:#9e8a57;
 }
 
@@ -133,7 +164,7 @@ h5{
   background-repeat: no-repeat;
   padding: 20px;
   font-size: 18px;
-  font-family: Roboto;
+  font-family: Oswald;
   color: #fff;
   font-weight: 800;
   cursor: pointer;
@@ -169,6 +200,29 @@ h5{
 }
 
 
+/* FOR BORDER ANIMATION */
+.play-to-earn > .navs{
+  border: 1px solid #9e8a57;
+  height: 30vw;
+  display: flex;
+  width: 25%;
+  align-items: center;
+  flex-direction: column;
+  justify-content: flex-end;
+  /* box-shadow: inset 0px 0px 20px 10px rgba(0,0,0,0.6); */
+  padding-top: 30px;
+  cursor: pointer;
+}
+
+
+@keyframes animateBorder {
+  0%{}
+  100%{}
+}
+
+
+
+
 @media all and (max-width: 600px) {
 
   .play-to-earn > .navs{
@@ -176,7 +230,7 @@ h5{
     color: aliceblue;
     font-size: 13px;
     width: 100%;
-    /* height: 10em; */
+    height: 30em;
     flex-grow: 1;
     background-position:center;
   }

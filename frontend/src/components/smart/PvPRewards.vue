@@ -58,7 +58,9 @@ export default {
   methods: {
     ...mapActions([
       'withdrawRankedRewards',
-      'getPlayerPrizePoolRewards'
+      'withdrawRankedRewardsOldContract',
+      'getPlayerPrizePoolRewards',
+      'getPlayerPrizePoolRewardsOldContract'
     ]),
 
     async claimRewards() {
@@ -66,8 +68,9 @@ export default {
 
       try {
         await this.withdrawRankedRewards();
+        await this.withdrawRankedRewardsOldContract();
 
-        this.availableSkill = await this.getPlayerPrizePoolRewards();
+        this.availableSkill = +(await this.getPlayerPrizePoolRewards()) + +(await this.getPlayerPrizePoolRewardsOldContract());
       } catch (err) {
         console.log('withdraw rewards error: ', err);
       }
@@ -77,7 +80,7 @@ export default {
   },
 
   async created() {
-    this.availableSkill = await this.getPlayerPrizePoolRewards();
+    this.availableSkill = +(await this.getPlayerPrizePoolRewards()) + +(await this.getPlayerPrizePoolRewardsOldContract());
 
     this.loading = false;
   }

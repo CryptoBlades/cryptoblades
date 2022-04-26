@@ -192,7 +192,7 @@ export default {
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
-      'configureMetaMask'
+      'configureMetaMask',
     ]),
     ...mapGetters([
       'getExchangeTransakUrl'
@@ -245,10 +245,6 @@ export default {
       }
 
       return toDisplay;
-    },
-
-    setBgImage(){
-      // return 'blacksmith-bg';
     },
 
     checkStorage() {
@@ -319,6 +315,23 @@ export default {
         );
       }
     },
+
+    renderPageDisplay(){
+      let toDisplay;
+
+      if(!this.featureFlagStakeOnly && this.currentCharacterId !== null){
+        if(this.toggleSideBar){
+          toDisplay = 'can-show-app';
+        }else{
+          toDisplay = 'col-xl-10 col-lg-9 col-md-9 col-sm-10 cols-11 set-normal';
+        }
+      }else{
+        toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
+      }
+
+      return toDisplay;
+    },
+
 
     async checkNotifications() {
       const response = await fetch(apiUrl('static/notifications'));
@@ -467,6 +480,7 @@ export default {
     clearInterval(this.pollCharacterStaminaIntervalId);
     clearInterval(this.slowPollIntervalId);
   },
+
 };
 </script>
 
@@ -593,6 +607,16 @@ button,
   color: grey;
 }
 
+
+.tooltip{
+  z-index: 6;
+}
+
+.popover .arrow{
+  display: none;
+}
+
+
 .fire-icon,.str-icon {
   color: red;
   content: url('assets/elements/icon-fire.png');
@@ -623,6 +647,20 @@ button,
   width: 1em;
   height: 1em;
 }
+.pwr-icon {
+  color: yellow;
+  content: url('assets/elements/power-icon.svg');
+  width: 0.9em;
+  height: 0.9em;
+}
+
+.bonus-power-icon {
+  content: url('assets/navbar-icons/blacksmith-icon.png');
+  width: 0.8em;
+  height: 0.8em;
+  padding-left: 1px;
+}
+
 
 .loading-container {
   position: absolute;
@@ -755,6 +793,29 @@ div.bg-success {
   border: 2px solid #9e8a57 !important;
   background: rgb(61, 61, 64);
   background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
+}
+
+.multiselect *{
+  background: transparent;
+  color:#fff;
+}
+.multiselect__tags, .multiselect__content-wrapper{
+  border:1px solid #404857;
+}
+.multiselect--above .multiselect__content-wrapper{
+  border-top:none;
+}
+
+.multiselect__option--selected.multiselect__option--highlight,
+.multiselect__option--selected.multiselect__option--highlight::after{
+  background: #9E8A57;
+}
+
+.multiselect__option--selected,
+.multiselect__option--selected::after,
+.multiselect__option--highlight,
+.multiselect__option--highlight::after{
+  background: #404857;
 }
 </style>
 <style scoped>

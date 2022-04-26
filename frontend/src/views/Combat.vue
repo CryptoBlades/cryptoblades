@@ -77,7 +77,7 @@
                     <!-- selected weapon for combat details -->
                     <div v-if="selectedWeaponId" class="mr-3">
                       <weapon-inventory class="weapon-icon" :weapon="selectedWeapon" :displayType="'adventure'"/>
-                      <button v-tooltip="'Change Weapon'" class="ml-3 btn ct-btn mb-3"
+                      <button v-tooltip="'Change Weapon'" class="ml-3 btn ct-btn mb-3 hideMobile"
                         @click="changeEquipedWeapon()">
                         <img src="../assets/swithc-wep.png">
                       </button>
@@ -586,7 +586,7 @@ h5{
 }
 
 .encounter img {
-  max-width: 200px;
+  max-width: 140px;
   transition: 1s all;
 }
 
@@ -606,7 +606,6 @@ h5{
 
 .frame-line{
   position: absolute;
-  width: 100%;
   display: flex;
   justify-content: center;
 }
@@ -617,6 +616,7 @@ h5{
 
 
 .frame-line > img{
+  max-width: 112%;
   animation-name: resizeUp;
   animation-duration: 0.5s;
 }
@@ -624,7 +624,7 @@ h5{
 
 @keyframes resizeUp {
   0%   {
-    width: 100%;
+    width: 90%;
     opacity: 0;
   }
   100%  {
@@ -633,10 +633,6 @@ h5{
   }
 }
 
-
-.frame-line > img{
-  width: 100%;
-}
 
 .combat-hints {
   margin: auto;
@@ -854,6 +850,11 @@ div.encounter.text-center {
   position: relative;
 }
 
+
+.hideMobile{
+  display: none;
+}
+
 h1 {
   font-weight: 900 !important;
   text-align: center;
@@ -955,6 +956,10 @@ h1 {
     max-width: 20px !important;
     width: auto;
     height: auto;
+  }
+
+  .hideMobile{
+    display: inline;
   }
 
   .body  > div{
@@ -1086,7 +1091,7 @@ h1 {
     background-image: url('../assets/combat-bg.png');
   }
   .encounter img {
-    width: calc(100% - 60px);
+    max-width: 140px;
   }
 
   .frame-line {
@@ -1149,7 +1154,7 @@ h1 {
   right: 0;
   height: 100vh;
   width: 30%;
-  z-index: 9999;
+  z-index: 5;
   background-color: #212529;
 }
 
@@ -1158,8 +1163,10 @@ h1 {
     text-transform: capitalize;
 }
 
+
 .cw-content{
   padding: 40px;
+  border: 1px solid #ffffff52;
 }
 /* --------------------------------- */
 .ct-btn{
