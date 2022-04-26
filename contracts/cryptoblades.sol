@@ -351,9 +351,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         require(
             msg.value == 
-            (tokens.mul(combatTokenChargePercent).div(100))
-            .div(priceOracleSkillPerUsd.currentPrice())
-            .div(tokensPrices.tokenPrice()),
+            (tokens.mul(priceOracleSkillPerUsd.currentPrice()).mul(combatTokenChargePercent))
+            .div(tokensPrices.tokenPrice().mul(10**18)),
             'Offset error'
         );
 

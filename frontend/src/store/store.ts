@@ -4728,11 +4728,11 @@ export function createStore(web3: Web3) {
         return CryptoBlades.methods.getMintCharacterFee().call(defaultCallOptions(state));
       },
 
-      async getCurrentSkillPerUsd({ state }) {
+      async getCurrentSkillPrice({ state }) {
         const { BasicPriceOracle } = state.contracts();
         if (!BasicPriceOracle || !state.defaultAccount) return;
 
-        const res = await BasicPriceOracle.methods.currentPrice().send({ from: state.defaultAccount });
+        const res = await BasicPriceOracle.methods.currentPrice().call(defaultCallOptions(state));
 
         return res;
       },
@@ -4741,7 +4741,18 @@ export function createStore(web3: Web3) {
         const { TokensPrices } = state.contracts();
         if (!TokensPrices || !state.defaultAccount) return;
 
-        const res = await TokensPrices.methods.tokenPrice().send({ from: state.defaultAccount });
+        const res = await TokensPrices.methods.tokenPrice().call(defaultCallOptions(state));
+
+        return res;
+      },
+
+      async getCombatTokenChargePercent({ state }) {
+        const { CryptoBlades } = state.contracts();
+        if(!CryptoBlades || !state.defaultAccount) return;
+
+        const res = await CryptoBlades.methods
+          .combatTokenChargePercent()
+          .call(defaultCallOptions(state));
 
         return res;
       },
