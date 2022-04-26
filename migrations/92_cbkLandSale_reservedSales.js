@@ -19,7 +19,7 @@ module.exports = async function (deployer, network, accounts) {
     await blacksmith.setLink(LINK_SKILL_ORACLE_2, skillOracle.address);
 
     const kingOracle = await deployProxy(BasicPriceOracle, [], { deployer });
-    await kingOracle.setCurrentPrice("333333333333333"); // about 0.3 usd per king
+    await kingOracle.setCurrentPrice("3333333333333333333"); // about 0.3 usd per king
     const LINK_KING_ORACLE = await blacksmith.LINK_KING_ORACLE();
     await blacksmith.setLink(LINK_KING_ORACLE, kingOracle.address);
 
