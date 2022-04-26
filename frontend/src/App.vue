@@ -247,6 +247,7 @@ export default {
       return toDisplay;
     },
 
+
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
       if (process.env.NODE_ENV === 'development') this.showAds = false;
@@ -314,22 +315,6 @@ export default {
           },
         );
       }
-    },
-
-    renderPageDisplay(){
-      let toDisplay;
-
-      if(!this.featureFlagStakeOnly && this.currentCharacterId !== null){
-        if(this.toggleSideBar){
-          toDisplay = 'can-show-app';
-        }else{
-          toDisplay = 'col-xl-10 col-lg-9 col-md-9 col-sm-10 cols-11 set-normal';
-        }
-      }else{
-        toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
-      }
-
-      return toDisplay;
     },
 
 
