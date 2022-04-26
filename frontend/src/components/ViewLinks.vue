@@ -1,9 +1,10 @@
 <template>
   <b-navbar-nav>
-    <!-- <li class="play-to-earn top-nav-links">
-      <P2EButton mainText="Play-to-earn" route="play-to-earn" />
-    </li> -->
-
+    <li class="character top-nav-links">
+      <router-link v-if="!stakeOnly" :to="{ name: 'play-to-earn' }" exact class="nav-link">
+        <div class="link-text play-to-earn-btn">{{ $t("PlayToEarn.playToEarn") }}</div>
+      </router-link>
+    </li>
     <li class="character top-nav-links">
       <router-link v-if="!stakeOnly" :to="{ name: 'plaza' }" exact class="nav-link">
         <div class="icon"><img src="../assets/navbar-icons/plaza-icon.png" class="ui-link-icon" alt="Plaza"></div>
@@ -16,31 +17,6 @@
         <div class="icon"><img src="../assets/navbar-icons/blacksmith-icon.png" class="ui-link-icon" alt="Blacksmith">
         </div>
         <div class="link-text">{{ $t("viewLink.blacksmith") }}</div>
-      </router-link>
-    </li>
-
-    <li v-if="!stakeOnly" class="top-nav-links">
-      <router-link :to="{ name: 'combat' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/combat-icon.png" class="ui-link-icon" alt="Combat"></div>
-        <div class="link-text">{{ $t("viewLink.combat") }}</div>
-      </router-link>
-    </li>
-
-    <li v-if="pvp" class="top-nav-links">
-      <router-link v-if="pvp" :to="{ name: 'pvp' }" exact class="nav-link" :class="supportsPvP ? '' : 'disabled-link'">
-        <div class="icon"><img src="../assets/navbar-icons/arena-icon.png" class="ui-link-icon" alt="Arena"></div>
-        <div class="link-text">{{ $t("viewLink.pvp") }}
-          <hint
-            v-if="!supportsPvP" class="hint"
-            :text="$t('viewLink.functionalityNotSupportedTooltip')"/>
-        </div>
-      </router-link>
-    </li>
-
-    <li v-if="!stakeOnly && raid" class="top-nav-links">
-      <router-link :to="{ name: 'raid' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/raid-icon.png" class="ui-link-icon" alt="Raid"></div>
-        <div class="link-text">{{ $t("viewLink.raid") }}</div>
       </router-link>
     </li>
 
@@ -148,9 +124,30 @@ a {
   white-space: nowrap;
   font-family: 'Oswald', 'serif';
   font-size: clamp(0.8rem, 1vw, 1rem);
-  color: #dfcc9a;
+  color: #ffffff;
 }
 
+.play-to-earn-btn{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin-right: 15px;
+  align-items: center;
+  vertical-align: middle;
+  justify-content: center;
+  background-image: url('../assets/btn-long.svg');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  object-fit: fill;
+  padding: 10px 40px 10px 40px;
+  border: none;
+  font-family: Oswald;
+  color: #fff;
+  font-size: 17px;
+  margin: auto;
+  margin-right: -10px;
+}
 .disabled-link > div {
   cursor: not-allowed;
   color: gray;
