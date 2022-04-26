@@ -28,13 +28,13 @@
   "PlayToEarn":{
     "playToEarn": "PLAY TO EARN",
     "adventure": "ADVENTURE",
-    "adventureDesc": "Engage on  PVE battles to earn rewards.",
+    "adventureDesc": "Engage in PVE battles to earn rewards.",
     "btnCombat": "COMBAT",
     "raid": "RAID",
-    "raidDesc": "Join the players in defeating the boss.",
+    "raidDesc": "Band together to bring down the boss.",
     "btnJoin": "JOIN",
     "arena": "ARENA",
-    "arenaDesc": "Defeat others Players on PVP battles.",
+    "arenaDesc": "Defeat Other players in PVP Battles.",
     "btnPvp": "PVP",
     "level": "Level"
   },
