@@ -358,9 +358,6 @@
                   <span>Element:
                     <span>{{getWeaponInfo('element')}}</span>
                   </span>
-
-                  <!-- COMMENTED FOR NOW IT'S THE RANK FOR WEAPON -->
-                  <!-- <span>Weapon Rank: 120,031</span> -->
                 </div>
 
                 <div class="power-status">
@@ -406,7 +403,6 @@
                     </div>
                     <div>
                       <p class="p-0 m-0">(LB) {{$t('blacksmith.lb')}}</p>
-                      <!-- <span>Req. 10/500</span> -->
                       <span>{{$t('blacksmith.15power')}}</span>
                     </div>
                   </div>
@@ -428,7 +424,6 @@
                     </div>
                     <div>
                       <p class="p-0 m-0">(4B) {{$t('blacksmith.4b')}}</p>
-                      <!-- <span>Req. 10/500</span> -->
                       <span>{{$t('blacksmith.30power')}}</span>
                     </div>
                   </div>
@@ -450,7 +445,6 @@
                     </div>
                     <div>
                       <p class="p-0 m-0">(5B) {{$t('blacksmith.5b')}}</p>
-                      <!-- <span>Req. 10/500</span> -->
                       <span>{{$t('blacksmith.75power')}}</span>
                     </div>
                   </div>
@@ -1413,9 +1407,6 @@ export default Vue.extend({
   margin: auto;
 }
 
-/* .forge-header > img{
-  background-color: #9e8a57;
-} */
 
 .forge-header > h3{
   font-family: Trajan;
@@ -1437,7 +1428,6 @@ export default Vue.extend({
 
 .footer-close {
   margin: auto;
-  /* width: 400px; */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1722,7 +1712,6 @@ export default Vue.extend({
 
 
 .weapon-img{
-  /* content: url('../assets/placeholder/weapon3.png'); */
   z-index: 4;
   height: 23vw;
   width: 23vw;
@@ -1954,7 +1943,6 @@ export default Vue.extend({
 
 .menus > div:nth-child(2), .menus > div:nth-child(3), .menus > div:nth-child(4){
   cursor: not-allowed;
-
 }
 
 .menus > div:nth-child(1){
