@@ -328,9 +328,6 @@ export default Vue.extend({
       else return '';
     },
   },
-  mounted(){
-    console.log(this.currentPath);
-  }
 });
 </script>
 
