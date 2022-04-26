@@ -295,7 +295,8 @@ export default {
 
   methods: {
     ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
-      'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight']),
+      'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight',
+      'getCurrentSkillPerUsd', 'getNativeTokenPriceInUsd']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -418,11 +419,18 @@ export default {
       this.setIsInCombat(this.waitingResults);
 
       try {
+        // const targetPower = targetToFight.power;
+        // const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: targetPower, isCalculator: true });
+
+        console.log('current skill usd: ', await this.getCurrentSkillPerUsd());
+        console.log('native usd: ', await this.getNativeTokenPriceInUsd());
+
         const results = await this.doEncounter({
           characterId: this.currentCharacterId,
           weaponId: this.selectedWeaponId,
           targetString: targetIndex,
           fightMultiplier: this.fightMultiplier,
+          // offsetCost: dsadsa
         });
 
         this.fightResults = results;
@@ -500,6 +508,7 @@ export default {
         const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: this.targets[i].power });
         expectedPayouts[i] = expectedPayout;
       }
+      console.log(expectedPayouts);
       this.targetExpectedPayouts = expectedPayouts;
     },
 

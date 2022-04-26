@@ -16,6 +16,7 @@ import "./util.sol";
 import "./common.sol";
 import "./Blacksmith.sol";
 import "./SpecialWeaponsManager.sol";
+import "./TokensPrices.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -100,6 +101,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         // migrateTo_5e833b0
         durabilityCostFight = 1;
+    
+        combatTokenChargePercent = 25;
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
@@ -219,6 +222,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     mapping(address => mapping(uint256 => uint256)) public userVars;
 
     SpecialWeaponsManager public specialWeaponsManager;
+
+    uint256 public combatTokenChargePercent;
+    TokensPrices public tokensPrices;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -343,7 +349,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
         uint256 tokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
 
-        if(playerRoll < monsterRoll) {
+        require(
+            msg.value == 
+            (tokens.mul(combatTokenChargePercent).div(100))
+            .div(priceOracleSkillPerUsd.currentPrice())
+            .div(tokensPrices.tokenPrice()),
+            'Offset error'
+        );
+
+        if (playerRoll < monsterRoll) {
             tokens = 0;
             xp = 0;
         }
@@ -854,6 +868,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         for(uint i = 0; i < varFields.length; i++) {
             vars[varFields[i]] = values[i];
         }
+    }
+
+    function setTokensPricesAddress(address tokensPricesContract) external restricted {
+        tokensPrices = TokensPrices(tokensPricesContract);
     }
 
     function giveInGameOnlyFunds(address to, uint256 skillAmount) external restricted {

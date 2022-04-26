@@ -2173,7 +2173,7 @@ export function createStore(web3: Web3) {
         commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
       },
 
-      async doEncounter({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier }) {
+      async doEncounter({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier, offsetCost }) {
         if(featureFlagStakeOnly) return;
 
         const res = await state.contracts().CryptoBlades!.methods
@@ -2183,7 +2183,7 @@ export function createStore(web3: Web3) {
             targetString,
             fightMultiplier
           )
-          .send({ from: state.defaultAccount, gas: '300000' });
+          .send({ from: state.defaultAccount, gas: '300000', value: offsetCost });
 
         await dispatch('fetchTargets', { characterId, weaponId });
 
@@ -5721,6 +5721,24 @@ export function createStore(web3: Web3) {
         if (!PvpArena || !state.defaultAccount) return;
 
         const res = await PvpArena.methods.withdrawRankedRewards().send({ from: state.defaultAccount });
+
+        return res;
+      },
+
+      async getCurrentSkillPerUsd({ state }) {
+        const { BasicPriceOracle } = state.contracts();
+        if (!BasicPriceOracle || !state.defaultAccount) return;
+
+        const res = await BasicPriceOracle.methods.currentPrice().send({ from: state.defaultAccount });
+
+        return res;
+      },
+
+      async getNativeTokenPriceInUsd({ state }) {
+        const { TokensPrices } = state.contracts();
+        if (!TokensPrices || !state.defaultAccount) return;
+
+        const res = await TokensPrices.methods.tokenPrice().send({ from: state.defaultAccount });
 
         return res;
       },

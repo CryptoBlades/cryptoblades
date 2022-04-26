@@ -44,6 +44,8 @@ import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/
 import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/PvpArena.json';
 import { abi as pvpCoreAbi, networks as pvpCoreNetworks } from '../../build/contracts/PvpCore.json';
 import { abi as pvpRankingsAbi, networks as pvpRankingsNetworks } from '../../build/contracts/PvpRankings.json';
+import { abi as basicPriceOracleAbi, networks as basicPriceOracleNetworks } from '../../build/contracts/BasicPriceOracle.json';
+import { abi as tokensPricesAbi, networks as tokensPricesNetworks } from '../../build/contracts/TokensPrices.json';
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
 import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
@@ -251,6 +253,15 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
 
+  const basicPriceOracleContractAddr = process.env.VUE_APP_PVP_CORE_CONTRACT_ADDRESS ||
+    getConfigValue('VUE_APP_BASIC_PRICE_ORACLE_CONTRACT_ADDRESS') || (basicPriceOracleNetworks as Networks)[networkId]!.address;
+  const BasicPriceOracle = new web3.eth.Contract(basicPriceOracleAbi as Abi, basicPriceOracleContractAddr);
+
+  const tokensPricesContractAddr = process.env.VUE_APP_PVP_CORE_CONTRACT_ADDRESS ||
+    getConfigValue('VUE_APP_BASIC_PRICE_ORACLE_CONTRACT_ADDRESS') || (tokensPricesNetworks as Networks)[networkId]!.address;
+  const TokensPrices = new web3.eth.Contract(tokensPricesAbi as Abi, tokensPricesContractAddr);
+
+
   let SpecialWeaponsManager;
   let specialWeaponsManagerAddr;
   try {
@@ -415,6 +426,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
     NFTStorage, CBKLandSale, CBKLand, Merchandise, Promos,
+    BasicPriceOracle, TokensPrices,
     ...raidContracts,
     ...pvpContracts,
     ...marketContracts,
