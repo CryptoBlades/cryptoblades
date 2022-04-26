@@ -282,9 +282,9 @@ export default Vue.extend({
 
 
 @media all and (max-width: 600px) {
-  .modal-dialog{
+  /* .modal-dialog{
     margin-top: 10em;
-  }
+  } */
 
   .outcome{
     font-size: 1.5em;

@@ -69,7 +69,7 @@ import { Contracts, isStakeType, isNftStakeType, StakeType, NftStakeType, Stakin
 
 import { StakingContractEntry, stakingContractsInfo, nftStakingContractsInfo } from './stake-types';
 
-import {raid, stakeOnly, market, pvp, quests, burningManager} from './feature-flags';
+import {raid, stakeOnly, pvp, quests, burningManager} from './feature-flags';
 import {currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 interface RaidContracts {
@@ -353,11 +353,11 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Junk = new web3.eth.Contract(junkAbi as Abi, junkAddress);
 
   const marketContracts: MarketContracts = {};
-  if(market) {
-    const marketContractAddr = getConfigValue('VUE_APP_MARKET_CONTRACT_ADDRESS') || (marketNetworks as Networks)[networkId]!.address;
 
-    marketContracts.NFTMarket = new web3.eth.Contract(marketAbi as Abi, marketContractAddr);
-  }
+  const marketContractAddr = getConfigValue('VUE_APP_MARKET_CONTRACT_ADDRESS') || (marketNetworks as Networks)[networkId]!.address;
+
+  marketContracts.NFTMarket = new web3.eth.Contract(marketAbi as Abi, marketContractAddr);
+
 
   const questsContracts: QuestsContracts = {};
   if(quests && currentChainSupportsQuests()) {
