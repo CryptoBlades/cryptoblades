@@ -77,7 +77,7 @@
                     <!-- selected weapon for combat details -->
                     <div v-if="selectedWeaponId" class="mr-3">
                       <weapon-inventory class="weapon-icon" :weapon="selectedWeapon" :displayType="'adventure'"/>
-                      <button v-tooltip="'Change Weapon'" class="ml-3 btn ct-btn mb-3"
+                      <button v-tooltip="'Change Weapon'" class="ml-3 btn ct-btn mb-3 hideMobile"
                         @click="changeEquipedWeapon()">
                         <img src="../assets/swithc-wep.png">
                       </button>
@@ -845,6 +845,11 @@ div.encounter.text-center {
   position: relative;
 }
 
+
+.hideMobile{
+  display: none;
+}
+
 h1 {
   font-weight: 900 !important;
   text-align: center;
@@ -946,6 +951,10 @@ h1 {
     max-width: 20px !important;
     width: auto;
     height: auto;
+  }
+
+  .hideMobile{
+    display: inline;
   }
 
   .body  > div{
@@ -1140,7 +1149,7 @@ h1 {
   right: 0;
   height: 100vh;
   width: 30%;
-  z-index: 9999;
+  z-index: 5;
   background-color: #212529;
 }
 
@@ -1149,8 +1158,10 @@ h1 {
     text-transform: capitalize;
 }
 
+
 .cw-content{
   padding: 40px;
+  border: 1px solid #ffffff52;
 }
 /* --------------------------------- */
 .ct-btn{

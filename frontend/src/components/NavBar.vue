@@ -102,9 +102,10 @@ a.router-link-active {
 }
 
 .view-links {
-  width: 100%;
   justify-content: space-between;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 5rem;
+  padding: 0em 2em;
 }
 
 .main-nav > .navbar-brand {
