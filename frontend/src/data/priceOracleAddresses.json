@@ -1,0 +1,32 @@
+{
+  "networks": {
+    "56": {
+      "name": "bscmainnet",
+      "address": ""
+    },
+    "66": {
+      "name": "okexmainnet",
+      "address": ""
+    },
+    "97": {
+      "name": "bsctestnet",
+      "address": ""
+    },
+    "128": {
+      "name": "hecomainnet",
+      "address": ""
+    },
+    "137": {
+      "name": "polygonmainnet",
+      "address": ""
+    },
+    "1337": {
+      "name": "truffle development",
+      "address": "0x0B7108B29ad73097cF7E549D542915348d885e5f"
+    },
+    "31337": {
+      "name": "hardhat development",
+      "address": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319"
+    }
+  }
+}

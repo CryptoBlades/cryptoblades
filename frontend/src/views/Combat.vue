@@ -295,7 +295,8 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
+    ...mapActions(['fetchTargets', 'doEncounterPayNative',
+      'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
       'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight',
       'getCurrentSkillPrice', 'getNativeTokenPriceInUsd', 'getCombatTokenChargePercent']),
     ...mapMutations(['setIsInCombat']),
@@ -420,27 +421,22 @@ export default {
       try {
         const targetPower = targetToFight.power;
         const expectedPayoutWei = new BigNumber(await this.fetchExpectedPayoutForMonsterPower({ power: targetPower, isCalculator: true }));
-        console.log('expected payout: ', expectedPayoutWei);
 
         const nativeTokenPriceUsd = new BigNumber (await this.getNativeTokenPriceInUsd());
-        console.log('native token price usd: ', nativeTokenPriceUsd.toString());
         const skillPriceUsdWei = new BigNumber(await this.getCurrentSkillPrice());
-        console.log('skill price usd: ', skillPriceUsdWei.toString());
         const tokenChargePercentage = (await this.getCombatTokenChargePercent());
-        console.log('token charge percentage: ', tokenChargePercentage);
 
-        const offsetToPayInNativeToken = (
+        const offsetToPayInNativeToken = ((
           expectedPayoutWei.multipliedBy(skillPriceUsdWei).multipliedBy(tokenChargePercentage)
-        ).div(nativeTokenPriceUsd.multipliedBy('1000000000000000000'));
+        ).div(nativeTokenPriceUsd.multipliedBy('1000000000000000000'))).integerValue(BigNumber.ROUND_DOWN);
 
-        console.log('OFFSET: ', offsetToPayInNativeToken.toString());
 
-        const results = await this.doEncounter({
+        const results = await this.doEncounterPayNative({
           characterId: this.currentCharacterId,
           weaponId: this.selectedWeaponId,
           targetString: targetIndex,
           fightMultiplier: this.fightMultiplier,
-          // offsetCost: offsetToPayInNativeToken
+          offsetCost: offsetToPayInNativeToken
         });
 
         this.fightResults = results;
@@ -518,7 +514,6 @@ export default {
         const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: this.targets[i].power });
         expectedPayouts[i] = expectedPayout;
       }
-      console.log(expectedPayouts);
       this.targetExpectedPayouts = expectedPayouts;
     },
 

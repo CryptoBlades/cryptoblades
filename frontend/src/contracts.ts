@@ -1,3 +1,4 @@
+import priceOracleAddresses from './data/priceOracleAddresses.json';
 import { abi as erc20Abi } from '../../build/contracts/IERC20.json';
 import { abi as erc721Abi } from '../../build/contracts/IERC721.json';
 
@@ -44,8 +45,9 @@ import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/
 import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/PvpArena.json';
 import { abi as pvpCoreAbi, networks as pvpCoreNetworks } from '../../build/contracts/PvpCore.json';
 import { abi as pvpRankingsAbi, networks as pvpRankingsNetworks } from '../../build/contracts/PvpRankings.json';
-import { abi as basicPriceOracleAbi, networks as basicPriceOracleNetworks } from '../../build/contracts/BasicPriceOracle.json';
+import { abi as basicPriceOracleAbi } from '../../build/contracts/BasicPriceOracle.json';
 import { abi as tokensPricesAbi, networks as tokensPricesNetworks } from '../../build/contracts/TokensPrices.json';
+import { abi as tokensReceiverAbi, networks as tokensReceiverNetworks } from '../../build/contracts/TokensReceiver.json';
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
 import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
@@ -253,13 +255,18 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
 
-  const basicPriceOracleContractAddr = process.env.VUE_APP_PVP_CORE_CONTRACT_ADDRESS ||
-    getConfigValue('VUE_APP_BASIC_PRICE_ORACLE_CONTRACT_ADDRESS') || (basicPriceOracleNetworks as Networks)[networkId]!.address;
+  // === Done differently due to migration 92 replacing skill oracle abi with king oracle's ===
+  const basicPriceOracleContractAddr = (priceOracleAddresses as any).networks[networkId].address;
   const BasicPriceOracle = new web3.eth.Contract(basicPriceOracleAbi as Abi, basicPriceOracleContractAddr);
+  // === ===
 
-  const tokensPricesContractAddr = process.env.VUE_APP_PVP_CORE_CONTRACT_ADDRESS ||
-    getConfigValue('VUE_APP_BASIC_PRICE_ORACLE_CONTRACT_ADDRESS') || (tokensPricesNetworks as Networks)[networkId]!.address;
+  const tokensPricesContractAddr = process.env.VUE_APP_TOKENS_PRICES_CONTRACT_ADDRESS ||
+    getConfigValue('VUE_APP_TOKENS_PRICES_CONTRACT_ADDRESS') || (tokensPricesNetworks as Networks)[networkId]!.address;
   const TokensPrices = new web3.eth.Contract(tokensPricesAbi as Abi, tokensPricesContractAddr);
+
+  const tokensReceiverContractAddr = process.env.VUE_APP_TOKENS_RECEIVER_CONTRACT_ADDRESS ||
+    getConfigValue('VUE_APP_TOKENS_RECEIVER_CONTRACT_ADDRESS') || (tokensReceiverNetworks as Networks)[networkId]!.address;
+  const TokensReceiver = new web3.eth.Contract(tokensReceiverAbi as Abi, tokensReceiverContractAddr);
 
 
   let SpecialWeaponsManager;
@@ -426,7 +433,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
     NFTStorage, CBKLandSale, CBKLand, Merchandise, Promos,
-    BasicPriceOracle, TokensPrices,
+    BasicPriceOracle, TokensPrices, TokensReceiver,
     ...raidContracts,
     ...pvpContracts,
     ...marketContracts,

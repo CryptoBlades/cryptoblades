@@ -1,5 +1,6 @@
 const { deployProxy } = require('@openzeppelin/truffle-upgrades');
 const assert = require('assert');
+const fs = require('fs-extra');
 
 const BasicPriceOracle = artifacts.require("BasicPriceOracle");
 const DummyRandoms = artifacts.require("DummyRandoms");
@@ -45,6 +46,14 @@ module.exports = async function (deployer, network) {
   assert(randoms != null, 'Expected random to be set to a contract');
 
   const priceOracle = await deployProxy(BasicPriceOracle, [], { deployer });
+
+  // === This is for development, migration already deployed in other networks ===
+  let priceOracleAddresses = JSON.parse(fs.readFileSync('./frontend/src/data/priceOracleAddresses.json'));
+
+  priceOracleAddresses.networks[deployer.networks[network].network_id].address = priceOracle.address;
+
+  fs.writeFileSync('./frontend/src/data/priceOracleAddresses.json', JSON.stringify(priceOracleAddresses, null, 2) , 'utf-8');
+  // === ===
 
   const charas = await deployProxy(Characters, [], { deployer });
 

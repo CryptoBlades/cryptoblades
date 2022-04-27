@@ -2,6 +2,7 @@ const { deployProxy } = require("@openzeppelin/truffle-upgrades");
 
 const CryptoBlades = artifacts.require("CryptoBlades");
 const TokensPrices = artifacts.require("TokensPrices");
+const TokensReceiver = artifacts.require("TokensReceiver");
 
 module.exports = async function (deployer, network, accounts) {
     const game = await CryptoBlades.deployed();
@@ -25,7 +26,15 @@ module.exports = async function (deployer, network, accounts) {
             { deployer }
         );
 
+        const tokensReceiver = await deployProxy(
+            TokensReceiver,
+            [game.address],
+            { deployer }
+        );
+
         await tokensPrices.grantRole(await tokensPrices.GAME_ADMIN(), accounts[0]);
+        await tokensReceiver.grantRole(await tokensReceiver.GAME_ADMIN(), accounts[0]);
+        await game.grantRole(await game.GAME_ADMIN(), tokensReceiver.address);
         await game.setTokensPricesAddress(tokensPrices.address);
 
         if (network === 'bsctestnet' || network === 'bsctestnet-fork') {
