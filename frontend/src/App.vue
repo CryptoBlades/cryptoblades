@@ -9,7 +9,7 @@
     <div class="content dark-bg-text">
       <b-row>
         <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
-        <b-col :class="renderPageDisplay()">
+        <b-col style="padding-left: 0;" :class="renderPageDisplay()">
           <router-view v-if="canShowApp" />
         </b-col>
         <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
@@ -492,7 +492,6 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
 
 
 .set-normal{
-  margin-top: 20px;
   margin-left: auto;
   margin-right: auto;
   transition: 1s all;
@@ -532,15 +531,6 @@ body {
 
 .dark-bg-text {
   color: #9e8a57;
-}
-
-.body {
-  padding-top: 15px 35px;
-  /* max-height: calc(100vh - 56px - 160px); */
-}
-
-.body  > div{
-  padding-left: 20px;
 }
 
 button,
@@ -894,7 +884,6 @@ div.bg-success {
 
 .can-show-app{
   width: 100%;
-  padding-top: 40px;
 }
 
 

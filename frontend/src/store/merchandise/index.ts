@@ -6,6 +6,7 @@ import {abi as priceOracleAbi} from '@/../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import BigNumber from 'bignumber.js';
 import {Dispatch} from 'vuex';
+import { getGasPrice } from '../store';
 
 
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
@@ -65,6 +66,7 @@ const merchandise = {
         CryptoBlades,
         SkillToken,
         rootState.defaultAccount,
+        getGasPrice(),
         defaultCallOptions(rootState),
         defaultCallOptions(rootState),
         new BigNumber(skillNeeded)
@@ -73,7 +75,8 @@ const merchandise = {
       await Merchandise.methods
         .createOrder(orderNumber, payingAmount)
         .send({
-          from: rootState.defaultAccount
+          from: rootState.defaultAccount,
+          gasPrice: getGasPrice(),
         });
 
       dispatch('fetchSkillBalance');
