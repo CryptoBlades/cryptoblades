@@ -4763,8 +4763,6 @@ export function createStore(web3: Web3) {
 
         await dispatch('fetchTargets', { characterId, weaponId });
 
-        console.log('RES: ', res);
-
         let playerRoll = '';
         let enemyRoll = '';
         let xpGain;

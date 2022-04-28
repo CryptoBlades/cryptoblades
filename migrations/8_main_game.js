@@ -48,7 +48,7 @@ module.exports = async function (deployer, network) {
   const priceOracle = await deployProxy(BasicPriceOracle, [], { deployer });
 
   // === This is for development, migration already deployed in other networks ===
-  let priceOracleAddresses = JSON.parse(fs.readFileSync('./frontend/src/data/priceOracleAddresses.json'));
+  const priceOracleAddresses = JSON.parse(fs.readFileSync('./frontend/src/data/priceOracleAddresses.json'));
 
   priceOracleAddresses.networks[deployer.networks[network].network_id].address = priceOracle.address;
 

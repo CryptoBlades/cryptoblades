@@ -33,10 +33,6 @@ contract TokensReceiver is Initializable, AccessControlUpgradeable {
         require(msg.value == offset, 'Offset error');
     }
 
-    function getBalance() external view restricted returns (uint256) {
-        return address(this).balance;
-    }
-
     function retrieve(address addressToTransferTo, uint256 amount) external restricted {
         payable(addressToTransferTo).transfer(amount);
     }
