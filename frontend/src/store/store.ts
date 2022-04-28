@@ -82,7 +82,6 @@ function getStakingContracts(contracts: Contracts, stakeType: StakeType | NftSta
 export function getGasPrice() {
   const gasPrice: string = getConfigValue('gasPrice');
   if(gasPrice) {
-    console.log(gasPrice);
     return Web3.utils.toWei(gasPrice, 'gwei');
   } else return '';
 }
