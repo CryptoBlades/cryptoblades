@@ -11,6 +11,7 @@ import {IERC721, ERC20} from '@/../../build/abi-interfaces';
 import {abi as erc721Abi} from '@/../../build/contracts/IERC721.json';
 
 import {Dispatch} from 'vuex';
+import { getGasPrice } from '../store';
 
 
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
@@ -589,11 +590,13 @@ const quests = {
 
       if(tokenIds.length === 1 && !isApprovedForAll) {
         await tokenContract.methods.approve(SimpleQuests.options.address, tokenIds[0]).send({
-          from: rootState.defaultAccount
+          from: rootState.defaultAccount,
+          gasPrice: getGasPrice()
         });
       } else if (!isApprovedForAll) {
         await tokenContract.methods.setApprovalForAll(SimpleQuests.options.address, true).send({
-          from: rootState.defaultAccount
+          from: rootState.defaultAccount,
+          gasPrice: getGasPrice()
         });
       }
 
@@ -610,7 +613,8 @@ const quests = {
       const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(rootState));
       const amountTimesDecimals = rootState.web3.utils.toBN(amount * 10 ** currencyDecimals);
       await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
-        from: rootState.defaultAccount
+        from: rootState.defaultAccount,
+        gasPrice: getGasPrice()
       });
 
       return await SimpleQuests.methods.submitProgressAmount(characterID, amountTimesDecimals.toString()).send(defaultCallOptions(rootState));
