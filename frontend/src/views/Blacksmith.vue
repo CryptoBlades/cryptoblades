@@ -17,7 +17,7 @@
         <div class="row mt-3" v-if="ownWeapons.length > 0 && !showReforge">
           <div class="col">
             <div class="buttons-panel">
-              <h1>{{$t('weapons')}} ({{ ownWeapons.length }})</h1>
+              <h1 class="m-2">{{$t('weapons')}} ({{ ownWeapons.length }})</h1>
               <div class="button-div">
                 <b-button
                         variant="primary"
@@ -186,7 +186,7 @@
         <div class="row mt-3" v-if="showReforge && !showReforgeDust">
           <div class="col">
             <div class="d-flex justify-content-space-between">
-              <h1>{{$t('blacksmith.createDust')}}</h1>
+              <h1 class="m-2">{{$t('blacksmith.createDust')}}</h1>
               <div class="d-flex justify-content-flex-end ml-auto">
                 <b-button
                         variant="primary"
@@ -217,7 +217,7 @@
             <div>
               <div class="col-lg-12 weapon-container">
                 <div class="col-lg-12">
-                  <h1 class="text-center">{{$t('blacksmith.selectDustAmount')}}</h1>
+                  <h1 class="text-center m-2">{{$t('blacksmith.selectDustAmount')}}</h1>
                 </div>
                 <div class="row">
                   <div class="col-lg-2"></div>
