@@ -27,7 +27,7 @@
             <h5 class="m-2">{{$t('combat.adventure')}}</h5>
             <img src="../assets/hint.png" alt="" @click="hideBottomMenu(true)">
           </div>
-          <div class="col-lg-6 col-md-12 col-xl-6 col-sm-12 text-right combant-hint" :style="isToggled ? 'display:inline' : 'none'"
+          <div class="col-lg-12 col-md-12 col-xl-12 col-sm-12 text-right combant-hint" :style="isToggled ? 'display:inline' : 'none'"
            @click="hideBottomMenu(false)">
             <div class="combat-hints">
               <Hint class="mr-3" :text="$t('combat.elementHint')"/>
@@ -634,7 +634,7 @@ h5{
   font-size: 2em;
   display: flex;
   align-items: center;
-  justify-content: right;
+  justify-content: center;
 }
 
 .combat-hints > div{
