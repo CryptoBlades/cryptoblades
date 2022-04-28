@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-import "./CryptoBlades.sol";
+import "./cryptoblades.sol";
 
 contract Launchpad is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
@@ -19,18 +19,18 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     struct Launch {
         string name;
         string tokenSymbol;
-        string details;
-        string imageUri;
+        string detailsJsonUri;
+        string imageUrl;
         address fundingTokenAddress;
         uint256 phase;
     }
 
     // VARS
     mapping(uint256 => uint256) public vars;
-    uint256 public VAR_TIERS_AMOUNT = 1;
-    uint256 public VAR_FUNDING_PERIOD_PHASE_1 = 2;
-    uint256 public VAR_FUNDING_PERIOD_PHASE_2 = 3;
-    uint256 public VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER = 3;
+    uint256 public constant VAR_TIERS_AMOUNT = 1;
+    uint256 public constant VAR_FUNDING_PERIOD_PHASE_1 = 2;
+    uint256 public constant VAR_FUNDING_PERIOD_PHASE_2 = 3;
+    uint256 public constant VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER = 4;
     
 
     // TIERS INFO
@@ -108,11 +108,49 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         return launchUserInvestment[launchId][user].mul(1e18).div(launchTokenPrice[launchId]).mul(launchVestingsPercentage[launchId][vestingId]).div(100);
     }
 
+    function getLaunchBaseInfo(uint256 launchId) public view returns (
+        string memory name,
+        string memory tokenSymbol,
+        string memory detailsJsonUri,
+        string memory imageUrl,
+        address fundingTokenAddress,
+        uint256 phase) {
+        Launch memory l = launches[launchId];
+        name = l.name;
+        tokenSymbol= l.tokenSymbol;
+        detailsJsonUri = l.detailsJsonUri;
+        imageUrl = l.imageUrl;
+        fundingTokenAddress = l.fundingTokenAddress;
+        phase = l.phase;
+    }
+
+    function getLaunchDetails(uint256 launchId) public view returns (
+        uint256 tokenPrice,
+        uint256 startTime, 
+        uint256 amountToSell,
+        uint256 fundsToRaise,
+        uint256 maxAllocation,
+        uint256 totalRaised,
+        address tokenAddress) 
+    {
+        tokenPrice = launchTokenPrice[launchId];
+        startTime = launchStartTime[launchId];
+        amountToSell = launchAmountToSell[launchId];
+        fundsToRaise = launchFundsToRaise[launchId];
+        maxAllocation = getOverallMaxAllocation(launchId);
+        totalRaised = launchTotalRaised[launchId];
+        tokenAddress = launchTokenAddress[launchId];
+    }
+
+    function getOverallMaxAllocation(uint256 launchId) public view returns (uint256) {
+        return getLaunchAllocationForTier(launchId, vars[VAR_TIERS_AMOUNT]);
+    }
+
     // RESTRICTED FUNCTIONS
 
     // TIERS
 
-    function setBrandNewTiers( uint256[] calldata tierIds, uint256[] calldata stakingRequirements, uint256[] calldata tierWeights) external restricted {
+    function setBrandNewTiers(uint256[] calldata tierIds, uint256[] calldata stakingRequirements, uint256[] calldata tierWeights) external restricted {
         require(tierIds.length == stakingRequirements.length, "Wrong input");
         vars[VAR_TIERS_AMOUNT] = tierIds.length;
         for (uint256 i = 0; i < tierIds.length; i++) {
@@ -145,15 +183,15 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     function addNewLaunch(
         string calldata name,
         string calldata tokenSymbol,
-        string calldata details,
-        string calldata imageUri,
+        string calldata detailsJsonUri,
+        string calldata imageUrl,
         address fundingTokenAddress
     ) external restricted {
         launches[nextLaunchId] = Launch(
             name,
             tokenSymbol,
-            details,
-            imageUri,
+            detailsJsonUri,
+            imageUrl,
             fundingTokenAddress,
             1
         );
@@ -165,8 +203,8 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         launches[launchId + 1] = Launch(
             lp.name,
             lp.tokenSymbol,
-            lp.details,
-            lp.imageUri,
+            lp.detailsJsonUri,
+            lp.imageUrl,
             lp.fundingTokenAddress,
             2
         );
@@ -183,17 +221,46 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         delete launches[launchId];
     }
 
-    function updateLaunchTokenPrice(uint256 launchId, uint256 tokenPrice) external restricted {
+    // UPDATING DETAILS
+    function setLaunchDetails(uint256 launchId, uint256 tokenPrice, uint256 startTime, uint256 fundsToRaise) external restricted {
         launchTokenPrice[launchId] = tokenPrice;
+        launchStartTime[launchId] = startTime;
+        launchFundsToRaise[launchId] = fundsToRaise;
+    }
+
+    function updateLaunchName(uint256 launchId, string calldata name) external restricted {
+        launches[launchId].name = name;
+    }
+
+    function updateLaunchTokenSymbol(uint256 launchId, string calldata tokenSymbol) external restricted {
+        launches[launchId].tokenSymbol = tokenSymbol;
+    }
+
+    function updateLaunchDetailsJsonUri(uint256 launchId, string calldata detailsJsonUri) external restricted {
+        launches[launchId].detailsJsonUri = detailsJsonUri;
+    }
+
+    function updateLaunchImageUrl(uint256 launchId, string calldata imageUrl) external restricted {
+        launches[launchId].imageUrl = imageUrl;
     }
 
     function updateLaunchFundingTokenAddress(uint256 launchId, address fundingTokenAddress) external restricted {
         launches[launchId].fundingTokenAddress = fundingTokenAddress;
     }
 
+    function updateLaunchTokenPrice(uint256 launchId, uint256 tokenPrice) external restricted {
+        launchTokenPrice[launchId] = tokenPrice;
+    }
+
     function updateLaunchStartTime(uint256 launchId, uint256 startTime) external restricted {
         launchStartTime[launchId] = startTime;
     }
+
+    function updateLaunchFundsToRaise(uint256 launchId, uint256 fundsToRaise) external restricted {
+        launchFundsToRaise[launchId] = fundsToRaise;
+    }
+
+    // VESTING
 
     function enableVesting(uint256 launchId, uint256 percentage) external restricted {
         require(launchTokenAddress[launchId] != address(0), "Token address not set");
@@ -261,7 +328,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     function commitUnclaimedSkill(uint256 launchId, uint256 amount) external {
         require(launchEligibleUsersSnapshot[launchId].contains(msg.sender), "Not whitelisted");
-        game.deductAfterPartnerClaim(amount, msg.sender);
-        launchUserUnclaimedSkillCommittedValue[launchId] += amount.mul(skillPrice).div(1e18);
+        _game.deductAfterPartnerClaim(amount, msg.sender);
+        launchUserUnclaimedSkillCommittedValue[launchId][msg.sender] += amount.mul(skillPrice).div(1e18);
     }
 }
