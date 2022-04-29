@@ -1,5 +1,5 @@
 <template>
-  <div class="body main-font">
+  <div class="body m-2 main-font" style="inline-flex">
     <div v-if="!haveCharacters" class="blank-slate">
       <div class="current-promotion">
         <div class="tob-bg-img promotion-decoration">

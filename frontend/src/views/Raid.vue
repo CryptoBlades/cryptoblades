@@ -1,6 +1,6 @@
 <template>
   <div class="main-font">
-    <div class="row">
+    <div style="display:inline-flex;">
        <div class="col-md-12 col-lg-12 col-sm-12 col-12">
         <div class="row">
           <div class="col-lg-12" id="raid-header">
@@ -75,7 +75,7 @@
             </div>
           </div>
           <div class="col-lg-12">
-             <div class="row raid-power">
+             <div class="row mt-3 raid-power">
               <div class="col-lg-4 none-mobile">
                 <div class="row">
                   <div class="col-lg-12 nav-raid">
