@@ -161,14 +161,14 @@
                 <div class="nav-icons">
                   <div class="forge-btn" @click="displayBlacksmith()">
                     <span id="forge"></span>
-                    <span>{{$t('blacksmith.forge')}}</span>
+                    <span :class="activeTab == 'forge' ? 'active' : ''">{{$t('blacksmith.forge')}}</span>
                   </div>
                   <div>
                     <div class="line"></div>
                   </div>
                   <div class="salvage-btn" @click="displayDustCreation()">
                     <span id="salvage"></span>
-                    <span>{{$t('blacksmith.salvage')}}</span>
+                    <span :class="activeTab == 'salvage' ? 'active' : ''">{{$t('blacksmith.salvage')}}</span>
                   </div>
                 </div>
                 <div class="button-div none-mobile">
@@ -261,14 +261,18 @@
                     <div class="row justify-content-center">
                       <h4 class="select-el">{{$t('blacksmith.selectElement')}}</h4>
                     </div>
-                    <div class="row justify-content-center select-elements-container">
+                    <div class="row justify-content-center select-elements-container" ref="forgeWeapon">
                       <div id="random-border" v-on:click="setChosenElement($event, 100)"> </div>
+                      <div class="line-sep-2"></div>
                       <div class="line-sep"></div>
                       <div id="fire-border" v-on:click="setChosenElement($event, 0)"> </div>
+                      <div class="line-sep-2"></div>
                       <div class="line-sep"></div>
                       <div id="earth-border" v-on:click="setChosenElement($event, 1)"> </div>
+                      <div class="line-sep-2"></div>
                       <div class="line-sep"></div>
                       <div id="lightning-border" v-on:click="setChosenElement($event, 2)"> </div>
+                      <div class="line-sep-2"></div>
                       <div class="line-sep"></div>
                       <div id="water-border" v-on:click="setChosenElement($event, 3)"> </div>
                     </div>
@@ -485,14 +489,14 @@
                   <div class="nav-icons" @click="displayBlacksmith()">
                     <div class="forge-btn">
                       <span id="forge"></span>
-                      <span>{{$t('blacksmith.forge').toUpperCase()}}</span>
+                      <span :class="activeTab == 'forge' ? 'active' : ''">{{$t('blacksmith.forge')}}</span>
                     </div>
                     <div>
                       <div class="line"></div>
                     </div>
                     <div class="salvage-btn">
                       <span id="salvage"></span>
-                      <span>{{$t('blacksmith.salvage')}}</span>
+                      <span :class="activeTab == 'salvage' ? 'active' : ''">{{$t('blacksmith.salvage')}}</span>
                     </div>
                   </div>
                 </div>
@@ -919,7 +923,7 @@ export default Vue.extend({
 
     async onForgeWeapon() {
       if(this.disableForge) return;
-
+      this.$refs.forgeWeapon.classList.add('activate-line');
       (this.$refs['forge-element-selector-modal']as BModal)?.hide();
 
       const forgeMultiplier = 1;
@@ -1244,6 +1248,14 @@ export default Vue.extend({
   margin-top: 30px;
   flex-wrap: wrap;
   z-index: 99;
+}
+
+.nav-icons div span:nth-child(2){
+  color: rgba(255, 255, 255, 0.445);
+}
+
+.nav-icons div span:nth-child(2).active{
+  color: rgb(255, 255, 255);
 }
 
 .buttons-panel > h2{
@@ -2393,6 +2405,27 @@ img.elements-modal:hover {
   background-color: rgba(255, 255, 255, 0.349);
 }
 
+.line-sep-2{
+  width: 0vw;
+}
+
+.activate-line .line-sep{
+  width: 0vw;
+  transition: all 0.5s ease;
+}
+
+.active{
+  color: #fff;
+}
+
+.activate-line .line-sep-2{
+  width: 2vw;
+  height: 2px;
+  background-color: rgb(255, 255, 255);
+  transition: all 0.5s ease;
+}
+
+
 .button-div {
   display: flex;
   justify-content: flex-end;
@@ -2692,6 +2725,7 @@ img.elements-modal:hover {
     height: 68vw;
     width: 68vw;
   }
+
 
   #random-border{
   background-image: url('../assets/questionmark-icon-45.png');

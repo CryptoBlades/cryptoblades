@@ -43,12 +43,12 @@
 
       <transition-group
         appear @before-enter="beforeEnter" @enter="enter"
-        class="weapon-grid" tag="ul" name="list"
+        class="weapon-grid" tag="ul" name="list" ref="weapon-grid"
         >
         <li
           class="weapon" :style="setBorderSelected(weapon.id) ? 'border: 2px solid #fff' : ''"
           :class="{ selected: highlight !== null && weapon.id === highlight }"
-          v-for="(weapon, i) in nonIgnoredWeapons.slice(((this.activePage*10)-10),((this.activePage*10)))"
+          v-for="(weapon, i) in nonIgnoredWeapons.slice(((this.activePage*20)-20),((this.activePage*20)))"
           :key="weapon.id" :data-index="i"
           @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
           @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
@@ -185,6 +185,7 @@ interface Data {
   activePage: number;
   pageSet: number[];
   noOfPages: number;
+  noOfItemsPerRow: number;
 }
 const sorts = [
   { name: i18n.t('weaponGrid.sorts.any'), dir: '' },
@@ -218,14 +219,8 @@ export default Vue.extend({
       default: null,
     },
     noPagination: {
-      // this forces Typescript to consider a prop a certain type
-      // without us specifying a "type" property;
-      // Vue's "type" property is not as flexible as we need it here
-      validator(x: boolean | number | null) {
-        void x;
-        return true;
-      },
-      default: null,
+      type: Boolean,
+      default: false,
     },
     showGivenWeaponIds: {
       type: Boolean,
@@ -312,6 +307,7 @@ export default Vue.extend({
       haveWeaponCosmetics: [],
       targetSkin: '',
       currentWeaponId: null,
+      noOfItemsPerRow: 0,
       weaponCosmeticsNames: [
         i18n.t('market.nftList.weaponGrayscale'),
         i18n.t('market.nftList.weaponContrast'),
@@ -415,6 +411,8 @@ export default Vue.extend({
   watch: {
     async weaponIdsToDisplay(newWeaponIds: string[]) {
       await this.fetchWeapons(newWeaponIds);
+      console.log('weapon forged');
+      await this.createPagination(this.activePage);
     },
   },
   methods: {
@@ -567,7 +565,7 @@ export default Vue.extend({
     createPagination(activePage: number){
       const noOfItems = this.nonIgnoredWeapons.length;
       this.activePage = activePage;
-      this.noOfPages = Math.ceil(noOfItems/10);
+      this.noOfPages = Math.ceil(noOfItems/20);
       this.pageSet = [];
       if(this.noOfPages > 5){
         if(activePage > 3){
@@ -586,8 +584,8 @@ export default Vue.extend({
           }
         }
       }else{
-        for (let x = 1; x < this.noOfPages; x++) {
-          this.pageSet.push(x);
+        for (let x = 0; x < this.noOfPages; x++) {
+          this.pageSet.push(x+1);
         }
       }
     },
@@ -611,6 +609,10 @@ export default Vue.extend({
       el.style.opacity = 0;
       el.style.transform = 'translateY(100px)';
     },
+    getNoOfItemPerRow(){
+      const gridWidth = this.$refs['weapon-grid'].$el.clientWidth;
+      return Math.floor((gridWidth - (((gridWidth/216)*32)+16))/216);
+    }
   },
   async mounted() {
     this.checkStorageFavorite();
@@ -662,7 +664,7 @@ export default Vue.extend({
   display: grid;
   padding: 0.5em;
   grid-template-columns: repeat(auto-fit, 13em);
-  gap: 2em;
+  gap: 3vw;
 }
 .weapon {
   width: 105%;
