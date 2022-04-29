@@ -4742,13 +4742,6 @@ export function createStore(web3: Web3) {
         return await TokensPrices.methods.tokenPrice().call(defaultCallOptions(state));
       },
 
-      async getSkillToNativeRatio({ state }) {
-        const { TokensPrices } = state.contracts();
-        if (!TokensPrices || !state.defaultAccount) return;
-
-        return await TokensPrices.methods.skillToNativeRatio().call(defaultCallOptions(state));
-      },
-
       async doEncounterPayNative({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier, offsetCost }) {
         if(featureFlagStakeOnly) return;
 

@@ -298,7 +298,7 @@ export default {
     ...mapActions(['fetchTargets', 'doEncounterPayNative',
       'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
       'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight',
-      'getCurrentSkillPrice', 'getNativeTokenPriceInUsd', 'getCombatTokenChargePercent', 'getSkillToNativeRatio']),
+      'getCurrentSkillPrice', 'getNativeTokenPriceInUsd', 'getCombatTokenChargePercent']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -426,19 +426,9 @@ export default {
         const skillPriceUsd = new BigNumber(await this.getCurrentSkillPrice());
         const tokenChargePercentage = (await this.getCombatTokenChargePercent());
 
-        // const skillToNativeRatio = (await this.getSkillToNativeRatio());
-
-        // const oldOffsetToPayInNativeToken = ((
-        //   expectedPayoutWei.multipliedBy(skillPriceUsdWei).multipliedBy(tokenChargePercentage)
-        // ).div(nativeTokenPriceUsd.multipliedBy('1000000000000000000'))).integerValue(BigNumber.ROUND_DOWN);
-
-        // console.log('prev: ', oldOffsetToPayInNativeToken);
-
         const offsetToPayInNativeToken = (
           expectedPayoutWei.multipliedBy(tokenChargePercentage).multipliedBy(skillPriceUsd)
         ).div(nativeTokenPriceUsd).integerValue(BigNumber.ROUND_DOWN);
-
-        console.log('new: ', offsetToPayInNativeToken.toString());
 
         const results = await this.doEncounterPayNative({
           characterId: this.currentCharacterId,

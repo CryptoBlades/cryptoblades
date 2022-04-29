@@ -38,8 +38,4 @@ contract TokensPrices is Initializable, AccessControlUpgradeable {
     function setSkillTokenPrice(uint256 price) external restricted {
         skillTokenPrice = price;
     }
-
-    function skillToNativeRatio() external view returns (int128) {
-        return ABDKMath64x64.divu(skillTokenPrice, tokenPrice);
-    }
 }
