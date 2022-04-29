@@ -1,18 +1,18 @@
 <template>
   <b-navbar-nav>
     <li class="character top-nav-links">
-      <router-link v-if="!stakeOnly" :to="{ name: 'play-to-earn' }" exact class="nav-link">
+      <router-link :to="{ name: 'play-to-earn' }" exact class="nav-link">
         <div class="link-text play-to-earn-btn">{{ $t("PlayToEarn.playToEarn") }}</div>
       </router-link>
     </li>
     <li class="character top-nav-links">
-      <router-link v-if="!stakeOnly" :to="{ name: 'plaza' }" exact class="nav-link">
+      <router-link :to="{ name: 'plaza' }" exact class="nav-link">
         <div class="icon"><img src="../assets/navbar-icons/plaza-icon.png" class="ui-link-icon" alt="Plaza"></div>
         <div class="link-text">{{ $t("viewLink.character") }}</div>
       </router-link>
     </li>
 
-    <li v-if="!stakeOnly" class="top-nav-links">
+    <li class="top-nav-links">
       <router-link :to="{ name: 'blacksmith', query: {tab: 'weapon'} }" exact class="nav-link">
         <div class="icon"><img src="../assets/navbar-icons/blacksmith-icon.png" class="ui-link-icon" alt="Blacksmith">
         </div>
@@ -31,7 +31,7 @@
       </router-link>
     </li>
 
-    <li v-if="!stakeOnly" class="top-nav-links">
+    <li class="top-nav-links">
       <a href="https://bazaar.market/" class="nav-link" target="_blank">
         <div class="icon"><img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar"></div>
         <div class="link-text">{{ $t("viewLink.bazaar") }}
@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import {merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
+import {merchandise, portal, pvp, quests, raid} from '@/feature-flags';
 import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
 
@@ -61,7 +61,6 @@ import Hint from '@/components/Hint';
 export default Vue.extend({
   data() {
     return {
-      stakeOnly,
       raid,
       portal,
       pvp,

@@ -8,7 +8,7 @@
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content dark-bg-text">
       <b-row>
-        <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
+        <character-bar :isToggled="toggleSideBar" v-if="currentCharacterId !== null"/>
         <b-col style="padding-left: 0;" :class="renderPageDisplay()">
           <router-view v-if="canShowApp" />
         </b-col>
@@ -113,7 +113,7 @@ Vue.directive('visible', (el, bind) => {
 });
 
 export default {
-  inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
+  inject: ['web3', 'expectedNetworkId', 'expectedNetworkName'],
   components: {
     NavBar,
     CharacterBar,
@@ -224,8 +224,6 @@ export default {
       this.updateCurrentChainSupportsQuests();
     },
     async updateCharacterStamina(id) {
-      if (this.featureFlagStakeOnly) return;
-
       if (id !== null) {
         await this.fetchCharacterStamina(id);
       }
@@ -303,7 +301,7 @@ export default {
     renderPageDisplay(){
       let toDisplay;
 
-      if(!this.featureFlagStakeOnly && this.currentCharacterId !== null){
+      if(this.currentCharacterId !== null){
         if(this.toggleSideBar){
           toDisplay = 'can-show-app';
         }else{

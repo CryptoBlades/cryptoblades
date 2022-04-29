@@ -17,20 +17,11 @@ import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
 import PlayToEarn from './views/PlayToEarn.vue';
 
-import {merchandise, portal, pvp, quests, raid, stakeOnly} from './feature-flags';
+import {merchandise, portal, pvp, quests, raid} from './feature-flags';
 import Merchandise from '@/components/smart/Merchandise.vue';
 import {currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 export default function createRouter() {
-  if (stakeOnly) {
-    return new VueRouter({
-      routes: [
-        {path: '/', redirect: 'stake'},
-        {path: '/stake', name: 'select-stake-type', component: SelectStakeType},
-        {path: '/stake/:stakeType', name: 'stake', component: Stake, props: true},
-      ]
-    });
-  }
 
   const router = new VueRouter({
     routes: [

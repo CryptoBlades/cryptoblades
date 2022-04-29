@@ -7,7 +7,7 @@ import {approveFeeFromAnyContract} from '@/contract-call-utils';
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
 import { getGasPrice } from '../store';
 import { IRaidState } from '@/interfaces';
-import {raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly} from '@/feature-flags';
+import {raid as featureFlagRaid} from '@/feature-flags';
 import { raidFromContract} from '@/contract-models';
 
 const raid = {
@@ -75,7 +75,7 @@ const raid = {
     },
 
     async fetchRaidState({ rootState, commit }: {rootState: IState, commit: Commit}) {
-      if(featureFlagStakeOnly || !featureFlagRaid) return;
+      if(!featureFlagRaid) return;
 
       const Raid1 = rootState.contracts().Raid1!;
 
