@@ -18,22 +18,17 @@ import {
 import {
   CharacterPower,
   Contract,
-  Contracts,
   IPartnerProject,
-  isNftStakeType,
   isStakeType,
-  IStakeOverviewState,
-  IStakeState,
   IState,
   IWeb3EventSubscription,
-  NftStakeType,
   StakeType
 } from '@/interfaces';
 import {getCharacterNameFromSeed} from '@/character-name';
 import {approveFee, approveFeeFromAnyContract, approveFeeFromAnyContractSimple, getFeeInSkillFromUsd} from '@/contract-call-utils';
 
 import {burningManager as featureFlagBurningManager, stakeOnly as featureFlagStakeOnly} from '@/feature-flags';
-import {ERC20, IERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
+import {ERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from '@/stake-types';
 import {Nft} from '@/interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
@@ -56,27 +51,6 @@ interface SetEventSubscriptionsPayload {
 type StakingRewardsAlias = Contract<IStakingRewards> | null;
 type NftStakingRewardsAlias = Contract<INftStakingRewards> | null;
 
-interface StakingContracts {
-  StakingRewards: NftStakingRewardsAlias | StakingRewardsAlias,
-  StakingToken: Contract<IERC20> | Contract<IERC721> | null,
-  RewardToken: Contracts['SkillToken'],
-}
-
-function getStakingContracts(contracts: Contracts, stakeType: StakeType | NftStakeType): StakingContracts {
-  if(isNftStakeType(stakeType)) {
-    return {
-      StakingRewards: contracts.nftStaking[stakeType]?.StakingRewards || null,
-      StakingToken: contracts.nftStaking[stakeType]?.StakingToken || null,
-      RewardToken: contracts.SkillToken
-    };
-  }
-  return {
-    StakingRewards: contracts.staking[stakeType]?.StakingRewards || null,
-    StakingToken: contracts.staking[stakeType]?.StakingToken || null,
-    RewardToken: contracts.SkillToken
-  };
-}
-
 export function getGasPrice() {
   const gasPrice: string = getConfigValue('gasPrice');
   if(gasPrice) {
@@ -88,31 +62,12 @@ type WaxBridgeDetailsPayload = Pick<
 IState, 'waxBridgeWithdrawableBnb' | 'waxBridgeRemainingWithdrawableBnbDuringPeriod' | 'waxBridgeTimeUntilLimitExpires'
 >;
 
-const defaultStakeState: IStakeState = {
-  ownBalance: '0',
-  stakedBalance: '0',
-  remainingCapacityForDeposit: '0',
-  remainingCapacityForWithdraw: '0',
-  contractBalance: '0',
-  currentRewardEarned: '0',
-  rewardMinimumStakeTime: 0,
-  rewardDistributionTimeLeft: 0,
-  unlockTimeLeft: 0,
-};
-
-const defaultStakeOverviewState: IStakeOverviewState = {
-  rewardRate: '0',
-  rewardsDuration: 0,
-  totalSupply: '0',
-  minimumStakeTime: 0,
-  rewardDistributionTimeLeft: 0
-};
-
 import bridge from './bridge';
 import pvp from './pvp';
 import quests from './quests';
 import merchandise from './merchandise';
 import raid from './raid';
+import staking from './staking';
 
 export function createStore(web3: Web3) {
   return new Vuex.Store<IState>({
@@ -121,7 +76,8 @@ export function createStore(web3: Web3) {
       pvp,
       quests,
       merchandise,
-      raid
+      raid,
+      staking
     },
     state: {
       web3,
@@ -185,35 +141,6 @@ export function createStore(web3: Web3) {
       keyboxes: {},
       currentShieldId: null,
       nfts: {},
-
-      staking: {
-        skill: { ...defaultStakeState },
-        skill2: { ...defaultStakeState },
-        lp: { ...defaultStakeState },
-        lp2: { ...defaultStakeState },
-        king: { ...defaultStakeState },
-        king90: { ...defaultStakeState },
-        king180: { ...defaultStakeState },
-        skill90: { ...defaultStakeState },
-        skill180: { ...defaultStakeState },
-        cbkLandT1: { ...defaultStakeState },
-        cbkLandT2: { ...defaultStakeState },
-        cbkLandT3: { ...defaultStakeState }
-      },
-      stakeOverviews: {
-        skill: { ...defaultStakeOverviewState },
-        skill2: { ...defaultStakeOverviewState },
-        lp: { ...defaultStakeOverviewState },
-        lp2: { ...defaultStakeOverviewState },
-        king: { ...defaultStakeOverviewState },
-        king90: { ...defaultStakeOverviewState },
-        king180: { ...defaultStakeOverviewState },
-        skill90: { ...defaultStakeOverviewState },
-        skill180: { ...defaultStakeOverviewState },
-        cbkLandT1: { ...defaultStakeOverviewState },
-        cbkLandT2: { ...defaultStakeOverviewState },
-        cbkLandT3: { ...defaultStakeOverviewState }
-      },
 
       waxBridgeWithdrawableBnb: '0',
       waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
@@ -285,30 +212,6 @@ export function createStore(web3: Web3) {
         // our root component prevents the app from being active if contracts
         // are not set up, so we never need to worry about it being null anywhere else
         return _.isFunction(state.contracts) ? state.contracts() : null!;
-      },
-
-      availableStakeTypes(state: IState) {
-        return Object.keys(state.contracts().staking).filter(isStakeType);
-      },
-
-      availableNftStakeTypes(state: IState) {
-        return Object.keys(state.contracts().nftStaking).filter(isNftStakeType);
-      },
-
-      hasStakedBalance(state) {
-        if(!state.contracts) return false;
-
-        const staking = state.contracts().staking;
-        for(const stakeType of Object.keys(staking).filter(isStakeType)) {
-          if(state.staking[stakeType].stakedBalance !== '0') {
-            return true;
-          }
-        }
-        return false;
-      },
-
-      stakedSkillBalanceThatCanBeSpent(state) {
-        return state.staking[stakeTypeThatCanHaveUnclaimedRewardsStakedTo].stakedBalance;
       },
 
       getTargetsByCharacterIdAndWeaponId(state: IState) {
@@ -608,10 +511,6 @@ export function createStore(web3: Web3) {
         return toBN(state.rewardsClaimTax).dividedBy(toBN(2).exponentiatedBy(64));
       },
 
-      stakeState(state) {
-        return (stakeType: StakeType): IStakeState => state.staking[stakeType];
-      },
-
       fightGasOffset(state) {
         return state.fightGasOffset;
       },
@@ -868,15 +767,6 @@ export function createStore(web3: Web3) {
         }
 
         Vue.set(state.targetsByCharacterIdAndWeaponId[characterId], weaponId, targets);
-      },
-
-      updateStakeData(state: IState, { stakeType, ...payload }: { stakeType: StakeType } & IStakeState) {
-        Vue.set(state.staking, stakeType, payload);
-      },
-
-      updateStakeOverviewDataPartial(state, payload: { stakeType: StakeType } & IStakeOverviewState) {
-        const { stakeType, ...data } = payload;
-        Vue.set(state.stakeOverviews, stakeType, data);
       },
 
       updateWaxBridgeDetails(state, payload: WaxBridgeDetailsPayload) {
@@ -2201,242 +2091,6 @@ export function createStore(web3: Web3) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
         return await CryptoBlades.methods.getRemainingTokenClaimAmountPreTax().call(defaultCallOptions(state));
-      },
-
-      async fetchStakeOverviewData({ getters, dispatch }) {
-        await Promise.all(
-          (getters.availableStakeTypes as StakeType[])
-            .map(stakeType =>
-              dispatch('fetchStakeOverviewDataPartial', { stakeType })
-            ),
-        );
-        await Promise.all(
-          (getters.availableNftStakeTypes as NftStakeType[])
-            .map(stakeType =>
-              dispatch('fetchStakeOverviewDataPartial', { stakeType })
-            )
-        );
-      },
-
-      async fetchStakeOverviewDataPartial({ state, commit }, { stakeType }: { stakeType: StakeType }) {
-        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards) return;
-
-        const [
-          rewardRate,
-          rewardsDuration,
-          totalSupply,
-          minimumStakeTime,
-          rewardDistributionTimeLeft,
-        ] = await Promise.all([
-          StakingRewards.methods.rewardRate().call(defaultCallOptions(state)),
-          StakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
-          StakingRewards.methods.totalSupply().call(defaultCallOptions(state)),
-          StakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
-          StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
-        ]);
-
-        const stakeSkillOverviewData: IStakeOverviewState = {
-          rewardRate,
-          rewardsDuration: parseInt(rewardsDuration, 10),
-          totalSupply,
-          minimumStakeTime: parseInt(minimumStakeTime, 10),
-          rewardDistributionTimeLeft: parseInt(rewardDistributionTimeLeft, 10),
-        };
-        commit('updateStakeOverviewDataPartial', { stakeType, ...stakeSkillOverviewData });
-      },
-
-      async fetchStakeDetails({ state, commit }, { stakeType }: { stakeType: StakeType }) {
-        if(!state.defaultAccount) return;
-
-        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards || !StakingToken) return;
-
-        const [
-          ownBalance,
-          stakedBalance,
-          remainingCapacityForDeposit,
-          remainingCapacityForWithdraw,
-          contractBalance,
-          currentRewardEarned,
-          rewardMinimumStakeTime,
-          rewardDistributionTimeLeft,
-          unlockTimeLeft
-        ] = await Promise.all([
-          StakingToken.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)),
-          StakingRewards.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)),
-          Promise.resolve(null as string | null),
-          StakingRewards.methods.totalSupply().call(defaultCallOptions(state)),
-          StakingToken.methods.balanceOf(StakingRewards.options.address).call(defaultCallOptions(state)),
-          StakingRewards.methods.earned(state.defaultAccount).call(defaultCallOptions(state)),
-          StakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
-          StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
-          StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
-        ]);
-        const stakeData: { stakeType: StakeType | NftStakeType } & IStakeState = {
-          stakeType,
-          ownBalance,
-          stakedBalance,
-          remainingCapacityForDeposit,
-          remainingCapacityForWithdraw,
-          contractBalance,
-          currentRewardEarned,
-          rewardMinimumStakeTime: parseInt(rewardMinimumStakeTime, 10),
-          rewardDistributionTimeLeft: parseInt(rewardDistributionTimeLeft, 10),
-          unlockTimeLeft: parseInt(unlockTimeLeft, 10)
-        };
-        commit('updateStakeData', stakeData);
-      },
-
-      async stake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
-        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards || !StakingToken || !state.defaultAccount) return;
-
-        await StakingToken.methods.approve(StakingRewards.options.address, amount).send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        await StakingRewards.methods.stake(amount).send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        await dispatch('fetchStakeDetails', { stakeType });
-      },
-
-      async stakeNfts({ state, dispatch }, { ids, stakeType }: { ids: string[], stakeType: StakeType }) {
-        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards || !StakingToken || !state.defaultAccount) return;
-
-        if(ids.length === 1) {
-          await StakingToken.methods.approve(StakingRewards.options.address, ids[0]).send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-
-          await StakingRewards.methods.stake(ids[0]).send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-        } else {
-          await (StakingToken as Contract<IERC721>).methods.setApprovalForAll(StakingRewards.options.address, true).send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-
-          await (StakingRewards as Contract<INftStakingRewards>).methods.bulkStake(ids).send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-        }
-
-        await dispatch('fetchStakeDetails', { stakeType });
-      },
-
-      async unstakeNfts({ state, dispatch }, { ids, stakeType }: { ids: string[], stakeType: StakeType }) {
-        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards || !StakingToken || !state.defaultAccount) return;
-
-        if(ids.length === 1) {
-          await StakingRewards.methods.withdraw(ids[0]).send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-        } else {
-          await (StakingRewards as Contract<INftStakingRewards>).methods.bulkWithdraw(ids).send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-        }
-
-        await dispatch('fetchStakeDetails', { stakeType });
-      },
-
-      async unstake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
-        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards || !state.defaultAccount) return;
-
-        await StakingRewards.methods.withdraw(amount).send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        await dispatch('fetchStakeDetails', { stakeType });
-      },
-
-      async unstakeKing({ state, dispatch }, { amount }: { amount: string }) {
-        const { KingStakingRewardsUpgradeable } = state.contracts();
-        if(!KingStakingRewardsUpgradeable || !state.defaultAccount) return;
-
-        await KingStakingRewardsUpgradeable.methods.withdrawWithoutFee(amount).send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        await dispatch('fetchStakeDetails', { stakeType: 'king' });
-      },
-
-      async getStakedIds({ state }, stakeType) {
-        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
-        const CBKLand = state.contracts().CBKLand!;
-        if(!StakingRewards || !CBKLand || !state.defaultAccount || !isNftStakeType(stakeType)) return;
-
-        const stakedIds = await (StakingRewards as NftStakingRewardsAlias)?.methods.stakedIdsOf(state.defaultAccount).call({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        if(!stakedIds) return [];
-
-        const landIdsWithTier = await Promise.all(stakedIds.map(async (landId: string) =>
-        {
-          const land = await CBKLand.methods.get(landId).call(defaultCallOptions(state));
-          return { id: landId, tier: land[0] };
-        }));
-
-        return landIdsWithTier;
-      },
-
-      async claimKingReward({ state, dispatch }) {
-        const { KingStakingRewardsUpgradeable } = state.contracts();
-        if(!KingStakingRewardsUpgradeable) return;
-
-        await KingStakingRewardsUpgradeable.methods.getRewardWithoutFee().send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        await dispatch('fetchStakeDetails', { stakeType: 'king' });
-      },
-
-      async stakeUnclaimedRewards({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
-        if(stakeType !== stakeTypeThatCanHaveUnclaimedRewardsStakedTo) return;
-
-        const { CryptoBlades } = state.contracts();
-        if(!CryptoBlades) return;
-
-        await CryptoBlades.methods
-          .stakeUnclaimedRewards()
-          .send(defaultCallOptions(state));
-
-        await Promise.all([
-          dispatch('fetchSkillBalance'),
-          dispatch('fetchStakeDetails', { stakeType }),
-          dispatch('fetchFightRewardSkill'),
-        ]);
-      },
-
-      async claimReward({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
-        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards) return;
-
-        await StakingRewards.methods.getReward().send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        await dispatch('fetchStakeDetails', { stakeType });
       },
 
       async fetchIsLandSaleAllowed({state}) {

@@ -182,9 +182,6 @@ export interface IState {
   currentNftType: string | null;
   currentNftId: number | null;
 
-  staking: Record<StakeType | NftStakeType, IStakeState>;
-  stakeOverviews: Record<StakeType | NftStakeType, IStakeOverviewState>;
-
   waxBridgeWithdrawableBnb: string;
   waxBridgeRemainingWithdrawableBnbDuringPeriod: string;
   waxBridgeTimeUntilLimitExpires: number;

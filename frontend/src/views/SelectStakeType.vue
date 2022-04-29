@@ -38,7 +38,10 @@ export default Vue.extend({
   },
 
   computed: {
-    ...mapState(['stakeOverviews', 'staking']),
+    ...mapState({
+      staking: state => state.staking.staking,
+      stakeOverviews: state => state.staking.stakeOverviews,
+    }),
     ...mapGetters(['availableStakeTypes', 'availableNftStakeTypes']),
 
     entries() {
@@ -48,6 +51,7 @@ export default Vue.extend({
       const nftEntires = this.availableNftStakeTypes.map(stakeType => ({
         stakeType, ...humanReadableDetailsForNftStakeTypes[stakeType]
       }));
+      console.log(entries.concat(nftEntires));
       return entries.concat(nftEntires);
     },
 
@@ -83,7 +87,7 @@ export default Vue.extend({
       if(isNftStakeType(stakeType)) {
         return estYield.dividedBy(BN(10).pow(18));
       }
-
+      console.log(estYield);
       return estYield;
     }
   },

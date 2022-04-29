@@ -288,7 +288,10 @@ export default Vue.extend({
     } as Data;
   },
   computed: {
-    ...mapState(['staking', 'defaultAccount']),
+    ...mapState({
+      staking: state => state.staking.staking,
+      defaultAccount: state => state.defaultAccount,
+    }),
     progressBarWidth(): number{
       if(this.minimumStakeTime === 0) return 100;
       return 100 * ((this.minimumStakeTime - this.stakeUnlockTimeLeftCurrentEstimate) / this.minimumStakeTime);
@@ -581,7 +584,6 @@ export default Vue.extend({
     },
 
     updateEstimates(): void {
-      console.log('udpate');
       if (this.stakeUnlockTimeLeftCurrentEstimate > 0) {
         this.stakeUnlockTimeLeftCurrentEstimate--;
       }
