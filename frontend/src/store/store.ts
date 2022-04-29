@@ -9,7 +9,6 @@ import {getConfigValue, setUpContracts} from '@/contracts';
 import {
   characterFromContract,
   junkFromContract,
-  raidFromContract,
   shieldFromContract,
   targetFromContract,
   trinketFromContract,
@@ -21,7 +20,6 @@ import {
   Contract,
   Contracts,
   IPartnerProject,
-  IRaidState,
   isNftStakeType,
   isStakeType,
   IStakeOverviewState,
@@ -34,7 +32,7 @@ import {
 import {getCharacterNameFromSeed} from '@/character-name';
 import {approveFee, approveFeeFromAnyContract, approveFeeFromAnyContractSimple, getFeeInSkillFromUsd} from '@/contract-call-utils';
 
-import {burningManager as featureFlagBurningManager, raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly} from '@/feature-flags';
+import {burningManager as featureFlagBurningManager, stakeOnly as featureFlagStakeOnly} from '@/feature-flags';
 import {ERC20, IERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from '@/stake-types';
 import {Nft} from '@/interfaces/Nft';
@@ -114,6 +112,7 @@ import bridge from './bridge';
 import pvp from './pvp';
 import quests from './quests';
 import merchandise from './merchandise';
+import raid from './raid';
 
 export function createStore(web3: Web3) {
   return new Vuex.Store<IState>({
@@ -121,7 +120,8 @@ export function createStore(web3: Web3) {
       bridge,
       pvp,
       quests,
-      merchandise
+      merchandise,
+      raid
     },
     state: {
       web3,
@@ -213,21 +213,6 @@ export function createStore(web3: Web3) {
         cbkLandT1: { ...defaultStakeOverviewState },
         cbkLandT2: { ...defaultStakeOverviewState },
         cbkLandT3: { ...defaultStakeOverviewState }
-      },
-
-      raid: {
-        index: '0',
-        expectedFinishTime: '0',
-        raiderCount: '0',
-        playerPower: '0',
-        bossPower: '0',
-        bossTrait: '0',
-        status: '0',
-        joinSkill: '0',
-        staminaCost: '0',
-        durabilityCost: '0',
-        xpReward: '0',
-        accountPower: '0',
       },
 
       waxBridgeWithdrawableBnb: '0',
@@ -627,10 +612,6 @@ export function createStore(web3: Web3) {
         return (stakeType: StakeType): IStakeState => state.staking[stakeType];
       },
 
-      getRaidState(state): IRaidState {
-        return state.raid;
-      },
-
       fightGasOffset(state) {
         return state.fightGasOffset;
       },
@@ -896,21 +877,6 @@ export function createStore(web3: Web3) {
       updateStakeOverviewDataPartial(state, payload: { stakeType: StakeType } & IStakeOverviewState) {
         const { stakeType, ...data } = payload;
         Vue.set(state.stakeOverviews, stakeType, data);
-      },
-
-      updateRaidState(state: IState, payload: { raidState: IRaidState }) {
-        state.raid.index = payload.raidState.index;
-        state.raid.expectedFinishTime = payload.raidState.expectedFinishTime;
-        state.raid.raiderCount = payload.raidState.raiderCount;
-        state.raid.playerPower = payload.raidState.playerPower;
-        state.raid.bossPower = payload.raidState.bossPower;
-        state.raid.bossTrait = payload.raidState.bossTrait;
-        state.raid.status = payload.raidState.status;
-        state.raid.joinSkill = payload.raidState.joinSkill;
-        state.raid.staminaCost = payload.raidState.staminaCost;
-        state.raid.durabilityCost = payload.raidState.durabilityCost;
-        state.raid.xpReward = payload.raidState.xpReward;
-        state.raid.accountPower = payload.raidState.accountPower;
       },
 
       updateWaxBridgeDetails(state, payload: WaxBridgeDetailsPayload) {
@@ -2471,172 +2437,6 @@ export function createStore(web3: Web3) {
         });
 
         await dispatch('fetchStakeDetails', { stakeType });
-      },
-
-      async joinRaid({ state, dispatch }, { characterId, weaponId }) {
-        const { CryptoBlades, SkillToken, Raid1 } = state.contracts();
-        if(!Raid1 || !CryptoBlades || !SkillToken || !state.defaultAccount) {
-          return;
-        }
-
-        await approveFeeFromAnyContract(
-          CryptoBlades,
-          Raid1,
-          SkillToken,
-          state.defaultAccount,
-          getGasPrice(),
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          raidsFunctions => raidsFunctions.getJoinCostInSkill(),
-          {},
-          true
-        );
-
-        await Raid1!.methods
-          .joinRaid(characterId, weaponId)
-          .send(defaultCallOptions(state));
-
-        await dispatch('fetchSkillBalance');
-      },
-
-      async fetchRaidState({ state, commit }) {
-        if(featureFlagStakeOnly || !featureFlagRaid) return;
-
-        const Raid1 = state.contracts().Raid1!;
-
-        await Promise.all([
-          (async () => {
-            const raidState: IRaidState = raidFromContract(
-              await Raid1.methods.getRaidData().call(defaultCallOptions(state))
-            );
-
-            commit('updateRaidState', { raidState });
-          })(),
-        ]);
-      },
-
-      async fetchRaidRewards({ state }, { startIndex, endIndex }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .getEligibleRewardIndexes(startIndex, endIndex)
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchRaidingCharacters({ state }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .getParticipatingCharacters()
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchRaidingWeapons({ state }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .getParticipatingWeapons()
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchRaidJoinEligibility({ state }, { characterID, weaponID }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .canJoinRaid(characterID, weaponID)
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchIsRaidStarted({ state }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .isRaidStarted()
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchHaveEnoughEnergy({ state }, { characterID, weaponID }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .haveEnoughEnergy(characterID, weaponID)
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchIsCharacterRaiding({ state }, { characterID }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .isCharacterRaiding(characterID)
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchIsWeaponRaiding({ state }, { weaponID }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .isWeaponRaiding(weaponID)
-          .call(defaultCallOptions(state));
-      },
-
-
-      async claimRaidRewards({ state, dispatch }, { rewardIndex }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        const res = await Raid1!.methods
-          .claimReward(rewardIndex)
-          .send(defaultCallOptions(state));
-
-        // claimreward does not reward trinket, those are given at raidcompletion by the bot
-
-        if(res.events.RewardedJunk) {
-          const junkIds = res.events.RewardedJunk.length ?
-            res.events.RewardedJunk.map((x: { returnValues: { tokenID: any; }; }) => x.returnValues.tokenID) :
-            [res.events.RewardedJunk.returnValues.tokenID];
-          await dispatch('fetchJunks', junkIds);
-        }
-
-        if(res.events.RewardedKeyBox) {
-          const keyboxIds = res.events.RewardedKeyBox.length ?
-            res.events.RewardedKeyBox.map((x: { returnValues: { tokenID: any; }; }) => x.returnValues.tokenID) :
-            [res.events.RewardedKeyBox.returnValues.tokenID];
-          await dispatch('fetchKeyLootboxes', keyboxIds);
-        }
-
-        // there may be other events fired that can be used to obtain the exact loot
-        // RewardedWeapon, RewardedJunk, RewardedTrinket, RewardedKeyBox etc
-        const rewards = {
-          rewardsClaimed: res.events.RewardClaimed?.returnValues,
-          weapons: res.events.RewardedWeapon && (res.events.RewardedWeapon.length ?
-            res.events.RewardedWeapon.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedWeapon.returnValues]),
-
-          junks: res.events.RewardedJunk && (res.events.RewardedJunk.length ?
-            res.events.RewardedJunk.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedJunk.returnValues]),
-
-          keyboxes: res.events.RewardedKeyBox && (res.events.RewardedKeyBox.length ?
-            res.events.RewardedKeyBox.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedKeyBox.returnValues]),
-
-          bonusXp: res.events.RewardedXpBonus && (res.events.RewardedXpBonus.length ?
-            res.events.RewardedXpBonus.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedXpBonus.returnValues]),
-
-          dustLb: res.events.RewardedDustLB && (res.events.RewardedDustLB.length ?
-            res.events.RewardedDustLB.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedDustLB.returnValues]),
-
-          dust4b: res.events.RewardedDust4B && (res.events.RewardedDust4B.length ?
-            res.events.RewardedDust4B.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedDust4B.returnValues]),
-
-          dust5b: res.events.RewardedDust5B && (res.events.RewardedDust5B.length ?
-            res.events.RewardedDust5B.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedDust5B.returnValues]),
-        };
-        return rewards;
       },
 
       async fetchIsLandSaleAllowed({state}) {
