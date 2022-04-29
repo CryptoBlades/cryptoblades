@@ -36,7 +36,7 @@
     </div>
     <div
       class="fullscreen-warning"
-      v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0' && !hasStakedBalance))"
+      v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0'))"
     >
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
@@ -139,8 +139,7 @@ export default {
 
   computed: {
     ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
-    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl',
-      'availableStakeTypes', 'availableNftStakeTypes', 'hasStakedBalance']),
+    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl']),
 
     canShowApp() {
       return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
@@ -189,7 +188,6 @@ export default {
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
       'setupWeaponDurabilities',
-      'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
       'configureMetaMask',
@@ -288,7 +286,7 @@ export default {
       if (
         this.hideWalletWarning &&
         !this.showMetamaskWarning &&
-        (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0' && !this.hasStakedBalance))
+        (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0'))
       ) {
         this.$dialog.notify.warning(i18n.t('app.warning.message.hideWalletWarning'),
           {
@@ -416,14 +414,6 @@ export default {
         await this.updateCharacterStamina(c.id);
       });
     }, 3000);
-
-    this.availableStakeTypes.forEach((item) => {
-      this.fetchStakeDetails({ stakeType: item });
-    });
-
-    this.availableNftStakeTypes.forEach((item) => {
-      this.fetchStakeDetails({ stakeType: item });
-    });
 
     this.slowPollIntervalId = setInterval(async () => {
       await Promise.all([
