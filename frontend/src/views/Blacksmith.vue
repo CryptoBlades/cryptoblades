@@ -2116,14 +2116,17 @@ export default Vue.extend({
 
 .equipment-body{
   height: 90vh;
+  padding: 0px 50px;
 }
 
 .dust-body{
   height: 90vh;
+  padding: 0px 50px;
 }
 
 .land-body{
   height: 90vh;
+  padding: 0px 50px;
 }
 
 
@@ -2485,6 +2488,10 @@ img.elements-modal:hover {
 
   .magic-circle{
     width: 100%;
+  }
+
+  .weapon-body,  .equipment-body, .dust-body, .land-body{
+    padding: 0px 20px;
   }
 
 
