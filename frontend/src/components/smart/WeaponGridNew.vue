@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div class="filters" v-if="!newWeapon" @change="saveFilters()">
+    <div class="filters pl-4 pr-4" v-if="!newWeapon" @change="saveFilters()">
       <h3 v-if="!noTitle">{{$t('weapons')}} ({{ ownWeapons }})</h3>
       <h3 v-if="noTitle">Selected ({{ ignore.length }})</h3>
       <span class="filter-icon" @click="showFilter"></span>
       <div class="row d-flex align-items-center none-mobile" style="flex-grow:0.6" >
-        <div class="col-sm-12 col-md-6 col-lg-4 d-flex none-mobile">
+          <div class="col-sm-12 col-md-6 col-lg-4 d-flex none-mobile">
             <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
               <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
               <strong>{{$t('weaponGrid.showFavorite')}}</strong>

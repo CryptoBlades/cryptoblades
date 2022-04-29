@@ -483,7 +483,7 @@
         </div>
         </transition>
         <div class="row mt-3" v-if="showReforge && showReforgeDust === false">
-          <div class="col-md-9 col-xl-8 col-lg-7">
+          <div class="col-md-9 col-xl-9 col-lg-7">
               <div class="row mt-3 ml-2" v-if="showReforge && !showReforgeDust">
                 <div class="weapon-header none-mobile">
                   <div class="nav-icons" @click="displayBlacksmith()">
@@ -501,12 +501,12 @@
                   </div>
                 </div>
             </div>
-            <div class="weapon-content">
+            <div class="weapon-content pr-0 pl-0">
               <weapon-grid v-model="burnWeaponId" :ignore="burnWeaponIds" :noTitle="true"
                       :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon"  />
             </div>
           </div>
-          <div class="col-md-3 col-xl-4 col-lg-5 none-mobile">
+          <div class="col-md-3 col-xl-3 col-lg-5 none-mobile">
             <div class="dust-content">
               <h4>{{$t('blacksmith.youWill').toUpperCase()}}</h4>
               <div class="create-dust flex-column">

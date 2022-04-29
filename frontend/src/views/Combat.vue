@@ -1,5 +1,5 @@
 <template>
-  <div style="display: inline-flex" class="body main-font">
+  <div style="display: inline-flex" class="body main-font pl-3 pr-3">
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
       <div v-if="error !== null">
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
