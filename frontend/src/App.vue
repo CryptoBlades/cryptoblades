@@ -553,6 +553,8 @@ button,
 
 .error {
   color: red;
+  overflow: hidden;
+  max-width: 75vw;
 }
 
 .fire,
