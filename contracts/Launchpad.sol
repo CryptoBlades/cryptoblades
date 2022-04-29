@@ -31,6 +31,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_FUNDING_PERIOD_PHASE_1 = 2;
     uint256 public constant VAR_FUNDING_PERIOD_PHASE_2 = 3;
     uint256 public constant VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER = 4;
+    uint256 public constant VAR_UNCLAIMED_ALLOCATION_PERCENTAGE = 5;
     
 
     // TIERS INFO
@@ -41,7 +42,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Launch) public launches;
     mapping(uint256 => uint256) public launchTokenPrice;
     mapping(uint256 => uint256) public launchStartTime;
-    mapping(uint256 => uint256) public launchAmountToSell;
+    //mapping(uint256 => uint256) public launchAmountToSell;
     mapping(uint256 => uint256) public launchFundsToRaise;
     mapping(uint256 => uint256) public launchBaseAllocation;
     mapping(uint256 => uint256) public launchTotalRaised;
@@ -52,6 +53,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     mapping(uint256 => mapping(address => uint256)) public launchUserStakedAmountSnapshot;    
     mapping(uint256 => mapping(address => uint256)) public launchUserInvestment;
     mapping(uint256 => mapping(address => uint256)) public launchUserUnclaimedSkillCommittedValue;
+    mapping(uint256 => uint256) public launchTotalUnclaimedSkillCommittedValue;
 
     // VESTING INFO
     mapping(uint256 => uint256[]) launchVestingsPercentage;
@@ -86,7 +88,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     function getTierForStakedAmount(uint256 amount) public view returns (uint256 tier) {
         for (uint256 i = 1; i <= vars[VAR_TIERS_AMOUNT]; i++) {
-            if (amount > tierStakingRequirement[i]) {
+            if (amount >= tierStakingRequirement[i]) {
                 tier++;
             } else {
                 break;
@@ -127,7 +129,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     function getLaunchDetails(uint256 launchId) public view returns (
         uint256 tokenPrice,
         uint256 startTime, 
-        uint256 amountToSell,
+        //uint256 amountToSell,
         uint256 fundsToRaise,
         uint256 maxAllocation,
         uint256 totalRaised,
@@ -135,7 +137,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     {
         tokenPrice = launchTokenPrice[launchId];
         startTime = launchStartTime[launchId];
-        amountToSell = launchAmountToSell[launchId];
+        //amountToSell = launchAmountToSell[launchId];
         fundsToRaise = launchFundsToRaise[launchId];
         maxAllocation = getOverallMaxAllocation(launchId);
         totalRaised = launchTotalRaised[launchId];
@@ -211,7 +213,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         
         launchStartTime[launchId + 1] = startTime;
         launchTokenPrice[launchId + 1] = launchTokenPrice[launchId];
-        launchAmountToSell[launchId + 1] = launchAmountToSell[launchId].sub(launchTotalRaised[launchId].mul(1e18).div(launchTokenPrice[launchId]));
+        //launchAmountToSell[launchId + 1] = launchAmountToSell[launchId].sub(launchTotalRaised[launchId].mul(1e18).div(launchTokenPrice[launchId]));
         launchFundsToRaise[launchId + 1] = launchFundsToRaise[launchId].sub(launchTotalRaised[launchId]);
         launchBaseAllocation[launchId + 1] = launchBaseAllocation[launchId];
         launchTokenAddress[launchId + 1] = launchTokenAddress[launchId];
@@ -328,7 +330,11 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     function commitUnclaimedSkill(uint256 launchId, uint256 amount) external {
         require(launchEligibleUsersSnapshot[launchId].contains(msg.sender), "Not whitelisted");
+        uint256 committingValue = amount.mul(skillPrice).div(1e18);
+        require((launchTotalUnclaimedSkillCommittedValue[launchId].add(committingValue)).mul(vars[VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER]).div(1e18) <= vars[VAR_UNCLAIMED_ALLOCATION_PERCENTAGE].mul(launchFundsToRaise[launchId]).div(100));
         _game.deductAfterPartnerClaim(amount, msg.sender);
-        launchUserUnclaimedSkillCommittedValue[launchId][msg.sender] += amount.mul(skillPrice).div(1e18);
+        launchUserUnclaimedSkillCommittedValue[launchId][msg.sender] += committingValue;
+        launchTotalUnclaimedSkillCommittedValue[launchId] += committingValue;
+        launchBaseAllocation[launchId] = launchBaseAllocation[launchId].sub(launchBaseAllocation[launchId].mul(launchTotalUnclaimedSkillCommittedValue[launchId]).div(launchFundsToRaise[launchId]));
     }
 }
