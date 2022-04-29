@@ -73,6 +73,7 @@ interface IStake {
 }
 
 const staking = {
+  namespaced: true,
   state: {
     staking: {
       skill: { ...defaultStakeState },
