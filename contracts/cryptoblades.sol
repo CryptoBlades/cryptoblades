@@ -351,6 +351,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
         uint256 tokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
 
+        uint256 offset = (tokens.mul(combatTokenChargePercent).mul(tokensPrices.skillTokenPrice())).div(tokensPrices.tokenPrice());
 
         if (playerRoll < monsterRoll) {
             tokens = 0;
@@ -372,8 +373,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         emit FightOutcome(tx.origin, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
 
-        return (tokens.mul(priceOracleSkillPerUsd.currentPrice()).mul(combatTokenChargePercent))
-            .div(tokensPrices.tokenPrice().mul(10**18));
+        return offset;
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {

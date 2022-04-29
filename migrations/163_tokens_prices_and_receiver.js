@@ -34,8 +34,6 @@ module.exports = async function (deployer, network, accounts) {
 
         await tokensPrices.grantRole(await tokensPrices.GAME_ADMIN(), accounts[0]);
         await tokensReceiver.grantRole(await tokensReceiver.GAME_ADMIN(), accounts[0]);
-        await game.grantRole(await game.GAME_ADMIN(), tokensReceiver.address);
-        await game.setTokensPricesAddress(tokensPrices.address);
 
         if (network === 'bsctestnet' || network === 'bsctestnet-fork') {
             // TODO: This is the PvP bot's address, do we want this one or another one?

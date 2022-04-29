@@ -4729,21 +4729,24 @@ export function createStore(web3: Web3) {
       },
 
       async getCurrentSkillPrice({ state }) {
-        const { BasicPriceOracle } = state.contracts();
-        if (!BasicPriceOracle || !state.defaultAccount) return;
+        const { TokensPrices } = state.contracts();
+        if (!TokensPrices || !state.defaultAccount) return;
 
-        const res = await BasicPriceOracle.methods.currentPrice().call(defaultCallOptions(state));
-
-        return res;
+        return await TokensPrices.methods.skillTokenPrice().call(defaultCallOptions(state));
       },
 
       async getNativeTokenPriceInUsd({ state }) {
         const { TokensPrices } = state.contracts();
         if (!TokensPrices || !state.defaultAccount) return;
 
-        const res = await TokensPrices.methods.tokenPrice().call(defaultCallOptions(state));
+        return await TokensPrices.methods.tokenPrice().call(defaultCallOptions(state));
+      },
 
-        return res;
+      async getSkillToNativeRatio({ state }) {
+        const { TokensPrices } = state.contracts();
+        if (!TokensPrices || !state.defaultAccount) return;
+
+        return await TokensPrices.methods.skillToNativeRatio().call(defaultCallOptions(state));
       },
 
       async doEncounterPayNative({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier, offsetCost }) {

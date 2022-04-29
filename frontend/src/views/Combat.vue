@@ -298,7 +298,7 @@ export default {
     ...mapActions(['fetchTargets', 'doEncounterPayNative',
       'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
       'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight',
-      'getCurrentSkillPrice', 'getNativeTokenPriceInUsd', 'getCombatTokenChargePercent']),
+      'getCurrentSkillPrice', 'getNativeTokenPriceInUsd', 'getCombatTokenChargePercent', 'getSkillToNativeRatio']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -423,13 +423,22 @@ export default {
         const expectedPayoutWei = new BigNumber(await this.fetchExpectedPayoutForMonsterPower({ power: targetPower, isCalculator: true }));
 
         const nativeTokenPriceUsd = new BigNumber (await this.getNativeTokenPriceInUsd());
-        const skillPriceUsdWei = new BigNumber(await this.getCurrentSkillPrice());
+        const skillPriceUsd = new BigNumber(await this.getCurrentSkillPrice());
         const tokenChargePercentage = (await this.getCombatTokenChargePercent());
 
-        const offsetToPayInNativeToken = ((
-          expectedPayoutWei.multipliedBy(skillPriceUsdWei).multipliedBy(tokenChargePercentage)
-        ).div(nativeTokenPriceUsd.multipliedBy('1000000000000000000'))).integerValue(BigNumber.ROUND_DOWN);
+        // const skillToNativeRatio = (await this.getSkillToNativeRatio());
 
+        // const oldOffsetToPayInNativeToken = ((
+        //   expectedPayoutWei.multipliedBy(skillPriceUsdWei).multipliedBy(tokenChargePercentage)
+        // ).div(nativeTokenPriceUsd.multipliedBy('1000000000000000000'))).integerValue(BigNumber.ROUND_DOWN);
+
+        // console.log('prev: ', oldOffsetToPayInNativeToken);
+
+        const offsetToPayInNativeToken = (
+          expectedPayoutWei.multipliedBy(tokenChargePercentage).multipliedBy(skillPriceUsd)
+        ).div(nativeTokenPriceUsd).integerValue(BigNumber.ROUND_DOWN);
+
+        console.log('new: ', offsetToPayInNativeToken.toString());
 
         const results = await this.doEncounterPayNative({
           characterId: this.currentCharacterId,
