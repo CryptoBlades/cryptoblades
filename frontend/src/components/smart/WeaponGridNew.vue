@@ -414,6 +414,9 @@ export default Vue.extend({
       console.log('weapon forged');
       await this.createPagination(this.activePage);
     },
+    starFilter(){
+      this.createPagination(1);
+    },
   },
   methods: {
     ...(mapActions(['fetchWeapons','renameWeapon','fetchTotalWeaponRenameTags',
