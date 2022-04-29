@@ -67,7 +67,7 @@ import { Contracts, isStakeType, isNftStakeType, StakeType, NftStakeType, Stakin
 
 import { StakingContractEntry, stakingContractsInfo, nftStakingContractsInfo } from './stake-types';
 
-import {raid, stakeOnly, pvp, quests, burningManager} from './feature-flags';
+import {raid, pvp, quests, burningManager} from './feature-flags';
 import {currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 interface RaidContracts {
@@ -232,10 +232,6 @@ async function setUpStakingContracts(web3: Web3) {
 export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   const stakingContracts = await setUpStakingContracts(web3);
-
-  if (stakeOnly) {
-    return stakingContracts;
-  }
 
   const cryptoBladesContractAddr = getConfigValue('VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS') || (cryptoBladesNetworks as Networks)[networkId]!.address;
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as Abi, cryptoBladesContractAddr);
