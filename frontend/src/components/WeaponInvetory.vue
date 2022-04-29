@@ -553,21 +553,10 @@ export default {
   margin-top: 5px;
 }
 
-.bonus-power > div{
-  display: flex;
-  border: 1px solid rgba(255, 255, 255, 0.397);
-  padding: 0px 10px;
-  border-radius: 3px;
-  font-size: 1.2em;
-  color: #fff;
-  margin-right: 7px;
-}
-
 .small-durability-bar {
   position: relative;
   height: 3px;
   width: 80%;
-  /* margin: 0 auto; */
   background : linear-gradient(to right, rgb(236, 75, 75) var(--durabilityReady), rgba(255, 255, 255, 0.1) 0);
 }
 
