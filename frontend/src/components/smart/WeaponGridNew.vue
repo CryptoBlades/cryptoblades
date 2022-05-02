@@ -216,7 +216,9 @@ export default Vue.extend({
         void x;
         return true;
       },
-      default: [],
+      default() {
+        return [];
+      },
     },
     noPagination: {
       type: Boolean,
@@ -611,7 +613,7 @@ export default Vue.extend({
     beforeEnter(el: any){
       el.style.opacity = 0;
       el.style.transform = 'translateY(100px)';
-    },
+    }
   },
   async mounted() {
     this.checkStorageFavorite();
