@@ -2109,7 +2109,6 @@ export default Vue.extend({
 
 
 .weapon-body{
-  /* height: 90vh;  */
   overflow: auto;
   padding: 0px 50px;
 }
