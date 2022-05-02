@@ -209,13 +209,7 @@ export default Vue.extend({
       default: null,
     },
     ignore: {
-      // this forces Typescript to consider a prop a certain type
-      // without us specifying a "type" property;
-      // Vue's "type" property is not as flexible as we need it here
-      validator(x: string | number | null) {
-        void x;
-        return true;
-      },
+      type: Array as PropType<string[]>,
       default() {
         return [];
       },

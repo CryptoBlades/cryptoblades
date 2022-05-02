@@ -673,7 +673,6 @@ interface StoreMappedGetters {
   ownWeapons: any[];
   nftsCount: number;
   stakedSkillBalanceThatCanBeSpent: number;
-  getWeaponName: string;
 }
 
 interface Data {
@@ -789,8 +788,11 @@ export default Vue.extend({
     ...(mapGetters([
       'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
       'getPowerfulDust', 'getGreaterDust', 'getLesserDust',
-      'stakedSkillBalanceThatCanBeSpent', 'getWeaponName',
+      'stakedSkillBalanceThatCanBeSpent',
     ]) as Accessors<StoreMappedGetters>),
+    ...mapGetters([
+      'getWeaponName'
+    ]),
 
     totalSkillBalance(): BN {
       console.log(toBN(fromWeiEther(this.skillRewards)).plus(toBN(fromWeiEther(this.inGameOnlyFunds))).plus(toBN(fromWeiEther(this.skillBalance))).toString());
