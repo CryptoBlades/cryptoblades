@@ -216,7 +216,7 @@ export default Vue.extend({
         void x;
         return true;
       },
-      default: null,
+      default: [],
     },
     noPagination: {
       type: Boolean,
@@ -612,10 +612,6 @@ export default Vue.extend({
       el.style.opacity = 0;
       el.style.transform = 'translateY(100px)';
     },
-    getNoOfItemPerRow(){
-      const gridWidth = this.$refs['weapon-grid'].$el.clientWidth;
-      return Math.floor((gridWidth - (((gridWidth/216)*32)+16))/216);
-    }
   },
   async mounted() {
     this.checkStorageFavorite();

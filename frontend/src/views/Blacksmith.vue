@@ -263,16 +263,12 @@
                     </div>
                     <div class="row justify-content-center select-elements-container" ref="forgeWeapon">
                       <div id="random-border" v-on:click="setChosenElement($event, 100)"> </div>
-                      <div class="line-sep-2"></div>
                       <div class="line-sep"></div>
                       <div id="fire-border" v-on:click="setChosenElement($event, 0)"> </div>
-                      <div class="line-sep-2"></div>
                       <div class="line-sep"></div>
                       <div id="earth-border" v-on:click="setChosenElement($event, 1)"> </div>
-                      <div class="line-sep-2"></div>
                       <div class="line-sep"></div>
                       <div id="lightning-border" v-on:click="setChosenElement($event, 2)"> </div>
-                      <div class="line-sep-2"></div>
                       <div class="line-sep"></div>
                       <div id="water-border" v-on:click="setChosenElement($event, 3)"> </div>
                     </div>
@@ -677,6 +673,7 @@ interface StoreMappedGetters {
   ownWeapons: any[];
   nftsCount: number;
   stakedSkillBalanceThatCanBeSpent: number;
+  getWeaponName: string;
 }
 
 interface Data {
@@ -923,7 +920,6 @@ export default Vue.extend({
 
     async onForgeWeapon() {
       if(this.disableForge) return;
-      this.$refs.forgeWeapon.classList.add('activate-line');
       (this.$refs['forge-element-selector-modal']as BModal)?.hide();
 
       const forgeMultiplier = 1;
