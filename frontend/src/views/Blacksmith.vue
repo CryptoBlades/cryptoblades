@@ -1,5 +1,5 @@
 <template>
-  <div class="body main-font blacksmith-page">
+  <div class="main-font blacksmith-page">
     <div class="mobile-menu">
       <span :class="activeTab == 'forge' ? 'active' : ''"
       @click="displayBlacksmith()"><span id="forge"></span> {{$t('blacksmith.forge').toUpperCase()}}</span>
@@ -142,7 +142,6 @@
     </Transition>
 
     <div class="bg-tint"></div>
-      <b-row>
         <b-col xl="12 weapon-body" v-if="$route.query.tab === 'weapon'">
           <div class="blank-slate" v-if="ownWeapons.length === 0">
             <span v-html="$t('blacksmith.noWeapons')"/>
@@ -408,7 +407,7 @@
                   </div>
                   <div>
                     <input v-model="lesserDust" type="range" min="0" :max="getLesserDust()" value="0" steps="1">
-                    <div class="value right">{{lesserDust}}/{{getLesserDust()}} {{$t('blacksmith.bonusDamage')}}</div>
+                    <div class="value right">{{lesserDust}}/{{getLesserDust()}}</div>
                   </div>
                   <div>
                     <span>{{lesserDust}}</span>
@@ -429,7 +428,7 @@
                   </div>
                   <div>
                     <input v-model="greaterDust" type="range" min="0" :max="getGreaterDust()" value="0" steps="1">
-                    <div class="value right">{{greaterDust}}/{{getGreaterDust()}} {{$t('blacksmith.bonusDamage')}}</div>
+                    <div class="value right">{{greaterDust}}/{{getGreaterDust()}}</div>
                   </div>
                   <div>
                     <span>{{greaterDust}}</span>
@@ -450,7 +449,7 @@
                   </div>
                   <div>
                     <input v-model="powerfulDust" type="range" min="0" :max="getPowerfulDust()" value="0" steps="1">
-                    <div class="value right">{{powerfulDust}}/{{getPowerfulDust()}} {{$t('blacksmith.bonusDamage')}}</div>
+                    <div class="value right">{{powerfulDust}}/{{getPowerfulDust()}}</div>
                   </div>
                   <div>
                     <span>{{powerfulDust}}</span>
@@ -470,7 +469,7 @@
                   </button>
                   <div class="back-btn" @click="displayBlacksmith()">
                     <span class="menu-btn"></span>
-                    <span>{{$t('blacksmith.changeEquipment').toUpperCase()}}</span>
+                    <span>{{$t('blacksmith.changeEquipment')}}</span>
                   </div>
                 </div>
               </div>
@@ -502,7 +501,7 @@
                       :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon"  />
             </div>
           </div>
-          <div class="col-md-3 col-xl-3 col-lg-5 none-mobile">
+          <div class="col-md-3 col-xl-3 col-lg-5 dust-area none-mobile">
             <div class="dust-content">
               <h4>{{$t('blacksmith.youWill').toUpperCase()}}</h4>
               <div class="create-dust flex-column">
@@ -568,7 +567,6 @@
           </div>
         </div>
       </b-col>
-    </b-row>
     <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
              :title="$t('blacksmith.dustReforgeConfirmation')" @ok="onReforgeWeaponWithDust">
       <div class="row">
@@ -996,8 +994,8 @@ export default Vue.extend({
     computeDust(operator: string,star: number, lesser: number,greater: number,powerful: number){
       if(operator === 'add'){
         if(star <= 3) this.lesser = this.lesser + (star * 2);
-        else if (star === 4) this.greater = this.greater + 1;
-        else if (star === 5) this.powerful = this.powerful + 1;
+        else if (star === 4) this.greater = this.greater + 2;
+        else if (star === 5) this.powerful = this.powerful + 2;
 
         if(lesser > 0){
           this.lesser = this.lesser + Math.floor(lesser/2);
@@ -1010,8 +1008,8 @@ export default Vue.extend({
         }
       }else{
         if(star <= 3) this.lesser = this.lesser - (star * 2);
-        else if (star === 4) this.greater = this.greater - 1;
-        else if (star === 5) this.powerful = this.powerful - 1;
+        else if (star === 4) this.greater = this.greater - 2;
+        else if (star === 5) this.powerful = this.powerful - 2;
 
         if(lesser > 0){
           this.lesser = this.lesser - Math.floor(lesser/2);
@@ -1553,7 +1551,6 @@ export default Vue.extend({
 
 .btn-forge > div > span {
   font-family: Oswald;
-  color: #6b6969;
   font-size: 16px;
 }
 
@@ -1575,7 +1572,7 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   border: none;
-  width: 200px;
+  width: 10rem;
   height: 70px;
   align-items: center;
   vertical-align: middle;
@@ -1594,8 +1591,6 @@ export default Vue.extend({
 .button-div > button:hover, .forge-btns:hover{
   display: flex !important;
   flex-direction: column !important;
-  width: 200px !important;
-  height: 70px !important;
   align-items: center !important;
   vertical-align: middle !important;
   justify-content: center !important;
@@ -1707,6 +1702,9 @@ export default Vue.extend({
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
+  min-height: 90vh;
+  min-width: 100%;
+  padding-top: 0;
 }
 
 .reforge-dust{
@@ -1873,8 +1871,6 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-top: auto;
-  margin-bottom: auto;
   align-items: stretch;
 }
 
@@ -1977,6 +1973,7 @@ export default Vue.extend({
 
 .dust-content{
   padding: 20px;
+  margin-top: 5rem;
 }
 
 .dust-content > div:nth-child(3){
@@ -2041,7 +2038,6 @@ export default Vue.extend({
 }
 
 .dust-gauge > div:nth-child(3) > span:nth-child(2){
-  /* background-color: rgba(255, 255, 255, 0.425); */
   border: 1px solid rgba(255, 255, 255, 0.205);
   padding: 5px 20px;
   color: #fff;
@@ -2107,7 +2103,6 @@ export default Vue.extend({
 
 
 .weapon-body{
-  overflow: auto;
   padding: 0px 50px;
 }
 
@@ -2314,15 +2309,11 @@ export default Vue.extend({
 }
 
 .confirmReforge{
-  /* margin: 1em auto 2em; */
   border-radius:0.15em;
   text-decoration:none;
   font-weight:400;
   text-align:center;
   width: 12em;
-}
-.confirmReforge:active{
-  top:0.1em;
 }
 
 .weapon {
@@ -2560,7 +2551,6 @@ img.elements-modal:hover {
 
     .body-forge > div > div > ul{
     height: 40vh;
-    overflow-y: auto;
   }
 
 
@@ -2711,7 +2701,6 @@ img.elements-modal:hover {
     font-size: 0.8em;
     word-break: normal;
     padding: 0px;
-    /* white-space: nowrap; */
   }
 
   .details > span > span{

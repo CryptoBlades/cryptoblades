@@ -7,14 +7,11 @@
     @mouseleave="hover = !isMobile()"
   >
 
-      <!-- :style="selected ? 'border:5px solid #fff' : ''" -->
-
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
     </div>
 
     <div class="glow-container" ref="el" :class="['glow-' + (weapon.stars || 0)]">
-      <!-- below use of weapon.id is for test purpose, should be replaced with getWeaponCosmetic(weapon.id) -->
       <div class="animation" v-bind:class="showCosmetics ? 'weapon-animation-applied-' + getWeaponCosmetic(weapon.id) : ''"/>
       <img v-if="showPlaceholder" v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
         class="placeholder" :src="getWeaponArt(weapon)" />
@@ -54,25 +51,18 @@
         </div>
       </div>
     </div>
-
-    <!-- <div class="id">{{$t('weaponIcon.id')}} #{{ weapon.id }}</div> -->
     <div class="rarity-label" :class="['rarity-' + (weapon.stars || 0)]">{{setRarity(weapon.stars)}}</div>
-
-
     <div class="stats">
       <div v-if="weapon.stat1Value">
         <span :class="weapon.stat1.toLowerCase() + '-icon'" class="mr-1 icon"></span>
-        <!-- <span :class="weapon.stat1.toLowerCase()">{{ weapon.stat1 }} +{{ weapon.stat1Value }}</span> -->
         <span :class="weapon.stat1.toLowerCase()">{{ weapon.stat1Value }}</span>
       </div>
       <div v-if="weapon.stat2Value">
         <span :class="weapon.stat2.toLowerCase() + '-icon'" class="mr-1 icon"></span>
-        <!-- <span :class="weapon.stat2.toLowerCase()">{{ weapon.stat2 }} +{{ weapon.stat2Value }}</span> -->
         <span :class="weapon.stat2.toLowerCase()">{{ weapon.stat2Value }}</span>
       </div>
       <div v-if="weapon.stat3Value">
         <span :class="weapon.stat3.toLowerCase() + '-icon'" class="mr-1 icon"></span>
-        <!-- <span :class="weapon.stat3.toLowerCase()">{{ weapon.stat3 }} +{{ weapon.stat3Value }}</span> -->
         <span :class="weapon.stat3.toLowerCase()">{{ weapon.stat3Value }}</span>
       </div>
     </div>
@@ -497,7 +487,6 @@ export default {
   width: 100%;
   margin: 0 auto;
   border-radius: 2px;
-  /* border: 0.5px solid rgb(216, 215, 215); */
   background : linear-gradient(to right, rgb(236, 75, 75) var(--durabilityReady), rgba(255, 255, 255, 0.1) 0);
 }
 
@@ -654,7 +643,6 @@ export default {
 }
 
 .weapon-details{
-  /* background-color: rgba(0, 0, 0, 0.363); */
   display: flex;
   padding: 0px 15px;
   flex-direction: column;
@@ -671,7 +659,6 @@ export default {
 }
 
 .name {
-  /* position: absolute; */
   bottom: 20px;
   left: 12%;
   right: 12%;
@@ -687,22 +674,18 @@ export default {
 }
 
 .glow-1 {
-  /* box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5); */
   border: 1px solid rgba(0, 162, 255);
 }
 
 .glow-2 {
-  /* box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5); */
   border: 1px solid rgba(125, 0, 125);
 }
 
 .glow-3 {
-  /* box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3); */
   border: 1px solid rgba(255, 102, 0);
 }
 
 .glow-4 {
-  /* box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5); */
   border: 1px solid rgba(125, 0, 0);
 }
 

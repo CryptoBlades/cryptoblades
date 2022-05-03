@@ -1,4 +1,3 @@
-/* eslint-disable vue/valid-template-root */
 <template>
   <div class="mobile-right-menu" v-if="activeTab == 'forge' && !showReforgeDust">
       <div v-for="menu in menuItem" :key="menu.id" class="menu-item mb-3 mt-3" :class="menu.isActive ? 'active-tag' : 'unactive-tag'">
