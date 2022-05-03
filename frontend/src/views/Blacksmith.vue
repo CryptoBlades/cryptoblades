@@ -141,8 +141,8 @@
       </div>
     </Transition>
 
-    <div class="bg-tint"></div>
-        <b-col xl="12 weapon-body" v-if="$route.query.tab === 'weapon'">
+      <div class="bg-tint"></div>
+        <div class="weapon-body" v-if="$route.query.tab === 'weapon'">
           <div class="blank-slate" v-if="ownWeapons.length === 0">
             <span v-html="$t('blacksmith.noWeapons')"/>
             <br>
@@ -154,8 +154,8 @@
             />
           </div>
           <transition name="slide-fade">
-          <div class="row mt-3" v-if="ownWeapons.length > 0 && !showReforge">
-            <div class="col">
+          <div class="mt-3" v-if="ownWeapons.length > 0 && !showReforge">
+            <div class="col-12">
               <div class="weapon-header none-mobile">
                 <div class="nav-icons">
                   <div class="forge-btn" @click="displayBlacksmith()">
@@ -333,7 +333,7 @@
 
         <!-- Reforge Dust Section -->
         <transition name="slide-fade">
-        <div class="row mt-3" v-if="reforgeWeaponId && showReforge && showReforgeDust === true">
+        <div style="margin: 0;" class="row mt-3" v-if="reforgeWeaponId && showReforge && showReforgeDust === true">
           <div class="col-lg-4 reforge-dust">
              <div class="magic-circle">
               <span class="inner" :class="magicCircleSpeed ? 'faster reverse' : 'slower reverse'"></span>
@@ -477,9 +477,9 @@
           </div>
         </div>
         </transition>
-        <div class="row mt-3" v-if="showReforge && showReforgeDust === false">
+        <div style="margin: 0" class="row mt-3" v-if="showReforge && showReforgeDust === false">
           <div class="col-md-9 col-xl-9 col-lg-7">
-              <div class="row mt-3 ml-2" v-if="showReforge && !showReforgeDust">
+              <div class="row ml-2" v-if="showReforge && !showReforgeDust">
                 <div class="weapon-header none-mobile">
                   <div class="nav-icons" @click="displayBlacksmith()">
                     <div class="forge-btn">
@@ -544,7 +544,7 @@
             </div>
           </div>
         </div>
-      </b-col>
+      </div>
       <b-col cols="12" v-if="$route.query.tab === 'equipment'">
         <div class="row equipment-body">
           <div class="col-xl-12 col-lg-12">
@@ -1702,8 +1702,9 @@ export default Vue.extend({
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  min-height: 90vh;
+  min-height: 95vh;
   min-width: 100%;
+  display: inline-flex;
   padding-top: 0;
 }
 
@@ -1715,6 +1716,7 @@ export default Vue.extend({
   width: 100%;
   height: 100%;
   position: absolute;
+  top: 0;
   background-color: rgba(0, 0, 0, 0.555);
 }
 
@@ -2103,22 +2105,23 @@ export default Vue.extend({
 
 
 .weapon-body{
-  padding: 0px 50px;
+  padding-left: 50px;
+  width: 100%;
 }
 
 .equipment-body{
   height: 90vh;
-  padding: 0px 50px;
+  padding-left: 50px;
 }
 
 .dust-body{
   height: 90vh;
-  padding: 0px 50px;
+  padding-left: 50px;
 }
 
 .land-body{
   height: 90vh;
-  padding: 0px 50px;
+  padding-left: 50px;
 }
 
 
@@ -2480,6 +2483,10 @@ img.elements-modal:hover {
 
   .weapon-body,  .equipment-body, .dust-body, .land-body{
     padding: 0px 20px;
+  }
+
+  .blacksmith-page {
+    display: block;
   }
 
 
