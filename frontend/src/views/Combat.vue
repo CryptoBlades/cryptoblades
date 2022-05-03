@@ -1,5 +1,5 @@
 <template>
-  <div style="display: inline-flex" class="body main-font">
+  <div style="display: inline-flex" class="body main-font pl-3 pr-3">
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
       <div v-if="error !== null">
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
@@ -610,6 +610,12 @@ h5{
   justify-content: center;
 }
 
+.content > div > div > div{
+  padding: 20px 40px;
+}
+
+
+/* .frame-line > img{ */
 .frame-line:hover{
   max-width: 112%;
   opacity: 1;
