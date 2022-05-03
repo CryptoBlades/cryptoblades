@@ -153,9 +153,8 @@
               @click="onForgeWeapon"
             />
           </div>
-          <transition name="slide-fade">
           <div class="mt-3" v-if="ownWeapons.length > 0 && !showReforge">
-            <div class="col-12">
+            <div style="padding-left: 0;" class="col-12">
               <div class="weapon-header none-mobile">
                 <div class="nav-icons">
                   <div class="forge-btn" @click="displayBlacksmith()">
@@ -329,10 +328,8 @@
               </div>
             </div>
           </div>
-          </transition>
 
         <!-- Reforge Dust Section -->
-        <transition name="slide-fade">
         <div style="margin: 0;" class="row mt-3" v-if="reforgeWeaponId && showReforge && showReforgeDust === true">
           <div class="col-lg-4 reforge-dust">
              <div class="magic-circle">
@@ -476,10 +473,9 @@
             </div>
           </div>
         </div>
-        </transition>
-        <div style="margin: 0" class="row mt-3" v-if="showReforge && showReforgeDust === false">
+        <div style="margin-right: 0" class="row mt-2" v-if="showReforge && showReforgeDust === false">
           <div class="col-md-9 col-xl-9 col-lg-7">
-              <div class="row ml-2" v-if="showReforge && !showReforgeDust">
+              <div class="row mt-3 ml-1" v-if="showReforge && !showReforgeDust">
                 <div class="weapon-header none-mobile">
                   <div class="nav-icons" @click="displayBlacksmith()">
                     <div class="forge-btn">
@@ -1241,7 +1237,6 @@ export default Vue.extend({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 30px;
   flex-wrap: wrap;
   z-index: 99;
 }
@@ -1475,7 +1470,7 @@ export default Vue.extend({
 
 /* MODAL TRANSITION */
 .slide-fade-enter-active, .slide-fade-leave-active  {
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease-out;
 }
 
 .slide-fade-enter,
@@ -1620,8 +1615,6 @@ export default Vue.extend({
 
 .weapon-content{
   background-color: rgba(0, 0, 0, 0.5);
-  padding: 50px;
-  padding-top: 20px;
   margin-top: 50px;
   border-radius: 5px;
 }
