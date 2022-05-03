@@ -936,11 +936,6 @@ export default Vue.extend({
 	background-color: #F5F5F5;
 }
 
-.content > div > div > div{
-  padding: 20px 40px;
-}
-
-
 .raid-style::-webkit-scrollbar
 {
 	width: 10px;

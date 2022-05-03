@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div class="filters" v-if="!newWeapon" @change="saveFilters()">
+    <div class="filters pl-4 pr-4" v-if="!newWeapon" @change="saveFilters()">
       <h3 v-if="!noTitle">{{$t('weapons')}} ({{ ownWeapons }})</h3>
       <h3 v-if="noTitle">Selected ({{ ignore.length }})</h3>
       <span class="filter-icon" @click="showFilter"></span>
       <div class="row d-flex align-items-center none-mobile" style="flex-grow:0.6" >
-        <div class="col-sm-12 col-md-6 col-lg-4 d-flex none-mobile">
+          <div class="col-sm-12 col-md-6 col-lg-4 d-flex none-mobile">
             <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
               <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
               <strong>{{$t('weaponGrid.showFavorite')}}</strong>
@@ -209,14 +209,10 @@ export default Vue.extend({
       default: null,
     },
     ignore: {
-      // this forces Typescript to consider a prop a certain type
-      // without us specifying a "type" property;
-      // Vue's "type" property is not as flexible as we need it here
-      validator(x: string | number | null) {
-        void x;
-        return true;
+      type: Array as PropType<string[]>,
+      default() {
+        return [];
       },
-      default: null,
     },
     noPagination: {
       type: Boolean,
@@ -414,6 +410,9 @@ export default Vue.extend({
       console.log('weapon forged');
       await this.createPagination(this.activePage);
     },
+    starFilter(){
+      this.createPagination(1);
+    },
   },
   methods: {
     ...(mapActions(['fetchWeapons','renameWeapon','fetchTotalWeaponRenameTags',
@@ -608,10 +607,6 @@ export default Vue.extend({
     beforeEnter(el: any){
       el.style.opacity = 0;
       el.style.transform = 'translateY(100px)';
-    },
-    getNoOfItemPerRow(){
-      const gridWidth = this.$refs['weapon-grid'].$el.clientWidth;
-      return Math.floor((gridWidth - (((gridWidth/216)*32)+16))/216);
     }
   },
   async mounted() {
