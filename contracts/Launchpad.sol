@@ -43,7 +43,6 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     mapping(uint256 => Launch) public launches;
     mapping(uint256 => uint256) public launchTokenPrice;
     mapping(uint256 => uint256) public launchStartTime;
-    //mapping(uint256 => uint256) public launchAmountToSell;
     mapping(uint256 => uint256) public launchFundsToRaise;
     mapping(uint256 => uint256) public launchBaseAllocation;
     mapping(uint256 => uint256) public launchTotalRaised;
@@ -57,8 +56,8 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public launchTotalUnclaimedSkillCommittedValue;
 
     // VESTING INFO
-    mapping(uint256 => uint256[]) launchVestingsPercentage;
-    mapping(address => mapping(uint256 => mapping(uint256 => bool))) userClaimedVestingPortion;
+    mapping(uint256 => uint256[]) launchVestingsPercentages;
+    mapping(address => mapping(uint256 => mapping(uint256 => bool))) public userClaimedVestingPortion;
 
 
     uint256 public nextLaunchId;
@@ -79,6 +78,8 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     event Invested(address indexed user, uint256 amount);
     event SkillCommitted(address indexed user, uint256 indexed launchId, uint256 amount);
     event VestingClaimed(address indexed user, uint256 indexed launchId, uint256 indexed vestingId, uint256 amount);
+    event FundsWithdrawn(uint256 indexed launchId, uint256 amount);
+    event VestingEnabled(uint256 indexed launchId, uint256 indexed vestingId, uint256 timestamp);
 
     // MODIFIERS
     modifier restricted() {
@@ -88,6 +89,15 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     function _restricted() internal view {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
+    }
+
+    modifier onlyPhase1(uint256 launchId) {
+        _onlyPhase1(launchId);
+        _;
+    }
+
+    function _onlyPhase1(uint256 launchId) internal pure {
+        require(launchId % 2 == 1, "Usable only on phase 1");
     }
 
     // VIEWS
@@ -107,14 +117,20 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     }
 
     function getUserRemainingAllocationForLaunch(address user, uint256 launchId) public view returns (uint256 maxAllocation) {
-        maxAllocation = getLaunchAllocationForTier(launchId, getTierForStakedAmount(launchUserStakedAmountSnapshot[launchId][user]));
+        if(launchId % 2 == 0) {
+            maxAllocation = getLaunchAllocationForTier(launchId, getTierForStakedAmount(launchUserStakedAmountSnapshot[launchId.sub(1)][user]));
+        }
+        else {
+            maxAllocation = getLaunchAllocationForTier(launchId, getTierForStakedAmount(launchUserStakedAmountSnapshot[launchId][user]));
+        }
         maxAllocation += launchUserUnclaimedSkillCommittedValue[launchId][user].mul(vars[VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER]);
         maxAllocation = maxAllocation.sub(launchUserInvestment[launchId][user]);
     }
 
-    function getAvailableClaimAmount(address user, uint256 launchId, uint256 vestingId) public view returns (uint256 claimAmount) {
+    function getAvailableClaimAmount(uint256 launchId, uint256 vestingId) public onlyPhase1(launchId) view returns (uint256 claimAmount) {
         uint256 decimals = ERC20(launchTokenAddress[launchId]).decimals();
-        claimAmount = launchUserInvestment[launchId][user].mul(1e18).div(launchTokenPrice[launchId]).mul(launchVestingsPercentage[launchId][vestingId]).div(100);
+        uint256 totalUserInvestment = launchUserInvestment[launchId][msg.sender].add(launchUserInvestment[launchId + 1][msg.sender]);
+        claimAmount = totalUserInvestment.mul(1e18).div(launchTokenPrice[launchId]).mul(launchVestingsPercentages[launchId][vestingId]).div(100);
         if(decimals > 18) {
             claimAmount = claimAmount.mul(10**uint(decimals - 18));
         } else {
@@ -140,8 +156,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     function getLaunchDetails(uint256 launchId) public view returns (
         uint256 tokenPrice,
-        uint256 startTime, 
-        //uint256 amountToSell,
+        uint256 startTime,
         uint256 fundsToRaise,
         uint256 maxAllocation,
         uint256 totalRaised,
@@ -149,7 +164,6 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     {
         tokenPrice = launchTokenPrice[launchId];
         startTime = launchStartTime[launchId];
-        //amountToSell = launchAmountToSell[launchId];
         fundsToRaise = launchFundsToRaise[launchId];
         maxAllocation = getOverallMaxAllocation(launchId);
         totalRaised = launchTotalRaised[launchId];
@@ -161,13 +175,22 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     }
 
     function isSenderWhitelisted(uint256 launchId) public view returns (bool) {
+        if(launchId % 2 == 0) launchId = launchId.sub(1);
         return launchEligibleUsersSnapshot[launchId].contains(msg.sender);
     }
 
     function getTotalUnlockedPercentage(uint256 launchId) public view returns (uint256 totalUnlockedPercentage) {
-        for(uint i = 0; i < launchVestingsPercentage[launchId].length; i++) {
-            totalUnlockedPercentage += launchVestingsPercentage[launchId][i];
+        for(uint i = 0; i < launchVestingsPercentages[launchId].length; i++) {
+            totalUnlockedPercentage += launchVestingsPercentages[launchId][i];
         }
+    }
+
+    function getLaunchVestingPercentages(uint256 launchId) public view returns(uint256[] memory) {
+        return launchVestingsPercentages[launchId];
+    }
+
+    function getTotalLaunchUserInvestment(uint256 launchId) public onlyPhase1(launchId) view returns(uint256) {
+        return launchUserInvestment[launchId][msg.sender].add(launchUserInvestment[launchId + 1][msg.sender]);
     }
 
     // RESTRICTED FUNCTIONS
@@ -221,11 +244,13 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         );
 
         emit LaunchAdded(nextLaunchId, 1);
+        // nextLaunchId + 1 is reserved for Phase 2s
         nextLaunchId += 2;
     }
 
-    function addSecondPhaseForLaunch(uint256 launchId, uint256 startTime) external restricted {
+    function addSecondPhaseForLaunch(uint256 launchId, uint256 startTime) external onlyPhase1(launchId) restricted {
         Launch memory lp = launches[launchId];
+        require(launchId < nextLaunchId, "Wrong id");
         require(block.timestamp > launchStartTime[launchId] + vars[VAR_FUNDING_PERIOD_PHASE_1], "Phase 1 not finished");
         require(launchFundsToRaise[launchId].sub(launchTotalRaised[launchId]) > 0, "Tokens sold out");
         launches[launchId + 1] = Launch(
@@ -239,10 +264,10 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         
         launchStartTime[launchId + 1] = startTime;
         launchTokenPrice[launchId + 1] = launchTokenPrice[launchId];
-        //launchAmountToSell[launchId + 1] = launchAmountToSell[launchId].sub(launchTotalRaised[launchId].mul(1e18).div(launchTokenPrice[launchId]));
         launchFundsToRaise[launchId + 1] = launchFundsToRaise[launchId].sub(launchTotalRaised[launchId]);
         launchBaseAllocation[launchId + 1] = launchBaseAllocation[launchId];
         launchTokenAddress[launchId + 1] = launchTokenAddress[launchId];
+        launchBaseAllocation[launchId + 1] = launchBaseAllocation[launchId];
 
         emit LaunchAdded(launchId + 1, 2);
     }
@@ -283,6 +308,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     }
 
     function updateLaunchStartTime(uint256 launchId, uint256 startTime) external restricted {
+        require(launchTokenPrice[launchId] != 0 && launchFundsToRaise[launchId] != 0, "Set token price and funds to raise first");
         launchStartTime[launchId] = startTime;
     }
 
@@ -290,21 +316,35 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         launchFundsToRaise[launchId] = fundsToRaise;
     }
 
+    function updateLaunchTokenAddress(uint256 launchId, address tokenAddress) external onlyPhase1(launchId) restricted {
+        launchTokenAddress[launchId] = tokenAddress;
+        launchTokenAddress[launchId + 1] = tokenAddress;
+    }
+
     // VESTING
 
-    function enableVesting(uint256 launchId, uint256 percentage) external restricted {
+    function enablePeriodicVesting(uint256 launchId, uint256 percentage) external onlyPhase1(launchId) restricted {
         require(launchTokenAddress[launchId] != address(0), "Token address not set");
         require(getTotalUnlockedPercentage(launchId) + percentage <= 100, "Total percentage exceeded");
-        require(IERC20(launchTokenAddress[launchId]).balanceOf(address(this)) >=
-            launchTotalRaised[launchId].mul(1e18).div(launchTokenPrice[launchId]).mul(getTotalUnlockedPercentage(launchId) + percentage).div(100),
+        uint256 totalLaunchRaised = launchTotalRaised[launchId].add(launchTotalRaised[launchId + 1]);
+        uint256 contractBalance = IERC20(launchTokenAddress[launchId]).balanceOf(address(this));
+        uint256 decimals = ERC20(launchTokenAddress[launchId]).decimals();
+        if(decimals > 18) {
+            contractBalance = contractBalance.mul(10**uint(decimals - 18));
+        } else {
+            contractBalance = contractBalance.div(10**uint(18 - decimals));
+        }
+        require(contractBalance >=
+            totalLaunchRaised.mul(1e18).div(launchTokenPrice[launchId]).mul(getTotalUnlockedPercentage(launchId) + percentage).div(100),
             "Not enough balance");
-        //require(IERC20(launchTokenAddress[launchId]).balanceOf(address(this)) >= launchPad);
-        launchVestingsPercentage[launchId].push(percentage);
+
+        launchVestingsPercentages[launchId].push(percentage);
+        emit VestingEnabled(launchId, launchVestingsPercentages[launchId].length - 1, block.timestamp);
     }
 
     // WHITELISTING
 
-    function setEligibleUsersData(uint256 launchId, address[] calldata users, uint256[] calldata stakedAmounts) external restricted {
+    function setEligibleUsersData(uint256 launchId, address[] calldata users, uint256[] calldata stakedAmounts) external onlyPhase1(launchId) restricted {
         require(nextLaunchId >= launchId, "Wrong launch ID");
         require(users.length == stakedAmounts.length, "Wrong input");
         require(launchStartTime[launchId] > block.timestamp, "Event already started");
@@ -316,6 +356,22 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
             totalWeight += tierAllocationWeight[getTierForStakedAmount(stakedAmounts[i])];
         }
         launchBaseAllocation[launchId] = launchFundsToRaise[launchId].div(totalWeight);
+    }
+
+    // WITHDRAW RAISED FUNDS
+
+    function withdrawRaisedFunds(uint256 launchId) external onlyPhase1(launchId) {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not owner");
+        require(
+            block.timestamp > launchStartTime[launchId] + vars[VAR_FUNDING_PERIOD_PHASE_1] &&
+            block.timestamp > launchStartTime[launchId + 1] + vars[VAR_FUNDING_PERIOD_PHASE_2],
+            "Launch not finished"
+        );
+
+        uint256 raisedFunds = launchTotalRaised[launchId] + launchTotalRaised[launchId + 1];
+
+        IERC20(launches[launchId].fundingTokenAddress).safeTransfer(msg.sender, raisedFunds);
+        emit FundsWithdrawn(launchId, raisedFunds);
     }
 
     // VARS SETTERS
@@ -344,7 +400,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         require(launchTokenPrice[launchId] != 0, "Token price not set");
         require(launchTotalRaised[launchId] + amount <= launchFundsToRaise[launchId], "Amount exceeds remaining supply");
         require(getUserRemainingAllocationForLaunch(msg.sender, launchId) >= amount, "Allocation allowance exceeded");
-        require(launchEligibleUsersSnapshot[launchId].contains(msg.sender), "Not whitelisted");
+        require(isSenderWhitelisted(launchId), "Not whitelisted");
 
         IERC20(lp.fundingTokenAddress).safeTransferFrom(msg.sender, address(this), amount);
         launchUserInvestment[launchId][msg.sender] += amount;
@@ -354,12 +410,12 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     }
 
     function claim(uint256 launchId, uint256 vestingId) external {
-        require(vestingId > 0 && launchVestingsPercentage[launchId].length >= vestingId, "Vesting unavailable");
+        require(launchVestingsPercentages[launchId].length >= vestingId, "Vesting unavailable");
         require(!userClaimedVestingPortion[msg.sender][launchId][vestingId], "Vesting already claimed");
 
         userClaimedVestingPortion[msg.sender][launchId][vestingId] = true;
-        uint256 claimAmount = getAvailableClaimAmount(msg.sender, launchId, vestingId);
-        IERC20(launchTokenAddress[launchId]).safeTransferFrom(address(this), msg.sender, claimAmount);
+        uint256 claimAmount = getAvailableClaimAmount(launchId, vestingId);
+        IERC20(launchTokenAddress[launchId]).safeTransfer(msg.sender, claimAmount);
 
         emit VestingClaimed(msg.sender, launchId, vestingId, claimAmount);
     }
