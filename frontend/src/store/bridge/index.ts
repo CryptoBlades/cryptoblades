@@ -4,7 +4,7 @@ import {
 } from '@/interfaces';
 import {Dispatch} from 'vuex';
 import {NftTransfer, TransferedNft} from '@/interfaces/Nft';
-import {approveFeeFromAnyContractSimple} from '@/contract-call-utils';
+import {approveFeeWalletOnly} from '@/contract-call-utils';
 import BigNumber from 'bignumber.js';
 
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
@@ -88,7 +88,7 @@ const bridge = {
     { nftContractAddr: string, tokenId: number, targetChain: string, bridgeFee: string }) {
       const { NFTStorage, CryptoBlades, SkillToken } = rootState.contracts();
       if (!NFTStorage || !CryptoBlades || !SkillToken || !rootState.defaultAccount) return;
-      await approveFeeFromAnyContractSimple(
+      await approveFeeWalletOnly(
         CryptoBlades,
         SkillToken,
         rootState.defaultAccount,

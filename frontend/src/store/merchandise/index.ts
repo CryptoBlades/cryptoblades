@@ -1,7 +1,7 @@
 import {
   IState,
 } from '@/interfaces';
-import {approveFeeFromAnyContractSimple} from '@/contract-call-utils';
+import {approveFeeWalletOnly} from '@/contract-call-utils';
 import {abi as priceOracleAbi} from '@/../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import BigNumber from 'bignumber.js';
@@ -62,7 +62,7 @@ const merchandise = {
         .getSkillNeededFromUserWallet(rootState.defaultAccount, payingAmount, true)
         .call(defaultCallOptions(rootState));
 
-      await approveFeeFromAnyContractSimple(
+      await approveFeeWalletOnly(
         CryptoBlades,
         SkillToken,
         rootState.defaultAccount,
