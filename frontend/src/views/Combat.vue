@@ -1,5 +1,5 @@
 <template>
-  <div style="display: inline-flex" class="body main-font pl-3 pr-3">
+  <div style="display: inline-flex" class="body main-font pl-3">
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
       <div v-if="error !== null">
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
@@ -147,7 +147,7 @@
         </div>
       </div>
       <!-- // error message boxes -->
-      <div class="row">
+      <div>
         <div class="col">
           <div class="message-box" v-if="!currentCharacter">{{$t('combat.errors.needToSelectChar')}}</div>
           <div class="row">
@@ -618,10 +618,6 @@ h5{
   position: absolute;
   display: flex;
   justify-content: center;
-}
-
-.content > div > div > div{
-  padding: 20px 40px;
 }
 
 
