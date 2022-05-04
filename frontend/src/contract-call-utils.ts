@@ -133,7 +133,7 @@ export async function approveFeeDynamic<T extends Contract<unknown>>(
 ) {
   const callOptsWithFrom: Web3JsCallOptions = { from, gasPrice, ...callOpts };
 
-  let feeInSkill = new BigNumber(
+  const feeInSkill = new BigNumber(
     fnReturnsSkill ?
       await fn(feeContract.methods).call(callOptsWithFrom) :
       await getFeeInSkillFromUsdFromAnyContract(
