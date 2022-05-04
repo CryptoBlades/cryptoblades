@@ -1282,7 +1282,10 @@
     "sort": "Sort",
     "showFavorite": "Show Favorite",
     "clearFilters": "Clear Filters",
+    "show": "Show",
+    "selected": "Selected",
     "noDrop": "Nothing dropped for you this time.",
+    "star": "Star",
     "sorts": {
       "any": "Any",
       "lowToHigh": "Price: Low -> High",
