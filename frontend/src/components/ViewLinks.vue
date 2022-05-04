@@ -1,9 +1,10 @@
 <template>
   <b-navbar-nav>
-    <!-- <li class="play-to-earn top-nav-links">
-      <P2EButton mainText="Play-to-earn" route="play-to-earn" />
-    </li> -->
-
+    <li class="character top-nav-links">
+      <router-link v-if="!stakeOnly" :to="{ name: 'play-to-earn' }" exact class="nav-link">
+        <div class="link-text play-to-earn-btn">{{ $t("PlayToEarn.playToEarn") }}</div>
+      </router-link>
+    </li>
     <li class="character top-nav-links">
       <router-link v-if="!stakeOnly" :to="{ name: 'plaza' }" exact class="nav-link">
         <div class="icon"><img src="../assets/navbar-icons/plaza-icon.png" class="ui-link-icon" alt="Plaza"></div>
@@ -12,35 +13,10 @@
     </li>
 
     <li v-if="!stakeOnly" class="top-nav-links">
-      <router-link :to="{ name: 'blacksmith' }" exact class="nav-link">
+      <router-link :to="{ name: 'blacksmith', query: {tab: 'weapon'} }" exact class="nav-link">
         <div class="icon"><img src="../assets/navbar-icons/blacksmith-icon.png" class="ui-link-icon" alt="Blacksmith">
         </div>
         <div class="link-text">{{ $t("viewLink.blacksmith") }}</div>
-      </router-link>
-    </li>
-
-    <li v-if="!stakeOnly" class="top-nav-links">
-      <router-link :to="{ name: 'combat' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/combat-icon.png" class="ui-link-icon" alt="Combat"></div>
-        <div class="link-text">{{ $t("viewLink.combat") }}</div>
-      </router-link>
-    </li>
-
-    <li v-if="pvp" class="top-nav-links">
-      <router-link v-if="pvp" :to="{ name: 'pvp' }" exact class="nav-link" :class="supportsPvP ? '' : 'disabled-link'">
-        <div class="icon"><img src="../assets/navbar-icons/arena-icon.png" class="ui-link-icon" alt="Arena"></div>
-        <div class="link-text">{{ $t("viewLink.pvp") }}
-          <hint
-            v-if="!supportsPvP" class="hint"
-            :text="$t('viewLink.functionalityNotSupportedTooltip')"/>
-        </div>
-      </router-link>
-    </li>
-
-    <li v-if="!stakeOnly && raid" class="top-nav-links">
-      <router-link :to="{ name: 'raid' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/raid-icon.png" class="ui-link-icon" alt="Raid"></div>
-        <div class="link-text">{{ $t("viewLink.raid") }}</div>
       </router-link>
     </li>
 
@@ -55,8 +31,8 @@
       </router-link>
     </li>
 
-    <li v-if="!stakeOnly && market" class="top-nav-links">
-      <a href="https://bazaar.market/" class="nav-link" target="_blank">
+    <li v-if="!stakeOnly" class="top-nav-links">
+      <a :href="BazaarLink()" class="nav-link" target="_blank">
         <div class="icon"><img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar"></div>
         <div class="link-text">{{ $t("viewLink.bazaar") }}
           <b-icon-box-arrow-up-right scale="0.7"/>
@@ -75,9 +51,10 @@
 </template>
 
 <script>
-import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
+import {merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
 import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
+
 import Hint from '@/components/Hint';
 
 
@@ -86,7 +63,6 @@ export default Vue.extend({
     return {
       stakeOnly,
       raid,
-      market,
       portal,
       pvp,
       quests,
@@ -116,14 +92,20 @@ export default Vue.extend({
       return this.getHasAdminAccess || this.getHasMinterAccess;
     },
   },
-
   components: {
     Hint,
   },
+  methods: {
+    BazaarLink() {
+      return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
+    }
+  }
 });
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
+
 a {
   font-weight: bold;
 }
@@ -145,10 +127,32 @@ a {
 .link-text {
   font-weight: bolder;
   white-space: nowrap;
+  font-family: 'Oswald', 'serif';
   font-size: clamp(0.8rem, 1vw, 1rem);
-  color: #dfcc9a;
+  color: #ffffff;
 }
 
+.play-to-earn-btn{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin-right: 15px;
+  align-items: center;
+  vertical-align: middle;
+  justify-content: center;
+  background-image: url('../assets/btn-long.svg');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  object-fit: fill;
+  padding: 10px 40px 10px 40px;
+  border: none;
+  font-family: Oswald;
+  color: #fff;
+  font-size: 17px;
+  margin: auto;
+  margin-right: -10px;
+}
 .disabled-link > div {
   cursor: not-allowed;
   color: gray;

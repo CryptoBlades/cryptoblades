@@ -15,16 +15,10 @@
             maxPower: 3 * baseCharacterPower
           })"/>
       </div>
-      <div class="w-100" :style="{
+      <div class="w-100 h-100" :style="{
         'background-image': 'url(' + getCharacterArt(character) + ')',
-      }"
-      :class="{
-        'h-100': !isMarket,
-        'h-75': isMarket
       }">
-
       </div>
-      <!--<small-button class="button" :text="`Purchase`" v-if="isMarket"/>-->
     </div>
 
     <div class="loading-container" v-if="!allLoaded">
@@ -43,7 +37,7 @@
     </div>
     </div>
 
-    <div v-if="!portrait && (isMarket || isGarrison)" class="small-stamina-char"
+    <div v-if="!portrait && isGarrison" class="small-stamina-char"
       :style="`--staminaReady: ${(characterStamina/maxStamina)*100}%;`"
       v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
       <div class="stamina-text black-outline">{{$t('CharacterArt.staminaShort')}} {{ characterStamina }} / 200</div>
@@ -92,7 +86,7 @@ function transformModel(model) {
 }
 
 export default {
-  props: ['character', 'portrait', 'isMarket', 'isGarrison', 'hideXpBar', 'hideIdContainer'],
+  props: ['character', 'portrait', 'isGarrison', 'hideXpBar', 'hideIdContainer'],
   components: {
     //SmallButton,
   },
@@ -170,9 +164,7 @@ export default {
       return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
     },
 
-    getCharacterArt,
-
-    init() {
+    getCharacterArt,init() {
       const container = this.$refs.el;
 
       this.camera = new Three.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 0.01, 1000);

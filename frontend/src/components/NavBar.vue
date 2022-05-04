@@ -1,7 +1,7 @@
 <template>
   <div class="main-nav-div">
     <b-navbar class="main-nav" toggleable="sm">
-      <div class="nav-logo">
+      <div class="nav-logo col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1">
         <router-link :to="{ name: 'plaza' }" exact class="game-ui-logo">
           <img
             src="../assets/cb-logo.png"
@@ -32,24 +32,6 @@
       </div>
     </b-navbar>
     <claim-rewards-bar v-if="canShowRewardsBar"/>
-    <div class="container_row">
-      <img src="../assets/divider4.png" class="expander-divider"/>
-      <b-button
-        class="expander-button"
-        @click="toggleCharacterView"
-        v-if="ownCharacters.length > 0"
-      >
-        <b-icon-arrows-expand
-          class="expand-collapse-icon"
-          v-if="!getIsCharacterViewExpanded"
-        />
-        <b-icon-arrows-collapse
-          class="expand-collapse-icon"
-          v-if="getIsCharacterViewExpanded"
-          aria-hidden="true"
-        />
-      </b-button>
-    </div>
   </div>
 </template>
 
@@ -75,6 +57,7 @@ export default Vue.extend({
   data() {
     return {
       canShowRewardsBar: true,
+      currentRoute: ''
     };
   },
 
@@ -119,9 +102,10 @@ a.router-link-active {
 }
 
 .view-links {
-  width: 100%;
   justify-content: space-between;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 5rem;
+  padding: 0em 2em;
 }
 
 .main-nav > .navbar-brand {
@@ -212,11 +196,13 @@ a.router-link-active {
 
   .nav-logo {
     width: 100%;
-    display: block;
+    display: flex;
+    justify-content: center;
     flex: 1;
     border: 0;
     margin: 0;
     padding:0;
+    transition: 0.5s all;
   }
 
   .right-details {
@@ -295,6 +281,7 @@ a.router-link-active {
 .nav-logo {
   flex: 1;
   height: 100%;
+  justify-content: center;
   border-right: 2px solid #404857;
   display: flex;
 }
@@ -336,6 +323,13 @@ a.router-link-active {
   grid-column: 1;
   grid-row: 1;
 }
+
+.game-ui-logo > img {
+  width: 90%;
+  max-width: 300px;
+  margin: auto;
+}
+
 @media (max-width: 576px) {
   .main-nav {
     height: 12vh;
