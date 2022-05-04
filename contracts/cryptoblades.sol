@@ -16,7 +16,6 @@ import "./util.sol";
 import "./common.sol";
 import "./Blacksmith.sol";
 import "./SpecialWeaponsManager.sol";
-import "./TokensPrices.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -101,8 +100,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         // migrateTo_5e833b0
         durabilityCostFight = 1;
-    
-        combatTokenChargePercent = 25;
     }
 
     function migrateTo_ef994e2(Promos _promos) public {
@@ -223,9 +220,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     SpecialWeaponsManager public specialWeaponsManager;
 
-    uint256 public combatTokenChargePercent;
-    TokensPrices public tokensPrices;
-
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
 
@@ -302,7 +296,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function fight(uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external
-        onlyNonContract() returns (uint256) {
+        restricted returns (uint256) {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
@@ -322,7 +316,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             target,
             now / 1 hours
         );
-        uint256 offset = performFight(
+        uint256 expectedTokens = performFight(
             char,
             wep,
             Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
@@ -331,7 +325,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             fightMultiplier
         );
 
-        return offset;
+        return expectedTokens;
     }
 
     function performFight(
@@ -349,9 +343,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         updateHourlyPayouts(); // maybe only check in trackIncome? (or do via bot)
 
         uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
-        uint256 tokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
-
-        uint256 offset = (tokens.mul(combatTokenChargePercent).mul(tokensPrices.skillTokenPrice())).div(tokensPrices.tokenPrice());
+        uint256 expectedTokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
+        uint256 tokens = expectedTokens;
 
         if (playerRoll < monsterRoll) {
             tokens = 0;
@@ -373,7 +366,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         emit FightOutcome(tx.origin, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
 
-        return offset;
+        return expectedTokens;
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
@@ -589,7 +582,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _onlyNonContract() internal view {
-        require(tx.origin == msg.sender || hasRole(GAME_ADMIN, msg.sender), "ONC");
+        require(tx.origin == msg.sender, "ONC");
     }
 
     modifier restricted() {
@@ -866,10 +859,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         for(uint i = 0; i < varFields.length; i++) {
             vars[varFields[i]] = values[i];
         }
-    }
-
-    function setTokensPricesAddress(address tokensPricesContract) external restricted {
-        tokensPrices = TokensPrices(tokensPricesContract);
     }
 
     function giveInGameOnlyFunds(address to, uint256 skillAmount) external restricted {

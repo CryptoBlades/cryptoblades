@@ -1,7 +1,6 @@
 const { upgradeProxy } = require("@openzeppelin/truffle-upgrades");
 const CryptoBlades = artifacts.require("CryptoBlades");
-const TokensPrices = artifacts.require("TokensPrices");
-const TokensReceiver = artifacts.require("TokensReceiver");
+const TokensManager = artifacts.require("TokensManager");
 
 module.exports = async function (deployer, network) {
     if (network === "development"
@@ -15,10 +14,8 @@ module.exports = async function (deployer, network) {
     || network === 'avaxtestnet-fork' || network === 'auroratestnet') {
         const game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
 
-        const tokensPrices = await TokensPrices.deployed();
-        const tokensReceiver = await TokensReceiver.deployed();
+        const tokensManager = await TokensManager.deployed();
 
-        await game.grantRole(await game.GAME_ADMIN(), tokensReceiver.address);
-        await game.setTokensPricesAddress(tokensPrices.address);
+        await game.grantRole(await game.GAME_ADMIN(), tokensManager.address);
     }
 };

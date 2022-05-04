@@ -44,8 +44,7 @@ import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/
 import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/PvpArena.json';
 import { abi as pvpCoreAbi, networks as pvpCoreNetworks } from '../../build/contracts/PvpCore.json';
 import { abi as pvpRankingsAbi, networks as pvpRankingsNetworks } from '../../build/contracts/PvpRankings.json';
-import { abi as tokensPricesAbi, networks as tokensPricesNetworks } from '../../build/contracts/TokensPrices.json';
-import { abi as tokensReceiverAbi, networks as tokensReceiverNetworks } from '../../build/contracts/TokensReceiver.json';
+import { abi as tokensManagerAbi, networks as tokensManagerNetworks } from '../../build/contracts/TokensManager.json';
 import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
 import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
@@ -253,14 +252,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
 
-  const tokensPricesContractAddr = process.env.VUE_APP_TOKENS_PRICES_CONTRACT_ADDRESS ||
-    getConfigValue('VUE_APP_TOKENS_PRICES_CONTRACT_ADDRESS') || (tokensPricesNetworks as Networks)[networkId]!.address;
-  const TokensPrices = new web3.eth.Contract(tokensPricesAbi as Abi, tokensPricesContractAddr);
-
-  const tokensReceiverContractAddr = process.env.VUE_APP_TOKENS_RECEIVER_CONTRACT_ADDRESS ||
-    getConfigValue('VUE_APP_TOKENS_RECEIVER_CONTRACT_ADDRESS') || (tokensReceiverNetworks as Networks)[networkId]!.address;
-  const TokensReceiver = new web3.eth.Contract(tokensReceiverAbi as Abi, tokensReceiverContractAddr);
-
+  const tokensManagerContractAddr = process.env.VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS ||
+    getConfigValue('VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS') || (tokensManagerNetworks as Networks)[networkId]!.address;
+  const TokensManager = new web3.eth.Contract(tokensManagerAbi as Abi, tokensManagerContractAddr);
 
   let SpecialWeaponsManager;
   let specialWeaponsManagerAddr;
@@ -426,7 +420,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
     NFTStorage, CBKLandSale, CBKLand, Merchandise, Promos,
-    TokensPrices, TokensReceiver,
+    TokensManager,
     ...raidContracts,
     ...pvpContracts,
     ...marketContracts,

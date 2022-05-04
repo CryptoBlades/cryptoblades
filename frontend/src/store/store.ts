@@ -4729,26 +4729,26 @@ export function createStore(web3: Web3) {
       },
 
       async getCurrentSkillPrice({ state }) {
-        const { TokensPrices } = state.contracts();
-        if (!TokensPrices || !state.defaultAccount) return;
+        const { TokensManager } = state.contracts();
+        if (!TokensManager || !state.defaultAccount) return;
 
-        return await TokensPrices.methods.skillTokenPrice().call(defaultCallOptions(state));
+        return await TokensManager.methods.skillTokenPrice().call(defaultCallOptions(state));
       },
 
       async getNativeTokenPriceInUsd({ state }) {
-        const { TokensPrices } = state.contracts();
-        if (!TokensPrices || !state.defaultAccount) return;
+        const { TokensManager } = state.contracts();
+        if (!TokensManager || !state.defaultAccount) return;
 
-        return await TokensPrices.methods.tokenPrice().call(defaultCallOptions(state));
+        return await TokensManager.methods.tokenPrice().call(defaultCallOptions(state));
       },
 
       async doEncounterPayNative({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier, offsetCost }) {
         if(featureFlagStakeOnly) return;
 
-        const { TokensReceiver, CryptoBlades } = state.contracts();
-        if (!TokensReceiver || !CryptoBlades || !state.defaultAccount) return;
+        const { TokensManager, CryptoBlades } = state.contracts();
+        if (!TokensManager || !CryptoBlades || !state.defaultAccount) return;
 
-        const res = await TokensReceiver.methods
+        const res = await TokensManager.methods
           .fight(
             characterId,
             weaponId,
@@ -4811,10 +4811,10 @@ export function createStore(web3: Web3) {
       },
 
       async getCombatTokenChargePercent({ state }) {
-        const { CryptoBlades } = state.contracts();
-        if(!CryptoBlades || !state.defaultAccount) return;
+        const { TokensManager } = state.contracts();
+        if(!TokensManager || !state.defaultAccount) return;
 
-        const res = await CryptoBlades.methods
+        const res = await TokensManager.methods
           .combatTokenChargePercent()
           .call(defaultCallOptions(state));
 
