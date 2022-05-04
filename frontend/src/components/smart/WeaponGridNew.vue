@@ -1,41 +1,56 @@
 <template>
   <div>
-    <div class="filters pl-4 pr-4" v-if="!newWeapon" @change="saveFilters()">
-      <h3 v-if="!noTitle">{{$t('weapons')}} ({{ ownWeapons }})</h3>
-      <h3 v-if="noTitle">Selected ({{ ignore.length }})</h3>
+    <div class="filters" v-if="!newWeapon" @change="saveFilters()">
+      <h3 class="ml-4" v-if="!noTitle && titleType=='weapon-list'">{{$t('weapons')}} ({{ ownWeapons }})</h3>
+      <h3 class="ml-4" v-if="!noTitle && titleType=='burn-weapon'">Selected ({{ ignore.length }})</h3>
       <span class="filter-icon" @click="showFilter"></span>
-      <div class="row d-flex align-items-center none-mobile" style="flex-grow:0.6" >
-          <div class="col-sm-12 col-md-6 col-lg-4 d-flex none-mobile">
+      <div v-if="titleType!='combat'" class="row d-flex align-items-center none-mobile" style="flex-grow:0.6" >
+          <div class="col-sm-12 col-md-3 col-lg-3 none-mobile">
+            <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">Clear Filter</button>
+          </div>
+          <div class="col-sm-12 col-md-3 col-lg-3 d-flex none-mobile">
             <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
               <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
               <strong>{{$t('weaponGrid.showFavorite')}}</strong>
             </div>
           </div>
-          <div class="col-sm-6 col-md-6 col-lg-3 mb-3 none-mobile">
-            <strong>{{$t('weaponGrid.stars')}}</strong>
+          <div class="col-sm-6 col-md-3 col-lg-3 mb-3 none-mobile select-wrapper-star" id="blacksmith1">
             <select class="form-control" v-model="starFilter" >
               <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
             </select>
           </div>
-
-          <div class="col-sm-6 col-md-6 col-lg-3 mb-3 none-mobile">
-            <strong>{{$t('weaponGrid.element')}}</strong>
+          <div class="col-sm-6 col-md-3 col-lg-3 mb-3 none-mobile select-wrapper-element" id="blacksmith2">
             <select class="form-control" v-model="elementFilter" >
               <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
               :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
             </select>
           </div>
-        <div class="col-sm-12 col-md-6 col-lg-2 none-mobile">
-          <b-button
-            v-if="!newWeapon"
-            variant="primary"
-            class="clear-filters-button mb-3"
-            @click="clearFilters"
-          >
-            <span>
-              Clear
-            </span>
-          </b-button>
+      </div>
+      <div v-if="titleType=='combat'" class="none-mobile filter-combat">
+        <div>
+          <div class="select-wrapper-star">
+            <select class="form-control" v-model="starFilter" >
+            <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+          </select>
+          </div>
+          <div class="select-wrapper-element">
+            <select class="form-control" v-model="elementFilter" >
+              <option style="background-color: #ffffff0"
+              v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+              :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+            </select>
+          </div>
+          <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
+            <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
+            <span>{{$t('weaponGrid.showFavorite')}}</span>
+          </div>
+          <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">Clear Filter</button>
+        </div>
+        <div class="d-flex align-items-center select-wrapper-items">
+          <span>Show</span>
+          <select class="form-control align-self-end" v-model="ItemPerPage" >
+            <option v-for="noOfItem in [10,20,50,100]" :value="noOfItem" :key="noOfItem">{{ noOfItem }}</option>
+          </select>
         </div>
       </div>
     </div>
@@ -44,11 +59,12 @@
       <transition-group
         appear @before-enter="beforeEnter" @enter="enter"
         class="weapon-grid" tag="ul" name="list" ref="weapon-grid"
+        :style="gridStyling != [] ? gridStyling : ''"
         >
         <li
           class="weapon" :style="setBorderSelected(weapon.id) ? 'border: 2px solid #fff' : ''"
           :class="{ selected: highlight !== null && weapon.id === highlight }"
-          v-for="(weapon, i) in nonIgnoredWeapons.slice(((this.activePage*20)-20),((this.activePage*20)))"
+          v-for="(weapon, i) in nonIgnoredWeapons.slice(((this.activePage*ItemPerPage)-ItemPerPage),((this.activePage*ItemPerPage)))"
           :key="weapon.id" :data-index="i"
           @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
           @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
@@ -186,6 +202,7 @@ interface Data {
   pageSet: number[];
   noOfPages: number;
   noOfItemsPerRow: number;
+  ItemPerPage: number;
 }
 const sorts = [
   { name: i18n.t('weaponGrid.sorts.any'), dir: '' },
@@ -207,6 +224,16 @@ export default Vue.extend({
         return true;
       },
       default: null,
+    },
+    titleType:{
+      type: String,
+      default: ''
+    },
+    gridStyling:{
+      type: Array as PropType<string[]>,
+      default() {
+        return [];
+      },
     },
     ignore: {
       type: Array as PropType<string[]>,
@@ -328,7 +355,8 @@ export default Vue.extend({
       // data for paginations
       activePage: 1,
       pageSet: [],
-      noOfPages: 0
+      noOfPages: 0,
+      ItemPerPage: 20
     } as Data;
   },
   components: {
@@ -413,6 +441,9 @@ export default Vue.extend({
     starFilter(){
       this.createPagination(1);
     },
+    ItemPerPage(){
+      this.createPagination(1);
+    }
   },
   methods: {
     ...(mapActions(['fetchWeapons','renameWeapon','fetchTotalWeaponRenameTags',
@@ -564,7 +595,7 @@ export default Vue.extend({
     createPagination(activePage: number){
       const noOfItems = this.nonIgnoredWeapons.length;
       this.activePage = activePage;
-      this.noOfPages = Math.ceil(noOfItems/20);
+      this.noOfPages = Math.ceil(noOfItems/this.ItemPerPage);
       this.pageSet = [];
       if(this.noOfPages > 5){
         if(activePage > 3){
@@ -635,7 +666,6 @@ export default Vue.extend({
 .filters {
    justify-content: center;
    width: 100%;
-   /* max-width: 900px; */
    margin: 0 auto;
    align-items: center;
    border-bottom: 0.2px solid rgba(102, 80, 80, 0.1);
@@ -682,6 +712,142 @@ export default Vue.extend({
 }
 .toggle-button {
   align-self: stretch;
+}
+.filter-combat{
+  margin-right: 30px;
+  padding-top: 1em;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.filter-combat > div {
+  display: flex;
+  justify-content: flex-start;
+}
+.filter-combat > select{
+  width: 5vw;
+  font-family: Roboto;
+}
+
+.select-wrapper-star,.select-wrapper-element {
+  position: relative;
+  width: 200px;
+}
+
+.select-wrapper-element > select{
+  padding-right: 20px;
+  text-align: right;
+}
+
+.select-wrapper-star > select{
+  padding-right: 20px;
+  text-align: right;
+}
+
+.select-wrapper-items > select,
+.select-wrapper-element > select,
+.select-wrapper-star > select{
+  background-color: rgba(255, 255, 255, 0);
+  color: #fff;
+}
+
+.select-wrapper-element > select option,
+.select-wrapper-items > select option,
+.select-wrapper-star > select option{
+  background-color: #171617;
+  padding: 1px;
+  color: #fff;
+}
+
+.select-wrapper-element > select option:hover,
+.select-wrapper-star > select option:hover{
+  box-shadow: 0 0 10px 100px #000 inset;
+  padding: 1px;
+  color: #fff;
+}
+
+
+.select-wrapper-star:after {
+  content: "Star: ";
+  width: 0;
+  height: 0;
+  border-top: 6px solid #666;
+  position: absolute;
+  left: 8px;
+  top: 2px;
+  font-family: Roboto;
+  color: rgba(255, 255, 255, 0.541);
+}
+
+.select-wrapper-star#blacksmith1:after {
+  content: "Star: ";
+  left: 25px;
+}
+
+.select-wrapper-element#blacksmith2:after {
+  content: "Element: ";
+  left: 25px;
+}
+
+
+.select-wrapper-element:after {
+  content: "Element: ";
+  width: 0;
+  height: 0;
+  border-top: 6px solid #666;
+  position: absolute;
+  left: 8px;
+  top: 2px;
+  font-family: Roboto;
+  color: rgba(255, 255, 255, 0.541);
+}
+
+.select-wrapper-element2:after {
+  content: "Element: ";
+  width: 0;
+  height: 0;
+  border-top: 6px solid #666;
+  position: absolute;
+  left: 25px;
+  top: 2px;
+  font-family: Roboto;
+  color: rgba(255, 255, 255, 0.541);
+}
+
+.btn-clear-filter{
+  padding: 0.4em 2em;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0);
+  border: 1px solid #EDCD90;
+  color: #EDCD90;
+  white-space: nowrap;
+}
+
+.filter-combat > div > div {
+  width: 12em;
+  margin-right: 2em;
+}
+
+.filter-combat > div:nth-child(2) > select{
+  width: 5em;
+  margin-right: 2em;
+  font-family: Roboto;
+}
+
+.filter-combat > div:nth-child(2) > span{
+  width: 5em;
+  font-family: Roboto;
+  color: #fff;
+}
+
+.filter-combat > div > div >select,
+.filter-combat > div > div > select > option,
+.filter-combat > div > div.show-favorite > span{
+  font-family: Roboto;
+}
+.filter-combat > div> div.show-favorite > span{
+  color: #fff;
 }
 .show-reforged {
   display: flex;
