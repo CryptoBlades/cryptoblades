@@ -2,11 +2,11 @@
   <div>
     <div class="filters" v-if="!newWeapon" @change="saveFilters()">
       <h3 class="ml-4" v-if="!noTitle && titleType=='weapon-list'">{{$t('weapons')}} ({{ ownWeapons }})</h3>
-      <h3 class="ml-4" v-if="!noTitle && titleType=='burn-weapon'">Selected ({{ ignore.length }})</h3>
+      <h3 class="ml-4" v-if="!noTitle && titleType=='burn-weapon'">{{$t('nftList.selected')}} ({{ ignore.length }})</h3>
       <span class="filter-icon" @click="showFilter"></span>
       <div v-if="titleType!='combat'" class="row d-flex align-items-center none-mobile" style="flex-grow:0.6" >
           <div class="col-sm-12 col-md-3 col-lg-3 none-mobile">
-            <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">Clear Filter</button>
+            <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
           </div>
           <div class="col-sm-12 col-md-3 col-lg-3 d-flex none-mobile">
             <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
@@ -14,12 +14,12 @@
               <strong>{{$t('weaponGrid.showFavorite')}}</strong>
             </div>
           </div>
-          <div class="col-sm-6 col-md-3 col-lg-3 mb-3 none-mobile select-wrapper-star" id="blacksmith1">
+          <div class="col-sm-6 col-md-3 col-lg-3 mb-3 none-mobile select-wrapper-star" :data-content="$t('nftList.star')"  id="blacksmith1">
             <select class="form-control" v-model="starFilter" >
               <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
             </select>
           </div>
-          <div class="col-sm-6 col-md-3 col-lg-3 mb-3 none-mobile select-wrapper-element" id="blacksmith2">
+          <div class="col-sm-6 col-md-3 col-lg-3 mb-3 none-mobile select-wrapper-element" :data-content="$t('nftList.element')" id="blacksmith2">
             <select class="form-control" v-model="elementFilter" >
               <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
               :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
@@ -28,12 +28,12 @@
       </div>
       <div v-if="titleType=='combat'" class="none-mobile filter-combat">
         <div>
-          <div class="select-wrapper-star">
+          <div class="select-wrapper-star" :data-content="$t('nftList.star')">
             <select class="form-control" v-model="starFilter" >
             <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
           </div>
-          <div class="select-wrapper-element">
+          <div class="select-wrapper-element" :data-content="$t('nftList.element')">
             <select class="form-control" v-model="elementFilter" >
               <option style="background-color: #ffffff0"
               v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
@@ -44,10 +44,10 @@
             <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
             <span>{{$t('weaponGrid.showFavorite')}}</span>
           </div>
-          <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">Clear Filter</button>
+          <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
         </div>
         <div class="d-flex align-items-center select-wrapper-items">
-          <span>Show</span>
+          <span>{{$t('nftList.show')}}</span>
           <select class="form-control align-self-end" v-model="ItemPerPage" >
             <option v-for="noOfItem in [10,20,50,100]" :value="noOfItem" :key="noOfItem">{{ noOfItem }}</option>
           </select>
@@ -209,6 +209,7 @@ const sorts = [
   { name: i18n.t('weaponGrid.sorts.lowToHigh'), dir: 1 },
   { name: i18n.t('weaponGrid.sorts.highToLow'), dir: -1 },
 ];
+
 export default Vue.extend({
   model: {
     prop: 'highlight',
@@ -769,7 +770,7 @@ export default Vue.extend({
 
 
 .select-wrapper-star:after {
-  content: "Star: ";
+  content: attr(data-content);
   width: 0;
   height: 0;
   border-top: 6px solid #666;
@@ -781,18 +782,18 @@ export default Vue.extend({
 }
 
 .select-wrapper-star#blacksmith1:after {
-  content: "Star: ";
+  content: attr(data-content);
   left: 25px;
 }
 
 .select-wrapper-element#blacksmith2:after {
-  content: "Element: ";
+  content: attr(data-content);
   left: 25px;
 }
 
 
 .select-wrapper-element:after {
-  content: "Element: ";
+  content: attr(data-content);
   width: 0;
   height: 0;
   border-top: 6px solid #666;
@@ -804,7 +805,7 @@ export default Vue.extend({
 }
 
 .select-wrapper-element2:after {
-  content: "Element: ";
+  content: attr(data-content);
   width: 0;
   height: 0;
   border-top: 6px solid #666;
