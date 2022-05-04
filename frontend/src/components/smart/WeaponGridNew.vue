@@ -30,7 +30,6 @@
         <div>
           <div class="select-wrapper-star">
             <select class="form-control" v-model="starFilter" >
-             <label for="option">Helloo</label>
             <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
           </select>
           </div>
