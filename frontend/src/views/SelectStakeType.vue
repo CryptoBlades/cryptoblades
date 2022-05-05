@@ -38,11 +38,8 @@ export default Vue.extend({
   },
 
   computed: {
-    ...mapState({
-      staking: state => state.staking.staking,
-      stakeOverviews: state => state.staking.stakeOverviews,
-    }),
-    ...mapGetters(['availableStakeTypes', 'availableNftStakeTypes']),
+    ...mapState('staking', ['staking', 'stakeOverviews']),
+    ...mapGetters('staking', ['availableStakeTypes', 'availableNftStakeTypes']),
 
     entries() {
       const entries = this.availableStakeTypes.map(stakeType => ({
@@ -51,7 +48,6 @@ export default Vue.extend({
       const nftEntires = this.availableNftStakeTypes.map(stakeType => ({
         stakeType, ...humanReadableDetailsForNftStakeTypes[stakeType]
       }));
-      console.log(entries.concat(nftEntires));
       return entries.concat(nftEntires);
     },
 
@@ -69,7 +65,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['fetchStakeOverviewData']),
+    ...mapActions('staking',['fetchStakeOverviewData']),
 
     calculateEstimatedYield(stakeType) {
       const rewardRate = this.stakeOverviews[stakeType].rewardRate;
@@ -87,7 +83,6 @@ export default Vue.extend({
       if(isNftStakeType(stakeType)) {
         return estYield.dividedBy(BN(10).pow(18));
       }
-      console.log(estYield);
       return estYield;
     }
   },
