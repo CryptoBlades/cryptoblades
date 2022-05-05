@@ -68,6 +68,7 @@ import quests from './quests';
 import merchandise from './merchandise';
 import raid from './raid';
 import staking from './staking';
+import land from './land';
 
 export function createStore(web3: Web3) {
   return new Vuex.Store<IState>({
@@ -77,7 +78,8 @@ export function createStore(web3: Web3) {
       quests,
       merchandise,
       raid,
-      staking
+      staking,
+      land
     },
     state: {
       web3,
