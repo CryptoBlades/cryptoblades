@@ -74,7 +74,7 @@
       <pvp-arena-information
         class="arenaInformation"
         :tierRewardsPool="tierRewardsPool"
-        :tierTopRankers="tierTopRankers"
+        :tierTopRankers="isUntiered ? untieredTopRankers : tierTopRankers"
         :currentRankedSeason="currentRankedSeason"
         :secondsBeforeNextSeason="secondsBeforeNextSeason"
         :characterInformation="characterInformation"
@@ -108,6 +108,9 @@ export default {
       default: null
     },
     tierTopRankers: {
+      default: []
+    },
+    untieredTopRankers: {
       default: []
     },
     currentRankedSeason: {
@@ -151,6 +154,7 @@ export default {
       loading: false,
       duelQueue: [],
       isCharacterInDuelQueue: false,
+      isUntiered: false
     };
   },
 
@@ -161,7 +165,8 @@ export default {
   methods: {
     ...mapActions([
       'withdrawFromArena',
-      'getDuelQueue'
+      'getDuelQueue',
+      'getPreviousTierByCharacter'
     ]),
 
     setTab(tabNumber) {
@@ -207,6 +212,8 @@ export default {
   async created() {
     this.loading = true;
 
+    this.isUntiered = await this.getPreviousTierByCharacter(this.currentCharacterId) === '20';
+
     try {
       this.duelQueue = await this.getDuelQueue();
 
@@ -219,6 +226,18 @@ export default {
     }
 
     this.loading = false;
+  },
+
+  watch: {
+    async currentCharacterId(value) {
+      this.loading = true;
+
+      if (value !== null) {
+        this.isUntiered = this.getPreviousTierByCharacter(value) === '20';
+      }
+
+      this.loading = false;
+    }
   }
 };
 </script>

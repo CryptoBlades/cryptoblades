@@ -100,18 +100,13 @@
 
             <a
               class="menu-icon"
-              v-if="!stakeOnly && market"
+              v-if="!stakeOnly"
               href="https://bazaar.market"
               target="_blank"
             >
               <img src="../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
               <span>{{ $t("viewLink.bazaar") }}</span>
             </a>
-
-            <div v-if="!market" class="menu-icon disabled-hover">
-              <img src="../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
-              <span>{{ $t("viewLink.bazaar") }}</span>
-            </div>
 
             <router-link
               class="menu-icon"
@@ -165,14 +160,9 @@
               <span>{{ $t("viewLink.settings") }}</span>
             </router-link>
 
-            <router-link
-              v-if="hasAdminAccess"
-              class="menu-icon"
-              :to="{ name: 'admin' }"
-              exact
-            >
-              <img src="../assets/navbar-icons/gear-icon.png" alt="Admin"/>
-              <span>{{ $t("viewLink.admin") }}</span>
+            <router-link class="menu-icon" :to="{ name: 'nft-display' }" exact>
+              <img src="../assets/navbar-icons/nft-display.svg" class="gold-icon" alt="Nft Display"/>
+              <span>{{ $t("viewLink.nftDisplay") }}</span>
             </router-link>
 
             <router-link
@@ -182,13 +172,22 @@
               exact
               :class="supportsMerchandise ? '' : 'disabled-link'"
             >
-              <img src="../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
+              <img src="../assets/navbar-icons/shopping-bag.svg" class="gold-icon" alt="Merchandise"/>
               <span>{{ $t("viewLink.merchandise") }} <hint
                 v-if="!supportsMerchandise"
                 class="hint"
                 :text="$t('viewLink.functionalityNotSupportedTooltip')"
               /></span>
+            </router-link>
 
+            <router-link
+              v-if="hasAdminAccess"
+              class="menu-icon"
+              :to="{ name: 'admin' }"
+              exact
+            >
+              <img src="../assets/navbar-icons/gear-icon.png" alt="Admin"/>
+              <span>{{ $t("viewLink.admin") }}</span>
             </router-link>
 
             <!-- disabled for now , will integrate later when other UI's merged -->
@@ -299,7 +298,7 @@ import {fromWeiEther, toBN} from '../utils/common';
 import {nft_bridge as bridgeEnabled} from './../feature-flags';
 import {SupportedProject} from '@/views/Treasury.vue';
 import Hint from '@/components/Hint.vue';
-import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
+import {merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -352,7 +351,6 @@ export default Vue.extend({
       ClaimStage,
       stakeOnly,
       raid,
-      market,
       portal,
       pvp,
       quests,
@@ -408,22 +406,6 @@ export default Vue.extend({
     },
     canClaimTokens(): boolean {
       return !toBN(this.skillRewards).lte(0);
-    },
-    supportedProjects(): SupportedProject[] {
-      const supportedProjects = this.getPartnerProjects.map(p => {
-        return {
-          id: p.id,
-          name: p.name,
-          tokenSymbol: p.tokenSymbol,
-          tokenAddress: p.tokenAddress,
-          tokenSupply: p.tokenSupply,
-          tokensClaimed: p.tokensClaimed,
-          tokenPrice: p.tokenPrice,
-          isActive: p.isActive
-        };
-      });
-
-      return supportedProjects;
     },
   },
 
@@ -494,10 +476,8 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.nft-display-icon {
-  margin-left: -3px;
-  height: 20px;
-  filter: invert(75%) sepia(8%) saturate(243%) hue-rotate(8deg) brightness(96%) contrast(81%);
+.gold-icon {
+  filter: invert(81%) sepia(97%) saturate(276%) hue-rotate(317deg) brightness(97%) contrast(91%);
 }
 
 .menu-burger {

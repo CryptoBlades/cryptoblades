@@ -1,7 +1,7 @@
 <template>
-  <div class="body main-font">
+  <div style="display: inline-flex" class="body main-font pl-3">
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
-      <div class="row" v-if="error !== null">
+      <div v-if="error !== null">
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
       </div>
 
@@ -9,23 +9,25 @@
         <CombatResults v-if="resultsAvailable" :fightResults="fightResults" class="mb-3" />
         <div class="footer-close">
             <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
-            <span @click="$bvModal.hide('fightResultsModal')"><img style="margin: auto;width: 40px !important;" src="../assets/close-btn.png" alt=""></span>
+            <span class="tap" @click="$bvModal.hide('fightResultsModal')">
+              <img style="width: 40px; margin-left: 215px;" src="../assets/close-btn.png" alt="">
+              </span>
         </div>
       </b-modal>
 
-      <div class="row waitingForResult" v-if="waitingResults">
+      <div class="waitingForResult" v-if="waitingResults">
         <div class="col wa">
             <i class="fas fa-spinner fa-spin fa-1x mr-3"></i>
             {{$t('combat.waiting').toUpperCase()}}
         </div>
       </div>
 
-      <div class="row">
+      <div>
           <div class="col-lg-6 col-md-12 col-xl-6 col-sm-12 adventure">
-            <h5>{{$t('combat.adventure')}}</h5>
+            <h5 class="m-2">{{$t('combat.adventure')}}</h5>
             <img src="../assets/hint.png" alt="" @click="hideBottomMenu(true)">
           </div>
-          <div class="col-lg-6 col-md-12 col-xl-6 col-sm-12 text-right combant-hint" :style="isToggled ? 'display:inline' : 'none'"
+          <div class="col-lg-12 col-md-12 col-xl-12 col-sm-12 text-right combant-hint" :style="isToggled ? 'display:inline' : 'none'"
            @click="hideBottomMenu(false)">
             <div class="combat-hints">
               <Hint class="mr-3" :text="$t('combat.elementHint')"/>
@@ -55,52 +57,31 @@
 
       <img src="../assets/divider7.png" class="info-divider enemy-divider" />
 
-      <!-- // error message boxes -->
-      <div class="row">
+      <div>
         <div class="col">
-          <div class="message-box" v-if="!currentCharacter">{{$t('combat.errors.needToSelectChar')}}</div>
-          <div class="row">
-            <div class="col-12 text-center">
-              <div class="message-box flex-column" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
-                {{$t('combat.needStamina', {staminaPerFight })}}
-                <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">{{$t('combat.errors.notEnoughDurability')}}</div>
-                <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">{{$t('combat.errors.lastSeconds')}}</div>
-              </div>
-            </div>
-          </div>
+        <div class="mb-3" :style="'align-self: baseline; width: 20vw'">
+          <span class="isMobile label-title">{{!selectedWeaponId ? $t('combat.selectStaminaStepOne') : $t('combat.selectStamina')}}</span>
+          <b-form-select style="background-color:#171617;color:#fff"
+          class="mt-3" v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
         </div>
-      </div>
-      <!-- --------------------------------------- -->
-
-      <div class="row" v-if="currentCharacterStamina >= staminaPerFight">
-      <!-- <div class="row"> -->
-        <div class="col">
-          <div class="combat-enemy-container">
+          <div  v-if="currentCharacterStamina >= staminaPerFight" class="combat-enemy-container">
               <!-- selected weapon for combat details -->
-              <div class="col weapon-selection mb-4">
+              <div class="weapon-selection mb-4">
                 <div class="header-row d-flex justify-content-between">
-                  <div class="d-flex align-items-end selectedWeaponDetails">
-
-                    <div class="message-box select-weapons" v-if="!selectedWeapon">
-                       <span class="isMobile">{{$t('combat.selectAWeapon')}}</span>
-                        <button :v-tooltip="$t('combat.changeWeapon')"  class="ml-3 ct-btn mb-3 ml-2" @click="changeEquipedWeapon()">
-                          <img src="../assets/swithc-wep.png">
-                      </button>
+                  <div class="selectedWeaponDetails">
+                    <div class="select-weapons" v-if="!selectedWeaponId || !weaponHasDurability(selectedWeaponId)">
+                      <span class="isMobile label-title">{{$t('combat.selectAWeapon')}}</span>
+                      <weapon-grid :showNftOptions="true" :ownWeapons="ownWeapons.length"
+                      :gridStyling="gridStyling" :noTitle="true" titleType="combat" v-model="selectedWeaponId" />
                     </div>
                     <!-- selected weapon for combat details -->
-                    <div v-if="selectedWeaponId" class="mr-3">
+                    <div v-if="selectedWeaponId && weaponHasDurability(selectedWeaponId)" class="mr-3">
                       <weapon-inventory class="weapon-icon" :weapon="selectedWeapon" :displayType="'adventure'"/>
+                      <button v-tooltip="'Change Weapon'" class="ml-3 btn ct-btn mb-3 hideMobile"
+                        @click="changeEquipedWeapon()">
+                        <img src="../assets/swithc-wep.png">
+                      </button>
                     </div>
-
-                    <button v-tooltip="'Change Weapon'" v-if="selectedWeaponId" class="ml-3 btn ct-btn mb-3"
-                    @click="changeEquipedWeapon()">
-                      <img src="../assets/swithc-wep.png">
-                    </button>
-                  </div>
-                  <div :style="!selectedWeaponId ? 'align-self: baseline' : 'align-self: center'">
-                      <div>
-                        <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
-                      </div>
                   </div>
                 </div>
               </div>
@@ -109,16 +90,18 @@
 
               <transition-group
                 appear @before-enter="beforeEnter" @enter="enter"
+                :key="index"
                 class="row mb-3 enemy-container" v-if="targets.length > 0">
               <div class="col-12 col-md-6 col-lg-6 col-sm-6 col-xl-3 encounter" v-for="(e, i) in targets" :key="e.original" :data-index="i">
                 <div class="encounter-container">
                     <div class="enemy-character" @mouseover="activeCard = i" :disabled="(timeMinutes === 59 && timeSeconds >= 30) ||
                           waitingResults || !weaponHasDurability(selectedWeaponId) || !charHasStamina()"
-                          @click="onClickEncounter(e,i)">
+                          @click="onClickEncounter(e,i)"
+                          v-if="weaponHasDurability(selectedWeaponId) || timeMinutes === 59 && timeSeconds >= 30">
 
                         <!-- frame -->
                         <div class="frame-line" v-if="activeCard === i">
-                          <img src="../assets/frame-line-3.png" alt="">
+                          <img style="width: 20rem; height: 35rem;" src="../assets/frame-line-3.png" alt="">
                         </div>
 
                        <!-- winning chance -->
@@ -155,10 +138,6 @@
                         <div class="skill-gain mb-1">
                           + ~{{formattedSkill(targetExpectedPayouts[i] * fightMultiplier)}}
                         </div>
-
-                        <div class="loot-chest" v-if="getWinChance(e.power, e.trait).toUpperCase() == 'UNLIKELY'">
-                          <img src="../assets/chest.png" alt="">
-                        </div>
                     </div>
                 <p v-if="isLoadingTargets">{{$t('combat.loading')}}</p>
                 </div>
@@ -167,8 +146,22 @@
           </div>
         </div>
       </div>
-
-      <div></div>
+      <!-- // error message boxes -->
+      <div>
+        <div class="col">
+          <div class="message-box" v-if="!currentCharacter">{{$t('combat.errors.needToSelectChar')}}</div>
+          <div class="row">
+            <div class="col-12 text-center">
+              <div class="message-box flex-column" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
+                {{$t('combat.needStamina', {staminaPerFight })}}
+              </div>
+              <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">{{$t('combat.errors.notEnoughDurability')}}</div>
+              <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">{{$t('combat.errors.lastSeconds')}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- --------------------------------------- -->
     </div>
     <b-modal class="centered-modal" ref="no-skill-warning-modal" @ok="fightTarget(targetToFight,targetToFightIndex)">
       <template #modal-title>
@@ -196,6 +189,7 @@ import Events from '../events';
 import CombatResults from '../components/CombatResults.vue';
 import {fromWeiEther, toBN} from '../utils/common';
 import WeaponInventory from '../components/WeaponInvetory.vue';
+import WeaponGrid from '../components/smart/WeaponGridNew.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
 
@@ -225,12 +219,16 @@ export default {
       powerAvg: null,
       expectedSkill: null,
       activeCard: null,
-      isToggled: false
+      isToggled: false,
+      gridStyling:'justify-content:flex-start; gap:2.5vw',
+      index: 1
     };
   },
   async mounted(){
-    Events.$on('setWeaponId', (id) =>{
+    this.selectedWeaponId = this.currentWeaponId;
+    Events.$on('chooseweapon', (id) =>{
       this.selectedWeaponId = id;
+      this.index++;
     });
   },
   created() {
@@ -248,7 +246,7 @@ export default {
     clearInterval(this.counterInterval);
   },
   computed: {
-    ...mapState(['currentCharacterId']),
+    ...mapState(['currentCharacterId','currentWeaponId']),
     ...mapGetters([
       'getTargetsByCharacterIdAndWeaponId',
       'ownCharacters',
@@ -545,28 +543,40 @@ export default {
   components: {
     Hint,
     CombatResults,
-    WeaponInventory
+    WeaponInventory,
+    WeaponGrid
   },
 };
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
-
+.body{
+  background: linear-gradient(0deg, rgba(22, 22, 22, 0.95), rgba(22, 22, 22, 0.95)), url('../assets/combat-bg.png');
+  background-size:cover;
+  min-height: 100%;
+}
 h5{
   font-family: Trajan;
   font-size: 25px;
   font-weight: 600;
 }
 
+.label-title{
+  font-family: Oswald;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 20px;
+}
+
 
 .enemy-character {
   position: relative;
-  width: 14em;
+  width: 20rem;
   cursor: pointer;
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 115%;
+  background-size: cover;
   background-image: url('../assets/enemy-bg-transparent.png');
   background-color: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, #242720 100%);
   border: 1px solid #a28d54;
@@ -580,14 +590,13 @@ h5{
 }
 
 .enemy-character:hover{
-  margin-top: -10px;
   transition: all 0.2s ease-in-out;
   border: 1px solid #a28d54;
-  box-shadow: inset 0px 0px 20px 10px rgba(0,0,0,0.6);
+  box-shadow: inset 0px 0px 0px 0px rgba(0,0,0,0.6);
 }
 
 .encounter img {
-  width: 140px;
+  width: 13rem;
   transition: 1s all;
 }
 
@@ -607,31 +616,28 @@ h5{
 
 .frame-line{
   position: absolute;
-  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
-.frame-line > img{
-  animation-name: resizeUp;
-  animation-duration: 0.5s;
+
+.frame-line:hover{
+  max-width: 112%;
+  opacity: 1;
 }
 
 
 @keyframes resizeUp {
   0%   {
-    width: 100%;
+    width: 80%;
     opacity: 0;
   }
   100%  {
-    width: 112%;
+    width: 115%;
     opacity: 1;
   }
 }
 
-
-.frame-line > img{
-  width: 112%;
-  margin-left: -13px;
-}
 
 .combat-hints {
   margin: auto;
@@ -639,7 +645,7 @@ h5{
   font-size: 2em;
   display: flex;
   align-items: center;
-  justify-content: right;
+  justify-content: center;
 }
 
 .combat-hints > div{
@@ -721,12 +727,14 @@ div.encounter.text-center {
 
 .encounter-power{
   color: #fff;
-  font-size: 17px;
+  font-size: 1.3rem;
   font-weight: 600;
+  margin-top: 1.5rem;
   font-family: Oswald;
 }
 
 .chance-winning{
+    z-index: 1;
     color: #fff;
     padding: 1px 15px;
     border-radius: 2px;
@@ -747,7 +755,7 @@ div.encounter.text-center {
   top: 15px;
   left: 15px;
   animation-name: moveUpFade;
-  animation-duration: 0.3s;
+  animation-duration: 1s;
 }
 
 .modal-body{
@@ -784,28 +792,22 @@ div.encounter.text-center {
 
 .xp-gain {
   bottom: 40px;
-  font-size: 0.8em;
+  font-size: 1rem;
 }
 
 .skill-gain {
   bottom: 20px;
-  font-size: 0.8em;
+  font-size: 1rem;
 }
 
-.loot-chest{
-  position: absolute;
-  bottom: 0;
-  margin-bottom: -38px;
-  border: 1px solid #9e8a57;
-  border-radius: 7px;
-  padding: 5px;
-  background-color:#131518;
+.selectedWeaponDetails > div >  button > img{
+  width: 30px;
 }
 
-.loot-chest > img{
-  width: 40px;
+.selectedWeaponDetails > div {
+  display: flex;
+  align-items: flex-start;
 }
-
 
 .victory-chance {
   left: 0;
@@ -854,6 +856,11 @@ div.encounter.text-center {
   position: relative;
 }
 
+
+.hideMobile{
+  display: none;
+}
+
 h1 {
   font-weight: 900 !important;
   text-align: center;
@@ -873,8 +880,7 @@ h1 {
 
 .enemy-img {
   position: relative;
-  top: -10px;
-  -webkit-filter: drop-shadow(0px 0px 25px rgba(0, 0, 0, 0.5));
+  top: -30px;
 }
 
 .adventure{
@@ -908,6 +914,24 @@ h1 {
   margin-left: 20px;
 }
 
+.select-weapons .ct-btn > img{
+  width: 30px;
+  margin-left: 20px;
+}
+
+.select-weapons > div{
+  width: 80vw;
+}
+
+.select-weapons > div > ul{
+  justify-content: flex-start;
+}
+
+.select-weapons .ct-btn{
+  background-color: rgba(0, 0, 0, 0);
+}
+
+
 
 .message-box  .ct-btn{
   margin-left: 20px;
@@ -928,13 +952,12 @@ h1 {
 }
 
 .select-weapons{
-  font-size: 1.5em;
+  margin-top: 1em;
   align-self: right;
+  display: flex;
+  flex-direction: column;
 }
 
-.select-weapons > span{
-  font-family: Trajan;
-}
 
 @media all and (max-width: 600px) {
   .combat-hints > div > .fire-icon,
@@ -945,6 +968,10 @@ h1 {
     max-width: 20px !important;
     width: auto;
     height: auto;
+  }
+
+  .hideMobile{
+    display: inline;
   }
 
   .body  > div{
@@ -1067,32 +1094,18 @@ h1 {
     position: absolute;
   }
 
-  .loot-chest{
-    position: absolute;
-    bottom: 0;
-    margin-bottom: -30px;
-    border: 1px solid #9e8a57;
-    border-radius: 7px;
-    padding: 5px;
-    background-color:#131518;
-  }
-
-  .loot-chest > img{
-    width: 40px !important;
-  }
-
-
 }
 
 /* Needed to asjust image size, not just image column-size and other classes to accommodate that */
 @media all and (max-width: 767.98px) {
-
-  .main-font{
-    background-image: url('../assets/combat-bg.png');
-  }
   .encounter img {
-    width: calc(100% - 60px);
+    max-width: 140px;
   }
+
+  .frame-line {
+    display: none;
+  }
+
   .enemy-list{
     flex-direction:column;
     align-items:center;
@@ -1145,11 +1158,11 @@ h1 {
 
 /* for change weapon compnent */
 .change-weapon{
-  position: absolute;
+  position: fixed;
   right: 0;
   height: 100vh;
   width: 30%;
-  z-index: 9999;
+  z-index: 5;
   background-color: #212529;
 }
 
@@ -1158,8 +1171,10 @@ h1 {
     text-transform: capitalize;
 }
 
+
 .cw-content{
   padding: 40px;
+  border: 1px solid #ffffff52;
 }
 /* --------------------------------- */
 .ct-btn{
@@ -1226,9 +1241,7 @@ h1 {
 }
 
 .footer-close{
-  justify-content: center;
-  align-items: center;
-  position: absolute;
+  margin: auto;
 }
 
 .footer-close > span{
@@ -1239,6 +1252,8 @@ h1 {
   font-size: 15px;
   color: #fff;
   margin-top: 40px;
+  text-align: center;
+  margin-left: auto;
   margin-bottom: 20px;
   font-family: Roboto;
 }

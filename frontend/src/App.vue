@@ -1,14 +1,18 @@
 <template>
   <div class="app">
+    <Banner
+      text="GIVEAWAY: Win 1 of 10 Level 70+ Characters"
+      link="https://gleam.io/uswdy/cryptoblades-70-character-giveaway"
+      linkText="Enter here"
+    />
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content dark-bg-text">
       <b-row>
         <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
-        <b-col :class="toggleSideBar ? 'can-show-app' : 'col-xl-9 col-lg-8 col-md-8 col-sm-10 cols-11 set-normal'">
-        <!-- :class="!featureFlagStakeOnly && currentCharacterId !== null ? 'bg-image' : ''"> -->
+        <b-col style="padding-left: 0;" :class="renderPageDisplay()">
           <router-view v-if="canShowApp" />
         </b-col>
-        <WeaponRowGrid v-if="showWeapon" v-model="currentWeaponId" :checkForDurability="true"/>
+        <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
       </b-row>
     </div>
     <div class="content dark-bg-text" v-if="!canShowApp">
@@ -102,6 +106,7 @@ import { getConfigValue } from './contracts';
 import '@/mixins/general';
 import config from '../app-config.json';
 import { addChainToRouter } from '@/utils/common';
+import Banner from './components/Banner.vue';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -114,7 +119,8 @@ export default {
     CharacterBar,
     BigButton,
     SmallButton,
-    WeaponRowGrid
+    WeaponRowGrid,
+    Banner
   },
 
   data: () => ({
@@ -126,7 +132,9 @@ export default {
     isOptions: false,
     showWeapon: false,
     currentWeaponId: null,
-    toggleSideBar: true
+    weaponId: null,
+    toggleSideBar: false,
+    currentPath: '',
   }),
 
   computed: {
@@ -158,11 +166,9 @@ export default {
     async currentCharacterId() {
       await this.updateCharacterStamina(this.currentCharacterId);
     },
-    currentWeaponId(){
-      Events.$emit('setWeaponId', this.currentWeaponId);
-    },
     $route(to) {
       // react to route changes
+      this.currentPath = to.path;
       this.checkChainAndParams();
       if(to.path === '/options') {
         return this.isOptions = true;
@@ -186,7 +192,7 @@ export default {
       'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
-      'configureMetaMask'
+      'configureMetaMask',
     ]),
     ...mapGetters([
       'getExchangeTransakUrl'
@@ -225,13 +231,30 @@ export default {
       }
     },
 
+    renderPageDisplay(){
+      let toDisplay;
+
+      if(!this.featureFlagStakeOnly && this.currentCharacterId !== null){
+        if(this.toggleSideBar){
+          toDisplay = 'can-show-app';
+        }else{
+          toDisplay = 'col-xl-10 col-lg-9 col-md-9 col-sm-10 cols-11 set-normal';
+        }
+      }else{
+        toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
+      }
+
+      return toDisplay;
+    },
+
+
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
       if (process.env.NODE_ENV === 'development') this.showAds = false;
       else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
     async initializeRecruitCost() {
-      const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
+      const recruitCost = await this.contracts.CryptoBlades.methods.getMintCharacterFee().call({ from: this.defaultAccount });
       const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
       this.recruitCost = BN(skillRecruitCost)
         .div(BN(10).pow(18))
@@ -294,6 +317,7 @@ export default {
       }
     },
 
+
     async checkNotifications() {
       const response = await fetch(apiUrl('static/notifications'));
       const notifications = await response.json();
@@ -340,6 +364,11 @@ export default {
     Events.$on('weapon-inventory', (bol) =>{
       this.showWeapon = bol;
     });
+
+    Events.$on('chooseweapon', (id) =>{
+      this.weaponId = id;
+    });
+
     Events.$on('toggle-sideBar', (bol) =>{
       this.toggleSideBar = bol;
     });
@@ -436,6 +465,7 @@ export default {
     clearInterval(this.pollCharacterStaminaIntervalId);
     clearInterval(this.slowPollIntervalId);
   },
+
 };
 </script>
 
@@ -463,12 +493,12 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
 
 
 .set-normal{
-  margin-top: 20px;
   margin-left: auto;
   margin-right: auto;
   transition: 1s all;
-  background-image: url('./assets/combat-bg.png');
+  padding: 0px;
 }
+
 
 hr.hr-divider {
   border-top: 1px solid #9e8a57;
@@ -505,15 +535,6 @@ body {
   color: #9e8a57;
 }
 
-.body {
-  padding-top: 15px 35px;
-  /* max-height: calc(100vh - 56px - 160px); */
-}
-
-.body  > div{
-  padding-left: 20px;
-}
-
 button,
 .pointer {
   cursor: pointer;
@@ -534,6 +555,8 @@ button,
 
 .error {
   color: red;
+  overflow: hidden;
+  max-width: 75vw;
 }
 
 .fire,
@@ -560,6 +583,16 @@ button,
   font-size: 0.8em;
   color: grey;
 }
+
+
+.tooltip{
+  z-index: 6;
+}
+
+.popover .arrow{
+  display: none;
+}
+
 
 .fire-icon,.str-icon {
   color: red;
@@ -591,6 +624,20 @@ button,
   width: 1em;
   height: 1em;
 }
+.pwr-icon {
+  color: yellow;
+  content: url('assets/elements/power-icon.svg');
+  width: 0.9em;
+  height: 0.9em;
+}
+
+.bonus-power-icon {
+  content: url('assets/navbar-icons/blacksmith-icon.png');
+  width: 0.8em;
+  height: 0.8em;
+  padding-left: 1px;
+}
+
 
 .loading-container {
   position: absolute;
@@ -642,6 +689,7 @@ button.close {
   background: rgb(31, 31, 34);
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
+
 
 .btn-outline-primary {
   color: #9e8a57 !important;
@@ -722,6 +770,29 @@ div.bg-success {
   border: 2px solid #9e8a57 !important;
   background: rgb(61, 61, 64);
   background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
+}
+
+.multiselect *{
+  background: transparent;
+  color:#fff;
+}
+.multiselect__tags, .multiselect__content-wrapper{
+  border:1px solid #404857;
+}
+.multiselect--above .multiselect__content-wrapper{
+  border-top:none;
+}
+
+.multiselect__option--selected.multiselect__option--highlight,
+.multiselect__option--selected.multiselect__option--highlight::after{
+  background: #9E8A57;
+}
+
+.multiselect__option--selected,
+.multiselect__option--selected::after,
+.multiselect__option--highlight,
+.multiselect__option--highlight::after{
+  background: #404857;
 }
 </style>
 <style scoped>
@@ -816,9 +887,20 @@ div.bg-success {
 }
 
 
+#blacksmith-bg{
+  background: rgba(20, 20, 20, 1);
+  background-image: url("./assets/blacksmith/blacksmith-bg.png");
+  background-image: url("./assets/blacksmith/blacksmith-bg.png"), linear-gradient(rgba(0, 68, 111, 0) 0%,
+  rgba(20, 20, 20, 0.4) 30%,rgba(20, 20, 20, 1) 100%); /* W3C */
+  /* background: radial-gradient(closest-side at 50% 50%, rgba(0, 68, 111, 0) 10%,
+  rgba(20, 20, 20, 0.4) 50%,rgba(20, 20, 20, 1) 100%), url('./assets/blacksmith/blacksmith-bg.png'); */
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .can-show-app{
   width: 100%;
-  padding-top: 40px;
+  padding: 0px;
 }
 
 

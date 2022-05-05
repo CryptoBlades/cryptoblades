@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="99.72" height="99.72" viewBox="0 0 99.72 99.72">
+  <g id="hammer" transform="translate(-1105.14 -218.64)">
+    <g id="Ellipse_29" data-name="Ellipse 29" transform="translate(1204.86 281.86) rotate(150)" fill="none" stroke="#edcd90" stroke-width="2" stroke-dasharray="100 70">
+      <circle cx="36.5" cy="36.5" r="36.5" stroke="none"/>
+      <circle cx="36.5" cy="36.5" r="35.5" fill="none"/>
+    </g>
+    <g id="_3553090_hammer_icon" data-name="3553090_hammer_icon" transform="translate(1128.125 223.128)">
+      <path id="Path_2" data-name="Path 2" d="M17.192,6H33.539a1.728,1.728,0,0,1,.918.159,1.083,1.083,0,0,1,.45.45,1.728,1.728,0,0,1,.159.918V21.156a1.728,1.728,0,0,1-.159.918,1.083,1.083,0,0,1-.45.45,1.728,1.728,0,0,1-.918.159H17.575a1.729,1.729,0,0,1-.916-.158,1.083,1.083,0,0,1-.45-.449,1.729,1.729,0,0,1-.162-.916L16,7.2A1.192,1.192,0,0,1,17.188,6Zm21.45,0h4.767V22.683H38.992a1.728,1.728,0,0,1-.918-.159,1.083,1.083,0,0,1-.45-.45,1.728,1.728,0,0,1-.16-.917L37.45,7.193A1.192,1.192,0,0,1,38.64,6Z" transform="translate(1.342)" fill="#edcd90"/>
+      <path id="Path_3" data-name="Path 3" d="M1.192,16.683H5.958V0H1.542A1.728,1.728,0,0,0,.625.159a1.083,1.083,0,0,0-.45.45,1.728,1.728,0,0,0-.16.917L0,15.49a1.192,1.192,0,0,0,1.19,1.193Z" transform="translate(14.958 22.683) rotate(180)" fill="#edcd90"/>
+      <path id="Path_4" data-name="Path 4" d="M22.692,22h3.575a1.192,1.192,0,0,1,1.192,1.192V42.854a2.979,2.979,0,0,1-2.979,2.979h0a2.979,2.979,0,0,1-2.98-2.979V23.192A1.192,1.192,0,0,1,22.692,22Z" transform="translate(2.396 3.067)" fill="#edcd90"/>
+    </g>
+    <g id="Rectangle_668" data-name="Rectangle 668" transform="translate(1134.494 272.028) rotate(-45)" fill="none" stroke="#edcd90" stroke-width="1">
+      <rect width="29" height="29" stroke="none"/>
+      <rect x="0.5" y="0.5" width="28" height="28" fill="none"/>
+    </g>
+    <path id="Path_177" data-name="Path 177" d="M6927.12,15113.7l5.076,5.076-5.076,5.077Z" transform="translate(-13963.811 7153.713) rotate(-90)" fill="#edcd90"/>
+    <g id="Rectangle_670" data-name="Rectangle 670" transform="translate(1165.506 272.028) rotate(-45)" fill="none" stroke="#edcd90" stroke-width="1">
+      <rect width="10.422" height="10.422" stroke="none"/>
+      <rect x="0.5" y="0.5" width="9.422" height="9.422" fill="none"/>
+    </g>
+    <g id="Rectangle_671" data-name="Rectangle 671" transform="translate(1129.756 272.028) rotate(-45)" fill="none" stroke="#edcd90" stroke-width="1">
+      <rect width="10.422" height="10.422" stroke="none"/>
+      <rect x="0.5" y="0.5" width="9.422" height="9.422" fill="none"/>
+    </g>
+  </g>
+</svg>

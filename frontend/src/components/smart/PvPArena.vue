@@ -10,6 +10,7 @@
         :tierTopRankers="tierTopRankers"
         :characterInformation="characterInformation"
         :entryWager="entryWager"
+        :untieredEntryWager="untieredEntryWager"
         :availableWeaponIds="availableWeaponIds"
         :availableShieldIds="availableShieldIds"
         :ownedWeaponsWithInformation="ownedWeaponsWithInformation"
@@ -22,6 +23,7 @@
         v-else-if="isCharacterInArena && !isMatchMaking"
         :tierRewardsPool="tierRewardsPool"
         :tierTopRankers="tierTopRankers"
+        :untieredTopRankers="untieredTopRankers"
         :characterInformation="characterInformation"
         :activeWeaponWithInformation="activeWeaponWithInformation"
         :activeShieldWithInformation="activeShieldWithInformation"
@@ -84,9 +86,11 @@ export default {
       loading: true,
       isCharacterInArena: false,
       entryWager: null,
+      untieredEntryWager: null,
       isMatchMaking: false,
       tierRewardsPool: null,
       tierTopRankers: [],
+      untieredTopRankers: [],
       currentRankedSeason: null,
       seasonStartedAt: null,
       seasonDuration: null,
@@ -160,12 +164,13 @@ export default {
       'getRankingsPoolByTier',
       'getTierTopCharacters',
       'getArenaTier',
-      'getEntryWager',
+      'getEntryWagerByTier',
       'getIsWeaponInArena',
       'getIsShieldInArena',
       'getIsCharacterInArena',
-      'getPvpContract',
-      'getRename'
+      'getPvpCoreContract',
+      'getPvpRankingsContract',
+      'getRename',
     ]),
 
     async getWeaponInformation(weaponId) {
@@ -287,10 +292,12 @@ export default {
     },
 
     async getKickedEvents(pvpContract, blockToScanFrom) {
-      let fromBlock = blockToScanFrom;
+      let fromBlock;
 
       if (!blockToScanFrom) {
         fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 1800, 0);
+      } else {
+        fromBlock = Math.max(blockToScanFrom, await this.web3.eth.getBlockNumber() - 1800);
       }
 
       const kickedEvents = await pvpContract.getPastEvents('CharacterKicked', {
@@ -310,7 +317,7 @@ export default {
         blockToScanFrom = lastKickedBlock;
       }
 
-      const kickedEvents = await this.getKickedEvents(await this.getPvpContract(), blockToScanFrom);
+      const kickedEvents = await this.getKickedEvents(await this.getPvpCoreContract(), blockToScanFrom);
 
       if (kickedEvents.length && !this.isCharacterInArena) {
         const formattedResult = formatCharacterKickedEvent(kickedEvents[kickedEvents.length - 1].returnValues);
@@ -357,7 +364,18 @@ export default {
 
           const tierTopRankersIds = await this.getTierTopCharacters(this.characterInformation.tier);
 
+          const untieredTopRankersIds = await this.getTierTopCharacters(20);
+
           this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+            const rename = await this.getRename(rankerId);
+            return {
+              rankerId,
+              name: rename ? rename : this.getCharacterName(rankerId),
+              rank: await this.getRankingPointsByCharacter(rankerId)
+            };
+          }));
+
+          this.untieredTopRankers = await Promise.all(untieredTopRankersIds.map(async (rankerId) => {
             const rename = await this.getRename(rankerId);
             return {
               rankerId,
@@ -379,7 +397,7 @@ export default {
 
     await this.updateSecondsBeforeSeason();
 
-    await this.listenForSeasonRestart(await this.getPvpContract(), currentBlock);
+    await this.listenForSeasonRestart(await this.getPvpRankingsContract(), currentBlock);
 
     // Note: currentCharacterId can be 0
     if (this.currentCharacterId !== null) {
@@ -397,7 +415,9 @@ export default {
 
       this.characterInformation.element = formatCharacter(this.currentCharacterId, await this.getCharacter(this.currentCharacterId)).traitName;
 
-      this.entryWager = await this.getEntryWager(this.currentCharacterId);
+      this.entryWager = await this.getEntryWagerByTier(this.characterInformation.tier);
+
+      this.untieredEntryWager = await this.getEntryWagerByTier(0);
 
       const weaponAvailability = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
         return {
@@ -459,9 +479,19 @@ export default {
 
       const tierTopRankersIds = await this.getTierTopCharacters(this.characterInformation.tier);
 
+      const untieredTopRankersIds = await this.getTierTopCharacters(20);
+
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
         const rename = await this.getRename(rankerId);
+        return {
+          rankerId,
+          name: rename ? rename : this.getCharacterName(rankerId),
+          rank: await this.getRankingPointsByCharacter(rankerId)
+        };
+      }));
 
+      this.untieredTopRankers = await Promise.all(untieredTopRankersIds.map(async (rankerId) => {
+        const rename = await this.getRename(rankerId);
         return {
           rankerId,
           name: rename ? rename : this.getCharacterName(rankerId),
@@ -471,7 +501,7 @@ export default {
 
       const fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 1800, 0);
 
-      const previousDuels = await (await this.getPvpContract()).getPastEvents('DuelFinished', {
+      const previousDuels = await (await this.getPvpCoreContract()).getPastEvents('DuelFinished', {
         filter: {attacker: this.currentCharacterId},
         toBlock: 'latest',
         fromBlock,
@@ -518,7 +548,9 @@ export default {
 
         this.characterInformation.element = formatCharacter(value, await this.getCharacter(value)).traitName;
 
-        this.entryWager = await this.getEntryWager(this.currentCharacterId);
+        this.entryWager = await this.getEntryWagerByTier(this.characterInformation.tier);
+
+        this.untieredEntryWager = await this.getEntryWagerByTier(0);
 
         const weaponAvailability = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
           return {
@@ -587,7 +619,17 @@ export default {
 
         const tierTopRankersIds = await this.getTierTopCharacters(this.characterInformation.tier);
 
+        const untieredTopRankersIds = await this.getTierTopCharacters(20);
+
         this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+          return {
+            rankerId,
+            name: this.getCharacterName(rankerId),
+            rank: await this.getRankingPointsByCharacter(rankerId)
+          };
+        }));
+
+        this.untieredTopRankers = await Promise.all(untieredTopRankersIds.map(async (rankerId) => {
           return {
             rankerId,
             name: this.getCharacterName(rankerId),
@@ -597,7 +639,7 @@ export default {
 
         const fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 1800, 0);
 
-        const previousDuels = await (await this.getPvpContract()).getPastEvents('DuelFinished', {
+        const previousDuels = await (await this.getPvpCoreContract()).getPastEvents('DuelFinished', {
           filter: {attacker: value},
           toBlock: 'latest',
           fromBlock,

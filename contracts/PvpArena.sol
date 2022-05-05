@@ -682,13 +682,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             ].add(winningPoints.add(duel.bonusRank));
 
             // Check if the loser's current raking points are 'losingPoints' or less and set them to 0 if that's the case, else subtract the ranking points
-            if (rankingPointsByCharacter[loserID] <= losingPoints) {
-                rankingPointsByCharacter[loserID] = 0;
-            } else {
-                rankingPointsByCharacter[loserID] = rankingPointsByCharacter[
-                    loserID
-                ].sub(losingPoints);
-            }
+            // if (rankingPointsByCharacter[loserID] <= losingPoints) {
+            //     rankingPointsByCharacter[loserID] = 0;
+            // } else {
+            //     rankingPointsByCharacter[loserID] = rankingPointsByCharacter[
+            //         loserID
+            //     ].sub(losingPoints);
+            // }
 
             _processWinner(winnerID, duel.tier);
             _processLoser(loserID, duel.tier);
