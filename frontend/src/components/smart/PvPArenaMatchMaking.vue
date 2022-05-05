@@ -401,7 +401,7 @@ export default {
       'getReRollFeePercent',
       'getWithdrawFeePercent',
       'approvePvpSkillSpending',
-      'getPvpContract',
+      'getPvpCoreContract',
       'getFighterByCharacter',
       'getDuelOffsetCost',
       'fetchFreeOpponentRerollTimestamp'
@@ -562,7 +562,7 @@ export default {
     async prepareCharacterDuel() {
       this.loading = true;
       try {
-        await this.listenForDuel(await this.getPvpContract());
+        await this.listenForDuel(await this.getPvpCoreContract());
 
         await this.prepareDuel({characterId: this.currentCharacterId, duelOffsetCost: this.duelOffsetCost});
       } catch (err) {
@@ -637,7 +637,7 @@ export default {
     if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
       this.isCharacterInDuelQueue = true;
 
-      await this.listenForDuel(await this.getPvpContract());
+      await this.listenForDuel(await this.getPvpCoreContract());
     }
 
     this.decisionSeconds = await this.getDecisionSeconds();

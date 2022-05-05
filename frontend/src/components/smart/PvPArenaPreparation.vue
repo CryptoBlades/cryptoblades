@@ -133,11 +133,23 @@
               </li>
               <li>
                 <div class="bulletpoint"></div>
+                {{$t('pvp.enterUntieredArenaWillCost', {formattedUntieredEntryWager})}}
+              </li>
+              <li>
+                <div class="bulletpoint"></div>
                 {{$t('pvp.playersCanAttackYou')}}
               </li>
               <li>
                 <div class="bulletpoint"></div>
                 {{$t('pvp.leavingWillCost', {formattedWithdrawCost})}}
+              </li>
+              <li>
+                <div class="bulletpoint"></div>
+                {{$t('pvp.tieredArena')}}
+              </li>
+              <li>
+                <div class="bulletpoint"></div>
+                {{$t('pvp.untieredArena')}}
               </li>
             </ul>
             <label class="checkboxWrapper">
@@ -151,14 +163,27 @@
           </div>
         </div>
         </div>
-        <div class="enterArenaButtonWrapper">
-          <pvp-button
-            class="pvpButton"
-            @click="handleEnterArenaClick()"
-            :buttonText="$t('pvp.enterArena')"
-            :buttonsubText="'$SKILL: ' + formattedEntryWager"
-            :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
-          />
+        <div class="enterButtonsWrapper">
+          <div class="enterArenaButtonWrapper">
+            <pvp-button
+              class="pvpButton"
+              @click="handleEnterArenaClick(true)"
+              :buttonText="$t('pvp.enterArena')"
+              :buttonsubText="$t('pvp.untiered')"
+              :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
+              secondary
+            />
+          </div>
+          <div class="enterArenaButtonWrapper">
+            <pvp-button
+              class="pvpButton"
+              @click="handleEnterArenaClick(false)"
+              :buttonText="$t('pvp.enterArena')"
+              :buttonsubText="$t('pvp.tiered')"
+              :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
+              secondary
+            />
+          </div>
         </div>
       </div>
       <div class="characterImage">
@@ -245,6 +270,9 @@ export default {
     entryWager: {
       default: null
     },
+    untieredEntryWager: {
+      default: null
+    },
     availableWeaponIds: {
       default: []
     },
@@ -288,6 +316,12 @@ export default {
     },
     formattedWithdrawCost() {
       return new BN(this.withdrawCost).div(new BN(10).pow(18)).toFixed(2);
+    },
+    formattedUntieredEntryWager() {
+      return new BN(this.untieredEntryWager).div(new BN(10).pow(18)).toFixed(2);
+    },
+    leavingArenaCost() {
+      return +this.formattedEntryWager / 4;
     },
     getIconSource () {
       return this.checkBoxAgreed && this.selectedWeaponId ? checkIcon : ellipseIcon;
@@ -335,7 +369,7 @@ export default {
     onClose() {
       this.$refs.popover.$emit('close');
     },
-    async handleEnterArenaClick() {
+    async handleEnterArenaClick(tierless) {
       if (!this.checkBoxAgreed) {
         alert('Please check the \'I understand\' box to proceed.');
         return;
@@ -345,7 +379,11 @@ export default {
         const isUsingShield = this.selectedShieldId !== null;
         const shieldId = this.selectedShieldId === null ? 0 : this.selectedShieldId;
         try {
-          await this.approvePvpSkillSpending(this.entryWager);
+          if (tierless) {
+            await this.approvePvpSkillSpending(this.untieredEntryWager);
+          } else {
+            await this.approvePvpSkillSpending(this.entryWager);
+          }
         } catch(err) {
           console.log('Enter Arena Approval Error: ', err);
           this.loading = false;
@@ -357,7 +395,8 @@ export default {
             characterId: this.currentCharacterId,
             weaponId: this.selectedWeaponId,
             shieldId,
-            useShield: isUsingShield
+            useShield: isUsingShield,
+            tierless
           });
         } catch(err){
           console.log('Enter Arena Error: ', err);
@@ -643,7 +682,6 @@ p, li, span {
   }
   .bottomList {
     flex-direction: row;
-    height: 8rem;
     ul {
       flex-direction: column;
       padding-left: 2rem;
@@ -701,13 +739,19 @@ p, li, span {
       }
     }
   }
-  .enterArenaButtonWrapper {
-    width: 15rem;
-    height: 5rem;
-    margin-top: 3rem;
+  .enterButtonsWrapper {
+    display: flex;
+    margin-top: 2rem;
 
-    .pvpButton {
-      text-transform: uppercase;
+      .enterArenaButtonWrapper {
+      flex: 1;
+      &:first-of-type {
+        margin-right: 2rem;
+      }
+
+      .pvpButton {
+        text-transform: uppercase;
+      }
     }
   }
 }

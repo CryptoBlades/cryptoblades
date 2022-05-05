@@ -6,7 +6,8 @@ const ExperimentToken2 = artifacts.require('ExperimentToken2');
 const SkillStakingRewardsUpgradeable = artifacts.require('SkillStakingRewardsUpgradeable');
 const LPStakingRewardsUpgradeable = artifacts.require('LPStakingRewardsUpgradeable');
 const LP2StakingRewardsUpgradeable = artifacts.require('LP2StakingRewardsUpgradeable');
-const PvpArena = artifacts.require('PvpArena');
+const PvpCore = artifacts.require('PvpCore');
+const PvpRankings = artifacts.require('PvpRankings');
 const BasicPriceOracle = artifacts.require('BasicPriceOracle');
 const DummyRandoms = artifacts.require('DummyRandoms');
 const Characters = artifacts.require('Characters');
@@ -31,7 +32,8 @@ async function prepareContracts(accounts) {
   const characters = await Characters.new();
   const weapons = await Weapons.new();
   const shields = await Shields.new();
-  const pvpArena = await PvpArena.new();
+  const pvpCore = await PvpCore.new();
+  const pvpRankings = await PvpRankings.new();
   const priceOracle = await BasicPriceOracle.new();
   const randoms = await DummyRandoms.new();
   const expToken = await ExperimentToken.new();
@@ -64,12 +66,14 @@ async function prepareContracts(accounts) {
   await raid.initialize(game.address);
   await nftMarket.initialize(skillToken.address, game.address);
   await raid1.initialize(game.address);
-  await pvpArena.initialize(game.address, shields.address, randoms.address);
+  await pvpCore.initialize(game.address, shields.address, randoms.address, pvpRankings.address);
+  await pvpRankings.initialize(game.address, pvpCore.address);
   await promos.initialize();
   await weaponRenameTagConsumables.initialize(weapons.address);
   await randoms.initialize();
 
   await skillToken.transferFrom(skillToken.address, accounts[0], web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
+  await skillToken.transferFrom(skillToken.address, pvpRankings.address, web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
   await expToken.transferFrom(expToken.address, accounts[0], web3.utils.toWei('599', 'ether'));
   await expToken2.transferFrom(expToken2.address, accounts[0], web3.utils.toWei('699', 'ether'));
 
@@ -91,17 +95,22 @@ async function prepareContracts(accounts) {
   characterWaterTraitChangeConsumables.initialize(characters.address);
   characterLightningTraitChangeConsumables.initialize(characters.address);
 
-  const pvpArena_GAME_ADMIN = await pvpArena.GAME_ADMIN();
+  const pvpCore_GAME_ADMIN = await pvpCore.GAME_ADMIN();
+  const pvpRankings_GAME_ADMIN = await pvpRankings.GAME_ADMIN();
   const promos_GAME_ADMIN = await promos.GAME_ADMIN();
 
-  await pvpArena.grantRole(pvpArena_GAME_ADMIN, game.address);
-  await pvpArena.grantRole(pvpArena_GAME_ADMIN, characters.address);
+  await pvpCore.grantRole(pvpCore_GAME_ADMIN, game.address);
+  await pvpCore.grantRole(pvpCore_GAME_ADMIN, characters.address);
+  await pvpCore.grantRole(pvpCore_GAME_ADMIN, pvpRankings.address);
+  await pvpRankings.grantRole(pvpRankings_GAME_ADMIN, game.address);
+  await pvpRankings.grantRole(pvpRankings_GAME_ADMIN, pvpCore.address);
   await characters.grantRole(charas_GAME_ADMIN, game.address);
-  await characters.grantRole(charas_GAME_ADMIN, pvpArena.address);
+  await characters.grantRole(charas_GAME_ADMIN, pvpCore.address);
+  await characters.grantRole(charas_GAME_ADMIN, pvpRankings.address);
 
   await weapons.grantRole(weps_GAME_ADMIN, game.address);
-  await weapons.grantRole(weps_GAME_ADMIN, pvpArena.address);
-  await shields.grantRole(shields_GAME_ADMIN, pvpArena.address);
+  await weapons.grantRole(weps_GAME_ADMIN, pvpCore.address);
+  await shields.grantRole(shields_GAME_ADMIN, pvpCore.address);
   await promos.grantRole(promos_GAME_ADMIN, game.address);
   await promos.grantRole(promos_GAME_ADMIN, characters.address);
   await game.grantRole(GAME_ADMIN, raid.address);
@@ -140,7 +149,8 @@ async function prepareContracts(accounts) {
     characters,
     weapons,
     shields,
-    pvpArena,
+    pvpCore,
+    pvpRankings,
     priceOracle,
     randoms,
     expToken,
