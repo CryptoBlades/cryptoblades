@@ -319,7 +319,7 @@ const staking = {
       await dispatch('fetchStakeDetails', { stakeType: 'king' });
     },
 
-    async getStakedIds({ rootState }: {rootState: IState}, stakeType: StakeType) {
+    async getStakedIds({ rootState }: {rootState: IState}, { stakeType }: { stakeType: StakeType }) {
       const { StakingRewards } = getStakingContracts(rootState.contracts(), stakeType);
       const CBKLand = rootState.contracts().CBKLand!;
       if(!StakingRewards || !CBKLand || !rootState.defaultAccount || !isNftStakeType(stakeType)) return;
