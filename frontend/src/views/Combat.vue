@@ -1,5 +1,5 @@
 <template>
-  <div style="display: inline-flex" class="body main-font">
+  <div style="display: inline-flex" class="body main-font pl-3">
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
       <div v-if="error !== null">
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
@@ -27,7 +27,7 @@
             <h5 class="m-2">{{$t('combat.adventure')}}</h5>
             <img src="../assets/hint.png" alt="" @click="hideBottomMenu(true)">
           </div>
-          <div class="col-lg-6 col-md-12 col-xl-6 col-sm-12 text-right combant-hint" :style="isToggled ? 'display:inline' : 'none'"
+          <div class="col-lg-12 col-md-12 col-xl-12 col-sm-12 text-right combant-hint" :style="isToggled ? 'display:inline' : 'none'"
            @click="hideBottomMenu(false)">
             <div class="combat-hints">
               <Hint class="mr-3" :text="$t('combat.elementHint')"/>
@@ -60,19 +60,19 @@
       <div>
         <div class="col">
         <div class="mb-3" :style="'align-self: baseline; width: 20vw'">
-          <span class="isMobile">{{$t('combat.selectStamina')}}</span>
-          <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
+          <span class="isMobile label-title">{{!selectedWeaponId ? $t('combat.selectStaminaStepOne') : $t('combat.selectStamina')}}</span>
+          <b-form-select style="background-color:#171617;color:#fff"
+          class="mt-3" v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
         </div>
           <div  v-if="currentCharacterStamina >= staminaPerFight" class="combat-enemy-container">
               <!-- selected weapon for combat details -->
-              <div class="col weapon-selection mb-4">
+              <div class="weapon-selection mb-4">
                 <div class="header-row d-flex justify-content-between">
-                  <div class="d-flex align-items-end selectedWeaponDetails">
+                  <div class="selectedWeaponDetails">
                     <div class="select-weapons" v-if="!selectedWeaponId || !weaponHasDurability(selectedWeaponId)">
-                       <span class="isMobile">{{$t('combat.selectAWeapon')}}</span>
-                        <button :v-tooltip="$t('combat.changeWeapon')"  class="ml-3 ct-btn ml-2" @click="changeEquipedWeapon()">
-                          <img src="../assets/swithc-wep.png">
-                      </button>
+                      <span class="isMobile label-title">{{$t('combat.selectAWeapon')}}</span>
+                      <weapon-grid :showNftOptions="true" :ownWeapons="ownWeapons.length"
+                      :gridStyling="gridStyling" :noTitle="true" titleType="combat" v-model="selectedWeaponId" />
                     </div>
                     <!-- selected weapon for combat details -->
                     <div v-if="selectedWeaponId && weaponHasDurability(selectedWeaponId)" class="mr-3">
@@ -147,7 +147,7 @@
         </div>
       </div>
       <!-- // error message boxes -->
-      <div class="row">
+      <div>
         <div class="col">
           <div class="message-box" v-if="!currentCharacter">{{$t('combat.errors.needToSelectChar')}}</div>
           <div class="row">
@@ -189,6 +189,7 @@ import Events from '../events';
 import CombatResults from '../components/CombatResults.vue';
 import {fromWeiEther, toBN} from '../utils/common';
 import WeaponInventory from '../components/WeaponInvetory.vue';
+import WeaponGrid from '../components/smart/WeaponGridNew.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
 
@@ -219,6 +220,7 @@ export default {
       expectedSkill: null,
       activeCard: null,
       isToggled: false,
+      gridStyling:'justify-content:flex-start; gap:2.5vw',
       index: 1
     };
   },
@@ -541,7 +543,8 @@ export default {
   components: {
     Hint,
     CombatResults,
-    WeaponInventory
+    WeaponInventory,
+    WeaponGrid
   },
 };
 </script>
@@ -557,6 +560,13 @@ h5{
   font-family: Trajan;
   font-size: 25px;
   font-weight: 600;
+}
+
+.label-title{
+  font-family: Oswald;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 20px;
 }
 
 
@@ -610,6 +620,7 @@ h5{
   justify-content: center;
 }
 
+
 .frame-line:hover{
   max-width: 112%;
   opacity: 1;
@@ -634,7 +645,7 @@ h5{
   font-size: 2em;
   display: flex;
   align-items: center;
-  justify-content: right;
+  justify-content: center;
 }
 
 .combat-hints > div{
@@ -795,7 +806,7 @@ div.encounter.text-center {
 
 .selectedWeaponDetails > div {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .victory-chance {
@@ -908,6 +919,14 @@ h1 {
   margin-left: 20px;
 }
 
+.select-weapons > div{
+  width: 80vw;
+}
+
+.select-weapons > div > ul{
+  justify-content: flex-start;
+}
+
 .select-weapons .ct-btn{
   background-color: rgba(0, 0, 0, 0);
 }
@@ -933,13 +952,12 @@ h1 {
 }
 
 .select-weapons{
-  font-size: 1.5em;
+  margin-top: 1em;
   align-self: right;
+  display: flex;
+  flex-direction: column;
 }
 
-.select-weapons > span{
-  font-family: Trajan;
-}
 
 @media all and (max-width: 600px) {
   .combat-hints > div > .fire-icon,

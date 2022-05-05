@@ -32,7 +32,7 @@
     </li>
 
     <li class="top-nav-links">
-      <a href="https://bazaar.market/" class="nav-link" target="_blank">
+      <a :href="BazaarLink()" class="nav-link" target="_blank">
         <div class="icon"><img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar"></div>
         <div class="link-text">{{ $t("viewLink.bazaar") }}
           <b-icon-box-arrow-up-right scale="0.7"/>
@@ -94,6 +94,11 @@ export default Vue.extend({
   components: {
     Hint,
   },
+  methods: {
+    BazaarLink() {
+      return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
+    }
+  }
 });
 </script>
 

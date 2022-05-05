@@ -227,6 +227,23 @@ export default {
       }
     },
 
+    renderPageDisplay(){
+      let toDisplay;
+
+      if(!this.featureFlagStakeOnly && this.currentCharacterId !== null){
+        if(this.toggleSideBar){
+          toDisplay = 'can-show-app';
+        }else{
+          toDisplay = 'col-xl-10 col-lg-9 col-md-9 col-sm-10 cols-11 set-normal';
+        }
+      }else{
+        toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
+      }
+
+      return toDisplay;
+    },
+
+
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
       if (process.env.NODE_ENV === 'development') this.showAds = false;
@@ -311,7 +328,6 @@ export default {
 
       return toDisplay;
     },
-
 
     async checkNotifications() {
       const response = await fetch(apiUrl('static/notifications'));
@@ -483,6 +499,7 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   margin-left: auto;
   margin-right: auto;
   transition: 1s all;
+  padding: 0px;
 }
 
 
@@ -541,6 +558,8 @@ button,
 
 .error {
   color: red;
+  overflow: hidden;
+  max-width: 75vw;
 }
 
 .fire,
@@ -673,6 +692,7 @@ button.close {
   background: rgb(31, 31, 34);
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
+
 
 .btn-outline-primary {
   color: #9e8a57 !important;
@@ -870,8 +890,20 @@ div.bg-success {
 }
 
 
+#blacksmith-bg{
+  background: rgba(20, 20, 20, 1);
+  background-image: url("./assets/blacksmith/blacksmith-bg.png");
+  background-image: url("./assets/blacksmith/blacksmith-bg.png"), linear-gradient(rgba(0, 68, 111, 0) 0%,
+  rgba(20, 20, 20, 0.4) 30%,rgba(20, 20, 20, 1) 100%); /* W3C */
+  /* background: radial-gradient(closest-side at 50% 50%, rgba(0, 68, 111, 0) 10%,
+  rgba(20, 20, 20, 0.4) 50%,rgba(20, 20, 20, 1) 100%), url('./assets/blacksmith/blacksmith-bg.png'); */
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .can-show-app{
   width: 100%;
+  padding: 0px;
 }
 
 
