@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="col-xl-12 col-lg-12">
     <h1 class="text-center">{{ $t('dustBalanceDisplay.availableDust') }}</h1>
     <div class="dusts-container mt-4">
       <div v-for="rarity in rarities" :key="rarity" class="dust-container text-center"

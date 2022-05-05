@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="filters row mt-2 pl-2" v-if="showFilters" @change="saveFilters()">
-      <div :class="isMarket ? 'col-sm-6 col-md-6 col-lg-2 mb-3' : 'col-sm-5 col-md-5 col-lg-3 mb-3'">
+      <div class="col-sm-5 col-md-5 col-lg-3 mb-3">
         <strong>{{$t('characterList.level')}}</strong>
         <select class="form-control" v-model="levelFilter">
           <option v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
@@ -10,30 +10,13 @@
         </select>
       </div>
 
-      <div :class="isMarket ? 'col-sm-6 col-md-6 col-lg-2 mb-3' : 'col-sm-5 col-md-5 col-lg-3 mb-3'">
+      <div class="col-sm-5 col-md-5 col-lg-3 mb-3">
         <strong>{{$t('characterList.element')}}</strong>
         <select class="form-control" v-model="elementFilter">
           <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
           :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('characterList.sorts.any') }}</option>
         </select>
       </div>
-
-      <template v-if="isMarket">
-        <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>{{$t('characterList.minPrice')}}</strong>
-          <input class="form-control" type="number" v-model.trim="minPriceFilter" :min="0" placeholder="Min" />
-        </div>
-        <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>{{$t('characterList.maxPrice')}}</strong>
-          <input class="form-control" type="number" v-model.trim="maxPriceFilter" :min="0" placeholder="Max" />
-        </div>
-        <div class="col-sm-6 col-md-6 col-lg-2 mb-3">
-          <strong>{{$t('characterList.sort')}}</strong>
-          <select class="form-control" v-model="priceSort">
-            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || $t('characterList.sorts.any') }}</option>
-          </select>
-        </div>
-      </template>
 
       <b-button variant="primary" class="clear-filters-button mb-3" @click="clearFilters" >
           <span>
@@ -55,11 +38,11 @@
         </div>
         <slot name="sold" :character="c"></slot>
         <nft-options-dropdown v-if="showNftOptions" :nftType="'character'" :nftId="c.id" :options="options"
-          :showTransfer="!isMarket" class="nft-options"/>
+          showTransfer class="nft-options"/>
         <div class="art" >
           <div class="animation" />
           <CharacterArt :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(c.id) : '']"
-            :character="c" :isMarket="isMarket" :isGarrison="isGarrison"/>
+            :character="c" :isGarrison="isGarrison"/>
         </div>
       </li>
     </ul>
@@ -116,7 +99,6 @@ import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
 import Events from '@/events';
 import i18n from '@/i18n';
-import { copyNftUrl } from '@/utils/common';
 
 const sorts = [
   { name: i18n.t('characterList.sorts.any'), dir: '' },
@@ -143,10 +125,6 @@ export default {
       type: Number,
       default: 0
     },
-    isMarket: {
-      type: Boolean,
-      default: false
-    },
     nftDisplay: {
       type: Boolean,
       default: false
@@ -165,9 +143,6 @@ export default {
     return {
       levelFilter: '',
       elementFilter: '',
-      minPriceFilter:'',
-      maxPriceFilter:'',
-      priceSort: '',
       sorts,
       haveRename: 0,
       characterRename: '',
@@ -297,7 +272,7 @@ export default {
       'changeCharacterTraitEarth', 'changeCharacterTraitFire', 'changeCharacterTraitWater',
       'fetchTotalCharacterFireTraitChanges','fetchTotalCharacterEarthTraitChanges',
       'fetchTotalCharacterWaterTraitChanges', 'fetchTotalCharacterLightningTraitChanges',
-      'fetchOwnedCharacterCosmetics','changeCharacterCosmetic','removeCharacterCosmetic','restoreFromGarrison', 'sendToGarrison', 'purchaseBurnCharacter']),
+      'fetchOwnedCharacterCosmetics','changeCharacterCosmetic','removeCharacterCosmetic','restoreFromGarrison', 'sendToGarrison']),
 
     getCharacterArt,
 
@@ -305,28 +280,15 @@ export default {
       sessionStorage.setItem('character-levelfilter', this.levelFilter);
       sessionStorage.setItem('character-elementfilter', this.elementFilter);
 
-      if(this.isMarket) {
-        sessionStorage.setItem('character-price-order', this.priceSort);
-        sessionStorage.setItem('character-price-minfilter', this.minPriceFilter);
-        sessionStorage.setItem('character-price-maxfilter', this.maxPriceFilter);
-      }
       this.$emit('character-filters-changed');
     },
 
     clearFilters() {
       sessionStorage.removeItem('character-levelfilter');
       sessionStorage.removeItem('character-elementfilter');
-      if(this.isMarket) {
-        sessionStorage.removeItem('character-price-order');
-        sessionStorage.removeItem('character-price-minfilter');
-        sessionStorage.removeItem('character-price-maxfilter');
-      }
 
       this.elementFilter = '';
       this.levelFilter = '';
-      this.priceSort = '';
-      this.minPriceFilter = '';
-      this.maxPriceFilter = '';
 
       this.$emit('character-filters-changed');
     },
@@ -341,17 +303,7 @@ export default {
     },
 
     updateOptions() {
-      if(this.isMarket) {
-        this.options = [
-          {
-            name: this.$t('copyLink'),
-            amount: 0,
-            handler: copyNftUrl,
-            hasDefaultOption: true,
-            noAmount: true
-          }
-        ];
-      } else if(this.isGarrison) {
+      if(this.isGarrison) {
         this.options = [
           {
             name: this.$t('characterList.restoreToPlaza'),
@@ -486,11 +438,7 @@ export default {
   async mounted() {
     this.levelFilter = sessionStorage.getItem('character-levelfilter') || '';
     this.elementFilter = sessionStorage.getItem('character-elementfilter') || '';
-    if(this.isMarket) {
-      this.priceSort = sessionStorage.getItem('character-price-order') || '';
-      this.minPriceFilter = sessionStorage.getItem('character-price-minfilter') || '';
-      this.maxPriceFilter = sessionStorage.getItem('character-price-maxfilter') || '';
-    }
+
     this.checkStorage();
     Events.$on('setting:showCosmetics', () => this.checkStorage());
 

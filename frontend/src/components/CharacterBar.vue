@@ -1,7 +1,7 @@
 <template>
-  <b-col :class="isToggled ? 'sideBorder' : 'col-xl-3 col-lg-4 col-md-4 col-sm-2 cols-1'" class="animates">
+  <b-col :class="renderPageDisplay()" class="animates">
     <div class="character-bar">
-      <character-display :toggled="isToggled"/>
+      <character-display :toggled="isToggled" :currentPath="currentPath" :key="componentKey"/>
       <div v-if="showAds && !isMobile()" class="ad-container">
         <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
           <div class="coinzilla" data-zone="C-541621de2f7bb717603"></div>
@@ -24,19 +24,31 @@ import CharacterDisplay from './smart/CharacterDisplay.vue';
 import '@/mixins/general';
 
 export default Vue.extend({
-  props: ['isToggled'],
+  props: ['isToggled', 'sidebarType'],
   components: {
     CharacterDisplay,
   },
   data() {
     return {
-      showAds: false
+      showAds: false,
+      componentKey: 0,
+      currentPath: ''
     };
   },
   methods: {
     checkStorage() {
       if (process.env.NODE_ENV === 'development') this.showAds = false;
       else this.showAds = localStorage.getItem('show-ads') === 'true';
+    },
+    renderPageDisplay(){
+      let toDisplay;
+
+      if(this.isToggled){
+        toDisplay = 'sideBorder';
+      }else{
+        toDisplay = 'col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1';
+      }
+      return toDisplay;
     },
   },
   computed:{
@@ -51,6 +63,11 @@ export default Vue.extend({
   async mounted() {
     this.checkStorage();
   },
+  watch:{
+    $route (to){
+      this.currentPath = to.path;
+    },
+  }
 });
 </script>
 
@@ -118,7 +135,7 @@ export default Vue.extend({
     top: 0;
     height: 100vh;
     width: 60%;
-    z-index: 9999;
+    z-index: 5;
     background-color: rgb(27, 29, 24);
     overflow-x: auto;
   }

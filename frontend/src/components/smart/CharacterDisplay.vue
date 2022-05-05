@@ -1,54 +1,87 @@
 <template>
   <div class="character-display-container bd-right" >
         <div class="row character-full-list">
-          <div class="btn-trigger" @click="hideSideBar(!toggled)">
-            <img :class="!toggled ? 'rotateLeft' : 'rotateRight'" src="../../assets/left-arrow.png" alt="">
-          </div>
-          <b-col class="character-list"
-              v-bind:class="[getIsInCombat ? 'disabled-li' : '', getIsCharacterViewExpanded ? '' : 'centered-list']">
-                <div
-                  :class="`${setListClassForSelChar(c.id, currentCharacterId)}`"
-                  :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
-                  v-for="c in filteredCharactersForList"
-                  :key="c.id"
-                  @click="!getIsInCombat && setCurrentCharacter(c.id) && alert(c.id)"
-                >
-                <div class="character-element">
-                  <div class="element-frame">
-                      <div>
-                        <span
-                          :id="`${setIdForElement(c.trait, c.isSelected)}`"
-                        />
+          <b-col class="character-list" v-if="currentPath != '/blacksmith'"
+            v-bind:class="[getIsInCombat ? 'disabled-li' : '', getIsCharacterViewExpanded ? '' : 'centered-list']">
+              <div
+                :class="`${setListClassForSelChar(filteredCharacter.id, currentCharacterId)}`"
+                :style="`--staminaReady: ${(getCharacterStamina(filteredCharacter.id)/maxStamina)*100}%;`"
+                v-for="filteredCharacter in filteredCharactersForList"
+                :key="filteredCharacter.id"
+                @click="(!getIfCharacterIsInRaid(filteredCharacter.id) || !filteredCharacter.pvpStatus === 'IN_ARENA'
+                || !getIsInCombat) && setCurrentCharacter(filteredCharacter.id) && alert(filteredCharacter.id) ">
+                <!--------  IN RAID ----------------IN ARENA ---------------------IN COMBAT ------------>
+              <div class="character-element">
+                <div class="element-frame">
+                    <div>
+                      <span
+                        :id="`${setIdForElement(filteredCharacter.trait, filteredCharacter.isSelected)}`"
+                      />
+                      <span v-if="toggled && getIfCharacterIsInRaid(filteredCharacter.id)" class="raid-indicator"></span>
+                      <span v-if="toggled && filteredCharacter.pvpStatus === 'IN_ARENA'" class="pvp-indicator"></span>
                       </div>
                   </div>
                   <div class="element-frame-active">
-                     <div>
+                    <div>
                         <span
-                          :id="`${setIdForElement(c.trait, c.isSelected)}`"
+                          :id="`${setIdForElement(filteredCharacter.trait, filteredCharacter.isSelected)}`"
                         />
                       </div>
                   </div>
                 </div>
                 <div class="character-details">
                   <div class="name-list">
-                    {{ getCleanCharacterName(c.id) }}
+                    {{ getCleanCharacterName(filteredCharacter.id) }}
                   </div>
                   <div class="small-stamina-char"
-                    :style="`--staminaReady: ${(getCharacterStamina(c.id)/maxStamina)*100}%;`"
-                    v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(c.id))">
+                    :style="`--staminaReady: ${(getCharacterStamina(filteredCharacter.id)/maxStamina)*100}%;`"
+                    v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(filteredCharacter.id))">
                   </div>
                   <div class="char-level">
-                      {{$t('PlayToEarn.level')}} {{ c.level + 1}} <span> (STA {{ getCharacterStamina(c.id) }} / 200)</span>
+                      {{$t('PlayToEarn.level')}} {{ filteredCharacter.level + 1}} <span> (STA {{ getCharacterStamina(filteredCharacter.id) }} / 200)</span>
                   </div>
                 </div>
-                </div>
+              </div>
           </b-col>
+          <b-col class="character-list centered-list" v-else>
+            <div v-for="sidebarItem in sideBarBlacksmith"
+                  :key="sidebarItem.id"
+                  :class="sidebarItem.status === 'active' ? 'character-highlight' : 'character'"
+                  @click="setActiveTab(sidebarItem)"
+                >
+                <div class="character-element">
+                  <div class="element-frame">
+                      <div>
+                        <span :id="`${sidebarItem.iconName}`"/>
+                      </div>
+                  </div>
+                  <div class="element-frame-active">
+                     <div>
+                        <span
+                          :id="`${sidebarItem.iconName}`"/>
+                      </div>
+                  </div>
+                </div>
+                <div class="character-details">
+                  <div class="name-list">
+                    {{ sidebarItem.title }}
+                  </div>
+                  <div class="nav-line"></div>
+                  <div class="char-level">
+                    {{ sidebarItem.desc }}
+                  </div>
+                </div>
+              </div>
+          </b-col>
+        </div>
+        <div class="btn-trigger" @click="hideSideBar(!toggled)">
+          <img :class="!toggled ? 'rotateLeft' : 'rotateRight'" src="../../assets/left-arrow.png" alt="">
         </div>
   </div>
 </template>
 
 <script lang="ts">
-import { mapGetters, mapState, mapMutations } from 'vuex';
+import {mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
 import Events from '../../events';
 import { CharacterPower, CharacterTrait } from '../../interfaces';
@@ -56,10 +89,34 @@ import { RequiredXp } from '../../interfaces';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../../utils/common';
 import { getCleanName } from '../../rename-censor';
+import {Nft, NftStatus} from '../../interfaces/Nft';
+import {Accessors} from 'vue/types/options';
+
+
+interface Data {
+  isLoading: boolean;
+  character?: Nft;
+  charOnRaid: string [],
+  sideBarBlacksmith: []
+}
+
+interface RaidMappedActions {
+  fetchIsCharacterRaiding(payload: { characterID: string }): Promise<boolean>;
+}
+
+interface StoreMappedGetters {
+  charactersWithIds(ids: (string | number)[]): Nft[];
+}
+
+interface StoreMappedActions {
+  getCharacterBusyStatus(payload: { characterId: string | number }): Promise<number>;
+}
+import i18n from '@/i18n';
 
 export default Vue.extend({
-  props:['toggled'],
+  props:['toggled','currentPath'],
   computed: {
+    ...mapGetters(['charactersWithIds']) as Accessors<StoreMappedGetters>,
     ...mapState(['maxStamina', 'currentCharacterId', 'ownedCharacterIds']),
     ...mapGetters([
       'currentCharacter',
@@ -72,6 +129,7 @@ export default Vue.extend({
       'getIsInCombat',
       'getIsCharacterViewExpanded',
       'fightGasOffset',
+      'getCharacterIsInArena',
       'fightBaseline',
       'getCharacterPower'
     ]),
@@ -83,6 +141,7 @@ export default Vue.extend({
       const items: any  = this.ownCharacters;
       for(const x of items){
         x.isSelected = false;
+        this.setCharacterOnRaid(x.id);
       }
       return items;
     },
@@ -91,14 +150,60 @@ export default Vue.extend({
   data() {
     return {
       traits: CharacterTrait,
-      isPlaza : false
-    };
+      isPlaza : false,
+      sideBarBlacksmith: [
+        {
+          id: 0,
+          title: i18n.t('blacksmith.weapon'),
+          desc: i18n.t('blacksmith.weaponDesc'),
+          iconName: 'icon-weapon',
+          status: 'active',
+          route: 'weapon'
+        },
+        {
+          id: 1,
+          title: i18n.t('blacksmith.equipment'),
+          desc: i18n.t('blacksmith.equipmentDesc'),
+          iconName: 'icon-equipment',
+          status: '',
+          route: 'equipment'
+        },
+        {
+          id: 2,
+          title:  i18n.t('blacksmith.dustStorage'),
+          desc: i18n.t('blacksmith.dustStorageDesc'),
+          iconName: 'icon-dust',
+          status: '',
+          route: 'dust'
+        },
+        {
+          id: 3,
+          title: i18n.t('blacksmith.land'),
+          desc: i18n.t('blacksmith.landDesc'),
+          iconName: 'icon-land',
+          status: '',
+          route: 'land'
+        },
+      ],
+      charOnRaid: [],
+      charOnPvp: [],
+      character: undefined,
+      NftStatus
+    } as unknown as Data;
   },
   methods: {
+    ...mapActions([
+      'getCharacterBusyStatus',
+    ]) as StoreMappedActions,
+    ...(mapActions(['fetchIsCharacterRaiding']) as RaidMappedActions),
     ...mapMutations(['setCurrentCharacter']),
     getCharacterArt,
     CharacterPower,
     RequiredXp,
+
+    async isCharacterAlreadyRaiding(characterID: string)  {
+      return await this.fetchIsCharacterRaiding({characterID});
+    },
 
     setListClassForSelChar(id: string, currentCharId: string): any {
       if (id === currentCharId){
@@ -109,8 +214,61 @@ export default Vue.extend({
       else return 'character';
     },
 
+    getNftStatus(activeCharacter: any){
+      this.composeCharacterData(activeCharacter.id).then(data => {
+        if (data.status !== undefined && data.status in NftStatus) {
+          for(const character of this.filteredCharactersForList){
+            if(character.id === activeCharacter.id){
+              character.pvpStatus = NftStatus[data.status];
+            }
+          }
+        } else {
+          for(const character of this.filteredCharactersForList){
+            if(character.id === activeCharacter.id){
+              character.pvpStatus = 'BUSY';
+            }
+          }
+        }
+      });
+    },
+
+
+    async composeCharacterData(id: any){
+      let characterStatus;
+      // eslint-disable-next-line prefer-const
+      characterStatus = await this.charactersWithIds([id]).filter(Boolean)[0];
+      characterStatus.status = + await this.getCharacterBusyStatus({characterId: id});
+      return characterStatus;
+    },
+
+    async setCharacterOnRaid(id: any){
+      const charId = id;
+      if(await this.isCharacterAlreadyRaiding(id)){
+        this.charOnRaid.push(charId);
+      }
+    },
+
+    getIfCharacterIsInRaid(id: any){
+      let toReturnWarning;
+      this.charOnRaid.forEach((characterOnRaid: any) => {
+        if(id === characterOnRaid){
+          toReturnWarning = true;
+        }
+      });
+
+      return toReturnWarning;
+    },
+
+    setActiveTab(tab: any){
+      (this as any).$router.push({ path: 'blacksmith', query: { tab: tab.route }});
+      this.sideBarBlacksmith.forEach((sidebarTab: { id: any; status: string; }) => {
+        if(sidebarTab.id === tab.id) sidebarTab.status = 'active';
+        else sidebarTab.status = '';
+      });
+    },
+
     toolTipHtml(time: string): string {
-      return 'Regenerates 1 point every 5 minutes, stamina bar will be full at: ' + time;
+      return i18n.t('blacksmith.regenerate') + time;
     },
 
     setSelectedCharacter(id: any){
@@ -122,6 +280,7 @@ export default Vue.extend({
         }
       }
     },
+
 
     //toggle the sidebar
     hideSideBar(bol: any){
@@ -268,6 +427,24 @@ div.character-list{
   overflow-y: visible;
 }
 
+.raid-indicator{
+  content: url('../../assets/navbar-icons/arena-icon.png');
+  height: 15px;
+  width: 15px;
+  position: absolute;
+  margin-bottom: -80px;
+  right: 0;
+}
+
+.pvp-indicator{
+  content: url('../../assets/navbar-icons/arena-icon.png');
+  height: 15px;
+  width: 15px;
+  position: absolute;
+  margin-bottom: -80px;
+  right: 0;
+}
+
 
 
 div.character-list .character .character-element .element-frame-active{
@@ -277,7 +454,7 @@ div.character-list .character .character-element .element-frame-active{
 div.character-list .character, div.character-list .character-highlight{
   display: flex;
   align-items: center;
-  margin-bottom: 50px;
+  margin-bottom: 40px;
   cursor: pointer;
 }
 
@@ -334,8 +511,7 @@ li.character-highlight{
   text-transform: uppercase;
   font-weight: 700;
   margin: auto;
-  font-size: 1vw;
-  white-space: nowrap;
+  font-size: 0.8vw;
   text-align: left;
   color: #9e8a57;
 }
@@ -382,6 +558,7 @@ li.character-highlight{
 .disabled-li {
   pointer-events: none;
   opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .trait-icon {
@@ -414,6 +591,33 @@ li.character-highlight{
   margin-right: 2px;
 }
 
+.raid-label{
+  margin-top: 6px;
+  font-family: Roboto;
+  color: #dabf75;
+  border: 1px solid #9e8a57;
+  padding: 2px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  background-color:rgba(0, 0, 0, 0.582);
+}
+
+.char-level > div > p{
+  display: flex;
+}
+
+
+.char-level > div > p{
+  margin-right: 10px;
+}
+
+.raid-label > img{
+  width: 25px;
+}
+
 .small-stamina-char {
   position: relative;
   width: 100%;
@@ -421,6 +625,15 @@ li.character-highlight{
   height :2.5px;
   margin: 5px 0px 5px 0px;
   background : linear-gradient(to right, rgb(236, 75, 75) var(--staminaReady), rgba(255, 255, 255, 0.1) 0);
+}
+
+.nav-line {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height :1px;
+  margin: 5px 0px 5px 0px;
+  background : rgba(255, 255, 255, 0.075);
 }
 
 .stamina-text {
@@ -478,19 +691,19 @@ li.character-highlight{
 }
 
  .btn-trigger{
-    position: absolute;
+    position: relative;
+    margin-right: -100px;
     width: 100%;
     justify-content: flex-end;
     z-index: 100;
-    bottom: 120px;
+    bottom: 0;
     display: flex;
-    /* margin-left: 20px; */
     cursor: pointer;
   }
 
 .btn-trigger > img{
     width: 30px;
-    /* margin-right: -100px; */
+    margin-right: -40px;
 }
 
  .character-full-list{
@@ -546,11 +759,11 @@ li.character-highlight{
   }
 
   .btn-trigger{
-    position: absolute;
+    position: relative;
     width: 20px;
     z-index: 100;
-    bottom: 120px;
-    margin-left: 20px
+    bottom: 0px;
+    margin-right: -40px;
   }
 
   .btn-trigger{
@@ -629,4 +842,35 @@ li.character-highlight{
   width: 30px;
   background: rgba(0, 0, 0, 0.076);
 }
+
+
+/* FOR BLACKSMITH SIDEBAR */
+#icon-weapon {
+  content: url("../../assets/raid-sidebar/icon-sword.png");
+  height: 30px;
+  width: 30px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
+#icon-equipment {
+  content: url("../../assets/raid-sidebar/icon-shield.png");
+  height: 30px;
+  width: 30px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
+#icon-land {
+  content: url("../../assets/raid-sidebar/icon-map.png");
+  height: 30px;
+  width: 30px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
+#icon-dust {
+  content: url("../../assets/raid-sidebar/icon-dust.png");
+  height: 30px;
+  width: 30px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
 </style>

@@ -3997,7 +3997,7 @@
     },
     "links": {},
     "address": "0xD7cE59E5914FFa1787AaBB806c2b449569bF69cC",
-    "transactionHash": "0x71ef7461cde845fdd7402c5dc9ac33deeba39274dbd8e457a210ee12758a4fd5|{\"gasBurned\":15909895327726,\"tx\":\"EqTejbiNBmeW3FCU1YeVrhKvyxKFMdcfhx7wYGn2ge7R\"}"
+    "transactionHash": "0x55f44c273195d57faa6938c40588209705d90c48cfdf0be3885d54c5294f2df8|{\"gasBurned\":15920091158206,\"tx\":\"7ja6STHo64UFewn7t2jYwbLj87yE1V5fiBT7dweeNkwq\"}"
   },
   "build/contracts/PvpRankings.json": {
     "events": {

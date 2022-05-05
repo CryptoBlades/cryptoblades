@@ -1,7 +1,7 @@
 <template>
   <div class="main-nav-div">
     <b-navbar class="main-nav" toggleable="sm">
-      <div class="nav-logo col-xl-3 col-lg-4 col-md-4 col-sm-2 cols-1">
+      <div class="nav-logo col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1">
         <router-link :to="{ name: 'plaza' }" exact class="game-ui-logo">
           <img
             src="../assets/cb-logo.png"
@@ -57,6 +57,7 @@ export default Vue.extend({
   data() {
     return {
       canShowRewardsBar: true,
+      currentRoute: ''
     };
   },
 
@@ -101,9 +102,10 @@ a.router-link-active {
 }
 
 .view-links {
-  width: 100%;
   justify-content: space-between;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 5rem;
+  padding: 0em 2em;
 }
 
 .main-nav > .navbar-brand {
@@ -200,6 +202,7 @@ a.router-link-active {
     border: 0;
     margin: 0;
     padding:0;
+    transition: 0.5s all;
   }
 
   .right-details {

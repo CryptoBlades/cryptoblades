@@ -20,5 +20,7 @@ module.exports = async function (deployer, network) {
     await specialWeaponsManager.setSpecialWeaponArt(2, 'https://gateway.ipfs.io/ipfs/QmdhNtnsfQdEbQ2BDevDGZAxRJsV2GLusZpKZCofSSCY8V/blazing-mane.png');
     await specialWeaponsManager.setSpecialWeaponDetails(2, 'The searing blade of Emberhearth can only be wielded by those found to be worthy of its power.  Passed on to the leader of the Faisar Fire Knights, it is said to be forged from an aether stone in the blazing inferno of L\'kah, an ancient volcanic dragon lost long ago.\n\nLay claim to this limited, regal weapon celebrating the first teaser and alpha test of CryptoBlades: Kingdoms.');
     await specialWeaponsManager.setSpecialWeaponWebsite(2, 'https://cryptobladeskingdoms.io/');
+
+    await specialWeaponsManager.setSpecialWeaponArt(3, 'https://gateway.ipfs.io/ipfs/QmdZj38bqfZFdd9JpUF5HDGM5owqSsRhDwD9deM17GSLmy/silverfang.png');
   }
 };
