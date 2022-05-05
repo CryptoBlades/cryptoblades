@@ -1217,7 +1217,7 @@ export function createStore(web3: Web3) {
                 return;
               }
 
-              await dispatch('fetchStakeDetails', { stakeType });
+              await dispatch('staking/fetchStakeDetails', { stakeType });
             })
           );
 
@@ -1228,7 +1228,7 @@ export function createStore(web3: Web3) {
                 return;
               }
 
-              await dispatch('fetchStakeDetails', { stakeType });
+              await dispatch('staking/fetchStakeDetails', { stakeType });
             })
           );
 
@@ -1239,7 +1239,7 @@ export function createStore(web3: Web3) {
                 return;
               }
 
-              await dispatch('fetchStakeDetails', { stakeType });
+              await dispatch('staking/fetchStakeDetails', { stakeType });
             })
           );
         }
@@ -1391,7 +1391,7 @@ export function createStore(web3: Web3) {
             }
           })(),
           dispatch('fetchInGameOnlyFunds'),
-          dispatch('fetchStakeDetails', { stakeType: stakeTypeThatCanHaveUnclaimedRewardsStakedTo })
+          dispatch('staking/fetchStakeDetails', { stakeType: stakeTypeThatCanHaveUnclaimedRewardsStakedTo })
         ]);
       },
 
