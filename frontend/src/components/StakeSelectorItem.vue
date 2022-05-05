@@ -144,7 +144,7 @@ import {mapActions, mapState} from 'vuex';
 import i18n from '@/i18n';
 import { TranslateResult } from 'vue-i18n';
 
-interface StoreMappedActions {
+interface StoreMappedStakingActions {
   fetchStakeDetails(payload: {stakeType: StakeType | NftStakeType}): Promise<void>;
   stake(payload: {amount: string; stakeType: StakeType | NftStakeType}): void;
   stakeNfts(payload: {ids: string[]; stakeType: StakeType | NftStakeType}): void;
@@ -152,10 +152,12 @@ interface StoreMappedActions {
   unstakeNfts(payload: {ids: string[]; stakeType: StakeType | NftStakeType}): void;
   unstakeKing(payload: {amount: string;}): Promise<void>;
   claimKingReward(): Promise<void>;
-  stakeUnclaimedRewards(payload: {stakeType: StakeType;}): Promise<void>;
-  claimReward(payload: {stakeType: StakeType | NftStakeType;}): Promise<void>;
-  getOwnedLandIdsWithTier(): Promise<LandIds[]>;
-  getStakedIds(payload: {stakeType: StakeType | NftStakeType;}): Promise<string[]>;
+  stakeUnclaimedRewards(payload: {stakeType: StakeType}): Promise<void>;
+  claimReward(payload: {stakeType: StakeType | NftStakeType}): Promise<void>;
+  getStakedIds(payload: {stakeType: StakeType | NftStakeType}): Promise<LandIds[]>;
+}
+interface StoreMappedLandActions {
+  fetchOwnedLandIdsWithTier(): Promise<LandIds[]>;
 }
 
 enum CurrentState {
@@ -207,7 +209,7 @@ interface Data {
   stakeUnlockTimeLeftCurrentEstimate: number,
   stakeRewardDistributionTimeLeftCurrentEstimate: number,
   ownedLandIds: LandIds[],
-  stakedIds: string[],
+  stakedIds: LandIds[],
   secondsInterval: ReturnType<typeof setInterval> | null,
   stakeRewardProgressInterval: ReturnType<typeof setInterval> | null,
 }
@@ -288,10 +290,8 @@ export default Vue.extend({
     } as Data;
   },
   computed: {
-    ...mapState({
-      staking: state => state.staking.staking,
-      defaultAccount: state => state.defaultAccount,
-    }),
+    ...mapState(['defaultAccount']),
+    ...mapState('staking', (['staking'])),
     progressBarWidth(): number{
       if(this.minimumStakeTime === 0) return 100;
       return 100 * ((this.minimumStakeTime - this.stakeUnlockTimeLeftCurrentEstimate) / this.minimumStakeTime);
@@ -558,19 +558,22 @@ export default Vue.extend({
     },
   },
   methods:{
-    ...(mapActions([
-      'fetchStakeDetails',
-      'stake',
-      'stakeNfts',
-      'unstake',
-      'unstakeNfts',
-      'unstakeKing',
-      'claimKingReward',
-      'stakeUnclaimedRewards',
-      'claimReward',
-      'getOwnedLandIdsWithTier',
-      'getStakedIds',
-    ]) as StoreMappedActions),
+    ...mapActions(
+      'staking',
+      [
+        'getStakedIds',
+        'fetchStakeDetails',
+        'stake',
+        'stakeNfts',
+        'unstake',
+        'unstakeNfts',
+        'unstakeKing',
+        'claimKingReward',
+        'stakeUnclaimedRewards',
+        'claimReward',
+      ]) as StoreMappedStakingActions,
+    ...mapActions(['fetchOwnedLandIdsWithTier']) as StoreMappedLandActions,
+
     inputByRatio(ratio: number): any {
       if(this.isDeposit){
         this.textAmount = toBN(this.walletBalance).dividedBy(1/ratio*1e18).toFixed(18);
@@ -660,13 +663,12 @@ export default Vue.extend({
       }
     },
     async updateOwnedLands(): Promise<void> {
-      this.ownedLandIds = await this.getOwnedLandIdsWithTier();
+      this.ownedLandIds = await this.fetchOwnedLandIdsWithTier();
       this.stakedIds = await this.getStakedIds({ stakeType: this.stakeType });
     }
   },
 });
 </script>
-
 <style scoped>
 .container {
   background: rgb(22, 22, 22); /* change to: background: #000E1D; */
