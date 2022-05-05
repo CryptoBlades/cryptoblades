@@ -1,3 +1,6 @@
+/* eslint-disable no-empty-pattern */
+/* this sucks, but I couldn't find a way to get the correct arguments of the getters properly without having unused vars*/
+/* using {rootState} is undefined. Getters args are defined as: (state: S, getters: any, rootState: R, rootGetters: any) (index.d.ts of vuex L118)*/
 import {
   Contract,
   Contracts,
@@ -105,18 +108,15 @@ const staking = {
     },
   } as IStake,
   getters: {
-    availableStakeTypes(state, getters, rootState) {
-      console.log(rootState);
-      // console.log(getters);
-      // if(!rootState.contracts) return;
+    availableStakeTypes({}, {}, rootState: IState): StakeType[] {
       return Object.keys(rootState.contracts().staking).filter(isStakeType);
     },
 
-    availableNftStakeTypes(state, getters, rootState) {
+    availableNftStakeTypes({}, {}, rootState: IState): NftStakeType[] {
       return Object.keys(rootState.contracts().nftStaking).filter(isNftStakeType);
     },
 
-    hasStakedBalance(state, rootState) {
+    hasStakedBalance(state: IStake, {}, rootState: IState): boolean {
       if(!rootState.contracts) return false;
 
       const staking = rootState.contracts().staking;
@@ -128,10 +128,10 @@ const staking = {
       return false;
     },
 
-    stakedSkillBalanceThatCanBeSpent(state) {
+    stakedSkillBalanceThatCanBeSpent(state: IStake) {
       return state.staking[stakeTypeThatCanHaveUnclaimedRewardsStakedTo].stakedBalance;
     },
-    stakeState(state) {
+    stakeState(state: IStake) {
       return (stakeType: StakeType): IStakeState => state.staking[stakeType];
     },
   },
