@@ -669,6 +669,8 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style scoped>
 .container {
   background: rgb(22, 22, 22); /* change to: background: #000E1D; */
