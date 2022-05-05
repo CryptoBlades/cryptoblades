@@ -2,7 +2,8 @@ import {
   IState,
 } from '@/interfaces';
 import {Dispatch, Commit} from 'vuex';
-import {approveFeeFromAnyContract} from '@/contract-call-utils';
+import {approveFeeWalletOrRewards} from '@/contract-call-utils';
+import BigNumber from 'bignumber.js';
 
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
 import { getGasPrice } from '../store';
@@ -53,18 +54,18 @@ const raid = {
         return;
       }
 
-      await approveFeeFromAnyContract(
+      const feeInSkill = new BigNumber(await Raid1.methods.getJoinCostInSkill().call(defaultCallOptions(rootState)));
+
+      await approveFeeWalletOrRewards(
         CryptoBlades,
         Raid1,
         SkillToken,
         rootState.defaultAccount,
         getGasPrice(),
-        rootState.skillRewards,
         defaultCallOptions(rootState),
         defaultCallOptions(rootState),
-        raidsFunctions => raidsFunctions.getJoinCostInSkill(),
-        {},
-        true
+        feeInSkill,
+        rootState.skillRewards
       );
 
       await Raid1!.methods
