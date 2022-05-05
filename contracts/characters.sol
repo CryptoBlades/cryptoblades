@@ -464,4 +464,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function setNftVar(uint256 characterID, uint256 nftVar, uint256 value) public restricted {
         nftVars[characterID][nftVar] = value;
     }
+
+    function setBaseURI(string memory baseUri) public restricted {
+        _setBaseURI(baseUri);
+    }
 }

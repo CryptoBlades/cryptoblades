@@ -1,30 +1,36 @@
 <template>
   <div class="skill-balance-display">
-    <div size="sm" class="my-2 my-sm-0 mr-3" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
-      <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
-      <div class="buy-skill-modal">
-        <div class="buy-skill-modal-child">
-         <img src="../../assets/apeswapbanana.png" class="img-apeswap"  tagname="buy_skill">
-              <b-button variant="primary" class="gtag-link-others" @click="onBuySkill">{{$t('skillBalanceDisplay.buyWithCrypto')}}</b-button>
-        </div>
-        <div class="buy-skill-modal-child">
-              <img src="../../assets/logoTransak.png" class="img-transak"  tagname="buy_skill_test">
-              <b-button variant="primary" class="gtag-link-others" @click="onBuyTransak">{{$t('skillBalanceDisplay.buyWithFiat')}}</b-button>
-        </div>
+    <div class="balance-icon-container">
+      <div size="sm" class="my-2 my-sm-0 mr-3 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
+        <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
+          <div class="buy-skill-modal">
+            <h4 class="text-center  mt-1 mb-4"> {{ $t('skillBalanceDisplay.buyWithCrypto') }} </h4>
+            <iframe
+              class="iframe"
+              :src="getExchangeUrl"
+            />
+            <h4 v-if="getExchangeTransakUrl" class="text-center mt-4 mb-4"> {{ $t('skillBalanceDisplay.buyWithFiat') }} </h4>
+            <iframe
+              class="iframe"
+              :src="getExchangeTransakUrl"
+              v-if="getExchangeTransakUrl"
+            />
+          </div>
+        </b-modal>
+        <img src="../../assets/navbar-icons/skill-token.png" class="add-button gtag-link-others" :style="isMobile() ? 'width:35px':''"  tagname="buy_skill">
       </div>
-    </b-modal>
-      <!-- <i class="fa fa-plus gtag-link-others" tagname="buy_skill"></i> -->
-      <img src="../../assets/addButton.png" class="add-button gtag-link-others"  tagname="buy_skill">
+
+      <div class="balance-container">
+        <p>$SKILL </p>
+        <b v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
+           @mouseover="hover = !isMobile() || true"
+           @mouseleave="hover = !isMobile()"
+        >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/></b>
+      </div>
     </div>
 
-    <div class="balance-container">
-      <strong class="mr-2 balance-text">{{$t('skillBalanceDisplay.totalBalance')}}</strong>
-      <span class="balance"
-        v-tooltip="{ content: totalSkillTooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
-        @mouseover="hover = !isMobile() || true"
-        @mouseleave="hover = !isMobile()"
-      >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/>
-      </span>
+    <div class="deposit-withdraw">
+      <span @click="showModal">Deposit</span>
     </div>
 
     <div class="bnb-withdraw-container mx-3" v-if="hasBnbAvailableToWithdraw">
@@ -75,7 +81,7 @@ export default Vue.extend({
     formattedTotalSkillBalance(): string {
       const skillBalance = fromWeiEther(Bignumber.sum(toBN(this.skillBalance), toBN(this.inGameOnlyFunds), toBN(this.skillRewards)));
 
-      return `${toBN(skillBalance).toFixed(4)} SKILL`;
+      return `${toBN(skillBalance).toFixed(4)}`;
     },
 
     formattedSkillBalance(): string {
@@ -150,13 +156,6 @@ export default Vue.extend({
       const amount = fromWeiEther(bnb);
       return `${toBN(amount).toFixed(4)} BNB`;
     },
-
-    onBuySkill() {
-      window.open(this.getExchangeUrl, '_blank');
-    },
-    onBuyTransak() {
-      window.open(this.getExchangeTransakUrl, '_blank');
-    },
     async onWithdrawBNB() {
       if(!this.canWithdrawBnb) return;
 
@@ -175,43 +174,64 @@ export default Vue.extend({
 
 <style scoped>
 .skill-balance-display {
+  align-items: center;
+  border-left: 1px solid #424A59;
+  border-right: 1px solid #424A59;
+  padding: 0.5rem;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.skill-tooltip > img{
+  top: 0;
+  left: 0;
+}
+
+.transaction-btn{
+  flex: 100%;
+  text-align: center;
+}
+
+.balance-icon-container {
   display: flex;
   align-items: center;
-  font-size: 1.1rem;
 }
 
 .balance-container {
-  margin-right: 5px;
   color: #b3b0a7;
+  line-height: 0.2;
+  text-align: right;
 }
 
+.deposit-withdraw > span{
+  line-height: 10px;
+}
+
+.deposit-withdraw > span:nth-child(2) {
+  color : gray;
+}
+
+.deposit-withdraw > span {
+  color: #EDCD90;
+  cursor: pointer;
+}
 .balance-text {
   color : #BFA765;
 }
 .add-button {
-  width : 30px;
-  height: 100%;
+  height: 2rem;
+  position: relative;
+  top: -15px;
+  right: -15px;
 }
+
 .add-button:hover {
   cursor: pointer;
 }
-.buy-skill-modal {
-  display: flex;
-  justify-content: space-between;
+.iframe{
+  min-height: 850px;
+  width: 100%;
 }
-.buy-skill-modal-child{
-  width: 50%;
-  height: 300px;
-  align-items: center;
-  justify-content: space-between;
-  margin: 10%;
-  display: flex;
-  flex-direction: column;
-}
-.img-apeswap, .img-transak {
-  width:100%;
-  max-width: 250px;
-  height: auto;
-  margin-bottom: 30px;
-}
+
 </style>

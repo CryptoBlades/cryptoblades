@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="99.184" height="97.483" viewBox="0 0 99.184 97.483">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #edcd90;
+      }
+
+      .cls-2 {
+        fill: #fff;
+        font-size: 30px;
+        font-family: Oswald-Regular, Oswald;
+      }
+
+      .cls-3 {
+        fill: none;
+        stroke: #edcd90;
+      }
+    </style>
+  </defs>
+  <g id="x10" transform="translate(952.184 1334.22)">
+    <g id="Group_657" data-name="Group 657" transform="translate(60 -21)">
+      <g id="_3553090_hammer_icon" data-name="3553090_hammer_icon" transform="translate(-989.861 -1285.512)">
+        <path id="Path_2" data-name="Path 2" class="cls-1" d="M17.192,6H33.539a1.728,1.728,0,0,1,.918.159,1.083,1.083,0,0,1,.45.45,1.728,1.728,0,0,1,.159.918V21.156a1.728,1.728,0,0,1-.159.918,1.083,1.083,0,0,1-.45.45,1.728,1.728,0,0,1-.918.159H17.575a1.729,1.729,0,0,1-.916-.158,1.083,1.083,0,0,1-.45-.449,1.729,1.729,0,0,1-.162-.916L16,7.2A1.192,1.192,0,0,1,17.188,6Zm21.45,0h4.767V22.683H38.992a1.728,1.728,0,0,1-.918-.159,1.083,1.083,0,0,1-.45-.45,1.728,1.728,0,0,1-.16-.917L37.45,7.193A1.192,1.192,0,0,1,38.64,6Z" transform="translate(1.342)"/>
+        <path id="Path_3" data-name="Path 3" class="cls-1" d="M1.192,16.683H5.958V0H1.542A1.728,1.728,0,0,0,.625.159a1.083,1.083,0,0,0-.45.45,1.728,1.728,0,0,0-.16.917L0,15.49a1.192,1.192,0,0,0,1.19,1.193Z" transform="translate(14.958 22.683) rotate(180)"/>
+        <path id="Path_4" data-name="Path 4" class="cls-1" d="M22.692,22h3.575a1.192,1.192,0,0,1,1.192,1.192V42.854a2.979,2.979,0,0,1-2.979,2.979h0a2.979,2.979,0,0,1-2.98-2.979V23.192A1.192,1.192,0,0,1,22.692,22Z" transform="translate(2.396 3.067)"/>
+      </g>
+      <path id="Path_177" data-name="Path 177" class="cls-1" d="M6927.12,15113.7l5.076,5.076-5.076,5.077Z" transform="translate(-16081.797 5645.073) rotate(-90)"/>
+    </g>
+    <text id="x10-2" data-name="x10" class="cls-2" transform="translate(-893 -1248)"><tspan x="0" y="0">x10</tspan></text>
+    <path id="Path_576" data-name="Path 576" class="cls-3" d="M-866.078-1273.947l11.07-10.938-47.977-48.628-48.488,47.969,48.488,48.1,8.31-8.3"/>
+  </g>
+</svg>
