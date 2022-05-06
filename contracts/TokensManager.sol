@@ -37,12 +37,19 @@ contract TokensManager is Initializable, AccessControlUpgradeable {
         combatTokenChargePercent = 25;
     }
 
+    receive() external payable restricted {
+    }
+
     function fight(uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external payable {
-        uint256 expectedTokens = game.fight(char, wep, target, fightMultiplier);
+        (uint256 expectedTokens, bool playerLost) = game.fight(char, wep, target, fightMultiplier);
 
         uint256 offset = ABDKMath64x64.mulu(getSkillToNativeRatio(), expectedTokens.mul(combatTokenChargePercent));
 
         require(msg.value == offset, 'Offset error');
+
+        if (playerLost) {
+            payable(msg.sender).transfer(msg.value);
+        }
     }
 
     function retrieve(address addressToTransferTo, uint256 amount) external restricted {
