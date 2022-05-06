@@ -56,8 +56,6 @@ export interface IRaidState {
   durabilityCost: string;
   xpReward: string;
   accountPower: string;
-
-  //isOwnedCharacterRaidingById: Record<number, boolean>; // ?
 }
 export interface IPartnerProject {
   id: string;
@@ -183,11 +181,6 @@ export interface IState {
 
   currentNftType: string | null;
   currentNftId: number | null;
-
-  staking: Record<StakeType | NftStakeType, IStakeState>;
-  stakeOverviews: Record<StakeType | NftStakeType, IStakeOverviewState>;
-
-  raid: IRaidState;
 
   waxBridgeWithdrawableBnb: string;
   waxBridgeRemainingWithdrawableBnbDuringPeriod: string;
