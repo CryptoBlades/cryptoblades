@@ -330,10 +330,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
     const simpleQuests = new web3.eth.Contract(simpleQuestsAbi as Abi, simpleQuestsContractAddr);
     questsContracts.SimpleQuests = simpleQuests;
-    if (simpleQuests.methods.partnerVault) {
-      const partnerVaultContractAddr = (partnerVaultNetworks as Networks)[networkId]!.address;
-      questsContracts.PartnerVault = new web3.eth.Contract(partnerVaultAbi as Abi, partnerVaultContractAddr);
-    }
+
+    const partnerVaultContractAddr = (partnerVaultNetworks as Networks)[networkId]!.address;
+    questsContracts.PartnerVault = new web3.eth.Contract(partnerVaultAbi as Abi, partnerVaultContractAddr);
   }
 
   const pvpContracts: PvPContracts = {};
