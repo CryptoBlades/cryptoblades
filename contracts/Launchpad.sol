@@ -58,6 +58,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     // VESTING INFO
     mapping(uint256 => uint256[]) launchPeriodicVestingsPercentages;
+    mapping(uint256 => mapping(uint256 => uint256)) public launchPeriodicVestingsStartTimestamps;
     mapping(uint256 => uint256) public launchLinearVestingsDurations;
     mapping(uint256 => uint256) public launchLinearVestingsStartTimestamps;
     mapping(address => mapping(uint256 => uint256)) public userLinearVestingClaimTimestamp;
@@ -169,22 +170,6 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         claimAmount = Common.adjustDecimals(claimAmount, decimals);
     }
 
-    function getLaunchBaseInfo(uint256 launchId) public view returns (
-        string memory name,
-        string memory tokenSymbol,
-        string memory detailsJsonUri,
-        string memory imageUrl,
-        address fundingTokenAddress,
-        uint256 phase) {
-        Launch memory l = launches[launchId];
-        name = l.name;
-        tokenSymbol= l.tokenSymbol;
-        detailsJsonUri = l.detailsJsonUri;
-        imageUrl = l.imageUrl;
-        fundingTokenAddress = l.fundingTokenAddress;
-        phase = l.phase;
-    }
-
     function getLaunchDetails(uint256 launchId) public view returns (
         uint256 tokenPrice,
         uint256 startTime,
@@ -222,6 +207,10 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     function getTotalLaunchUserInvestment(uint256 launchId) public onlyPhase1(launchId) view returns(uint256) {
         return launchUserInvestment[launchId][msg.sender].add(launchUserInvestment[launchId + 1][msg.sender]);
+    }
+
+    function getUnclaimedCommittedValue(uint256 launchId) public view returns(uint256) {
+        return launchTotalUnclaimedSkillCommittedValue[launchId].mul(vars[VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER]);
     }
 
     // RESTRICTED FUNCTIONS
@@ -282,6 +271,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     function addSecondPhaseForLaunch(uint256 launchId, uint256 startTime) external onlyPhase1(launchId) restricted {
         Launch memory lp = launches[launchId];
         require(launchId < nextLaunchId, "Wrong id");
+        require(launchStartTime[launchId + 1] == 0, "Already added");
         require(block.timestamp > launchStartTime[launchId] + vars[VAR_FUNDING_PERIOD_PHASE_1], "Phase 1 not finished");
         require(launchFundsToRaise[launchId].sub(launchTotalRaised[launchId]) > 0, "Tokens sold out");
         launches[launchId + 1] = Launch(
@@ -360,17 +350,15 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         uint256 totalLaunchRaised = launchTotalRaised[launchId].add(launchTotalRaised[launchId + 1]);
         uint256 contractBalance = IERC20(launchTokenAddress[launchId]).balanceOf(address(this));
         uint256 decimals = ERC20(launchTokenAddress[launchId]).decimals();
-        if(decimals > 18) {
-            contractBalance = contractBalance.mul(10**uint(decimals - 18));
-        } else {
-            contractBalance = contractBalance.div(10**uint(18 - decimals));
-        }
+        contractBalance = Common.adjustDecimals(contractBalance, decimals);
         require(contractBalance >=
             totalLaunchRaised.mul(1e18).div(launchTokenPrice[launchId]).mul(getTotalUnlockedPercentage(launchId) + percentage).div(100),
             "Not enough balance");
 
         launchPeriodicVestingsPercentages[launchId].push(percentage);
-        emit PeriodicVestingEnabled(launchId, launchPeriodicVestingsPercentages[launchId].length - 1, block.timestamp);
+        uint256 newVestingId = launchPeriodicVestingsPercentages[launchId].length - 1;
+        launchPeriodicVestingsStartTimestamps[launchId][newVestingId] = block.timestamp;
+        emit PeriodicVestingEnabled(launchId, newVestingId, block.timestamp);
     }
 
     function enableLinearVesting(uint256 launchId, uint256 duration) external onlyPhase1(launchId) isTokenAddressSet(launchId) restricted {
@@ -379,11 +367,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         uint256 totalLaunchRaised = launchTotalRaised[launchId].add(launchTotalRaised[launchId + 1]);
         uint256 contractBalance = IERC20(launchTokenAddress[launchId]).balanceOf(address(this));
         uint256 decimals = ERC20(launchTokenAddress[launchId]).decimals();
-        if(decimals > 18) {
-            contractBalance = contractBalance.mul(10**uint(decimals - 18));
-        } else {
-            contractBalance = contractBalance.div(10**uint(18 - decimals));
-        }
+        contractBalance = Common.adjustDecimals(contractBalance, decimals);
         require(contractBalance >= totalLaunchRaised.mul(1e18).div(launchTokenPrice[launchId]), "Not enough balance");
 
         launchLinearVestingsDurations[launchId] = duration;
@@ -396,10 +380,10 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     function setEligibleUsersData(uint256 launchId, address[] calldata users, uint256[] calldata stakedAmounts) external onlyPhase1(launchId) restricted {
         require(nextLaunchId >= launchId, "Wrong ID");
-        require(users.length == stakedAmounts.length, "Bad input");
+        require(users.length > 0 && users.length == stakedAmounts.length, "Bad input");
         require(launchStartTime[launchId] > block.timestamp, "Launch started");
 
-        uint totalWeight = 0;
+        uint totalWeight = launchBaseAllocation[launchId] == 0 ? 0 : launchFundsToRaise[launchId].div(launchBaseAllocation[launchId]);
         for(uint i = 0; i < users.length; i++) {
             if(!launchEligibleUsersSnapshot[launchId].add(users[i])) continue;
             launchUserStakedAmountSnapshot[launchId][users[i]] = stakedAmounts[i];
@@ -481,7 +465,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     function commitUnclaimedSkill(uint256 launchId, uint256 amount) external isWhitelistedFor(launchId) {
         uint256 committingValue = amount.mul(skillPrice).div(1e18);
-        require((launchTotalUnclaimedSkillCommittedValue[launchId].add(committingValue)).mul(vars[VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER]).div(1e18) <= vars[VAR_UNCLAIMED_ALLOCATION_PERCENTAGE].mul(launchFundsToRaise[launchId]).div(100));
+        require((launchTotalUnclaimedSkillCommittedValue[launchId].add(committingValue)).mul(vars[VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER]) <= vars[VAR_UNCLAIMED_ALLOCATION_PERCENTAGE].mul(launchFundsToRaise[launchId]).div(100), "Unclaimed limit reached");
         _game.deductAfterPartnerClaim(amount, msg.sender);
         launchUserUnclaimedSkillCommittedValue[launchId][msg.sender] += committingValue;
         launchTotalUnclaimedSkillCommittedValue[launchId] += committingValue;
