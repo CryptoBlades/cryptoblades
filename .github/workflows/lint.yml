@@ -38,7 +38,7 @@ jobs:
         run: node scripts/ci-setup-frontend-for-mainnet.js
 
       - name: Build smart contracts
-        run: npm run contract:prepare
+        run: npm run build -- --all
 
       - run: npm run build:frontend
         env:
