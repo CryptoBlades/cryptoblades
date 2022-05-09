@@ -3,7 +3,6 @@ import VueRouter from 'vue-router';
 import Plaza from './views/Plaza.vue';
 import Blacksmith from './views/Blacksmith.vue';
 import Combat from './views/Combat.vue';
-import Stake from './views/Stake.vue';
 import SelectStakeType from './views/SelectStakeType.vue';
 import Raid from './views/Raid.vue';
 import Leaderboard from './views/Leaderboard.vue';
@@ -17,20 +16,11 @@ import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
 import PlayToEarn from './views/PlayToEarn.vue';
 
-import {merchandise, portal, pvp, quests, raid, stakeOnly} from './feature-flags';
+import {merchandise, portal, pvp, quests, raid} from './feature-flags';
 import Merchandise from '@/components/smart/Merchandise.vue';
 import {currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 export default function createRouter() {
-  if (stakeOnly) {
-    return new VueRouter({
-      routes: [
-        {path: '/', redirect: 'stake'},
-        {path: '/stake', name: 'select-stake-type', component: SelectStakeType},
-        {path: '/stake/:stakeType', name: 'stake', component: Stake, props: true},
-      ]
-    });
-  }
 
   const router = new VueRouter({
     routes: [
@@ -39,7 +29,6 @@ export default function createRouter() {
       {path: '/combat', name: 'combat', component: Combat},
       {path: '/leaderboard', name: 'leaderboard', component: Leaderboard},
       {path: '/stake', name: 'select-stake-type', component: SelectStakeType},
-      {path: '/stake/:stakeType', name: 'stake', component: Stake, props: true},
       {path: '/options', name: 'options', component: Options},
       {path: '/nft-display', name: 'nft-display', component: NftDisplay},
       {path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true},

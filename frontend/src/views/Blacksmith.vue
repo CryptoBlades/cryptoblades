@@ -324,7 +324,7 @@
                 </div>
               </div>
               <div class="weapon-content" v-if="showBlacksmith">
-                <weapon-grid :showNftOptions="true" :ownWeapons="ownWeapons.length" v-model="reforgeWeaponId" />
+                <weapon-grid :showNftOptions="true" :ownWeapons="ownWeapons.length" :noTitle="false" titleType="weapon-list" v-model="reforgeWeaponId" />
               </div>
             </div>
           </div>
@@ -493,7 +493,7 @@
                 </div>
             </div>
             <div class="weapon-content pr-0 pl-0">
-              <weapon-grid v-model="burnWeaponId" :ignore="burnWeaponIds" :noTitle="true"
+              <weapon-grid v-model="burnWeaponId" :ignore="burnWeaponIds" :noTitle="false" titleType="burn-weapon"
                       :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon"  />
             </div>
           </div>
@@ -666,7 +666,6 @@ interface StoreMappedGetters {
   contracts: Contracts;
   ownWeapons: any[];
   nftsCount: number;
-  stakedSkillBalanceThatCanBeSpent: number;
 }
 
 interface Data {
@@ -782,11 +781,11 @@ export default Vue.extend({
     ...(mapGetters([
       'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
       'getPowerfulDust', 'getGreaterDust', 'getLesserDust',
-      'stakedSkillBalanceThatCanBeSpent',
     ]) as Accessors<StoreMappedGetters>),
     ...mapGetters([
       'getWeaponName'
     ]),
+    ...(mapGetters('staking', ['stakedSkillBalanceThatCanBeSpent'])) as Accessors<{ stakedSkillBalanceThatCanBeSpent: BN }>,
 
     totalSkillBalance(): BN {
       console.log(toBN(fromWeiEther(this.skillRewards)).plus(toBN(fromWeiEther(this.inGameOnlyFunds))).plus(toBN(fromWeiEther(this.skillBalance))).toString());
@@ -1617,6 +1616,10 @@ export default Vue.extend({
   background-color: rgba(0, 0, 0, 0.5);
   margin-top: 50px;
   border-radius: 5px;
+}
+
+.weapon-content > div{
+  padding: 20px 25px;
 }
 
 .button-div > button >span{

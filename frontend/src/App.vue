@@ -8,7 +8,7 @@
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content dark-bg-text">
       <b-row>
-        <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
+        <character-bar :isToggled="toggleSideBar" v-if="currentCharacterId !== null"/>
         <b-col style="padding-left: 0;" :class="renderPageDisplay()">
           <router-view v-if="canShowApp" />
         </b-col>
@@ -36,7 +36,7 @@
     </div>
     <div
       class="fullscreen-warning"
-      v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0' && !hasStakedBalance))"
+      v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0'))"
     >
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
@@ -113,7 +113,7 @@ Vue.directive('visible', (el, bind) => {
 });
 
 export default {
-  inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
+  inject: ['web3', 'expectedNetworkId', 'expectedNetworkName'],
   components: {
     NavBar,
     CharacterBar,
@@ -139,8 +139,7 @@ export default {
 
   computed: {
     ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
-    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl',
-      'availableStakeTypes', 'availableNftStakeTypes', 'hasStakedBalance']),
+    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl']),
 
     canShowApp() {
       return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
@@ -189,7 +188,6 @@ export default {
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
       'setupWeaponDurabilities',
-      'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
       'configureMetaMask',
@@ -224,29 +222,10 @@ export default {
       this.updateCurrentChainSupportsQuests();
     },
     async updateCharacterStamina(id) {
-      if (this.featureFlagStakeOnly) return;
-
       if (id !== null) {
         await this.fetchCharacterStamina(id);
       }
     },
-
-    renderPageDisplay(){
-      let toDisplay;
-
-      if(!this.featureFlagStakeOnly && this.currentCharacterId !== null){
-        if(this.toggleSideBar){
-          toDisplay = 'can-show-app';
-        }else{
-          toDisplay = 'col-xl-10 col-lg-9 col-md-9 col-sm-10 cols-11 set-normal';
-        }
-      }else{
-        toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
-      }
-
-      return toDisplay;
-    },
-
 
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
@@ -307,7 +286,7 @@ export default {
       if (
         this.hideWalletWarning &&
         !this.showMetamaskWarning &&
-        (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0' && !this.hasStakedBalance))
+        (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0'))
       ) {
         this.$dialog.notify.warning(i18n.t('app.warning.message.hideWalletWarning'),
           {
@@ -317,6 +296,21 @@ export default {
       }
     },
 
+    renderPageDisplay(){
+      let toDisplay;
+
+      if(this.currentCharacterId !== null){
+        if(this.toggleSideBar){
+          toDisplay = 'can-show-app';
+        }else{
+          toDisplay = 'col-xl-10 col-lg-9 col-md-9 col-sm-10 cols-11 set-normal';
+        }
+      }else{
+        toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
+      }
+
+      return toDisplay;
+    },
 
     async checkNotifications() {
       const response = await fetch(apiUrl('static/notifications'));
@@ -419,14 +413,6 @@ export default {
         await this.updateCharacterStamina(c.id);
       });
     }, 3000);
-
-    this.availableStakeTypes.forEach((item) => {
-      this.fetchStakeDetails({ stakeType: item });
-    });
-
-    this.availableNftStakeTypes.forEach((item) => {
-      this.fetchStakeDetails({ stakeType: item });
-    });
 
     this.slowPollIntervalId = setInterval(async () => {
       await Promise.all([

@@ -183,7 +183,7 @@ export default Vue.extend({
     ]) as Accessors<StoreMappedGetters>),
 
     marketLink(): string{
-      return `https://bazaar.market/buy/${this.nftType}?id=${this.nftId}`;
+      return `${process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/'}buy/${this.nftType}?id=${this.nftId}`;
     },
 
     isKnownNftType(): boolean {

@@ -47,7 +47,7 @@
     "lint": "lerna exec -- npm run lint",
     "build:frontend": "cd frontend && npm run build",
     "start:frontend": "cd frontend && npm start",
-    "contract:prepare": "npm run build",
+    "contract:prepare": "npm run build -- --all && run-s \"restore-networks 56\" \"restore-networks 97\" \"restore-networks 128\" \"restore-networks 256\" \"restore-networks 65\" \"restore-networks 66\" \"restore-networks 137\" \"restore-networks 80001\" \"restore-networks 43114\" \"restore-networks 43113\" \"restore-networks 1313161554\" \"restore-networks 1313161555\" ",
     "contract:deploy": "npm run deploy",
     "build": "truffle compile",
     "postbuild": "npm --prefix frontend/ run setup-app-config && node scripts/generate-ts-from-abis.js",
@@ -81,6 +81,7 @@
     "deploy-mainnet-dry-run": "truffle migrate --network bscmainnet --dry-run",
     "backup-networks": "node scripts/manage-networks.js backup",
     "backup-networks-to-file": "node scripts/manage-networks.js backupToFile",
+    "restore-networks": "node scripts/manage-networks.js restore",
     "restore-networks-from-file": "node scripts/manage-networks.js restoreFromFile",
     "verify-contracts": "node scripts/verify-contracts.js"
   },

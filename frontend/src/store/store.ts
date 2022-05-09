@@ -9,7 +9,6 @@ import {getConfigValue, setUpContracts} from '@/contracts';
 import {
   characterFromContract,
   junkFromContract,
-  raidFromContract,
   shieldFromContract,
   targetFromContract,
   trinketFromContract,
@@ -19,23 +18,17 @@ import {
 import {
   CharacterPower,
   Contract,
-  Contracts,
   IPartnerProject,
-  IRaidState,
-  isNftStakeType,
   isStakeType,
-  IStakeOverviewState,
-  IStakeState,
   IState,
   IWeb3EventSubscription,
-  NftStakeType,
   StakeType
 } from '@/interfaces';
 import {getCharacterNameFromSeed} from '@/character-name';
-import {approveFee, approveFeeFromAnyContract, approveFeeFromAnyContractSimple, getFeeInSkillFromUsd} from '@/contract-call-utils';
+import {approveFee, approveFeeDynamic, approveFeeWalletOnly, approveFeeWalletOrRewards, getFeeInSkillFromUsd} from '@/contract-call-utils';
 
-import {burningManager as featureFlagBurningManager, raid as featureFlagRaid, stakeOnly as featureFlagStakeOnly} from '@/feature-flags';
-import {ERC20, IERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
+import {burningManager as featureFlagBurningManager} from '@/feature-flags';
+import {ERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from '@/stake-types';
 import {Nft} from '@/interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
@@ -58,27 +51,6 @@ interface SetEventSubscriptionsPayload {
 type StakingRewardsAlias = Contract<IStakingRewards> | null;
 type NftStakingRewardsAlias = Contract<INftStakingRewards> | null;
 
-interface StakingContracts {
-  StakingRewards: NftStakingRewardsAlias | StakingRewardsAlias,
-  StakingToken: Contract<IERC20> | Contract<IERC721> | null,
-  RewardToken: Contracts['SkillToken'],
-}
-
-function getStakingContracts(contracts: Contracts, stakeType: StakeType | NftStakeType): StakingContracts {
-  if(isNftStakeType(stakeType)) {
-    return {
-      StakingRewards: contracts.nftStaking[stakeType]?.StakingRewards || null,
-      StakingToken: contracts.nftStaking[stakeType]?.StakingToken || null,
-      RewardToken: contracts.SkillToken
-    };
-  }
-  return {
-    StakingRewards: contracts.staking[stakeType]?.StakingRewards || null,
-    StakingToken: contracts.staking[stakeType]?.StakingToken || null,
-    RewardToken: contracts.SkillToken
-  };
-}
-
 export function getGasPrice() {
   const gasPrice: string = getConfigValue('gasPrice');
   if(gasPrice) {
@@ -90,30 +62,13 @@ type WaxBridgeDetailsPayload = Pick<
 IState, 'waxBridgeWithdrawableBnb' | 'waxBridgeRemainingWithdrawableBnbDuringPeriod' | 'waxBridgeTimeUntilLimitExpires'
 >;
 
-const defaultStakeState: IStakeState = {
-  ownBalance: '0',
-  stakedBalance: '0',
-  remainingCapacityForDeposit: '0',
-  remainingCapacityForWithdraw: '0',
-  contractBalance: '0',
-  currentRewardEarned: '0',
-  rewardMinimumStakeTime: 0,
-  rewardDistributionTimeLeft: 0,
-  unlockTimeLeft: 0,
-};
-
-const defaultStakeOverviewState: IStakeOverviewState = {
-  rewardRate: '0',
-  rewardsDuration: 0,
-  totalSupply: '0',
-  minimumStakeTime: 0,
-  rewardDistributionTimeLeft: 0
-};
-
 import bridge from './bridge';
 import pvp from './pvp';
 import quests from './quests';
 import merchandise from './merchandise';
+import raid from './raid';
+import staking from './staking';
+import land from './land';
 
 export function createStore(web3: Web3) {
   return new Vuex.Store<IState>({
@@ -121,7 +76,10 @@ export function createStore(web3: Web3) {
       bridge,
       pvp,
       quests,
-      merchandise
+      merchandise,
+      raid,
+      staking,
+      land
     },
     state: {
       web3,
@@ -185,50 +143,6 @@ export function createStore(web3: Web3) {
       keyboxes: {},
       currentShieldId: null,
       nfts: {},
-
-      staking: {
-        skill: { ...defaultStakeState },
-        skill2: { ...defaultStakeState },
-        lp: { ...defaultStakeState },
-        lp2: { ...defaultStakeState },
-        king: { ...defaultStakeState },
-        king90: { ...defaultStakeState },
-        king180: { ...defaultStakeState },
-        skill90: { ...defaultStakeState },
-        skill180: { ...defaultStakeState },
-        cbkLandT1: { ...defaultStakeState },
-        cbkLandT2: { ...defaultStakeState },
-        cbkLandT3: { ...defaultStakeState }
-      },
-      stakeOverviews: {
-        skill: { ...defaultStakeOverviewState },
-        skill2: { ...defaultStakeOverviewState },
-        lp: { ...defaultStakeOverviewState },
-        lp2: { ...defaultStakeOverviewState },
-        king: { ...defaultStakeOverviewState },
-        king90: { ...defaultStakeOverviewState },
-        king180: { ...defaultStakeOverviewState },
-        skill90: { ...defaultStakeOverviewState },
-        skill180: { ...defaultStakeOverviewState },
-        cbkLandT1: { ...defaultStakeOverviewState },
-        cbkLandT2: { ...defaultStakeOverviewState },
-        cbkLandT3: { ...defaultStakeOverviewState }
-      },
-
-      raid: {
-        index: '0',
-        expectedFinishTime: '0',
-        raiderCount: '0',
-        playerPower: '0',
-        bossPower: '0',
-        bossTrait: '0',
-        status: '0',
-        joinSkill: '0',
-        staminaCost: '0',
-        durabilityCost: '0',
-        xpReward: '0',
-        accountPower: '0',
-      },
 
       waxBridgeWithdrawableBnb: '0',
       waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
@@ -300,30 +214,6 @@ export function createStore(web3: Web3) {
         // our root component prevents the app from being active if contracts
         // are not set up, so we never need to worry about it being null anywhere else
         return _.isFunction(state.contracts) ? state.contracts() : null!;
-      },
-
-      availableStakeTypes(state: IState) {
-        return Object.keys(state.contracts().staking).filter(isStakeType);
-      },
-
-      availableNftStakeTypes(state: IState) {
-        return Object.keys(state.contracts().nftStaking).filter(isNftStakeType);
-      },
-
-      hasStakedBalance(state) {
-        if(!state.contracts) return false;
-
-        const staking = state.contracts().staking;
-        for(const stakeType of Object.keys(staking).filter(isStakeType)) {
-          if(state.staking[stakeType].stakedBalance !== '0') {
-            return true;
-          }
-        }
-        return false;
-      },
-
-      stakedSkillBalanceThatCanBeSpent(state) {
-        return state.staking[stakeTypeThatCanHaveUnclaimedRewardsStakedTo].stakedBalance;
       },
 
       getTargetsByCharacterIdAndWeaponId(state: IState) {
@@ -623,14 +513,6 @@ export function createStore(web3: Web3) {
         return toBN(state.rewardsClaimTax).dividedBy(toBN(2).exponentiatedBy(64));
       },
 
-      stakeState(state) {
-        return (stakeType: StakeType): IStakeState => state.staking[stakeType];
-      },
-
-      getRaidState(state): IRaidState {
-        return state.raid;
-      },
-
       fightGasOffset(state) {
         return state.fightGasOffset;
       },
@@ -887,30 +769,6 @@ export function createStore(web3: Web3) {
         }
 
         Vue.set(state.targetsByCharacterIdAndWeaponId[characterId], weaponId, targets);
-      },
-
-      updateStakeData(state: IState, { stakeType, ...payload }: { stakeType: StakeType } & IStakeState) {
-        Vue.set(state.staking, stakeType, payload);
-      },
-
-      updateStakeOverviewDataPartial(state, payload: { stakeType: StakeType } & IStakeOverviewState) {
-        const { stakeType, ...data } = payload;
-        Vue.set(state.stakeOverviews, stakeType, data);
-      },
-
-      updateRaidState(state: IState, payload: { raidState: IRaidState }) {
-        state.raid.index = payload.raidState.index;
-        state.raid.expectedFinishTime = payload.raidState.expectedFinishTime;
-        state.raid.raiderCount = payload.raidState.raiderCount;
-        state.raid.playerPower = payload.raidState.playerPower;
-        state.raid.bossPower = payload.raidState.bossPower;
-        state.raid.bossTrait = payload.raidState.bossTrait;
-        state.raid.status = payload.raidState.status;
-        state.raid.joinSkill = payload.raidState.joinSkill;
-        state.raid.staminaCost = payload.raidState.staminaCost;
-        state.raid.durabilityCost = payload.raidState.durabilityCost;
-        state.raid.xpReward = payload.raidState.xpReward;
-        state.raid.accountPower = payload.raidState.accountPower;
       },
 
       updateWaxBridgeDetails(state, payload: WaxBridgeDetailsPayload) {
@@ -1239,119 +1097,117 @@ export function createStore(web3: Web3) {
 
         const subscriptions: IWeb3EventSubscription[] = [];
 
-        if (!featureFlagStakeOnly) {
-          subscriptions.push(
-            state.contracts().Characters!.events.NewCharacter(
-              { filter: { minter: state.defaultAccount } },
-              async (err: Error, data: any) => {
-                if (err) {
-                  console.error(err, data);
-                  return;
-                }
-
-                const characterId = data.returnValues.character;
-
-                commit('addNewOwnedCharacterId', characterId);
-
-                await Promise.all([
-                  dispatch('fetchCharacter', { characterId }),
-                  dispatch('fetchSkillBalance'),
-                  dispatch('fetchFightRewardSkill'),
-                  dispatch('fetchFightRewardXp'),
-                  dispatch('fetchDustBalance')
-                ]);
-              })
-          );
-
-          subscriptions.push(
-            state.contracts().Garrison!.events.CharacterReceived(
-              { filter: { minter: state.defaultAccount } },
-              async (err: Error, data: any) => {
-                if (err) {
-                  console.error(err, data);
-                  return;
-                }
-
-                const characterId = data.returnValues.character;
-
-                commit('addNewOwnedGarrisonCharacterId', characterId);
-                //Events.$emit('garrison:characterReceived', { id: characterId });
-
-                await Promise.all([
-                  dispatch('fetchCharacter', { characterId, inGarrison: true }),
-                  dispatch('fetchSkillBalance'),
-                  dispatch('fetchFightRewardSkill'),
-                  dispatch('fetchFightRewardXp'),
-                  dispatch('fetchGarrisonCharactersXp'),
-                  dispatch('fetchDustBalance')
-                ]);
-              })
-          );
-
-          subscriptions.push(
-            state.contracts().Weapons!.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
+        subscriptions.push(
+          state.contracts().Characters!.events.NewCharacter(
+            { filter: { minter: state.defaultAccount } },
+            async (err: Error, data: any) => {
               if (err) {
                 console.error(err, data);
                 return;
               }
 
-              const weaponId = data.returnValues.weapon;
+              const characterId = data.returnValues.character;
 
-              commit('addNewOwnedWeaponId', weaponId);
-
-              await Promise.all([
-                dispatch('fetchWeapon', weaponId),
-                dispatch('fetchSkillBalance'),
-              ]);
-            })
-          );
-
-          subscriptions.push(
-            state.contracts().Shields!.events.NewShield({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
-              if (err) {
-                console.error(err, data);
-                return;
-              }
-
-              const shieldId = data.returnValues.shield;
-
-              commit('addNewOwnedShieldId', shieldId);
+              commit('addNewOwnedCharacterId', characterId);
 
               await Promise.all([
-                dispatch('fetchShield', shieldId),
+                dispatch('fetchCharacter', { characterId }),
                 dispatch('fetchSkillBalance'),
+                dispatch('fetchFightRewardSkill'),
+                dispatch('fetchFightRewardXp'),
                 dispatch('fetchDustBalance')
               ]);
             })
-          );
+        );
 
-          subscriptions.push(
-            state.contracts().CryptoBlades!.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
+        subscriptions.push(
+          state.contracts().Garrison!.events.CharacterReceived(
+            { filter: { minter: state.defaultAccount } },
+            async (err: Error, data: any) => {
               if (err) {
                 console.error(err, data);
                 return;
               }
 
-              await Promise.all([
-                dispatch('fetchCharacter', { characterId: data.returnValues.character }),
-                dispatch('fetchSkillBalance')
-              ]);
-            })
-          );
+              const characterId = data.returnValues.character;
 
-          subscriptions.push(
-            state.contracts().CryptoBlades!.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
-              if (err) {
-                console.error(err, data);
-                return;
-              }
+              commit('addNewOwnedGarrisonCharacterId', characterId);
+              //Events.$emit('garrison:characterReceived', { id: characterId });
 
               await Promise.all([
-                dispatch('fetchInGameOnlyFunds')
+                dispatch('fetchCharacter', { characterId, inGarrison: true }),
+                dispatch('fetchSkillBalance'),
+                dispatch('fetchFightRewardSkill'),
+                dispatch('fetchFightRewardXp'),
+                dispatch('fetchGarrisonCharactersXp'),
+                dispatch('fetchDustBalance')
               ]);
             })
-          );
-        }
+        );
+
+        subscriptions.push(
+          state.contracts().Weapons!.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
+            if (err) {
+              console.error(err, data);
+              return;
+            }
+
+            const weaponId = data.returnValues.weapon;
+
+            commit('addNewOwnedWeaponId', weaponId);
+
+            await Promise.all([
+              dispatch('fetchWeapon', weaponId),
+              dispatch('fetchSkillBalance'),
+            ]);
+          })
+        );
+
+        subscriptions.push(
+          state.contracts().Shields!.events.NewShield({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
+            if (err) {
+              console.error(err, data);
+              return;
+            }
+
+            const shieldId = data.returnValues.shield;
+
+            commit('addNewOwnedShieldId', shieldId);
+
+            await Promise.all([
+              dispatch('fetchShield', shieldId),
+              dispatch('fetchSkillBalance'),
+              dispatch('fetchDustBalance')
+            ]);
+          })
+        );
+
+        subscriptions.push(
+          state.contracts().CryptoBlades!.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
+            if (err) {
+              console.error(err, data);
+              return;
+            }
+
+            await Promise.all([
+              dispatch('fetchCharacter', { characterId: data.returnValues.character }),
+              dispatch('fetchSkillBalance')
+            ]);
+          })
+        );
+
+        subscriptions.push(
+          state.contracts().CryptoBlades!.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
+            if (err) {
+              console.error(err, data);
+              return;
+            }
+
+            await Promise.all([
+              dispatch('fetchInGameOnlyFunds')
+            ]);
+          })
+        );
 
         function setupStakingEvents(stakeType: StakeType, StakingRewards: StakingRewardsAlias | NftStakingRewardsAlias) {
           if(!StakingRewards) return;
@@ -1363,7 +1219,7 @@ export function createStore(web3: Web3) {
                 return;
               }
 
-              await dispatch('fetchStakeDetails', { stakeType });
+              await dispatch('staking/fetchStakeDetails', { stakeType });
             })
           );
 
@@ -1374,7 +1230,7 @@ export function createStore(web3: Web3) {
                 return;
               }
 
-              await dispatch('fetchStakeDetails', { stakeType });
+              await dispatch('staking/fetchStakeDetails', { stakeType });
             })
           );
 
@@ -1385,7 +1241,7 @@ export function createStore(web3: Web3) {
                 return;
               }
 
-              await dispatch('fetchStakeDetails', { stakeType });
+              await dispatch('staking/fetchStakeDetails', { stakeType });
             })
           );
         }
@@ -1409,15 +1265,12 @@ export function createStore(web3: Web3) {
       async fetchUserDetails({ dispatch }) {
         const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails'), dispatch('fetchDustBalance'), dispatch('fetchShardsSupply')];
 
-        if (!featureFlagStakeOnly) {
-          promises.push(dispatch('fetchUserGameDetails'));
-        }
+        promises.push(dispatch('fetchUserGameDetails'));
 
         await Promise.all([promises]);
       },
 
       async fetchUserGameDetails({ state, dispatch, commit }) {
-        if(featureFlagStakeOnly) return;
         const [
           ownedCharacterIds,
           ownedGarrisonCharacterIds,
@@ -1469,8 +1322,6 @@ export function createStore(web3: Web3) {
       },
 
       async updateWeaponIds({ dispatch, commit }) {
-        if(featureFlagStakeOnly) return;
-
         const ownedWeaponIds = await dispatch('getAccountWeapons');
         commit('updateUserDetails', {
           ownedWeaponIds: Array.from(ownedWeaponIds)
@@ -1479,8 +1330,6 @@ export function createStore(web3: Web3) {
       },
 
       async updateCharacterIds({ dispatch, commit }) {
-        if(featureFlagStakeOnly) return;
-
         const ownedCharacterIds = await dispatch('getAccountCharacters');
         const ownedGarrisonCharacterIds = await dispatch('getAccountGarrisonCharacters');
         commit('updateUserDetails', {
@@ -1492,8 +1341,6 @@ export function createStore(web3: Web3) {
       },
 
       async updateShieldIds({ state, dispatch, commit }) {
-        if(featureFlagStakeOnly) return;
-
         const ownedShieldIds = await state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state));
         commit('updateUserDetails', {
           ownedShieldIds: Array.from(ownedShieldIds)
@@ -1502,7 +1349,7 @@ export function createStore(web3: Web3) {
       },
 
       async updateTrinketIds({ state, dispatch, commit }) {
-        if(featureFlagStakeOnly || !state.defaultAccount) return;
+        if(!state.defaultAccount) return;
 
         const ownedTrinketIds = await state.contracts().RaidTrinket!.methods.getOwned().call(defaultCallOptions(state));
         commit('updateUserDetails', {
@@ -1512,7 +1359,7 @@ export function createStore(web3: Web3) {
       },
 
       async updateJunkIds({ state, dispatch, commit }) {
-        if(featureFlagStakeOnly || !state.defaultAccount) return;
+        if(!state.defaultAccount) return;
 
         const ownedJunkIds = await state.contracts().Junk!.methods.getOwned().call(defaultCallOptions(state));
         commit('updateUserDetails', {
@@ -1522,7 +1369,7 @@ export function createStore(web3: Web3) {
       },
 
       async updateKeyLootboxIds({ state, dispatch, commit }) {
-        if(featureFlagStakeOnly || !state.defaultAccount) return;
+        if(!state.defaultAccount) return;
 
         const ownedKeyLootboxIds = await state.contracts().KeyLootbox!.methods.getOwned().call(defaultCallOptions(state));
         commit('updateUserDetails', {
@@ -1546,7 +1393,7 @@ export function createStore(web3: Web3) {
             }
           })(),
           dispatch('fetchInGameOnlyFunds'),
-          dispatch('fetchStakeDetails', { stakeType: stakeTypeThatCanHaveUnclaimedRewardsStakedTo })
+          dispatch('staking/fetchStakeDetails', { stakeType: stakeTypeThatCanHaveUnclaimedRewardsStakedTo })
         ]);
       },
 
@@ -1594,8 +1441,6 @@ export function createStore(web3: Web3) {
       },
 
       async addMoreSkill({ state, dispatch }, skillToAdd: string) {
-        if(featureFlagStakeOnly) return;
-
         await state.contracts().CryptoBlades!.methods.recoverSkill(skillToAdd).send({
           from: state.defaultAccount,
           gasPrice: getGasPrice(),
@@ -1746,8 +1591,6 @@ export function createStore(web3: Web3) {
       },
 
       async fetchWeaponDurability({ state, commit }, weaponId: number) {
-        if(featureFlagStakeOnly) return;
-
         const durabilityString = await state.contracts().Weapons!.methods
           .getDurabilityPoints('' + weaponId)
           .call(defaultCallOptions(state));
@@ -1815,8 +1658,6 @@ export function createStore(web3: Web3) {
       },
 
       async fetchCharacterStamina({ state, commit }, characterId: number) {
-        if(featureFlagStakeOnly) return;
-
         const staminaString = await state.contracts().Characters!.methods
           .getStaminaPoints('' + characterId)
           .call(defaultCallOptions(state));
@@ -1893,7 +1734,7 @@ export function createStore(web3: Web3) {
         }
       },
       async mintCharacter({ state, dispatch }, approveMintSlippage: boolean) {
-        if(featureFlagStakeOnly || !state.defaultAccount) return;
+        if(!state.defaultAccount) return;
         const slippageMultiplier = approveMintSlippage ? 1.05 : 1;
 
         await approveFee(
@@ -2012,7 +1853,7 @@ export function createStore(web3: Web3) {
             });
         }
         else {
-          await approveFeeFromAnyContract(
+          await approveFeeDynamic(
             CryptoBlades,
             BurningManager,
             SkillToken,
@@ -2021,7 +1862,8 @@ export function createStore(web3: Web3) {
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            burningManagerMethods => burningManagerMethods.reforgeWeaponFee()
+            burningManagerMethods => burningManagerMethods.reforgeWeaponFee(),
+            { allowInGameOnlyFunds: false },
           );
 
           await BurningManager.methods
@@ -2067,7 +1909,7 @@ export function createStore(web3: Web3) {
             });
         }
         else {
-          await approveFeeFromAnyContract(
+          await approveFeeDynamic(
             CryptoBlades,
             BurningManager,
             SkillToken,
@@ -2076,7 +1918,8 @@ export function createStore(web3: Web3) {
             state.skillRewards,
             defaultCallOptions(state),
             defaultCallOptions(state),
-            burningManagerMethods => burningManagerMethods.reforgeWeaponWithDustFee()
+            burningManagerMethods => burningManagerMethods.reforgeWeaponWithDustFee(),
+            { allowInGameOnlyFunds: false },
           );
 
           await BurningManager.methods
@@ -2116,7 +1959,7 @@ export function createStore(web3: Web3) {
             });
         }
         else {
-          await approveFeeFromAnyContract(
+          await approveFeeDynamic(
             CryptoBlades,
             BurningManager,
             SkillToken,
@@ -2149,8 +1992,6 @@ export function createStore(web3: Web3) {
       },
 
       async fetchTargets({ state, commit }, { characterId, weaponId }) {
-        if(featureFlagStakeOnly) return;
-
         if(isUndefined(characterId) || isUndefined(weaponId)) {
           commit('updateTargets', { characterId, weaponId, targets: [] });
           return;
@@ -2164,8 +2005,6 @@ export function createStore(web3: Web3) {
       },
 
       async doEncounter({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier }) {
-        if(featureFlagStakeOnly) return;
-
         const res = await state.contracts().CryptoBlades!.methods
           .fight(
             characterId,
@@ -2237,408 +2076,6 @@ export function createStore(web3: Web3) {
         return await CryptoBlades.methods.getRemainingTokenClaimAmountPreTax().call(defaultCallOptions(state));
       },
 
-      async fetchStakeOverviewData({ getters, dispatch }) {
-        await Promise.all(
-          (getters.availableStakeTypes as StakeType[])
-            .map(stakeType =>
-              dispatch('fetchStakeOverviewDataPartial', { stakeType })
-            ),
-        );
-        await Promise.all(
-          (getters.availableNftStakeTypes as NftStakeType[])
-            .map(stakeType =>
-              dispatch('fetchStakeOverviewDataPartial', { stakeType })
-            )
-        );
-      },
-
-      async fetchStakeOverviewDataPartial({ state, commit }, { stakeType }: { stakeType: StakeType }) {
-        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards) return;
-
-        const [
-          rewardRate,
-          rewardsDuration,
-          totalSupply,
-          minimumStakeTime,
-          rewardDistributionTimeLeft,
-        ] = await Promise.all([
-          StakingRewards.methods.rewardRate().call(defaultCallOptions(state)),
-          StakingRewards.methods.rewardsDuration().call(defaultCallOptions(state)),
-          StakingRewards.methods.totalSupply().call(defaultCallOptions(state)),
-          StakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
-          StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
-        ]);
-
-        const stakeSkillOverviewData: IStakeOverviewState = {
-          rewardRate,
-          rewardsDuration: parseInt(rewardsDuration, 10),
-          totalSupply,
-          minimumStakeTime: parseInt(minimumStakeTime, 10),
-          rewardDistributionTimeLeft: parseInt(rewardDistributionTimeLeft, 10),
-        };
-        commit('updateStakeOverviewDataPartial', { stakeType, ...stakeSkillOverviewData });
-      },
-
-      async fetchStakeDetails({ state, commit }, { stakeType }: { stakeType: StakeType }) {
-        if(!state.defaultAccount) return;
-
-        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards || !StakingToken) return;
-
-        const [
-          ownBalance,
-          stakedBalance,
-          remainingCapacityForDeposit,
-          remainingCapacityForWithdraw,
-          contractBalance,
-          currentRewardEarned,
-          rewardMinimumStakeTime,
-          rewardDistributionTimeLeft,
-          unlockTimeLeft
-        ] = await Promise.all([
-          StakingToken.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)),
-          StakingRewards.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)),
-          Promise.resolve(null as string | null),
-          StakingRewards.methods.totalSupply().call(defaultCallOptions(state)),
-          StakingToken.methods.balanceOf(StakingRewards.options.address).call(defaultCallOptions(state)),
-          StakingRewards.methods.earned(state.defaultAccount).call(defaultCallOptions(state)),
-          StakingRewards.methods.minimumStakeTime().call(defaultCallOptions(state)),
-          StakingRewards.methods.getStakeRewardDistributionTimeLeft().call(defaultCallOptions(state)),
-          StakingRewards.methods.getStakeUnlockTimeLeft().call(defaultCallOptions(state)),
-        ]);
-        const stakeData: { stakeType: StakeType | NftStakeType } & IStakeState = {
-          stakeType,
-          ownBalance,
-          stakedBalance,
-          remainingCapacityForDeposit,
-          remainingCapacityForWithdraw,
-          contractBalance,
-          currentRewardEarned,
-          rewardMinimumStakeTime: parseInt(rewardMinimumStakeTime, 10),
-          rewardDistributionTimeLeft: parseInt(rewardDistributionTimeLeft, 10),
-          unlockTimeLeft: parseInt(unlockTimeLeft, 10)
-        };
-        commit('updateStakeData', stakeData);
-      },
-
-      async stake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
-        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards || !StakingToken || !state.defaultAccount) return;
-
-        await StakingToken.methods.approve(StakingRewards.options.address, amount).send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        await StakingRewards.methods.stake(amount).send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        await dispatch('fetchStakeDetails', { stakeType });
-      },
-
-      async stakeNfts({ state, dispatch }, { ids, stakeType }: { ids: string[], stakeType: StakeType }) {
-        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards || !StakingToken || !state.defaultAccount) return;
-
-        if(ids.length === 1) {
-          await StakingToken.methods.approve(StakingRewards.options.address, ids[0]).send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-
-          await StakingRewards.methods.stake(ids[0]).send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-        } else {
-          await (StakingToken as Contract<IERC721>).methods.setApprovalForAll(StakingRewards.options.address, true).send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-
-          await (StakingRewards as Contract<INftStakingRewards>).methods.bulkStake(ids).send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-        }
-
-        await dispatch('fetchStakeDetails', { stakeType });
-      },
-
-      async unstakeNfts({ state, dispatch }, { ids, stakeType }: { ids: string[], stakeType: StakeType }) {
-        const { StakingRewards, StakingToken } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards || !StakingToken || !state.defaultAccount) return;
-
-        if(ids.length === 1) {
-          await StakingRewards.methods.withdraw(ids[0]).send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-        } else {
-          await (StakingRewards as Contract<INftStakingRewards>).methods.bulkWithdraw(ids).send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-        }
-
-        await dispatch('fetchStakeDetails', { stakeType });
-      },
-
-      async unstake({ state, dispatch }, { amount, stakeType }: { amount: string, stakeType: StakeType }) {
-        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards || !state.defaultAccount) return;
-
-        await StakingRewards.methods.withdraw(amount).send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        await dispatch('fetchStakeDetails', { stakeType });
-      },
-
-      async unstakeKing({ state, dispatch }, { amount }: { amount: string }) {
-        const { KingStakingRewardsUpgradeable } = state.contracts();
-        if(!KingStakingRewardsUpgradeable || !state.defaultAccount) return;
-
-        await KingStakingRewardsUpgradeable.methods.withdrawWithoutFee(amount).send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        await dispatch('fetchStakeDetails', { stakeType: 'king' });
-      },
-
-      async getStakedIds({ state }, stakeType) {
-        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
-        const CBKLand = state.contracts().CBKLand!;
-        if(!StakingRewards || !CBKLand || !state.defaultAccount || !isNftStakeType(stakeType)) return;
-
-        const stakedIds = await (StakingRewards as NftStakingRewardsAlias)?.methods.stakedIdsOf(state.defaultAccount).call({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        if(!stakedIds) return [];
-
-        const landIdsWithTier = await Promise.all(stakedIds.map(async (landId: string) =>
-        {
-          const land = await CBKLand.methods.get(landId).call(defaultCallOptions(state));
-          return { id: landId, tier: land[0] };
-        }));
-
-        return landIdsWithTier;
-      },
-
-      async claimKingReward({ state, dispatch }) {
-        const { KingStakingRewardsUpgradeable } = state.contracts();
-        if(!KingStakingRewardsUpgradeable) return;
-
-        await KingStakingRewardsUpgradeable.methods.getRewardWithoutFee().send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        await dispatch('fetchStakeDetails', { stakeType: 'king' });
-      },
-
-      async stakeUnclaimedRewards({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
-        if(stakeType !== stakeTypeThatCanHaveUnclaimedRewardsStakedTo) return;
-
-        const { CryptoBlades } = state.contracts();
-        if(!CryptoBlades) return;
-
-        await CryptoBlades.methods
-          .stakeUnclaimedRewards()
-          .send(defaultCallOptions(state));
-
-        await Promise.all([
-          dispatch('fetchSkillBalance'),
-          dispatch('fetchStakeDetails', { stakeType }),
-          dispatch('fetchFightRewardSkill'),
-        ]);
-      },
-
-      async claimReward({ state, dispatch }, { stakeType }: { stakeType: StakeType }) {
-        const { StakingRewards } = getStakingContracts(state.contracts(), stakeType);
-        if(!StakingRewards) return;
-
-        await StakingRewards.methods.getReward().send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-
-        await dispatch('fetchStakeDetails', { stakeType });
-      },
-
-      async joinRaid({ state, dispatch }, { characterId, weaponId }) {
-        const { CryptoBlades, SkillToken, Raid1 } = state.contracts();
-        if(!Raid1 || !CryptoBlades || !SkillToken || !state.defaultAccount) {
-          return;
-        }
-
-        await approveFeeFromAnyContract(
-          CryptoBlades,
-          Raid1,
-          SkillToken,
-          state.defaultAccount,
-          getGasPrice(),
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          raidsFunctions => raidsFunctions.getJoinCostInSkill(),
-          {},
-          true
-        );
-
-        await Raid1!.methods
-          .joinRaid(characterId, weaponId)
-          .send(defaultCallOptions(state));
-
-        await dispatch('fetchSkillBalance');
-      },
-
-      async fetchRaidState({ state, commit }) {
-        if(featureFlagStakeOnly || !featureFlagRaid) return;
-
-        const Raid1 = state.contracts().Raid1!;
-
-        await Promise.all([
-          (async () => {
-            const raidState: IRaidState = raidFromContract(
-              await Raid1.methods.getRaidData().call(defaultCallOptions(state))
-            );
-
-            commit('updateRaidState', { raidState });
-          })(),
-        ]);
-      },
-
-      async fetchRaidRewards({ state }, { startIndex, endIndex }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .getEligibleRewardIndexes(startIndex, endIndex)
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchRaidingCharacters({ state }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .getParticipatingCharacters()
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchRaidingWeapons({ state }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .getParticipatingWeapons()
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchRaidJoinEligibility({ state }, { characterID, weaponID }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .canJoinRaid(characterID, weaponID)
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchIsRaidStarted({ state }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .isRaidStarted()
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchHaveEnoughEnergy({ state }, { characterID, weaponID }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .haveEnoughEnergy(characterID, weaponID)
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchIsCharacterRaiding({ state }, { characterID }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .isCharacterRaiding(characterID)
-          .call(defaultCallOptions(state));
-      },
-
-      async fetchIsWeaponRaiding({ state }, { weaponID }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        return await Raid1.methods
-          .isWeaponRaiding(weaponID)
-          .call(defaultCallOptions(state));
-      },
-
-
-      async claimRaidRewards({ state, dispatch }, { rewardIndex }) {
-        const Raid1 = state.contracts().Raid1!;
-
-        const res = await Raid1!.methods
-          .claimReward(rewardIndex)
-          .send(defaultCallOptions(state));
-
-        // claimreward does not reward trinket, those are given at raidcompletion by the bot
-
-        if(res.events.RewardedJunk) {
-          const junkIds = res.events.RewardedJunk.length ?
-            res.events.RewardedJunk.map((x: { returnValues: { tokenID: any; }; }) => x.returnValues.tokenID) :
-            [res.events.RewardedJunk.returnValues.tokenID];
-          await dispatch('fetchJunks', junkIds);
-        }
-
-        if(res.events.RewardedKeyBox) {
-          const keyboxIds = res.events.RewardedKeyBox.length ?
-            res.events.RewardedKeyBox.map((x: { returnValues: { tokenID: any; }; }) => x.returnValues.tokenID) :
-            [res.events.RewardedKeyBox.returnValues.tokenID];
-          await dispatch('fetchKeyLootboxes', keyboxIds);
-        }
-
-        // there may be other events fired that can be used to obtain the exact loot
-        // RewardedWeapon, RewardedJunk, RewardedTrinket, RewardedKeyBox etc
-        const rewards = {
-          rewardsClaimed: res.events.RewardClaimed?.returnValues,
-          weapons: res.events.RewardedWeapon && (res.events.RewardedWeapon.length ?
-            res.events.RewardedWeapon.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedWeapon.returnValues]),
-
-          junks: res.events.RewardedJunk && (res.events.RewardedJunk.length ?
-            res.events.RewardedJunk.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedJunk.returnValues]),
-
-          keyboxes: res.events.RewardedKeyBox && (res.events.RewardedKeyBox.length ?
-            res.events.RewardedKeyBox.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedKeyBox.returnValues]),
-
-          bonusXp: res.events.RewardedXpBonus && (res.events.RewardedXpBonus.length ?
-            res.events.RewardedXpBonus.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedXpBonus.returnValues]),
-
-          dustLb: res.events.RewardedDustLB && (res.events.RewardedDustLB.length ?
-            res.events.RewardedDustLB.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedDustLB.returnValues]),
-
-          dust4b: res.events.RewardedDust4B && (res.events.RewardedDust4B.length ?
-            res.events.RewardedDust4B.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedDust4B.returnValues]),
-
-          dust5b: res.events.RewardedDust5B && (res.events.RewardedDust5B.length ?
-            res.events.RewardedDust5B.map((x: { returnValues: any; })=> x.returnValues) :
-            [res.events.RewardedDust5B.returnValues]),
-        };
-        return rewards;
-      },
-
       async fetchIsLandSaleAllowed({state}) {
         const CBKLandSale = state.contracts().CBKLandSale!;
 
@@ -2676,7 +2113,7 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
         if(currency === 0) {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOnly(
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
@@ -2711,7 +2148,7 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
         if(currency === 0) {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOnly(
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
@@ -2745,7 +2182,7 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
 
         if(currency === 0) {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOnly(
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
@@ -2997,7 +2434,6 @@ export function createStore(web3: Web3) {
       async fetchFightGasOffset({ state, commit }) {
         const { CryptoBlades } = state.contracts();
         if(!CryptoBlades) return;
-
         const fightGasOffset = await getFeeInSkillFromUsd(
           CryptoBlades,
           defaultCallOptions(state),
@@ -3100,14 +2536,16 @@ export function createStore(web3: Web3) {
         const { CryptoBlades, SkillToken, Blacksmith } = state.contracts();
         if(!CryptoBlades || !Blacksmith || !state.defaultAccount) return;
 
-        await approveFeeFromAnyContractSimple(
+        await approveFeeWalletOrRewards(
+          CryptoBlades,
           CryptoBlades,
           SkillToken,
           state.defaultAccount,
           getGasPrice(),
           defaultCallOptions(state),
           defaultCallOptions(state),
-          new BigNumber(web3.utils.toWei('100', 'ether'))
+          new BigNumber(web3.utils.toWei('100', 'ether')),
+          state.skillRewards
         );
 
         await Blacksmith.methods.purchaseShield().send({
@@ -3500,14 +2938,16 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOrRewards(
+            CryptoBlades,
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(Web3.utils.toWei('' + price))
+            new BigNumber(Web3.utils.toWei('' + price)),
+            state.skillRewards
           );
         } catch(err) {
           console.error(err);
@@ -3530,14 +2970,16 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOrRewards(
+            CryptoBlades,
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(Web3.utils.toWei('' + price))
+            new BigNumber(Web3.utils.toWei('' + price)),
+            state.skillRewards
           );
         } catch(err) {
           console.error(err);
@@ -3581,14 +3023,16 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOrRewards(
+            CryptoBlades,
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(Web3.utils.toWei('' + price))
+            new BigNumber(Web3.utils.toWei('' + price)),
+            state.skillRewards
           );
         } catch(err) {
           console.error(err);
@@ -3611,14 +3055,16 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOrRewards(
+            CryptoBlades,
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(Web3.utils.toWei('' + price))
+            new BigNumber(Web3.utils.toWei('' + price)),
+            state.skillRewards
           );
         } catch(err) {
           console.error(err);
@@ -3663,14 +3109,16 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterFireTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOrRewards(
+            CryptoBlades,
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(Web3.utils.toWei('' + price))
+            new BigNumber(Web3.utils.toWei('' + price)),
+            state.skillRewards
           );
         } catch(err) {
           console.error(err);
@@ -3715,14 +3163,16 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterEarthTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOrRewards(
+            CryptoBlades,
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(Web3.utils.toWei('' + price))
+            new BigNumber(Web3.utils.toWei('' + price)),
+            state.skillRewards
           );
         } catch(err) {
           console.error(err);
@@ -3767,14 +3217,16 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterWaterTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOrRewards(
+            CryptoBlades,
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(Web3.utils.toWei('' + price))
+            new BigNumber(Web3.utils.toWei('' + price)),
+            state.skillRewards
           );
         } catch(err) {
           console.error(err);
@@ -3819,14 +3271,16 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterLightningTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOrRewards(
+            CryptoBlades,
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(Web3.utils.toWei('' + price))
+            new BigNumber(Web3.utils.toWei('' + price)),
+            state.skillRewards
           );
         } catch(err) {
           console.error(err);
@@ -3870,14 +3324,16 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !WeaponCosmetics || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOrRewards(
+            CryptoBlades,
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(web3.utils.toWei('' + price, 'ether'))
+            new BigNumber(web3.utils.toWei('' + price, 'ether')),
+            state.skillRewards
           );
         } catch(err) {
           console.error(err);
@@ -3936,14 +3392,16 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !CharacterCosmetics || !Blacksmith || !state.defaultAccount) return;
 
         try {
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOrRewards(
+            CryptoBlades,
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(web3.utils.toWei('' + price, 'ether'))
+            new BigNumber(web3.utils.toWei('' + price, 'ether')),
+            state.skillRewards
           );
         } catch(err) {
           console.error(err);
@@ -4237,7 +3695,6 @@ export function createStore(web3: Web3) {
 
         window.location.reload();
       },
-
       async fetchItemPrices({state, commit}){
         const { Blacksmith } = state.contracts();
         if (!Blacksmith) return;
@@ -4410,20 +3867,21 @@ export function createStore(web3: Web3) {
 
         return characterPower;
       },
-
       async burnCharactersIntoCharacter({ state, dispatch }, {burnIds, targetId}) {
         const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
         if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
 
         const burnCost = await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
-        await approveFeeFromAnyContractSimple(
+        await approveFeeWalletOrRewards(
+          CryptoBlades,
           CryptoBlades,
           SkillToken,
           state.defaultAccount,
           getGasPrice(),
           defaultCallOptions(state),
           defaultCallOptions(state),
-          new BigNumber(burnCost)
+          new BigNumber(burnCost),
+          state.skillRewards
         );
 
         await BurningManager.methods.burnCharactersIntoCharacter(burnIds, targetId).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
@@ -4438,14 +3896,16 @@ export function createStore(web3: Web3) {
         if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
 
         const burnCost = await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
-        await approveFeeFromAnyContractSimple(
+        await approveFeeWalletOrRewards(
+          CryptoBlades,
           CryptoBlades,
           SkillToken,
           state.defaultAccount,
           getGasPrice(),
           defaultCallOptions(state),
           defaultCallOptions(state),
-          new BigNumber(burnCost)
+          new BigNumber(burnCost),
+          state.skillRewards
         );
 
         await BurningManager.methods.burnCharactersIntoSoul(burnIds).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
@@ -4692,14 +4152,16 @@ export function createStore(web3: Web3) {
 
         if(orderWithSkill) {
           const price = await SpecialWeaponsManager.methods.getSkillForgeCost(orderOption).call(defaultCallOptions(state));
-          await approveFeeFromAnyContractSimple(
+          await approveFeeWalletOrRewards(
+            CryptoBlades,
             CryptoBlades,
             SkillToken,
             state.defaultAccount,
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(price)
+            new BigNumber(price),
+            state.skillRewards
           );
           await SpecialWeaponsManager.methods.orderSpecialWeaponWithSkill(eventId, orderOption).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
         }
