@@ -296,7 +296,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function fight(uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external
-        restricted returns (uint256, bool) {
+        restricted returns (uint256, uint256) {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
@@ -333,7 +333,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 traitsCWE, // could fit into uint8 since each trait is only stored on 2 bits (TODO)
         uint24 targetPower,
         uint8 fightMultiplier
-    ) private returns (uint256, bool) {
+    ) private returns (uint256 tokens, uint256 expectedTokens) {
         uint256 seed = uint256(keccak256(abi.encodePacked(now, tx.origin)));
         uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
@@ -341,31 +341,29 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         updateHourlyPayouts(); // maybe only check in trackIncome? (or do via bot)
 
         uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
-        uint256 tokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
+        tokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
+        expectedTokens = tokens;
 
         if(tokenRewards[tx.origin] == 0 && tokens > 0) {
             _rewardsClaimTaxTimerStart[tx.origin] = block.timestamp;
         }
 
-        if (playerRoll >= monsterRoll) {
-            // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
-            tokenRewards[tx.origin] += tokens;
-            vars[VAR_UNCLAIMED_SKILL] += tokens;
-            vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
-            xpRewards[char] += xp;
+        if (playerRoll < monsterRoll) {
+            tokens = 0;
+            xp = 0;
         }
+
+        // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
+        tokenRewards[tx.origin] += tokens;
+        vars[VAR_UNCLAIMED_SKILL] += tokens;
+        vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
+        xpRewards[char] += xp;
+        
 
         vars[VAR_HOURLY_FIGHTS] += fightMultiplier;
         vars[VAR_HOURLY_POWER_SUM] += playerFightPower * fightMultiplier;
 
-        // doing this instead of converting tokens to 0 and adding another variable due to stack limit
-        if (playerRoll >= monsterRoll) {
-            emit FightOutcome(tx.origin, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
-        } else {
-            emit FightOutcome(tx.origin, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, 0, 0);
-        }
-
-        return (tokens, playerRoll < monsterRoll);
+        emit FightOutcome(tx.origin, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
