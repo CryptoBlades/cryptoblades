@@ -4,11 +4,12 @@ import {
 } from '@/interfaces';
 import {Dispatch} from 'vuex';
 import {NftTransfer, TransferedNft} from '@/interfaces/Nft';
-import {approveFeeFromAnyContractSimple} from '@/contract-call-utils';
+import {approveFeeWalletOnly} from '@/contract-call-utils';
 import BigNumber from 'bignumber.js';
 
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
 import {IERC721} from '@/../../build/abi-interfaces';
+import { getGasPrice } from '../store';
 
 const bridge = {
   actions: {
@@ -31,6 +32,7 @@ const bridge = {
         .storeItem(nftContractAddr, tokenId)
         .send({
           from: rootState.defaultAccount,
+          gasPrice: getGasPrice(),
         });
 
       if(nftContractAddr === Weapons.options.address)
@@ -71,6 +73,7 @@ const bridge = {
         .withdrawFromStorage(nftContractAddr, tokenId)
         .send({
           from: rootState.defaultAccount,
+          gasPrice: getGasPrice(),
         });
 
       if(nftContractAddr === Weapons.options.address)
@@ -85,10 +88,11 @@ const bridge = {
     { nftContractAddr: string, tokenId: number, targetChain: string, bridgeFee: string }) {
       const { NFTStorage, CryptoBlades, SkillToken } = rootState.contracts();
       if (!NFTStorage || !CryptoBlades || !SkillToken || !rootState.defaultAccount) return;
-      await approveFeeFromAnyContractSimple(
+      await approveFeeWalletOnly(
         CryptoBlades,
         SkillToken,
         rootState.defaultAccount,
+        getGasPrice(),
         defaultCallOptions(rootState),
         defaultCallOptions(rootState),
         new BigNumber(bridgeFee)
@@ -97,6 +101,7 @@ const bridge = {
         .bridgeItem(nftContractAddr, tokenId, targetChain)
         .send({
           from: rootState.defaultAccount,
+          gasPrice: getGasPrice(),
         });
       dispatch('fetchSkillBalance');
     },
@@ -139,6 +144,7 @@ const bridge = {
         .withdrawFromBridge(tokenId)
         .send({
           from: rootState.defaultAccount,
+          gasPrice: getGasPrice(),
         });
     },
     async cancelBridge({ rootState }: {rootState: IState, dispatch: Dispatch}) {

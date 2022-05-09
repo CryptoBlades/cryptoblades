@@ -18,7 +18,6 @@ import App from './App.vue';
 
 import {
   raid as featureFlagRaid,
-  stakeOnly as featureFlagStakeOnly,
   reforging as featureFlagReforging
 } from './feature-flags';
 import { getConfigValue } from './contracts';
@@ -54,7 +53,7 @@ new Vue({
   provide: {
     web3,
     // maybe feature flags should just reference the feature-flags.ts module directly?
-    featureFlagStakeOnly, featureFlagRaid, featureFlagReforging,
+    featureFlagRaid, featureFlagReforging,
     expectedNetworkId, expectedNetworkName
   }
 }).$mount('#app');

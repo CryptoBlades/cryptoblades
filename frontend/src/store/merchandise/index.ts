@@ -1,11 +1,12 @@
 import {
   IState,
 } from '@/interfaces';
-import {approveFeeFromAnyContractSimple} from '@/contract-call-utils';
+import {approveFeeWalletOnly} from '@/contract-call-utils';
 import {abi as priceOracleAbi} from '@/../../build/contracts/IPriceOracle.json';
 import {CartEntry} from '@/components/smart/VariantChoiceModal.vue';
 import BigNumber from 'bignumber.js';
 import {Dispatch} from 'vuex';
+import { getGasPrice } from '../store';
 
 
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
@@ -61,10 +62,11 @@ const merchandise = {
         .getSkillNeededFromUserWallet(rootState.defaultAccount, payingAmount, true)
         .call(defaultCallOptions(rootState));
 
-      await approveFeeFromAnyContractSimple(
+      await approveFeeWalletOnly(
         CryptoBlades,
         SkillToken,
         rootState.defaultAccount,
+        getGasPrice(),
         defaultCallOptions(rootState),
         defaultCallOptions(rootState),
         new BigNumber(skillNeeded)
@@ -73,7 +75,8 @@ const merchandise = {
       await Merchandise.methods
         .createOrder(orderNumber, payingAmount)
         .send({
-          from: rootState.defaultAccount
+          from: rootState.defaultAccount,
+          gasPrice: getGasPrice(),
         });
 
       dispatch('fetchSkillBalance');

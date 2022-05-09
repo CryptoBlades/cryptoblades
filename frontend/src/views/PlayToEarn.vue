@@ -1,16 +1,16 @@
 <template>
-  <div class="body main-font">
+  <div class="body main-font" style="inline-flex">
     <div class="blind-background"></div>
     <div>
-      <div class="row">
+      <div>
           <div class="col-lg-6 col-sm-12 adventure">
             <h5>{{$t('PlayToEarn.playToEarn')}}</h5>
           </div>
       </div>
       <img src="../assets/divider7.png" class="info-divider enemy-divider" />
-      <div class="row">
+      <div>
           <div class="col-lg-12 play-to-earn">
-            <router-link v-if="!stakeOnly" :to="{ name: 'combat' }" exact class="adventures navs">
+            <router-link :to="{ name: 'combat' }" exact class="adventures navs">
                 <div>
                   <h4>{{$t('PlayToEarn.adventure')}}</h4>
                   <p>{{$t('PlayToEarn.adventureDesc')}}</p>
@@ -19,7 +19,7 @@
                 <card-frame v-if="!isMobile()"/>
             </router-link>
 
-            <router-link v-if="!stakeOnly" :to="{ name: 'raid' }" exact class="raid navs">
+            <router-link :to="{ name: 'raid' }" exact class="raid navs">
                 <div>
                   <h4>{{$t('PlayToEarn.raid')}}</h4>
                   <p>{{$t('PlayToEarn.raidDesc')}}</p>
@@ -28,7 +28,7 @@
                 <card-frame v-if="!isMobile()"/>
             </router-link>
 
-            <router-link v-if="!stakeOnly" :to="{ name: 'pvp' }" exact class="arena navs">
+            <router-link :to="{ name: 'pvp' }" exact class="arena navs">
                 <div>
                   <h4>{{$t('PlayToEarn.arena')}}</h4>
                   <p>{{$t('PlayToEarn.arenaDesc')}}</p>
@@ -44,13 +44,11 @@
 
 <script>
 
-import {stakeOnly} from '@/feature-flags';
 import Events from '../events';
 import CardFrame from '../components/CardFrame.vue';
 export default {
   data() {
     return {
-      stakeOnly,
       isToggled: false
     };
   },
@@ -107,9 +105,8 @@ h5{
   background-color: rgb(0, 0, 0);
   opacity: 0.7;
   height: 100%;
-  width: 99%;
+  width: 100%;
   position: absolute;
-  padding: 30px;
 }
 
 

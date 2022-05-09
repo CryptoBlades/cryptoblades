@@ -4034,6 +4034,12 @@
     "address": "0x27a3EB90CE340f50FE4a478F454946EfB6453b47",
     "transactionHash": "0xf10f23562c903e24130d41d9266e6c5798568862c6291d5d92388dcdce638140"
   },
+  "build/contracts/Launchpad.json": {
+    "events": {},
+    "links": {},
+    "address": "0x866388a88cDA8a2fA68C0ac410373639e4286088",
+    "transactionHash": "0xbead651d60b871f61bd2aeff0f7e1035aedb6f6a99a041caf9da3abcdd213a9a"
+  },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
     "links": {},
