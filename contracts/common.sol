@@ -82,4 +82,12 @@ library Common {
                 .mul(level.div(10).add(1))
         );
     }
+
+    function adjustDecimals(uint256 amount, uint256 decimals) internal pure returns (uint256 adjustedAmount){
+        if(decimals > 18) {
+            adjustedAmount = amount.mul(10**uint(decimals - 18));
+        } else {
+            adjustedAmount = amount.div(10**uint(18 - decimals));
+        }
+    }
 }
