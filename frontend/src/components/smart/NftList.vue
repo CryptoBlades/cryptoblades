@@ -428,8 +428,11 @@ interface StoreMappedActions {
   getPlayerReservedLand(): Promise<{t2Reservations: number[], t3Reservations: number[]}>;
   getChunksOfReservation(payload: {reservationId: number}): Promise<number[]>;
   claimPlayerReservedLand(payload: {reservationId: number, chunkId: number, tier: number}): Promise<void>;
-  getOwnedLands(): Promise<{ 0: string, 1: string, 2: string, 3: string, 4: string }[]>;
   getTakenT3Chunks(): Promise<number[]>;
+}
+
+interface StoreMappedLandActions{
+  fetchOwnedLands(): Promise<{ 0: string, 1: string, 2: string, 3: string, 4: string }[]>;
 }
 
 export default Vue.extend({
@@ -735,8 +738,9 @@ export default Vue.extend({
       'purchaseWeaponCosmetic', 'purchaseCharacterCosmetic', 'getAllZonesPopulation', 'checkIfChunkAvailable',
       'getZoneChunkPopulation', 'getChunkPopulation', 'purchaseT1CBKLand', 'purchaseT2CBKLand', 'purchaseT3CBKLand', 'getCBKLandPrice',
       'getPurchase', 'getReservedChunksIds', 'getAvailableLand', 'fetchIsLandSaleAllowed', 'getPlayerReservedLand',
-      'getChunksOfReservation', 'claimPlayerReservedLand', 'getOwnedLands', 'getTakenT3Chunks',
+      'getChunksOfReservation', 'claimPlayerReservedLand', 'getTakenT3Chunks',
     ]) as StoreMappedActions),
+    ...(mapActions('land', ['fetchOwnedLands']) as StoreMappedLandActions),
     ...mapMutations(['setCurrentNft']),
 
     async onShieldBuy() {
@@ -981,7 +985,7 @@ export default Vue.extend({
       (this.$refs['t2-claim-map-modal'] as BModal).hide();
       (this.$refs['t3-claim-zone-modal'] as BModal).hide();
       (this.$refs['t3-claim-map-modal'] as BModal).hide();
-      await this.fetchOwnedLands();
+      await this.getOwnedLands();
       await this.checkIfCanPurchaseLand();
     },
 
@@ -1022,8 +1026,8 @@ export default Vue.extend({
       return {id, tier, chunks, zones,} as Reservation;
     },
 
-    async fetchOwnedLands() {
-      const results = await this.getOwnedLands();
+    async getOwnedLands() {
+      const results = await this.fetchOwnedLands();
       if(results){
         this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1], reseller: result[4]}));
       }
@@ -1138,8 +1142,8 @@ export default Vue.extend({
     await this.checkIfCanPurchaseLand();
     this.checkIfCanPurchaseLandInterval = setInterval(await this.checkIfCanPurchaseLand,3000);
 
-    await this.fetchOwnedLands();
-    this.checkOwnedLandsInterval = setInterval(await this.fetchOwnedLands, 3000);
+    await this.getOwnedLands();
+    this.checkOwnedLandsInterval = setInterval(await this.getOwnedLands, 3000);
 
     this.reservedChunks = await this.getReservedChunksIds();
     const {t1Land, t2Land, t3Land} = await this.getAvailableLand();

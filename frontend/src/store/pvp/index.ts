@@ -1,6 +1,6 @@
 import {IState} from '@/interfaces';
 import {Dispatch, Commit} from 'vuex';
-import {approveFeeFromAnyContractSimple} from '@/contract-call-utils';
+import {approveFeeWalletOnly} from '@/contract-call-utils';
 import BigNumber from 'bignumber.js';
 import { getGasPrice } from '../store';
 
@@ -330,7 +330,7 @@ const pvp = {
       const { PvpCore, SkillToken } = rootState.contracts();
       if (!PvpCore || !SkillToken || !rootState.defaultAccount) return;
 
-      return await approveFeeFromAnyContractSimple(
+      return await approveFeeWalletOnly(
         PvpCore,
         SkillToken,
         rootState.defaultAccount,

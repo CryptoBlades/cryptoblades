@@ -8,7 +8,7 @@
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content dark-bg-text">
       <b-row>
-        <character-bar :isToggled="toggleSideBar" v-if="!featureFlagStakeOnly && currentCharacterId !== null"/>
+        <character-bar :isToggled="toggleSideBar" v-if="currentCharacterId !== null"/>
         <b-col style="padding-left: 0;" :class="renderPageDisplay()">
           <router-view v-if="canShowApp" />
         </b-col>
@@ -36,7 +36,7 @@
     </div>
     <div
       class="fullscreen-warning"
-      v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0' && !hasStakedBalance))"
+      v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0'))"
     >
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
@@ -113,7 +113,7 @@ Vue.directive('visible', (el, bind) => {
 });
 
 export default {
-  inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
+  inject: ['web3', 'expectedNetworkId', 'expectedNetworkName'],
   components: {
     NavBar,
     CharacterBar,
@@ -139,8 +139,7 @@ export default {
 
   computed: {
     ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
-    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl',
-      'availableStakeTypes', 'availableNftStakeTypes', 'hasStakedBalance']),
+    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl']),
 
     canShowApp() {
       return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
@@ -189,7 +188,6 @@ export default {
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
       'setupWeaponDurabilities',
-      'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
       'configureMetaMask',
@@ -224,8 +222,6 @@ export default {
       this.updateCurrentChainSupportsQuests();
     },
     async updateCharacterStamina(id) {
-      if (this.featureFlagStakeOnly) return;
-
       if (id !== null) {
         await this.fetchCharacterStamina(id);
       }
@@ -290,7 +286,7 @@ export default {
       if (
         this.hideWalletWarning &&
         !this.showMetamaskWarning &&
-        (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0' && !this.hasStakedBalance))
+        (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0'))
       ) {
         this.$dialog.notify.warning(i18n.t('app.warning.message.hideWalletWarning'),
           {
@@ -303,7 +299,7 @@ export default {
     renderPageDisplay(){
       let toDisplay;
 
-      if(!this.featureFlagStakeOnly && this.currentCharacterId !== null){
+      if(this.currentCharacterId !== null){
         if(this.toggleSideBar){
           toDisplay = 'can-show-app';
         }else{
@@ -315,7 +311,6 @@ export default {
 
       return toDisplay;
     },
-
 
     async checkNotifications() {
       const response = await fetch(apiUrl('static/notifications'));
@@ -419,14 +414,6 @@ export default {
       });
     }, 3000);
 
-    this.availableStakeTypes.forEach((item) => {
-      this.fetchStakeDetails({ stakeType: item });
-    });
-
-    this.availableNftStakeTypes.forEach((item) => {
-      this.fetchStakeDetails({ stakeType: item });
-    });
-
     this.slowPollIntervalId = setInterval(async () => {
       await Promise.all([
         this.setupWeaponDurabilities(),
@@ -495,6 +482,7 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   margin-left: auto;
   margin-right: auto;
   transition: 1s all;
+  padding: 0px;
 }
 
 
@@ -553,6 +541,8 @@ button,
 
 .error {
   color: red;
+  overflow: hidden;
+  max-width: 75vw;
 }
 
 .fire,
@@ -685,6 +675,7 @@ button.close {
   background: rgb(31, 31, 34);
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
+
 
 .btn-outline-primary {
   color: #9e8a57 !important;
@@ -882,8 +873,20 @@ div.bg-success {
 }
 
 
+#blacksmith-bg{
+  background: rgba(20, 20, 20, 1);
+  background-image: url("./assets/blacksmith/blacksmith-bg.png");
+  background-image: url("./assets/blacksmith/blacksmith-bg.png"), linear-gradient(rgba(0, 68, 111, 0) 0%,
+  rgba(20, 20, 20, 0.4) 30%,rgba(20, 20, 20, 1) 100%); /* W3C */
+  /* background: radial-gradient(closest-side at 50% 50%, rgba(0, 68, 111, 0) 10%,
+  rgba(20, 20, 20, 0.4) 50%,rgba(20, 20, 20, 1) 100%), url('./assets/blacksmith/blacksmith-bg.png'); */
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .can-show-app{
   width: 100%;
+  padding: 0px;
 }
 
 
