@@ -16,6 +16,7 @@ import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
 import PlayToEarn from './views/PlayToEarn.vue';
+import Dashboard from './views/Dashboard.vue';
 
 import {merchandise, portal, pvp, quests, raid, stakeOnly} from './feature-flags';
 import Merchandise from '@/components/smart/Merchandise.vue';
@@ -34,7 +35,8 @@ export default function createRouter() {
 
   const router = new VueRouter({
     routes: [
-      {path: '/', name: 'plaza', component: Plaza},
+      {path: '/', name: 'dashboard', component: Dashboard},
+      {path: '/plaza', name: 'plaza', component: Plaza},
       {path: '/blacksmith', name: 'blacksmith', component: Blacksmith},
       {path: '/combat', name: 'combat', component: Combat},
       {path: '/leaderboard', name: 'leaderboard', component: Leaderboard},
