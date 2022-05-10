@@ -3,34 +3,24 @@ import VueRouter from 'vue-router';
 import Plaza from './views/Plaza.vue';
 import Blacksmith from './views/Blacksmith.vue';
 import Combat from './views/Combat.vue';
-import Stake from './views/Stake.vue';
 import SelectStakeType from './views/SelectStakeType.vue';
 import Raid from './views/Raid.vue';
-import Market from './views/Market.vue';
 import Leaderboard from './views/Leaderboard.vue';
 import Portal from './views/Portal.vue';
 import Options from './views/Options.vue';
 import PvP from './views/PvP.vue';
 import Quests from './views/Quests.vue';
-import Admin from '@/views/Admin.vue';
+import Admin from './views/Admin.vue';
 import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
+import PlayToEarn from './views/PlayToEarn.vue';
 
-import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from './feature-flags';
+import {merchandise, portal, pvp, quests, raid} from './feature-flags';
 import Merchandise from '@/components/smart/Merchandise.vue';
 import {currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 export default function createRouter() {
-  if (stakeOnly) {
-    return new VueRouter({
-      routes: [
-        {path: '/', redirect: 'stake'},
-        {path: '/stake', name: 'select-stake-type', component: SelectStakeType},
-        {path: '/stake/:stakeType', name: 'stake', component: Stake, props: true},
-      ]
-    });
-  }
 
   const router = new VueRouter({
     routes: [
@@ -39,19 +29,15 @@ export default function createRouter() {
       {path: '/combat', name: 'combat', component: Combat},
       {path: '/leaderboard', name: 'leaderboard', component: Leaderboard},
       {path: '/stake', name: 'select-stake-type', component: SelectStakeType},
-      {path: '/stake/:stakeType', name: 'stake', component: Stake, props: true},
       {path: '/options', name: 'options', component: Options},
       {path: '/nft-display', name: 'nft-display', component: NftDisplay},
       {path: '/nft-display/:nftTypeProp/:nftIdProp', component: NftDisplay, props: true},
       {path: '/bridge', name: 'bridge', component: Bridge},
       {path: '/treasury', name: 'treasury', component: Treasury},
       {path: '/admin', name: 'admin', component: Admin},
+      {path: '/play-to-earn', name: 'play-to-earn', component: PlayToEarn},
     ]
   });
-
-  if (market) {
-    router.addRoute({path: '/market', name: 'market', component: Market});
-  }
 
   if (raid) {
     router.addRoute({path: '/raid', name: 'raid', component: Raid});

@@ -1,104 +1,83 @@
 <template>
   <b-navbar-nav>
+    <li class="character top-nav-links">
+      <router-link :to="{ name: 'play-to-earn' }" exact class="nav-link">
+        <div class="link-text play-to-earn-btn">{{ $t("PlayToEarn.playToEarn") }}</div>
+      </router-link>
+    </li>
+    <li class="character top-nav-links">
+      <router-link :to="{ name: 'plaza' }" exact class="nav-link">
+        <div class="icon"><img src="../assets/navbar-icons/plaza-icon.png" class="ui-link-icon" alt="Plaza"></div>
+        <div class="link-text">{{ $t("viewLink.character") }}</div>
+      </router-link>
+    </li>
 
-    <router-link v-if="!stakeOnly" :to="{ name: 'plaza' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.plaza") }}</span>
-      </li>
-    </router-link>
+    <li class="top-nav-links">
+      <router-link :to="{ name: 'blacksmith', query: {tab: 'weapon'} }" exact class="nav-link">
+        <div class="icon"><img src="../assets/navbar-icons/blacksmith-icon.png" class="ui-link-icon" alt="Blacksmith">
+        </div>
+        <div class="link-text">{{ $t("viewLink.blacksmith") }}</div>
+      </router-link>
+    </li>
 
-    <router-link v-if="!stakeOnly" :to="{ name: 'blacksmith' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.blacksmith") }}</span>
-      </li>
-    </router-link>
+    <li v-if="quests" class="top-nav-links">
+      <router-link :to="{ name: 'quests'}" exact class="nav-link" :class="supportsQuests ? '' : 'disabled-link'">
+        <div class="icon"><img src="../assets/navbar-icons/quests-icon.png" class="ui-link-icon" alt="Quests"></div>
+        <div class="link-text">{{ $t("viewLink.quests") }}
+          <hint
+            v-if="!supportsQuests" class="hint"
+            :text="$t('viewLink.functionalityNotSupportedTooltip')"/>
+        </div>
+      </router-link>
+    </li>
 
-    <router-link v-if="!stakeOnly" :to="{ name: 'combat' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.combat") }}</span>
-      </li>
-    </router-link>
+    <li class="top-nav-links">
+      <a :href="BazaarLink()" class="nav-link" target="_blank">
+        <div class="icon"><img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar"></div>
+        <div class="link-text">{{ $t("viewLink.bazaar") }}
+          <b-icon-box-arrow-up-right scale="0.7"/>
+        </div>
+      </a>
+    </li>
 
-    <router-link v-if="!stakeOnly && raid" :to="{ name: 'raid' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.raid") }}</span>
-      </li>
-    </router-link>
-
-    <a v-if="!stakeOnly && market" href="https://bazaar.market/" class="nav-link" target="_blank">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.bazaar") }} <b-icon-box-arrow-up-right scale="0.7"/></span>
-      </li>
-    </a>
-
-    <router-link :to="{ name: 'select-stake-type' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.stake") }}</span>
-      </li>
-    </router-link>
-
-    <router-link v-if="pvp" :to="{ name: 'pvp' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" :class="supportsPvP ? '' : 'disabled'">{{ $t("viewLink.pvp") }} <hint
-          v-if="!supportsPvP" class="hint"
-          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
-      </li>
-    </router-link>
-
-    <router-link v-if="quests" :to="{ name: 'quests' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" :class="supportsQuests ? '' : 'disabled'">{{ $t("viewLink.quests") }} <hint
-          v-if="!supportsQuests" class="hint"
-          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
-      </li>
-    </router-link>
-
-    <router-link :to="{ name: 'treasury' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.treasury") }}</span>
-      </li>
-    </router-link>
-
-    <router-link v-if="merchandise" :to="{ name: 'merchandise' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others" :class="supportsMerchandise ? '' : 'disabled'">{{ $t("viewLink.merchandise") }} <hint
-          v-if="!supportsMerchandise" class="hint"
-          :text="$t('viewLink.functionalityNotSupportedTooltip')"/></span>
-      </li>
-    </router-link>
-
-    <router-link v-if="hasAdminAccess" :to="{ name: 'admin' }" exact class="nav-link">
-      <li class="nav-item nav-top-links">
-        <span class="gtag-link-others">{{ $t("viewLink.admin") }}</span>
-      </li>
-    </router-link>
+    <li v-if="hasAdminAccess" class="top-nav-links">
+      <router-link :to="{ name: 'admin' }" exact class="nav-link">
+        <div class="icon"><img src="../assets/navbar-icons/gear-icon.png" class="ui-link-icon" alt="Admin"></div>
+        <div class="link-text">{{ $t("viewLink.admin") }}</div>
+      </router-link>
+    </li>
 
   </b-navbar-nav>
 </template>
 
 <script>
-import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
-import {mapActions, mapGetters, mapState} from 'vuex';
+import {merchandise, portal, pvp, quests, raid} from '@/feature-flags';
+import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
+
 import Hint from '@/components/Hint';
+
 
 export default Vue.extend({
   data() {
     return {
-      stakeOnly,
       raid,
-      market,
       portal,
       pvp,
       quests,
       merchandise,
-      hasAdminAccess: false,
     };
   },
 
   computed: {
     ...mapState(['defaultAccount']),
-    ...mapGetters(['getCurrentChainSupportsMerchandise', 'getCurrentChainSupportsPvP', 'getCurrentChainSupportsQuests']),
+    ...mapGetters([
+      'getCurrentChainSupportsMerchandise',
+      'getCurrentChainSupportsPvP',
+      'getCurrentChainSupportsQuests',
+      'getHasAdminAccess',
+      'getHasMinterAccess',
+    ]),
     supportsMerchandise() {
       return this.getCurrentChainSupportsMerchandise;
     },
@@ -108,33 +87,30 @@ export default Vue.extend({
     supportsQuests() {
       return this.getCurrentChainSupportsQuests;
     },
-  },
-
-  methods: {
-    ...mapActions(['userHasAnyAdminAccess', 'userHasAnyMinterAccess']),
-
-    async fetchData() {
-      this.hasAdminAccess = await this.userHasAnyAdminAccess() || await this.userHasAnyMinterAccess();
+    hasAdminAccess() {
+      return this.getHasAdminAccess || this.getHasMinterAccess;
     },
   },
-
   components: {
     Hint,
   },
-
-  watch: {
-    async defaultAccount(newVal) {
-      if (newVal) {
-        await this.fetchData();
-      }
-    },
+  methods: {
+    BazaarLink() {
+      return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
+    }
   }
 });
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
+
 a {
   font-weight: bold;
+}
+
+.nav-top-links {
+  list-style-type: none;
 }
 
 .nav-top-links > span {
@@ -143,8 +119,92 @@ a {
   padding: 0 5px 0 5px;
 }
 
-.disabled {
-  cursor: not-allowed;
-  color: gray !important;
+.ui-link-icon {
+  height: 1.5rem;
 }
+
+.link-text {
+  font-weight: bolder;
+  white-space: nowrap;
+  font-family: 'Oswald', 'serif';
+  font-size: clamp(0.8rem, 1vw, 1rem);
+  color: #ffffff;
+}
+
+.play-to-earn-btn{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin-right: 15px;
+  align-items: center;
+  vertical-align: middle;
+  justify-content: center;
+  background-image: url('../assets/btn-long.svg');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  object-fit: fill;
+  padding: 10px 40px 10px 40px;
+  border: none;
+  font-family: Oswald;
+  color: #fff;
+  font-size: 17px;
+  margin: auto;
+  margin-right: -10px;
+}
+.disabled-link > div {
+  cursor: not-allowed;
+  color: gray;
+}
+
+.navbar-nav {
+  display: flex;
+}
+
+li {
+  display: inline-block;
+  flex: 1;
+}
+
+li:last-child {
+  padding-right: 0;
+}
+
+.top-nav-links .nav-link {
+  padding: 0;
+}
+
+li .nav-link {
+  text-transform: uppercase;
+  font-weight: 500;
+  text-align: center;
+}
+
+li.active a,
+.router-link-exact-active {
+  color: #EDCD90;
+}
+
+li .nav-link .icon {
+  padding-bottom: 0.5rem;
+}
+
+.play-to-earn {
+  display: flex;
+  align-items: center;
+}
+
+.play-to-earn a {
+  border: 1px solid #EDCD90;
+  display: block;
+  padding: 20px;
+}
+
+@media (max-width: 1366px) {
+  .play-to-earn > div {
+    text-align: center;
+    width: 176px;
+  }
+}
+
 </style>

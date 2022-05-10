@@ -66,6 +66,23 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         emit Minted(tokenID, minter);
     }
 
+    function performMintJunkDetailed(address minter,
+        uint256 metaData, uint256 tokenID
+    ) public restricted returns(uint256) {
+
+        uint8 mintStars = uint8(metaData & 0xFF);
+
+        // tokenId 0 => it's a new mint
+        if(tokenID == 0){
+            tokenID = mint(minter, mintStars);
+        } else {
+            // tokenId is not 0 => we are updating an existing mint; update the stars in case they can change
+            tokenStars[tokenID] = mintStars;
+        }
+
+        return tokenID;
+    }
+
     function mintN(address minter, uint8 mintStars, uint32 amount) public restricted returns(uint256[] memory tokenIds) {
         tokenIds = new uint256[](amount);
         for(uint i = 0; i < amount; i++) {
@@ -91,5 +108,9 @@ contract Junk is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
 
     function setNextTokenID(uint to) public restricted {
         nextTokenID = to;
+    }
+
+    function setBaseURI(string memory baseUri) public restricted {
+        _setBaseURI(baseUri);
     }
 }

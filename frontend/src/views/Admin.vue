@@ -7,15 +7,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import {mapActions, mapGetters, mapState} from 'vuex';
+import {mapGetters, mapState} from 'vuex';
 import {Contract} from '@/interfaces';
 import AdminTab from '@/components/smart/AdminTab.vue';
-
-interface StoreMappedActions {
-  userHasAnyAdminAccess(): Promise<boolean>;
-
-  userHasAnyMinterAccess(): Promise<boolean>;
-}
 
 interface Tab {
   title: string;
@@ -24,7 +18,6 @@ interface Tab {
 }
 
 interface Data {
-  hasAccessToAnyTab: boolean;
   tabs: Tab[];
 }
 
@@ -32,23 +25,18 @@ export default Vue.extend({
   components: {AdminTab},
 
   computed: {
-    ...mapGetters(['contracts']),
+    ...mapGetters(['contracts', 'getHasAdminAccess', 'getHasMinterAccess']),
     ...mapState(['defaultAccount']),
+
+    hasAccessToAnyTab(): boolean {
+      return this.getHasAdminAccess || this.getHasMinterAccess;
+    },
   },
 
   data() {
     return {
-      hasAccessToAnyTab: false,
       tabs: [] as Tab[],
     } as Data;
-  },
-
-  methods: {
-    ...mapActions(['userHasAnyAdminAccess', 'userHasAnyMinterAccess']) as StoreMappedActions,
-
-    async fetchData() {
-      this.hasAccessToAnyTab = await this.userHasAnyAdminAccess() || await this.userHasAnyMinterAccess();
-    },
   },
 
   async mounted() {
@@ -77,16 +65,32 @@ export default Vue.extend({
       contract: this.contracts.PartnerVault,
       component: 'PartnerVaultAdmin',
     });
-    await this.fetchData();
+    this.tabs.push({
+      title: 'treasury',
+      contract: this.contracts.Treasury,
+      component: 'TreasuryAdmin',
+    });
+    this.tabs.push({
+      title: 'cryptoblades',
+      contract: this.contracts.CryptoBlades,
+      component: 'CryptoBladesAdmin',
+    });
+    this.tabs.push({
+      title: 'blacksmith',
+      contract: this.contracts.Blacksmith,
+      component: 'BlacksmithAdmin',
+    });
+    this.tabs.push({
+      title: 'raid',
+      contract: this.contracts.Raid1,
+      component: 'RaidAdmin',
+    });
+    this.tabs.push({
+      title: 'specialWeaponsManager',
+      contract: this.contracts.SpecialWeaponsManager,
+      component: 'SpecialWeaponsManagerAdmin',
+    });
   },
-
-  watch: {
-    async defaultAccount(newVal) {
-      if (newVal) {
-        await this.fetchData();
-      }
-    },
-  }
 });
 </script>
 

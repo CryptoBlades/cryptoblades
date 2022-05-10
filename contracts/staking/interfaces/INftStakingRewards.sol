@@ -32,7 +32,11 @@ interface INftStakingRewards {
     // Mutative
     function stake(uint256 id) external;
 
+    function bulkStake(uint256[] calldata ids) external;
+
     function withdraw(uint256 id) external;
+
+    function bulkWithdraw(uint256[] calldata ids) external;
 
     function getReward() external;
 

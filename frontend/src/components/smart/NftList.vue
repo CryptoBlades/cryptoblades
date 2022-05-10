@@ -205,7 +205,7 @@
         <h1 v-if="isLandTab">{{$t('nftList.lands')}} ({{totalNonIgnoredLandsCount}})</h1>
       </div>
       <div class="filters row mt-2" v-if="!isReward && !isBridge">
-        <div v-if="!isMarket && !isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
+        <div v-if="!isLandTab" class="col-sm-6 col-md-4 dropdown-elem">
           <strong>{{$t('nftList.nftType')}}</strong>
           <select class="form-control" v-model="typeFilter" @change="saveFilters()">
             <option v-for="x in typesOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
@@ -223,13 +223,6 @@
           <strong>{{$t('nftList.element')}}</strong>
           <select class="form-control" v-model="elementFilter" @change="saveFilters()">
             <option v-for="x in ['', 'Earth', 'Fire', 'Lightning', 'Water']" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
-          </select>
-        </div>
-
-        <div class="col-sm-6 col-md-4 dropdown-elem" v-if="isMarket">
-          <strong>{{$t('nftList.sort')}}</strong>
-          <select class="form-control" v-model="priceSort" @change="saveFilters()">
-            <option v-for="x in sorts" :value="x.dir" :key="x.dir">{{ x.name || $t('nftList.sorts.any') }}</option>
           </select>
         </div>
 
@@ -281,7 +274,7 @@
           @click="onNftClick(nft.type, nft.id)"
           @contextmenu="canFavorite && toggleFavorite($event, nft.type, nft.id)"
         >
-          <nft-options-dropdown v-if="showNftOptions" :nftType="nft.type" :nftId="nft.id" :options="options" class="nft-options"/>
+          <nft-options-dropdown v-if="showNftOptions" :nftType="nft.type" :nftId="+nft.id" :options="options" showTransfer class="nft-options"/>
           <nft-icon :favorite="isFavorite(nft.type, nft.id)" :nft="nft" :isShop="isShop"/>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
             <slot name="above" :nft="nft"></slot>
@@ -313,7 +306,7 @@ import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
 import { IState } from '@/interfaces';
 import { BModal } from 'bootstrap-vue';
-import {copyNftUrl, fromWeiEther} from '@/utils/common';
+import {fromWeiEther} from '@/utils/common';
 import _ from 'lodash';
 import CurrencyConverter from '@/components/CurrencyConverter.vue';
 import BigNumber from 'bignumber.js';
@@ -435,8 +428,11 @@ interface StoreMappedActions {
   getPlayerReservedLand(): Promise<{t2Reservations: number[], t3Reservations: number[]}>;
   getChunksOfReservation(payload: {reservationId: number}): Promise<number[]>;
   claimPlayerReservedLand(payload: {reservationId: number, chunkId: number, tier: number}): Promise<void>;
-  getOwnedLands(): Promise<{ 0: string, 1: string, 2: string, 3: string, 4: string }[]>;
   getTakenT3Chunks(): Promise<number[]>;
+}
+
+interface StoreMappedLandActions{
+  fetchOwnedLands(): Promise<{ 0: string, 1: string, 2: string, 3: string, 4: string }[]>;
 }
 
 export default Vue.extend({
@@ -466,10 +462,6 @@ export default Vue.extend({
       },
     },
     isShop: {
-      type: Boolean,
-      default: false,
-    },
-    isMarket: {
       type: Boolean,
       default: false,
     },
@@ -530,6 +522,9 @@ export default Vue.extend({
       default() {
         return ['', 'Shield', 'Trinket', 'Junk', 'Keybox', 'Land'];
       },
+    },
+    chosenStarsOption: {
+      type: [String, Number],
     },
   },
 
@@ -607,16 +602,6 @@ export default Vue.extend({
 
     displayNfts(): Nft[] {
       if(!this.nftsToDisplay) return [];
-
-      if(this.isMarket && this.showGivenNftIdTypes) {
-        const type = this.nftIdTypes && this.nftIdTypes[0]?.type;
-        switch(type) {
-        case('shield'):
-          return this.shieldsWithIds(this.nftsToDisplay.map(x => x.id.toString())).filter(Boolean);
-        default:
-          return [];
-        }
-      }
 
       if(this.isReward && this.showGivenNftIdTypes) {
         const rewardedDust = this.nftsToDisplay.filter(x => x.type?.startsWith('dust')).map(x => { return { type: x.type, id: 0, amount: x.amount }; });
@@ -753,8 +738,9 @@ export default Vue.extend({
       'purchaseWeaponCosmetic', 'purchaseCharacterCosmetic', 'getAllZonesPopulation', 'checkIfChunkAvailable',
       'getZoneChunkPopulation', 'getChunkPopulation', 'purchaseT1CBKLand', 'purchaseT2CBKLand', 'purchaseT3CBKLand', 'getCBKLandPrice',
       'getPurchase', 'getReservedChunksIds', 'getAvailableLand', 'fetchIsLandSaleAllowed', 'getPlayerReservedLand',
-      'getChunksOfReservation', 'claimPlayerReservedLand', 'getOwnedLands', 'getTakenT3Chunks',
+      'getChunksOfReservation', 'claimPlayerReservedLand', 'getTakenT3Chunks',
     ]) as StoreMappedActions),
+    ...(mapActions('land', ['fetchOwnedLands']) as StoreMappedLandActions),
     ...mapMutations(['setCurrentNft']),
 
     async onShieldBuy() {
@@ -762,30 +748,16 @@ export default Vue.extend({
     },
 
     saveFilters() {
-      if(this.isMarket) {
-        sessionStorage.setItem('market-nft-typefilter', this.typeFilter);
-        sessionStorage.setItem('market-nft-starfilter', this.starFilter.toString());
-        sessionStorage.setItem('market-nft-elementfilter', this.elementFilter);
-        sessionStorage.setItem('market-nft-price-order', this.priceSort);
-      } else {
-        sessionStorage.setItem('nft-typefilter', this.typeFilter);
-        sessionStorage.setItem('nft-starfilter', this.starFilter.toString());
-        sessionStorage.setItem('nft-elementfilter', this.elementFilter);
-      }
+      sessionStorage.setItem('nft-typefilter', this.typeFilter);
+      sessionStorage.setItem('nft-starfilter', this.starFilter.toString());
+      sessionStorage.setItem('nft-elementfilter', this.elementFilter);
       this.$emit('nft-filters-changed');
     },
 
     clearFilters() {
-      if(this.isMarket) {
-        sessionStorage.removeItem('market-nft-typefilter');
-        sessionStorage.removeItem('market-nft-starfilter');
-        sessionStorage.removeItem('market-nft-elementfilter');
-        sessionStorage.removeItem('market-nft-price-order');
-      } else {
-        sessionStorage.removeItem('nft-typefilter');
-        sessionStorage.removeItem('nft-starfilter');
-        sessionStorage.removeItem('nft-elementfilter');
-      }
+      sessionStorage.removeItem('nft-typefilter');
+      sessionStorage.removeItem('nft-starfilter');
+      sessionStorage.removeItem('nft-elementfilter');
 
       this.typeFilter = this.typesOptions?.length === 1 ? this.typesOptions[0] : '';
       this.starFilter = this.starsOptions?.length === 1 ? this.starsOptions[0] : '';
@@ -1013,7 +985,7 @@ export default Vue.extend({
       (this.$refs['t2-claim-map-modal'] as BModal).hide();
       (this.$refs['t3-claim-zone-modal'] as BModal).hide();
       (this.$refs['t3-claim-map-modal'] as BModal).hide();
-      await this.fetchOwnedLands();
+      await this.getOwnedLands();
       await this.checkIfCanPurchaseLand();
     },
 
@@ -1054,8 +1026,8 @@ export default Vue.extend({
       return {id, tier, chunks, zones,} as Reservation;
     },
 
-    async fetchOwnedLands() {
-      const results = await this.getOwnedLands();
+    async getOwnedLands() {
+      const results = await this.fetchOwnedLands();
       if(results){
         this.ownedLands = results.map(result => ({tier: result[0], chunkId: result[1], reseller: result[4]}));
       }
@@ -1137,33 +1109,15 @@ export default Vue.extend({
     itemDescriptionHtml(item: SkillShopListing): string {
       return item.name + '<br>' + item.description;
     },
-
-    updateOptions() {
-      if (this.isMarket) {
-        this.options = [
-          {
-            name: i18n.t('copyLink').toString(),
-            amount: 0,
-            handler: copyNftUrl,
-            hasDefaultOption: true,
-            noAmount: true
-          },
-        ];
-      }
-    },
   },
 
   async mounted() {
     this.checkStorageFavorite();
-    this.updateOptions();
 
     Events.$on('nft:newFavorite', () => this.checkStorageFavorite());
 
-    if(this.isMarket) {
-      this.typeFilter = sessionStorage.getItem('market-nft-typefilter') || '';
-      this.starFilter = sessionStorage.getItem('market-nft-starfilter') || '';
-      this.elementFilter = sessionStorage.getItem('market-nft-elementfilter') || '';
-      this.priceSort = sessionStorage.getItem('market-nft-price-order') || '';
+    if (this.chosenStarsOption !== undefined) {
+      this.starFilter = this.chosenStarsOption;
     } else {
       this.typeFilter = sessionStorage.getItem('nft-typefilter') || '';
       this.starFilter = sessionStorage.getItem('nft-starfilter') || '';
@@ -1188,8 +1142,8 @@ export default Vue.extend({
     await this.checkIfCanPurchaseLand();
     this.checkIfCanPurchaseLandInterval = setInterval(await this.checkIfCanPurchaseLand,3000);
 
-    await this.fetchOwnedLands();
-    this.checkOwnedLandsInterval = setInterval(await this.fetchOwnedLands, 3000);
+    await this.getOwnedLands();
+    this.checkOwnedLandsInterval = setInterval(await this.getOwnedLands, 3000);
 
     this.reservedChunks = await this.getReservedChunksIds();
     const {t1Land, t2Land, t3Land} = await this.getAvailableLand();

@@ -13,7 +13,8 @@
     "@truffle/hdwallet-provider": "^1.5.0",
     "abdk-libraries-solidity": "2.4.0",
     "dayjs": "^1.10.7",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "gsap": "^3.9.1"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
@@ -46,10 +47,11 @@
     "lint": "lerna exec -- npm run lint",
     "build:frontend": "cd frontend && npm run build",
     "start:frontend": "cd frontend && npm start",
-    "contract:prepare": "npm run build",
+    "contract:prepare": "npm run build -- --all",
     "contract:deploy": "npm run deploy",
     "build": "truffle compile",
-    "postbuild": "node scripts/generate-ts-from-abis.js",
+    "postbuild": "npm --prefix frontend/ run setup-app-config && node scripts/generate-ts-from-abis.js && npm run restore-all-networks",
+    "restore-all-networks": "run-s \"restore-networks 56\" \"restore-networks 97\" \"restore-networks 128\" \"restore-networks 256\" \"restore-networks 65\" \"restore-networks 66\" \"restore-networks 137\" \"restore-networks 80001\" \"restore-networks 43114\" \"restore-networks 43113\" \"restore-networks 1313161554\" \"restore-networks 1313161555\"",
     "test": "truffle test",
     "test:local": "hardhat test",
     "deploy": "truffle migrate --reset",
@@ -80,6 +82,7 @@
     "deploy-mainnet-dry-run": "truffle migrate --network bscmainnet --dry-run",
     "backup-networks": "node scripts/manage-networks.js backup",
     "backup-networks-to-file": "node scripts/manage-networks.js backupToFile",
+    "restore-networks": "node scripts/manage-networks.js restore",
     "restore-networks-from-file": "node scripts/manage-networks.js restoreFromFile",
     "verify-contracts": "node scripts/verify-contracts.js"
   },

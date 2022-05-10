@@ -251,6 +251,12 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokenID;
     }
 
+    function mintGiveawayShield(address to, uint256 stars, uint256 shieldType) external restricted returns(uint256) {
+        require(shieldType != 1, "Can't mint founders shield");
+        // MANUAL USE ONLY; DO NOT USE IN CONTRACTS!
+        return mintShieldWithStars(to, stars, shieldType, uint256(keccak256(abi.encodePacked(now, tokens.length))));
+    }
+
     function getRandomProperties(uint256 stars, uint256 seed) public pure returns (uint16) {
         return uint16((stars & 0x7) // stars aren't randomized here!
             | ((RandomUtil.randomSeededMinMax(0,3,RandomUtil.combineSeeds(seed,1)) & 0x3) << 3) // trait
@@ -421,6 +427,11 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return result;
     }
 
+    function getDefenseMultiplierForTrait(uint256 id, uint8 trait) public view returns(int128) {
+        Shield storage shd = tokens[id];
+        return getDefenseMultiplierForTrait(shd.properties, shd.stat1, shd.stat2, shd.stat3, trait);
+    }
+
     function getFightData(uint256 id, uint8 charTrait) public view noFreshLookup(id) returns (int128, int128, uint24, uint8) {
         Shield storage shd = tokens[id];
         return (
@@ -524,5 +535,9 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override {
         require(promos.getBit(from, 4) == false && promos.getBit(to, 4) == false
             && nftVars[tokenId][NFTVAR_BUSY] == 0);
+    }
+
+    function setBaseURI(string memory baseUri) public restricted {
+        _setBaseURI(baseUri);
     }
 }

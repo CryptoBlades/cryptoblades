@@ -20,11 +20,9 @@ import powerfulDust from '@/assets/dusts/powerfulDust.png';
 import soul from '@/assets/dusts/soulDust.png';
 import sword from '@/assets/placeholder/sword-placeholder-1.png';
 import junk from '@/assets/junk/junk3.png';
-//TODO: Missing icons!
 import reputation from '@/assets/reputation.png';
-import stamina from '@/assets/reputation.png';
-import raid from '@/assets/reputation.png';
-//these three^
+import stamina from '@/assets/stamina.png';
+import raid from '@/assets/raid.png';
 import experience from '@/assets/experience.png';
 import shield from '@/assets/shield2.png';
 import trinket from '@/assets/trinkets/trinket1.png';

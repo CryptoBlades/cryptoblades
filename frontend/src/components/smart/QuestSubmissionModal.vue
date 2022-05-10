@@ -1,7 +1,7 @@
 <template>
-  <b-modal v-if="quest" class="centered-modal" :visible="showModal" button-size="lg" no-close-on-backdrop scrollable
+  <b-modal v-if="quest" :visible="showModal" button-size="lg" no-close-on-backdrop scrollable
            :title="$t('quests.turnIn')" size="xl" @close.prevent="resetTokens"
-           @cancel.prevent="resetTokens"
+           @cancel.prevent="resetTokens" content-class="modal-footer-margin"
            :ok-title="$t('quests.submit')" :busy="isLoading"
            :ok-disabled="isSubmitDisabled()"
            @ok.prevent="quest.requirementType === RequirementType.DUST
@@ -9,12 +9,14 @@
            || quest.requirementType === RequirementType.SOUL
            || isCurrency ?
             submitAmount() : submit()">
+    <h5 class="text-center">{{ $t('quests.submitDisclaimer') }}</h5>
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
                    showGivenWeaponIds @chooseweapon="addBurnToken"
-                   :starsOptions="[quest.requirementRarity + 1]" :canFavorite="false"/>
+                   :starsOptions="getRequiredStarsAndHigher" :canFavorite="false"
+                   :chosenStarsOption="getRequiredStars"/>
       <weapon-grid :weaponIds="tokensToBurn" showGivenWeaponIds @chooseweapon="removeBurnToken"
-                   :starsOptions="[quest.requirementRarity + 1]" :canFavorite="false"/>
+                   :canFavorite="false" :chosenStarsOption="''"/>
     </div>
     <div v-else-if="quest.requirementType === RequirementType.DUST
       || quest.requirementType === RequirementType.STAMINA
@@ -44,11 +46,11 @@
     </div>
     <div v-else class="d-flex">
       <nft-list v-model="selectedToken" showGivenNftIdTypes :nftIdTypes="ownedNftIdTypes"
-                @choosenft="addNftIdType" :starsOptions="[quest.requirementRarity + 1]"
-                :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"/>
+                @choosenft="addNftIdType" :starsOptions="getRequiredStarsAndHigher"
+                :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"
+                :chosenStarsOption="getRequiredStars"/>
       <nft-list showGivenNftIdTypes :nftIdTypes="nftIdTypesToBurn" @choosenft="removeNftIdType"
-                :starsOptions="[quest.requirementRarity + 1]"
-                :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]"/>
+                :typesOptions="[upperFirstChar(RequirementType[quest.requirementType])]" :chosenStarsOption="''"/>
     </div>
   </b-modal>
 </template>
@@ -150,6 +152,15 @@ export default Vue.extend({
         return this.soulBalance;
       } else return 0;
     },
+
+    getRequiredStars(): number {
+      if (this.quest?.requirementRarity === undefined) return 0;
+      return this.quest.requirementRarity + 1;
+    },
+
+    getRequiredStarsAndHigher(): number[] {
+      return Array.from(Array(5 - this.getRequiredStars + 1).keys()).map(x => x + this.getRequiredStars);
+    },
   },
 
   methods: {
@@ -203,6 +214,8 @@ export default Vue.extend({
     },
 
     addNftIdType(nftIdType: NftIdType) {
+      if (!this.quest) return;
+      if (this.questProgress + this.tokensToBurn.length >= this.quest.requirementAmount) return;
       this.nftIdTypesToBurn.push(nftIdType);
       this.ownedNftIdTypes = this.ownedNftIdTypes.filter(val => !this.nftIdTypesToBurn.some(nftToBurn => nftToBurn.id === val.id));
       this.tokensToBurn = this.nftIdTypesToBurn.map(nftIdType => nftIdType.id);
@@ -321,6 +334,10 @@ export default Vue.extend({
 <style scoped>
 .single-dust-display {
   width: 40%;
+}
+
+/deep/ .modal-footer-margin {
+  margin-bottom: 3rem;
 }
 
 @media (max-width: 576px) {

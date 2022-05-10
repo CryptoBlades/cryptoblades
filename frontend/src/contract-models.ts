@@ -5,8 +5,7 @@ import {
   IWeapon,
   WeaponTrait,
   WeaponElement,
-  IRaidState,
-  IPartnerProject
+  IRaidState
 } from './interfaces';
 import { Nft } from './interfaces/Nft';
 import { IShield } from './interfaces/Shield';
@@ -223,18 +222,19 @@ export function duelByAttackerFromContract(data: [string,string,string,boolean])
   };
 }
 
-export function duelResultFromContract(data: [string,string,string,string,string,boolean]) {
+export function duelResultFromContract(data: [string,string,string,string,string,boolean,string]) {
   const attackerId = data[0];
   const defenderId = data[1];
   const timestamp = data[2];
   const attackerRoll = data[3];
   const defenderRoll = data[4];
   const attackerWon = data[5];
+  const bonusRank = data[6];
   const previousDuelReward = 0;
   const newDuelReward = 0;
 
   return {
-    attackerId,attackerRoll,attackerWon,defenderId,defenderRoll,timestamp, previousDuelReward, newDuelReward
+    attackerId,attackerRoll,attackerWon,defenderId,defenderRoll,timestamp, previousDuelReward, newDuelReward, bonusRank
   };
 }
 
@@ -247,20 +247,5 @@ export function characterKickedEventFromContract(data: [string,string,string]) {
     characterId,
     kickedBy,
     timestamp
-  };
-}
-
-export function partnerProjectFromContract(data: [string, string, string, string, string, string, string, boolean]): IPartnerProject {
-  const id = data[0];
-  const name = data[1];
-  const tokenSymbol = data[2];
-  const tokenAddress = data[3];
-  const tokenSupply = data[4];
-  const tokensClaimed = data[5];
-  const tokenPrice = data[6];
-  const isActive = data[7];
-
-  return {
-    id, name, tokenSymbol, tokenAddress, tokenSupply, tokensClaimed, tokenPrice, isActive
   };
 }

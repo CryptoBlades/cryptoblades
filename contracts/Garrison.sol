@@ -122,6 +122,17 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
       restoreFromGarrison(garrisonId);
     }
 
+    function transferFromGarrison(address receiver, uint256 id)
+        public
+        isCharacterOwner(id)
+        isInGarrison(id)
+    {
+        delete characterOwner[id];
+        userGarrison[msg.sender].remove(id);
+        allCharactersInGarrison.remove(id);
+        characters.safeTransferFrom(address(this), receiver, id);
+    }
+
     function claimAllXp(uint256[] calldata chars) external isCharactersOwner(chars) {
         uint256[] memory xps = game.getXpRewards(chars);
         game.resetXp(chars);

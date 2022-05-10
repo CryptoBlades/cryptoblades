@@ -21,26 +21,29 @@
           <QuestsList v-if="tier !== undefined" :tier="usePromoQuests ? tier + 10 : tier"/>
         </b-modal>
       </div>
-      <div v-if="weeklyReward.id" class="d-flex flex-column gap-2">
+      <div v-if="weeklyReward && weeklyReward.id && currentWeeklyCompletions !== undefined && weeklyReward.completionsGoal"
+           class="d-flex flex-column gap-2">
         <div class="d-flex align-items-center gap-2">
           <div class="d-flex flex-column gap-2">
             <div class="d-flex justify-content-between gap-4">
               <span class="text-uppercase weekly-progress">{{ $t('quests.weeklyProgress') }}</span>
-              <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon" alt="Hourglass"/> {{
+              <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon"
+                                                                     alt="Hourglass"/> {{
                   $t('quests.resetsIn', {time: nextWeekResetTime})
                 }}</span>
             </div>
             <div class="quest-progress w-100">
               <div class="quest-progress-bar" role="progressbar"
-                   :style="`width: calc(${currentWeeklyCompletions/maxWeeklyCompletions*100}% - 8px);`"
+                   :style="`width: calc(${currentWeeklyCompletions/weeklyReward.completionsGoal*100}% - 8px);`"
                    :aria-valuenow="currentWeeklyCompletions"
-                   aria-valuemin="0" :aria-valuemax="maxWeeklyCompletions">
+                   aria-valuemin="0" :aria-valuemax="weeklyReward.completionsGoal">
               </div>
-              <span v-if="currentWeeklyCompletions <= maxWeeklyCompletions"
-                    class="quest-progress-value">{{ `${currentWeeklyCompletions} / ${maxWeeklyCompletions}` }}</span>
+              <span v-if="currentWeeklyCompletions <= weeklyReward.completionsGoal"
+                    class="quest-progress-value">{{ `${currentWeeklyCompletions} / ${weeklyReward.completionsGoal}` }}</span>
             </div>
           </div>
-          <div class="d-flex justify-content-center gap-2">
+          <div class="d-flex justify-content-center align-items-center gap-2 position-relative h-100">
+            <span v-if="weeklyClaimed" class="claimed-banner">{{ $t('quests.claimed') }}</span>
             <QuestComponentIcon :questItemType="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
                                 :amount="weeklyReward.rewardAmount"
                                 :externalAddress="weeklyReward.rewardExternalAddress"/>
@@ -99,6 +102,8 @@ export interface WeeklyReward {
   rewardAmount: number;
   rewardExternalAddress?: string;
   reputationAmount: number;
+  completionsGoal: number;
+  weekNumber: number;
 }
 
 export interface Quest {
@@ -203,8 +208,6 @@ interface StoreMappedActions {
 
   nextWeeklyQuestCompletionGoalReset(): Promise<string>;
 
-  getWeeklyCompletionsGoal(): Promise<number>;
-
   getWeeklyCompletions(): Promise<number>;
 
   getWeeklyReward(payload: { timestamp: number }): Promise<WeeklyReward>;
@@ -230,7 +233,6 @@ interface Data {
   isLoading: boolean;
   nextWeekResetTime: string;
   nextWeekResetCheckInterval?: ReturnType<typeof setInterval>;
-  maxWeeklyCompletions: number;
   currentWeeklyCompletions: number;
   showQuestsListModal: boolean;
   rarities: Rarity[];
@@ -258,7 +260,6 @@ export default Vue.extend({
       showWeeklyClaimedModal: false,
       isLoading: false,
       nextWeekResetTime: '',
-      maxWeeklyCompletions: 0,
       currentWeeklyCompletions: 0,
       showQuestsListModal: false,
       rarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
@@ -279,7 +280,7 @@ export default Vue.extend({
     },
 
     weeklyGoalReached(): boolean {
-      return this.currentWeeklyCompletions >= this.maxWeeklyCompletions;
+      return this.currentWeeklyCompletions >= this.weeklyReward?.completionsGoal!;
     },
   },
 
@@ -289,7 +290,6 @@ export default Vue.extend({
       'getCharacterQuestData',
       'getReputationLevelRequirements',
       'nextWeeklyQuestCompletionGoalReset',
-      'getWeeklyCompletionsGoal',
       'getWeeklyCompletions',
       'getWeeklyReward',
       'hasClaimedWeeklyReward',
@@ -317,6 +317,7 @@ export default Vue.extend({
           this.showWeeklyClaimedModal = true;
         }
       } finally {
+        await this.refreshQuestData();
         this.isLoading = false;
       }
     },
@@ -325,8 +326,7 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         this.usePromoQuests = await this.isUsingPromoQuests();
-        this.currentWeeklyCompletions = await this.getWeeklyCompletions();
-        this.maxWeeklyCompletions = await this.getWeeklyCompletionsGoal();
+        this.currentWeeklyCompletions = +await this.getWeeklyCompletions();
         this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});
         this.weeklyClaimed = await this.hasClaimedWeeklyReward();
         await this.getNextWeekResetTime();
@@ -345,11 +345,14 @@ export default Vue.extend({
       if (this.nextWeekResetCheckInterval) {
         clearInterval(this.nextWeekResetCheckInterval);
       }
-      this.nextWeekResetCheckInterval = setInterval(() => {
+      this.nextWeekResetCheckInterval = setInterval(async () => {
         const {total, days, hours, minutes, seconds} = getTimeRemaining(nextWeekResetTimestamp);
         this.nextWeekResetTime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-        if (total <= 0 && this.nextWeekResetCheckInterval) {
+        if (total <= 1000 && this.nextWeekResetCheckInterval) {
           clearInterval(this.nextWeekResetCheckInterval);
+          this.currentWeeklyCompletions = +await this.getWeeklyCompletions();
+          this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});
+          this.weeklyClaimed = await this.hasClaimedWeeklyReward();
         }
       }, 1000);
     },
@@ -427,11 +430,21 @@ export default Vue.extend({
   position: absolute;
   width: 100%;
   font-weight: bold;
+  text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+}
+
+.claimed-banner {
+  position: absolute;
+  text-transform: uppercase;
+  transform: rotate(15deg);
+  font-weight: bold;
+  text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
 }
 
 @media (max-width: 576px) {
   .quests-container {
     padding: 1rem;
+    margin-bottom: 3rem;
   }
 
   .weekly-progress-container {

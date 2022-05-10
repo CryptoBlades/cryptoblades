@@ -1,5 +1,5 @@
 <template>
-  <div class="body main-font">
+  <div class="body m-2 main-font pl-3 pr-3" style="inline-flex">
     <div v-if="!haveCharacters" class="blank-slate">
       <div class="current-promotion">
         <div class="tob-bg-img promotion-decoration">
@@ -31,23 +31,30 @@
           <div class="navbar-staking">
             <button
               class="switch"
-              :class="{ switch_active: !isUpgrading }"
-              @click="isUpgrading = false;"
+              :class="{ switch_active: isBurning }"
+              @click="isBurning = true; isUpgrading = false; isTransferring = false;"
             >
               <span>{{$t('plaza.burn')}}</span>
             </button>
             <button
               class="switch"
               :class="{ switch_active: isUpgrading }"
-              @click="isUpgrading = true; clearAllBurn();"
+              @click="isBurning = false; isUpgrading = true; isTransferring = false; clearAllBurn();"
             >
               <span>{{$t('plaza.upgrade')}}</span>
+            </button>
+            <button
+              class="switch"
+              :class="{ switch_active: isTransferring }"
+              @click="isBurning = false; isUpgrading = false; isTransferring = true; clearAllBurn();"
+            >
+              <span>{{$t('plaza.transfer')}}</span>
             </button>
           </div>
         </div>
         <div class="d-flex justify-content-flex-end ml-auto">
           <b-button
-            v-if="!isUpgrading"
+            v-if="isBurning"
             variant="primary"
             class="ml-3"
             @click="showBurnConfirmation"
@@ -67,6 +74,15 @@
             ({{soulAmount}} {{$t('plaza.soul')}})
           </b-button>
           <b-button
+            v-if="isTransferring"
+            variant="primary"
+            class="ml-3"
+            @click="showTransferConfirmation"
+            v-tooltip="$t('plaza.transferSelected')"
+            :disabled="!isValidWeb3Address(receiverAddress)">
+            {{$t('plaza.transferSouls')}}
+          </b-button>
+          <b-button
             variant="primary"
             class="ml-3 gtag-link-others"
             @click="toggleSoulCreation"
@@ -78,11 +94,11 @@
       <div>
         <div class="col-md-12">
           <div class="row mobile-flip">
-            <div class="col-md-4 character-container" v-if="!isUpgrading">
+            <div class="col-md-4 character-container" v-if="isBurning">
               <h1 align="center" class="text-center">{{$t('plaza.selectBurnCharacter')}}</h1>
               <character-list :showFilters="true" :showGivenCharacterIds="true" :characterIds="remainingCharactersIds" @input="addBurnCharacter"/>
             </div>
-            <div class="col-md-4 character-container" v-if="!isUpgrading">
+            <div class="col-md-4 character-container" v-if="isBurning">
               <h1 class="text-center">{{$t('plaza.charactersToBurn')}}</h1>
               <h1 class="text-center mt-3 mb-4">
                 <b-button
@@ -96,8 +112,8 @@
               </h1>
               <character-list class="mt-4" :showGivenCharacterIds="true" :characterIds="burnCharacterIds" @input="removeBurnCharacter"/>
             </div>
-            <div class="col-md-8 d-flex character-container flex-column align-items-center" v-if="isUpgrading">
-              <h1 align="center" class="text-center">{{$t('plaza.selectSoulAmount')}}</h1>
+            <div class="col-md-8 d-flex character-container flex-column align-items-center" v-if="!isBurning">
+              <h1 align="center" class="text-center">{{isUpgrading ? $t('plaza.selectSoulAmount') : $t('plaza.selectSoulAmountTransfer')}}</h1>
               <div class="soul-image mt-5" />
               <h2>Soul</h2>
               <div class="range">
@@ -114,7 +130,7 @@
                     class="mt-4 mb-1"
                     variant="primary"
                     @click="setMaxSoulAmount"
-                    :disabled="!targetCharacterId">
+                    :disabled="!isTransferring && !targetCharacterId">
                     {{$t('blacksmith.useMaxSoulAmount')}}
                   </b-button>
                 </div>
@@ -122,13 +138,15 @@
             </div>
             <div class="col-md-4">
               <div class="d-flex flex-row w-100 align-items-center mt-2">
-                <h3 class="mt-2">{{isUpgrading ? $t('plaza.characterToUpgrade') : $t('plaza.burnInto')}}:</h3>
-                <b-form-select v-if="!isUpgrading" class="w-50 ml-1" size="sm" :value="burnOption" v-model="burnOption">
+                <h3 class="mt-2">{{isBurning ? $t('plaza.burnInto')+':' : ''}}</h3>
+                <h3 class="mt-2">{{isUpgrading ? $t('plaza.characterToUpgrade')+':' : ''}}</h3>
+                <h3 class="mt-2">{{isTransferring ? $t('plaza.receiverAddress')+':' : ''}}</h3>
+                <b-form-select v-if="isBurning" class="w-50 ml-1" size="sm" :value="burnOption" v-model="burnOption">
                   <b-form-select-option :value="0">{{$t('plaza.soul')}}</b-form-select-option>
                   <b-form-select-option :value="1">{{$t('character')}}</b-form-select-option>
                 </b-form-select>
               </div>
-              <div v-if="burnOption === 0 && !isUpgrading" class="d-flex flex-column mt-3 align-items-center">
+              <div v-if="burnOption === 0 && isBurning" class="d-flex flex-column mt-3 align-items-center">
                 <div class="soul-image" />
                 <h2>Soul</h2>
                 <h2>{{soulBalance}} (+{{Math.floor(burnPower/10)}})</h2>
@@ -147,6 +165,12 @@
                   :characterIds="[targetCharacterId]" />
                 <div v-if="targetCharacterId">
                   <h2 :class="powerLimitExceeded ? 'text-danger' : ''">{{$t('CharacterDisplay.power')}} +{{burnPower}}/{{remainingPowerLimit}}</h2>
+                </div>
+              </div>
+              <div v-if="isTransferring">
+                <b-form-input placeholder="Receiver address" v-model="receiverAddress"/>
+                <div class="transferResultContainer">
+                  <span class="resultMsg text-center"> {{(!isValidWeb3Address(receiverAddress) && receiverAddress !== '') ? 'Invalid address' : ''}} </span>
                 </div>
               </div>
             </div>
@@ -171,9 +195,8 @@
                     :disabled="!haveCharacters"
                     variant="primary"
                     class="ml-3 gtag-link-others"
-                    @click="toggleSoulCreation"
-                    v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
-                    {{$t('plaza.burn')}} / {{$t('plaza.upgrade')}}
+                    @click="toggleSoulCreation">
+                    {{$t('plaza.burn')}} / {{$t('plaza.upgrade')}} / {{$t('plaza.transfer')}}
                   </b-button>
                   <b-button
                     :disabled="!canRecruit()"
@@ -183,6 +206,14 @@
                     v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
                     {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
                   </b-button>
+                  <b-checkbox
+                    variant="primary"
+                    class="mx-3 my-auto"
+                    v-model="mintSlippageApproved">
+                    <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
+                    <b-icon-question-circle class="ml-1 centered-icon" v-tooltip.bottom="$t('plaza.dynamicPricesDetails',
+                      { decreaseAmount: mintPriceDecreasePerHour, increaseAmount: mintCharacterPriceIncrease, minimumPrice: mintCharacterMinPrice})"/>
+                  </b-checkbox>
                 </div>
               </div>
 
@@ -232,6 +263,15 @@
                     v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
                     {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
                   </b-button>
+                  <b-checkbox
+                    v-if="ownCharacters.length === 4"
+                    variant="primary"
+                    class="mx-3 my-auto"
+                    v-model="mintSlippageApproved">
+                    <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
+                    <b-icon-question-circle class="ml-1 centered-icon" v-tooltip.bottom="$t('plaza.dynamicPricesDetails',
+                      { decreaseAmount: mintPriceDecreasePerHour, increaseAmount: mintCharacterPriceIncrease, minimumPrice: mintCharacterMinPrice})"/>
+                  </b-checkbox>
                 </div>
               </div>
 
@@ -271,6 +311,25 @@
         <b-icon icon="exclamation-circle" variant="danger" /> {{ $t('plaza.noRefunds')}}
       </div>
     </b-modal>
+    <b-modal class="centered-modal text-center" ref="transfer-confirmation-modal" :title="$t('plaza.transferSoulConfirmation')"
+      @ok="onTransferConfirm" :ok-disabled="!isValidWeb3Address(receiverAddress) || !soulAmount">
+      <div class="text-center">
+        <b-icon icon="exclamation-circle" variant="danger" />
+        {{ $t('plaza.transferSoulConfirm') }}: {{ soulAmount }} {{ $t('plaza.soul') }}<br>
+        {{ $t('plaza.cantBeUndone') }}
+      </div>
+      <div class="text-center">
+        <b-icon icon="exclamation-circle" variant="danger" /> {{ $t('plaza.noRefunds')}}
+      </div>
+    </b-modal>
+    <div class="ad-padding">
+    </div>
+    <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
+      <script2 async src="https://coinzillatag.com/lib/sticky.js"></script2>
+        <div class="coinzilla" data-zone="C-2621de2f7c4f7a272"></div>
+        <script2>window.coinzilla_sticky = window.coinzilla_sticky
+            || [];function czilla(){coinzilla_sticky.push(arguments);}czilla('2621de2f7c4f7a272');</script2>
+    </div>
   </div>
 </template>
 
@@ -285,6 +344,7 @@ import Vue from 'vue';
 import i18n from '@/i18n';
 import { BModal } from 'bootstrap-vue';
 import { CharacterPower } from '@/interfaces';
+import { isValidWeb3Address } from '../utils/common';
 
 import {
   burningManager as featureFlagBurningManager
@@ -301,13 +361,22 @@ interface Data {
   burnOption: number;
   soulBalance: number;
   burnCost: number;
+  isBurning: boolean;
   isUpgrading: boolean;
+  isTransferring: boolean;
   soulAmount: number;
+  receiverAddress: string;
   remainingPowerLimit: number;
   burnPowerMultiplier: number;
   isClaimingXp: boolean;
   isBurnInProgress: boolean;
   isUpgradeInProgress: boolean;
+  isTransferInProgress: boolean;
+  updateInterval: ReturnType<typeof setInterval> | null;
+  mintSlippageApproved: boolean;
+  mintPriceDecreasePerHour: string;
+  mintCharacterPriceIncrease: string;
+  mintCharacterMinPrice: string;
 }
 
 export default Vue.extend({
@@ -380,13 +449,21 @@ export default Vue.extend({
 
     canClaimGarrisonXp(): boolean {
       return this.ownedGarrisonCharacterIds.filter((id: string|number) => +this.xpRewards[id] > 0).length > 0;
-    },
+    }
   },
 
   async created() {
-    const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
-    const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
-    this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
+    this.mintPriceDecreasePerHour = new BN(await this.fetchMintCharacterPriceDecreasePerSecond()).div(new BN(10).pow(18)).multipliedBy(60*60).toFixed(6);
+    this.mintCharacterPriceIncrease = new BN(await this.fetchCharacterMintIncreasePrice()).div(new BN(10).pow(18)).toFixed(6);
+    this.mintCharacterMinPrice = new BN(await this.fetchMintCharacterMinPrice()).div(new BN(10).pow(18)).toFixed(4);
+    this.updateMintCharacterFee();
+    this.updateInterval = setInterval(async () => { await this.updateMintCharacterFee(); }, 2000);
+  },
+
+  destroyed() {
+    if(this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
   },
 
   data() {
@@ -401,25 +478,37 @@ export default Vue.extend({
       burnOption: 0,
       soulBalance: 0,
       burnCost: 0,
+      isBurning: true,
       isUpgrading: false,
+      isTransferring: false,
       soulAmount: 0,
+      receiverAddress: '',
       remainingPowerLimit: 0,
       burnPowerMultiplier: 1,
       isClaimingXp: false,
       isBurnInProgress: false,
-      isUpgradeInProgress: false
+      isUpgradeInProgress: false,
+      isTransferInProgress: false,
+      isValidWeb3Address,
+      updateInterval: null as ReturnType<typeof setInterval> | null,
+      mintSlippageApproved: false,
+      mintPriceDecreasePerHour: '0',
+      mintCharacterPriceIncrease: '0',
+      mintCharacterMinPrice: '0',
     } as Data;
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
-      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'claimGarrisonXp', 'fetchBurnPowerMultiplier']),
+      'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'claimGarrisonXp', 'fetchBurnPowerMultiplier',
+      'transferSoul', 'fetchMintCharacterPriceDecreasePerSecond', 'fetchCharacterMintIncreasePrice',
+      'fetchMintCharacterMinPrice', 'fetchMintCharacterFee']),
     ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
       try {
-        await this.mintCharacter();
+        await this.mintCharacter(this.mintSlippageApproved);
       } catch (e) {
         (this as any).$dialog.notify.error(i18n.t('plaza.couldNotMint'));
       }
@@ -438,7 +527,8 @@ export default Vue.extend({
       return balance.isGreaterThanOrEqualTo(cost);
     },
     checkStorage() {
-      this.showAds =  localStorage.getItem('show-ads') === 'true';
+      if (process.env.NODE_ENV === 'development') this.showAds = false;
+      else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
     async toggleSoulCreation() {
       this.soulCreationActive = !this.soulCreationActive;
@@ -495,6 +585,9 @@ export default Vue.extend({
     showUpgradeConfirmation() {
       (this.$refs['upgrade-confirmation-modal'] as BModal).show();
     },
+    showTransferConfirmation() {
+      (this.$refs['transfer-confirmation-modal'] as BModal).show();
+    },
     async onBurnConfirm() {
       if(this.burnCharacterIds.length === 0) return;
       this.isBurnInProgress = true;
@@ -529,6 +622,18 @@ export default Vue.extend({
       this.soulBalance = await this.fetchSoulBalance();
       this.soulAmount = 0;
     },
+    async onTransferConfirm() {
+      if(!isValidWeb3Address(this.receiverAddress) || this.soulAmount === 0) return;
+      this.isTransferInProgress = true;
+      try {
+        await this.transferSoul({ targetAddress: this.receiverAddress, soulAmount: this.soulAmount });
+      }
+      finally {
+        this.isUpgradeInProgress = false;
+      }
+      this.soulBalance = await this.fetchSoulBalance();
+      this.soulAmount = 0;
+    },
     async onClaimGarrisonXp() {
       this.isClaimingXp = true;
       try {
@@ -539,7 +644,17 @@ export default Vue.extend({
       }
     },
     setMaxSoulAmount() {
-      this.soulAmount = this.remainingPowerLimit > this.soulBalance * 10 ? this.soulBalance : this.remainingPowerLimit / 10;
+      if (this.isTransferring) {
+        this.soulAmount = this.soulBalance;
+      } else {
+        this.soulAmount = this.remainingPowerLimit > this.soulBalance * 10 ? this.soulBalance : this.remainingPowerLimit / 10;
+      }
+    },
+
+    async updateMintCharacterFee() {
+      const recruitCost = await this.fetchMintCharacterFee();
+      const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
+      this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
     }
   },
 
@@ -648,4 +763,9 @@ export default Vue.extend({
   min-width: 140px;
   text-align: center;
 }
+
+.ad-padding {
+  padding: 30px;
+}
+
 </style>

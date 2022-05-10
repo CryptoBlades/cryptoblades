@@ -1,9 +1,19 @@
 <template>
   <div class="app">
-    <nav-bar />
-    <character-bar v-if="!featureFlagStakeOnly && currentCharacterId !== null" />
+    <Banner
+      text="GIVEAWAY: Win 1 of 10 Level 70+ Characters"
+      link="https://gleam.io/uswdy/cryptoblades-70-character-giveaway"
+      linkText="Enter here"
+    />
+    <nav-bar :isToggled="toggleSideBar"/>
     <div class="content dark-bg-text">
-      <router-view v-if="canShowApp" />
+      <b-row>
+        <character-bar :isToggled="toggleSideBar" v-if="currentCharacterId !== null"/>
+        <b-col style="padding-left: 0;" :class="renderPageDisplay()">
+          <router-view v-if="canShowApp" />
+        </b-col>
+        <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
+      </b-row>
     </div>
     <div class="content dark-bg-text" v-if="!canShowApp">
       {{$t('app.cantView')}}
@@ -26,7 +36,7 @@
     </div>
     <div
       class="fullscreen-warning"
-      v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0' && !hasStakedBalance))"
+      v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0'))"
     >
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
@@ -61,13 +71,17 @@
         <div class="seperator"></div>
         <small-button class="button mm-button" @click="toggleHideWalletWarning" :text="$t('app.warning.buttons.hide')" />
       </div>
-      <div class="ad-container">
-        <Adsense v-if="showAds && !isMobile()"
-          data-ad-client="ca-pub-6717992096530538"
-          data-ad-slot="5115599573"
-          data-ad-format="auto"
-          data-full-width-responsive="yes"
-          />
+      <div v-if="showAds && !isMobile()" class="ad-container">
+      <script2 src="https://coinzillatag.com/lib/display.js"></script2>
+        <div class="coinzilla" data-zone="C-541621de2f7bb717603"></div>
+          <script2>
+                window.coinzilla_display = window.coinzilla_display || [];
+                var c_display_preferences = {};
+                c_display_preferences.zone = "541621de2f7bb717603";
+                c_display_preferences.width = "728";
+                c_display_preferences.height = "90";
+                coinzilla_display.push(c_display_preferences);
+          </script2>
       </div>
     </div>
   </div>
@@ -85,24 +99,28 @@ import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
+import WeaponRowGrid from './components/smart/WeaponRowGrid.vue';
 import { apiUrl } from './utils/common';
 import i18n from './i18n';
 import { getConfigValue } from './contracts';
 import '@/mixins/general';
 import config from '../app-config.json';
 import { addChainToRouter } from '@/utils/common';
+import Banner from './components/Banner.vue';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
 });
 
 export default {
-  inject: ['web3', 'featureFlagStakeOnly', 'expectedNetworkId', 'expectedNetworkName'],
+  inject: ['web3', 'expectedNetworkId', 'expectedNetworkName'],
   components: {
     NavBar,
     CharacterBar,
     BigButton,
     SmallButton,
+    WeaponRowGrid,
+    Banner
   },
 
   data: () => ({
@@ -112,12 +130,16 @@ export default {
     isConnecting: false,
     recruitCost: '',
     isOptions: false,
+    showWeapon: false,
+    currentWeaponId: null,
+    weaponId: null,
+    toggleSideBar: false,
+    currentPath: '',
   }),
 
   computed: {
     ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
-    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl',
-      'availableStakeTypes', 'availableNftStakeTypes', 'hasStakedBalance']),
+    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl']),
 
     canShowApp() {
       return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
@@ -145,6 +167,7 @@ export default {
     },
     $route(to) {
       // react to route changes
+      this.currentPath = to.path;
       this.checkChainAndParams();
       if(to.path === '/options') {
         return this.isOptions = true;
@@ -165,10 +188,9 @@ export default {
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
       'setupWeaponDurabilities',
-      'fetchStakeDetails',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
-      'configureMetaMask'
+      'configureMetaMask',
     ]),
     ...mapGetters([
       'getExchangeTransakUrl'
@@ -200,8 +222,6 @@ export default {
       this.updateCurrentChainSupportsQuests();
     },
     async updateCharacterStamina(id) {
-      if (this.featureFlagStakeOnly) return;
-
       if (id !== null) {
         await this.fetchCharacterStamina(id);
       }
@@ -209,10 +229,11 @@ export default {
 
     checkStorage() {
       this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
-      this.showAds =  localStorage.getItem('show-ads') === 'true';
+      if (process.env.NODE_ENV === 'development') this.showAds = false;
+      else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
     async initializeRecruitCost() {
-      const recruitCost = await this.contracts.CryptoBlades.methods.mintCharacterFee().call({ from: this.defaultAccount });
+      const recruitCost = await this.contracts.CryptoBlades.methods.getMintCharacterFee().call({ from: this.defaultAccount });
       const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
       this.recruitCost = BN(skillRecruitCost)
         .div(BN(10).pow(18))
@@ -265,7 +286,7 @@ export default {
       if (
         this.hideWalletWarning &&
         !this.showMetamaskWarning &&
-        (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0' && !this.hasStakedBalance))
+        (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0'))
       ) {
         this.$dialog.notify.warning(i18n.t('app.warning.message.hideWalletWarning'),
           {
@@ -273,6 +294,22 @@ export default {
           },
         );
       }
+    },
+
+    renderPageDisplay(){
+      let toDisplay;
+
+      if(this.currentCharacterId !== null){
+        if(this.toggleSideBar){
+          toDisplay = 'can-show-app';
+        }else{
+          toDisplay = 'col-xl-10 col-lg-9 col-md-9 col-sm-10 cols-11 set-normal';
+        }
+      }else{
+        toDisplay = 'col-xl-12 col-lg-12 col-md-12 col-sm-12 cols-12 set-normal';
+      }
+
+      return toDisplay;
     },
 
     async checkNotifications() {
@@ -318,6 +355,17 @@ export default {
     //     },
     //   );
     // });
+    Events.$on('weapon-inventory', (bol) =>{
+      this.showWeapon = bol;
+    });
+
+    Events.$on('chooseweapon', (id) =>{
+      this.weaponId = id;
+    });
+
+    Events.$on('toggle-sideBar', (bol) =>{
+      this.toggleSideBar = bol;
+    });
 
     document.body.addEventListener('click', (e) => {
       const tagname = e.target.getAttribute('tagname');
@@ -366,14 +414,6 @@ export default {
       });
     }, 3000);
 
-    this.availableStakeTypes.forEach((item) => {
-      this.fetchStakeDetails({ stakeType: item });
-    });
-
-    this.availableNftStakeTypes.forEach((item) => {
-      this.fetchStakeDetails({ stakeType: item });
-    });
-
     this.slowPollIntervalId = setInterval(async () => {
       await Promise.all([
         this.setupWeaponDurabilities(),
@@ -411,14 +451,40 @@ export default {
     clearInterval(this.pollCharacterStaminaIntervalId);
     clearInterval(this.slowPollIntervalId);
   },
+
 };
 </script>
 
 <style>
+
+@font-face {
+    font-family: 'Trajan';
+    src: url('./assets/fonts/Trajan.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
+
+
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
   font-weight: 600;
   text-align: center;
 }
+
+.app{
+  width: auto;
+}
+
+
+.set-normal{
+  margin-left: auto;
+  margin-right: auto;
+  transition: 1s all;
+  padding: 0px;
+}
+
 
 hr.hr-divider {
   border-top: 1px solid #9e8a57;
@@ -426,7 +492,7 @@ hr.hr-divider {
 }
 body {
   margin: 0;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, #242720 100%);
 }
 
 .no-margin {
@@ -455,10 +521,6 @@ body {
   color: #9e8a57;
 }
 
-.body {
-  max-height: calc(100vh - 56px - 160px);
-}
-
 button,
 .pointer {
   cursor: pointer;
@@ -479,6 +541,8 @@ button,
 
 .error {
   color: red;
+  overflow: hidden;
+  max-width: 75vw;
 }
 
 .fire,
@@ -506,10 +570,19 @@ button,
   color: grey;
 }
 
-.fire-icon,
-.str-icon {
+
+.tooltip{
+  z-index: 6;
+}
+
+.popover .arrow{
+  display: none;
+}
+
+
+.fire-icon,.str-icon {
   color: red;
-  content: url('assets/elements/fire.png');
+  content: url('assets/elements/icon-fire.png');
   width: 1em;
   height: 1em;
 }
@@ -517,7 +590,7 @@ button,
 .earth-icon,
 .dex-icon {
   color: green;
-  content: url('assets/elements/earth.png');
+  content: url('assets/elements/icon-earth.png');
   width: 1em;
   height: 1em;
 }
@@ -525,7 +598,7 @@ button,
 .water-icon,
 .int-icon {
   color: cyan;
-  content: url('assets/elements/water.png');
+  content: url('assets/elements/icon-water.png');
   width: 1em;
   height: 1em;
 }
@@ -533,10 +606,24 @@ button,
 .lightning-icon,
 .cha-icon {
   color: yellow;
-  content: url('assets/elements/lightning.png');
+  content: url('assets/elements/icon-thunder.png');
   width: 1em;
   height: 1em;
 }
+.pwr-icon {
+  color: yellow;
+  content: url('assets/elements/power-icon.svg');
+  width: 0.9em;
+  height: 0.9em;
+}
+
+.bonus-power-icon {
+  content: url('assets/navbar-icons/blacksmith-icon.png');
+  width: 0.8em;
+  height: 0.8em;
+  padding-left: 1px;
+}
+
 
 .loading-container {
   position: absolute;
@@ -588,6 +675,7 @@ button.close {
   background: rgb(31, 31, 34);
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
+
 
 .btn-outline-primary {
   color: #9e8a57 !important;
@@ -668,6 +756,29 @@ div.bg-success {
   border: 2px solid #9e8a57 !important;
   background: rgb(61, 61, 64);
   background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
+}
+
+.multiselect *{
+  background: transparent;
+  color:#fff;
+}
+.multiselect__tags, .multiselect__content-wrapper{
+  border:1px solid #404857;
+}
+.multiselect--above .multiselect__content-wrapper{
+  border-top:none;
+}
+
+.multiselect__option--selected.multiselect__option--highlight,
+.multiselect__option--selected.multiselect__option--highlight::after{
+  background: #9E8A57;
+}
+
+.multiselect__option--selected,
+.multiselect__option--selected::after,
+.multiselect__option--highlight,
+.multiselect__option--highlight::after{
+  background: #404857;
 }
 </style>
 <style scoped>
@@ -754,9 +865,42 @@ div.bg-success {
   border: 1px solid #9e8a57;
 }
 
+.bg-image{
+  background: url('./assets/combat-bg.png');
+  background-repeat: no-repeat;
+  background-size:cover;
+  border-radius:0px;
+}
+
+
+#blacksmith-bg{
+  background: rgba(20, 20, 20, 1);
+  background-image: url("./assets/blacksmith/blacksmith-bg.png");
+  background-image: url("./assets/blacksmith/blacksmith-bg.png"), linear-gradient(rgba(0, 68, 111, 0) 0%,
+  rgba(20, 20, 20, 0.4) 30%,rgba(20, 20, 20, 1) 100%); /* W3C */
+  /* background: radial-gradient(closest-side at 50% 50%, rgba(0, 68, 111, 0) 10%,
+  rgba(20, 20, 20, 0.4) 50%,rgba(20, 20, 20, 1) 100%), url('./assets/blacksmith/blacksmith-bg.png'); */
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.can-show-app{
+  width: 100%;
+  padding: 0px;
+}
+
+
+
+@media all and (max-width: 600px) {
+  .can-show-app{
+    overflow-y: hidden ;
+  }
+}
+
 @media all and (max-width: 767.98px) {
   .content {
     padding: 10px;
+    padding-top: 0px;
   }
   .dark-bg-text {
     width: 100%;

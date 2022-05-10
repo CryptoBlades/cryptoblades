@@ -1,6 +1,7 @@
 <template>
   <div class="body main-font">
-    <b-navbar v-if="isBar">
+
+    <b-navbar v-if="isBar" class="claim-xp-bar">
       <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
       variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="$t('ClaimRewardsBar.readyToClaim')"/>
 
@@ -8,9 +9,9 @@
 
       <b-nav-item
         class="ml-3 bar"
-        @click="claimSkill(ClaimStage.Summary)"><!-- moved gtag-link below b-nav-item -->
+        @click="claimSkill(ClaimStage.Summary)">
         <span class="gtag-link-others" tagname="claim_skill" v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
-          <strong>SKILL</strong> {{ formattedSkillReward }}
+          <strong>SKILL </strong>{{ formattedSkillReward }}
         </span>
       </b-nav-item>
 
@@ -18,7 +19,7 @@
         class="ml-3 bar"
         :disabled="!canClaimXp"
         @click="onClaimXp">
-          <div class="gtag-link-others" v-html="`<strong>XP</strong> ${formattedXpRewardsBar}`"></div>
+          <div class="gtag-link-others" v-html="`<strong>XP </strong>${formattedXpRewardsBar}`"></div>
       </b-nav-item>
     </b-navbar>
 
@@ -34,8 +35,7 @@
         <b-dropdown-item
           @click="claimSkill(ClaimStage.Summary)" class="rewards-info gtag-link-others" tagname="claim_skill"
            v-tooltip.bottom="$t('ClaimRewardsBar.clickDetails')">
-            SKILL
-            <div class="pl-3">{{ formattedSkillReward }}</div>
+            SKILL<div class="pl-3">{{ formattedSkillReward }}</div>
         </b-dropdown-item>
 
         <b-dropdown-item
@@ -98,7 +98,7 @@
         <div class="d-flex flex-row w-100 align-items-baseline">
           <h5>{{$t('ClaimRewardsBar.payoutCurrency')}}:</h5>
           <b-form-select class="w-50 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
-            <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
+            <b-form-select-option v-for="p in getPartnerProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
           </b-form-select>
         </div>
         <div v-if="selectedPartneredProject" class="d-flex mt-2">
@@ -113,11 +113,7 @@
             <b-form-input type="number" max="100" step="0.5" v-model="slippage" class="claim-input" />
           </div>
         </div>
-        <partnered-project v-if="selectedPartneredProject"
-          :id="selectedPartneredProject.id" :name="selectedPartneredProject.name"
-          :tokenSymbol="selectedPartneredProject.tokenSymbol" :tokenSupply="selectedPartneredProject.tokenSupply"
-          :tokenPrice="selectedPartneredProject.tokenPrice" :logoFileName="getLogoFile(selectedPartneredProject.name)"
-          :tokenAddress="selectedPartneredProject.tokenAddress"/>
+        <PartneredProject v-if="selectedPartneredProject" :partnerProject="selectedPartneredProject" :key="selectedPartneredProject.id"/>
         <div class="mt-3" v-if="selectedPartneredProject && !canClaimSelectedProject">
           <h5>{{$t('ClaimRewardsBar.partnerTokenClaimed')}}</h5>
         </div>
@@ -125,7 +121,7 @@
           <h6 v-if="formattedMultiplier < 0.5" class="very-low-multiplier">{{$t('ClaimRewardsBar.lowMultiplier', {currentMultiplier})}}</h6>
           <h6 >{{
               $t('ClaimRewardsBar.realWithdrawValueClaimable', {
-                actualAmount: (skillAmount / formattedRatio * formattedMultiplier).toFixed(4),
+                actualAmount: (skillAmount / nonFormattedRatio * formattedMultiplier).toFixed(4),
                 tokenSymbol: selectedPartneredProject.tokenSymbol,
                 skillAmount: (+skillAmount).toFixed(4)
               })
@@ -223,9 +219,9 @@ export default Vue.extend({
       return this.selectedPartneredProject && +toBN(this.partnerProjectMultipliers[+this.selectedPartneredProject.id]).div(toBN(10).pow(18)).toFixed(4) || 1;
     },
 
-    formattedRatio(): number {
+    nonFormattedRatio(): number {
       return this.selectedPartneredProject &&
-        +toBN(1).dividedBy(toBN(this.partnerProjectRatios[+this.selectedPartneredProject.id]).dividedBy(toBN(2).exponentiatedBy(64))).toFixed(4) || 1;
+        +toBN(1).dividedBy(toBN(this.partnerProjectRatios[+this.selectedPartneredProject.id]).dividedBy(toBN(2).exponentiatedBy(64))) || 1;
     },
 
     formattedSkillReward(): string {
@@ -300,25 +296,8 @@ export default Vue.extend({
       return !areAllXpsZeroOrLess;
     },
 
-    supportedProjects(): SupportedProject[] {
-      const supportedProjects = this.getPartnerProjects.map(p => {
-        return {
-          id: p.id,
-          name: p.name,
-          tokenSymbol: p.tokenSymbol,
-          tokenAddress: p.tokenAddress,
-          tokenSupply: p.tokenSupply,
-          tokensClaimed: p.tokensClaimed,
-          tokenPrice: p.tokenPrice,
-          isActive: p.isActive
-        };
-      });
-
-      return supportedProjects;
-    },
-
     selectedPartneredProject(): SupportedProject | undefined {
-      return this.supportedProjects.find(x => x.id === this.payoutCurrencyId);
+      return this.getPartnerProjects.find(partnerProject => partnerProject.id.toString() === this.payoutCurrencyId.toString());
     },
 
     isNoProjectAvailable(): boolean {
@@ -396,7 +375,7 @@ export default Vue.extend({
     },
 
     choosePayoutCurrencyIfNotChosenBefore() {
-      const supportedProjects = this.supportedProjects;
+      const supportedProjects = this.getPartnerProjects;
       if(this.payoutCurrencyId === '-1' && supportedProjects.length !== 0) {
         this.updatePayoutCurrencyId(supportedProjects[0].id);
       }
@@ -431,7 +410,10 @@ export default Vue.extend({
 
 .navbar {
   background: rgb(20,20,20);
-  background: linear-gradient(45deg, rgba(20,20,20,1) 0%, rgba(36,39,32,1) 100%);
+}
+
+.claim-xp-bar {
+  gap: 0.5rem;
 }
 
 .nav-item.bar {
