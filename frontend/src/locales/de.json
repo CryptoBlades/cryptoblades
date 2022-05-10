@@ -656,7 +656,7 @@
         "addMetamask": "Add MetaMask",
         "confMetamask": "Configure MetaMask",
         "startMetamask": "Connect to MetaMask",
-        "network": "Switch to BSC Network",
+        "network": "Switch to BNB Network",
         "hide": "Hide Warning"
       },
       "errorMessage": {
