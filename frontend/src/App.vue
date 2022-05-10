@@ -211,6 +211,10 @@ export default {
         localStorage.setItem('currentChain', currentChain);
         addChainToRouter(currentChain);
       }
+      if(currentChain === 'BSC') {
+        localStorage.setItem('currentChain', 'BNB');
+        addChainToRouter('BNB');
+      }
 
       //set chain in localStorage & MM from query param; check if supported
       else if (currentChain !== paramChain && supportedChains.includes(paramChain)){
