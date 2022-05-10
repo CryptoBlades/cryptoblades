@@ -1406,7 +1406,7 @@
         "welcome": "Get started With CryptoBlades"
       },
       "message": {
-        "BSC":{
+        "BNB":{
           "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .0015 BNB for gas. You will also need a litle bit of BNB for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
           "inst1": "1. Buying BNB with fiat: <a target=_blank href=https://youtu.be/6-sUDUE2RPA> Watch Video </a> or <a target=_blank href={link1}> Buy with Transak</a>",
           "inst2": "2. Once you have BNB, go to ApeSwap to obtain SKILL tokens: <a target=_blank href={link1}> Trade SKILL/BNB </a>",

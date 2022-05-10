@@ -302,7 +302,7 @@ export function createStore(web3: Web3) {
         return getConfigValue('exchangeUrl');
       },
       getExchangeTransakUrl() {
-        const currencyNetwork = getConfigValue('currencyNetwork') || 'BSC';
+        const currencyNetwork = getConfigValue('currencyNetwork') || 'BNB';
         const currencyDefault = getConfigValue('currency') || 'BNB';
         const currencyList = getConfigValue('currencyTransak') || 'BNB,BUSD';
 

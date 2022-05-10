@@ -152,7 +152,7 @@ export default Vue.extend({
     }
     this.showCosmetics = localStorage.getItem('showCosmetics') !== 'false';
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
-    this.currentChain = localStorage.getItem('currentChain') || 'BSC';
+    this.currentChain = localStorage.getItem('currentChain') || 'BNB';
     this.supportedChains = config.supportedChains;
     await this.fetchPartnerProjects();
   },
@@ -166,7 +166,7 @@ export default Vue.extend({
       showSkillInUsd: false,
       showCosmetics: true,
       fightMultiplier: 1,
-      currentChain: 'BSC',
+      currentChain: 'BNB',
       checked: false,
       ClaimStage,
       supportedChains: []
