@@ -67,6 +67,8 @@
     "postdeploy-avaxtestnet": "run-s \"backup-networks 43113\" \"verify-contracts -- --network avaxtestnet\"",
     "deploy-auroratestnet": "truffle migrate --network auroratestnet",
     "postdeploy-auroratestnet": "run-s \"backup-networks 1313161555\" \"verify-contracts -- --network auroratestnet\"",
+    "deploy-kavatestnet": "truffle migrate --network kavatestnet",
+    "postdeploy-kavatestnet": "run-s \"backup-networks 2221\" \"verify-contracts -- --network kavatestnet\"",
     "deploy-mainnet-warning-be-careful-this-is-prod": "truffle migrate --network bscmainnet",
     "postdeploy-mainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 56\" \"verify-contracts -- --network bscmainnet\"",
     "deploy-hecomainnet-warning-be-careful-this-is-prod": "truffle migrate --network hecomainnet",
