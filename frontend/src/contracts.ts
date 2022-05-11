@@ -250,10 +250,12 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
 
-  const tokensManagerContractAddr = process.env.VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS ||
-    getConfigValue('VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS') || (tokensManagerNetworks as Networks)[networkId]!.address;
-  const TokensManager = new web3.eth.Contract(tokensManagerAbi as Abi, tokensManagerContractAddr);
-
+  let TokensManager;
+  if((tokensManagerNetworks as Networks)[networkId]) {
+    const tokensManagerContractAddr = process.env.VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS ||
+      getConfigValue('VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS') || (tokensManagerNetworks as Networks)[networkId]!.address;
+    TokensManager = new web3.eth.Contract(tokensManagerAbi as Abi, tokensManagerContractAddr);
+  }
   const specialWeaponsManagerAddr = (specialWeaponsManagerNetworks as Networks)[networkId]!.address;
   const SpecialWeaponsManager = new web3.eth.Contract(specialWeaponsManagerAbi as Abi, specialWeaponsManagerAddr);
 
