@@ -51,7 +51,7 @@
     "contract:deploy": "npm run deploy",
     "build": "truffle compile",
     "postbuild": "npm --prefix frontend/ run setup-app-config && node scripts/generate-ts-from-abis.js && npm run restore-all-networks",
-    "restore-all-networks": "run-s \"restore-networks 56\" \"restore-networks 97\" \"restore-networks 128\" \"restore-networks 256\" \"restore-networks 65\" \"restore-networks 66\" \"restore-networks 137\" \"restore-networks 80001\" \"restore-networks 43114\" \"restore-networks 43113\" \"restore-networks 1313161554\" \"restore-networks 1313161555\"",
+    "restore-all-networks": "run-s \"restore-networks 56\" \"restore-networks 97\" \"restore-networks 128\" \"restore-networks 256\" \"restore-networks 65\" \"restore-networks 66\" \"restore-networks 137\" \"restore-networks 80001\" \"restore-networks 43114\" \"restore-networks 43113\" \"restore-networks 1313161554\" \"restore-networks 1313161555\" \"restore-networks 2221\"",
     "test": "truffle test",
     "test:local": "hardhat test",
     "deploy": "truffle migrate --reset",
