@@ -1,25 +1,22 @@
-const { deployProxy } = require("@openzeppelin/truffle-upgrades");
-
+const { upgradeProxy, deployProxy } = require("@openzeppelin/truffle-upgrades");
 const CryptoBlades = artifacts.require("CryptoBlades");
 const TokensManager = artifacts.require("TokensManager");
 
 module.exports = async function (deployer, network, accounts) {
-    const game = await CryptoBlades.deployed();
+    if (network === "development"
+    || network === "development-fork"
+    || network === 'bsctestnet'
+    || network === 'bsctestnet-fork'
+    || network === 'hecotestnet'
+    || network === 'okextestnet'
+    || network === 'polygontestnet'
+    || network === 'avaxtestnet'
+    || network === 'avaxtestnet-fork'
+    || network === 'auroratestnet'
+    || network === 'kavatestnet') {
+        const game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
 
-    if (
-        network === "development" ||
-        network === "development-fork" ||
-        network === 'bsctestnet' ||
-        network === 'bsctestnet-fork' ||
-        network === 'hecotestnet' ||
-        network === 'okextestnet' ||
-        network === 'polygontestnet' ||
-        network === 'avaxtestnet' ||
-        network === 'avaxtestnet-fork' ||
-        network === 'auroratestnet'
-        ) 
-    {
-         const tokensManager = await deployProxy(
+        const tokensManager = await deployProxy(
             TokensManager,
             [game.address],
             { deployer }
@@ -33,5 +30,7 @@ module.exports = async function (deployer, network, accounts) {
       
             await tokensManager.grantRole(await tokensManager.GAME_ADMIN(), tokensManagerBotAddress);
         }
+
+        await game.grantRole(await game.GAME_ADMIN(), tokensManager.address);
     }
 };
