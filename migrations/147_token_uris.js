@@ -59,6 +59,10 @@ module.exports = async function (deployer, network, accounts) {
     else if(network === 'auroramainnet' || network === 'auroratestnet') {
       networkName = 'aurora';
     }
+    else if(network === 'kavamainnet' || network === 'kavatestnet') {
+      networkName = 'kava';
+    }
+
 
     await weapons.grantRole(weapons_GA, altChainsDeployerAddress);
     await characters.grantRole(characters_GA, altChainsDeployerAddress);
