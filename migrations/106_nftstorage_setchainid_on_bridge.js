@@ -16,8 +16,14 @@ module.exports = async function (deployer, network, accounts) {
 	else if (network === 'polygontestnet' || network === 'polygonmainnet') {
 		await storage.setLocalChainPrefix('POLYGON');
 	}
-	else if (network === 'avaxtestnet' || network === 'avaxtestnet-fork' || network === 'auroratestnet' || network === 'avaxmainnet' || network === 'auroramainnet') {
+	else if (network === 'avaxtestnet' || network === 'avaxtestnet-fork' || network === 'avaxmainnet') {
 		await storage.setLocalChainPrefix('AVAX');
+	}
+	else if (network === 'auroratestnet' || network === 'auroramainnet') {
+		await storage.setLocalChainPrefix('AURORA');
+	}
+	else if(network === 'kavatestnet') {
+		await storage.setLocalChainPrefix('KAVA');
 	}
 	else {
 		throw 'cant find prefix to set'; // we can't have the prefix empty; break the migration
