@@ -12,14 +12,20 @@
           </div>
         </div>
         <div class="character-name">
-          <span>Zhangtsun</span>
+          <span>{{this.characterInformation.name}}</span>
         </div>
         <div class="character-data-container">
           <div class="character-element-name">
-              <span>FIRE</span>
+              <span>{{this.characterInformation.element}}</span>
+          </div>
+          <div class="character-data-divider">
+              <span>|</span>
           </div>
           <div class="character-level">
-              <span>LEVEL 51</span>
+              <span>LEVEL {{this.characterInformation.level}}</span>
+          </div>
+          <div class="character-data-divider">
+              <span>|</span>
           </div>
           <div class="character-stamina">
             <span>120/200 STAMINA</span>
@@ -42,7 +48,7 @@
               <span>PVP RANK</span>
             </div>
             <div class="pvp-rank-value">
-              <span>2,320</span>
+              <span>{{this.characterInformation.rank}}</span>
             </div>
           </div>
           <div class="pvp-power-container">
@@ -50,7 +56,7 @@
               <span>POWER</span>
             </div>
             <div class="pvp-power-value">
-              <span>5,320</span>
+              <span>{{this.characterInformation.power}}</span>
             </div>
           </div>
         </div>
@@ -67,7 +73,7 @@
             <span>Engage on PVE battles to earn rewards.</span>
           </div>
           <div class="pve-button dashboard-btn">
-              <span>COMBAT</span>
+              <span @click="goToCombat()">COMBAT</span>
           </div>
         </div>
         <div class="pvp-container">
@@ -78,7 +84,7 @@
             <span>Defeat other Players on PVP battles to earn rewards.</span>
           </div>
           <div class="pve-button dashboard-btn">
-              <span>SIGN UP</span>
+              <span @click="goToArena()">SIGN UP</span>
           </div>
         </div>
       </div>
@@ -86,9 +92,90 @@
   </div>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-export default Vue.extend({});
+<script>
+import { mapActions, mapGetters, mapState } from 'vuex';
+import { characterFromContract as formatCharacter } from '../contract-models';
+import { duelResultFromContract as formatDuelResult } from '../contract-models';
+export default {
+  inject: ['web3'],
+
+  data() {
+    return {
+      duelHistory: [],
+      characterInformation: {
+        name: '',
+        level: 0,
+        power: null,
+        rank: null,
+        element: '',
+      }
+    };
+  },
+
+  computed: {
+    ...mapState(['currentCharacterId']),
+    ...mapGetters(['getCharacterName'])
+  },
+
+  methods: {
+    ...mapActions([
+      'getCharacter',
+      'getCharacterPower',
+      'getCharacterLevel',
+      'getPvpCoreContract',
+      'getRankingPointsByCharacter',
+      'getRename'
+    ]),
+
+    goToCombat(){
+      console.log('Went to combat');
+    },
+    goToArena(){
+      console.log('Went to arena');
+    }
+  },
+
+  async created(){
+
+    const rename = await this.getRename(this.currentCharacterId);
+
+    this.characterInformation.name = rename ? rename : this.getCharacterName(this.currentCharacterId);
+
+    this.characterInformation.level = Number(await this.getCharacterLevel(this.currentCharacterId)) + 1;
+
+    this.characterInformation.power = await this.getCharacterPower(this.currentCharacterId);
+
+    this.characterInformation.rank = await this.getRankingPointsByCharacter(this.currentCharacterId);
+
+    this.characterInformation.element = formatCharacter(this.currentCharacterId, await this.getCharacter(this.currentCharacterId)).traitName;
+
+    const fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 1800, 0);
+
+    const previousDuels = await (await this.getPvpCoreContract()).getPastEvents('DuelFinished', {
+      filter: {attacker: this.currentCharacterId},
+      toBlock: 'latest',
+      fromBlock,
+    });
+
+    previousDuels.push({
+      attackerId: '1',
+      defenderId: this.currentCharacterId,
+      timestamp: '',
+      attackerRoll: '100',
+      defenderRoll: '1000',
+      attackerWon: true,
+      bonusRank: '0'
+    });
+
+    this.duelHistory = previousDuels.map(duel => {
+      console.log(duel);
+      return formatDuelResult(duel);
+    });
+
+    console.log(this.duelHistory);
+  }
+
+};
 </script>
 
 <style scoped>
@@ -211,6 +298,10 @@ export default Vue.extend({});
   background: rgba(0, 0, 0, 0.076);
 }
 
+.character-details-container {
+  width: 30%;
+}
+
 .character-data-container {
   display: flex;
   flex-direction: row nowrap;
@@ -221,7 +312,11 @@ export default Vue.extend({});
   font-variant: normal;
   letter-spacing: 1px;
   color: #ffff;
-  column-gap: 40px;
+  column-gap: 20px;
+}
+
+.character-data-divider {
+  color: #7F8693;
 }
 
 .small-stamina-char {
@@ -261,6 +356,10 @@ export default Vue.extend({});
   font-style: normal;
   font-variant: normal;
   letter-spacing: 1px;
+}
+
+.dashboard-btn:hover{
+  cursor: pointer;
 }
 
 .dashboard-btn > span{
