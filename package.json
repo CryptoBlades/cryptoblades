@@ -69,6 +69,8 @@
     "postdeploy-auroratestnet": "run-s \"backup-networks 1313161555\" \"verify-contracts -- --network auroratestnet\"",
     "deploy-kavatestnet": "truffle migrate --network kavatestnet",
     "postdeploy-kavatestnet": "run-s \"backup-networks 2221\" \"verify-contracts -- --network kavatestnet\"",
+    "deploy-skaletestnet": "truffle migrate --network skaletestnet",
+    "postdeploy-skaletestnet": "run-s \"backup-networks 2433657680876851\" \"verify-contracts -- --network skaletestnet\"",
     "deploy-mainnet-warning-be-careful-this-is-prod": "truffle migrate --network bscmainnet",
     "postdeploy-mainnet-warning-be-careful-this-is-prod": "run-s \"backup-networks 56\" \"verify-contracts -- --network bscmainnet\"",
     "deploy-hecomainnet-warning-be-careful-this-is-prod": "truffle migrate --network hecomainnet",
