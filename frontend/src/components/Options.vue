@@ -464,7 +464,7 @@ export default Vue.extend({
     },
 
     currentChainSupportsClaimTokens() {
-      return (localStorage.getItem('currentChain') || 'BSC') !== 'BSC';
+      return (localStorage.getItem('currentChain') || 'BNB') !== 'BNB';
     },
   }
 });

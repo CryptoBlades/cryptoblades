@@ -197,7 +197,7 @@ export default {
     ]),
     ...mapMutations(['updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP', 'updateCurrentChainSupportsQuests']),
     async checkChainAndParams(){
-      const currentChain = localStorage.getItem('currentChain') || 'BSC';
+      const currentChain = localStorage.getItem('currentChain') || 'BNB';
       const paramChain = this.$router.currentRoute.query.chain;
       const supportedChains = config.supportedChains;
 
@@ -210,6 +210,10 @@ export default {
       if(currentChain === paramChain || !paramChain){
         localStorage.setItem('currentChain', currentChain);
         addChainToRouter(currentChain);
+      }
+      if(currentChain === 'BSC') {
+        localStorage.setItem('currentChain', 'BNB');
+        addChainToRouter('BNB');
       }
 
       //set chain in localStorage & MM from query param; check if supported
