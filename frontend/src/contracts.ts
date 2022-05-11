@@ -48,8 +48,8 @@ import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/Pv
 import { abi as pvpCoreAbi, networks as pvpCoreNetworks } from '../../build/contracts/PvpCore.json';
 import { abi as pvpRankingsAbi, networks as pvpRankingsNetworks } from '../../build/contracts/PvpRankings.json';
 import { abi as tokensManagerAbi, networks as tokensManagerNetworks } from '../../build/contracts/TokensManager.json';
-import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
-import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
+import { abi as weaponCosmeticsAbi, networks as weaponCosmeticsNetworks } from '../../build/contracts/WeaponCosmetics.json';
+import { abi as characterCosmeticsAbi, networks as characterCosmeticsNetworks } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
 import { abi as treasuryAbi, networks as treasuryNetworks } from '../../build/contracts/Treasury.json';
 import { abi as burningManagerAbi, networks as burningManagerNetworks } from '../../build/contracts/BurningManager.json';
