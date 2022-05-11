@@ -4314,8 +4314,6 @@ export function createStore(web3: Web3) {
       },
 
       async doEncounterPayNative({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier, offsetCost }) {
-        if(featureFlagStakeOnly) return;
-
         const { TokensManager, CryptoBlades } = state.contracts();
         if (!TokensManager || !CryptoBlades || !state.defaultAccount) return;
 
