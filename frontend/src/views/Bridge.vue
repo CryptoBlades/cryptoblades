@@ -487,7 +487,7 @@ export default Vue.extend({
     this.supportedChains = config.supportedChains;
 
     //remove currentChain from chains to send to
-    this.currentChain = localStorage.getItem('currentChain') || 'BSC';
+    this.currentChain = localStorage.getItem('currentChain') || 'BNB';
     this.chainsToSendTo = this.supportedChains.filter(item => item !== this.currentChain);
 
     //check current net by checking url
