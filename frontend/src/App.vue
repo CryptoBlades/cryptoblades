@@ -15,10 +15,12 @@
         <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
       </b-row>
     </div>
-    <div class="content dark-bg-text" v-if="!canShowApp">
-      {{$t('app.cantView')}}
+    <div class="content dark-bg-text" v-if="!canShowApp && !showMetamaskWarning">
+      <div class="outcome">
+        <i class="fas fa-spinner fa-spin"></i>
+      </div>
     </div>
-    <div class="fullscreen-warning" v-if="!hideWalletWarning && (showMetamaskWarning || showNetworkError)">
+    <div class="fullscreen-warning" v-if="(showMetamaskWarning)">
       <div class="starter-panel">
         <div class="tob-bg-img promotion-decoration">
           <img class="vertical-decoration bottom" src="./assets/border-element.png">
@@ -28,9 +30,7 @@
           <big-button class="button common-width-button"
           :mainText="$t('app.warning.buttons.addMetamask')" @click="startOnboarding" v-if="showMetamaskWarning" />
           <big-button class="button common-width-button"
-          :mainText="$t('app.warning.buttons.network')" @click="configureMetamask" v-if="showNetworkError" />
-          <big-button class="button common-width-button"
-          :mainText="$t('app.warning.buttons.hide')" @click="toggleHideWalletWarning" />
+          mainText="Wallet Connect" @click="$router.push({ name: 'options' }); showMetamaskWarning=false" />
         </div>
       </div>
     </div>
@@ -137,26 +137,24 @@ export default {
     weaponId: null,
     toggleSideBar: false,
     currentPath: '',
+    showMetamaskWarning: false,
   }),
 
   computed: {
-    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
+    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking', 'web3']),
     ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl']),
 
-    loadingApp() {
-      return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
+    canShowApp() {
+      return (this.contracts !== null && !_.isEmpty(this.contracts)) || (this.isOptions);
     },
 
-    showMetamaskWarning() {
-      return false;
+    currentProvider(){
+      return this.web3.currentProvider;
     },
 
-    showNetworkError() {
-      return this.expectedNetworkId && this.currentNetworkId !== null && this.currentNetworkId !== this.expectedNetworkId;
-    },
     currentChain(){
       return localStorage.getItem('currentChain');
-    }
+    },
   },
 
   watch: {
@@ -214,6 +212,7 @@ export default {
         addChainToRouter(currentChain);
       }
 
+      //if user has an unsupported chain set (e.g. BSC instead of BNB) in storage or query param
       if(!supportedChains.includes(currentChain) || !supportedChains.includes(paramChain)){
         localStorage.setItem('currentChain', 'BNB');
         addChainToRouter('BNB');
@@ -257,15 +256,16 @@ export default {
       onboarding.startOnboarding();
     },
     async configureMetamask() {
+      console.log('configureMetamask');
       await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
 
     async connectMetamask() {
       const web3 = new Web3(Web3.givenProvider);
-      console.log(web3);
       this.setWeb3(web3);
       this.isConnecting = true;
       this.errorMessage = i18n.t('app.warning.errorMessage.connecting');
+      //test connection
       web3.eth
         .requestAccounts()
         .then(() => {
@@ -273,7 +273,6 @@ export default {
           this.isConnecting = false;
 
           this.initializeStore();
-          this.toggleHideWalletWarning();
         })
         .catch(() => {
           this.errorMessage = i18n.t('app.warning.errorMessage.error');
@@ -295,7 +294,7 @@ export default {
       if (
         this.hideWalletWarning &&
         !this.showMetamaskWarning &&
-        (this.errorMessage || this.showNetworkError || (this.ownCharacters.length === 0 && this.skillBalance === '0'))
+        (this.errorMessage || (this.ownCharacters.length === 0 && this.skillBalance === '0'))
       ) {
         this.$dialog.notify.warning(i18n.t('app.warning.message.hideWalletWarning'),
           {
@@ -424,11 +423,15 @@ export default {
     }
   },
   async created() {
+    if(!this.givenProvider){
+      this.showMetamaskWarning = true;
+    }
     this.checkChainAndParams();
     if(!localStorage.getItem('walletconnect')){
       await this.connectMetamask();
     }
     else{
+      this.showMetamaskWarning = false;
       await this.connectWalletConnect();
     }
 
@@ -483,6 +486,7 @@ export default {
 
     this.checkNotifications();
     this.initializeRecruitCost();
+    this.loading = false;
   },
 
   beforeDestroy() {
@@ -928,7 +932,15 @@ div.bg-success {
   padding: 0px;
 }
 
-
+.outcome {
+  /* margin: 20px auto; */
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 3em;
+}
 
 @media all and (max-width: 600px) {
   .can-show-app{
