@@ -345,6 +345,12 @@ export default {
 
       localStorage.setItem('lastnotification', notifications[0].hash);
     },
+    initializeSettings(){
+      if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
+      if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
+      if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
+      if (!localStorage.getItem('fightMultiplier')) localStorage.setItem('fightMultiplier', '1');
+    }
   },
 
   mounted() {
@@ -397,6 +403,7 @@ export default {
   },
 
   async created() {
+    this.initializeSettings();
     this.checkChainAndParams();
     try {
       await this.initializeStore();
@@ -441,11 +448,6 @@ export default {
     };
 
     pollAccounts();
-
-    if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
-    if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
-    if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
-    if (!localStorage.getItem('fightMultiplier')) localStorage.setItem('fightMultiplier', '1');
 
     this.checkNotifications();
     this.initializeRecruitCost();
