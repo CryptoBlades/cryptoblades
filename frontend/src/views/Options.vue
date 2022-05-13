@@ -71,13 +71,24 @@
                 </b-form-select-option>
               </b-form-select>
             </b-list-group-item>
-            <b-list-group-item class="d-flex justify-content-between align-items-center">
+            <b-list-group-item v-if="!isWalletConnect" class="d-flex justify-content-between align-items-center">
               <h4>Current chain</h4>
               <b-form-select size="lg" v-model="currentChain" @change="setCurrentChain()">
                 <b-form-select-option v-for="chain in supportedChains" :key="chain" :value="chain">
                   {{chain}}
                 </b-form-select-option>
               </b-form-select>
+            </b-list-group-item>
+            <b-list-group-item class="d-flex justify-content-between align-items-center">
+              <h4>Wallet Connect</h4>
+              <b-form-select size="lg" v-model="walletConnectChain" :disabled="isWalletConnect">
+                <b-form-select-option v-for="chain in supportedChains" :key="chain" :value="chain">
+                  {{chain}}
+                </b-form-select-option>
+              </b-form-select>
+              <b-button size="lg" class="m-2" variant="outline-primary" @click="connectWallet()">
+                <span v-html="!isWalletConnect ? 'Connect' : 'Disconnect'"></span>
+              </b-button>
             </b-list-group-item>
           </b-list-group>
         </div>
@@ -101,6 +112,8 @@ import {getConfigValue} from '@/contracts';
 import config from '../../app-config.json';
 import {SupportedProject} from './Treasury.vue';
 import {addChainToRouter} from '@/utils/common';
+import WalletConnectProvider from '@walletconnect/web3-provider';
+import Web3 from 'web3';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -126,12 +139,14 @@ interface Data {
   fightMultiplier: number;
   currentChain: string;
   supportedChains: string[];
+  walletConnectChain: string;
 }
 
 interface StoreMappedGetters {
   rewardsClaimTaxAsFactorBN: BigNumber;
   maxRewardsClaimTaxAsFactorBN: BigNumber;
   getPartnerProjects: SupportedProject[];
+  getWeb3: any;
 }
 
 enum ClaimStage {
@@ -142,6 +157,7 @@ enum ClaimStage {
 
 export default Vue.extend({
   async created() {
+    console.log('isWalletConnect', this.isWalletConnect);
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
@@ -154,6 +170,7 @@ export default Vue.extend({
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
     this.currentChain = localStorage.getItem('currentChain') || 'BNB';
     this.supportedChains = config.supportedChains;
+    this.walletConnectChain = this.currentChain;
     await this.fetchPartnerProjects();
   },
 
@@ -167,6 +184,7 @@ export default Vue.extend({
       showCosmetics: true,
       fightMultiplier: 1,
       currentChain: 'BNB',
+      walletConnectChain: 'BNB',
       checked: false,
       ClaimStage,
       supportedChains: []
@@ -175,7 +193,7 @@ export default Vue.extend({
 
   computed: {
     ...mapState(['skillRewards', 'directStakeBonusPercent', 'payoutCurrencyId', 'currentNetworkId']) as Accessors<StoreMappedState>,
-    ...mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>,
+    ...mapGetters(['getWeb3', 'rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>,
 
     formattedSkillReward(): string {
       const skillRewards = fromWeiEther(this.skillRewards);
@@ -208,6 +226,9 @@ export default Vue.extend({
         rObj[key] = value.name.toString();
       }
       return rObj;
+    },
+    isWalletConnect(): boolean {
+      return localStorage.getItem('walletconnect') ? true : false;
     }
   },
 
@@ -225,6 +246,7 @@ export default Vue.extend({
       'updateCurrentChainSupportsMerchandise',
       'updateCurrentChainSupportsPvP',
       'updateCurrentChainSupportsQuests',
+      'setWeb3',
     ]),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
@@ -297,14 +319,48 @@ export default Vue.extend({
     },
 
     async setCurrentChain() {
+      console.log(+getConfigValue('VUE_APP_NETWORK_ID'));
       localStorage.setItem('currentChain', this.currentChain);
       this.updateCurrentChainSupportsMerchandise();
       this.updateCurrentChainSupportsPvP();
       this.updateCurrentChainSupportsQuests();
       Events.$emit('setting:currentChain', { value: this.currentChain });
       addChainToRouter(this.currentChain);
+      console.log(+getConfigValue('VUE_APP_NETWORK_ID'));
       await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
+    async connectWallet() {
+      if(this.isWalletConnect) {
+        localStorage.removeItem('walletconnect');
+        window.location.reload();
+      }
+      else{
+        console.log('connecting to net ',+getConfigValue('VUE_APP_NETWORK_ID'));
+
+        //  Create WalletConnect Provider
+        const provider = new WalletConnectProvider({
+          rpc: {
+            56: 'https://bsc-dataseed.binance.org/',
+            128: 'https://http-mainnet.hecochain.com',
+            66: 'https://exchainrpc.okex.org',
+            137: 'https://matic-mainnet.chainstacklabs.com',
+            43114: 'https://api.avax.network/ext/bc/C/rpc',
+            1313161554: 'https://mainnet.aurora.dev'
+          },
+          chainId: +getConfigValue('VUE_APP_NETWORK_ID'),
+        });
+
+        //  Enable session (triggers QR Code modal)
+        await provider.enable();
+
+        // provider.updateRpcUrl(128);
+        const w3 = new Web3(provider as any);
+        this.setWeb3(w3);
+        this.currentChain = this.walletConnectChain;
+        this.setCurrentChain();
+        window.location.reload();
+      }
+    }
   },
   watch: {
     '$i18n.locale'(newVal, ) {
