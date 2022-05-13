@@ -108,7 +108,10 @@ export function getConfigValue(key: string): any {
 
   if(process.env.NODE_ENV === 'development') return '';
   const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
-  const chain = localStorage.getItem('currentChain') || 'BNB';
+  let chain = localStorage.getItem('currentChain') || 'BNB';
+  if(!config.supportedChains.includes(chain)){
+    chain = 'BNB';
+  }
   return (config as Config).environments[env].chains[chain][key];
 }
 
@@ -250,10 +253,12 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
 
-  const tokensManagerContractAddr = process.env.VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS ||
-    getConfigValue('VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS') || (tokensManagerNetworks as Networks)[networkId]!.address;
-  const TokensManager = new web3.eth.Contract(tokensManagerAbi as Abi, tokensManagerContractAddr);
-
+  let TokensManager;
+  if((tokensManagerNetworks as Networks)[networkId]) {
+    const tokensManagerContractAddr = process.env.VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS ||
+      getConfigValue('VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS') || (tokensManagerNetworks as Networks)[networkId]!.address;
+    TokensManager = new web3.eth.Contract(tokensManagerAbi as Abi, tokensManagerContractAddr);
+  }
   const specialWeaponsManagerAddr = (specialWeaponsManagerNetworks as Networks)[networkId]!.address;
   const SpecialWeaponsManager = new web3.eth.Contract(specialWeaponsManagerAbi as Abi, specialWeaponsManagerAddr);
 
