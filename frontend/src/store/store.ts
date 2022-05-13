@@ -70,7 +70,7 @@ import raid from './raid';
 import staking from './staking';
 import land from './land';
 
-export function createStore(web3: Web3) {
+export function createStore() {
   return new Vuex.Store<IState>({
     modules:{
       bridge,
@@ -82,7 +82,7 @@ export function createStore(web3: Web3) {
       land
     },
     state: {
-      web3,
+      web3: new Web3(),
       contracts: null!,
       eventSubscriptions: () => [],
 
@@ -210,6 +210,9 @@ export function createStore(web3: Web3) {
     },
 
     getters: {
+      getWeb3(state: IState) {
+        return state.web3;
+      },
       contracts(state: IState) {
         // our root component prevents the app from being active if contracts
         // are not set up, so we never need to worry about it being null anywhere else
@@ -539,6 +542,9 @@ export function createStore(web3: Web3) {
     },
 
     mutations: {
+      setWeb3(state, web3) {
+        state.web3 = web3;
+      },
       setNetworkId(state, payload) {
         state.currentNetworkId = payload;
       },
@@ -1049,14 +1055,16 @@ export function createStore(web3: Web3) {
 
       async pollAccountsAndNetwork({ state, dispatch, commit }) {
         let refreshUserDetails = false;
-        const networkId = await web3.eth.net.getId();
+        const networkId = await state.web3.eth.net.getId();
 
         if(state.currentNetworkId !== networkId) {
           commit('setNetworkId', networkId);
           refreshUserDetails = true;
         }
-
-        const accounts = await web3.eth.requestAccounts();
+        console.log('requestAccounts; net id: ',await state.web3.eth.net.getId());
+        console.log(state.web3);
+        const accounts = await state.web3.eth.getAccounts();
+        console.log(accounts);
 
         if (!_.isEqual(state.accounts, accounts)) {
           commit('setAccounts', { accounts });
@@ -1257,8 +1265,9 @@ export function createStore(web3: Web3) {
         commit('setEventSubscriptions', payload);
       },
 
-      async setUpContracts({ commit }) {
-        const contracts = await setUpContracts(web3);
+      async setUpContracts({state, commit }) {
+        console.log('1269', state.web3);
+        const contracts = await setUpContracts(state.web3);
         commit('setContracts', () => contracts);
       },
 
@@ -2028,7 +2037,7 @@ export function createStore(web3: Web3) {
           skillGain
         } = res.events.FightOutcome.returnValues;
 
-        const {gasPrice} = await web3.eth.getTransaction(res.transactionHash);
+        const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
 
         const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
 
@@ -2127,7 +2136,7 @@ export function createStore(web3: Web3) {
             .getCurrency(currency)
             .call(defaultCallOptions(state));
 
-          await new web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
+          await new state.web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
             .approve(Blacksmith.options.address, price)
             .send({
               from: state.defaultAccount,
@@ -2162,7 +2171,7 @@ export function createStore(web3: Web3) {
             .getCurrency(currency)
             .call(defaultCallOptions(state));
 
-          await new web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
+          await new state.web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
             .approve(Blacksmith.options.address, price)
             .send({
               from: state.defaultAccount,
@@ -2196,7 +2205,7 @@ export function createStore(web3: Web3) {
             .getCurrency(currency)
             .call(defaultCallOptions(state));
 
-          await new web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
+          await new state.web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
             .approve(Blacksmith.options.address, price)
             .send({
               from: state.defaultAccount,
@@ -2564,7 +2573,7 @@ export function createStore(web3: Web3) {
         const {PartnerVault} = state.contracts();
         if(!PartnerVault || !state.defaultAccount) return;
 
-        const tokenContract = new web3.eth.Contract(erc721Abi as any[], tokenAddress) as Contract<IERC721>;
+        const tokenContract = new state.web3.eth.Contract(erc721Abi as any[], tokenAddress) as Contract<IERC721>;
 
         const isApprovedForAll = await tokenContract.methods.isApprovedForAll(state.defaultAccount, PartnerVault.options.address)
           .call(defaultCallOptions(state));
@@ -2590,9 +2599,9 @@ export function createStore(web3: Web3) {
         const {PartnerVault} = state.contracts();
         if (!PartnerVault || !state.defaultAccount) return;
 
-        const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
+        const currencyContract = new state.web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
         const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
-        const amountTimesDecimals = web3.utils.toBN(amount * 10 ** currencyDecimals);
+        const amountTimesDecimals = state.web3.utils.toBN(amount * 10 ** currencyDecimals);
 
         await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
           from: state.defaultAccount,
@@ -2616,9 +2625,9 @@ export function createStore(web3: Web3) {
 
       async getCurrencyBalanceInPartnerVault({state}, {currencyAddress}){
         const {PartnerVault} = state.contracts();
-        if(!PartnerVault || !state.defaultAccount) return;
+        if(!PartnerVault || !state.defaultAccount || !state.web3) return;
 
-        const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
+        const currencyContract = new state.web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
         let currencyBalance = await currencyContract.methods.balanceOf(PartnerVault.options.address).call(defaultCallOptions(state));
         const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
         currencyBalance = new BigNumber(currencyBalance).div(new BigNumber(10 ** currencyDecimals)).toFixed();
@@ -2638,7 +2647,7 @@ export function createStore(web3: Web3) {
 
       async isExternalCurrency({state}, {currencyAddress}) {
         try{
-          const currencyContract = new web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
+          const currencyContract = new state.web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
           await currencyContract.methods.decimals().call(defaultCallOptions(state));
           return true;
         } catch (e) {
@@ -3332,7 +3341,7 @@ export function createStore(web3: Web3) {
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(web3.utils.toWei('' + price, 'ether')),
+            new BigNumber(state.web3.utils.toWei('' + price, 'ether')),
             state.skillRewards
           );
         } catch(err) {
@@ -3400,7 +3409,7 @@ export function createStore(web3: Web3) {
             getGasPrice(),
             defaultCallOptions(state),
             defaultCallOptions(state),
-            new BigNumber(web3.utils.toWei('' + price, 'ether')),
+            new BigNumber(state.web3.utils.toWei('' + price, 'ether')),
             state.skillRewards
           );
         } catch(err) {
@@ -3617,8 +3626,8 @@ export function createStore(web3: Web3) {
         ]);
       },
 
-      async configureMetaMask({ dispatch }) {
-        const currentNetwork = await web3.eth.net.getId();
+      async configureMetaMask({ state, dispatch }) {
+        const currentNetwork = await state.web3.eth.net.getId();
         if(currentNetwork === +getConfigValue('VUE_APP_NETWORK_ID')) return;
         dispatch('configureChainNet', {
           networkId: +getConfigValue('VUE_APP_NETWORK_ID'),
@@ -3633,7 +3642,7 @@ export function createStore(web3: Web3) {
         });
       },
       async configureChainNet(
-        { commit },
+        { state, commit },
         { networkId, chainId, chainName, currencyName, currencySymbol, currencyDecimals, rpcUrls, blockExplorerUrls, skillAddress }:
         { networkId: number,
           chainId: string,
@@ -3648,13 +3657,13 @@ export function createStore(web3: Web3) {
       {
         commit('setNetworkId', networkId);
         try {
-          await (web3.currentProvider as any).request({
+          await (state.web3.currentProvider as any).request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId }],
           });
         } catch (switchError) {
           try {
-            await (web3.currentProvider as any).request({
+            await (state.web3.currentProvider as any).request({
               method: 'wallet_addEthereumChain',
               params: [
                 {
@@ -3677,7 +3686,7 @@ export function createStore(web3: Web3) {
         }
 
         try {
-          await (web3.currentProvider as any).request({
+          await (state.web3.currentProvider as any).request({
             method: 'wallet_watchAsset',
             params: {
               type: 'ERC20',
@@ -4333,10 +4342,10 @@ export function createStore(web3: Web3) {
         let xpGain;
         let skillGain;
 
-        const currentBlock = await web3.eth.getBlockNumber();
+        const currentBlock = await state.web3.eth.getBlockNumber();
 
         await new Promise<void>((resolve, reject) => {
-          const subscription = web3.eth.subscribe('newBlockHeaders', async () => {
+          const subscription = state.web3.eth.subscribe('newBlockHeaders', async () => {
             const fightOutcomeEvents = await CryptoBlades.getPastEvents('FightOutcome', {
               filter: { owner: state.defaultAccount! },
               toBlock: 'latest',
@@ -4363,7 +4372,7 @@ export function createStore(web3: Web3) {
           });
         });
 
-        const {gasPrice} = await web3.eth.getTransaction(res.transactionHash);
+        const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
 
         const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
 
