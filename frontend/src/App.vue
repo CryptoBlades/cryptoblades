@@ -107,13 +107,15 @@ import '@/mixins/general';
 import config from '../app-config.json';
 import { addChainToRouter } from '@/utils/common';
 import Banner from './components/Banner.vue';
+import Web3 from 'web3';
+import WalletConnectProvider from '@walletconnect/web3-provider';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
 });
 
 export default {
-  inject: ['web3', 'expectedNetworkId', 'expectedNetworkName'],
+  inject: ['expectedNetworkId', 'expectedNetworkName'],
   components: {
     NavBar,
     CharacterBar,
@@ -141,12 +143,12 @@ export default {
     ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking']),
     ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl']),
 
-    canShowApp() {
+    loadingApp() {
       return (this.contracts !== null && !_.isEmpty(this.contracts) && !this.showNetworkError) || (this.isOptions);
     },
 
     showMetamaskWarning() {
-      return !this.web3.currentProvider;
+      return false;
     },
 
     showNetworkError() {
@@ -195,7 +197,7 @@ export default {
     ...mapGetters([
       'getExchangeTransakUrl'
     ]),
-    ...mapMutations(['updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP', 'updateCurrentChainSupportsQuests']),
+    ...mapMutations(['setWeb3', 'updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP', 'updateCurrentChainSupportsQuests']),
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BNB';
       const paramChain = this.$router.currentRoute.query.chain;
@@ -258,11 +260,13 @@ export default {
     },
 
     async connectMetamask() {
-      const web3 = this.web3.currentProvider;
+      const web3 = new Web3(Web3.givenProvider);
+      console.log(web3);
+      this.setWeb3(web3);
       this.isConnecting = true;
       this.errorMessage = i18n.t('app.warning.errorMessage.connecting');
-      web3
-        .request({ method: 'eth_requestAccounts' })
+      web3.eth
+        .requestAccounts()
         .then(() => {
           this.errorMessage = i18n.t('app.warning.errorMessage.success');
           this.isConnecting = false;
@@ -344,9 +348,33 @@ export default {
 
       localStorage.setItem('lastnotification', notifications[0].hash);
     },
+    async connectWalletConnect(){
+      // localStorage.removeItem('walletconnect');
+      //  Create WalletConnect Provider
+      console.log(JSON.parse(localStorage.getItem('walletconnect')).chainId);
+      const provider = new WalletConnectProvider({
+        rpc: {
+          56: 'https://bsc-dataseed.binance.org/',
+          128: 'https://http-mainnet.hecochain.com',
+          66: 'https://exchainrpc.okex.org',
+          137: 'https://matic-mainnet.chainstacklabs.com',
+          43114: 'https://api.avax.network/ext/bc/C/rpc',
+          1313161554: 'https://mainnet.aurora.dev'
+        },
+        chainId: JSON.parse(localStorage.getItem('walletconnect')).chainId,
+      });
+
+      //  Enable session (triggers QR Code modal)
+      await provider.enable();
+      provider.updateRpcUrl(JSON.parse(localStorage.getItem('walletconnect')).chainId);
+      const w3 = new Web3(provider);
+      this.setWeb3(w3);
+      console.log('y', w3);
+      // const web3 = new Web3(provider);
+    },
   },
 
-  mounted() {
+  async mounted() {
     this.checkStorage();
 
     Events.$on('setting:hideRewards', () => this.checkStorage());
@@ -394,9 +422,15 @@ export default {
       this.configureMetamask();
     }
   },
-
   async created() {
     this.checkChainAndParams();
+    if(!localStorage.getItem('walletconnect')){
+      await this.connectMetamask();
+    }
+    else{
+      await this.connectWalletConnect();
+    }
+
     try {
       await this.initializeStore();
     } catch (e) {
@@ -436,7 +470,7 @@ export default {
         console.error(e);
       }
 
-      setTimeout(pollAccounts, 200);
+      setTimeout(pollAccounts, 2000);
     };
 
     pollAccounts();
