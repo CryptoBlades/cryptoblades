@@ -108,7 +108,10 @@ export function getConfigValue(key: string): any {
 
   if(process.env.NODE_ENV === 'development') return '';
   const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
-  const chain = localStorage.getItem('currentChain') || 'BNB';
+  let chain = localStorage.getItem('currentChain') || 'BNB';
+  if(!config.supportedChains.includes(chain)){
+    chain = 'BNB';
+  }
   return (config as Config).environments[env].chains[chain][key];
 }
 
