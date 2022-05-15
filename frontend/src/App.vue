@@ -20,7 +20,7 @@
         <i class="fas fa-spinner fa-spin"></i>
       </div>
     </div>
-    <div class="fullscreen-warning" v-if="(showMetamaskWarning)">
+    <div class="fullscreen-warning" v-if="showMetamaskWarning">
       <div class="starter-panel">
         <div class="tob-bg-img promotion-decoration">
           <img class="vertical-decoration bottom" src="./assets/border-element.png">
@@ -30,7 +30,7 @@
           <big-button class="button common-width-button"
           :mainText="$t('app.warning.buttons.addMetamask')" @click="startOnboarding" v-if="showMetamaskWarning" />
           <big-button class="button common-width-button"
-          mainText="Wallet Connect" @click="$router.push({ name: 'options' }); showMetamaskWarning=false" />
+          mainText="Wallet Connect" @click="walletConnectOnboarding()" />
         </div>
       </div>
     </div>
@@ -44,7 +44,7 @@
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
         <div>
           <big-button class="button mm-button" :mainText="$t('app.warning.buttons.confMetamask')" @click="configureMetamask" />
-          <big-button v-bind:class="[isConnecting ? 'disabled' : '']" class="button mm-button"
+          <big-button :class="[isConnecting || isConnected ? 'disabled' : '']" class="button mm-button"
           :mainText="$t('app.warning.buttons.startMetamask')" @click="connectMetamask" />
         </div>
         <div class="seperator"></div>
@@ -130,6 +130,7 @@ export default {
     hideWalletWarning: false,
     showAds: false,
     isConnecting: false,
+    isConnected: false,
     recruitCost: '',
     isOptions: false,
     showWeapon: false,
@@ -154,6 +155,9 @@ export default {
 
     currentChain(){
       return localStorage.getItem('currentChain');
+    },
+    isWalletConnect() {
+      return localStorage.getItem('walletconnect');
     },
   },
 
@@ -203,6 +207,7 @@ export default {
 
       if(!paramChain){
         localStorage.setItem('currentChain', currentChain);
+        console.log('addTo', currentChain);
         addChainToRouter(currentChain);
       }
 
@@ -212,8 +217,8 @@ export default {
         addChainToRouter(currentChain);
       }
 
-      //if user has an unsupported chain set (e.g. BSC instead of BNB) in storage or query param
-      if(!supportedChains.includes(currentChain) || !supportedChains.includes(paramChain)){
+      //if user has an unsupported chain set (e.g. BSC instead of BNB) in storage
+      if(!supportedChains.includes(currentChain)){
         localStorage.setItem('currentChain', 'BNB');
         addChainToRouter('BNB');
       }
@@ -221,7 +226,7 @@ export default {
       //set chain in localStorage & MM from query param; check if supported
       else if (currentChain !== paramChain && supportedChains.includes(paramChain)){
         localStorage.setItem('currentChain', paramChain);
-        await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
+        if(!this.isWalletConnect) await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
       }
       this.updateCurrentChainSupportsMerchandise();
       this.updateCurrentChainSupportsPvP();
@@ -256,7 +261,6 @@ export default {
       onboarding.startOnboarding();
     },
     async configureMetamask() {
-      console.log('configureMetamask');
       await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
 
@@ -271,6 +275,7 @@ export default {
         .then(() => {
           this.errorMessage = i18n.t('app.warning.errorMessage.success');
           this.isConnecting = false;
+          this.isConnected = true;
 
           this.initializeStore();
         })
@@ -366,17 +371,17 @@ export default {
 
       //  Enable session (triggers QR Code modal)
       await provider.enable();
-      provider.updateRpcUrl(JSON.parse(localStorage.getItem('walletconnect')).chainId);
-      const w3 = new Web3(provider);
-      this.setWeb3(w3);
-      console.log('y', w3);
-      // const web3 = new Web3(provider);
+      // provider.updateRpcUrl(JSON.parse(localStorage.getItem('walletconnect')).chainId);
+      this.setWeb3(new Web3(provider));
     },
+    walletConnectOnboarding(){
+      this.$router.push({ name: 'options' });
+      this.showMetamaskWarning = false;
+      this.hideWalletWarning = true;
+    }
   },
 
   async mounted() {
-    this.checkStorage();
-
     Events.$on('setting:hideRewards', () => this.checkStorage());
     Events.$on('setting:useGraphics', () => this.checkStorage());
     Events.$on('setting:hideWalletWarning', () => this.checkStorage());
@@ -423,18 +428,20 @@ export default {
     }
   },
   async created() {
-    if(!this.givenProvider){
-      this.showMetamaskWarning = true;
-    }
     this.checkChainAndParams();
-    if(!localStorage.getItem('walletconnect')){
+    this.checkStorage();
+
+    if(!this.isWalletConnect){
       await this.connectMetamask();
     }
     else{
       this.showMetamaskWarning = false;
+      this.hideWalletWarning = true;
       await this.connectWalletConnect();
     }
-
+    if(!this.currentProvider){
+      this.showMetamaskWarning = true;
+    }
     try {
       await this.initializeStore();
     } catch (e) {
@@ -474,15 +481,10 @@ export default {
         console.error(e);
       }
 
-      setTimeout(pollAccounts, 2000);
+      setTimeout(pollAccounts, 500);
     };
 
     pollAccounts();
-
-    if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
-    if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
-    if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
-    if (!localStorage.getItem('fightMultiplier')) localStorage.setItem('fightMultiplier', '1');
 
     this.checkNotifications();
     this.initializeRecruitCost();

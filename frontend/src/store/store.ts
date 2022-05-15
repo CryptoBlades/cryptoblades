@@ -2553,7 +2553,7 @@ export function createStore() {
           getGasPrice(),
           defaultCallOptions(state),
           defaultCallOptions(state),
-          new BigNumber(web3.utils.toWei('100', 'ether')),
+          new BigNumber(state.web3.utils.toWei('100', 'ether')),
           state.skillRewards
         );
 

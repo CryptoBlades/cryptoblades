@@ -140,6 +140,7 @@ interface Data {
   currentChain: string;
   supportedChains: string[];
   walletConnectChain: string;
+  connectingWalletConnect: boolean;
 }
 
 interface StoreMappedGetters {
@@ -157,6 +158,8 @@ enum ClaimStage {
 
 export default Vue.extend({
   async created() {
+    console.log(getConfigValue('currencyNetwork'));
+    if(this.isWalletConnect) this.walletConnectChain = getConfigValue('currencyNetwork');
     console.log('isWalletConnect', this.isWalletConnect);
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
@@ -185,6 +188,7 @@ export default Vue.extend({
       fightMultiplier: 1,
       currentChain: 'BNB',
       walletConnectChain: 'BNB',
+      connectingWalletConnect: false,
       checked: false,
       ClaimStage,
       supportedChains: []
@@ -326,8 +330,7 @@ export default Vue.extend({
       this.updateCurrentChainSupportsQuests();
       Events.$emit('setting:currentChain', { value: this.currentChain });
       addChainToRouter(this.currentChain);
-      console.log(+getConfigValue('VUE_APP_NETWORK_ID'));
-      await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
+      if(!this.connectingWalletConnect) await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
     async connectWallet() {
       if(this.isWalletConnect) {
@@ -335,6 +338,10 @@ export default Vue.extend({
         window.location.reload();
       }
       else{
+        this.connectingWalletConnect = true;
+        this.currentChain = this.walletConnectChain;
+        this.setCurrentChain();
+
         console.log('connecting to net ',+getConfigValue('VUE_APP_NETWORK_ID'));
 
         //  Create WalletConnect Provider
@@ -353,11 +360,9 @@ export default Vue.extend({
         //  Enable session (triggers QR Code modal)
         await provider.enable();
 
-        // provider.updateRpcUrl(128);
         const w3 = new Web3(provider as any);
         this.setWeb3(w3);
-        this.currentChain = this.walletConnectChain;
-        this.setCurrentChain();
+        (this as any).$router.push({ path: '/', query: { chain: this.currentChain } });
         window.location.reload();
       }
     }
