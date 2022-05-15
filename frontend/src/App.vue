@@ -1,10 +1,5 @@
 <template>
   <div class="app">
-    <Banner
-      text="GIVEAWAY: Win 1 of 10 Level 70+ Characters"
-      link="https://gleam.io/uswdy/cryptoblades-70-character-giveaway"
-      linkText="Enter here"
-    />
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content dark-bg-text">
       <b-row>
@@ -106,7 +101,6 @@ import { getConfigValue } from './contracts';
 import '@/mixins/general';
 import config from '../app-config.json';
 import { addChainToRouter } from '@/utils/common';
-import Banner from './components/Banner.vue';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -120,7 +114,6 @@ export default {
     BigButton,
     SmallButton,
     WeaponRowGrid,
-    Banner
   },
 
   data: () => ({
