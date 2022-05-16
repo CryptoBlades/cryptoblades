@@ -174,8 +174,10 @@ export default Vue.extend({
     this.showCosmetics = localStorage.getItem('showCosmetics') !== 'false';
     this.fightMultiplier = Number(localStorage.getItem('fightMultiplier'));
     this.currentChain = localStorage.getItem('currentChain') || 'BNB';
-    this.supportedChains = config.supportedChains;
+
     this.walletConnectChain = this.currentChain;
+    this.supportedChains = window.location.href.startsWith('https://test') ? config.testSupportedChains : config.supportedChains;
+
     await this.fetchPartnerProjects();
   },
 

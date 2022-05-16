@@ -249,8 +249,9 @@ export default Vue.extend({
     ])as StoreMappedMutations,
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BNB';
+
       const paramChain = (this as any).$router.currentRoute.query.chain;
-      const supportedChains = config.supportedChains;
+      const supportedChains = window.location.href.startsWith('https://test') ? config.testSupportedChains : config.supportedChains;
 
       if(!paramChain){
         localStorage.setItem('currentChain', currentChain);
