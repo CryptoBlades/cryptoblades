@@ -162,9 +162,7 @@ enum ClaimStage {
 
 export default Vue.extend({
   async created() {
-    console.log(getConfigValue('currencyNetwork'));
     if(this.isWalletConnect) this.walletConnectChain = getConfigValue('currencyNetwork');
-    console.log('isWalletConnect', this.isWalletConnect);
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
@@ -327,7 +325,6 @@ export default Vue.extend({
     },
 
     async setCurrentChain() {
-      console.log(+getConfigValue('VUE_APP_NETWORK_ID'));
       localStorage.setItem('currentChain', this.currentChain);
       this.updateCurrentChainSupportsMerchandise();
       this.updateCurrentChainSupportsPvP();
@@ -345,8 +342,6 @@ export default Vue.extend({
         this.connectingWalletConnect = true;
         this.currentChain = this.walletConnectChain;
         this.setCurrentChain();
-
-        console.log('connecting to net ',+getConfigValue('VUE_APP_NETWORK_ID'));
 
         const rpcs = {} as RPCS;
         config.supportedChains.forEach((chain) => {
