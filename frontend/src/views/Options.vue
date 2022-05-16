@@ -150,6 +150,10 @@ interface StoreMappedGetters {
   getWeb3: any;
 }
 
+interface RPCS {
+  [key: number]: string;
+}
+
 enum ClaimStage {
   WaxBridge = 0,
   Stake = 1,
@@ -344,16 +348,15 @@ export default Vue.extend({
 
         console.log('connecting to net ',+getConfigValue('VUE_APP_NETWORK_ID'));
 
+        const rpcs = {} as RPCS;
+        config.supportedChains.forEach((chain) => {
+          const chainId = getConfigValue('VUE_APP_NETWORK_ID', chain);
+          rpcs[chainId] = getConfigValue('rpcUrls',chain)[0];
+        });
+
         //  Create WalletConnect Provider
         const provider = new WalletConnectProvider({
-          rpc: {
-            56: 'https://bsc-dataseed.binance.org/',
-            128: 'https://http-mainnet.hecochain.com',
-            66: 'https://exchainrpc.okex.org',
-            137: 'https://matic-mainnet.chainstacklabs.com',
-            43114: 'https://api.avax.network/ext/bc/C/rpc',
-            1313161554: 'https://mainnet.aurora.dev'
-          },
+          rpc: rpcs,
           chainId: +getConfigValue('VUE_APP_NETWORK_ID'),
         });
 
