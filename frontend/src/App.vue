@@ -1,10 +1,5 @@
 <template>
   <div class="app">
-    <Banner
-      text="GIVEAWAY: Win 1 of 10 Level 70+ Characters"
-      link="https://gleam.io/uswdy/cryptoblades-70-character-giveaway"
-      linkText="Enter here"
-    />
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content dark-bg-text">
       <b-row>
@@ -106,7 +101,6 @@ import { getConfigValue } from './contracts';
 import '@/mixins/general';
 import config from '../app-config.json';
 import { addChainToRouter } from '@/utils/common';
-import Banner from './components/Banner.vue';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -120,7 +114,6 @@ export default {
     BigButton,
     SmallButton,
     WeaponRowGrid,
-    Banner
   },
 
   data: () => ({
@@ -199,7 +192,7 @@ export default {
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BNB';
       const paramChain = this.$router.currentRoute.query.chain;
-      const supportedChains = config.supportedChains;
+      const supportedChains = window.location.href.startsWith('https://test') ? config.testSupportedChains : config.supportedChains;
 
       if(!paramChain){
         localStorage.setItem('currentChain', currentChain);
@@ -211,7 +204,8 @@ export default {
         localStorage.setItem('currentChain', currentChain);
         addChainToRouter(currentChain);
       }
-      if(currentChain === 'BSC') {
+
+      if(!supportedChains.includes(currentChain) || !supportedChains.includes(paramChain)){
         localStorage.setItem('currentChain', 'BNB');
         addChainToRouter('BNB');
       }
