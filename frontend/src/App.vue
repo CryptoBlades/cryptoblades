@@ -192,7 +192,7 @@ export default {
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BNB';
       const paramChain = this.$router.currentRoute.query.chain;
-      const supportedChains = config.supportedChains;
+      const supportedChains = window.location.href.startsWith('https://test') ? config.testSupportedChains : config.supportedChains;
 
       if(!paramChain){
         localStorage.setItem('currentChain', currentChain);
