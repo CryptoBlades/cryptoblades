@@ -23,7 +23,7 @@
       <!-- Character Name Heading -->
       <div class="mb-5 d-flex">
         <h1 class="title mb-0">{{ getCharacterName(currentCharacterId) }}</h1>
-        <button class="edit-icon" @click="openChangeNameModal" ><img src="../assets/edit-icon.svg" /></button>
+        <button class="edit-icon" @click="openChangeNameModal" ><img src="../../assets/edit-icon.svg" /></button>
         <span class="ml-auto text-muted align-self-end">#{{currentCharacterId}}</span>
       </div>
       <!-- Character chart info -->
@@ -104,14 +104,14 @@
           <option class="text-body" v-if="availableTraits.length === 0" value="">{{ $t('Character.noTraits') }}</option>
         </select>
         <div class="inputImage">
-          <img src="../assets/elements/potion_05_te.png" />
+          <img src="../../assets/elements/potion_05_te.png" />
           <span class="main-font">{{availableTraits.length}}/1</span>
         </div>
       </div>
       <button @click="changeCharacterTraitCall">Change</button>
       <button class="offset" @click="$refs['character-change-trait-modal'].hide()">
           {{$t('characterModal.close')}}
-          <img src="../assets/close-btn.png"/>
+          <img src="../../assets/close-btn.png"/>
       </button>
     </b-modal>
     <!-- Character Transfer Modal -->
@@ -131,7 +131,7 @@
         <button :disabled="isSending || receiverAddress === ''" @click="transfer">Transfer</button>
         <button class="offset" @click="$refs['character-transfer-modal'].hide()">
           {{$t('characterModal.close')}}
-          <img src="../assets/close-btn.png"/>
+          <img src="../../assets/close-btn.png"/>
         </button>
     </b-modal>
     <!-- Character Change Name Modal -->
@@ -143,7 +143,7 @@
         <div class="input">
           <b-form-input placeholder="Enter new name" v-model="newName"/>
           <div class="inputImage">
-            <img src="../assets/elements/scroll_06_te.png" />
+            <img src="../../assets/elements/scroll_06_te.png" />
             <span class="main-font">{{haveRename}}/1</span>
           </div>
         </div>
@@ -157,7 +157,7 @@
         <button :disabled="isSending || newName === ''" @click="renameCharacterCall">Change</button>
         <button class="offset" @click="$refs['character-change-name-modal'].hide()">
           {{$t('characterModal.close')}}
-          <img src="../assets/close-btn.png"/>
+          <img src="../../assets/close-btn.png"/>
         </button>
     </b-modal>
   </div>
@@ -492,7 +492,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import '../styles/character-cosmetics.css';
+@import '../../styles/character-cosmetics.css';
 
 
 .character-container {
@@ -511,7 +511,7 @@ export default Vue.extend({
   max-width: 500px;
   max-height: 100vh;
   height: max-content;
-  background-image: url("../assets/placeholder/standImage.png");
+  background-image: url("../../assets/placeholder/standImage.png");
   background-size: contain;
   background-position-y: bottom;
   background-repeat: no-repeat;
