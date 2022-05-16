@@ -54,6 +54,24 @@
     "lowMultiplier": "Current multiplier is low, you will receive only {currentMultiplier} of claimed tokens.",
     "realWithdrawValueClaimable": "Currently you'll receive approximately {actualAmount} {tokenSymbol} for withdrawing {skillAmount} SKILL."
   },
+  "Character": {
+    "upgradeText": "Upgrading is the process of spending SKILL tokens to upgrade a character's power using souls. The target character receives bonus power, and the souls used will disappear.",
+    "level": "Level",
+    "power": "Power",
+    "element": "Element",
+    "reputation": "Reputation",
+    "exp": "EXP",
+    "expNeeded": "Exp needed to level",
+    "stamina": "Stamina",
+    "loading": "Loading...",
+    "souls": "Souls",
+    "soul": "Soul",
+    "changeTrait":"Change Trait",
+    "changeName": "Change Name",
+    "noTraits": "You have no traits left to pick.",
+    "garrison": "Garrison",
+    "info": "Info"
+  },
   "CharacterDisplay": {
     "loading": "Loading...",
     "powerIncrease": "Power increases by 10 every level up, and multiplied every 10 level ups",
