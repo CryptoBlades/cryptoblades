@@ -110,7 +110,7 @@
       </div>
       <button @click="changeCharacterTraitCall">Change</button>
       <button class="offset" @click="$refs['character-change-trait-modal'].hide()">
-          Tap Anywhere To Close
+          {{$t('characterModal.close')}}
           <img src="../assets/close-btn.png"/>
       </button>
     </b-modal>
@@ -130,7 +130,7 @@
         </div>
         <button :disabled="isSending || receiverAddress === ''" @click="transfer">Transfer</button>
         <button class="offset" @click="$refs['character-transfer-modal'].hide()">
-          Tap Anywhere To Close
+          {{$t('characterModal.close')}}
           <img src="../assets/close-btn.png"/>
         </button>
     </b-modal>
@@ -156,7 +156,7 @@
         </div>
         <button :disabled="isSending || newName === ''" @click="renameCharacterCall">Change</button>
         <button class="offset" @click="$refs['character-change-name-modal'].hide()">
-          Tap Anywhere To Close
+          {{$t('characterModal.close')}}
           <img src="../assets/close-btn.png"/>
         </button>
     </b-modal>

@@ -22,7 +22,7 @@
             </div>
         </div>
         <h5 class="m-0 mt-2 cosmetic-font">{{cosmetic.name}}</h5>
-        <span class="main-font text-muted">Owned</span>
+        <span class="main-font text-muted">{{$t(`Character.owned`)}}</span>
       </div>
       </div>
     </b-tab>

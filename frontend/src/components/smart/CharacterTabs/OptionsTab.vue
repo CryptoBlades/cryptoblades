@@ -3,24 +3,24 @@
       <div class="mt-2">
         <div class="d-flex py-4 options-border">
           <div class="options-text main-font">
-            <h3>Change Trait</h3>
-            <p>Change your character's element.</p>
+            <h3>{{$t('Character.changeTrait')}}</h3>
+            <p>{{$t('Character.changeTraitText')}}</p>
           </div>
-          <button @click="$emit('openChangeTrait')" class="options-button main-font">Change</button>
+          <button @click="$emit('openChangeTrait')" class="options-button main-font">{{$t('Character.change')}}</button>
         </div>
         <div  class="d-flex py-4 options-border">
           <div class="options-text main-font">
-            <h3>Send to Garrison</h3>
-            <p>You will not be able to use the character when in garrison.</p>
+            <h3>{{$t('Character.sendToGarrison')}}</h3>
+            <p>{{$t('Character.sendToGarrisonText')}}</p>
           </div>
-          <button @click="$emit('onSendToGarrison')"  class="options-button main-font">Send</button>
+          <button @click="$emit('onSendToGarrison')"  class="options-button main-font">{{$t('Character.send')}}</button>
         </div>
         <div  class="d-flex py-4 options-border">
           <div class="options-text main-font">
-            <h3>Transfer</h3>
-            <p>Transfer character to another address.</p>
+            <h3>{{$t('Character.transfer')}}</h3>
+            <p>{{$t('Character.transferText')}}</p>
           </div>
-          <button @click="$emit('openTransferModal')" class="options-button main-font">Transfer</button>
+          <button @click="$emit('openTransferModal')" class="options-button main-font">{{$t('Character.transfer')}}</button>
         </div>
       </div>
     </b-tab>

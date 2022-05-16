@@ -31,7 +31,7 @@
         </div>
       </div>
       <button class="upgrade-character-button mt-5" @click="onUpgradeConfirm">
-        <span>UPGRADE</span><br/>{{powerAmount/10}} {{$t(`Character.soul`)}}
+        <span>{{$t('Character.upgrade')}}</span><br/>{{powerAmount/10}} {{$t(`Character.soul`)}}
       </button>
     </b-tab>
 </template>

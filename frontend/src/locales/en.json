@@ -67,10 +67,22 @@
     "souls": "Souls",
     "soul": "Soul",
     "changeTrait":"Change Trait",
+    "changeTraitText": "Change your character's element.",
     "changeName": "Change Name",
     "noTraits": "You have no traits left to pick.",
     "garrison": "Garrison",
-    "info": "Info"
+    "info": "Info",
+    "owned": "Owned",
+    "upgrade": "UPGRADE",
+    "sendToGarrison": "Send to Garrison",
+    "sendToGarrisonText": "You will not be able to use the character when in garrison.",
+    "transfer": "Transfer",
+    "transferText": "Transfer character to another address.",
+    "change": "Change",
+    "send": "Send"
+  },
+  "characterModal": {
+    "close": "Tap Anywhere To Close"
   },
   "CharacterDisplay": {
     "loading": "Loading...",
