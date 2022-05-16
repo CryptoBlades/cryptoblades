@@ -1031,7 +1031,7 @@ export function createStore() {
     },
 
     actions: {
-      async initialize({ dispatch }) {
+      async initializeStore({ dispatch }) {
         await dispatch('setUpContracts');
         await dispatch('setUpContractEvents');
 
