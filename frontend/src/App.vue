@@ -261,7 +261,6 @@ export default Vue.extend({
 
       if(!paramChain){
         localStorage.setItem('currentChain', currentChain);
-        console.log('addTo', currentChain);
         addChainToRouter(currentChain);
       }
 
@@ -474,7 +473,6 @@ export default Vue.extend({
     }
   },
   async created() {
-    console.log(localStorage.getItem('walletconnect'));
     this.checkChainAndParams();
     this.checkStorage();
 
