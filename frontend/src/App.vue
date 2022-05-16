@@ -52,7 +52,7 @@
           <p>{{ $t('app.warning.message.' + currentChain + '.instructions', {recruitCost: this.recruitCost}) }}</p>
           <ul class="unstyled-list">
             <li>
-              <span v-html="$t('app.warning.message.' + currentChain + '.inst1', {link1: getExchangeTransakUrl()})"></span>
+              <span v-html="$t('app.warning.message.' + currentChain + '.inst1', {link1: getExchangeTransakUrl})"></span>
             </li>
             <li>
               <span v-html="$t('app.warning.message.' + currentChain + '.inst2', {link1: getExchangeUrl})"></span>
@@ -126,19 +126,24 @@ interface Data {
   isConnecting: boolean,
   isConnected: boolean,
   recruitCost: string,
-  isOptions: boolean,
   showWeapon: boolean,
   currentWeaponId: null | number,
   weaponId: null | number,
   toggleSideBar: boolean,
   currentPath: string,
   showMetamaskWarning: boolean,
+  pollCharacterStaminaIntervalId: ReturnType<typeof setInterval> | null,
+  slowPollIntervalId: ReturnType<typeof setInterval> | null,
+  doPollAccounts: boolean,
 }
 
 interface StoreMappedState {
   skillBalance: string,
   defaultAccount: string | null,
   currentNetworkId: number,
+  currentCharacterId: number,
+  web3: Web3,
+  staking: string,
 }
 
 interface StoreMappedGetters {
@@ -146,13 +151,14 @@ interface StoreMappedGetters {
   ownCharacters: ICharacter[],
   ownGarrisonCharacters: ICharacter[],
   getExchangeUrl: string,
+  getExchangeTransakUrl: string,
 }
 
 interface StoreMappedActions {
   initializeStore: () => void,
   fetchCharacterStamina: (characterId: number) => void,
   pollAccountsAndNetwork: () => void,
-  setupWeaponDurabilities: (characterId: number) => void,
+  setupWeaponDurabilities: () => void,
   fetchWaxBridgeDetails: () => void,
   fetchRewardsClaimTax: () => void,
   configureMetaMask: () => void,
@@ -172,7 +178,6 @@ interface Notification {
 }
 
 export default Vue.extend({
-  inject: ['expectedNetworkId', 'expectedNetworkName'],
   components: {
     NavBar,
     CharacterBar,
@@ -182,39 +187,44 @@ export default Vue.extend({
     Banner
   },
 
-  data: () => ({
-    errorMessage: '',
-    hideWalletWarning: false,
-    showAds: false,
-    isConnecting: false,
-    isConnected: false,
-    recruitCost: '',
-    isOptions: false,
-    showWeapon: false,
-    currentWeaponId: null,
-    weaponId: null,
-    toggleSideBar: false,
-    currentPath: '',
-    showMetamaskWarning: false,
-  }) as Data,
+  data() {
+    return {
+      errorMessage: '',
+      hideWalletWarning: false,
+      showAds: false,
+      isConnecting: false,
+      isConnected: false,
+      recruitCost: '',
+      showWeapon: false,
+      currentWeaponId: null,
+      weaponId: null,
+      toggleSideBar: false,
+      currentPath: '',
+      showMetamaskWarning: false,
+      pollCharacterStaminaIntervalId: null,
+      slowPollIntervalId: null,
+      doPollAccounts: false
+    } as Data;
+  },
 
   computed: {
-    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking', 'web3']) as Accessors<StoreMappedState>,
-    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl']) as Accessors<StoreMappedGetters>,
+    ...(mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking', 'web3']) as Accessors<StoreMappedState>),
+    ...(mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl', 'getExchangeTransakUrl']) as Accessors<StoreMappedGetters>),
 
-    canShowApp() {
-      return (this.contracts !== null && !_.isEmpty(this.contracts)) || (this.isOptions);
+    canShowApp(): boolean {
+      return (this.contracts !== null && !_.isEmpty(this.contracts)) || this.isOptions;
     },
 
-    currentProvider(){
-      return this.web3.currentProvider;
+    currentChain(): string {
+      return localStorage.getItem('currentChain') || '';
     },
 
-    currentChain(){
-      return localStorage.getItem('currentChain');
+    isWalletConnect(): boolean {
+      return localStorage.getItem('walletconnect') === '';
     },
-    isWalletConnect() {
-      return localStorage.getItem('walletconnect');
+
+    isOptions(): boolean {
+      return (this as any).$route.path === '/options';
     },
   },
 
@@ -225,21 +235,6 @@ export default Vue.extend({
 
     async currentCharacterId() {
       await this.updateCharacterStamina(this.currentCharacterId);
-    },
-    $route(to) {
-      // react to route changes
-      this.currentPath = to.path;
-      this.checkChainAndParams();
-      if(to.path === '/options') {
-        return this.isOptions = true;
-      } else this.isOptions = false;
-
-      window.gtag('event', 'page_view', {
-        page_title: to.name,
-        page_location: to.fullPath,
-        page_path: to.path,
-        send_to: 'G-C5RLX74PEW',
-      });
     },
   },
 
@@ -261,7 +256,7 @@ export default Vue.extend({
     ])as StoreMappedMutations,
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BNB';
-      const paramChain = this.$router.currentRoute.query.chain;
+      const paramChain = (this as any).$router.currentRoute.query.chain;
       const supportedChains = config.supportedChains;
 
       if(!paramChain){
@@ -285,7 +280,7 @@ export default Vue.extend({
       //set chain in localStorage & MM from query param; check if supported
       else if (currentChain !== paramChain && supportedChains.includes(paramChain)){
         localStorage.setItem('currentChain', paramChain);
-        if(!this.isWalletConnect) await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
+        if(!this.isWalletConnect) await this.configureMetaMask();
       }
       this.updateCurrentChainSupportsMerchandise();
       this.updateCurrentChainSupportsPvP();
@@ -303,16 +298,12 @@ export default Vue.extend({
       else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
     async initializeRecruitCost() {
+      if(!this.contracts.CryptoBlades) return;
       const recruitCost = await this.contracts.CryptoBlades.methods.getMintCharacterFee().call({ from: this.defaultAccount });
-      const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
+      const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call({ from: this.defaultAccount });
       this.recruitCost = new BN(skillRecruitCost)
         .div(new BN(10).pow(18))
         .toFixed(4);
-    },
-    data() {
-      return {
-        recruitCost: this.recruitCost,
-      };
     },
 
     async startOnboarding() {
@@ -320,26 +311,26 @@ export default Vue.extend({
       onboarding.startOnboarding();
     },
     async configureMetamask() {
-      await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
+      await this.configureMetaMask();
     },
 
     async connectMetamask() {
       const web3 = new Web3(Web3.givenProvider);
       this.setWeb3(web3);
       this.isConnecting = true;
-      this.errorMessage = i18n.t('app.warning.errorMessage.connecting');
+      this.errorMessage = i18n.t('app.warning.errorMessage.connecting').toString();
       //test connection
       web3.eth
         .requestAccounts()
         .then(() => {
-          this.errorMessage = i18n.t('app.warning.errorMessage.success');
+          this.errorMessage = i18n.t('app.warning.errorMessage.success').toString();
           this.isConnecting = false;
           this.isConnected = true;
 
           this.initializeStore();
         })
         .catch(() => {
-          this.errorMessage = i18n.t('app.warning.errorMessage.error');
+          this.errorMessage = i18n.t('app.warning.errorMessage.error').toString();
           this.isConnecting = false;
         });
     },
@@ -360,7 +351,7 @@ export default Vue.extend({
         !this.showMetamaskWarning &&
         (this.errorMessage || (this.ownCharacters.length === 0 && this.skillBalance === '0'))
       ) {
-        this.$dialog.notify.warning(i18n.t('app.warning.message.hideWalletWarning'),
+        (this as any).$dialog.notify.warning(i18n.t('app.warning.message.hideWalletWarning'),
           {
             timeout: 0,
           },
@@ -368,7 +359,7 @@ export default Vue.extend({
       }
     },
 
-    renderPageDisplay(){
+    renderPageDisplay(): string{
       let toDisplay;
 
       if(this.currentCharacterId !== null){
@@ -399,7 +390,7 @@ export default Vue.extend({
           return;
         }
 
-        this.$dialog.notify.warning(
+        (this as any).$dialog.notify.warning(
           `${notification.title}
           <br>
           <a href="${notification.link}" target="_blank">Check it out!</a>
@@ -428,7 +419,7 @@ export default Vue.extend({
       this.setWeb3(new Web3(provider as any));
     },
     walletConnectOnboarding(){
-      this.$router.push({ name: 'options' });
+      (this as any).$router.push({ name: 'options' });
       this.showMetamaskWarning = false;
       this.hideWalletWarning = true;
     }
@@ -459,17 +450,17 @@ export default Vue.extend({
 
     document.body.addEventListener('click', (e: MouseEvent) => {
       if(e !== null){
-        const tagname = e.target.getAttribute('tagname');
+        const tagname = (e.target as HTMLInputElement).getAttribute('tagname');
         if (!tagname) return;
 
-        if (e.target.nodeName === 'BUTTON') {
-          window.gtag('event', 'button_clicked', {
+        if ((e.target as HTMLInputElement).nodeName === 'BUTTON') {
+          (window as any).gtag('event', 'button_clicked', {
             value: tagname,
           });
         }
 
-        if (e.target.className.includes('gtag-link-others')) {
-          window.gtag('event', 'nav', {
+        if ((e.target as HTMLInputElement).className.includes('gtag-link-others')) {
+          (window as any).gtag('event', 'nav', {
             event_category: 'navigation',
             event_label: 'navbar',
             value: tagname,
@@ -494,15 +485,15 @@ export default Vue.extend({
       this.hideWalletWarning = true;
       await this.connectWalletConnect();
     }
-    if(!this.currentProvider){
+    if(!this.web3.currentProvider){
       this.showMetamaskWarning = true;
     }
     try {
       await this.initializeStore();
-    } catch (e) {
-      this.errorMessage = i18n.t('app.warning.errorMessage.welcome');
+    } catch (e: any) {
+      this.errorMessage = i18n.t('app.warning.errorMessage.welcome').toString();
       if (e.code === 4001) {
-        this.errorMessage = i18n.t('app.warning.errorMessage.error');
+        this.errorMessage = i18n.t('app.warning.errorMessage.error').toString();
       }
 
       console.error(e);
@@ -543,13 +534,12 @@ export default Vue.extend({
 
     this.checkNotifications();
     this.initializeRecruitCost();
-    this.loading = false;
   },
 
   beforeDestroy() {
     this.doPollAccounts = false;
-    clearInterval(this.pollCharacterStaminaIntervalId);
-    clearInterval(this.slowPollIntervalId);
+    if(this.pollCharacterStaminaIntervalId) clearInterval(this.pollCharacterStaminaIntervalId);
+    if(this.slowPollIntervalId) clearInterval(this.slowPollIntervalId);
   },
 
 });
