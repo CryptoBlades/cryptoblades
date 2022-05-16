@@ -87,7 +87,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import BN from 'bignumber.js';
 
 import {mapState, mapActions, mapGetters, mapMutations} from 'vuex';
@@ -109,12 +109,62 @@ import { addChainToRouter } from '@/utils/common';
 import Banner from './components/Banner.vue';
 import Web3 from 'web3';
 import WalletConnectProvider from '@walletconnect/web3-provider';
+import { Contracts, ICharacter } from '@/interfaces';
+import { Accessors } from 'vue/types/options';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
 });
 
-export default {
+interface RPCS {
+  [key: number]: string;
+}
+interface Data {
+  errorMessage: string,
+  hideWalletWarning: boolean,
+  showAds: boolean,
+  isConnecting: boolean,
+  isConnected: boolean,
+  recruitCost: string,
+  isOptions: boolean,
+  showWeapon: boolean,
+  currentWeaponId: null | number,
+  weaponId: null | number,
+  toggleSideBar: boolean,
+  currentPath: string,
+  showMetamaskWarning: boolean,
+}
+
+interface StoreMappedState {
+  skillBalance: string,
+  defaultAccount: string | null,
+  currentNetworkId: number,
+}
+
+interface StoreMappedGetters {
+  contracts: Contracts,
+  ownCharacters: ICharacter[],
+  ownGarrisonCharacters: ICharacter[],
+  getExchangeUrl: string,
+}
+
+interface StoreMappedActions {
+  initializeStore: () => void,
+  fetchCharacterStamina: (characterId: number) => void,
+  pollAccountsAndNetwork: () => void,
+  setupWeaponDurabilities: (characterId: number) => void,
+  fetchWaxBridgeDetails: () => void,
+  fetchRewardsClaimTax: () => void,
+  configureMetaMask: () => void,
+}
+
+interface Notification {
+  hash: string,
+  title: string,
+  link: string,
+}
+
+export default Vue.extend({
   inject: ['expectedNetworkId', 'expectedNetworkName'],
   components: {
     NavBar,
@@ -139,11 +189,11 @@ export default {
     toggleSideBar: false,
     currentPath: '',
     showMetamaskWarning: false,
-  }),
+  }) as Data,
 
   computed: {
-    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking', 'web3']),
-    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl']),
+    ...mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking', 'web3']) as Accessors<StoreMappedState>,
+    ...mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl']) as Accessors<StoreMappedGetters>,
 
     canShowApp() {
       return (this.contracts !== null && !_.isEmpty(this.contracts)) || (this.isOptions);
@@ -187,19 +237,16 @@ export default {
   },
 
   methods: {
-    ...mapActions({ initializeStore: 'initialize' }),
     ...mapActions([
+      'initializeStore',
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
       'setupWeaponDurabilities',
       'fetchWaxBridgeDetails',
       'fetchRewardsClaimTax',
       'configureMetaMask',
-    ]),
-    ...mapGetters([
-      'getExchangeTransakUrl'
-    ]),
-    ...mapMutations(['setWeb3', 'updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP', 'updateCurrentChainSupportsQuests']),
+    ]) as StoreMappedActions,
+    ...mapMutations(['setWeb3', 'updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP', 'updateCurrentChainSupportsQuests']) as StoreMappedMutations,
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BNB';
       const paramChain = this.$router.currentRoute.query.chain;
@@ -232,7 +279,7 @@ export default {
       this.updateCurrentChainSupportsPvP();
       this.updateCurrentChainSupportsQuests();
     },
-    async updateCharacterStamina(id) {
+    async updateCharacterStamina(id: number) {
       if (id !== null) {
         await this.fetchCharacterStamina(id);
       }
@@ -246,8 +293,8 @@ export default {
     async initializeRecruitCost() {
       const recruitCost = await this.contracts.CryptoBlades.methods.getMintCharacterFee().call({ from: this.defaultAccount });
       const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
-      this.recruitCost = BN(skillRecruitCost)
-        .div(BN(10).pow(18))
+      this.recruitCost = new BN(skillRecruitCost)
+        .div(new BN(10).pow(18))
         .toFixed(4);
     },
     data() {
@@ -332,7 +379,7 @@ export default {
       const lastHash = localStorage.getItem('lastnotification');
       let shouldContinue = true;
 
-      notifications.forEach((notification) => {
+      notifications.forEach((notification: Notification) => {
         if (!shouldContinue) return;
 
         if (lastHash === notification.hash) {
@@ -354,25 +401,19 @@ export default {
       localStorage.setItem('lastnotification', notifications[0].hash);
     },
     async connectWalletConnect(){
-      // localStorage.removeItem('walletconnect');
-      //  Create WalletConnect Provider
-      console.log(JSON.parse(localStorage.getItem('walletconnect')).chainId);
+      const rpcs = {} as RPCS;
+      config.supportedChains.forEach((chain) => {
+        const chainId = getConfigValue('VUE_APP_NETWORK_ID', chain);
+        rpcs[chainId] = getConfigValue('rpcUrls',chain)[0];
+      });
       const provider = new WalletConnectProvider({
-        rpc: {
-          56: 'https://bsc-dataseed.binance.org/',
-          128: 'https://http-mainnet.hecochain.com',
-          66: 'https://exchainrpc.okex.org',
-          137: 'https://matic-mainnet.chainstacklabs.com',
-          43114: 'https://api.avax.network/ext/bc/C/rpc',
-          1313161554: 'https://mainnet.aurora.dev'
-        },
-        chainId: JSON.parse(localStorage.getItem('walletconnect')).chainId,
+        rpc: rpcs,
+        chainId: JSON.parse(localStorage.getItem('walletconnect') || '').chainId,
       });
 
       //  Enable session (triggers QR Code modal)
       await provider.enable();
-      // provider.updateRpcUrl(JSON.parse(localStorage.getItem('walletconnect')).chainId);
-      this.setWeb3(new Web3(provider));
+      this.setWeb3(new Web3(provider as any));
     },
     walletConnectOnboarding(){
       this.$router.push({ name: 'options' });
@@ -392,34 +433,36 @@ export default {
     //     },
     //   );
     // });
-    Events.$on('weapon-inventory', (bol) =>{
+    Events.$on('weapon-inventory', (bol: boolean) =>{
       this.showWeapon = bol;
     });
 
-    Events.$on('chooseweapon', (id) =>{
+    Events.$on('chooseweapon', (id: number) =>{
       this.weaponId = id;
     });
 
-    Events.$on('toggle-sideBar', (bol) =>{
+    Events.$on('toggle-sideBar', (bol: boolean) =>{
       this.toggleSideBar = bol;
     });
 
-    document.body.addEventListener('click', (e) => {
-      const tagname = e.target.getAttribute('tagname');
-      if (!tagname) return;
+    document.body.addEventListener('click', (e: MouseEvent) => {
+      if(e !== null){
+        const tagname = e.target.getAttribute('tagname');
+        if (!tagname) return;
 
-      if (e.target.nodeName === 'BUTTON') {
-        window.gtag('event', 'button_clicked', {
-          value: tagname,
-        });
-      }
+        if (e.target.nodeName === 'BUTTON') {
+          window.gtag('event', 'button_clicked', {
+            value: tagname,
+          });
+        }
 
-      if (e.target.className.includes('gtag-link-others')) {
-        window.gtag('event', 'nav', {
-          event_category: 'navigation',
-          event_label: 'navbar',
-          value: tagname,
-        });
+        if (e.target.className.includes('gtag-link-others')) {
+          window.gtag('event', 'nav', {
+            event_category: 'navigation',
+            event_label: 'navbar',
+            value: tagname,
+          });
+        }
       }
     });
     this.showWarningDialog();
@@ -497,7 +540,7 @@ export default {
     clearInterval(this.slowPollIntervalId);
   },
 
-};
+});
 </script>
 
 <style>
