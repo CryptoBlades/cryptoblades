@@ -220,7 +220,7 @@ export default Vue.extend({
     },
 
     isWalletConnect(): boolean {
-      return localStorage.getItem('walletconnect') === '';
+      return localStorage.getItem('walletconnect') !== null;
     },
 
     isOptions(): boolean {
@@ -474,6 +474,7 @@ export default Vue.extend({
     }
   },
   async created() {
+    console.log(localStorage.getItem('walletconnect'));
     this.checkChainAndParams();
     this.checkStorage();
 
