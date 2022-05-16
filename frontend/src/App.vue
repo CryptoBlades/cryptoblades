@@ -158,6 +158,13 @@ interface StoreMappedActions {
   configureMetaMask: () => void,
 }
 
+interface StoreMappedMutations {
+  setWeb3: (web3: Web3) => void,
+  updateCurrentChainSupportsMerchandise: () => void,
+  updateCurrentChainSupportsPvP: () => void,
+  updateCurrentChainSupportsQuests: () => void,
+}
+
 interface Notification {
   hash: string,
   title: string,
@@ -246,7 +253,12 @@ export default Vue.extend({
       'fetchRewardsClaimTax',
       'configureMetaMask',
     ]) as StoreMappedActions,
-    ...mapMutations(['setWeb3', 'updateCurrentChainSupportsMerchandise', 'updateCurrentChainSupportsPvP', 'updateCurrentChainSupportsQuests']) as StoreMappedMutations,
+    ...mapMutations([
+      'setWeb3',
+      'updateCurrentChainSupportsMerchandise',
+      'updateCurrentChainSupportsPvP',
+      'updateCurrentChainSupportsQuests'
+    ])as StoreMappedMutations,
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BNB';
       const paramChain = this.$router.currentRoute.query.chain;
