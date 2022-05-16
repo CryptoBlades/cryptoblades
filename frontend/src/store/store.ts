@@ -1061,10 +1061,8 @@ export function createStore() {
           commit('setNetworkId', networkId);
           refreshUserDetails = true;
         }
-        console.log('requestAccounts; net id: ',await state.web3.eth.net.getId());
-        console.log(state.web3);
+
         const accounts = await state.web3.eth.getAccounts();
-        console.log(accounts);
 
         if (!_.isEqual(state.accounts, accounts)) {
           commit('setAccounts', { accounts });
@@ -1266,7 +1264,6 @@ export function createStore() {
       },
 
       async setUpContracts({state, commit }) {
-        console.log('1269', state.web3);
         const contracts = await setUpContracts(state.web3);
         commit('setContracts', () => contracts);
       },
@@ -2938,7 +2935,6 @@ export function createStore() {
 
       async fetchTotalRenameTags({ state }) {
         const { CharacterRenameTagConsumables } = state.contracts();
-        //console.log(CharacterRenameTagConsumables+' / '+!state.defaultAccount);
         if(!CharacterRenameTagConsumables || !state.defaultAccount) return;
         return await CharacterRenameTagConsumables.methods.getItemCount().call(defaultCallOptions(state));
       },
