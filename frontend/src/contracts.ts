@@ -101,18 +101,21 @@ interface Chain {
   chains: Record<string, Record<string, any>>;
 }
 
-export function getConfigValue(key: string): any {
+export function getConfigValue(key: string, chain?: string): any {
   if (process.env.VUE_APP_STAGE === 'alpha') {
     return process.env[key];
   }
 
   if(process.env.NODE_ENV === 'development') return '';
   const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
-  let chain = localStorage.getItem('currentChain') || 'BNB';
-  if(!config.supportedChains.includes(chain)){
-    chain = 'BNB';
+
+  if(chain) return (config as Config).environments[env].chains[chain][key];
+
+  let currentChain = localStorage.getItem('currentChain') || 'BNB';
+  if(!config.supportedChains.includes(currentChain)){
+    currentChain = 'BNB';
   }
-  return (config as Config).environments[env].chains[chain][key];
+  return (config as Config).environments[env].chains[currentChain][key];
 }
 
 let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
