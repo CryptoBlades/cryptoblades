@@ -185,22 +185,7 @@
     "noWeaponsStored": "No Weapons stored!",
     "noCharactersStored": "No Characters stored!",
     "noShieldsStored" : "No Shields Stored!",
-    "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!",
-    "incomingNfts": "Incoming NFTs",
-    "noIncomingNfts": "No incoming NFTs!",
-    "selectWeaponToWithdraw": "Select a weapon to withdraw",
-    "selectYourWeapon": "Select your Weapon",
-    "weaponId": "Weapon ID",
-    "fromChain": "from Chain",
-    "withdrawWeapon": "Withdraw Weapon",
-    "selectCharacterToWithdraw": "Select a character to withdraw",
-    "selectYourCharacter": "Select your Character",
-    "selectYourShieldToWithdraw": "Select shield to withdraw",
-    "selectYourShield" : "Select your Shield",
-    "shieldId" : "Shield ID",
-    "withdrawShield": "Withdraw Shield",
-    "characterId": "Character ID",
-    "withdrawCharacter": "Withdraw Character"
+    "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!"
   },
   "characterList": {
     "level": "Level",
@@ -269,6 +254,7 @@
     "forgeNew": "Forge a new weapon",
     "forge10New": "Forge 10 new weapons",
     "forge": "Forge",
+    "reforge": "Reforge",
     "coolingForge": "Cooling forge ...",
     "notEnoughStakedSkill": "Not enough staked SKILL!",
     "approveMintSlippage": "Enable 5% mint price slippage",
@@ -319,6 +305,7 @@
     "burnWarning": "Please confirm you want to burn these {weaponAmount} weapon(s) to Dust.",
     "noRefunds": "No refunds will be given for accidentally burned items!",
     "reforgeBonuses": "Reforge Bonuses",
+    "bonusOfReforge": "Reforge Bonus",
     "reforgeBonus": {
       "5star": "5* Burn: 1 5B (75 Bonus Power | 600 Max).",
       "4star": "4* Burn: 1 4B (30 Bonus Power | 750 Max).",
@@ -369,7 +356,32 @@
     "dustStorageDesc": "Forge your weapons with dust",
     "land": "Land",
     "landDesc": "Own land and conquer",
-    "regenerate": "Regenerates 1 point every 5 minutes, stamina bar will be full at: " 
+    "regenerate": "Regenerates 1 point every 5 minutes, stamina bar will be full at: ",
+    "salvage": "Salvage",
+    "dustConfirm": "Dust Reforge Confirmation",
+    "lb": "Low Star Burn",
+    "4b": "Four Star Burn",
+    "5b": "Five Star Burn",
+    "confirm": "CONFIRM",
+    "reforgeSucces": "REFORGE SUCCESSFUL",
+    "tapAnyWhere": "Tap Anywhere To Continue",
+    "dwarvesForge": "The Dwarves Have Forged Your Weapons",
+    "selectElement": "Select An Element",
+    "enchant": "Enchant",
+    "skin": "Skin",
+    "reforgeNote": "Reforging weapons is the process of spending SKILL tokens to burn one weapon into another. The target weapon receives bonus power, and the burned weapon disappears.",
+    "15power": "15 power per level",
+    "30power": "35 power per level",
+    "75power": "75 power per level",
+    "bonusDamage": "Bonus Damage",
+    "max": "Max",
+    "changeEquipment": "Change Equipment",
+    "youWill": "You Will Receive",
+    "powerfulDust": "Powerful Dust",
+    "greaterDust": "Greater Dust",
+    "lowerDust": "Lower Dust",
+    "createDustConfirm": "Create Dust Confirmation",
+    "noDust": "No Dust Selected" 
   },
   "dustBalanceDisplay": {
     "availableDust": "Available Dust",
@@ -402,7 +414,8 @@
     "youWill4": "distributed during the last allowance.",
     "changeWeapon": "Change Weapon",
     "selectStamina": "Select stamina usage",
-    "selectAWeapon": "Select a weapon",
+    "selectStaminaStepOne": "Step 1: Select stamina usage",
+    "selectAWeapon": "Step 2: Select weapon",
     "adventure": "ADVENTURE",
     "tabAnywhere": "Tap Anywhere to Continue",
     "warning": "WARNING",
@@ -1254,7 +1267,10 @@
     "sort": "Sort",
     "showFavorite": "Show Favorite",
     "clearFilters": "Clear Filters",
+    "show": "Show",
+    "selected": "Selected",
     "noDrop": "Nothing dropped for you this time.",
+    "star": "Star",
     "sorts": {
       "any": "Any",
       "lowToHigh": "Price: Low -> High",
@@ -1359,13 +1375,13 @@
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
     "warning": {
-      "title": "Metamask Not Detected Or Incorrect Network",
+      "title": "Metamask Not Detected",
       "start": "Get Started With CryptoBlades",
       "buttons": {
         "addMetamask": "Add MetaMask",
         "confMetamask": "Configure MetaMask",
         "startMetamask": "Connect to MetaMask",
-        "network": "Switch to BSC Network",
+        "network": "Switch to BNB Network",
         "hide": "Hide Warning"
       },
       "errorMessage": {
@@ -1375,7 +1391,7 @@
         "welcome": "Get started With CryptoBlades"
       },
       "message": {
-        "BSC":{
+        "BNB":{
           "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .0015 BNB for gas. You will also need a litle bit of BNB for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
           "inst1": "1. Buying BNB with fiat: <a target=_blank href=https://youtu.be/6-sUDUE2RPA> Watch Video </a> or <a target=_blank href={link1}> Buy with Transak</a>",
           "inst2": "2. Once you have BNB, go to ApeSwap to obtain SKILL tokens: <a target=_blank href={link1}> Trade SKILL/BNB </a>",

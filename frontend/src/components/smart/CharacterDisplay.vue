@@ -1,9 +1,6 @@
 <template>
   <div class="character-display-container bd-right" >
         <div class="row character-full-list">
-          <div class="btn-trigger" @click="hideSideBar(!toggled)">
-            <img :class="!toggled ? 'rotateLeft' : 'rotateRight'" src="../../assets/left-arrow.png" alt="">
-          </div>
           <b-col class="character-list" v-if="currentPath != '/blacksmith'"
             v-bind:class="[getIsInCombat ? 'disabled-li' : '', getIsCharacterViewExpanded ? '' : 'centered-list']">
               <div
@@ -76,6 +73,9 @@
                 </div>
               </div>
           </b-col>
+        </div>
+        <div class="btn-trigger" @click="hideSideBar(!toggled)">
+          <img :class="!toggled ? 'rotateLeft' : 'rotateRight'" src="../../assets/left-arrow.png" alt="">
         </div>
   </div>
 </template>
@@ -691,19 +691,19 @@ li.character-highlight{
 }
 
  .btn-trigger{
-    position: absolute;
+    position: relative;
+    margin-right: -100px;
     width: 100%;
     justify-content: flex-end;
     z-index: 100;
-    bottom: 120px;
+    bottom: 0;
     display: flex;
-    /* margin-left: 20px; */
     cursor: pointer;
   }
 
 .btn-trigger > img{
     width: 30px;
-    /* margin-right: -100px; */
+    margin-right: -40px;
 }
 
  .character-full-list{
@@ -759,11 +759,11 @@ li.character-highlight{
   }
 
   .btn-trigger{
-    position: absolute;
+    position: relative;
     width: 20px;
     z-index: 100;
-    bottom: 120px;
-    margin-left: 20px
+    bottom: 0px;
+    margin-right: -40px;
   }
 
   .btn-trigger{

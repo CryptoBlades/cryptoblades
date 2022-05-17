@@ -1,5 +1,5 @@
 <template>
-  <div style="display: inline-flex" class="body main-font">
+  <div style="display: inline-flex" class="body main-font pl-3">
     <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
       <div v-if="error !== null">
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
@@ -60,19 +60,19 @@
       <div>
         <div class="col">
         <div class="mb-3" :style="'align-self: baseline; width: 20vw'">
-          <span class="isMobile">{{$t('combat.selectStamina')}}</span>
-          <b-form-select v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
+          <span class="isMobile label-title">{{!selectedWeaponId ? $t('combat.selectStaminaStepOne') : $t('combat.selectStamina')}}</span>
+          <b-form-select style="background-color:#171617;color:#fff"
+          class="mt-3" v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
         </div>
           <div  v-if="currentCharacterStamina >= staminaPerFight" class="combat-enemy-container">
               <!-- selected weapon for combat details -->
-              <div class="col weapon-selection mb-4">
+              <div class="weapon-selection mb-4">
                 <div class="header-row d-flex justify-content-between">
-                  <div class="d-flex align-items-end selectedWeaponDetails">
+                  <div class="selectedWeaponDetails">
                     <div class="select-weapons" v-if="!selectedWeaponId || !weaponHasDurability(selectedWeaponId)">
-                       <span class="isMobile">{{$t('combat.selectAWeapon')}}</span>
-                        <button :v-tooltip="$t('combat.changeWeapon')"  class="ml-3 ct-btn ml-2" @click="changeEquipedWeapon()">
-                          <img src="../assets/swithc-wep.png">
-                      </button>
+                      <span class="isMobile label-title">{{$t('combat.selectAWeapon')}}</span>
+                      <weapon-grid :showNftOptions="true" :ownWeapons="ownWeapons.length"
+                      :gridStyling="gridStyling" :noTitle="true" titleType="combat" v-model="selectedWeaponId" />
                     </div>
                     <!-- selected weapon for combat details -->
                     <div v-if="selectedWeaponId && weaponHasDurability(selectedWeaponId)" class="mr-3">
@@ -147,7 +147,7 @@
         </div>
       </div>
       <!-- // error message boxes -->
-      <div class="row">
+      <div>
         <div class="col">
           <div class="message-box" v-if="!currentCharacter">{{$t('combat.errors.needToSelectChar')}}</div>
           <div class="row">
@@ -188,7 +188,9 @@ import Hint from '../components/Hint.vue';
 import Events from '../events';
 import CombatResults from '../components/CombatResults.vue';
 import {fromWeiEther, toBN} from '../utils/common';
+import BigNumber from 'bignumber.js';
 import WeaponInventory from '../components/WeaponInvetory.vue';
+import WeaponGrid from '../components/smart/WeaponGridNew.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
 
@@ -219,6 +221,7 @@ export default {
       expectedSkill: null,
       activeCard: null,
       isToggled: false,
+      gridStyling:'justify-content:flex-start; gap:2.5vw',
       index: 1
     };
   },
@@ -295,8 +298,10 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
-      'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight']),
+    ...mapActions(['fetchTargets', 'doEncounterPayNative',
+      'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
+      'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight',
+      'getCurrentSkillPrice', 'getNativeTokenPriceInUsd', 'getCombatTokenChargePercent']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -403,7 +408,6 @@ export default {
       if (this.selectedWeaponId === null || this.currentCharacterId === null) {
         return;
       }
-
       this.waitingResults = true;
 
       // Force a quick refresh of targets
@@ -417,13 +421,24 @@ export default {
       this.fightResults = null;
       this.error = null;
       this.setIsInCombat(this.waitingResults);
-
       try {
-        const results = await this.doEncounter({
+        const targetPower = targetToFight.power;
+        const expectedPayoutWei = new BigNumber(await this.fetchExpectedPayoutForMonsterPower({ power: targetPower, isCalculator: true }));
+
+        const nativeTokenPriceUsd = new BigNumber (await this.getNativeTokenPriceInUsd());
+        const skillPriceUsd = new BigNumber(await this.getCurrentSkillPrice());
+        const tokenChargePercentage = (await this.getCombatTokenChargePercent());
+
+        const offsetToPayInNativeToken = (
+          expectedPayoutWei.multipliedBy(tokenChargePercentage).multipliedBy(skillPriceUsd)
+        ).div(nativeTokenPriceUsd).integerValue(BigNumber.ROUND_DOWN);
+
+        const results = await this.doEncounterPayNative({
           characterId: this.currentCharacterId,
           weaponId: this.selectedWeaponId,
           targetString: targetIndex,
           fightMultiplier: this.fightMultiplier,
+          offsetCost: offsetToPayInNativeToken
         });
 
         this.fightResults = results;
@@ -541,7 +556,8 @@ export default {
   components: {
     Hint,
     CombatResults,
-    WeaponInventory
+    WeaponInventory,
+    WeaponGrid
   },
 };
 </script>
@@ -557,6 +573,13 @@ h5{
   font-family: Trajan;
   font-size: 25px;
   font-weight: 600;
+}
+
+.label-title{
+  font-family: Oswald;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 20px;
 }
 
 
@@ -609,6 +632,7 @@ h5{
   display: flex;
   justify-content: center;
 }
+
 
 .frame-line:hover{
   max-width: 112%;
@@ -795,7 +819,7 @@ div.encounter.text-center {
 
 .selectedWeaponDetails > div {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .victory-chance {
@@ -908,6 +932,14 @@ h1 {
   margin-left: 20px;
 }
 
+.select-weapons > div{
+  width: 80vw;
+}
+
+.select-weapons > div > ul{
+  justify-content: flex-start;
+}
+
 .select-weapons .ct-btn{
   background-color: rgba(0, 0, 0, 0);
 }
@@ -933,13 +965,12 @@ h1 {
 }
 
 .select-weapons{
-  font-size: 1.5em;
+  margin-top: 1em;
   align-self: right;
+  display: flex;
+  flex-direction: column;
 }
 
-.select-weapons > span{
-  font-family: Trajan;
-}
 
 @media all and (max-width: 600px) {
   .combat-hints > div > .fire-icon,

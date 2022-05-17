@@ -48,7 +48,7 @@ export default {
 
   async created() {
     this.waitingLeaderboardOutcome = true;
-    const currentChain = localStorage.getItem('currentChain') || 'BSC';
+    const currentChain = localStorage.getItem('currentChain') || 'BNB';
     const leaderboardData = await fetch(apiUrl('static/leaderboard/' + currentChain));
     const leaderboards = await leaderboardData.json();
 
