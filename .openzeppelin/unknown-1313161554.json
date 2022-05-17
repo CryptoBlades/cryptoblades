@@ -219,6 +219,16 @@
       "address": "0xAc572b2Bad7e242d1E393fF34E1B836eF529080e",
       "txHash": "0x6e621688b7c70e083850260669beeb9e0b43518a50812b3283b84b2b77eabc91|{\"gasBurned\":15808213621041,\"tx\":\"7bi8Vzn5ak9tEHjPdy4g2zsjY3ThApo6MbrgZ2C7z3PT\"}",
       "kind": "transparent"
+    },
+    {
+      "address": "0xb23F1C1841567b95F1C6E8fd6189539790BBB9F4",
+      "txHash": "0x5d563f2b6ad7683d565b7418f84c08136377122c1dd50dc0f118ad3afc4eb0e0|{\"gasBurned\":24623300226398,\"tx\":\"54HUdg3XJ8K7ZB1MWrLUz7F7Bho1tFrdGNsa7wKvPnvY\"}",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x236777456dD5159Da6c38A0E24f46e30C6f9e326",
+      "txHash": "0xf0ea359706d29c844969495d7f7b84d83cfca8dc633fd877e1e40bcae2932bbb|{\"gasBurned\":29002834677701,\"tx\":\"HVKufuu8xgx5rA8ZfBAJmsxRNjYhysVFRTwrMNd1PMCv\"}",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -22050,6 +22060,1115 @@
           },
           "t_bool": {
             "label": "bool"
+          }
+        }
+      }
+    },
+    "f4bd3150671c27fc9068f41d37a956d9ab852b708b9d79225d1c20de0bbf7aa3": {
+      "address": "0x19e3DDD7C13ab357d94b622028d62C4413fa27b0",
+      "txHash": "0x9b6f570e7ebe60d363a1d777986e2be1e1edf7baa28e15a09bedff955d0e4c33|{\"gasBurned\":16759547478908,\"tx\":\"GpVdSQqxvBZ668ANdJXqVNwUUVQkyRsdtoFWi6my9aHn\"}",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)55881_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "game",
+            "type": "t_contract(CryptoBlades)41116",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:45"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "characters",
+            "type": "t_contract(Characters)37167",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:46"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "weapons",
+            "type": "t_contract(Weapons)55434",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:47"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "shields",
+            "type": "t_contract(Shields)47777",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:48"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "skillToken",
+            "type": "t_contract(IERC20)61082",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:49"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "randoms",
+            "type": "t_contract(IRandoms)41187",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:50"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_baseWagerUSD",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:53"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_tierWagerUSD",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:55"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_rankingsPoolTaxPercent",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:57"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "wageringFactor",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:59"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "winningPoints",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:61"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "losingPoints",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:63"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_maxTopCharactersPerTier",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:65"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "reRollFeePercent",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:67"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "withdrawFeePercent",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:69"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "currentRankedSeason",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:71"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "seasonStartedAt",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:73"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "seasonDuration",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:75"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "decisionSeconds",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:77"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "gameCofferTaxDue",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:79"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "arenaAccess",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:81"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "prizePercentages",
+            "type": "t_array(t_uint256)dyn_storage",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:83"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_duelQueue",
+            "type": "t_struct(UintSet)62127_storage",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:85"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "fighterByCharacter",
+            "type": "t_mapping(t_uint256,t_struct(Fighter)19409_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:88"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "matchByFinder",
+            "type": "t_mapping(t_uint256,t_struct(Match)19416_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:90"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "isCharacterInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:92"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "isWeaponInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:94"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "isShieldInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:96"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "isDefending",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:98"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "finderByOpponent",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:100"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "previousTierByCharacter",
+            "type": "t_mapping(t_uint256,t_uint8)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:102"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "excessWagerByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:104"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "seasonByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:106"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "rankingPointsByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:108"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "rankingsPoolByTier",
+            "type": "t_mapping(t_uint8,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:110"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_rankingRewardsByPlayer",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:112"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_topRankingCharactersByTier",
+            "type": "t_mapping(t_uint8,t_array(t_uint256)dyn_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:114"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_matchableCharactersByTier",
+            "type": "t_mapping(t_uint8,t_struct(UintSet)62127_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:116"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "duelOffsetCost",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:118"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "pvpBotAddress",
+            "type": "t_address_payable",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:119"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "specialWeaponRerollTimestamp",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:122"
+          },
+          {
+            "contract": "PvpArena",
+            "label": "_ownerByCharacter",
+            "type": "t_mapping(t_uint256,t_address)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpArena.sol:123"
+          }
+        ],
+        "types": {
+          "t_contract(CryptoBlades)41116": {
+            "label": "contract CryptoBlades"
+          },
+          "t_contract(Characters)37167": {
+            "label": "contract Characters"
+          },
+          "t_contract(Weapons)55434": {
+            "label": "contract Weapons"
+          },
+          "t_contract(Shields)47777": {
+            "label": "contract Shields"
+          },
+          "t_contract(IERC20)61082": {
+            "label": "contract IERC20"
+          },
+          "t_contract(IRandoms)41187": {
+            "label": "contract IRandoms"
+          },
+          "t_int128": {
+            "label": "int128"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]"
+          },
+          "t_struct(UintSet)62127_storage": {
+            "label": "struct EnumerableSet.UintSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)61741_storage"
+              }
+            ]
+          },
+          "t_struct(Set)61741_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_mapping(t_uint256,t_struct(Fighter)19409_storage)": {
+            "label": "mapping(uint256 => struct PvpArena.Fighter)"
+          },
+          "t_struct(Fighter)19409_storage": {
+            "label": "struct PvpArena.Fighter",
+            "members": [
+              {
+                "label": "characterID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "weaponID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "shieldID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "wager",
+                "type": "t_uint256"
+              },
+              {
+                "label": "useShield",
+                "type": "t_bool"
+              }
+            ]
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_uint256,t_struct(Match)19416_storage)": {
+            "label": "mapping(uint256 => struct PvpArena.Match)"
+          },
+          "t_struct(Match)19416_storage": {
+            "label": "struct PvpArena.Match",
+            "members": [
+              {
+                "label": "attackerID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "defenderID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "createdAt",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_mapping(t_uint256,t_uint8)": {
+            "label": "mapping(uint256 => uint8)"
+          },
+          "t_mapping(t_uint8,t_uint256)": {
+            "label": "mapping(uint8 => uint256)"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_uint8,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(uint8 => uint256[])"
+          },
+          "t_mapping(t_uint8,t_struct(UintSet)62127_storage)": {
+            "label": "mapping(uint8 => struct EnumerableSet.UintSet)"
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)55881_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_struct(RoleData)55881_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)59076_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)59076_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)58811_storage"
+              }
+            ]
+          },
+          "t_struct(Set)58811_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "ea622ffd0510b9d2579ecf3fd5dd1caa88fcfb7b7ab36c925d5e99fb05d7844f": {
+      "address": "0x88f264c18255592F101A04694BCF664FEB6DE780",
+      "txHash": "0x6080d97920194bee06a5a7e159368b9876d58256e189302ef6073841ec91698f|{\"gasBurned\":12143075896786,\"tx\":\"BaCjLNpqDZ6R5uC17nbUWxrvdsHKQgYjgLc2apwwTCeg\"}",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)55881_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "game",
+            "type": "t_contract(CryptoBlades)41116",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:19"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "characters",
+            "type": "t_contract(Characters)37167",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:20"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "skillToken",
+            "type": "t_contract(IERC20)61082",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:21"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "pvpcore",
+            "type": "t_contract(PvpCore)25775",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:22"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "_rankingsPoolTaxPercent",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:25"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "winningPoints",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:27"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "losingPoints",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:29"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "_maxTopCharactersPerTier",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:31"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "currentRankedSeason",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:33"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "seasonStartedAt",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:35"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "seasonDuration",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:37"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "gameCofferTaxDue",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:39"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "prizePercentages",
+            "type": "t_array(t_uint256)dyn_storage",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:41"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "seasonByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:44"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "rankingPointsByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:46"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "rankingsPoolByTier",
+            "type": "t_mapping(t_uint8,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:48"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "_rankingRewardsByPlayer",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:50"
+          },
+          {
+            "contract": "PvpRankings",
+            "label": "_topRankingCharactersByTier",
+            "type": "t_mapping(t_uint8,t_array(t_uint256)dyn_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpRankings.sol:52"
+          }
+        ],
+        "types": {
+          "t_contract(CryptoBlades)41116": {
+            "label": "contract CryptoBlades"
+          },
+          "t_contract(Characters)37167": {
+            "label": "contract Characters"
+          },
+          "t_contract(IERC20)61082": {
+            "label": "contract IERC20"
+          },
+          "t_contract(PvpCore)25775": {
+            "label": "contract PvpCore"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_mapping(t_uint8,t_uint256)": {
+            "label": "mapping(uint8 => uint256)"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_uint8,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(uint8 => uint256[])"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)55881_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(RoleData)55881_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)59076_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)59076_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)58811_storage"
+              }
+            ]
+          },
+          "t_struct(Set)58811_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "8b9fbd07dd2d70b8dbadaca23ce8747cf87d83225522e1ed7c15e3209301ede7": {
+      "address": "0x26634986Ad0C4bDbc347Ed606b9E3BB0B8e16b06",
+      "txHash": "0x9b9c9995055667e6c8ac28811bea45b51d4b745d7491f4a04306247d0c26fab2|{\"gasBurned\":15517636286224,\"tx\":\"8NThFP1RQYASe8NJhqSHyBXYL1YJmMThNWBYpZjyboFH\"}",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)55881_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "game",
+            "type": "t_contract(CryptoBlades)41116",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:57"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "characters",
+            "type": "t_contract(Characters)37167",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:58"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "weapons",
+            "type": "t_contract(Weapons)55434",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:59"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "shields",
+            "type": "t_contract(Shields)47777",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:60"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "skillToken",
+            "type": "t_contract(IERC20)61082",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:61"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "randoms",
+            "type": "t_contract(IRandoms)41187",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:62"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "pvprankings",
+            "type": "t_contract(PvpRankings)26941",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:63"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "_baseWagerUSD",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:66"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "_tierWagerUSD",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:68"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "wageringFactor",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:70"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "reRollFeePercent",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:72"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "withdrawFeePercent",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:74"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "decisionSeconds",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:76"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "arenaAccess",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:78"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "duelOffsetCost",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:80"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "pvpBotAddress",
+            "type": "t_address_payable",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:82"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "_duelQueue",
+            "type": "t_struct(UintSet)62127_storage",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:84"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "fighterByCharacter",
+            "type": "t_mapping(t_uint256,t_struct(Fighter)23076_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:87"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "matchByFinder",
+            "type": "t_mapping(t_uint256,t_struct(Match)23083_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:89"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "isCharacterInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:91"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "isWeaponInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:93"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "isShieldInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:95"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "isDefending",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:97"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "finderByOpponent",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:99"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "previousTierByCharacter",
+            "type": "t_mapping(t_uint256,t_uint8)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:101"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "excessWagerByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:103"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "_matchableCharactersByTier",
+            "type": "t_mapping(t_uint8,t_struct(UintSet)62127_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:105"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "specialWeaponRerollTimestamp",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:107"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "_ownerByCharacter",
+            "type": "t_mapping(t_uint256,t_address)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\PvpCore.sol:109"
+          }
+        ],
+        "types": {
+          "t_contract(CryptoBlades)41116": {
+            "label": "contract CryptoBlades"
+          },
+          "t_contract(Characters)37167": {
+            "label": "contract Characters"
+          },
+          "t_contract(Weapons)55434": {
+            "label": "contract Weapons"
+          },
+          "t_contract(Shields)47777": {
+            "label": "contract Shields"
+          },
+          "t_contract(IERC20)61082": {
+            "label": "contract IERC20"
+          },
+          "t_contract(IRandoms)41187": {
+            "label": "contract IRandoms"
+          },
+          "t_contract(PvpRankings)26941": {
+            "label": "contract PvpRankings"
+          },
+          "t_int128": {
+            "label": "int128"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_struct(UintSet)62127_storage": {
+            "label": "struct EnumerableSet.UintSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)61741_storage"
+              }
+            ]
+          },
+          "t_struct(Set)61741_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_mapping(t_uint256,t_struct(Fighter)23076_storage)": {
+            "label": "mapping(uint256 => struct PvpCore.Fighter)"
+          },
+          "t_struct(Fighter)23076_storage": {
+            "label": "struct PvpCore.Fighter",
+            "members": [
+              {
+                "label": "characterID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "weaponID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "shieldID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "wager",
+                "type": "t_uint256"
+              },
+              {
+                "label": "useShield",
+                "type": "t_bool"
+              }
+            ]
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_uint256,t_struct(Match)23083_storage)": {
+            "label": "mapping(uint256 => struct PvpCore.Match)"
+          },
+          "t_struct(Match)23083_storage": {
+            "label": "struct PvpCore.Match",
+            "members": [
+              {
+                "label": "attackerID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "defenderID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "createdAt",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_mapping(t_uint256,t_uint8)": {
+            "label": "mapping(uint256 => uint8)"
+          },
+          "t_mapping(t_uint8,t_struct(UintSet)62127_storage)": {
+            "label": "mapping(uint8 => struct EnumerableSet.UintSet)"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)55881_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_struct(RoleData)55881_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)59076_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)59076_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)58811_storage"
+              }
+            ]
+          },
+          "t_struct(Set)58811_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
           }
         }
       }
