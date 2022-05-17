@@ -396,6 +396,13 @@ export default Vue.extend({
 
       localStorage.setItem('lastnotification', notifications[0].hash);
     },
+
+    initializeSettings(){
+      if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
+      if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
+      if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
+      if (!localStorage.getItem('fightMultiplier')) localStorage.setItem('fightMultiplier', '1');
+    },
     async connectWalletConnect(){
       const rpcs = {} as RPCS;
       config.supportedChains.forEach((chain) => {
@@ -467,6 +474,7 @@ export default Vue.extend({
     }
   },
   async created() {
+    this.initializeSettings();
     this.checkChainAndParams();
     this.checkStorage();
 
