@@ -573,7 +573,7 @@ export default Vue.extend({
         'stakeUnclaimedRewards',
         'claimReward',
       ]) as StoreMappedStakingActions,
-    ...mapActions(['fetchOwnedLandIdsWithTier']) as StoreMappedLandActions,
+    ...mapActions('land', ['fetchOwnedLandIdsWithTier']) as StoreMappedLandActions,
 
     inputByRatio(ratio: number): any {
       if(this.isDeposit){

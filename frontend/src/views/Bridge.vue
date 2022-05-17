@@ -412,7 +412,7 @@ export default Vue.extend({
     },
   },
   created(){
-    this.supportedChains = config.supportedChains;
+    this.supportedChains = window.location.href.startsWith('https://test') ? config.testSupportedChains : config.supportedChains;
 
     //remove currentChain from chains to send to
     this.currentChain = localStorage.getItem('currentChain') || 'BNB';
