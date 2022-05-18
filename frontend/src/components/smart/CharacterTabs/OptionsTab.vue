@@ -1,5 +1,5 @@
 <template>
-    <b-tab title="Options" title-item-class="character-wrapper"  title-link-class="character-tab">
+    <b-tab :title="$t('Character.options')" title-item-class="character-wrapper"  title-link-class="character-tab">
       <div class="mt-2">
         <div class="d-flex py-4 options-border">
           <div class="options-text main-font">

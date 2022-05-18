@@ -1,5 +1,5 @@
 <template>
-    <b-tab title="Skins" title-item-class="character-wrapper" title-link-class="character-tab" @click="$emit('loadCosmeticsCount')">
+    <b-tab :title="$t('Character.skins')" title-item-class="character-wrapper" title-link-class="character-tab" @click="$emit('loadCosmeticsCount')">
       <div class="d-flex flex-wrap">
       <div
         class="w-25 p-1 text-white text-center mb-3"

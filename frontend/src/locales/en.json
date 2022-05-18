@@ -73,13 +73,16 @@
     "garrison": "Garrison",
     "info": "Info",
     "owned": "Owned",
-    "upgrade": "UPGRADE",
     "sendToGarrison": "Send to Garrison",
     "sendToGarrisonText": "You will not be able to use the character when in garrison.",
     "transfer": "Transfer",
     "transferText": "Transfer character to another address.",
     "change": "Change",
-    "send": "Send"
+    "send": "Send",
+    "max": "Max",
+    "upgrade": "Upgrade",
+    "skins": "Skins",
+    "options": "Options"
   },
   "characterModal": {
     "close": "Tap Anywhere To Close"
@@ -411,7 +414,7 @@
     "greaterDust": "Greater Dust",
     "lowerDust": "Lower Dust",
     "createDustConfirm": "Create Dust Confirmation",
-    "noDust": "No Dust Selected" 
+    "noDust": "No Dust Selected"
   },
   "dustBalanceDisplay": {
     "availableDust": "Available Dust",

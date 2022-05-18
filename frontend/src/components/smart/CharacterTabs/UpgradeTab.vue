@@ -1,5 +1,5 @@
 <template>
-    <b-tab active title="Upgrade" title-item-class="character-wrapper" title-link-class="character-tab" >
+    <b-tab active :title="$t('Character.upgrade')" title-item-class="character-wrapper" title-link-class="character-tab" >
       <b-card-text class="character-text mb-4">{{$t(`Character.upgradeText`)}}</b-card-text>
       <div class="row justify-content-between">
         <div class="col-3 d-flex flex-row">
@@ -27,10 +27,10 @@
         </div>
         <div class="col-2 character-text d-flex">
           <input id="powerAmount" type="number" :value="powerAmount" @change="handleInput" />
-          <button class="mx-1 px-2"  @click="handleMax">Max</button>
+          <button class="mx-1 px-2"  @click="handleMax">{{$t(`Character.max`)}}</button>
         </div>
       </div>
-      <button class="upgrade-character-button mt-5" @click="onUpgradeConfirm">
+      <button class="upgrade-character-button mt-5" :disabled="powerAmount/10 === 0" @click="onUpgradeConfirm">
         <span>{{$t('Character.upgrade')}}</span><br/>{{powerAmount/10}} {{$t(`Character.soul`)}}
       </button>
     </b-tab>
@@ -129,7 +129,7 @@ export default Vue.extend({
 .upgrade-character-button {
   width: 200px;
   height: 80px;
-  background: #000E2900 0% 0% no-repeat padding-box;
+  background: transparent;
   background-image: url('../../../assets/btn-join.png');
   background-size: contain;
   background-position: center;
@@ -140,6 +140,11 @@ export default Vue.extend({
   font-weight: 500;
   font-family: 'Roboto', sans-serif;
   text-transform: uppercase;
+}
+
+.upgrade-character-button:disabled {
+  filter:grayscale(100%);
+  opacity: 0.8;
 }
 
 .upgrade-character-button span {
