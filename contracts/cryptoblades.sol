@@ -296,17 +296,17 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function fight(uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external
-        restricted returns (uint256, uint256) {
+        onlyNonContract() {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightData(characters.getFightDataAndDrainStamina(tx.origin,
+            unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
                 char, staminaCostFight * fightMultiplier, false, 0));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(tx.origin, wep, charTrait,
+            uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(msg.sender, wep, charTrait,
                 durabilityCostFight * fightMultiplier, false, 0);
 
         // dirty variable reuse to avoid stack limits
@@ -316,7 +316,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             target,
             now / 1 hours
         );
-        return performFight(
+        performFight(
             char,
             wep,
             Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
@@ -333,37 +333,35 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 traitsCWE, // could fit into uint8 since each trait is only stored on 2 bits (TODO)
         uint24 targetPower,
         uint8 fightMultiplier
-    ) private returns (uint256 tokens, uint256 expectedTokens) {
-        uint256 seed = uint256(keccak256(abi.encodePacked(now, tx.origin)));
+    ) private {
+        uint256 seed = uint256(keccak256(abi.encodePacked(now, msg.sender)));
         uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
 
         updateHourlyPayouts(); // maybe only check in trackIncome? (or do via bot)
 
         uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
-        tokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
-        expectedTokens = tokens;
+        uint256 tokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
 
-        if(tokenRewards[tx.origin] == 0 && tokens > 0) {
-            _rewardsClaimTaxTimerStart[tx.origin] = block.timestamp;
-        }
-
-        if (playerRoll < monsterRoll) {
+        if(playerRoll < monsterRoll) {
             tokens = 0;
             xp = 0;
         }
 
+        if(tokenRewards[msg.sender] == 0 && tokens > 0) {
+            _rewardsClaimTaxTimerStart[msg.sender] = block.timestamp;
+        }
+
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
-        tokenRewards[tx.origin] += tokens;
+        tokenRewards[msg.sender] += tokens;
         vars[VAR_UNCLAIMED_SKILL] += tokens;
         vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
         xpRewards[char] += xp;
-        
 
         vars[VAR_HOURLY_FIGHTS] += fightMultiplier;
         vars[VAR_HOURLY_POWER_SUM] += playerFightPower * fightMultiplier;
 
-        emit FightOutcome(tx.origin, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
+        emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {

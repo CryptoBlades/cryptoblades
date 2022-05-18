@@ -47,7 +47,6 @@ import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/
 import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/PvpArena.json';
 import { abi as pvpCoreAbi, networks as pvpCoreNetworks } from '../../build/contracts/PvpCore.json';
 import { abi as pvpRankingsAbi, networks as pvpRankingsNetworks } from '../../build/contracts/PvpRankings.json';
-import { abi as tokensManagerAbi, networks as tokensManagerNetworks } from '../../build/contracts/TokensManager.json';
 import { abi as weaponCosmeticsAbi, networks as weaponCosmeticsNetworks } from '../../build/contracts/WeaponCosmetics.json';
 import { abi as characterCosmeticsAbi, networks as characterCosmeticsNetworks } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
@@ -256,12 +255,6 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
 
-  let TokensManager;
-  if((tokensManagerNetworks as Networks)[networkId]) {
-    const tokensManagerContractAddr = process.env.VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS ||
-      getConfigValue('VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS') || (tokensManagerNetworks as Networks)[networkId]!.address;
-    TokensManager = new web3.eth.Contract(tokensManagerAbi as Abi, tokensManagerContractAddr);
-  }
   const specialWeaponsManagerAddr = (specialWeaponsManagerNetworks as Networks)[networkId]!.address;
   const SpecialWeaponsManager = new web3.eth.Contract(specialWeaponsManagerAbi as Abi, specialWeaponsManagerAddr);
 
@@ -403,7 +396,6 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
     NFTStorage, CBKLandSale, CBKLand, Merchandise, Promos,
-    TokensManager,
     ...raidContracts,
     ...pvpContracts,
     ...marketContracts,
