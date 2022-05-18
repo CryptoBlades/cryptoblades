@@ -358,7 +358,6 @@ const pvp = {
         PvpCore,
         SkillToken,
         rootState.defaultAccount,
-        getGasPrice(),
         defaultCallOptions(rootState),
         defaultCallOptions(rootState),
         new BigNumber(`${amount}`)
