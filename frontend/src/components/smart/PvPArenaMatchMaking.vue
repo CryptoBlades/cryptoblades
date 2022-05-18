@@ -162,7 +162,7 @@
       :defenderPower="duelResult.defenderPower"
       :defenderRoll="duelResult.defenderRoll"
       :skillEarned="duelResult.skillDifference"
-      :rankVariation="duelResult.result === 'win' ? `+${this.duelResult.bonusRank ? 5 + +this.duelResult.bonusRank : 5}` : '-3'"
+      :rankVariation="duelResult.result === 'win' ? `+${this.duelResult.bonusRank ? 5 + +this.duelResult.bonusRank : 5}` : '0'"
       :userCurrentRank="duelResult.rankDifference"
       @close-modal="handleCloseModal"
     />
@@ -525,9 +525,11 @@ export default {
           // TODO: Make this prettier
           this.duelResult.rankDifference = formattedResult.attackerWon ?
             +this.characterInformation.rank + 5 + +this.duelResult.bonusRank :
-            +this.characterInformation.rank - 3 <= 0 ?
-              0 :
-              +this.characterInformation.rank - 3;
+            // Mute ranking loss
+            // +this.characterInformation.rank - 3 <= 0 ?
+            //   0 :
+            //   +this.characterInformation.rank - 3;
+            +this.characterInformation.rank;
 
           subscription.unsubscribe((error, result) => {
             if (!error) {
@@ -594,7 +596,7 @@ export default {
 
       this.wager = (await this.getFighterByCharacter(this.currentCharacterId)).wager;
 
-      if (this.wager < this.duelCost) {
+      if (+this.formattedWager < +this.formattedDuelCost) {
         this.$emit('kickCharacterFromArena');
       }
 
