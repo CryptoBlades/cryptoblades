@@ -596,7 +596,7 @@ export default {
 
       this.wager = (await this.getFighterByCharacter(this.currentCharacterId)).wager;
 
-      if (this.wager < this.duelCost) {
+      if (+this.formattedWager < +this.formattedDuelCost) {
         this.$emit('kickCharacterFromArena');
       }
 
