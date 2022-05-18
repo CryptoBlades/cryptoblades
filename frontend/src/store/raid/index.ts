@@ -6,7 +6,6 @@ import {approveFeeWalletOrRewards} from '@/contract-call-utils';
 import BigNumber from 'bignumber.js';
 
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
-import { getGasPrice } from '../store';
 import { IRaidState } from '@/interfaces';
 import {raid as featureFlagRaid} from '@/feature-flags';
 import { raidFromContract} from '@/contract-models';
@@ -61,7 +60,6 @@ const raid = {
         Raid1,
         SkillToken,
         rootState.defaultAccount,
-        getGasPrice(),
         defaultCallOptions(rootState),
         defaultCallOptions(rootState),
         feeInSkill,
