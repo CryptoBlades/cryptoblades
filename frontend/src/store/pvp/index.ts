@@ -146,6 +146,18 @@ const pvp = {
       return isCharacterInArena;
     },
 
+    async getIsCharacterInOldArena({ rootState }: {rootState: IState}, characterId: number) {
+      const { PvpArena } = rootState.contracts();
+
+      if (!PvpArena || !rootState.defaultAccount) {
+        return;
+      }
+
+      const isCharacterInOldArena = await PvpArena.methods.isCharacterInArena(characterId).call({ from: rootState.defaultAccount });
+
+      return isCharacterInOldArena;
+    },
+
     async getIsCharacterUnderAttack({ rootState }: {rootState: IState}, characterId: number) {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
@@ -263,6 +275,18 @@ const pvp = {
       const res = await PvpCore.methods.withdrawFromArena(characterId).send({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
 
       await dispatch('getIsCharacterInArena', characterId);
+
+      return res;
+    },
+
+
+    async withdrawFromOldArena({ rootState }: {rootState: IState}, characterId: number) {
+      const { PvpArena } = rootState.contracts();
+      if (!PvpArena || !rootState.defaultAccount) {
+        return;
+      }
+
+      const res = await PvpArena.methods.withdrawFromArena(characterId).send({ from: rootState.defaultAccount });
 
       return res;
     },

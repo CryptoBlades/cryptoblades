@@ -1400,12 +1400,13 @@
     "tieredArena": "Tiered: Face players of similar levels",
     "untieredArena": "Free for All: Fight players of any level!",
     "tiered": "Tiered",
+    "leaveOldArena": "Due to an improvement in the PvP Arena, you will be required to leave and re-enter. This is just a one time thing. All unclaimed rewards will still be claimable without time limit.",
     "untiered": "Free for All"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
     "warning": {
-      "title": "Metamask Not Detected Or Incorrect Network",
+      "title": "Metamask Not Detected",
       "start": "Get Started With CryptoBlades",
       "buttons": {
         "addMetamask": "Add MetaMask",
