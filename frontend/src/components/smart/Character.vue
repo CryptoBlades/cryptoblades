@@ -27,21 +27,25 @@
         <span class="ml-auto text-muted align-self-end">#{{currentCharacterId}}</span>
       </div>
       <!-- Character chart info -->
-      <div class="row mb-5 text-white">
+      <div class="row mb-5">
         <div class="col cell">
-          <span class="main-font cell-title">{{$t(`Character.level`)}}</span>
+          <div class="table-bg"></div>
+          <span class="main-font cell-title text-white">{{$t(`Character.level`)}}</span>
           <span class="alt-text cell-value">{{ characterLvl }}</span>
         </div>
         <div class="col cell">
-          <span class="main-font cell-title">{{$t(`Character.power`)}}</span>
+          <div class="table-bg"></div>
+          <span class="main-font cell-title text-white">{{$t(`Character.power`)}}</span>
           <span class="alt-text cell-value">{{ totalCharacterPower }}</span>
         </div>
         <div class="col cell">
-          <span class="main-font cell-title">{{$t(`Character.reputation`)}}</span>
+          <div class="table-bg"></div>
+          <span class="main-font cell-title text-white">{{$t(`Character.reputation`)}}</span>
           <span class="cell-value">{{$t(`quests.reputationTier.${ReputationTier[getReputationLevel(reputation)]}`)}}</span>
         </div>
         <div class="col cell">
-          <span class="main-font cell-title">{{$t(`Character.element`)}}</span>
+          <div class="table-bg"></div>
+          <span class="main-font cell-title text-white">{{$t(`Character.element`)}}</span>
           <p class="alt-text cell-value">
             <span :class="characterTrait.toLowerCase() + '-icon circle-element'"></span>
             {{characterTrait}}
@@ -362,7 +366,8 @@ export default Vue.extend({
       'transferNFT',
       'renameCharacter',
       'sendToGarrison',
-      'fetchOwnedCharacterCosmetics'
+      'fetchOwnedCharacterCosmetics',
+      'fetchTotalRenameTags',
     ]) as StoreMappedActions,
     getCharacterArt,
     RequiredXp,
@@ -575,6 +580,23 @@ export default Vue.extend({
   text-align: center;
   border: 1px solid #404857;
   padding: 1.5rem 2rem;
+  position: relative;
+}
+
+.cell span, .cell p {
+  position: relative;
+  z-index: 10;
+}
+
+.table-bg{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top:0;
+  left: 0;
+  background: #1E293C;
+  opacity: 0.2;
+  z-index: 1;
 }
 
 .cell:first-child{
