@@ -4,7 +4,7 @@
            'd-flex gap-3 align-items-center link',
            (!garrison && havePlazaCharacters) ? 'active' : ''
          ]"
-          @click="toggleGarrison"
+          @click="$emit('toggle')"
         >
           <div class="img-nav">
             <div class="img-frame"></div>
@@ -17,7 +17,7 @@
            'd-flex gap-3 align-items-center link',
            (garrison || !havePlazaCharacters) ? 'active' : ''
          ]"
-          @click="toggleGarrison"
+          @click="$emit('toggle')"
          >
           <div class="img-nav">
             <div class="img-frame"></div>
@@ -31,6 +31,14 @@
           </div>
           <span  class="main-font text-white fs-5">{{$t('Character.garrison')}}</span>
         </div>
+         <b-button
+          v-if="ownCharacters.length <= 4"
+          variant="primary"
+          class="ml-3 gtag-link-others"
+          @click="$emit('mintCharacter')"
+          v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+          {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
+        </b-button>
     </div>
 </template>
 
@@ -47,13 +55,17 @@ export default Vue.extend({
     havePlazaCharacters: {
       type: Boolean,
       default: false
+    },
+    ownCharacters: {
+      type: Array,
+      default: ()=> []
+    },
+    recruitCost: {
+      type: Number,
+      default: 0
     }
   },
-  methods: {
-    toggleGarrison(): void {
-      this.$emit('toggle');
-    }
-  },
+
 });
 
 </script>
