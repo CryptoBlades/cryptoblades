@@ -3872,6 +3872,7 @@ export function createStore() {
 
         return characterPower;
       },
+
       async burnCharactersIntoCharacter({ state, dispatch }, {burnIds, targetId}) {
         const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
         if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
