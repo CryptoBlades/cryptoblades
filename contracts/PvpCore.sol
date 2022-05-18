@@ -434,11 +434,11 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
             duel.cost = getDuelCostByTier(duel.tier);
 
-            duel.attacker.power = getCharacterPower(duel.attacker.ID);
-            duel.defender.power = getCharacterPower(duel.defender.ID);
+            duel.attacker.power = getCharacterPower(duel.attacker.ID, duel.tier);
+            duel.defender.power = getCharacterPower(duel.defender.ID, duel.tier);
 
-            duel.attacker.roll = _getCharacterPowerRoll(duel.attacker, duel.defender.trait);
-            duel.defender.roll = _getCharacterPowerRoll(duel.defender, duel.attacker.trait);
+            duel.attacker.roll = _getCharacterPowerRoll(duel.attacker, duel.defender.trait, duel.tier);
+            duel.defender.roll = _getCharacterPowerRoll(duel.defender, duel.attacker.trait, duel.tier);
 
             // Reduce defender roll if attacker has a shield
             if (fighterByCharacter[duel.attacker.ID].useShield) {
@@ -746,12 +746,12 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         weapons.setNftVar(weaponID, 1, 0);
     }
 
-    function _getCharacterPowerRoll(Duelist memory character, uint8 opponentTrait)
+    function _getCharacterPowerRoll(Duelist memory character, uint8 opponentTrait, uint8 tier)
         private
         view
         returns (uint24)
     {
-        uint24 playerFightPower = getCharacterPower(character.ID);
+        uint24 playerFightPower = getCharacterPower(character.ID, tier);
 
         Fighter memory fighter = fighterByCharacter[character.ID];
         uint256 weaponID = fighter.weaponID;
@@ -776,7 +776,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         return uint24(playerTraitBonus.mulu(playerPower));
     }
 
-    function getCharacterPower(uint256 characterID)
+    function getCharacterPower(uint256 characterID, uint8 tier)
         public
         view
         characterInArena(characterID)
@@ -796,9 +796,17 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
             bonusShieldStats = _getShieldStats(characterID).sub(1).mul(20).div(100);
         }
 
+        uint24 power;
+
+        if (tier == 20) {
+            power = Common.getPowerAtLevel(0);
+        } else {
+            power = Common.getPowerAtLevel(characters.getLevel(characterID));
+        }
+
         return (   
             Common.getPlayerPowerBase100(
-                Common.getPowerAtLevel(characters.getLevel(characterID)),
+                power,
                 (weaponMultFight.add(bonusShieldStats)),
                 weaponBonusPower)
         );
