@@ -20,7 +20,6 @@
           <div class="menu-icons">
             <router-link
               class="menu-icon"
-              v-if="!stakeOnly"
               :to="{ name: 'plaza' }"
               exact
             >
@@ -30,7 +29,6 @@
 
             <router-link
               class="menu-icon"
-              v-if="!stakeOnly"
               :to="{ name: 'blacksmith' }"
               exact
             >
@@ -40,7 +38,6 @@
 
             <router-link
               class="menu-icon"
-              v-if="!stakeOnly"
               :to="{ name: 'combat' }"
               exact
             >
@@ -70,7 +67,7 @@
 
             <router-link
               class="menu-icon"
-              v-if="!stakeOnly && raid"
+              v-if="raid"
               :to="{ name: 'raid' }"
               exact
             >
@@ -100,18 +97,12 @@
 
             <a
               class="menu-icon"
-              v-if="!stakeOnly && market"
               href="https://bazaar.market"
               target="_blank"
             >
               <img src="../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
               <span>{{ $t("viewLink.bazaar") }}</span>
             </a>
-
-            <div v-if="!market" class="menu-icon disabled-hover">
-              <img src="../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
-              <span>{{ $t("viewLink.bazaar") }}</span>
-            </div>
 
             <router-link
               class="menu-icon"
@@ -303,7 +294,7 @@ import {fromWeiEther, toBN} from '../utils/common';
 import {nft_bridge as bridgeEnabled} from './../feature-flags';
 import {SupportedProject} from '@/views/Treasury.vue';
 import Hint from '@/components/Hint.vue';
-import {market, merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
+import {merchandise, portal, pvp, quests, raid} from '@/feature-flags';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -354,9 +345,7 @@ export default Vue.extend({
       hideWalletWarning: false,
       showSkillInUsd: false,
       ClaimStage,
-      stakeOnly,
       raid,
-      market,
       portal,
       pvp,
       quests,
@@ -475,7 +464,7 @@ export default Vue.extend({
     },
 
     currentChainSupportsClaimTokens() {
-      return (localStorage.getItem('currentChain') || 'BSC') !== 'BSC';
+      return (localStorage.getItem('currentChain') || 'BNB') !== 'BNB';
     },
   }
 });

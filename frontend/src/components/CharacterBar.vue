@@ -135,7 +135,7 @@ export default Vue.extend({
     top: 0;
     height: 100vh;
     width: 60%;
-    z-index: 9999;
+    z-index: 5;
     background-color: rgb(27, 29, 24);
     overflow-x: auto;
   }

@@ -1,10 +1,8 @@
 <template>
   <div class="weapon-icon"
+    :id="'weapon-details'"
+    :key="weapon.id"
     v-bind:class="[(getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '')]"
-    v-tooltip="{
-      content: tooltipHtml ,
-      trigger: (isMobile() ? 'click' : 'hover')
-    }"
     @mouseover="hover = !isMobile() || true"
     @mouseleave="hover = !isMobile()"
   >
@@ -15,10 +13,10 @@
 
     <!-- adventure selected weapon display  (MOBILE VIEW)-->
     <div class="displayed-weapon" v-if="displayType === 'adventure' && isMobile()">
+        <div class="id">
+          <span v-for="star in weapon.stars+1" :key="star">&#9733;</span>
+        </div>
         <div :class="'weapon-img img-adventure frame-'+ (weapon.stars || 0)">
-          <!-- WEAPON ID -->
-          <div class="id">{{$t('weaponIcon.id')}} {{ weapon.id }}</div>
-
           <!-- below use of weapon.id is for test purpose, should be replaced with getWeaponCosmetic(weapon.id) -->
           <img v-if="showPlaceholder" v-bind:class="showCosmetics ? ' weapon-cosmetic-applied-'
           + getWeaponCosmetic(weapon.id) : ''"
@@ -33,9 +31,13 @@
     <div v-if="displayType === 'adventure' && !isMobile()" class="glow-container" ref="el">
       <div class="weapon-flex">
         <div :class="'weapon-img-desktop frame-'+ (weapon.stars || 0)">
-            <!-- WEAPON ID -->
-          <div class="id">{{$t('weaponIcon.id')}} {{ weapon.id }}</div>
-          <img v-if="showPlaceholder" class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)" />
+          <div class="id mt-10">
+            <span v-for="star in weapon.stars+1" :key="star">&#9733;</span>
+          </div>
+          <img v-if="showPlaceholder" class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)">
+          <div class="change-wep"  @click="changeEquipedWeapon()">
+            <span class="change-icon"></span>
+          </div>
         </div>
         <div class="weapon-details">
 
@@ -44,6 +46,50 @@
 
             <!-- WEAPON NAME -->
             <div class="name-desktop">
+              {{ (getCleanWeaponName(weapon.id, weapon.stars)).toUpperCase()}}
+            </div>
+
+           <!-- BATTLE POWER -->
+            <div class="trait">
+              <div class="d-flex align-items-center traits">
+                <span :class="weapon.element.toLowerCase() + '-icon'"></span>
+                <span class="trait-name">Battle Power: {{ weapon.stat1Value + weapon.stat2Value + weapon.stat3Value}}</span>
+              </div>
+            </div>
+
+             <!-- DURABILITY BAR -->
+            <div class="mt-1 mb-1">
+              <div class="small-durability-bar"
+              :style="`--durabilityReady: ${(getWeaponDurability(weapon.id)/maxDurability)*100}%;`"
+              v-tooltip.bottom="`${$t('weaponIcon.durability')} ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
+                ${$t('weaponIcon.durabilityTooltip')} ${timeUntilWeaponHasMaxDurability(weapon.id)}`"></div>
+            </div>
+
+            <!-- WEAPON STATS -->
+            <div class="bonus-power">
+              <div v-if="weapon.lowStarBurnPoints > 0"><span>LB : {{ weapon.lowStarBurnPoints }} </span></div>
+              <div v-if="weapon.fourStarBurnPoints > 0"><span>4B: {{ weapon.fourStarBurnPoints }}</span></div>
+              <div v-if="weapon.fiveStarBurnPoints > 0"><span>5B: {{ weapon.fiveStarBurnPoints }}</span></div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- raid selected weapon display  (DESKTOP VIEW)-->
+    <div v-if="displayType === 'raid'" class="glow-container" ref="el">
+      <div class="weapon-flex">
+        <div :class="'weapon-img-desktop frame-'+ (weapon.stars || 0)" style="border-radius:5px">
+            <!-- WEAPON ID -->
+          <div class="id">{{$t('weaponIcon.id')}} {{ weapon.id }}</div>
+          <img v-if="showPlaceholder" class="placeholder" :src="getWeaponArt(weapon)"  />
+        </div>
+        <div class="weapon-details">
+
+            <!-- FAVORITE -->
+            <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
+
+            <!-- WEAPON NAME -->
+            <div class="name-desktop raid-weapon">
               {{ (getCleanWeaponName(weapon.id, weapon.stars)).toUpperCase()}}
             </div>
 
@@ -81,9 +127,9 @@
 
             <!-- WEAPON STATS -->
             <div class="bonus-power">
-              <div v-if="weapon.lowStarBurnPoints > 0"><span>{{ weapon.lowStarBurnPoints }} LB</span></div>
-              <div v-if="weapon.fourStarBurnPoints > 0"><span>{{ weapon.fourStarBurnPoints }} 4B</span></div>
-              <div v-if="weapon.fiveStarBurnPoints > 0"><span>{{ weapon.fiveStarBurnPoints }} 5B</span></div>
+              <div v-if="weapon.lowStarBurnPoints > 0"><span>LB: {{ weapon.lowStarBurnPoints }}</span></div>
+              <div v-if="weapon.fourStarBurnPoints > 0"><span>4B: {{ weapon.fourStarBurnPoints }}</span></div>
+              <div v-if="weapon.fiveStarBurnPoints > 0"><span>5B: {{ weapon.fiveStarBurnPoints }}</span></div>
             </div>
         </div>
       </div>
@@ -93,9 +139,10 @@
     <!-- inventory selected weapon list display -->
     <div v-if="displayType === 'inventory'" class="glow-container" ref="el">
       <div class="weapon-flex">
+        <div class="id">
+          <span v-for="star in weapon.stars+1" :key="star">&#9733;</span>
+        </div>
         <div :class="'weapon-img frame-'+ (weapon.stars || 0)">
-            <!-- WEAPON ID -->
-          <div class="id">{{$t('weaponIcon.id')}} {{ weapon.id }}</div>
           <img v-if="showPlaceholder" class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)" />
         </div>
         <div class="weapon-details">
@@ -108,27 +155,12 @@
               {{ (getCleanWeaponName(weapon.id, weapon.stars)).toUpperCase()}}
             </div>
 
-            <!-- STAR -->
+            <!-- BATTLE POWER -->
             <div class="trait">
               <div class="d-flex align-items-center traits">
                 <span :class="weapon.element.toLowerCase() + '-icon'"></span>
-                <span class="trait-name">{{weapon.element.toUpperCase()}}</span>
-              </div>
-              <div>
-                <div class="stats">
-                  <div v-if="weapon.stat1Value">
-                    <span :class="weapon.stat1.toLowerCase() + '-icon'" class="mr-1 icon"></span>
-                    <span :class="weapon.stat1.toLowerCase()">{{ weapon.stat1 }} +{{ weapon.stat1Value }}</span>
-                  </div>
-                  <div v-if="weapon.stat2Value">
-                    <span :class="weapon.stat2.toLowerCase() + '-icon'" class="mr-1 icon"></span>
-                    <span :class="weapon.stat2.toLowerCase()">{{ weapon.stat2 }} +{{ weapon.stat2Value }}</span>
-                  </div>
-                  <div v-if="weapon.stat3Value">
-                    <span :class="weapon.stat3.toLowerCase() + '-icon'" class="mr-1 icon"></span>
-                    <span :class="weapon.stat3.toLowerCase()">{{ weapon.stat3 }} +{{ weapon.stat3Value }}</span>
-                  </div>
-                </div>
+                <span class="trait-name">Battle Power: {{ weapon.stat1Value + weapon.stat2Value + weapon.stat3Value}}</span>
+                <span class="mobile-info" :id="'weapon-'+weapon.id" @click.stop="''"></span>
               </div>
             </div>
 
@@ -142,19 +174,20 @@
 
             <!-- WEAPON STATS -->
             <div class="bonus-power">
-              <div v-if="weapon.lowStarBurnPoints > 0"><span>{{ weapon.lowStarBurnPoints }} LB</span></div>
-              <div v-if="weapon.fourStarBurnPoints > 0"><span>{{ weapon.fourStarBurnPoints }} 4B</span></div>
-              <div v-if="weapon.fiveStarBurnPoints > 0"><span>{{ weapon.fiveStarBurnPoints }} 5B</span></div>
+              <div v-if="weapon.lowStarBurnPoints > 0"><span>LB: {{ weapon.lowStarBurnPoints }}</span></div>
+              <div v-if="weapon.fourStarBurnPoints > 0"><span>4B: {{ weapon.fourStarBurnPoints }}</span></div>
+              <div v-if="weapon.fiveStarBurnPoints > 0"><span>5B: {{ weapon.fiveStarBurnPoints }}</span></div>
             </div>
         </div>
       </div>
     </div>
-  </div>
+</div>
 </template>
 
 <script>
 import { getWeaponArt } from '../weapon-arts-placeholder';
 import '@/mixins/general';
+import Events from '../events';
 import { Stat1PercentForChar,
   Stat2PercentForChar,
   Stat3PercentForChar
@@ -278,6 +311,9 @@ export default {
     checkStorage() {
       this.showCosmetics = localStorage.getItem('showCosmetics') !== 'false';
     },
+    changeEquipedWeapon(){
+      Events.$emit('weapon-inventory', true);
+    },
   },
   mounted() {
     this.checkStorage();
@@ -333,12 +369,21 @@ export default {
   max-height: 180px;
   margin: auto;
   display: block;
-
   transform: scale(0.7);
 }
 
 .frame-0{
     animation: none;
+}
+
+.mobile-info{
+  display: none;
+}
+
+.favorite-star{
+  position: absolute;
+  right: 50px;
+  top: 20px;
 }
 
 .frame-1{
@@ -398,35 +443,37 @@ export default {
 }
 
 .weapon-img-desktop > img{
-  max-width: 70px;
-  min-width: 70px;
-  min-height: 70px;
-  max-height: 70px;
+  max-width: 100px;
+  min-width: 100px;
+  min-height: 100px;
+  max-height: 100px;
 }
 
 .trait-name{
-  color:#fff;
-  font-size: 11px;
+  color:rgba(255, 255, 255, 0.521);
+  font-size: 13px;
   padding-right: 10px;
-  border-right: 1px solid rgba(255, 255, 255, 0.261);
+  font-family: Roboto;
+  margin-left: 7px;
 }
 
 .name {
   font-size: 17px;
   color: #fff;
-  font-size: 0.9em;
+  font-size: 1em;
   text-align: left;
+  font-family: Trajan;
   text-transform: capitalize !important;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .name-desktop {
   font-size: 17px;
-  color: #fff;
+  color: #EDCD90;
   font-size: 1em;
   text-align: left;
   text-transform: capitalize !important;
-  font-weight: 800;
+  font-weight: 500;
   font-family: Trajan;
 }
 
@@ -438,9 +485,25 @@ export default {
   left: 10px;
   font-style: normal;
   font-size: 12px;
-  color: #fff;
+  color: #EDCD90;
 }
 
+
+.change-wep {
+  position: absolute;
+  bottom: 13px;
+  left: 75px;
+  font-style: normal;
+  font-size: 12px;
+  color: #EDCD90;
+  cursor: pointer;
+}
+
+.change-icon{
+  content: url('../assets/swithc-wep.png');
+  height: 15px;
+  width: 15px;
+}
 
 .trait {
   display: flex;
@@ -473,14 +536,35 @@ export default {
 .bonus-power {
   font-size: 0.6em;
   text-align: right;
+  display: flex;
+  padding-top: 10px;
+}
+
+
+.bonus-power > div > span{
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.623);
+  font-size: 1.1em;
+  padding: 2px 10px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.329);
+  margin-right: 10px;
+  font-family: Roboto;
+  margin-top: 5px;
 }
 
 .small-durability-bar {
   position: relative;
   height: 3px;
-  width: 100%;
-  margin: 0 auto;
+  width: 80%;
   background : linear-gradient(to right, rgb(236, 75, 75) var(--durabilityReady), rgba(255, 255, 255, 0.1) 0);
+}
+
+
+
+
+#weapon-details{
+  overflow: visible;
 }
 
 
@@ -492,6 +576,11 @@ export default {
     max-height: 70px;
   }
 
+  .mobile-info{
+    display: inline-block;
+    content: url('../assets/hint.png');
+    height: 20px;
+  }
   .img-adventure > span{
     position: absolute;
     bottom:10px;

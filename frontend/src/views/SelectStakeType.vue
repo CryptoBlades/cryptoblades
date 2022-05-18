@@ -1,6 +1,7 @@
 <template>
   <div class="body main-font">
-    <ul class="stake-select-list" v-if="true">
+    <h1 class="text-center">{{$t('stake.staking')}}</h1>
+    <ul class="stake-select-list">
       <li class="stake-select-item" v-for="e in entries" :key="e.stakeType">
         <stake-selector-item
           :stakeTitle="e.stakeTitle"
@@ -12,12 +13,11 @@
           :rewardsDuration="stakeOverviews[e.stakeType].rewardsDuration"
           :deprecated="e.deprecated"
           :rewardDistributionTimeLeft="stakeOverviews[e.stakeType].rewardDistributionTimeLeft"
-          :currentRewardEarned="staking[e.stakeType].currentRewardEarned"/>
+          :currentRewardEarned="staking[e.stakeType].currentRewardEarned"
+          :totalStaked="staking[e.stakeType].contractBalance"
+          :walletBalance="staking[e.stakeType].ownBalance"/>
       </li>
     </ul>
-    <div class="loading-indicator" v-else>
-      <h1>{{$t('stake.loading')}}</h1>
-    </div>
   </div>
 </template>
 
@@ -28,18 +28,18 @@ import _ from 'lodash';
 BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 import StakeSelectorItem from '../components/StakeSelectorItem.vue';
-
+import Vue from 'vue';
 import { humanReadableDetailsForStakeTypes, humanReadableDetailsForNftStakeTypes } from '../stake-types';
 import { isNftStakeType } from '@/interfaces';
 
-export default {
+export default Vue.extend({
   components: {
     StakeSelectorItem,
   },
 
   computed: {
-    ...mapState(['stakeOverviews', 'staking']),
-    ...mapGetters(['availableStakeTypes', 'availableNftStakeTypes']),
+    ...mapState('staking', ['staking', 'stakeOverviews']),
+    ...mapGetters('staking', ['availableStakeTypes', 'availableNftStakeTypes']),
 
     entries() {
       const entries = this.availableStakeTypes.map(stakeType => ({
@@ -65,7 +65,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchStakeOverviewData']),
+    ...mapActions('staking',['fetchStakeOverviewData']),
 
     calculateEstimatedYield(stakeType) {
       const rewardRate = this.stakeOverviews[stakeType].rewardRate;
@@ -83,7 +83,6 @@ export default {
       if(isNftStakeType(stakeType)) {
         return estYield.dividedBy(BN(10).pow(18));
       }
-
       return estYield;
     }
   },
@@ -91,44 +90,41 @@ export default {
   async mounted() {
     await this.fetchStakeOverviewData();
   }
-};
+});
 </script>
 
 <style scoped>
+.body{
+  width: clamp(0px, 100%, 1400px);
+  margin:0 auto;
+}
+h1{
+  font-family: 'Trajan';
+  font-size: 30px/38px Trajan;
+  color: #EDCD90;
+  margin-bottom: 30px;
+}
 .stake-select-list {
   list-style: none;
   margin: 0 auto;
   padding: 0;
   display: flex;
-  max-width: 80rem;
   justify-content: center;
   flex-wrap: wrap;
 }
 
 .stake-select-item {
-  width: 17rem;
-  height: 22rem;
-  margin: 2rem;
-  border-radius: 1rem;
-  overflow: hidden;
-  border: 2px solid #6c5f38;
-  border-radius: 0.1em;
+  width: clamp(520px, 45%, 650px);
+  margin: 1rem;
+  border: 1px solid #404857;
+  border-radius: 5px;
 }
 
-.stake-select-item > * {
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-.loading-indicator {
-  min-height: 8rem;
-  display: flex;
-  justify-content: center;
-}
-
-.loading-indicator h1 {
-  margin: 3rem;
-  display: inline-block;
+/* Mobile */
+@media only screen and (max-width: 768px)  {
+  .stake-select-item {
+    width: 100%;
+    margin: 1rem 0;
+  }
 }
 </style>

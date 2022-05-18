@@ -47,45 +47,6 @@
             :canFavorite="false"
             :newWeapon="true"
           >
-            <template #above="{ weapon: { id } }">
-              <div
-                class="
-                  d-flex
-                  flex-column
-                  align-items-center
-                  justify-content-center
-                  m-top-negative-5
-                "
-              >
-                <span
-                  class="d-block text-center fix-h24"
-                  v-if="nftPrice && nftPrice !== '0'"
-                >
-                  <span
-                    v-tooltip.top="{
-                      content: maxPrecisionSkill(nftPrice),
-                      trigger: isMobile() ? 'click' : 'hover',
-                    }"
-                    @mouseover="hover = !isMobile() || true"
-                    @mouseleave="hover = !isMobile()"
-                  >
-                    <strong>Price</strong>:
-                    <CurrencyConverter :skill="nftPriceInSkill()" />
-                  </span>
-                </span>
-                <b-button
-                  v-if="nftPrice && nftPrice !== '0'"
-                  @click="
-                    nftId = id;
-                    purchaseNft();
-                  "
-                  variant="primary"
-                  class="gtag-link-others"
-                >
-                  Purchase
-                </b-button>
-              </div>
-            </template>
           </weapon-grid>
 
           <character-list
@@ -93,57 +54,8 @@
             class="character-list"
             :characterIds="[this.character.id]"
             :showGivenCharacterIds="true"
-            :isMarket="nftPrice && nftPrice !== '0'"
             :nftDisplay="true"
           >
-            <template #above="{ character: { id } }">
-              <div
-                class="
-                  token-price
-                  d-flex
-                  flex-column
-                  align-items-center
-                  justify-content-center
-                  m-top-negative-50
-                "
-              >
-                <span
-                  class="d-block text-center fix-h24"
-                  v-if="nftPrice && nftPrice !== '0'"
-                >
-                  <span
-                    v-tooltip.top="{
-                      content: maxPrecisionSkill(nftPrice),
-                      trigger: isMobile() ? 'click' : 'hover',
-                    }"
-                    @mouseover="hover = !isMobile() || true"
-                    @mouseleave="hover = !isMobile()"
-                  >
-                    <CurrencyConverter :skill="nftPriceInSkill()" />
-                  </span>
-                </span>
-
-                <b-button
-                  v-if="nftPrice && nftPrice !== '0'"
-                  @click="
-                    selectedNftId = id;
-                    canPurchase && purchaseNft();
-                  "
-                  variant="primary"
-                  v-bind:class="[!canPurchase ? 'disabled-button' : '']"
-                  class="gtag-link-others"
-                  tagname="confirm_purchase"
-                >
-                  Purchase
-                  <b-icon-question-circle
-                    v-if="!canPurchase"
-                    v-tooltip.bottom="
-                      'You already have max amount of characters (4).'
-                    "
-                  />
-                </b-button>
-              </div>
-            </template>
           </character-list>
 
           <nft-list
@@ -153,61 +65,44 @@
             :showGivenNftIdTypes="true"
             :isReward="true"
           >
-            <template #above="{ nft: { id } }">
-              <div
-                class="
-                  d-flex
-                  flex-column
-                  align-items-center
-                  justify-content-center
-                  m-top-negative-5
-                "
-              >
-                <span
-                  class="d-block text-center fix-h24"
-                  v-if="nftPrice && nftPrice !== '0'"
-                >
-                  <span
-                    v-tooltip.top="{
-                      content: maxPrecisionSkill(nftPrice),
-                      trigger: isMobile() ? 'click' : 'hover',
-                    }"
-                    @mouseover="hover = !isMobile() || true"
-                    @mouseleave="hover = !isMobile()"
-                  >
-                    <strong>Price</strong>:
-                    <CurrencyConverter :skill="nftPriceInSkill()" />
-                  </span>
-                </span>
-                <b-button
-                  v-if="nftPrice && nftPrice !== '0'"
-                  @click="
-                    selectedNftId = id;
-                    purchaseNft();
-                  "
-                  variant="primary"
-                  class="gtag-link-others"
-                >
-                  Purchase
-                </b-button>
-              </div>
-            </template>
           </nft-list>
 
           <h3 v-else class="info-text">
             NFT search result will be displayed here
           </h3>
 
-          <h3 class="owned-by" v-if="ownerAddress">
-            Owned by: {{ ownerAddress }}
-          </h3>
-
-          <big-button
-            v-if="ownerAddress"
-            class="encounter-button btn-styled copy-url-button"
-            :mainText="`Copy URL`"
-            @click="copyNftUrl"
-          />
+          <div class="btn-section">
+          <div
+            v-if="nftPrice && nftPrice !== '0' && (shield||weapon||character)"
+            class="purchase-section"
+          >
+              <span
+                v-tooltip.top="{
+                  content: maxPrecisionSkill(nftPrice),
+                  trigger: isMobile() ? 'click' : 'hover',
+                }"
+                @mouseover="hover = !isMobile() || true"
+                @mouseleave="hover = !isMobile()"
+              >
+                <strong>Price</strong>:
+                <CurrencyConverter :skill="nftPriceInSkill()" />
+              </span>
+              <a :href="marketLink" target="_blank" rel="noopener noreferrer">
+                <big-button
+                class="encounter-button btn-styled purchase-button"
+                variant="primary"
+                :mainText="`Buy on Bazaar!`"
+                >
+              </big-button>
+            </a>
+            <big-button
+              v-if="ownerAddress"
+              class="encounter-button btn-styled copy-url-button"
+              :mainText="`Copy URL`"
+              @click="copyNftUrl"
+            />
+          </div>
+          </div>
         </div>
       </div>
     </div>
@@ -249,12 +144,6 @@ interface StoreMappedActions {
     nftContractAddr: string;
     tokenId: string | number;
   }): Promise<string>;
-  purchaseMarketListing(payload: {
-    nftContractAddr: string;
-    tokenId: string;
-    maxPrice: string;
-  }): Promise<{ seller: string; nftID: string; price: string }>;
-  fetchAllMarketNftIds(payload: { nftContractAddr: string }): Promise<string[]>;
 }
 
 export default Vue.extend({
@@ -292,6 +181,10 @@ export default Vue.extend({
       'charactersWithIds',
       'ownCharacters',
     ]) as Accessors<StoreMappedGetters>),
+
+    marketLink(): string{
+      return `${process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/'}buy/${this.nftType}?id=${this.nftId}`;
+    },
 
     isKnownNftType(): boolean {
       return isNftType(this.nftType);
@@ -334,8 +227,6 @@ export default Vue.extend({
       'fetchCharacters',
       'checkMarketItemOwnership',
       'fetchMarketNftPrice',
-      'purchaseMarketListing',
-      'fetchAllMarketNftIds',
     ]) as StoreMappedActions),
     displayCharacter(): void {
       this.character = this.charactersWithIds([this.nftId]).filter(Boolean)[0];
@@ -411,39 +302,6 @@ export default Vue.extend({
     convertStringToDecimal(val: string, maxDecimals: number) {
       return new BigNumber(val).toFixed(maxDecimals);
     },
-    async purchaseNft() {
-      if (this.nftId === null) return;
-
-      const price = await this.lookupNftPrice(this.nftId);
-      if (!price) return;
-
-      const skillChainPrice = this.convertStringToDecimal(
-        this.convertWeiToSkill(price),
-        2
-      );
-      const skillUIPrice = this.convertStringToDecimal(
-        this.nftPriceInSkill(),
-        2
-      );
-
-      if (skillChainPrice !== skillUIPrice) {
-        (this as any).$dialog.notify.error(
-          'The price of the listing has changed. Please refresh listing and try again'
-        );
-        return;
-      }
-
-      await this.purchaseMarketListing({
-        nftContractAddr: this.contractAddress,
-        tokenId: this.nftId,
-        maxPrice: price,
-      });
-
-      await this.fetchAllMarketNftIds({
-        nftContractAddr: this.contractAddress,
-      });
-      await this.fetchOwnerAddress();
-    },
     async lookupNftPrice(id: string) {
       if (!this.contractAddress) return;
 
@@ -495,10 +353,19 @@ export default Vue.extend({
   position: relative;
 }
 
+.purchase-section{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 50px;
+}
+.purchase-section > span{
+  font-size: 32px;
+}
 .character-list {
   transform: scale(1.5);
 }
-
 .nft-list,
 .weapon-grid {
   transform: scale(2);
@@ -506,9 +373,21 @@ export default Vue.extend({
 
 /deep/ .weapon-grid {
   justify-items: center;
+  padding: 30px 0;
+  margin: 10px 0;
 }
-
+/deep/ .character-list {
+  padding: 40px 0;
+  margin: 10px 0;
+}
+/deep/ .nft-list {
+  padding: 40px 0;
+  margin: 10px 0;
+}
 .search-button {
+  width: 22em;
+}
+.purchase-section * {
   width: 100%;
 }
 
@@ -518,9 +397,18 @@ export default Vue.extend({
   width: 22em;
 }
 
-.copy-url-button,
 .search-button {
   margin-top: 30px;
+}
+
+.copy-url-button{
+  margin-top: 10px;
+}
+
+.btn-section{
+  margin-top:20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .nft-display {
@@ -545,16 +433,8 @@ export default Vue.extend({
   align-items: center;
 }
 
-.owned-by,
 .info-text {
   text-align: center;
-}
-
-.owned-by {
-  margin-top: 150px;
-  word-break: break-all;
-  padding-left: 20px;
-  padding-right: 20px;
 }
 
 .search-input-section {
@@ -574,15 +454,15 @@ export default Vue.extend({
   .nft-list,
   .weapon-grid,
   .character-list {
-    transform: scale(1);
+    transform: scale(1.25);
   }
 
   .nft-list,
   .weapon-grid {
     padding-left: 0;
   }
-  .owned-by {
-    margin-top: 50px;
+  .copy-url-button {
+    margin-top: 10px;
   }
 }
 </style>

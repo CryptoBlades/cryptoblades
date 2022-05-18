@@ -682,13 +682,13 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
             ].add(winningPoints.add(duel.bonusRank));
 
             // Check if the loser's current raking points are 'losingPoints' or less and set them to 0 if that's the case, else subtract the ranking points
-            if (rankingPointsByCharacter[loserID] <= losingPoints) {
-                rankingPointsByCharacter[loserID] = 0;
-            } else {
-                rankingPointsByCharacter[loserID] = rankingPointsByCharacter[
-                    loserID
-                ].sub(losingPoints);
-            }
+            // if (rankingPointsByCharacter[loserID] <= losingPoints) {
+            //     rankingPointsByCharacter[loserID] = 0;
+            // } else {
+            //     rankingPointsByCharacter[loserID] = rankingPointsByCharacter[
+            //         loserID
+            //     ].sub(losingPoints);
+            // }
 
             _processWinner(winnerID, duel.tier);
             _processLoser(loserID, duel.tier);
@@ -1233,17 +1233,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     // Note: The following are debugging functions..
 
-    // function clearDuelQueue(uint256 length) external restricted {
-    //     for (uint256 i = 0; i < length; i++) {
-    //         if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
-    //             isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
-    //         }
+    function clearDuelQueue(uint256 length) external restricted {
+        for (uint256 i = 0; i < length; i++) {
+            if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
+                isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
+            }
 
-    //         _duelQueue.remove(_duelQueue.at(i));
-    //     }
+            _duelQueue.remove(_duelQueue.at(i));
+        }
 
-    //     isDefending[0] = false;
-    // }
+        isDefending[0] = false;
+    }
 
     // Note: Unmute this to test ranking interactions 
     

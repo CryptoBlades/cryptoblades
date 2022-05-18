@@ -656,7 +656,7 @@
         "addMetamask": "Add MetaMask",
         "confMetamask": "Configure MetaMask",
         "startMetamask": "Connect to MetaMask",
-        "network": "Switch to BSC Network",
+        "network": "Switch to BNB Network",
         "hide": "Hide Warning"
       },
       "errorMessage": {
@@ -666,7 +666,7 @@
         "welcome": "Willkommen zu Cryptoblades!"
       },
       "message": {
-        "BSC":{
+        "BNB":{
           "instructions": "Fange im Nullkommanichts an! Um deinen ersten Charakter zu rekrutieren, brauchst du {recruitCost} SKILL und .0015 BNB als gas. Außerdem brauchst du noch etwas BNB als gas, um deine ersten Kämpfe auszuführen,aber keine Angst, du profitierst direkt durch Belohnungen, die du beim Kämpfen erhältst!",
           "inst1": "1. Kaufe BNB mit fiat: <a target=_blank href=https://youtu.be/6-sUDUE2RPA> Video </a> or <a target=_blank href={link1}> Mit Transak kaufen</a>",
           "inst2": "2. Sobald du BNB hast, gehe zu ApeSwap, um SKILL Tokens zu tauschen: <a target=_blank href={link1}> Tausche SKILL/BNB </a>",

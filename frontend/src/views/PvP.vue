@@ -45,7 +45,8 @@ export default {
 
   methods: {
     ...mapActions([
-      'getPlayerPrizePoolRewards'
+      'getPlayerPrizePoolRewards',
+      'getPlayerPrizePoolRewardsOldContract'
     ]),
 
     // TODO: Use router for this.
@@ -63,12 +64,12 @@ export default {
   },
 
   async created() {
-    const playerRewards = await this.getPlayerPrizePoolRewards();
+    const playerRewards = +(await this.getPlayerPrizePoolRewards()) + +(await this.getPlayerPrizePoolRewardsOldContract());
     this.hasRewards = !!+playerRewards;
   },
 
   async updated() {
-    const playerRewards = await this.getPlayerPrizePoolRewards();
+    const playerRewards = +(await this.getPlayerPrizePoolRewards()) + +(await this.getPlayerPrizePoolRewardsOldContract());
 
     this.hasRewards = !!+playerRewards;
   }
@@ -84,7 +85,6 @@ export default {
   min-height: 100vh;
   background-image: url('../assets/pvpBackgroundImage.png');
   padding: 1rem 4rem 4rem 4rem;
-  margin: -2rem -1rem 0 -1rem;
 
   .noCharacter {
     margin-top: 3rem;
