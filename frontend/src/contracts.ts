@@ -48,8 +48,8 @@ import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/Pv
 import { abi as pvpCoreAbi, networks as pvpCoreNetworks } from '../../build/contracts/PvpCore.json';
 import { abi as pvpRankingsAbi, networks as pvpRankingsNetworks } from '../../build/contracts/PvpRankings.json';
 import { abi as tokensManagerAbi, networks as tokensManagerNetworks } from '../../build/contracts/TokensManager.json';
-import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
-import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
+import { abi as weaponCosmeticsAbi, networks as weaponCosmeticsNetworks } from '../../build/contracts/WeaponCosmetics.json';
+import { abi as characterCosmeticsAbi, networks as characterCosmeticsNetworks } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
 import { abi as treasuryAbi, networks as treasuryNetworks } from '../../build/contracts/Treasury.json';
 import { abi as burningManagerAbi, networks as burningManagerNetworks } from '../../build/contracts/BurningManager.json';
@@ -101,15 +101,21 @@ interface Chain {
   chains: Record<string, Record<string, any>>;
 }
 
-export function getConfigValue(key: string): any {
+export function getConfigValue(key: string, chain?: string): any {
   if (process.env.VUE_APP_STAGE === 'alpha') {
     return process.env[key];
   }
 
   if(process.env.NODE_ENV === 'development') return '';
   const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
-  const chain = localStorage.getItem('currentChain') || 'BSC';
-  return (config as Config).environments[env].chains[chain][key];
+
+  if(chain) return (config as Config).environments[env].chains[chain][key];
+
+  let currentChain = localStorage.getItem('currentChain') || 'BNB';
+  if(!config.supportedChains.includes(currentChain)){
+    currentChain = 'BNB';
+  }
+  return (config as Config).environments[env].chains[currentChain][key];
 }
 
 let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
@@ -250,10 +256,12 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
 
-  const tokensManagerContractAddr = process.env.VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS ||
-    getConfigValue('VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS') || (tokensManagerNetworks as Networks)[networkId]!.address;
-  const TokensManager = new web3.eth.Contract(tokensManagerAbi as Abi, tokensManagerContractAddr);
-
+  let TokensManager;
+  if((tokensManagerNetworks as Networks)[networkId]) {
+    const tokensManagerContractAddr = process.env.VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS ||
+      getConfigValue('VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS') || (tokensManagerNetworks as Networks)[networkId]!.address;
+    TokensManager = new web3.eth.Contract(tokensManagerAbi as Abi, tokensManagerContractAddr);
+  }
   const specialWeaponsManagerAddr = (specialWeaponsManagerNetworks as Networks)[networkId]!.address;
   const SpecialWeaponsManager = new web3.eth.Contract(specialWeaponsManagerAbi as Abi, specialWeaponsManagerAddr);
 

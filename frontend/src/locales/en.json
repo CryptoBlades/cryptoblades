@@ -185,22 +185,7 @@
     "noWeaponsStored": "No Weapons stored!",
     "noCharactersStored": "No Characters stored!",
     "noShieldsStored" : "No Shields Stored!",
-    "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!",
-    "incomingNfts": "Incoming NFTs",
-    "noIncomingNfts": "No incoming NFTs!",
-    "selectWeaponToWithdraw": "Select a weapon to withdraw",
-    "selectYourWeapon": "Select your Weapon",
-    "weaponId": "Weapon ID",
-    "fromChain": "from Chain",
-    "withdrawWeapon": "Withdraw Weapon",
-    "selectCharacterToWithdraw": "Select a character to withdraw",
-    "selectYourCharacter": "Select your Character",
-    "selectYourShieldToWithdraw": "Select shield to withdraw",
-    "selectYourShield" : "Select your Shield",
-    "shieldId" : "Shield ID",
-    "withdrawShield": "Withdraw Shield",
-    "characterId": "Character ID",
-    "withdrawCharacter": "Withdraw Character"
+    "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!"
   },
   "characterList": {
     "level": "Level",
@@ -1385,18 +1370,19 @@
     "tieredArena": "Tiered: Face players of similar levels",
     "untieredArena": "Free for All: Fight players of any level!",
     "tiered": "Tiered",
+    "leaveOldArena": "Due to an improvement in the PvP Arena, you will be required to leave and re-enter. This is just a one time thing. All unclaimed rewards will still be claimable without time limit.",
     "untiered": "Free for All"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
     "warning": {
-      "title": "Metamask Not Detected Or Incorrect Network",
+      "title": "Metamask Not Detected",
       "start": "Get Started With CryptoBlades",
       "buttons": {
         "addMetamask": "Add MetaMask",
         "confMetamask": "Configure MetaMask",
         "startMetamask": "Connect to MetaMask",
-        "network": "Switch to BSC Network",
+        "network": "Switch to BNB Network",
         "hide": "Hide Warning"
       },
       "errorMessage": {
@@ -1406,7 +1392,7 @@
         "welcome": "Get started With CryptoBlades"
       },
       "message": {
-        "BSC":{
+        "BNB":{
           "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and .0015 BNB for gas. You will also need a litle bit of BNB for gas to cover your first few battles, but don't worry, you will profit with rewards immediately!",
           "inst1": "1. Buying BNB with fiat: <a target=_blank href=https://youtu.be/6-sUDUE2RPA> Watch Video </a> or <a target=_blank href={link1}> Buy with Transak</a>",
           "inst2": "2. Once you have BNB, go to ApeSwap to obtain SKILL tokens: <a target=_blank href={link1}> Trade SKILL/BNB </a>",

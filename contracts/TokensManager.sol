@@ -17,6 +17,7 @@ contract TokensManager is Initializable, AccessControlUpgradeable {
     // Note: All prices are multiplied by 100
     uint256 public tokenPrice;
     uint256 public skillTokenPrice;
+    uint8 public offsetSlippage;
 
     modifier restricted() {
         _restricted();
@@ -35,6 +36,7 @@ contract TokensManager is Initializable, AccessControlUpgradeable {
 
         game = CryptoBlades(gameContract);
         combatTokenChargePercent = 25;
+        offsetSlippage = 5;
     }
 
     receive() external payable restricted {
@@ -45,7 +47,10 @@ contract TokensManager is Initializable, AccessControlUpgradeable {
 
         uint256 offset = ABDKMath64x64.mulu(getSkillToNativeRatio(), expectedTokens.mul(combatTokenChargePercent));
 
-        require(msg.value == offset, 'Offset error');
+        require(
+            msg.value > offset.mul(100 - offsetSlippage).div(100) && msg.value < offset.mul(100 + offsetSlippage).div(100),
+            'Offset error'
+            );
 
         if (tokens == 0) {
             payable(msg.sender).transfer(msg.value);
@@ -70,5 +75,9 @@ contract TokensManager is Initializable, AccessControlUpgradeable {
 
     function setCombatTokenChargePercent(uint256 percent) external restricted {
         combatTokenChargePercent = percent;
+    }
+
+    function setOffsetSlippage(uint8 slippage) external restricted {
+        offsetSlippage = slippage;
     }
 }

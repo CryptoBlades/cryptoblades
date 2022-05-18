@@ -12,8 +12,6 @@ import {abi as erc20Abi} from '../../../build/contracts/ERC20.json';
 BigNumber.config({ROUNDING_MODE: BigNumber.ROUND_DOWN});
 BigNumber.config({EXPONENTIAL_AT: 100});
 
-const web3 = new Web3(Web3.givenProvider || process.env.VUE_APP_WEB3_FALLBACK_PROVIDER);
-
 export function addChainToRouter(chain: string) {
   router.replace(
     {
@@ -91,9 +89,9 @@ export const copyNftUrl = (id: number | string, type?: string): void => {
 
 export const addTokenToMetamask = async (address: string, symbol: string): Promise<void> => {
   try {
-    const contract = new web3.eth.Contract(erc20Abi as any[], address);
+    const contract = new (window as any).ethereum.Contract(erc20Abi as any[], address);
     const decimals = await contract.methods.decimals().call();
-    await (web3.currentProvider as any).request({
+    await (window as any).ethereum?.request({
       method: 'wallet_watchAsset',
       params: {
         type: 'ERC20',

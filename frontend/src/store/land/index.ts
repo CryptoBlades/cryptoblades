@@ -5,6 +5,7 @@ import {
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
 
 const land = {
+  namespaced: true,
   actions: {
     async fetchOwnedLands({rootState}: {rootState: IState}) {
       const CBKLand = rootState.contracts().CBKLand!;
