@@ -192,8 +192,6 @@ import { duelResultFromContract as formatDuelResult } from '../../contract-model
 import i18n from '../../i18n';
 
 export default {
-  inject: ['web3'],
-
   components: {
     'pvp-weapon': PvPWeapon,
     'pvp-shield': PvPShield,
@@ -286,7 +284,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['contracts', 'currentCharacterId', 'defaultAccount']),
+    ...mapState(['contracts', 'currentCharacterId', 'defaultAccount', 'web3']),
 
     formattedWager() {
       return new BN(this.wager).div(new BN(10).pow(18)).toFixed(2);
