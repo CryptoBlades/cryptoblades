@@ -27,7 +27,7 @@
             ${$t('weaponIcon.durabilityTooltip')} ${timeUntilWeaponHasMaxDurability(weapon.id)}`"></div>
         </div>
         <div class="stats">
-          <div v-if="weapon.stat1Value">
+          <div v-if="weapon.stat1Value"> gwwggewgwegwewgeweg
             <span :class="weapon.stat1.toLowerCase() + '-icon'" class="mr-1 icon"></span> &nbsp;
             <span :class="weapon.stat1.toLowerCase()">{{ weapon.stat1 }} +{{ weapon.stat1Value }}</span>
           </div>
