@@ -1,11 +1,8 @@
-const {upgradeProxy} = require('@openzeppelin/truffle-upgrades');
+const { upgradeProxy } = require("@openzeppelin/truffle-upgrades");
 
-const Merchandise = artifacts.require("Merchandise");
-const PvpArena = artifacts.require("PvpArena");
+const PvpCore = artifacts.require("PvpCore");
 
-module.exports = async function (deployer, network) {
-  await upgradeProxy(Merchandise.address, Merchandise, {deployer});
-  
+module.exports = async function (deployer, network, accounts) {
   if (network === "development"
   || network === "development-fork"
   || network === 'bsctestnet'
@@ -18,6 +15,6 @@ module.exports = async function (deployer, network) {
   || network === 'auroratestnet'
   || network === 'kavatestnet'
   || network === 'skaletestnet') {
-    await upgradeProxy(PvpArena.address, PvpArena, { deployer });
+    await upgradeProxy(PvpCore.address, PvpCore, { deployer });
   }
 };

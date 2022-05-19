@@ -162,7 +162,7 @@
       :defenderPower="duelResult.defenderPower"
       :defenderRoll="duelResult.defenderRoll"
       :skillEarned="duelResult.skillDifference"
-      :rankVariation="duelResult.result === 'win' ? `+${this.duelResult.bonusRank ? 5 + +this.duelResult.bonusRank : 5}` : '-3'"
+      :rankVariation="duelResult.result === 'win' ? `+${this.duelResult.bonusRank ? 5 + +this.duelResult.bonusRank : 5}` : '0'"
       :userCurrentRank="duelResult.rankDifference"
       @close-modal="handleCloseModal"
     />
@@ -192,8 +192,6 @@ import { duelResultFromContract as formatDuelResult } from '../../contract-model
 import i18n from '../../i18n';
 
 export default {
-  inject: ['web3'],
-
   components: {
     'pvp-weapon': PvPWeapon,
     'pvp-shield': PvPShield,
@@ -212,6 +210,7 @@ export default {
         level: null,
         power: null,
         fullPower: null,
+        untieredFullPower: null,
         rank: null,
         element: null
       }
@@ -237,6 +236,7 @@ export default {
         rank: null,
         power: null,
         fullPower: null,
+        untieredFullPower: null,
       }
     },
     opponentActiveWeaponWithInformation: {
@@ -281,12 +281,13 @@ export default {
       },
       matchablePlayersCount: null,
       duelOffsetCost: null,
-      specialWeaponFreeRerollTimestamp: null
+      specialWeaponFreeRerollTimestamp: null,
+      isUntiered: false
     };
   },
 
   computed: {
-    ...mapState(['contracts', 'currentCharacterId', 'defaultAccount']),
+    ...mapState(['contracts', 'currentCharacterId', 'defaultAccount', 'web3']),
 
     formattedWager() {
       return new BN(this.wager).div(new BN(10).pow(18)).toFixed(2);
@@ -348,13 +349,16 @@ export default {
     },
 
     winChance() {
-      if (this.characterInformation.fullPower === this.opponentInformation.fullPower) {
+      const characterFullPower = this.isUntiered ? this.characterInformation.untieredFullPower : this.characterInformation.fullPower;
+      const opponentFullPower = this.isUntiered ? this.opponentInformation.untieredFullPower : this.opponentInformation.fullPower;
+
+      if (characterFullPower === opponentFullPower) {
         return 50;
       }
 
-      if (this.characterInformation.fullPower < this.opponentInformation.fullPower) {
-        const weakerPower = this.characterInformation.fullPower;
-        const strongerPower = this.opponentInformation.fullPower;
+      if (characterFullPower < opponentFullPower) {
+        const weakerPower = characterFullPower;
+        const strongerPower = opponentFullPower;
         return (this.getWinChance(weakerPower, strongerPower)).toFixed(1);
       } else {
         return '> 50';
@@ -387,7 +391,8 @@ export default {
       'getPvpCoreContract',
       'getFighterByCharacter',
       'getDuelOffsetCost',
-      'fetchFreeOpponentRerollTimestamp'
+      'fetchFreeOpponentRerollTimestamp',
+      'getPreviousTierByCharacter'
     ]),
 
     getWinChance(weakerPower, strongerPower) {
@@ -515,8 +520,8 @@ export default {
 
         if (duelFinishedResult.length) {
           const formattedResult = formatDuelResult(duelFinishedResult[duelFinishedResult.length - 1].returnValues);
-          this.duelResult.defenderPower = this.opponentInformation.fullPower;
-          this.duelResult.attackerPower = this.characterInformation.fullPower;
+          this.duelResult.defenderPower = this.isUntiered ? this.opponentInformation.untieredFullPower : this.opponentInformation.fullPower;
+          this.duelResult.attackerPower = this.isUntiered ? this.characterInformation.untieredFullPower : this.characterInformation.fullPower;
           this.duelResult.result = formattedResult.attackerWon ? 'win' : 'lose';
           this.duelResult.attackerRoll = formattedResult.attackerRoll;
           this.duelResult.defenderRoll = formattedResult.defenderRoll;
@@ -527,9 +532,11 @@ export default {
           // TODO: Make this prettier
           this.duelResult.rankDifference = formattedResult.attackerWon ?
             +this.characterInformation.rank + 5 + +this.duelResult.bonusRank :
-            +this.characterInformation.rank - 3 <= 0 ?
-              0 :
-              +this.characterInformation.rank - 3;
+            // Mute ranking loss
+            // +this.characterInformation.rank - 3 <= 0 ?
+            //   0 :
+            //   +this.characterInformation.rank - 3;
+            +this.characterInformation.rank;
 
           subscription.unsubscribe((error, result) => {
             if (!error) {
@@ -596,7 +603,7 @@ export default {
 
       this.wager = (await this.getFighterByCharacter(this.currentCharacterId)).wager;
 
-      if (this.wager < this.duelCost) {
+      if (+this.formattedWager < +this.formattedDuelCost) {
         this.$emit('kickCharacterFromArena');
       }
 
@@ -610,6 +617,8 @@ export default {
 
   async created() {
     this.loading = true;
+
+    this.isUntiered = await this.getPreviousTierByCharacter(this.currentCharacterId) === '20';
 
     this.isInMatch = (await this.getMatchByFinder(this.currentCharacterId)).createdAt !== '0';
 
@@ -674,6 +683,10 @@ export default {
   watch: {
     async match(value) {
       this.loading = true;
+
+      if (value !== null) {
+        this.isUntiered = this.getPreviousTierByCharacter(value) === '20';
+      }
 
       if (value.defenderID) {
         this.$emit('updateOpponentInformation', value.defenderID);

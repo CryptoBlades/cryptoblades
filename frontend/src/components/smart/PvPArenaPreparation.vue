@@ -263,6 +263,7 @@ export default {
         level: null,
         power: null,
         fullPower: null,
+        untieredFullPower: null,
         rank: null,
         element: null,
       }
