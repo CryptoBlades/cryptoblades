@@ -1,7 +1,7 @@
 <template>
-    <div class="d-flex gap-4 align-items-center ">
+    <div class="row gap-3">
         <div role="button" :class="[
-           'd-flex gap-3 align-items-center link',
+           'd-flex gap-3 align-items-center link col',
            (!garrison && havePlazaCharacters) ? 'active' : ''
          ]"
           @click="$emit('toggle')"
@@ -11,10 +11,11 @@
             <img src="../assets/navbar-icons/plaza-icon.png"/>
           </div>
           <span class="main-font text-white fs-5">{{$t('Character.info')}}</span>
-         </div>
-         <div class="separator"></div>
+        </div>
+        <div class="w-100 d-block d-md-none"></div>
+        <div class="separator d-none d-md-block"></div>
          <div role="button" :class="[
-           'd-flex gap-3 align-items-center link',
+           'd-flex gap-3 align-items-center link col',
            (garrison || !havePlazaCharacters) ? 'active' : ''
          ]"
           @click="$emit('toggle')"
@@ -31,10 +32,11 @@
           </div>
           <span  class="main-font text-white fs-5">{{$t('Character.garrison')}}</span>
         </div>
+        <div class="w-100 d-block d-md-none"></div>
          <b-button
           v-if="ownCharacters.length <= 4"
           variant="primary"
-          class="ml-3 gtag-link-others"
+          class="ml-3 gtag-link-others col"
           @click="$emit('mintCharacter')"
           v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
           {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
@@ -61,8 +63,8 @@ export default Vue.extend({
       default: ()=> []
     },
     recruitCost: {
-      type: Number,
-      default: 0
+      type: String,
+      default: '0'
     }
   },
 
@@ -94,6 +96,8 @@ export default Vue.extend({
 .separator{
   border: 1px solid #7F8693;
   width: 68px;
+  height: 0px;
+  align-self: center;
 }
 
 .img-nav {

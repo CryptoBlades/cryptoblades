@@ -1,6 +1,6 @@
 
 <template>
-  <div class="p-5 mb-5 background-image">
+  <div class="background-image">
     <div v-if="!haveCharacters" class="blank-slate">
       <div class="current-promotion">
         <div class="tob-bg-img promotion-decoration">
@@ -27,7 +27,7 @@
 
       </div>
     </div>
-    <template v-else>
+    <div class="p-3" v-else>
       <CharacterNav
         :garrison="garrison"
         :havePlazaCharacters="havePlazaCharacters"
@@ -137,7 +137,7 @@
           </div>
         </div>
       </template>
-    </template>
+    </div>
     <b-modal class="centered-modal text-center" ref="burn-confirmation-modal" :title="$t('plaza.burnConfirmation')"
       @ok="onBurnConfirm" :ok-disabled="burnCharacterIds.length === 0">
       <div class="text-center">
@@ -437,7 +437,7 @@ export default Vue.extend({
     this.checkStorage();
   },
   watch: {
-    async selectedCharacter(){
+    async ownedCharacterIds(){
       await this.updateMintCharacterFee();
     }
   },
@@ -462,7 +462,8 @@ export default Vue.extend({
   background-size: cover;
   background-repeat: no-repeat;
   background-position: top right;
-  min-height: 100vh;
+  min-height: calc(100vh - 120px);
+  height: 100%;
 }
 
 
