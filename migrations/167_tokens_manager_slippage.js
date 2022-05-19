@@ -13,7 +13,8 @@ module.exports = async function (deployer, network) {
     || network === 'avaxtestnet'
     || network === 'avaxtestnet-fork'
     || network === 'auroratestnet'
-    || network === 'kavatestnet') {
+    || network === 'kavatestnet'
+    || network === 'skaletestnet') {
         const tokensManager = await upgradeProxy(TokensManager.address, TokensManager, { deployer });
     }
 };
