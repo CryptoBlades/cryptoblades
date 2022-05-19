@@ -79,7 +79,6 @@
           </script2>
       </div>
     </div>
-    <enrex-widget class="hide-on-mobile" />
   </div>
 </template>
 
@@ -96,7 +95,6 @@ import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
 import WeaponRowGrid from './components/smart/WeaponRowGrid.vue';
-import EnrexWidget from './components/EnrexWidget.vue';
 import { apiUrl } from './utils/common';
 import i18n from './i18n';
 import { getConfigValue } from './contracts';
@@ -180,7 +178,6 @@ export default Vue.extend({
     BigButton,
     SmallButton,
     WeaponRowGrid,
-    EnrexWidget,
   },
 
   data() {
@@ -1084,9 +1081,6 @@ a.character-tab:focus {
   }
   .vertical-decoration {
     width: 100%;
-  }
-  .hide-on-mobile{
-    display: none;
   }
 }
 </style>
