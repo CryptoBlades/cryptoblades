@@ -1155,6 +1155,7 @@
       "availableInWallet": "Available in Wallet",
       "rewards": "Rewards",
       "claim": "Claim!",
+      "restake": "Restake!",
       "stake": "Stake",
       "unstake": "Unstake",
       "max": "MAX",
