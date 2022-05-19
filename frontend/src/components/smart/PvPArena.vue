@@ -86,8 +86,6 @@ import { characterKickedEventFromContract as formatCharacterKickedEvent } from '
 
 
 export default {
-  inject: ['web3'],
-
   components: {
     'pvp-arena-preparation': PvPArenaPreparation,
     'pvp-arena-summary': PvPArenaSummary,
@@ -118,6 +116,7 @@ export default {
         level: null,
         power: null,
         fullPower: null,
+        untieredFullPower: null,
         rank: null,
         element: null,
       },
@@ -141,6 +140,7 @@ export default {
         rank: null,
         power: null,
         fullPower: null,
+        untieredFullPower: null
       },
       opponentActiveWeaponWithInformation: {
         weaponId: null,
@@ -160,7 +160,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
+    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds', 'web3']),
     ...mapGetters(['getCharacterName'])
   },
 
@@ -205,7 +205,8 @@ export default {
 
       const fighter = formatFighter(await this.getFighterByCharacter(this.currentCharacterId));
 
-      this.characterInformation.fullPower = await this.getCharacterFullPower(this.currentCharacterId);
+      this.characterInformation.fullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: this.characterInformation.tier});
+      this.characterInformation.untieredFullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: 20});
 
       this.activeWeaponWithInformation = {
         weaponId: fighter.weaponID,
@@ -255,7 +256,9 @@ export default {
 
       this.opponentInformation.power = await this.getCharacterPower(defenderId);
 
-      this.opponentInformation.fullPower = await this.getCharacterFullPower(defenderId);
+      this.opponentInformation.fullPower = await this.getCharacterFullPower({characterId: defenderId, tier: this.characterInformation.tier});
+
+      this.opponentInformation.untieredFullPower = await this.getCharacterFullPower({characterId: defenderId, tier: 20});
 
       const fighter = formatFighter(await this.getFighterByCharacter(defenderId));
 
@@ -280,7 +283,8 @@ export default {
         level: null,
         rank: null,
         power: null,
-        fullPower: null
+        fullPower: null,
+        untieredFullPower: null,
       };
 
       this.opponentActiveWeaponWithInformation = {
@@ -496,7 +500,8 @@ export default {
       if (this.isCharacterInArena) {
         const fighter = formatFighter(await this.getFighterByCharacter(this.currentCharacterId));
 
-        this.characterInformation.fullPower = await this.getCharacterFullPower(this.currentCharacterId);
+        this.characterInformation.fullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: this.characterInformation.tier});
+        this.characterInformation.untieredFullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: 20});
 
         this.activeWeaponWithInformation = {
           weaponId: fighter.weaponID,
@@ -637,7 +642,9 @@ export default {
         if (this.isCharacterInArena) {
           const fighter = formatFighter(await this.getFighterByCharacter(value));
 
-          this.characterInformation.fullPower = await this.getCharacterFullPower(value);
+          this.characterInformation.fullPower = await this.getCharacterFullPower({characterId: value, tier: this.characterInformation.tier});
+
+          this.characterInformation.untieredFullPower = await this.getCharacterFullPower({characterId: value, tier: 20});
 
           this.activeWeaponWithInformation = {
             weaponId: fighter.weaponID,

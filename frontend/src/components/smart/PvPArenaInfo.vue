@@ -69,7 +69,7 @@
           {{$t('pvp.power')}}
         </span>
         <span>
-          {{ characterInformation.fullPower }}
+          {{ isUntiered ? characterInformation.untieredFullPower : characterInformation.fullPower }}
         </span>
       </li>
       <li v-else>
@@ -115,6 +115,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    isUntiered: {
+      type: Boolean,
+      default: false,
+    },
     tierRewardsPool: {
       default: null
     },
@@ -134,6 +138,7 @@ export default {
         level: null,
         power: null,
         fullPower: null,
+        untieredFullPower: null,
         rank: null,
         element: null,
       }

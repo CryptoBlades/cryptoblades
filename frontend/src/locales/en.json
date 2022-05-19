@@ -54,6 +54,39 @@
     "lowMultiplier": "Current multiplier is low, you will receive only {currentMultiplier} of claimed tokens.",
     "realWithdrawValueClaimable": "Currently you'll receive approximately {actualAmount} {tokenSymbol} for withdrawing {skillAmount} SKILL."
   },
+  "Character": {
+    "upgradeText": "Upgrading is the process of spending SKILL tokens to upgrade a character's power using souls. The target character receives bonus power, and the souls used will disappear.",
+    "level": "Level",
+    "power": "Power",
+    "element": "Element",
+    "reputation": "Reputation",
+    "exp": "EXP",
+    "expNeeded": "Exp needed to level",
+    "stamina": "Stamina",
+    "loading": "Loading...",
+    "souls": "Souls",
+    "soul": "Soul",
+    "changeTrait":"Change Trait",
+    "changeTraitText": "Change your character's element.",
+    "changeName": "Change Name",
+    "noTraits": "You have no traits left to pick.",
+    "garrison": "Garrison",
+    "info": "Info",
+    "owned": "Owned",
+    "sendToGarrison": "Send to Garrison",
+    "sendToGarrisonText": "You will not be able to use the character when in garrison.",
+    "transfer": "Transfer",
+    "transferText": "Transfer character to another address.",
+    "change": "Change",
+    "send": "Send",
+    "max": "Max",
+    "upgrade": "Upgrade",
+    "skins": "Skins",
+    "options": "Options"
+  },
+  "characterModal": {
+    "close": "Tap Anywhere To Close"
+  },
   "CharacterDisplay": {
     "loading": "Loading...",
     "powerIncrease": "Power increases by 10 every level up, and multiplied every 10 level ups",
@@ -381,7 +414,7 @@
     "greaterDust": "Greater Dust",
     "lowerDust": "Lower Dust",
     "createDustConfirm": "Create Dust Confirmation",
-    "noDust": "No Dust Selected" 
+    "noDust": "No Dust Selected"
   },
   "dustBalanceDisplay": {
     "availableDust": "Available Dust",
