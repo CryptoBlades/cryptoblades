@@ -79,7 +79,7 @@
           </script2>
       </div>
     </div>
-    <enrex-widget/>
+    <enrex-widget class="hide-on-mobile" />
   </div>
 </template>
 
@@ -1009,6 +1009,9 @@ div.bg-success {
   }
   .vertical-decoration {
     width: 100%;
+  }
+  .hide-on-mobile{
+    display: none;
   }
 }
 </style>
