@@ -251,7 +251,6 @@ export default {
       this.scene.add( directionalLight2 );
 
       this.renderer = new Three.WebGLRenderer({antialias: true, alpha:true});
-      console.log(this.renderer);
       this.renderer.setPixelRatio( window.devicePixelRatio );
       this.renderer.setClearColor( 0x000000, 0 );
       this.renderer.setSize(container.clientWidth, container.clientHeight);
