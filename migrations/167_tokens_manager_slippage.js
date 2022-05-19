@@ -1,5 +1,6 @@
 const { upgradeProxy } = require("@openzeppelin/truffle-upgrades");
-const PvpArena = artifacts.require("PvpArena");
+
+const TokensManager = artifacts.require("TokensManager");
 
 module.exports = async function (deployer, network) {
     if (network === "development"
@@ -12,10 +13,7 @@ module.exports = async function (deployer, network) {
     || network === 'avaxtestnet'
     || network === 'avaxtestnet-fork'
     || network === 'auroratestnet'
-    || network === 'kavatestnet'
-    || network === 'skaletestnet') {
-        await upgradeProxy(PvpArena.address, PvpArena, { deployer });
+    || network === 'kavatestnet') {
+        const tokensManager = await upgradeProxy(TokensManager.address, TokensManager, { deployer });
     }
-
-
 };

@@ -3929,7 +3929,7 @@
     },
     "links": {},
     "address": "0x0Ff7f673BBf4b47d8e7d31a59cEB2244a8CBEb68",
-    "transactionHash": "0x84dfe64cda7a6bc6f33f88cdd834b28c905ff2e73ada1e6f5eb1547d67d50867|{\"gasBurned\":15255166932748,\"tx\":\"25uowgRekphia5kkUxzLLnEAUxqWP3ZBrcTQpKJAcXFQ\"}"
+    "transactionHash": "0x06c4a729150bc17b795be30281d8d4d0683dcadc87cb4a69eee0780287ce3358|{\"gasBurned\":15217902547418,\"tx\":\"26SY3zGEGbr2KRfXpCGdJrJYYy6F6PB5TVcUsvUVovos\"}"
   },
   "build/contracts/PvpCore.json": {
     "events": {
@@ -5275,7 +5275,7 @@
     },
     "links": {},
     "address": "0xa79d3B198Cd5F45c449B8C8e1292993F93B28AE3",
-    "transactionHash": "0xf2313b1fd5297362f081d9cf3b50500bd11666053c15878864a34dafbbe32c85|{\"gasBurned\":9320815112458,\"tx\":\"G3sxqDggWxjWcmb5Y8tgPfXSZdDNh31sZjcPVgRagngh\"}"
+    "transactionHash": "0xde4db9a0311c4c51d4ce4b101abe40860248a4ab514051c17c106955ba31aadc|{\"gasBurned\":9499008267602,\"tx\":\"6fhZZHhBEQU9hkRBwmQGnUAQZ7DzMzo5H4kGeiedfgjb\"}"
   },
   "build/contracts/Treasury.json": {
     "events": {},
