@@ -162,7 +162,7 @@
       :defenderPower="duelResult.defenderPower"
       :defenderRoll="duelResult.defenderRoll"
       :skillEarned="duelResult.skillDifference"
-      :rankVariation="duelResult.result === 'win' ? `+${this.duelResult.bonusRank ? 5 + +this.duelResult.bonusRank : 5}` : '-3'"
+      :rankVariation="duelResult.result === 'win' ? `+${this.duelResult.bonusRank ? 5 + +this.duelResult.bonusRank : 5}` : '0'"
       :userCurrentRank="duelResult.rankDifference"
       @close-modal="handleCloseModal"
     />
@@ -192,8 +192,6 @@ import { duelResultFromContract as formatDuelResult } from '../../contract-model
 import i18n from '../../i18n';
 
 export default {
-  inject: ['web3'],
-
   components: {
     'pvp-weapon': PvPWeapon,
     'pvp-shield': PvPShield,
@@ -286,7 +284,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['contracts', 'currentCharacterId', 'defaultAccount']),
+    ...mapState(['contracts', 'currentCharacterId', 'defaultAccount', 'web3']),
 
     formattedWager() {
       return new BN(this.wager).div(new BN(10).pow(18)).toFixed(2);
@@ -527,9 +525,11 @@ export default {
           // TODO: Make this prettier
           this.duelResult.rankDifference = formattedResult.attackerWon ?
             +this.characterInformation.rank + 5 + +this.duelResult.bonusRank :
-            +this.characterInformation.rank - 3 <= 0 ?
-              0 :
-              +this.characterInformation.rank - 3;
+            // Mute ranking loss
+            // +this.characterInformation.rank - 3 <= 0 ?
+            //   0 :
+            //   +this.characterInformation.rank - 3;
+            +this.characterInformation.rank;
 
           subscription.unsubscribe((error, result) => {
             if (!error) {
@@ -596,7 +596,7 @@ export default {
 
       this.wager = (await this.getFighterByCharacter(this.currentCharacterId)).wager;
 
-      if (this.wager < this.duelCost) {
+      if (+this.formattedWager < +this.formattedDuelCost) {
         this.$emit('kickCharacterFromArena');
       }
 

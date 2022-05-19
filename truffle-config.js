@@ -242,6 +242,19 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true
     },
+    skaletestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.SKALE_TESTNET_PRIVATE_KEY,
+        process.env.SKALE_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.SKALE_TESTNET_RPC_URL || 'https://staging-v2.skalenodes.com/v1/glamorous-grumium'
+        }
+      )),
+      network_id: 2433657680876851,
+      gasPrice: 0,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    }
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port

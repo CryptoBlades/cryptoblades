@@ -86,8 +86,6 @@ import { characterKickedEventFromContract as formatCharacterKickedEvent } from '
 
 
 export default {
-  inject: ['web3'],
-
   components: {
     'pvp-arena-preparation': PvPArenaPreparation,
     'pvp-arena-summary': PvPArenaSummary,
@@ -160,7 +158,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
+    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds', 'web3']),
     ...mapGetters(['getCharacterName'])
   },
 
