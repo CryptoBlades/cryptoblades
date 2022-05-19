@@ -663,7 +663,7 @@ button,
 
 
 .tooltip{
-  z-index: 6;
+  z-index: 1051 !important;
 }
 
 .popover .arrow{
