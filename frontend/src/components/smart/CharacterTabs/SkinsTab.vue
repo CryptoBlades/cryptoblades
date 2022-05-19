@@ -1,29 +1,29 @@
 <template>
     <b-tab :title="$t('Character.skins')" title-item-class="character-wrapper" title-link-class="character-tab" @click="$emit('loadCosmeticsCount')">
       <div class="d-flex flex-wrap">
-      <div
-        class="w-25 p-1 text-white text-center mb-3"
-        role="button"
-        v-for="(cosmetic, index) in availableSkins" :key="index"
-        @click="handleSkin(cosmetic.id)"
-      >
         <div
-        :class="['imgs px-3 pt-5 pb-3 text-center', characterCosmetics[currentCharacterId] == cosmetic ? 'active' : '' ]"
-        :style="{
-          border: characterCosmetics[currentCharacterId] === cosmetic.id ? '1px solid #1168D0!important' : '1px solid #404857'
-        }"
+          class="col col-md-3 image-width p-1 text-white text-center mb-3"
+          role="button"
+          v-for="(cosmetic, index) in availableSkins" :key="index"
+          @click="handleSkin(cosmetic.id)"
         >
-            <template v-if="characterCosmetics[currentCharacterId] === cosmetic.id">
-              <span>Equiped</span>
-            </template>
-            <div v-bind:class="['character-cosmetic-applied-' + cosmetic.id, 'character-animation-applied-' + cosmetic.id]">
-                <div class="animation" />
-                <img class="placeholder" :src="getCharacterArt(characters[currentCharacterId])" />
-            </div>
+          <div
+          :class="['imgs px-3 pt-5 pb-3 text-center', characterCosmetics[currentCharacterId] == cosmetic ? 'active' : '' ]"
+          :style="{
+            border: characterCosmetics[currentCharacterId] === cosmetic.id ? '1px solid #1168D0!important' : '1px solid #404857'
+          }"
+          >
+              <template v-if="characterCosmetics[currentCharacterId] === cosmetic.id">
+                <span>Equiped</span>
+              </template>
+              <div v-bind:class="['character-cosmetic-applied-' + cosmetic.id, 'character-animation-applied-' + cosmetic.id]">
+                  <div class="animation" />
+                  <img class="placeholder" :src="getCharacterArt(characters[currentCharacterId])" />
+              </div>
+          </div>
+          <h5 class="m-0 mt-2 cosmetic-font">{{cosmetic.name}}</h5>
+          <span class="main-font text-muted">{{$t(`Character.owned`)}}</span>
         </div>
-        <h5 class="m-0 mt-2 cosmetic-font">{{cosmetic.name}}</h5>
-        <span class="main-font text-muted">{{$t(`Character.owned`)}}</span>
-      </div>
       </div>
     </b-tab>
 </template>
@@ -83,6 +83,10 @@ export default Vue.extend({
   max-height: 180px;
   margin-left: 10px;
   margin-top: 5px;
+}
+
+.image-width {
+  max-width: 250px;
 }
 
 .imgs{

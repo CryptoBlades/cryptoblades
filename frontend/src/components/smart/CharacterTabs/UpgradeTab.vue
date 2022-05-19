@@ -1,8 +1,8 @@
 <template>
     <b-tab active :title="$t('Character.upgrade')" title-item-class="character-wrapper" title-link-class="character-tab" >
       <b-card-text class="character-text mb-4">{{$t(`Character.upgradeText`)}}</b-card-text>
-      <div class="row justify-content-between">
-        <div class="col-3 d-flex flex-row">
+      <div class="row w-100 justify-content-between">
+        <div class="col col-md-3 d-flex flex-row">
           <div class="soul-container">
             <img src="../../../assets/dusts/soulIcon.svg" alt="soul"/>
           </div>
@@ -11,7 +11,8 @@
             <p class="mb-0">{{ soulBalance }}</p>
           </div>
         </div>
-        <div class="col-6 d-flex flex-column">
+        <div class="w-100 d-block d-md-none"></div>
+        <div class="w-col col-md-6 d-flex flex-column">
           <input
             @change="handlePower"
             class="range-character"
@@ -25,7 +26,8 @@
             <p class="text-center character-text">{{powerAmount}}/{{remainingPowerLimit}} Power</p>
           </div>
         </div>
-        <div class="col-2 character-text d-flex">
+        <div class="w-100 d-block d-md-none"></div>
+        <div class="col col-md-3 character-text d-flex">
           <input id="powerAmount" type="number" :value="powerAmount" @change="handleInput" />
           <button class="mx-1 px-2"  @click="handleMax">{{$t(`Character.max`)}}</button>
         </div>

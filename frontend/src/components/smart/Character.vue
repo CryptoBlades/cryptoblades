@@ -1,25 +1,27 @@
 <template>
-   <div class="character-container">
+   <div class="row">
     <!-- Character Image -->
-    <div class="characterWrapper">
-      <div
-        v-bind:class="
-          ['character-cosmetic-applied-'+
-            characterCosmetics[currentCharacterId],
-            'character-animation-applied-'+
-            characterCosmetics[currentCharacterId]
-          ]
-        "
-      >
-       <div class="animation" />
-      <img
-        class="characterImg placeholder"
-        :src="getCharacterArt(characters[currentCharacterId])"
-        :alt="getCharacterName(currentCharacterId)"
-      />
+    <div class="col col-md-4">
+      <div class="characterWrapper">
+        <div
+          v-bind:class="
+            ['character-cosmetic-applied-'+
+              characterCosmetics[currentCharacterId],
+              'character-animation-applied-'+
+              characterCosmetics[currentCharacterId]
+            ]
+          "
+        >
+        <div class="animation" />
+        <img
+          class="characterImg placeholder"
+          :src="getCharacterArt(characters[currentCharacterId])"
+          :alt="getCharacterName(currentCharacterId)"
+        />
+        </div>
       </div>
     </div>
-    <div class="character-data">
+    <div class="col col-md-8">
       <!-- Character Name Heading -->
       <div class="mb-5 d-flex">
         <h1 class="title mb-0">{{ getCharacterName(currentCharacterId) }}</h1>
@@ -33,16 +35,19 @@
           <span class="main-font cell-title text-white">{{$t(`Character.level`)}}</span>
           <span class="alt-text cell-value">{{ characterLvl }}</span>
         </div>
+        <div class="w-100 d-block d-md-none"></div>
         <div class="col cell">
           <div class="table-bg"></div>
           <span class="main-font cell-title text-white">{{$t(`Character.power`)}}</span>
           <span class="alt-text cell-value">{{ totalCharacterPower }}</span>
         </div>
+        <div class="w-100 d-block d-md-none"></div>
         <div class="col cell">
           <div class="table-bg"></div>
           <span class="main-font cell-title text-white">{{$t(`Character.reputation`)}}</span>
           <span class="cell-value">{{$t(`quests.reputationTier.${ReputationTier[getReputationLevel(reputation)]}`)}}</span>
         </div>
+        <div class="w-100 d-block d-md-none"></div>
         <div class="col cell">
           <div class="table-bg"></div>
           <span class="main-font cell-title text-white">{{$t(`Character.element`)}}</span>
@@ -506,9 +511,6 @@ export default Vue.extend({
   gap: 1.5rem;
 }
 
-.character-data {
-  max-width: 800px;
-}
 
 .characterWrapper {
   position: relative;

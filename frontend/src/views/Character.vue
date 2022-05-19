@@ -27,7 +27,7 @@
 
       </div>
     </div>
-    <div class="p-3" v-else>
+    <div class="p-5" v-else>
       <CharacterNav
         :garrison="garrison"
         :havePlazaCharacters="havePlazaCharacters"
@@ -43,9 +43,9 @@
         <div v-if="!soulCreationActive" class="row mt-3 z-index-1">
           <div class="col">
             <div>
-              <div class="d-flex justify-content-space-between">
+              <div class="d-flex flex-column flex-md-row justify-content-space-between">
                 <h1>{{$t('characters')}} ({{ ownedGarrisonCharacterIds.length }})</h1>
-                <div class="d-flex justify-content-flex-end ml-auto">
+                <div class="d-flex justify-content-flex-end ml-md-auto">
                   <b-button
                     v-if="canClaimGarrisonXp"
                     :disabled="isClaimingXp"

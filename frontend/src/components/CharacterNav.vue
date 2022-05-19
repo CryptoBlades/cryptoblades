@@ -1,7 +1,7 @@
 <template>
-    <div class="row gap-3">
+    <div class="d-flex flex-column flex-md-row">
         <div role="button" :class="[
-           'd-flex gap-3 align-items-center link col',
+           'd-flex gap-3 align-items-center link',
            (!garrison && havePlazaCharacters) ? 'active' : ''
          ]"
           @click="$emit('toggle')"
@@ -13,9 +13,9 @@
           <span class="main-font text-white fs-5">{{$t('Character.info')}}</span>
         </div>
         <div class="w-100 d-block d-md-none"></div>
-        <div class="separator d-none d-md-block"></div>
+        <div class="separator d-none d-md-block mx-3"></div>
          <div role="button" :class="[
-           'd-flex gap-3 align-items-center link col',
+           'd-flex gap-3 align-items-center link mt-4 mt-md-0',
            (garrison || !havePlazaCharacters) ? 'active' : ''
          ]"
           @click="$emit('toggle')"
@@ -36,7 +36,7 @@
          <b-button
           v-if="ownCharacters.length <= 4"
           variant="primary"
-          class="ml-3 gtag-link-others col"
+          class="ml-3 gtag-link-others  mt-4 mt-md-0 ml-md-auto"
           @click="$emit('mintCharacter')"
           v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
           {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>

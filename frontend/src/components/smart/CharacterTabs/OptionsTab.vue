@@ -1,26 +1,29 @@
 <template>
     <b-tab :title="$t('Character.options')" title-item-class="character-wrapper"  title-link-class="character-tab">
       <div class="mt-2">
-        <div class="d-flex py-4 options-border">
-          <div class="options-text main-font">
+        <div class="row py-4 options-border">
+          <div class="options-text main-font col">
             <h3>{{$t('Character.changeTrait')}}</h3>
             <p>{{$t('Character.changeTraitText')}}</p>
           </div>
-          <button @click="$emit('openChangeTrait')" class="options-button main-font">{{$t('Character.change')}}</button>
+          <div class="w-100 d-block d-md-none "></div>
+          <button @click="$emit('openChangeTrait')" class="options-button main-font mt-2 mt-md-0 col-md-2">{{$t('Character.change')}}</button>
         </div>
-        <div  class="d-flex py-4 options-border">
-          <div class="options-text main-font">
+        <div  class="row py-4 options-border">
+          <div class="options-text main-font col" >
             <h3>{{$t('Character.sendToGarrison')}}</h3>
             <p>{{$t('Character.sendToGarrisonText')}}</p>
           </div>
-          <button @click="$emit('onSendToGarrison')"  class="options-button main-font">{{$t('Character.send')}}</button>
+          <div class="w-100 d-block d-md-none"></div>
+          <button @click="$emit('onSendToGarrison')"  class="options-button main-font mt-2 mt-md-0 col-md-2">{{$t('Character.send')}}</button>
         </div>
-        <div  class="d-flex py-4 options-border">
-          <div class="options-text main-font">
+        <div  class="row py-4 options-border">
+          <div class="options-text main-font col">
             <h3>{{$t('Character.transfer')}}</h3>
             <p>{{$t('Character.transferText')}}</p>
           </div>
-          <button @click="$emit('openTransferModal')" class="options-button main-font">{{$t('Character.transfer')}}</button>
+          <div class="w-100 d-block d-md-none"></div>
+          <button @click="$emit('openTransferModal')" class="options-button main-font mt-2 mt-md-0 col-md-2">{{$t('Character.transfer')}}</button>
         </div>
       </div>
     </b-tab>
