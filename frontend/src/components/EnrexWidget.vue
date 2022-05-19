@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div id='badget-hover-box'></div>
-      <p name='39d3428e-48c2-40c7-a06f-8c185a2437cb' side='right' id='badget'>
-        <p id='badget-box'></p>
-      </p>
+    <div id="badget-hover-box"></div>
+      <div name="39d3428e-48c2-40c7-a06f-8c185a2437cb" side="right" id="badget">
+        <div id="badget-box"></div>
+      </div>
   </div>
 </template>
 <script>
