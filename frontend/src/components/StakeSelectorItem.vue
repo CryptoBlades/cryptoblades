@@ -55,15 +55,6 @@
             <span v-if="isLoadingClaim"><i class="fa fa-spinner fa-spin"></i></span>
             <span v-else>{{ $t('stake.StakeSelectorItem.claim') }}</span>
           </button>
-          <button
-            v-if="canRestake"
-            class="stake-button"
-            @click="onRestake"
-            :disabled="rewardClaimState !== RewardClaimState.OK"
-          >
-            <span v-if="isLoadingRestake"><i class="fa fa-spinner fa-spin"></i></span>
-            <span v-else>{{ $t('stake.StakeSelectorItem.restake') }}</span>
-          </button>
         </div>
       </div>
       <div class="progressBarWrapper"
@@ -152,7 +143,6 @@ import BN from 'bignumber.js';
 import {mapActions, mapState} from 'vuex';
 import i18n from '@/i18n';
 import { TranslateResult } from 'vue-i18n';
-import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from '@/stake-types';
 
 interface StoreMappedStakingActions {
   fetchStakeDetails(payload: {stakeType: StakeType | NftStakeType}): Promise<void>;
@@ -214,7 +204,6 @@ interface Data {
   isDeposit: boolean,
   isLoadingClaim: boolean,
   isLoadingStake: boolean,
-  isLoadingRestake: boolean,
   startedStaking: boolean,
   rewardClaimLoading: boolean,
   stakeUnlockTimeLeftCurrentEstimate: number,
@@ -225,7 +214,7 @@ interface Data {
   stakeRewardProgressInterval: ReturnType<typeof setInterval> | null,
 }
 
-type AllStakeTypes = StakeType | NftStakeType; // PropType<AllStakeTypes>
+type AllStakeTypes = StakeType | NftStakeType;
 
 export default Vue.extend({
   components: {
@@ -237,7 +226,7 @@ export default Vue.extend({
       required: true,
     },
     stakeType: {
-      type: String as PropType<StakeType>,
+      type: String as PropType<AllStakeTypes>,
       required: true,
     },
     stakeTokenName: {
@@ -288,7 +277,6 @@ export default Vue.extend({
       isDeposit: true,
       isLoadingClaim: false,
       isLoadingStake: false,
-      isLoadingRestake: false,
       startedStaking: false,
       rewardClaimLoading: false,
       stakeUnlockTimeLeftCurrentEstimate: 0,
@@ -338,7 +326,7 @@ export default Vue.extend({
     unlockTimeLeftInternal(): number { return this.stakeData.unlockTimeLeft; },
 
     stakingTokenName(): string {
-      switch(this.stakeType as AllStakeTypes) {
+      switch(this.stakeType) {
       case 'skill':
       case 'skill2':
       case 'skill90':
@@ -506,9 +494,6 @@ export default Vue.extend({
         this.textAmount = newBnAmount.dividedBy(1e18).toString();
       },
     },
-    canRestake(): boolean{
-      return stakeTypeThatCanHaveUnclaimedRewardsStakedTo === this.stakeType;
-    }
   },
   async mounted(){
     this.stakeUnlockTimeLeftCurrentEstimate = this.unlockTimeLeftInternal;
@@ -653,16 +638,6 @@ export default Vue.extend({
         this.idsToStake = [];
       }
     },
-    async onRestake(): Promise<void> {
-      try {
-        this.isLoadingRestake = true;
-        await this.stakeUnclaimedRewards({ stakeType: this.stakeType });
-      } catch (e) {
-        console.error(e);
-      } finally {
-        this.isLoadingRestake = false;
-      }
-    },
     async onClaimReward(): Promise<void> {
       if (this.rewardClaimState !== RewardClaimState.OK) return;
 
@@ -783,14 +758,9 @@ export default Vue.extend({
   justify-content: space-between;
   align-items: center;
 }
-.claim-rewards-btns{
-  display: flex;
-}
-
 .claim-rewards-btns button{
-  min-width: 85px;
+  min-width: 70px;
   padding: 5px 10px;
-  margin: 0 5px;
 }
 
 .btn-restake{
