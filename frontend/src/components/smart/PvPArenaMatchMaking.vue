@@ -5,7 +5,12 @@
         {{$t('pvp.arena')}}
       </div>
       <div class="navStats">
-        <div>
+        <div v-if="isUntiered">
+          <span>
+            {{$t('pvp.untiered')}}
+          </span>
+        </div>
+        <div v-else>
           <span>
             {{$t('pvp.arenaTier')}}
           </span>
@@ -683,10 +688,6 @@ export default {
   watch: {
     async match(value) {
       this.loading = true;
-
-      if (value !== null) {
-        this.isUntiered = this.getPreviousTierByCharacter(value) === '20';
-      }
 
       if (value.defenderID) {
         this.$emit('updateOpponentInformation', value.defenderID);
