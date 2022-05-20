@@ -8,6 +8,7 @@ import {networks as pvpNetworks} from '../../../build/contracts/PvpArena.json';
 import {networks as simpleQuestsNetworks} from '../../../build/contracts/SimpleQuests.json';
 import {QuestItemType} from '@/views/Quests.vue';
 import {abi as erc20Abi} from '../../../build/contracts/ERC20.json';
+import store from '@/store/store';
 
 BigNumber.config({ROUNDING_MODE: BigNumber.ROUND_DOWN});
 BigNumber.config({EXPONENTIAL_AT: 100});
@@ -30,7 +31,7 @@ interface Chain {
   chains: Record<string, Record<string, any>>;
 }
 
-// executes when network is changed in MetaMask
+// executes when network is changed in wallet
 (window as any).ethereum?.on('chainChanged', (chainIdHex: string) => {
   const chainId = parseInt(chainIdHex, 16);
   const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
@@ -43,6 +44,14 @@ interface Chain {
     }
   }
   window.location.reload();
+});
+
+// executes when account is changed in wallet
+(window as any).ethereum?.on('accountsChanged', async () => {
+  const accounts = await store.state.web3.eth.getAccounts();
+  store.commit('setAccounts', { accounts });
+  store.dispatch('setUpContractEvents');
+  store.dispatch('fetchUserDetails');
 });
 
 export const apiUrl = (url: string) => `${process.env.VUE_APP_API_URL || 'https://api.cryptoblades.io'}/${url}`;
