@@ -141,6 +141,7 @@ interface Data {
   supportedChains: string[];
   walletConnectChain: string;
   connectingWalletConnect: boolean;
+  enabledLanguages: string[];
 }
 
 interface StoreMappedGetters {
@@ -195,7 +196,14 @@ export default Vue.extend({
       connectingWalletConnect: false,
       checked: false,
       ClaimStage,
-      supportedChains: []
+      supportedChains: [],
+      enabledLanguages: [
+        'en',
+        'es',
+        'fr',
+        'pl',
+        'de',
+      ]
     } as Data;
   },
 
@@ -230,7 +238,7 @@ export default Vue.extend({
     languages(): { [key: string]: string } {
       const rObj: { [key: string]: string } = {};
       for (const [key, value] of Object.entries(i18n.messages)) {
-        if(value.name.toString === null) continue;
+        if(value.name.toString === null || !this.enabledLanguages.includes(key)) continue;
         rObj[key] = value.name.toString();
       }
       return rObj;

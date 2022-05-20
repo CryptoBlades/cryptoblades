@@ -9,7 +9,7 @@ import Vuex from 'vuex';
 import VueRouter from 'vue-router';
 import VTooltip from 'v-tooltip';
 
-import { createStore } from './store/store';
+import store from './store/store';
 import createRouter from './router';
 
 import App from './App.vue';
@@ -40,7 +40,6 @@ Vue.use(BootstrapVueIcons);
 
 Vue.use(require('vue-script2'));
 
-const store = createStore();
 export const router = createRouter();
 
 new Vue({
