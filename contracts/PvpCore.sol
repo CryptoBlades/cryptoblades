@@ -768,7 +768,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
             opponentTrait
         );
 
-        uint256 playerPower = RandomUtil.plusMinus30PercentSeeded(
+        uint256 playerPower = RandomUtil.plusMinus10PercentSeeded(
             playerFightPower,
             seed
         );
@@ -799,7 +799,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         uint24 power;
 
         if (tier == 20) {
-            power = Common.getPowerAtLevel(0);
+            power = Common.getPowerAtLevel(35);
         } else {
             power = Common.getPowerAtLevel(characters.getLevel(characterID));
         }

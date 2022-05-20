@@ -26,11 +26,11 @@ library Common {
         // Note: Formula hard-copied in PvPArenaMatchMaking.vue due to contract size limitations in PvPArena.sol
         uint256 bonusRanking;
 
-        uint256 strongerMinRoll = strongerPower.mul(70).div(100);
-        uint256 strongerMaxRoll = strongerPower.mul(130).div(100);
+        uint256 strongerMinRoll = strongerPower.mul(90).div(100);
+        uint256 strongerMaxRoll = strongerPower.mul(110).div(100);
  
-        uint256 weakerMinRoll = weakerPower.mul(70).div(100);
-        uint256 weakerMaxRoll = weakerPower.mul(130).div(100);
+        uint256 weakerMinRoll = weakerPower.mul(90).div(100);
+        uint256 weakerMaxRoll = weakerPower.mul(110).div(100);
 
         uint256 strongerRollSpread = strongerMaxRoll.sub(strongerMinRoll);
         uint256 weakerRollSpread = weakerMaxRoll.sub(weakerMinRoll);

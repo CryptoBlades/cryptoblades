@@ -397,11 +397,11 @@ export default {
 
     getWinChance(weakerPower, strongerPower) {
       // Formula hard-copied from common.sol due to contract size limitations in PvPArena.sol
-      const strongerMinRoll = strongerPower * 0.7;
-      const strongerMaxRoll = strongerPower * 1.3;
+      const strongerMinRoll = strongerPower * 0.9;
+      const strongerMaxRoll = strongerPower * 1.1;
 
-      const weakerMinRoll = weakerPower * 0.7;
-      const weakerMaxRoll = weakerPower * 1.3;
+      const weakerMinRoll = weakerPower * 0.9;
+      const weakerMaxRoll = weakerPower * 1.1;
 
       const strongerRollSpread = strongerMaxRoll - strongerMinRoll;
       const weakerRollSpread = weakerMaxRoll - weakerMinRoll;
