@@ -799,7 +799,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         uint24 power;
 
         if (tier == 20) {
-            power = Common.getPowerAtLevel(35);
+            power = Common.getPowerAtLevel(34);
         } else {
             power = Common.getPowerAtLevel(characters.getLevel(characterID));
         }
