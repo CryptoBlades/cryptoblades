@@ -527,8 +527,6 @@ export default Vue.extend({
       } catch (e) {
         console.error(e);
       }
-
-      setTimeout(pollAccounts, 500);
     };
 
     pollAccounts();
