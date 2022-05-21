@@ -192,7 +192,7 @@
       <pvp-arena-information
         class="arenaInformation"
         :tierRewardsPool="tierRewardsPool"
-        :tierTopRankers="tierTopRankers"
+        :tierTopRankers="untieredTopRankers"
         :currentRankedSeason="currentRankedSeason"
         :secondsBeforeNextSeason="secondsBeforeNextSeason"
         :characterInformation="characterInformation"
@@ -248,6 +248,9 @@ export default {
       default: null
     },
     tierTopRankers: {
+      default: []
+    },
+    untieredTopRankers: {
       default: []
     },
     currentRankedSeason: {
