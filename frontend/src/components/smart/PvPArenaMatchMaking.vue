@@ -366,12 +366,14 @@ export default {
         const strongerPower = opponentFullPower;
         return (this.getWinChance(weakerPower, strongerPower)).toFixed(1);
       } else {
-        return '> 50';
+        const weakerPower = opponentFullPower;
+        const strongerPower = characterFullPower;
+        return ((100 - this.getWinChance(weakerPower, strongerPower))).toFixed(1);
       }
     },
 
     rankPlusBonus() {
-      if (this.winChance === '> 50') {
+      if (this.winChance > 50) {
         return 5;
       }
       return (this.getBonusRank(50 - this.winChance) + 5).toFixed(0);
