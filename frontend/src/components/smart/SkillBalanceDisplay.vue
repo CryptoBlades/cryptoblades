@@ -29,8 +29,43 @@
       </div>
     </div>
 
-    <div class="deposit-withdraw">
-      <span @click="showModal">Deposit</span>
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="deposit-withdraw p-2">
+        <span id="claim-xp-popover" @click="canClaimXp ? onClaimXp : ''">CLAIM EXP</span>
+        <b-popover target="claim-xp-popover" custom-class="claim-exp-popover" triggers="hover" placement="bottom">
+          <img class="position-absolute mt-1" width="233" :src="require('@/assets/separator.png')" />
+          <div class="d-flex justify-content-center position-relative">
+            <div>
+              <img width="40" :src="require('@/assets/fight-result-header.png')" />
+            </div>
+          </div>
+          <div class="d-flex flex-column pb-1">
+            <div class="d-flex justify-content-between">
+              <div class="px-2 custom-header-font">Character Name</div>
+              <div class="px-3"></div>
+              <div class="px-2 custom-header-font">Unclaimed EXP</div>
+            </div>
+          </div>
+          <div class="d-flex flex-column" v-for="charXp in formattedXpRewardsBar" :key="charXp.id">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="p-2 character-name">
+                <element-trait class="mr-1" :width="15" :traitName="charXp.traitName"></element-trait>{{ charXp.name }}
+              </div>
+              <div class="px-3"></div>
+              <div class="p-2">
+                <b>{{ charXp.xp }}</b>
+              </div>
+            </div>
+          </div>
+          <img width="230" :src="require('@/assets/separator.png')" />
+        </b-popover>
+      </div>
+      <div class="deposit-withdraw border-line-custom p-1">
+        <span>|</span>
+      </div>
+      <div class="deposit-withdraw p-2">
+        <span @click="showModal">DEPOSIT</span>
+      </div>
     </div>
 
     <div class="bnb-withdraw-container mx-3" v-if="hasBnbAvailableToWithdraw">
@@ -49,35 +84,81 @@ import Bignumber from 'bignumber.js';
 import { Accessors } from 'vue/types/options';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { toBN, fromWeiEther } from '../../utils/common';
-import { IState } from '@/interfaces';
 import { formatDurationFromSeconds } from '@/utils/date-time';
 import { BModal } from 'bootstrap-vue';
 import i18n from '@/i18n';
 import {TranslateResult} from 'vue-i18n';
+import { ICharacter } from '@/interfaces';
+import { getCleanName } from '@/rename-censor';
+import ElementTrait from '@/components/smart/ElementTrait.vue';
 
-type StoreMappedState = Pick<IState, 'skillRewards' | 'skillBalance' | 'inGameOnlyFunds' | 'waxBridgeWithdrawableBnb' | 'waxBridgeTimeUntilLimitExpires'>;
+interface StoreMappedState {
+  skillRewards: string;
+  skillBalance: string;
+  inGameOnlyFunds: string;
+  waxBridgeWithdrawableBnb: string;
+  waxBridgeTimeUntilLimitExpires: number;
+  ownedCharacterIds: string[];
+  xpRewards: Record<string, string>;
+}
 
 interface StoreMappedGetters {
+  ownCharacters: ICharacter[];
   getExchangeTransakUrl: string;
   getExchangeUrl: string;
   availableBNB: string;
+  currentCharacter: ICharacter | null;
+  getCharacterName(id: number): string;
 }
 
 interface StoreMappedActions {
   addMoreSkill(skillToAdd: string): Promise<void>;
   withdrawBnbFromWaxBridge(): Promise<void>;
+  claimXpRewards(): Promise<void>;
 }
+
+interface ICharacterClaimableExp{
+  id: number;
+  name: string;
+  traitName: string;
+  xp: any;
+}
+
 
 export default Vue.extend({
   computed: {
     ...(mapState(['skillRewards', 'skillBalance', 'inGameOnlyFunds', 'waxBridgeWithdrawableBnb',
-      'waxBridgeTimeUntilLimitExpires']) as Accessors<StoreMappedState>),
+      'waxBridgeTimeUntilLimitExpires', 'ownedCharacterIds', 'xpRewards']) as Accessors<StoreMappedState>),
     ...(mapGetters({
       availableBNB: 'waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod',
       getExchangeUrl: 'getExchangeUrl',
-      getExchangeTransakUrl: 'getExchangeTransakUrl'
+      getExchangeTransakUrl: 'getExchangeTransakUrl',
+      ownCharacters: 'ownCharacters',
+      getCharacterName: 'getCharacterName'
     }) as Accessors<StoreMappedGetters>),
+    formattedXpRewardsBar(): ICharacterClaimableExp[] {
+      const characterXp: ICharacterClaimableExp[] = [];
+      this.xpRewardsForOwnedCharacters.map((xp, i) => {
+        const character = this.ownCharacters[i];
+        if (character) {
+          characterXp.push({
+            id: character.id,
+            traitName: character.traitName,
+            name: this.getCleanCharacterName(character.id),
+            xp
+          });
+        }
+      });
+      return characterXp;
+    },
 
+    canClaimXp(): boolean {
+      const areAllXpsZeroOrLess = this.xpRewardsForOwnedCharacters.every(xp => toBN(xp).lte(0));
+      return !areAllXpsZeroOrLess;
+    },
+    xpRewardsForOwnedCharacters(): string[] {
+      return this.ownedCharacterIds.map(charaId => this.xpRewards[charaId] || '0');
+    },
     formattedTotalSkillBalance(): string {
       const skillBalance = fromWeiEther(Bignumber.sum(toBN(this.skillBalance), toBN(this.inGameOnlyFunds), toBN(this.skillRewards)));
 
@@ -150,8 +231,15 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['addMoreSkill', 'withdrawBnbFromWaxBridge']) as StoreMappedActions),
-
+    ...(mapActions(['addMoreSkill', 'withdrawBnbFromWaxBridge', 'claimXpRewards']) as StoreMappedActions),
+    getCleanCharacterName(id: number): string {
+      return getCleanName(this.getCharacterName(id));
+    },
+    async onClaimXp() {
+      if(this.canClaimXp) {
+        await this.claimXpRewards();
+      }
+    },
     formatBnb(bnb: string): string {
       const amount = fromWeiEther(bnb);
       return `${toBN(amount).toFixed(4)} BNB`;
@@ -167,12 +255,34 @@ export default Vue.extend({
   },
 
   components: {
-    BModal
+    BModal,
+    ElementTrait
   }
 });
 </script>
 
 <style scoped>
+.custom-header-font{
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+}
+.claim-exp-popover{
+  font-family: 'Trajan' !important;
+  background: rgba(33,35,30, .7);
+}
+.unclaimed-text{
+  color: #ffc107;
+  font-size: 13px;
+}
+.character-name{
+  font-family: 'Trajan';
+}
+::v-deep.claim-exp-popover .popover-body {
+  color: #fff !important;
+}
+.border-line-custom{
+  font-size: 13px;
+}
 .skill-balance-display {
   align-items: center;
   border-left: 1px solid #424A59;
