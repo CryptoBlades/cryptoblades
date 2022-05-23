@@ -463,8 +463,8 @@ export default {
       } catch (err) {
         console.log('leave arena error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'Not in arena', i18n.t('pvp.charNotInArena'));
-        this.handleErrorMessage(err.message, 'Defender duel in process', i18n.t('pvp.duelInProcess'));
+        this.handleErrorMessage(err.message, 'N', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.duelInProcess'));
       }
 
       this.loading = false;
@@ -483,11 +483,10 @@ export default {
       } catch (err) {
         console.log('find match error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'No enemy found', i18n.t('pvp.noEnemyFound'));
-        this.handleErrorMessage(err.message, 'Already in match', i18n.t('pvp.alreadyInMatch'));
-        this.handleErrorMessage(err.message, 'No enemy in tier', i18n.t('pvp.noEnemyInTier'));
-        this.handleErrorMessage(err.message, 'Char dueling', i18n.t('pvp.charDueling'));
-        this.handleErrorMessage(err.message, 'Not in arena', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(err.message, 'E', i18n.t('pvp.noEnemyFound'));
+        this.handleErrorMessage(err.message, 'M', i18n.t('pvp.alreadyInMatch'));
+        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.charDueling'));
+        this.handleErrorMessage(err.message, 'N', i18n.t('pvp.charNotInArena'));
 
         this.loading = false;
         return;
@@ -515,10 +514,9 @@ export default {
       } catch (err) {
         console.log('reroll opponent error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'No enemy found', i18n.t('pvp.noEnemyFound'));
-        this.handleErrorMessage(err.message, 'Not in match', i18n.t('pvp.notInMatch'));
-        this.handleErrorMessage(err.message, 'No enemy in tier', i18n.t('pvp.noEnemyInTier'));
-        this.handleErrorMessage(err.message, 'Char dueling', i18n.t('pvp.charDueling'));
+        this.handleErrorMessage(err.message, 'E', i18n.t('pvp.noEnemyFound'));
+        this.handleErrorMessage(err.message, 'M', i18n.t('pvp.notInMatch'));
+        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.charDueling'));
 
         this.loading = false;
 
@@ -580,9 +578,9 @@ export default {
       } catch (err) {
         console.log('prepare perform duel error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'Decision time expired', i18n.t('pvp.decisionTimeExpired'));
-        this.handleErrorMessage(err.message, 'In queue', i18n.t('pvp.charDueling'));
-        this.handleErrorMessage(err.message, 'Not in match', i18n.t('pvp.notInMatch'));
+        this.handleErrorMessage(err.message, 'D', i18n.t('pvp.decisionTimeExpired'));
+        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.charDueling'));
+        this.handleErrorMessage(err.message, 'M', i18n.t('pvp.notInMatch'));
 
         this.loading = false;
 
