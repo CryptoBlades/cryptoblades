@@ -12,40 +12,44 @@ import { networks as lp2TokenNetworks } from '../../build/contracts/ExperimentTo
 import { networks as cbkLandT1StakingRewardsNetworks } from '../../build/contracts/CBKLandT1StakingRewardsUpgradeable.json';
 import { networks as cbkLandT2StakingRewardsNetworks } from '../../build/contracts/CBKLandT2StakingRewardsUpgradeable.json';
 import { networks as cbkLandT3StakingRewardsNetworks } from '../../build/contracts/CBKLandT3StakingRewardsUpgradeable.json';
-import { networks as cbkLandNetworks } from '../../build/contracts/CBKLand.json';
 import { abi as stakingRewardsAbi } from '../../build/contracts/IStakingRewards.json';
 import { abi as nftStakingRewardsAbi } from '../../build/contracts/INftStakingRewards.json';
 
 import { abi as cryptoBladesAbi, networks as cryptoBladesNetworks } from '../../build/contracts/CryptoBlades.json';
 import { abi as raidAbi, networks as raidNetworks } from '../../build/contracts/Raid1.json';
-import { abi as charactersAbi } from '../../build/contracts/Characters.json';
-import { abi as weaponsAbi } from '../../build/contracts/Weapons.json';
-import { abi as blacksmithAbi } from '../../build/contracts/Blacksmith.json';
-import { abi as shieldsAbi } from '../../build/contracts/Shields.json';
-import { abi as garrisonAbi } from '../../build/contracts/Garrison.json';
-import { abi as cbkLandSaleAbi } from '../../build/contracts/CBKLandSale.json';
-import { abi as promosAbi } from '../../build/contracts/Promos.json';
+import { abi as charactersAbi, networks as charactersNetworks } from '../../build/contracts/Characters.json';
+import { abi as weaponsAbi, networks as weaponsNetworks } from '../../build/contracts/Weapons.json';
+import { abi as blacksmithAbi, networks as blacksmithNetworks } from '../../build/contracts/Blacksmith.json';
+import { abi as shieldsAbi, networks as shieldsNetworks } from '../../build/contracts/Shields.json';
+import { abi as garrisonAbi, networks as garrisonNetworks } from '../../build/contracts/Garrison.json';
+import { abi as cbkLandSaleAbi, networks as cbkLandSaleNetworks } from '../../build/contracts/CBKLandSale.json';
+import { abi as promosAbi, networks as promosNetworks } from '../../build/contracts/Promos.json';
 import { abi as merchandiseAbi, networks as merchandiseNetworks } from '../../build/contracts/Merchandise.json';
-import { abi as cbkLandAbi } from '../../build/contracts/CBKLand.json';
-import { abi as weaponRenameTagConsumablesAbi } from '../../build/contracts/WeaponRenameTagConsumables.json';
-import { abi as characterRenameTagConsumablesAbi } from '../../build/contracts/CharacterRenameTagConsumables.json';
-import { abi as characterFireTraitChangeConsumablesAbi } from '../../build/contracts/CharacterFireTraitChangeConsumables.json';
-import { abi as characterEarthTraitChangeConsumablesAbi } from '../../build/contracts/CharacterEarthTraitChangeConsumables.json';
-import { abi as characterWaterTraitChangeConsumablesAbi } from '../../build/contracts/CharacterWaterTraitChangeConsumables.json';
-import { abi as characterLightningTraitChangeConsumablesAbi } from '../../build/contracts/CharacterLightningTraitChangeConsumables.json';
-import { abi as raidTrinketAbi } from '../../build/contracts/RaidTrinket.json';
-import { abi as keyboxAbi } from '../../build/contracts/KeyLootbox.json';
-import { abi as junkAbi } from '../../build/contracts/Junk.json';
+import { abi as cbkLandAbi, networks as cbkLandNetworks } from '../../build/contracts/CBKLand.json';
+import { abi as weaponRenameTagConsumablesAbi, networks as weaponRenameTagConsumablesNetworks } from '../../build/contracts/WeaponRenameTagConsumables.json';
+import { abi as characterRenameTagConsumablesAbi, networks as characterRenameTagConsumables } from '../../build/contracts/CharacterRenameTagConsumables.json';
+import { abi as characterFireTraitChangeConsumablesAbi, networks as characterFireTraitChangeConsumablesNetworks }
+  from '../../build/contracts/CharacterFireTraitChangeConsumables.json';
+import { abi as characterEarthTraitChangeConsumablesAbi, networks as characterEarthTraitChangeConsumablesNetworks }
+  from '../../build/contracts/CharacterEarthTraitChangeConsumables.json';
+import { abi as characterWaterTraitChangeConsumablesAbi, networks as characterWaterTraitChangeConsumablesNetworks }
+  from '../../build/contracts/CharacterWaterTraitChangeConsumables.json';
+import { abi as characterLightningTraitChangeConsumablesAbi, networks as characterLightningTraitChangeConsumablesNetworks }
+  from '../../build/contracts/CharacterLightningTraitChangeConsumables.json';
+import { abi as raidTrinketAbi, networks as raidTrinketNetworks } from '../../build/contracts/RaidTrinket.json';
+import { abi as keyboxAbi, networks as keyboxNetworks } from '../../build/contracts/KeyLootbox.json';
+import { abi as junkAbi, networks as junkNetworks } from '../../build/contracts/Junk.json';
 import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
 import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
 import { abi as simpleQuestsAbi, networks as simpleQuestsNetworks } from '../../build/contracts/SimpleQuests.json';
-import { abi as partnerVaultAbi} from '../../build/contracts/PartnerVault.json';
+import { abi as partnerVaultAbi, networks as partnerVaultNetworks} from '../../build/contracts/PartnerVault.json';
 import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
 import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/PvpArena.json';
 import { abi as pvpCoreAbi, networks as pvpCoreNetworks } from '../../build/contracts/PvpCore.json';
 import { abi as pvpRankingsAbi, networks as pvpRankingsNetworks } from '../../build/contracts/PvpRankings.json';
-import { abi as weaponCosmeticsAbi } from '../../build/contracts/WeaponCosmetics.json';
-import { abi as characterCosmeticsAbi } from '../../build/contracts/CharacterCosmetics.json';
+import { abi as tokensManagerAbi, networks as tokensManagerNetworks } from '../../build/contracts/TokensManager.json';
+import { abi as weaponCosmeticsAbi, networks as weaponCosmeticsNetworks } from '../../build/contracts/WeaponCosmetics.json';
+import { abi as characterCosmeticsAbi, networks as characterCosmeticsNetworks } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
 import { abi as treasuryAbi, networks as treasuryNetworks } from '../../build/contracts/Treasury.json';
 import { abi as burningManagerAbi, networks as burningManagerNetworks } from '../../build/contracts/BurningManager.json';
@@ -58,7 +62,7 @@ import { abi as kingStakingRewardsUpgradeable90Abi,
 import { abi as kingStakingRewardsUpgradeable180Abi,
   networks as kingStakingRewardsUpgradeable180Networks }
   from '../../build/contracts/KingStakingRewardsUpgradeable180.json';
-import { abi as specialWeaponsManagerAbi } from '../../build/contracts/SpecialWeaponsManager.json';
+import { abi as specialWeaponsManagerAbi, networks as specialWeaponsManagerNetworks } from '../../build/contracts/SpecialWeaponsManager.json';
 import config from '../app-config.json';
 
 
@@ -67,7 +71,7 @@ import { Contracts, isStakeType, isNftStakeType, StakeType, NftStakeType, Stakin
 
 import { StakingContractEntry, stakingContractsInfo, nftStakingContractsInfo } from './stake-types';
 
-import {raid, stakeOnly, pvp, quests, burningManager} from './feature-flags';
+import {raid, pvp, quests, burningManager} from './feature-flags';
 import {currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 interface RaidContracts {
@@ -97,15 +101,24 @@ interface Chain {
   chains: Record<string, Record<string, any>>;
 }
 
-export function getConfigValue(key: string): any {
+export function getConfigValue(key: string, chain?: string): any {
   if (process.env.VUE_APP_STAGE === 'alpha') {
     return process.env[key];
   }
 
   if(process.env.NODE_ENV === 'development') return '';
   const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
-  const chain = localStorage.getItem('currentChain') || 'BSC';
-  return (config as Config).environments[env].chains[chain][key];
+
+  if(chain) return (config as Config).environments[env].chains[chain][key];
+
+  let currentChain = localStorage.getItem('currentChain') || 'BNB';
+  if(env === 'production' && !config.supportedChains.includes(currentChain)) {
+    currentChain = 'BNB';
+  }
+  if(env === 'test' && !config.testSupportedChains.includes(currentChain)) {
+    currentChain = 'BNB';
+  }
+  return (config as Config).environments[env].chains[currentChain][key];
 }
 
 let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
@@ -230,92 +243,75 @@ async function setUpStakingContracts(web3: Web3) {
 }
 
 export async function setUpContracts(web3: Web3): Promise<Contracts> {
-
   const stakingContracts = await setUpStakingContracts(web3);
-
-  if (stakeOnly) {
-    return stakingContracts;
-  }
 
   const cryptoBladesContractAddr = getConfigValue('VUE_APP_CRYPTOBLADES_CONTRACT_ADDRESS') || (cryptoBladesNetworks as Networks)[networkId]!.address;
   const CryptoBlades = new web3.eth.Contract(cryptoBladesAbi as Abi, cryptoBladesContractAddr);
-  const [charactersAddr, weaponsAddr, randomsAddr, blacksmithAddr] = await Promise.all([
-    CryptoBlades.methods.characters().call(),
-    CryptoBlades.methods.weapons().call(),
-    CryptoBlades.methods.randoms().call(),
-    CryptoBlades.methods.blacksmith().call(),
-  ]);
+
+  const randomsAddr = await CryptoBlades.methods.randoms().call();
+  const charactersAddr = (charactersNetworks as Networks)[networkId]!.address;
+  const weaponsAddr = (weaponsNetworks as Networks)[networkId]!.address;
+  const blacksmithAddr = (blacksmithNetworks as Networks)[networkId]!.address;
+
 
   const Randoms = new web3.eth.Contract(randomsAbi as Abi, randomsAddr);
   const Characters = new web3.eth.Contract(charactersAbi as Abi, charactersAddr);
   const Weapons = new web3.eth.Contract(weaponsAbi as Abi, weaponsAddr);
   const Blacksmith = new web3.eth.Contract(blacksmithAbi as Abi, blacksmithAddr);
 
-  let SpecialWeaponsManager;
-  let specialWeaponsManagerAddr;
-  try {
-    specialWeaponsManagerAddr = await CryptoBlades.methods.specialWeaponsManager().call();
+  let TokensManager;
+  if((tokensManagerNetworks as Networks)[networkId]) {
+    const tokensManagerContractAddr = process.env.VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS ||
+      getConfigValue('VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS') || (tokensManagerNetworks as Networks)[networkId]!.address;
+    TokensManager = new web3.eth.Contract(tokensManagerAbi as Abi, tokensManagerContractAddr);
   }
-  catch(e) {
-    console.error(e);
-  }
+  const specialWeaponsManagerAddr = (specialWeaponsManagerNetworks as Networks)[networkId]!.address;
+  const SpecialWeaponsManager = new web3.eth.Contract(specialWeaponsManagerAbi as Abi, specialWeaponsManagerAddr);
 
-  if(specialWeaponsManagerAddr) {
-    SpecialWeaponsManager = new web3.eth.Contract(specialWeaponsManagerAbi as Abi, specialWeaponsManagerAddr);
-  }
-
-  const garrisonAddr = await Characters.methods.garrison().call();
+  const garrisonAddr = (garrisonNetworks as Networks)[networkId]!.address;
   const Garrison = new web3.eth.Contract(garrisonAbi as Abi, garrisonAddr);
 
-  const shieldsAddr = await Blacksmith.methods.shields().call();
+  const shieldsAddr = (shieldsNetworks as Networks)[networkId]!.address;
   const Shields = new web3.eth.Contract(shieldsAbi as Abi, shieldsAddr);
 
-  const promosAddr = await Characters.methods.promos().call();
+  const promosAddr = (promosNetworks as Networks)[networkId]!.address;
   const Promos = new web3.eth.Contract(promosAbi as Abi, promosAddr);
 
-  const weaponRenameTagConsumablesIndex = await Blacksmith.methods.ITEM_WEAPON_RENAME().call();
-  const weaponRenameTagConsumablesAddr = await Blacksmith.methods.getAddressOfItem(weaponRenameTagConsumablesIndex).call();
+  const weaponRenameTagConsumablesAddr = (weaponRenameTagConsumablesNetworks as Networks)[networkId]!.address;
   const WeaponRenameTagConsumables = new web3.eth.Contract(weaponRenameTagConsumablesAbi as Abi, weaponRenameTagConsumablesAddr);
 
-  const characterRenameTagConsumablesIndex = await Blacksmith.methods.ITEM_CHARACTER_RENAME().call();
-  const characterRenameTagConsumablesAddr = await Blacksmith.methods.getAddressOfItem(characterRenameTagConsumablesIndex).call();
+  const characterRenameTagConsumablesAddr = (characterRenameTagConsumables as Networks)[networkId]!.address;
   const CharacterRenameTagConsumables = new web3.eth.Contract(characterRenameTagConsumablesAbi as Abi, characterRenameTagConsumablesAddr);
 
-  const CharacterFireTraitChangeConsumablesIndex = await Blacksmith.methods.ITEM_CHARACTER_TRAITCHANGE_FIRE().call();
-  const characterFireTraitChangeConsumablesAddr = await Blacksmith.methods.getAddressOfItem(CharacterFireTraitChangeConsumablesIndex).call();
+  const characterFireTraitChangeConsumablesAddr = (characterFireTraitChangeConsumablesNetworks as Networks)[networkId]!.address;
   const CharacterFireTraitChangeConsumables = new web3.eth.Contract(characterFireTraitChangeConsumablesAbi as Abi, characterFireTraitChangeConsumablesAddr);
 
-  const CharacterEarthTraitChangeConsumablesIndex = await Blacksmith.methods.ITEM_CHARACTER_TRAITCHANGE_EARTH().call();
-  const characterEarthTraitChangeConsumablesAddr = await Blacksmith.methods.getAddressOfItem(CharacterEarthTraitChangeConsumablesIndex).call();
+  const characterEarthTraitChangeConsumablesAddr = (characterEarthTraitChangeConsumablesNetworks as Networks)[networkId]!.address;
   const CharacterEarthTraitChangeConsumables = new web3.eth.Contract(characterEarthTraitChangeConsumablesAbi as Abi, characterEarthTraitChangeConsumablesAddr);
 
-  const CharacterWaterTraitChangeConsumablesIndex = await Blacksmith.methods.ITEM_CHARACTER_TRAITCHANGE_WATER().call();
-  const characterWaterTraitChangeConsumablesAddr = await Blacksmith.methods.getAddressOfItem(CharacterWaterTraitChangeConsumablesIndex).call();
+  const characterWaterTraitChangeConsumablesAddr = (characterWaterTraitChangeConsumablesNetworks as Networks)[networkId]!.address;
   const CharacterWaterTraitChangeConsumables = new web3.eth.Contract(characterWaterTraitChangeConsumablesAbi as Abi, characterWaterTraitChangeConsumablesAddr);
 
-  const CharacterLightningTraitChangeConsumablesIndex = await Blacksmith.methods.ITEM_CHARACTER_TRAITCHANGE_LIGHTNING().call();
-  const characterLightningTraitChangeConsumablesAddr = await Blacksmith.methods.getAddressOfItem(CharacterLightningTraitChangeConsumablesIndex).call();
+  const characterLightningTraitChangeConsumablesAddr = (characterLightningTraitChangeConsumablesNetworks as Networks)[networkId]!.address;
   const CharacterLightningTraitChangeConsumables = new web3.eth.Contract(characterLightningTraitChangeConsumablesAbi as Abi,
     characterLightningTraitChangeConsumablesAddr);
 
-  const cosmeticsWeaponIndex = await Blacksmith.methods.ITEM_COSMETIC_WEAPON().call();
-  const cosmeticsWeaponAddr = await Blacksmith.methods.getAddressOfItem(cosmeticsWeaponIndex).call();
+  const cosmeticsWeaponAddr = (weaponCosmeticsNetworks as Networks)[networkId]!.address;
   const WeaponCosmetics = new web3.eth.Contract(weaponCosmeticsAbi as Abi, cosmeticsWeaponAddr);
 
-  const cosmeticsCharacterIndex = await Blacksmith.methods.ITEM_COSMETIC_CHARACTER().call();
-  const cosmeticsCharacterAddr = await Blacksmith.methods.getAddressOfItem(cosmeticsCharacterIndex).call();
+  const cosmeticsCharacterAddr = (characterCosmeticsNetworks as Networks)[networkId]!.address;
   const CharacterCosmetics = new web3.eth.Contract(characterCosmeticsAbi as Abi, cosmeticsCharacterAddr);
 
   const NFTStorageAddr = getConfigValue('VUE_APP_STORAGE_CONTRACT_ADDRESS') || (nftStorageNetworks as Networks)[networkId]!.address;
   const NFTStorage = new web3.eth.Contract(nftStorageAbi as Abi, NFTStorageAddr);
 
-  const cbkLandSaleAddr = await Blacksmith.methods.cbkLandSale().call();
+  const cbkLandSaleAddr = (cbkLandSaleNetworks as Networks)[networkId]!.address;
   const CBKLandSale = new web3.eth.Contract(cbkLandSaleAbi as Abi, cbkLandSaleAddr);
 
   const merchandiseAddr = getConfigValue('VUE_APP_MERCHANDISE_CONTRACT_ADDRESS') || (merchandiseNetworks as Networks)[networkId]!.address;
   const Merchandise = new web3.eth.Contract(merchandiseAbi as Abi, merchandiseAddr);
 
-  const cbkLandAddr = await CBKLandSale.methods.cbkLand().call();
+  const cbkLandAddr = (cbkLandNetworks as Networks)[networkId]!.address;
   const CBKLand = new web3.eth.Contract(cbkLandAbi as Abi, cbkLandAddr);
 
   const raidContracts: RaidContracts = {};
@@ -328,13 +324,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     const Raid1 = new web3.eth.Contract(raidAbi as Abi, raidContractAddr);
     raidContracts.Raid1 = Raid1;
 
-    // for the time being, junk, keylootbox and trinket are dependent on raids for the address
-    const RAID_LINK_TRINKET = await Raid1.methods.LINK_TRINKET().call();
-    const RAID_LINK_KEYBOX = await Raid1.methods.LINK_KEYBOX().call();
-    const RAID_LINK_JUNK = await Raid1.methods.LINK_JUNK().call();
-    raidTrinketAddress = await Raid1.methods.getLinkAddress(RAID_LINK_TRINKET).call();
-    keyboxAddress = await Raid1.methods.getLinkAddress(RAID_LINK_KEYBOX).call();
-    junkAddress = await Raid1.methods.getLinkAddress(RAID_LINK_JUNK).call();
+    raidTrinketAddress = (raidTrinketNetworks as Networks)[networkId]!.address;
+    keyboxAddress = (keyboxNetworks as Networks)[networkId]!.address;
+    junkAddress = (junkNetworks as Networks)[networkId]!.address;
   }
 
   const RaidTrinket = new web3.eth.Contract(raidTrinketAbi as Abi, raidTrinketAddress);
@@ -354,10 +346,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
     const simpleQuests = new web3.eth.Contract(simpleQuestsAbi as Abi, simpleQuestsContractAddr);
     questsContracts.SimpleQuests = simpleQuests;
-    if (simpleQuests.methods.partnerVault) {
-      const partnerVaultContractAddr = await simpleQuests.methods.partnerVault().call();
-      questsContracts.PartnerVault = new web3.eth.Contract(partnerVaultAbi as Abi, partnerVaultContractAddr);
-    }
+
+    const partnerVaultContractAddr = (partnerVaultNetworks as Networks)[networkId]!.address;
+    questsContracts.PartnerVault = new web3.eth.Contract(partnerVaultAbi as Abi, partnerVaultContractAddr);
   }
 
   const pvpContracts: PvPContracts = {};
@@ -415,6 +406,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
     NFTStorage, CBKLandSale, CBKLand, Merchandise, Promos,
+    TokensManager,
     ...raidContracts,
     ...pvpContracts,
     ...marketContracts,

@@ -25,6 +25,7 @@ module.exports = async function (deployer, network, accounts) {
 
   const bscDeployerAddress = "0xa2bB660A6A3Bb5c74E36415ffe5D4862eFfc417A";
   const altChainsDeployerAddress = "0x15C899E13be4db3bDaa518A4bb29Cbb9F4e7B8Be";
+  const skaleDeployerAddress = "0x122B914ceC7513D0800f98425f197DdC28120115";
   let networkName = 'bsc';
 
   if(network === 'development') {
@@ -43,6 +44,15 @@ module.exports = async function (deployer, network, accounts) {
     await raidTrinket.grantRole(raidTrinket_GA, bscDeployerAddress);
     await keyLootbox.grantRole(keyLootbox_GA, bscDeployerAddress);
   }
+  else if(network === 'skalemainnet' || network === 'skaletestnet') {
+    networkName = 'skale';
+    await weapons.grantRole(weapons_GA, skaleDeployerAddress);
+    await characters.grantRole(characters_GA, skaleDeployerAddress);
+    await shields.grantRole(shields_GA, skaleDeployerAddress);
+    await junk.grantRole(junk_GA, skaleDeployerAddress);
+    await raidTrinket.grantRole(raidTrinket_GA, skaleDeployerAddress);
+    await keyLootbox.grantRole(keyLootbox_GA, skaleDeployerAddress);
+  }
   else {
     if(network === 'hecomainnet' || network === 'hecotestnet') {
       networkName = 'heco';
@@ -59,6 +69,9 @@ module.exports = async function (deployer, network, accounts) {
     else if(network === 'auroramainnet' || network === 'auroratestnet') {
       networkName = 'aurora';
     }
+    else if(network === 'kavamainnet' || network === 'kavatestnet' || network === 'skaletestnet') {
+      networkName = 'kava';
+    }
 
     await weapons.grantRole(weapons_GA, altChainsDeployerAddress);
     await characters.grantRole(characters_GA, altChainsDeployerAddress);
@@ -67,7 +80,6 @@ module.exports = async function (deployer, network, accounts) {
     await raidTrinket.grantRole(raidTrinket_GA, altChainsDeployerAddress);
     await keyLootbox.grantRole(keyLootbox_GA, altChainsDeployerAddress);
   }
-
   await weapons.setBaseURI(`https://testapi.cryptoblades.io/nfts/view/${networkName}/cb-weapon/`);
   await characters.setBaseURI(`https://testapi.cryptoblades.io/nfts/view/${networkName}/cb-character/`);
   await shields.setBaseURI(`https://testapi.cryptoblades.io/nfts/view/${networkName}/cb-shield/`);

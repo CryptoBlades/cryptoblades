@@ -12,7 +12,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const fighter = await PvpCore.methods.fighterByCharacter(characterId).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const fighter = await PvpCore.methods.fighterByCharacter(characterId).call({ from: rootState.defaultAccount });
 
       return fighter;
     },
@@ -21,7 +21,7 @@ const pvp = {
       const { PvpRankings } = rootState.contracts();
       if (!PvpRankings || !rootState.defaultAccount) return;
 
-      const currentRankedSeason = await PvpRankings.methods.currentRankedSeason().call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const currentRankedSeason = await PvpRankings.methods.currentRankedSeason().call({ from: rootState.defaultAccount });
 
       return currentRankedSeason;
     },
@@ -30,7 +30,7 @@ const pvp = {
       const { PvpRankings } = rootState.contracts();
       if (!PvpRankings || !rootState.defaultAccount) return;
 
-      const seasonStartedAt = await PvpRankings.methods.seasonStartedAt().call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const seasonStartedAt = await PvpRankings.methods.seasonStartedAt().call({ from: rootState.defaultAccount });
 
       return seasonStartedAt;
     },
@@ -39,7 +39,7 @@ const pvp = {
       const { PvpRankings } = rootState.contracts();
       if (!PvpRankings || !rootState.defaultAccount) return;
 
-      const seasonDuration = await PvpRankings.methods.seasonDuration().call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const seasonDuration = await PvpRankings.methods.seasonDuration().call({ from: rootState.defaultAccount });
 
       return seasonDuration;
     },
@@ -48,16 +48,16 @@ const pvp = {
       const { Characters } = rootState.contracts();
       if (!Characters || !rootState.defaultAccount) return;
 
-      const characterLevel = await Characters.methods.getLevel(characterId).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const characterLevel = await Characters.methods.getLevel(characterId).call({ from: rootState.defaultAccount });
 
       return characterLevel;
     },
 
-    async getCharacterFullPower({ rootState }: {rootState: IState}, characterId: number) {
+    async getCharacterFullPower({ rootState }: {rootState: IState}, {characterId, tier}: {characterId: number, tier: number}) {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const characterFullPower = await PvpCore.methods.getCharacterPower(characterId).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const characterFullPower = await PvpCore.methods.getCharacterPower(characterId, tier).call({ from: rootState.defaultAccount });
 
       return characterFullPower;
     },
@@ -78,7 +78,7 @@ const pvp = {
       const { PvpRankings } = rootState.contracts();
       if (!PvpRankings || !rootState.defaultAccount) return;
 
-      const rankingsPoolByTier = await PvpRankings.methods.rankingsPoolByTier(tier).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const rankingsPoolByTier = await PvpRankings.methods.rankingsPoolByTier(tier).call({ from: rootState.defaultAccount });
 
       return rankingsPoolByTier;
     },
@@ -87,7 +87,7 @@ const pvp = {
       const { PvpRankings } = rootState.contracts();
       if (!PvpRankings || !rootState.defaultAccount) return;
 
-      const tierTopCharacters = await PvpRankings.methods.getTierTopCharacters(tier).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const tierTopCharacters = await PvpRankings.methods.getTierTopCharacters(tier).call({ from: rootState.defaultAccount });
 
       return tierTopCharacters;
     },
@@ -96,7 +96,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const arenaTier = await PvpCore.methods.getArenaTier(characterId).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const arenaTier = await PvpCore.methods.getArenaTier(characterId).call({ from: rootState.defaultAccount });
 
       return arenaTier;
     },
@@ -105,7 +105,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const arenaTier = await PvpCore.methods.previousTierByCharacter(characterId).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const arenaTier = await PvpCore.methods.previousTierByCharacter(characterId).call({ from: rootState.defaultAccount });
 
       return arenaTier;
     },
@@ -114,7 +114,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const entryWager = await PvpCore.methods.getEntryWagerByTier(tier).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const entryWager = await PvpCore.methods.getEntryWagerByTier(tier).call({ from: rootState.defaultAccount });
 
       return entryWager;
     },
@@ -123,7 +123,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const isWeaponInArena = await PvpCore.methods.isWeaponInArena(weaponId).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const isWeaponInArena = await PvpCore.methods.isWeaponInArena(weaponId).call({ from: rootState.defaultAccount });
 
       return isWeaponInArena;
     },
@@ -132,7 +132,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const isShieldInArena = await PvpCore.methods.isShieldInArena(shieldId).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const isShieldInArena = await PvpCore.methods.isShieldInArena(shieldId).call({ from: rootState.defaultAccount });
 
       return isShieldInArena;
     },
@@ -140,10 +140,22 @@ const pvp = {
     async getIsCharacterInArena({ rootState, commit }: {rootState: IState, commit: Commit}, characterId: number) {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
-      const isCharacterInArena = await PvpCore.methods.isCharacterInArena(characterId).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const isCharacterInArena = await PvpCore.methods.isCharacterInArena(characterId).call({ from: rootState.defaultAccount });
       commit('updateCharacterInArena', { characterId, isCharacterInArena });
 
       return isCharacterInArena;
+    },
+
+    async getIsCharacterInOldArena({ rootState }: {rootState: IState}, characterId: number) {
+      const { PvpArena } = rootState.contracts();
+
+      if (!PvpArena || !rootState.defaultAccount) {
+        return;
+      }
+
+      const isCharacterInOldArena = await PvpArena.methods.isCharacterInArena(characterId).call({ from: rootState.defaultAccount });
+
+      return isCharacterInOldArena;
     },
 
     async getIsCharacterUnderAttack({ rootState }: {rootState: IState}, characterId: number) {
@@ -162,7 +174,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const matchByFinder = await PvpCore.methods.matchByFinder(characterId).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const matchByFinder = await PvpCore.methods.matchByFinder(characterId).call({ from: rootState.defaultAccount });
 
       return matchByFinder;
     },
@@ -171,7 +183,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const matchByFinder = await PvpCore.methods.getDuelQueue().call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const matchByFinder = await PvpCore.methods.getDuelQueue().call({ from: rootState.defaultAccount });
 
       return matchByFinder;
     },
@@ -180,7 +192,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const matchByFinder = await PvpCore.methods.getDuelCost(characterId).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const matchByFinder = await PvpCore.methods.getDuelCost(characterId).call({ from: rootState.defaultAccount });
 
       return matchByFinder;
     },
@@ -189,7 +201,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const matchablePlayerCount = await PvpCore.methods.getMatchablePlayerCount(characterId).call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const matchablePlayerCount = await PvpCore.methods.getMatchablePlayerCount(characterId).call({ from: rootState.defaultAccount });
 
       return matchablePlayerCount;
     },
@@ -198,7 +210,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const decisionSeconds = await PvpCore.methods.decisionSeconds().call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const decisionSeconds = await PvpCore.methods.decisionSeconds().call({ from: rootState.defaultAccount});
 
       return decisionSeconds;
     },
@@ -207,7 +219,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const reRollFeePercent = await PvpCore.methods.reRollFeePercent().call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const reRollFeePercent = await PvpCore.methods.reRollFeePercent().call({ from: rootState.defaultAccount });
 
       return reRollFeePercent;
     },
@@ -225,7 +237,7 @@ const pvp = {
       const { PvpRankings } = rootState.contracts();
       if (!PvpRankings || !rootState.defaultAccount) return;
 
-      const playerPrizePoolRewards = await PvpRankings.methods.getPlayerPrizePoolRewards().call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const playerPrizePoolRewards = await PvpRankings.methods.getPlayerPrizePoolRewards().call({ from: rootState.defaultAccount });
 
       return playerPrizePoolRewards;
     },
@@ -234,7 +246,7 @@ const pvp = {
       const { PvpArena } = rootState.contracts();
       if (!PvpArena || !rootState.defaultAccount) return;
 
-      const playerPrizePoolRewards = await PvpArena.methods.getPlayerPrizePoolRewards().call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const playerPrizePoolRewards = await PvpArena.methods.getPlayerPrizePoolRewards().call({ from: rootState.defaultAccount });
 
       return playerPrizePoolRewards;
     },
@@ -243,7 +255,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const duelOffsetCost = await PvpCore.methods.duelOffsetCost().call({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
+      const duelOffsetCost = await PvpCore.methods.duelOffsetCost().call({ from: rootState.defaultAccount });
 
       return duelOffsetCost;
     },
@@ -272,6 +284,18 @@ const pvp = {
       const res = await PvpCore.methods.withdrawFromArena(characterId).send({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
 
       await dispatch('getIsCharacterInArena', characterId);
+
+      return res;
+    },
+
+
+    async withdrawFromOldArena({ rootState }: {rootState: IState}, characterId: number) {
+      const { PvpArena } = rootState.contracts();
+      if (!PvpArena || !rootState.defaultAccount) {
+        return;
+      }
+
+      const res = await PvpArena.methods.withdrawFromArena(characterId).send({ from: rootState.defaultAccount, gasPrice: getGasPrice() });
 
       return res;
     },
@@ -343,7 +367,6 @@ const pvp = {
         PvpCore,
         SkillToken,
         rootState.defaultAccount,
-        getGasPrice(),
         defaultCallOptions(rootState),
         defaultCallOptions(rootState),
         new BigNumber(`${amount}`)

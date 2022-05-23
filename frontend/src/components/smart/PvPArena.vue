@@ -3,6 +3,19 @@
     <div v-if="loading">
         <img class="loadingSpinner" src="../../assets/loadingSpinner.svg" />
     </div>
+    <div v-else-if="!loading && isCharacterInOldArena">
+      <p>
+        {{$t('pvp.leaveOldArena')}}
+      </p>
+      <div class="buttonWrapper">
+        <pvp-button
+          @click="leaveOldArena"
+          :disabled="loading"
+          :buttonText="$t('pvp.leaveArena')"
+          secondary
+        />
+      </div>
+    </div>
     <div v-else>
       <pvp-arena-preparation
         v-if="!isCharacterInArena"
@@ -68,6 +81,7 @@ import PvPArenaPreparation from './PvPArenaPreparation.vue';
 import PvPArenaSummary from './PvPArenaSummary.vue';
 import PvPArenaMatchMaking from './PvPArenaMatchMaking.vue';
 import PvPKickedModal from './PvPKickedModal.vue';
+import PvPButton from './PvPButton.vue';
 import { weaponFromContract as formatWeapon } from '../../contract-models';
 import { shieldFromContract as formatShield } from '../../contract-models';
 import { pvpFighterFromContract as formatFighter } from '../../contract-models';
@@ -77,19 +91,19 @@ import { characterKickedEventFromContract as formatCharacterKickedEvent } from '
 
 
 export default {
-  inject: ['web3'],
-
   components: {
     'pvp-arena-preparation': PvPArenaPreparation,
     'pvp-arena-summary': PvPArenaSummary,
     'pvp-arena-matchmaking': PvPArenaMatchMaking,
-    'pvp-kicked-modal': PvPKickedModal
+    'pvp-kicked-modal': PvPKickedModal,
+    'pvp-button': PvPButton,
   },
 
   data() {
     return {
       loading: true,
       isCharacterInArena: false,
+      isCharacterInOldArena: false,
       entryWager: null,
       untieredEntryWager: null,
       isMatchMaking: false,
@@ -107,6 +121,7 @@ export default {
         level: null,
         power: null,
         fullPower: null,
+        untieredFullPower: null,
         rank: null,
         element: null,
       },
@@ -130,6 +145,7 @@ export default {
         rank: null,
         power: null,
         fullPower: null,
+        untieredFullPower: null
       },
       opponentActiveWeaponWithInformation: {
         weaponId: null,
@@ -149,7 +165,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
+    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds', 'web3']),
     ...mapGetters(['getCharacterName'])
   },
 
@@ -173,11 +189,13 @@ export default {
       'getIsWeaponInArena',
       'getIsShieldInArena',
       'getIsCharacterInArena',
-      'getRename',
       'getWithdrawFeePercent',
       'getMatchByFinder',
+      'getIsCharacterInOldArena',
       'getPvpCoreContract',
       'getPvpRankingsContract',
+      'getRename',
+      'withdrawFromOldArena'
     ]),
 
     async getWeaponInformation(weaponId) {
@@ -194,7 +212,8 @@ export default {
 
       const fighter = formatFighter(await this.getFighterByCharacter(this.currentCharacterId));
 
-      this.characterInformation.fullPower = await this.getCharacterFullPower(this.currentCharacterId);
+      this.characterInformation.fullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: this.characterInformation.tier});
+      this.characterInformation.untieredFullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: 20});
 
       this.activeWeaponWithInformation = {
         weaponId: fighter.weaponID,
@@ -244,7 +263,9 @@ export default {
 
       this.opponentInformation.power = await this.getCharacterPower(defenderId);
 
-      this.opponentInformation.fullPower = await this.getCharacterFullPower(defenderId);
+      this.opponentInformation.fullPower = await this.getCharacterFullPower({characterId: defenderId, tier: this.characterInformation.tier});
+
+      this.opponentInformation.untieredFullPower = await this.getCharacterFullPower({characterId: defenderId, tier: 20});
 
       const fighter = formatFighter(await this.getFighterByCharacter(defenderId));
 
@@ -269,7 +290,8 @@ export default {
         level: null,
         rank: null,
         power: null,
-        fullPower: null
+        fullPower: null,
+        untieredFullPower: null,
       };
 
       this.opponentActiveWeaponWithInformation = {
@@ -396,7 +418,21 @@ export default {
       });
 
       this.restartEventSubscription = subscription;
-    }
+    },
+
+    async leaveOldArena() {
+      this.loading = true;
+
+      try {
+        await this.withdrawFromOldArena(this.currentCharacterId);
+
+        this.isCharacterInOldArena = false;
+      } catch (err) {
+        console.log('leave old arena error: ', err.message);
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 
   async created() {
@@ -466,10 +502,15 @@ export default {
         this.isCharacterInArena = true;
       }
 
+      if (await this.getIsCharacterInOldArena(this.currentCharacterId)) {
+        this.isCharacterInOldArena = true;
+      }
+
       if (this.isCharacterInArena) {
         const fighter = formatFighter(await this.getFighterByCharacter(this.currentCharacterId));
 
-        this.characterInformation.fullPower = await this.getCharacterFullPower(this.currentCharacterId);
+        this.characterInformation.fullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: this.characterInformation.tier});
+        this.characterInformation.untieredFullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: 20});
 
         this.activeWeaponWithInformation = {
           weaponId: fighter.weaponID,
@@ -611,10 +652,18 @@ export default {
           this.isCharacterInArena = false;
         }
 
+        if (await this.getIsCharacterOldInArena(value)) {
+          this.isCharacterInOldArena = true;
+        } else {
+          this.isCharacterInOldArena = false;
+        }
+
         if (this.isCharacterInArena) {
           const fighter = formatFighter(await this.getFighterByCharacter(value));
 
-          this.characterInformation.fullPower = await this.getCharacterFullPower(value);
+          this.characterInformation.fullPower = await this.getCharacterFullPower({characterId: value, tier: this.characterInformation.tier});
+
+          this.characterInformation.untieredFullPower = await this.getCharacterFullPower({characterId: value, tier: 20});
 
           this.activeWeaponWithInformation = {
             weaponId: fighter.weaponID,
@@ -703,5 +752,12 @@ export default {
         transform: rotate(360deg);
       }
     }
+  }
+  .buttonWrapper {
+    margin-top: 2rem;
+    margin-left: auto;
+    margin-right: auto;
+    height: 3rem;
+    width: 60%;
   }
 </style>

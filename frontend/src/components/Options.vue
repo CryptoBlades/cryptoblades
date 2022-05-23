@@ -20,7 +20,6 @@
           <div class="menu-icons">
             <router-link
               class="menu-icon"
-              v-if="!stakeOnly"
               :to="{ name: 'plaza' }"
               exact
             >
@@ -30,7 +29,6 @@
 
             <router-link
               class="menu-icon"
-              v-if="!stakeOnly"
               :to="{ name: 'blacksmith' }"
               exact
             >
@@ -40,12 +38,11 @@
 
             <router-link
               class="menu-icon"
-              v-if="!stakeOnly"
-              :to="{ name: 'combat' }"
+              :to="{ name: 'adventure' }"
               exact
             >
-              <img src="../assets/navbar-icons/combat-icon.png" alt="Combat"/>
-              <span>{{ $t("viewLink.combat") }}</span>
+              <img src="../assets/navbar-icons/combat-icon.png" alt="Adventure"/>
+              <span>{{ $t("viewLink.adventure") }}</span>
             </router-link>
 
             <router-link
@@ -70,7 +67,7 @@
 
             <router-link
               class="menu-icon"
-              v-if="!stakeOnly && raid"
+              v-if="raid"
               :to="{ name: 'raid' }"
               exact
             >
@@ -100,7 +97,6 @@
 
             <a
               class="menu-icon"
-              v-if="!stakeOnly"
               href="https://bazaar.market"
               target="_blank"
             >
@@ -298,7 +294,7 @@ import {fromWeiEther, toBN} from '../utils/common';
 import {nft_bridge as bridgeEnabled} from './../feature-flags';
 import {SupportedProject} from '@/views/Treasury.vue';
 import Hint from '@/components/Hint.vue';
-import {merchandise, portal, pvp, quests, raid, stakeOnly} from '@/feature-flags';
+import {merchandise, portal, pvp, quests, raid} from '@/feature-flags';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -349,7 +345,6 @@ export default Vue.extend({
       hideWalletWarning: false,
       showSkillInUsd: false,
       ClaimStage,
-      stakeOnly,
       raid,
       portal,
       pvp,
@@ -469,7 +464,7 @@ export default Vue.extend({
     },
 
     currentChainSupportsClaimTokens() {
-      return (localStorage.getItem('currentChain') || 'BSC') !== 'BSC';
+      return (localStorage.getItem('currentChain') || 'BNB') !== 'BNB';
     },
   }
 });

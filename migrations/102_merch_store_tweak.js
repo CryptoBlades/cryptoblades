@@ -14,7 +14,8 @@ module.exports = async function (deployer, network, accounts) {
     || network === 'hecotestnet'
     || network === 'okextestnet'
     || network === 'polygontestnet'
-    || network === 'avaxtestnet' || network === 'avaxtestnet-fork' || network === 'auroratestnet') {
+    || network === 'avaxtestnet' || network === 'avaxtestnet-fork' || network === 'auroratestnet'
+    || network === 'kavatestnet' || network === 'skaletestnet') {
 
     const LINK_SKILL_TOKEN = await merch.LINK_SKILL_TOKEN();
     const VAR_ORDERS_ENABLED = await merch.VAR_ORDERS_ENABLED();
