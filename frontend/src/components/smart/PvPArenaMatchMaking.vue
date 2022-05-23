@@ -29,14 +29,9 @@
       <div v-if="opponentInformation.fullPower" class="icon">!</div>
     <b-popover v-if="opponentInformation.fullPower" ref="popover" target="duel-popover" triggers="hover blur" placement="bottom" custom-class="popoverWrapper">
       <span class="popoverTitle">{{$t('pvp.battleOdds')}}</span>
-      <div v-if="winChance !== '> 50'" class="oddsWrapper">
+      <div class="oddsWrapper">
         <p>{{$t('pvp.winChance')}}: {{ winChance }}%</p>
         <p>{{$t('pvp.rankToEarn')}}: {{ rankPlusBonus }}</p>
-        <p class="goodLuck">{{$t('pvp.goodLuck')}}</p>
-      </div>
-      <div v-else class="oddsWrapper">
-        <p>{{$t('pvp.noOdds')}}</p>
-        <p>{{$t('pvp.noBonus')}}</p>
         <p class="goodLuck">{{$t('pvp.goodLuck')}}</p>
       </div>
     </b-popover>
