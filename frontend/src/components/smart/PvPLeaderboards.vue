@@ -66,8 +66,9 @@ export default {
         { text: '8', value: 8 },
         { text: '9', value: 9 },
         { text: '10', value: 10 },
+        { text: 'FFA', value: 20 },
       ],
-      tierFilter: 0,
+      tierFilter: 20,
     };
   },
   computed: {

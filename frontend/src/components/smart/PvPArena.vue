@@ -21,6 +21,7 @@
         v-if="!isCharacterInArena"
         :tierRewardsPool="tierRewardsPool"
         :tierTopRankers="tierTopRankers"
+        :untieredTopRankers="untieredTopRankers"
         :characterInformation="characterInformation"
         :entryWager="entryWager"
         :untieredEntryWager="untieredEntryWager"
