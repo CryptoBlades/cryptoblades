@@ -175,7 +175,12 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         if(lastClaimTimestamp == 0) {
             lastClaimTimestamp = launchLinearVestingsStartTimestamps[launchId];
         }
-        claimAmount = totalUserInvestment.mul(1e18).div(launchTokenPrice[launchId]).mul(block.timestamp - lastClaimTimestamp).div(launchLinearVestingsDurations[launchId]);
+        uint256 effectiveClaimTimestamp = launchLinearVestingsStartTimestamps[launchId] + launchLinearVestingsDurations[launchId];
+        if(block.timestamp < effectiveClaimTimestamp) {
+            effectiveClaimTimestamp = block.timestamp;
+        }
+        
+        claimAmount = totalUserInvestment.mul(1e18).div(launchTokenPrice[launchId]).mul(effectiveClaimTimestamp - lastClaimTimestamp).div(launchLinearVestingsDurations[launchId]);
         claimAmount = Common.adjustDecimals(claimAmount, decimals);
     }
 
