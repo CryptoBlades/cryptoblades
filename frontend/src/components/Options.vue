@@ -38,11 +38,11 @@
 
             <router-link
               class="menu-icon"
-              :to="{ name: 'combat' }"
+              :to="{ name: 'adventure' }"
               exact
             >
-              <img src="../assets/navbar-icons/combat-icon.png" alt="Combat"/>
-              <span>{{ $t("viewLink.combat") }}</span>
+              <img src="../assets/navbar-icons/combat-icon.png" alt="Adventure"/>
+              <span>{{ $t("viewLink.adventure") }}</span>
             </router-link>
 
             <router-link

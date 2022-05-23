@@ -20,7 +20,8 @@
             min="0"
             :max="remainingPowerLimit"
             :disabled="soulBalance <= 0"
-            :value="powerAmount" steps="10"
+            :value="handleSoulPowerValue(powerAmount)" 
+            steps="10"
           />
           <div class="boxed soul-box">
             <p class="text-center character-text">{{powerAmount}}/{{remainingPowerLimit}} Power</p>
@@ -33,7 +34,7 @@
         </div>
       </div>
       <button class="upgrade-character-button mt-5" :disabled="powerAmount/10 === 0" @click="onUpgradeConfirm">
-        <span>{{$t('Character.upgrade')}}</span><br/>{{powerAmount/10}} {{$t(`Character.soul`)}}
+        <span>{{$t('Character.upgrade')}}</span><br/>{{powerAmount}} {{$t(`Character.souls`)}}
       </button>
     </b-tab>
 </template>
@@ -96,7 +97,13 @@ export default Vue.extend({
       }
       this.powerAmount = Math.ceil((+e.target.value)/10)*10;
     },
-
+    handleSoulPowerValue(soulPowerValue: number): number{
+      if (soulPowerValue >= (this.soulBalance)) {
+        this.powerAmount = this.soulBalance;
+        return this.soulBalance;
+      }
+      return soulPowerValue;
+    },
     async onUpgradeConfirm() {
       if(!this.currentCharacterId || this.powerAmount === 0) return;
       try {

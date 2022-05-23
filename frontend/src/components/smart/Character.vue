@@ -26,7 +26,7 @@
       <div class="mb-5 d-flex">
         <h1 class="title mb-0">{{ getCharacterName(currentCharacterId) }}</h1>
         <button class="edit-icon" @click="openChangeNameModal" ><img src="../../assets/edit-icon.svg" /></button>
-        <span class="ml-auto text-muted align-self-end">#{{currentCharacterId}}</span>
+        <span class="ml-auto align-self-end">#{{currentCharacterId}}</span>
       </div>
       <!-- Character chart info -->
       <div class="row mb-5">
@@ -45,7 +45,7 @@
         <div class="col cell">
           <div class="table-bg"></div>
           <span class="main-font cell-title text-white">{{$t(`Character.reputation`)}}</span>
-          <span class="cell-value">{{$t(`quests.reputationTier.${ReputationTier[getReputationLevel(reputation)]}`)}}</span>
+          <span class="cell-value">{{$t(`quests.reputationTier.${ReputationTier[getReputationLevel(reputation)] || ''}`)}}</span>
         </div>
         <div class="w-100 d-block d-md-none"></div>
         <div class="col cell">
@@ -320,7 +320,7 @@ export default Vue.extend({
       return this.characters[this.currentCharacterId]?.xp ?? 0;
     },
     expDiff(): string {
-      const result = RequiredXp(this.characters[this.currentCharacterId]?.level ?? 0) - (this.characters[this.currentCharacterId]?.xp ?? 0);
+      const result = RequiredXp(this.characters[this.currentCharacterId]?.level + 1 ?? 0) - (this.characters[this.currentCharacterId]?.xp ?? 0);
       return new Intl.NumberFormat().format(result);
     },
     expPercentage(): number {
@@ -553,8 +553,8 @@ export default Vue.extend({
 }
 
 .edit-icon img {
-  width: 12px;
-  height: 12px;
+  width: 1rem;
+  height: 1rem;
 }
 
 
@@ -587,7 +587,7 @@ export default Vue.extend({
 
 .cell span, .cell p {
   position: relative;
-  z-index: 10;
+  z-index: 1;
 }
 
 .table-bg{

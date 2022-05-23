@@ -4,7 +4,7 @@
     :placement="isMobile() ? 'auto' : placement"
     style="z-index:999"
     class="weapon-popover"
-    triggers="hover focus click">
+    triggers="hover">
     <div class="weapon-popover-body">
       <img :src="getWeaponArt(weapon)">
       <div class="details">

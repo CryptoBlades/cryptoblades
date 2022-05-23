@@ -1,8 +1,9 @@
 
 <template>
   <div class="background-image">
+    <div class="blind-background"></div>
     <div v-if="!haveCharacters" class="blank-slate">
-      <div class="current-promotion">
+      <div class="initial-recruitment">
         <div class="tob-bg-img promotion-decoration">
           <img class="vertical-decoration bottom" src="../assets/border-element.png">
         </div>
@@ -10,14 +11,14 @@
         <div class="bot-bg-img promotion-decoration">
             <img src="../assets/border-element.png">
         </div>
-      </div>
-      <big-button
-        class="button"
+        <big-button
+        class="button mt-5"
         :mainText="$t('plaza.recruitCharacter') + ` ${recruitCost} SKILL`"
         :disabled="!canRecruit()"
         @click="onMintCharacter"
         tagname="recruit_character"
       />
+      </div>
       <div v-if="formatSkill() < recruitCost" >
         <br>
         <i18n path="plaza.notEnoughSkill" tag="label" for="plaza.notEnoughSkillLink">
@@ -63,14 +64,6 @@
                     v-tooltip="$t('plaza.recruitNew')">
                     {{$t('plaza.burn')}}
                   </b-button>
-                  <b-button
-                    v-if="ownCharacters.length === 4"
-                    variant="primary"
-                    class="ml-3 gtag-link-others"
-                    @click="onMintCharacter"
-                    v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
-                    {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
-                  </b-button>
                   <b-checkbox
                     v-if="ownCharacters.length === 4"
                     variant="primary"
@@ -95,7 +88,7 @@
             <div class="d-flex justify-content-flex-end ml-auto">
               <b-button
                 variant="primary"
-                class="ml-3"
+                class="ml-3 garrison-buttons"
                 @click="showBurnConfirmation"
                 v-tooltip="$t('plaza.burnSelected')"
                 :disabled="burnCharacterIds.length === 0 || powerLimitExceeded || (burnOption === 1 && !targetCharacterId) || !canBurn() || isBurnInProgress">
@@ -104,9 +97,9 @@
               </b-button>
               <b-button
                 variant="primary"
-                class="ml-3 gtag-link-others"
+                class="ml-3 gtag-link-others garrison-buttons"
                 @click="toggleSoulCreation"
-                v-tooltip="$t('plaza.recruitNew')">
+                v-tooltip="$t('plaza.cancelBurning')">
                 {{$t('plaza.cancelBurning')}}
               </b-button>
             </div>
@@ -466,6 +459,20 @@ export default Vue.extend({
   height: 100%;
 }
 
+.background-image > div:nth-child(1){
+  background-color: rgb(0, 0, 0, 0.3);
+  height: 100%;
+  width: 100%;
+  position: absolute;
+}
+
+.initial-recruitment {
+  z-index: 1;
+}
+
+.garrison-buttons{
+  z-index: 2;
+}
 
 .chooser {
   height: 72px;
