@@ -97,12 +97,12 @@ export default Vue.extend({
       }
       this.powerAmount = Math.ceil((+e.target.value)/10)*10;
     },
-    handleSoulPowerValue(value: number): number{
-      if (value >= (this.soulBalance)) {
+    handleSoulPowerValue(soulPowerValue: number): number{
+      if (soulPowerValue >= (this.soulBalance)) {
         this.powerAmount = this.soulBalance;
         return this.soulBalance;
       }
-      return value;
+      return soulPowerValue;
     },
     async onUpgradeConfirm() {
       if(!this.currentCharacterId || this.powerAmount === 0) return;
