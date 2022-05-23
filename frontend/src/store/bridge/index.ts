@@ -3,7 +3,7 @@ import {
   IState,
 } from '@/interfaces';
 import {Dispatch} from 'vuex';
-import {NftTransfer, TransferedNft} from '@/interfaces/Nft';
+import {NftTransfer} from '@/interfaces/Nft';
 import {approveFeeWalletOnly} from '@/contract-call-utils';
 import BigNumber from 'bignumber.js';
 
@@ -92,7 +92,6 @@ const bridge = {
         CryptoBlades,
         SkillToken,
         rootState.defaultAccount,
-        getGasPrice(),
         defaultCallOptions(rootState),
         defaultCallOptions(rootState),
         new BigNumber(bridgeFee)
@@ -155,29 +154,6 @@ const bridge = {
         .send({
           from: rootState.defaultAccount,
         });
-    },
-    async getReceivedNFTs({ rootState }: {rootState: IState, dispatch: Dispatch}) {
-      const { NFTStorage } = rootState.contracts();
-      if(!NFTStorage || !rootState.defaultAccount) return;
-      const nftIds = await NFTStorage.methods
-        .getReceivedNFTs()
-        .call(defaultCallOptions(rootState));
-      return nftIds.map(Number) as number[];
-    },
-    async getReceivedNFT({ rootState }: {rootState: IState, dispatch: Dispatch}, {tokenId}: {tokenId: number}) {
-      const { NFTStorage } = rootState.contracts();
-      if(!NFTStorage || !rootState.defaultAccount) return;
-      const nft: string[] = await NFTStorage.methods
-        .getReceivedNFT(tokenId)
-        .call(defaultCallOptions(rootState));
-      return {
-        owner: nft[0],
-        nftType: +nft[1],
-        sourceChain: +nft[2],
-        sourceId: +nft[3],
-        status: +nft[4],
-        transferInsMeta: nft[5],
-      } as TransferedNft;
     },
     async chainEnabled({ rootState }: {rootState: IState, dispatch: Dispatch}, { chainId }: { chainId: string }) {
       const { NFTStorage } = rootState.contracts();

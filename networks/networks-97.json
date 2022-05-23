@@ -2993,7 +2993,7 @@
     },
     "links": {},
     "address": "0xC59f827A6cf187C1487bE3a2400AAeaa740cE6DB",
-    "transactionHash": "0x6ae8047297c71546838cee0b0278e042ae31cb311c6a1d0155cdd57a6f1e05e6"
+    "transactionHash": "0x1f9cd65437a4153b62a4173672666a47e03b0083ee093b631af8d6641a44b8df"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -4033,6 +4033,12 @@
     "links": {},
     "address": "0x27a3EB90CE340f50FE4a478F454946EfB6453b47",
     "transactionHash": "0xf10f23562c903e24130d41d9266e6c5798568862c6291d5d92388dcdce638140"
+  },
+  "build/contracts/Launchpad.json": {
+    "events": {},
+    "links": {},
+    "address": "0x866388a88cDA8a2fA68C0ac410373639e4286088",
+    "transactionHash": "0xbead651d60b871f61bd2aeff0f7e1035aedb6f6a99a041caf9da3abcdd213a9a"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
@@ -5132,7 +5138,7 @@
     },
     "links": {},
     "address": "0xAf8f6eD3860B6f0fD97Bd50e2109E520C2Fc2328",
-    "transactionHash": "0x67cf81c77d50a272a95880d49bd5294909766fc70635cddf0b0b77801fe078c3"
+    "transactionHash": "0x96db40e43b8bcfe0f82c78f4b537f26e72eb299ef26cf0fc5420cf7190f82078"
   },
   "build/contracts/PvpCore.json": {
     "events": {
@@ -5288,7 +5294,7 @@
     },
     "links": {},
     "address": "0x103BDAFB76F7d2df334d17734D591e72B3A0B74a",
-    "transactionHash": "0xeadb2d1a36b9205c104968725178d19af036a7fbb64205d786d444f30017c359"
+    "transactionHash": "0x9926a0d7cca5c6e4eeb95cdc3c6367963cff12b4c25cf92f5755c44f895d417e"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -6768,6 +6774,88 @@
     "links": {},
     "address": "0xF63bD8C1c62dff4Ca13BB4c9518D74846A6BA48f",
     "transactionHash": "0xf4fb749314a40ee7f1dcbd20ff52b62715d0a5e91f0432ac95b99d3f82b631e1"
+  },
+  "build/contracts/TokensManager.json": {
+    "events": {
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0x4eD213d2F40380bBB0C8b4231aCFA7dEFA5CCc25",
+    "transactionHash": "0x0ffd22916e91d035059d20f00fc50bc82dd906396f9665209c4a32496337c7e9"
   },
   "build/contracts/Treasury.json": {
     "events": {},

@@ -21,7 +21,10 @@ module.exports = async function (deployer, network, accounts) {
     || network === 'okextestnet'
     || network === 'polygontestnet'
     || network === 'avaxtestnet'
-    || network === 'avaxtestnet-fork' || network === 'auroratestnet') {
+    || network === 'avaxtestnet-fork'
+    || network === 'auroratestnet'
+    || network === 'kavatestnet'
+    || network === 'skaletestnet') {
     const characters = await upgradeProxy(Characters.address, Characters, {deployer});
     const weapons = await upgradeProxy(Weapons.address, Weapons, {deployer});
     const junk = await upgradeProxy(Junk.address, Junk, {deployer});

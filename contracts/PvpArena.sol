@@ -1233,17 +1233,17 @@ contract PvpArena is Initializable, AccessControlUpgradeable {
 
     // Note: The following are debugging functions..
 
-    // function clearDuelQueue(uint256 length) external restricted {
-    //     for (uint256 i = 0; i < length; i++) {
-    //         if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
-    //             isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
-    //         }
+    function clearDuelQueue(uint256 length) external restricted {
+        for (uint256 i = 0; i < length; i++) {
+            if (matchByFinder[_duelQueue.at(i)].defenderID > 0) {
+                isDefending[matchByFinder[_duelQueue.at(i)].defenderID] = false;
+            }
 
-    //         _duelQueue.remove(_duelQueue.at(i));
-    //     }
+            _duelQueue.remove(_duelQueue.at(i));
+        }
 
-    //     isDefending[0] = false;
-    // }
+        isDefending[0] = false;
+    }
 
     // Note: Unmute this to test ranking interactions 
     

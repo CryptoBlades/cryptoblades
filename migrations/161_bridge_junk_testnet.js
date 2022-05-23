@@ -14,7 +14,9 @@ module.exports = async function (deployer, network) {
   || network === 'polygontestnet'
   || network === 'avaxtestnet'
   || network === 'avaxtestnet-fork'
-  || network === 'auroratestnet') {
+  || network === 'auroratestnet'
+  || network === 'kavatestnet'
+  || network === 'skaletestnet') {
     let storage = await NFTStorage.deployed();
     let junk = await upgradeProxy(Junk.address, Junk, { deployer });
     let junkProxy = await deployProxy(JunkBridgeProxyContract, [storage.address, junk.address], { deployer });

@@ -66,7 +66,6 @@ const merchandise = {
         CryptoBlades,
         SkillToken,
         rootState.defaultAccount,
-        getGasPrice(),
         defaultCallOptions(rootState),
         defaultCallOptions(rootState),
         new BigNumber(skillNeeded)

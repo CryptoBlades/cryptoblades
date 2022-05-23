@@ -26,11 +26,11 @@ library Common {
         // Note: Formula hard-copied in PvPArenaMatchMaking.vue due to contract size limitations in PvPArena.sol
         uint256 bonusRanking;
 
-        uint256 strongerMinRoll = strongerPower.mul(70).div(100);
-        uint256 strongerMaxRoll = strongerPower.mul(130).div(100);
+        uint256 strongerMinRoll = strongerPower.mul(90).div(100);
+        uint256 strongerMaxRoll = strongerPower.mul(110).div(100);
  
-        uint256 weakerMinRoll = weakerPower.mul(70).div(100);
-        uint256 weakerMaxRoll = weakerPower.mul(130).div(100);
+        uint256 weakerMinRoll = weakerPower.mul(90).div(100);
+        uint256 weakerMaxRoll = weakerPower.mul(110).div(100);
 
         uint256 strongerRollSpread = strongerMaxRoll.sub(strongerMinRoll);
         uint256 weakerRollSpread = weakerMaxRoll.sub(weakerMinRoll);
@@ -81,5 +81,13 @@ library Common {
                 .add(level.mul(10))
                 .mul(level.div(10).add(1))
         );
+    }
+
+    function adjustDecimals(uint256 amount, uint256 decimals) internal pure returns (uint256 adjustedAmount){
+        if(decimals > 18) {
+            adjustedAmount = amount.mul(10**uint(decimals - 18));
+        } else {
+            adjustedAmount = amount.div(10**uint(18 - decimals));
+        }
     }
 }

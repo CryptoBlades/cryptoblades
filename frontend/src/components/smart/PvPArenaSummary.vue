@@ -78,6 +78,7 @@
         :currentRankedSeason="currentRankedSeason"
         :secondsBeforeNextSeason="secondsBeforeNextSeason"
         :characterInformation="characterInformation"
+        :isUntiered="isUntiered"
         insideArena
       />
     </div>
@@ -126,6 +127,7 @@ export default {
         level: null,
         power: null,
         fullPower: null,
+        untieredFullPower: null,
         rank: null,
         element: null,
       }
