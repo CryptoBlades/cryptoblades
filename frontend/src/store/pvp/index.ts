@@ -224,6 +224,15 @@ const pvp = {
       return reRollFeePercent;
     },
 
+    async getWithdrawFeePercent({ rootState }: {rootState: IState}) {
+      const { PvpCore } = rootState.contracts();
+      if (!PvpCore || !rootState.defaultAccount) return;
+
+      const withdrawFeePercent = await PvpCore.methods.withdrawFeePercent().call({ from: rootState.defaultAccount });
+
+      return withdrawFeePercent;
+    },
+
     async getPlayerPrizePoolRewards({ rootState }: {rootState: IState}) {
       const { PvpRankings } = rootState.contracts();
       if (!PvpRankings || !rootState.defaultAccount) return;

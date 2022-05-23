@@ -141,7 +141,7 @@
               </li>
               <li>
                 <div class="bulletpoint"></div>
-                {{$t('pvp.leavingWillCost', {leavingArenaCost})}}
+                {{$t('pvp.leavingWillCost', {formattedWithdrawCost})}}
               </li>
               <li>
                 <div class="bulletpoint"></div>
@@ -286,6 +286,9 @@ export default {
     ownedShieldsWithInformation: {
       default: []
     },
+    withdrawCost: {
+      default: null
+    }
   },
   data() {
     return {
@@ -304,13 +307,16 @@ export default {
       shieldStarFilter: 0,
       shieldStarOptions: defaultStarOptions,
       shieldElementFilter: '',
-      shieldElementOptions: defaultElementOptions
+      shieldElementOptions: defaultElementOptions,
     };
   },
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
     formattedEntryWager() {
       return new BN(this.entryWager).div(new BN(10).pow(18)).toFixed(2);
+    },
+    formattedWithdrawCost() {
+      return new BN(this.withdrawCost).div(new BN(10).pow(18)).toFixed(2);
     },
     formattedUntieredEntryWager() {
       return new BN(this.untieredEntryWager).div(new BN(10).pow(18)).toFixed(2);
