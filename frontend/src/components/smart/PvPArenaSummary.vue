@@ -202,9 +202,8 @@ export default {
       } catch (err) {
         console.log('leave arena error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'NA', i18n.t('pvp.charNotInArena'));
-        this.handleErrorMessage(err.message, 'IQ', i18n.t('pvp.duelInProcess'));
-        this.handleErrorMessage(err.message, 'NOW', i18n.t('pvp.notOwner'));
+        this.handleErrorMessage(err.message, 'N', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.duelInProcess'));
       } finally {
         this.loading = false;
       }
