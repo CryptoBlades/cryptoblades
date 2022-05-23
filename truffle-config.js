@@ -228,6 +228,33 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true
     },
+    kavatestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.KAVA_TESTNET_PRIVATE_KEY,
+        process.env.KAVA_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.KAVA_TESTNET_RPC_URL || 'https://evm.evm-alpha.kava.io'
+        }
+      )),
+      network_id: 2221,
+      gas: 8000000,
+      gasPrice: 7000000000,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    skaletestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.SKALE_TESTNET_PRIVATE_KEY,
+        process.env.SKALE_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.SKALE_TESTNET_RPC_URL || 'https://staging-v2.skalenodes.com/v1/glamorous-grumium'
+        }
+      )),
+      network_id: 2433657680876851,
+      gasPrice: 0,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    }
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port

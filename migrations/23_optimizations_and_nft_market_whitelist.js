@@ -18,8 +18,6 @@ module.exports = async function (deployer, _network, accounts) {
   const GAME_ADMIN = await newMarket.GAME_ADMIN();
   await newMarket.grantRole(GAME_ADMIN, accounts[0]);
 
-  await Promise.all([
-    newMarket.allowToken(Characters.address),
-    newMarket.allowToken(Weapons.address)
-  ]);
+  await newMarket.allowToken(Characters.address);
+  await newMarket.allowToken(Weapons.address);
 };
