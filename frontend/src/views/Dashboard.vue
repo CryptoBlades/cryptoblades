@@ -2,17 +2,18 @@
   <div class="dashboard-container">
     <div class="overlay-bg">
     </div>
+    <div v-if="haveCharacters">
     <div class="upper-body-container">
       <div class="character-details-container">
         <div class="character-element">
           <div class="element-frame">
             <div>
-              <span id="fire-element" />
+              <span :class="this.characterInformation.element.toLowerCase() + '-icon circle-element'"></span>
             </div>
           </div>
         </div>
         <div class="character-name">
-          <span>{{this.characterInformation.name}}</span>
+          <span>{{ getCharacterName(currentCharacterId) }}</span>
         </div>
         <div class="character-data-container">
           <div class="character-element-name">
@@ -56,7 +57,7 @@
               <span>POWER</span>
             </div>
             <div class="pvp-power-value">
-              <span>{{this.characterInformation.power}}</span>
+              <span>{{ totalCharacterPower }}</span>
             </div>
           </div>
         </div>
@@ -72,7 +73,7 @@
             <div class="raid-boss-element-container">
                 <div class="raid-element-frame">
                   <div>
-                    <span id="raid-fire-element"/>
+                    <span :class="traitNumberToName(this.raidData.bossTrait).toLowerCase() + '-icon circle-element'"></span>
                   </div>
                 </div>
             </div>
@@ -112,16 +113,18 @@
           <div class="raid-boss-participants-total-power-container">
             <div>
             <span class="raid-boss-label">Participants Total Power: </span>
-            <span class="raid-boss-power-value">{{this.raidData.totalPower}} ({{(this.raidData.totalPower/this.raidData.bossPower)*100}}%)</span>
+            <span class="raid-boss-power-value">{{this.raidData.totalPower}} ({{((this.raidData.totalPower/this.raidData.bossPower)*100).toFixed(0)}}%)</span>
             </div>
             <div class="participants-power"
-              :style="`--power: ${(this.raidData.totalPower/this.raidData.bossPower)*100}%;`">
+              :style="`--power: ${((this.raidData.totalPower/this.raidData.bossPower)*100).toFixed(0)}%;`">
             </div>
           </div>
           <div class="raid-boss-button-and-drops">
-            <div class="pve-button dashboard-btn">
-              <span @click="goToRaid()">JOIN RAID</span>
-            </div>
+            <router-link :to="{ name: 'raid' }" exact>
+              <div class="pve-button dashboard-btn">
+                <span>JOIN RAID</span>
+              </div>
+            </router-link>
               <div class="raid-drops">
                 <img class="raid-img" src="../assets/trinkets/trinket1.png">
                 <img class="raid-img" src="../assets/junk/junk1.png">
@@ -138,9 +141,11 @@
           <div class="pve-description">
             <span>Engage on PVE battles to earn rewards.</span>
           </div>
-          <div class="pve-button dashboard-btn">
-              <span @click="goToCombat()">COMBAT</span>
-          </div>
+          <router-link :to="{ name: 'combat' }" exact>
+            <div class="pve-button dashboard-btn">
+              <span>Adventure</span>
+            </div>
+          </router-link>
         </div>
         <div class="pvp-container">
           <div class="pve-title">
@@ -149,24 +154,40 @@
           <div class="pve-description">
             <span>Defeat other Players on PVP battles to earn rewards.</span>
           </div>
-          <div class="pve-button dashboard-btn">
-              <span @click="goToArena()">SIGN UP</span>
-          </div>
+          <router-link :to="{ name: 'pvp' }" exact>
+            <div class="pve-button dashboard-btn">
+              <span>SIGN UP</span>
+            </div>
+          </router-link>
         </div>
+      </div>
+      </div>
+    </div>
+    <div style="min-height: 100vh;" class="d-flex align-items-start justify-content-center" v-if="!haveCharacters">
+      <div style="z-index: 3;">
+        <span>Go to plaza to recruit your first character</span>
+      </div>
+      <div style="z-index: 3;">
+        <router-link :to="{ name: 'plaza' }" exact>
+          <div class="pve-button dashboard-btn">
+            <span>Go to Plaza</span>
+          </div>
+        </router-link>
       </div>
     </div>
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { characterFromContract as formatCharacter } from '../contract-models';
 import { duelResultFromContract as formatDuelResult } from '../contract-models';
 import {getBossArt} from '@/raid-boss-art-placeholder';
 import {traitNumberToName} from '@/contract-models';
-export default {
-  inject: ['web3'],
+import { Nft } from '@/interfaces/Nft';
 
+export default Vue.extend({
   data() {
     return {
       duelHistory: [],
@@ -174,16 +195,16 @@ export default {
         raidIndex: '',
         bossName: '',
         raiderCount: '',
-        totalPower: '',
+        totalPower: 0,
         expectedFinishTime: new Date(),
         xpReward: '',
         staminaCost: '',
         durabilityCost: '',
         joinCost: '',
         raidStatus: '',
-        bossPower: '',
+        bossPower: 0,
         bossTrait: '',
-        accountPower: ''
+        accountPower: 0
       },
       remainingTime: {
         days: 0,
@@ -204,15 +225,27 @@ export default {
   },
 
   computed: {
-    ...mapState(['currentCharacterId', 'maxStamina', 'ownedCharacterIds']),
-    ...mapGetters(['getCharacterName', 'currentCharacterStamina', 'getRaidState']),
+    ...mapState(['characters', 'currentCharacterId', 'maxStamina', 'ownedCharacterIds', 'web3', 'ownedGarrisonCharacterIds',]),
+    ...mapGetters(['getCharacterName', 'currentCharacterStamina', 'getRaidState', 'ownCharacters',
+      'getCharacterPower', 'getCharacterRank', 'getCharacterElement', 'getCharacterPvpWins', 'ownGarrisonCharacters']),
+    selectedCharacter(): Nft{
+      return this.characters[this.currentCharacterId];
+    },
+    haveCharacters() {
+      return this.ownedGarrisonCharacterIds.length > 0 || this.ownCharacters?.length > 0;
+    },
+    characterLvl(): number {
+      return this.characters[this.currentCharacterId]?.level + 1 ?? 1;
+    },
+    totalCharacterPower(): number {
+      return this.getCharacterPower(this.currentCharacterId);
+    },
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions([
       'getCharacter',
-      'getCharacterPower',
       'getCharacterLevel',
       'getPvpCoreContract',
       'getRankingPointsByCharacter',
@@ -223,18 +256,8 @@ export default {
 
     getBossArt,
     traitNumberToName,
-
-    goToCombat(){
-      this.$router.push('/combat');
-    },
-    goToArena(){
-      this.$router.push('/pvp');
-    },
-    goToRaid(){
-      this.$router.push('/raid');
-    },
     getBossName() {
-      const dragonNames = [
+      const raidBossNames = [
         'Fudbringer',
         'HODL Lord',
         'Skill Eater',
@@ -246,7 +269,7 @@ export default {
         'Eater of Stakes',
       ];
 
-      return dragonNames[+this.raidData.raidIndex % dragonNames.length];
+      return raidBossNames[+this.raidData.raidIndex % raidBossNames.length];
     },
 
     getTimeRemaining(){
@@ -261,15 +284,10 @@ export default {
         const s = Math.floor((diffTime % (1000 * 60)) / 1000);
 
         this.remainingTime = {days:d,hours:h,minutes:m,seconds:s};
-
       }, 1000);
     },
 
-    async fetchDashboardDetails(characterId){
-      const rename = await this.getRename(characterId);
-
-      this.characterInformation.name = rename ? rename : this.getCharacterName(characterId);
-
+    async fetchDashboardDetails(characterId: string|number) {
       this.characterInformation.level = Number(await this.getCharacterLevel(characterId)) + 1;
 
       this.characterInformation.power = await this.getCharacterPower(characterId);
@@ -300,14 +318,13 @@ export default {
         bonusRank: '0'
       });
 
-      this.duelHistory = previousDuels.map(duel => {
+      this.duelHistory = previousDuels.map((duel: [string, string, string, string, string, boolean, string]) => {
         return formatDuelResult(duel);
       });
 
     },
     async processRaidData() {
       const raidData = this.getRaidState;
-
       this.raidData.raidIndex = raidData.index;
       this.raidData.bossName = this.getBossName();
       this.raidData.raiderCount = raidData.raiderCount;
@@ -321,15 +338,23 @@ export default {
       this.raidData.bossPower = +raidData.bossPower;
       this.raidData.bossTrait = raidData.bossTrait;
       this.raidData.accountPower = +raidData.accountPower;
-
     }
   },
 
   async mounted(){
     this.getTimeRemaining();
+    const refreshRaidData = async () => {
+      await (this as any).fetchRaidState();
+      (this as any).processRaidData();
+    };
+    await refreshRaidData();
+    window.setInterval(async () => {
+      await refreshRaidData();
+    }, 3000);
 
     if(this.currentCharacterId === null){
       this.setCurrentCharacter(this.ownedCharacterIds[0]);
+      this.fetchDashboardDetails(this.ownedCharacterIds[0]);
     }
 
     Promise.all([
@@ -337,11 +362,13 @@ export default {
       await this.fetchRaidState(),
       await this.processRaidData()
     ]);
-
-
+  },
+  watch: {
+    currentCharacterId(newId: string|number){
+      this.fetchDashboardDetails(newId);
+    }
   }
-
-};
+});
 </script>
 
 <style scoped>
