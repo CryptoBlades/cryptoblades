@@ -35,9 +35,8 @@
         <div class="w-100 d-block d-md-none"></div>
          <b-button
           v-if="ownCharacters.length <= 4"
-          style="z-index: 1;"
           variant="primary"
-          class="ml-3 gtag-link-others mt-4 mt-md-0 ml-md-auto"
+          class="ml-3 gtag-link-others mt-4 mt-md-0 ml-md-auto mint-character"
           @click="$emit('mintCharacter')"
           v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
           {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
@@ -92,6 +91,10 @@ export default Vue.extend({
       filter: none
     }
   }
+}
+
+.mint-character-btn {
+  z-index: 1;
 }
 
 .separator{
