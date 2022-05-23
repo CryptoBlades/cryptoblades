@@ -20,7 +20,7 @@
             min="0"
             :max="remainingPowerLimit"
             :disabled="soulBalance <= 0"
-            :value="handleSoulPowerValue(powerAmount)" 
+            :value="handleSoulPowerValue(powerAmount)"
             steps="10"
           />
           <div class="boxed soul-box">
