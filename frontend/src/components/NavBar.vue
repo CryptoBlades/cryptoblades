@@ -145,7 +145,6 @@ a.router-link-active {
     flex: 5;
     display: flex;
     align-items: center;
-    height: 90px;
   }
 
   .skill-display-mobile > .balance-container {
@@ -213,7 +212,7 @@ a.router-link-active {
 
   /* hide when in mobile */
   .none-mobile {
-    display: none;
+    display: none !important;
   }
 
   .menu-icons {
@@ -276,9 +275,7 @@ a.router-link-active {
 }
 
 .nav-logo {
-  flex: 1;
   height: 100%;
-  justify-content: center;
   border-right: 2px solid #404857;
   display: flex;
 }

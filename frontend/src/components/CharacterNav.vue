@@ -33,14 +33,13 @@
           <span  class="main-font text-white fs-5">{{$t('Character.garrison')}}</span>
         </div>
         <div class="w-100 d-block d-md-none"></div>
-         <b-button
-          v-if="ownCharacters.length <= 4"
-          variant="primary"
-          class="ml-3 gtag-link-others  mt-4 mt-md-0 ml-md-auto"
-          @click="$emit('mintCharacter')"
-          v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
-          {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
-        </b-button>
+         <div
+            v-if="ownCharacters.length <= 4"
+            class="ml-3 mt-4 mt-md-0 ml-md-auto recruit-btn text-uppercase custom-recruit-text-size"
+            @click="$emit('mintCharacter')"
+            v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+            {{$t('plaza.recruit')}} <span class="gtag-link-others custom-recruit-text">({{ recruitCost }} NON-IGO SKILL)</span>
+        </div>
     </div>
 </template>
 
@@ -72,7 +71,35 @@ export default Vue.extend({
 
 </script>
 <style scoped lang="scss">
-
+custom-recruit-text-size{
+  font-size: 20px;
+  font-weight: bold;
+}
+.custom-recruit-text{
+  color: #e9c97a;
+}
+.recruit-btn{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin-right: 15px;
+  align-items: center;
+  vertical-align: middle;
+  justify-content: center;
+  background-image: url('../assets/btn-long.svg');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  object-fit: fill;
+  padding: 10px 40px 10px 40px;
+  border: none;
+  font-family: Oswald;
+  color: #fff;
+  font-size: 17px;
+  margin: auto;
+  margin-right: -10px;
+  cursor: pointer;
+}
 .link {
     background: transparent;
     outline: none;
