@@ -125,6 +125,15 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         require(launchTokenAddress[launchId] != address(0), "Token address not set");
     }
 
+    modifier launchNotStarted(uint256 launchId) {
+        _launchNotStarted(launchId);
+        _;
+    }
+
+    function _launchNotStarted(uint256 launchId) internal view {
+        require(launchStartTime[launchId] > block.timestamp, "Launch started");
+    }
+
     // VIEWS
 
     function getTierForStakedAmount(uint256 amount) public view returns (uint256 tier) {
@@ -166,7 +175,12 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         if(lastClaimTimestamp == 0) {
             lastClaimTimestamp = launchLinearVestingsStartTimestamps[launchId];
         }
-        claimAmount = totalUserInvestment.mul(1e18).div(launchTokenPrice[launchId]).mul(block.timestamp - lastClaimTimestamp).div(launchLinearVestingsDurations[launchId]);
+        uint256 effectiveClaimTimestamp = launchLinearVestingsStartTimestamps[launchId] + launchLinearVestingsDurations[launchId];
+        if(block.timestamp < effectiveClaimTimestamp) {
+            effectiveClaimTimestamp = block.timestamp;
+        }
+        
+        claimAmount = totalUserInvestment.mul(1e18).div(launchTokenPrice[launchId]).mul(effectiveClaimTimestamp.sub(lastClaimTimestamp)).div(launchLinearVestingsDurations[launchId]);
         claimAmount = Common.adjustDecimals(claimAmount, decimals);
     }
 
@@ -320,11 +334,11 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         launches[launchId].imageUrl = imageUrl;
     }
 
-    function updateLaunchFundingTokenAddress(uint256 launchId, address fundingTokenAddress) external restricted {
+    function updateLaunchFundingTokenAddress(uint256 launchId, address fundingTokenAddress) external launchNotStarted(launchId) restricted {
         launches[launchId].fundingTokenAddress = fundingTokenAddress;
     }
 
-    function updateLaunchTokenPrice(uint256 launchId, uint256 tokenPrice) external restricted {
+    function updateLaunchTokenPrice(uint256 launchId, uint256 tokenPrice) external launchNotStarted(launchId) restricted {
         launchTokenPrice[launchId] = tokenPrice;
     }
 
@@ -333,7 +347,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         launchStartTime[launchId] = startTime;
     }
 
-    function updateLaunchFundsToRaise(uint256 launchId, uint256 fundsToRaise) external restricted {
+    function updateLaunchFundsToRaise(uint256 launchId, uint256 fundsToRaise) external launchNotStarted(launchId) restricted {
         launchFundsToRaise[launchId] = fundsToRaise;
     }
 
@@ -378,10 +392,9 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     // WHITELISTING
 
-    function setEligibleUsersData(uint256 launchId, address[] calldata users, uint256[] calldata stakedAmounts) external onlyPhase1(launchId) restricted {
+    function setEligibleUsersData(uint256 launchId, address[] calldata users, uint256[] calldata stakedAmounts) external onlyPhase1(launchId) launchNotStarted(launchId) restricted {
         require(nextLaunchId >= launchId, "Wrong ID");
         require(users.length > 0 && users.length == stakedAmounts.length, "Bad input");
-        require(launchStartTime[launchId] > block.timestamp, "Launch started");
 
         uint totalWeight = launchBaseAllocation[launchId] == 0 ? 0 : launchFundsToRaise[launchId].div(launchBaseAllocation[launchId]);
         for(uint i = 0; i < users.length; i++) {
@@ -463,7 +476,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         emit LinearVestingClaimed(msg.sender, launchId, claimAmount);
     }
 
-    function commitUnclaimedSkill(uint256 launchId, uint256 amount) external isWhitelistedFor(launchId) {
+    function commitUnclaimedSkill(uint256 launchId, uint256 amount) external isWhitelistedFor(launchId) launchNotStarted(launchId) {
         uint256 committingValue = amount.mul(skillPrice).div(1e18);
         require((launchTotalUnclaimedSkillCommittedValue[launchId].add(committingValue)).mul(vars[VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER]) <= vars[VAR_UNCLAIMED_ALLOCATION_PERCENTAGE].mul(launchFundsToRaise[launchId]).div(100), "Unclaimed limit reached");
         _game.deductAfterPartnerClaim(amount, msg.sender);

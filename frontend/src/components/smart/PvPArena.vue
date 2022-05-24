@@ -21,9 +21,11 @@
         v-if="!isCharacterInArena"
         :tierRewardsPool="tierRewardsPool"
         :tierTopRankers="tierTopRankers"
+        :untieredTopRankers="untieredTopRankers"
         :characterInformation="characterInformation"
         :entryWager="entryWager"
         :untieredEntryWager="untieredEntryWager"
+        :withdrawCost="withdrawCost"
         :availableWeaponIds="availableWeaponIds"
         :availableShieldIds="availableShieldIds"
         :ownedWeaponsWithInformation="ownedWeaponsWithInformation"
@@ -43,6 +45,9 @@
         :duelHistory="duelHistory"
         :currentRankedSeason="currentRankedSeason"
         :secondsBeforeNextSeason="secondsBeforeNextSeason"
+        :opponentInformation="opponentInformation"
+        :entryWager="entryWager"
+        :withdrawCost="withdrawCost"
         @enterMatchMaking="handleEnterMatchMaking"
         @leaveArena="leaveArena"
       />
@@ -55,6 +60,7 @@
         :opponentInformation="opponentInformation"
         :opponentActiveWeaponWithInformation="opponentActiveWeaponWithInformation"
         :opponentActiveShieldWithInformation="opponentActiveShieldWithInformation"
+        :withdrawCost="withdrawCost"
         @updateOpponentInformation="updateOpponentInformation"
         @clearOpponentInformation="clearOpponentInformation"
         @kickCharacterFromArena="kickCharacterFromArena"
@@ -155,7 +161,7 @@ export default {
         characterId: null,
         kickedBy: null
       },
-
+      withdrawCost: null
     };
   },
 
@@ -184,6 +190,8 @@ export default {
       'getIsWeaponInArena',
       'getIsShieldInArena',
       'getIsCharacterInArena',
+      'getWithdrawFeePercent',
+      'getMatchByFinder',
       'getIsCharacterInOldArena',
       'getPvpCoreContract',
       'getPvpRankingsContract',
@@ -275,7 +283,7 @@ export default {
       }
     },
 
-    async clearOpponentInformation() {
+    clearOpponentInformation() {
       this.opponentInformation = {
         id: null,
         element: '',
@@ -455,6 +463,8 @@ export default {
 
       this.untieredEntryWager = await this.getEntryWagerByTier(0);
 
+      this.withdrawCost = this.entryWager * ((await this.getWithdrawFeePercent()) / 100);
+
       const weaponAvailability = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
         return {
           weaponId,
@@ -513,6 +523,14 @@ export default {
             shieldId: fighter.shieldID,
             information: await this.getShieldInformation(fighter.shieldID)
           };
+        }
+
+        const { defenderID, createdAt } = (await this.getMatchByFinder(this.currentCharacterId));
+
+        if (+createdAt) {
+          await this.updateOpponentInformation(defenderID);
+        } else {
+          this.clearOpponentInformation();
         }
       }
 
@@ -593,6 +611,8 @@ export default {
 
         this.untieredEntryWager = await this.getEntryWagerByTier(0);
 
+        this.withdrawCost = this.entryWager * ((await this.getWithdrawFeePercent()) / 100);
+
         const weaponAvailability = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
           return {
             weaponId,
@@ -661,6 +681,14 @@ export default {
               shieldId: null,
               information: {}
             };
+          }
+
+          const { defenderID, createdAt } = (await this.getMatchByFinder(value));
+
+          if (+createdAt) {
+            await this.updateOpponentInformation(defenderID);
+          } else {
+            this.clearOpponentInformation();
           }
         }
 

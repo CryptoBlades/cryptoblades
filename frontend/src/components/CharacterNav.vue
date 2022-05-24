@@ -35,7 +35,7 @@
         <div class="w-100 d-block d-md-none"></div>
          <div
             v-if="ownCharacters.length <= 4"
-            class="ml-3 mt-4 mt-md-0 ml-md-auto recruit-btn text-uppercase custom-recruit-text-size"
+            class="ml-3 mt-4 mt-md-0 ml-md-auto recruit-btn text-uppercase custom-recruit-text-size mint-character"
             @click="$emit('mintCharacter')"
             v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
             {{$t('plaza.recruit')}} <span class="gtag-link-others custom-recruit-text">({{ recruitCost }} NON-IGO SKILL)</span>
@@ -118,6 +118,10 @@ custom-recruit-text-size{
       filter: none
     }
   }
+}
+
+.mint-character {
+  z-index: 1;
 }
 
 .separator{

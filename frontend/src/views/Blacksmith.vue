@@ -534,7 +534,7 @@
                 @click="showMassDustConfirmation"
                 >
                   <span>{{$t('blacksmith.salvage').toUpperCase()}}</span>
-                  <span>({{burnCost * burnWeaponIds.length }} SKILL)</span>
+                  <span>({{(burnCost * burnWeaponIds.length).toFixed(4) }} SKILL)</span>
                 </button>
               </div>
             </div>
