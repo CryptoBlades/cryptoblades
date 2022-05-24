@@ -780,6 +780,16 @@ button.close {
   border-color: #9e8a57 !important;
 }
 
+.modal-content{
+  margin-top: 20%;
+  background-color:  rgba(0, 0, 0, 0.021) !important;
+}
+
+.modal-backdrop {
+   background-color: rgb(0, 0, 0);
+   opacity: 0.6;
+}
+
 .character-modal {
   background: #051126!important;
   border: none !important;
@@ -830,7 +840,8 @@ button.close {
 
 .modal-body {
   color: #9e8a57 !important;
-  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  /* background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%); */
+  background: linear-gradient(90deg, rgba(31, 31, 34, 0), rgba(24, 27, 30, 1), rgba(24, 27, 30, 1), rgba(24, 38, 45, 0));
 }
 
 .modal-footer {

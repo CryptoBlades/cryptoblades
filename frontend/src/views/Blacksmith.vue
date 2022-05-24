@@ -240,22 +240,29 @@
                     </div>
                   </b-modal>
 
-                  <b-modal size="lg" hide-footer hide-header ref="new-forge-weapon">
+                  <b-modal size="xl" hide-footer hide-header ref="new-forge-weapon">
                     <div class="row new-weapons">
-                      <img src="../assets/header-line.png" alt="">
+                      <div class="tob-bg-imgs forge-headers promotion-decoration">
+                        <img class="vertical-decorations bottom" src="../assets/header-line.png">
+                      </div>
+                      <!-- <img src="../assets/header-line.png" alt=""> -->
                       <h3>{{$t('blacksmith.dwarvesForge')}}</h3>
                     </div>
                     <div class="weapon-list">
                       <weapon-grid :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true" :noPagination="true"/>
                     </div>
-                    <div class="footer-close">
-                      <img src="../assets/separator.png" alt="">
-                      <span>{{$t('blacksmith.tapAnyWhere')}}</span>
-                      <span class="close-icon" @click="closeModal('new-forge-weapon')"></span>
+                    <div class="bot-bg-imgs promotion-decoration mb-3">
+                      <img src="../assets/separator.png">
+                    </div>
+                    <div class="footer-close"  @click="closeModal('new-forge-weapon')">
+                        <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
+                        <span class="tap">
+                          <img src="../assets/close-btn.png" alt="">
+                          </span>
                     </div>
                   </b-modal>
 
-                  <b-modal size="lg" hide-footer hide-header ref="forge-element-selector-modal">
+                  <b-modal size="xl" class="pt-4 pb-3" hide-footer hide-header ref="forge-element-selector-modal">
                     <div class="row justify-content-center">
                       <h4 class="select-el">{{$t('blacksmith.selectElement')}}</h4>
                     </div>
@@ -319,6 +326,12 @@
                       <b-icon-question-circle v-if="clickedForgeButton === 1"
                         class="ml-4 centered-icon" v-tooltip.bottom="$t('blacksmith.dynamicPricesDetails',
                           { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
+                    </div>
+                    <div class="footer-close"  @click="closeModal('forge-element-selector-modal')">
+                        <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
+                        <span class="tap">
+                          <img src="../assets/close-btn.png" alt="">
+                          </span>
                     </div>
                   </b-modal>
                 </div>
@@ -1434,10 +1447,7 @@ export default Vue.extend({
 
 .footer-close {
   margin: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  cursor: pointer;
 }
 
 .header-close {
@@ -1743,6 +1753,9 @@ export default Vue.extend({
 }
 
 
+.forge-headers > img{
+  width: 85%;
+}
 
 .weapon-menu > div > div > .details > span{
   border-right: 1px solid rgba(255, 255, 255, 0.445);
@@ -2317,6 +2330,32 @@ export default Vue.extend({
   font-weight:400;
   text-align:center;
   width: 12em;
+}
+
+.footer-close{
+  width: 100%;
+  text-align: center;
+  position: absolute;
+  margin: auto;
+  margin-left: -17px;
+}
+
+.footer-close > span{
+  cursor: pointer;
+}
+
+.footer-close > span > img{
+  width: 40px;
+}
+
+.footer-close > .tap{
+  font-size: 15px;
+  color: #fff;
+  margin-top: 40px;
+  text-align: center;
+  margin-left: auto;
+  margin-bottom: 20px;
+  font-family: Roboto;
 }
 
 .weapon {

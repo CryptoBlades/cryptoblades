@@ -5,12 +5,12 @@
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
       </div>
 
-      <b-modal id="fightResultsModal" hide-footer hide-header>
+      <b-modal id="fightResultsModal" size="xl" hide-footer hide-header>
         <CombatResults v-if="resultsAvailable" :fightResults="fightResults" class="mb-3" />
-        <div class="footer-close">
+        <div class="footer-close"  @click="$bvModal.hide('fightResultsModal')">
             <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
-            <span class="tap" @click="$bvModal.hide('fightResultsModal')">
-              <img style="width: 40px; margin-left: 215px;" src="../assets/close-btn.png" alt="">
+            <span class="tap">
+              <img style="width: 40px" src="../assets/close-btn.png" alt="">
               </span>
         </div>
       </b-modal>
@@ -1241,7 +1241,11 @@ h1 {
 }
 
 .footer-close{
+  width: 100%;
+  text-align: center;
+  position: absolute;
   margin: auto;
+  margin-left: -17px;
 }
 
 .footer-close > span{
@@ -1258,7 +1262,7 @@ h1 {
   font-family: Roboto;
 }
 
-.vertical-decoration.bottom{
+.vertical-decorations.bottom{
   transform: rotate(0deg) !important;
 }
 

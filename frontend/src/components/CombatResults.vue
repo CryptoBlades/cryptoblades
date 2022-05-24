@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="tob-bg-img promotion-decoration">
-      <img class="vertical-decoration bottom" src="../assets/header-ads.png">
+    <div class="tob-bg-imgs promotion-decoration">
+      <img class="vertical-decorations bottom" src="../assets/header-ads.png">
     </div>
   <div class="results-panel">
     <div class="float-center">
@@ -55,7 +55,7 @@
       </h6>
     </div>
   </div>
-    <div class="bot-bg-img promotion-decoration">
+    <div class="bot-bg-imgs promotion-decoration">
       <img src="../assets/separator.png">
     </div>
     <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
@@ -162,8 +162,8 @@ export default Vue.extend({
 }
 .outcome {
   font-family: Trajan;
-  font-size: 2em;
-  font-weight: bold;
+  font-size: 1.7em;
+  font-weight: 500;
   padding: 0.1em;
   margin-top: 0.25em;
   margin-bottom: 0;
@@ -269,22 +269,43 @@ export default Vue.extend({
   gap: 0.5rem;
 }
 
-.top-bg-img > img, .bot-bg-img > img {
-    width: 69% !important;
-    margin-bottom: -70px;
-
+.bot-bg-imgs{
+  text-align: center;
 }
 
+.bot-bg-imgs > img {
+  width: 40%;
+  margin-bottom: -75px;
+}
 
-.tob-bg-img > img{
-  margin-top: -40px !important;
+.tob-bg-imgs{
+  text-align: center;
+}
+
+.tob-bg-imgs > img{
+  margin-top: -75px !important;
+  width: 60%;
 }
 
 
 @media all and (max-width: 600px) {
-  /* .modal-dialog{
-    margin-top: 10em;
-  } */
+.bot-bg-imgs{
+  text-align: center;
+}
+
+.bot-bg-imgs > img {
+  width: 80%;
+  margin-bottom: -75px;
+}
+
+.tob-bg-imgs{
+  text-align: center;
+}
+
+.tob-bg-imgs > img{
+  margin-top: -70px !important;
+  width: 100%;
+}
 
   .outcome{
     font-size: 1.5em;
