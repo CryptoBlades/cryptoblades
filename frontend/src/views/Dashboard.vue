@@ -1,7 +1,6 @@
 <template>
   <div class="dashboard-container">
     <div class="overlay-bg">
-    </div>
     <div v-if="haveCharacters">
     <div class="upper-body-container">
       <div class="character-details-container">
@@ -163,19 +162,8 @@
       </div>
       </div>
     </div>
-    <div style="min-height: 100vh;" class="d-flex align-items-start justify-content-center" v-if="!haveCharacters">
-      <div style="z-index: 3;">
-        <span>Go to plaza to recruit your first character</span>
-      </div>
-      <div style="z-index: 3;">
-        <router-link :to="{ name: 'plaza' }" exact>
-          <div class="pve-button dashboard-btn">
-            <span>Go to Plaza</span>
-          </div>
-        </router-link>
-      </div>
-    </div>
   </div>
+      </div>
 </template>
 
 <script lang="ts">
@@ -376,7 +364,7 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   height: 100%;
-  z-index: 1;
+  z-index: 2;
 }
 
 .overlay-bg {
@@ -384,14 +372,15 @@ export default Vue.extend({
   background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/dashboard-bg.png");
   background-size: cover;
   background-repeat: no-repeat;
-  height: 50%;
+  height: 70%;
   width: 100%;
-  z-index: 2;
+  z-index: 0;
 }
 
 .upper-body-container {
   background-color: transparent;
-  height: 30%;
+  height: 50%;
+  margin-bottom: 5.2rem;
 }
 
 .lower-body-container {
@@ -403,7 +392,6 @@ export default Vue.extend({
 .lower-body-container {
   display: flex;
   flex-direction: row;
-  z-index: 3;
   padding: 50px;
 }
 
