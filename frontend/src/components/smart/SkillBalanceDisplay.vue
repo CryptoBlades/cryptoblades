@@ -38,7 +38,7 @@
     </div>
     <div class="d-flex justify-content-end align-items-center">
       <div class="deposit-withdraw px-2">
-        <span id="claim-xp-popover" @click="onClaimXp" :class="canClaimXp ? 'claimable' : ''">CLAIM EXP</span>
+        <span id="claim-xp-popover" @click="onClaimXp" :class="!canClaimXp ? 'no-claimable' : ''">CLAIM EXP</span>
         <b-popover target="claim-xp-popover" custom-class="claim-exp-popover" triggers="hover" placement="bottom">
           <img class="position-absolute mt-1" width="233" :src="require('@/assets/separator.png')" />
           <div class="d-flex justify-content-center position-relative">
@@ -449,19 +449,11 @@ export default Vue.extend({
     display: none !important;
   }
 }
-.claimable {
-  text-align: center;
-  animation: claimable 3s ease-in-out infinite alternate;
+
+.no-claimable {
+  cursor: context-menu !important;
 }
 
-@keyframes claimable {
-  from {
-    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e4b322, 0 0 40px #e4b322, 0 0 50px #e4b322, 0 0 60px #e4b322, 0 0 70px #e4b322;
-  }
-  to {
-    text-shadow: 0 0 20px #fff, 0 0 30px #ffc107, 0 0 40px #ffc107, 0 0 50px #ffc107, 0 0 60px #ffc107, 0 0 70px #ffc107, 0 0 80px #ffc107;
-  }
-}
 .custom-header-font{
   font-family: 'Roboto', sans-serif;
   font-size: 12px;
