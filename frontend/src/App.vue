@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <nav-bar :isToggled="toggleSideBar"/>
-    <div class="content dark-bg-text">
+    <div class="content bg-dark">
       <b-row>
         <character-bar :isToggled="toggleSideBar" v-if="currentCharacterId !== null"/>
         <b-col style="padding-left: 0;" :class="renderPageDisplay()">
@@ -10,7 +10,7 @@
         <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
       </b-row>
     </div>
-    <div class="content dark-bg-text" v-if="!canShowApp && !showMetamaskWarning">
+    <div class="content bg-dark" v-if="!canShowApp && !showMetamaskWarning">
       <div class="outcome">
         <i class="fas fa-spinner fa-spin"></i>
       </div>
@@ -544,7 +544,7 @@ export default Vue.extend({
 });
 </script>
 
-<style>
+<style lang="scss">
 
 @font-face {
     font-family: 'Trajan';
@@ -555,6 +555,7 @@ export default Vue.extend({
 
 @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
+@import '@/scss/app.scss';
 
 
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
@@ -581,7 +582,6 @@ hr.hr-divider {
 }
 body {
   margin: 0;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, #242720 100%);
 }
 
 .no-margin {
@@ -606,13 +606,6 @@ body {
   top: -10px;
 }
 
-.title-bg-text {
-  color: #9e8a57;
-}
-
-.dark-bg-text {
-  color: #9e8a57;
-}
 
 button,
 .pointer {
@@ -763,7 +756,7 @@ button.close {
 }
 
 .btn-primary {
-  color: #9e8a57 !important;
+  color: $primary !important;
   background: rgb(31, 31, 34);
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
@@ -953,7 +946,6 @@ a.character-tab:focus {
 .content {
   padding: 0 1em;
   height: auto;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
   margin: auto;
 }
 
@@ -961,7 +953,6 @@ a.character-tab:focus {
   position: fixed;
   top: 0;
   left: 0;
-  background: rgba(0, 0, 0, 0.425);
   height: 100vh;
   width: 100vw;
   display: flex;
@@ -975,7 +966,6 @@ a.character-tab:focus {
 .starter-panel {
   width: 100%;
   max-width: 28em;
-  background: rgba(0, 0, 0, 1);
   box-shadow: 0 2px 4px #ffffff38;
   border: 1px solid #9e8a57;
   border-radius: 5px;
@@ -1040,10 +1030,6 @@ a.character-tab:focus {
 #blacksmith-bg{
   background: rgba(20, 20, 20, 1);
   background-image: url("./assets/blacksmith/blacksmith-bg.png");
-  background-image: url("./assets/blacksmith/blacksmith-bg.png"), linear-gradient(rgba(0, 68, 111, 0) 0%,
-  rgba(20, 20, 20, 0.4) 30%,rgba(20, 20, 20, 1) 100%); /* W3C */
-  /* background: radial-gradient(closest-side at 50% 50%, rgba(0, 68, 111, 0) 10%,
-  rgba(20, 20, 20, 0.4) 50%,rgba(20, 20, 20, 1) 100%), url('./assets/blacksmith/blacksmith-bg.png'); */
   background-repeat: no-repeat;
   background-size: cover;
 }

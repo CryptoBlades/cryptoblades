@@ -141,7 +141,7 @@
       </div>
     </Transition>
 
-      <div class="bg-tint"></div>
+      <div class="bg-tint bg-dark"></div>
         <div class="weapon-body" v-if="$route.query.tab === 'weapon'">
           <div class="blank-slate" v-if="ownWeapons.length === 0">
             <span v-html="$t('blacksmith.noWeapons')"/>
@@ -1717,7 +1717,7 @@ export default Vue.extend({
   height: 100%;
   position: absolute;
   top: 0;
-  background-color: rgba(0, 0, 0, 0.555);
+  opacity: 0.5;
 }
 
 

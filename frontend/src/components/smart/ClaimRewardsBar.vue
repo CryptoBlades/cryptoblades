@@ -1,7 +1,7 @@
 <template>
   <div class="body main-font">
 
-    <b-navbar v-if="isBar" class="claim-xp-bar">
+    <b-navbar v-if="isBar" class="claim-xp-bar bg-dark">
       <b-icon-exclamation-circle-fill class="rewards-claimable-icon" scale="1.2"
       variant="success" :hidden="!canClaimTokens && !canClaimXp" v-tooltip.bottom="$t('ClaimRewardsBar.readyToClaim')"/>
 
@@ -407,10 +407,6 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-
-.navbar {
-  background: rgb(20,20,20);
-}
 
 .claim-xp-bar {
   gap: 0.5rem;

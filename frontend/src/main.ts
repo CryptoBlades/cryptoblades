@@ -1,7 +1,6 @@
 import BootstrapVue from 'bootstrap-vue';
 import { BootstrapVueIcons } from 'bootstrap-vue';
 import BootstrapVueDialog from 'bootstrap-vue-dialog';
-import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 
 import Vue from 'vue';

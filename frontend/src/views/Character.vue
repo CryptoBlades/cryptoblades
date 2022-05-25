@@ -1,8 +1,8 @@
 
 <template>
-  <div class="background-image">
-    <div class="blind-background"></div>
-    <div v-if="!haveCharacters" class="blank-slate">
+  <div class="position-relative">
+    <div class="blind-background background-image position-absolute w-100 h-100 opacity-75"></div>
+    <div v-if="!haveCharacters" class="blank-slate position-relative content">
       <div class="initial-recruitment">
         <div class="tob-bg-img promotion-decoration">
           <img class="vertical-decoration bottom" src="../assets/border-element.png">
@@ -28,7 +28,7 @@
 
       </div>
     </div>
-    <div class="p-5" v-else>
+    <div class="p-5 content" v-else>
       <CharacterNav
         :garrison="garrison"
         :havePlazaCharacters="havePlazaCharacters"
@@ -395,7 +395,6 @@ export default Vue.extend({
     },
     async updateMintCharacterFee() {
       const recruitCost = await this.fetchMintCharacterFee();
-      console.log({recruitCost});
       const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
       this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
     },
@@ -457,6 +456,11 @@ export default Vue.extend({
   background-position: top right;
   min-height: calc(100vh - 120px);
   height: 100%;
+  z-index: 0;
+}
+.content {
+  z-index: 10;
+  position: relative;
 }
 
 .background-image > div:nth-child(1){

@@ -1,6 +1,6 @@
 <template>
   <div class="body main-font" style="inline-flex">
-    <div class="blind-background"></div>
+    <div class="blind-background bg-dark"></div>
     <div>
       <div>
           <div class="col-lg-6 col-sm-12 adventure">
