@@ -192,6 +192,7 @@
       <pvp-arena-information
         class="arenaInformation"
         :tierRewardsPool="tierRewardsPool"
+        :untieredRewardsPool="untieredRewardsPool"
         :tierTopRankers="untieredTopRankers"
         :currentRankedSeason="currentRankedSeason"
         :secondsBeforeNextSeason="secondsBeforeNextSeason"
@@ -245,6 +246,9 @@ export default {
 
   props: {
     tierRewardsPool: {
+      default: null
+    },
+    untieredRewardsPool: {
       default: null
     },
     tierTopRankers: {
