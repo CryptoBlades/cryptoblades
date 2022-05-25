@@ -17,7 +17,7 @@
             />
           </div>
         </b-modal>
-        <img src="../../assets/add-skill-icon.svg" class="add-button gtag-link-others mr-1 mt-1" :style="isMobile() ? 'width: 10px':''"  tagname="buy_skill">
+        <img src="../../assets/add-skill-icon.svg" class="add-button gtag-link-others mr-1" :style="isMobile() ? 'width: 10px':''"  tagname="buy_skill">
       </div>
       <div class="d-flex justify-content-between align-items-center balance-container mt-1">
         <div>
