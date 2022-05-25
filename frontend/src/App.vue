@@ -152,9 +152,6 @@ interface StoreMappedActions {
   initializeStore: () => void,
   fetchCharacterStamina: (characterId: number) => void,
   pollAccountsAndNetwork: () => void,
-  setupWeaponDurabilities: () => void,
-  fetchWaxBridgeDetails: () => void,
-  fetchRewardsClaimTax: () => void,
   configureMetaMask: () => void,
 }
 
@@ -236,9 +233,6 @@ export default Vue.extend({
       'initializeStore',
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
-      'setupWeaponDurabilities',
-      'fetchWaxBridgeDetails',
-      'fetchRewardsClaimTax',
       'configureMetaMask',
     ]) as StoreMappedActions,
     ...mapMutations([
@@ -508,15 +502,7 @@ export default Vue.extend({
       this.ownGarrisonCharacters.forEach(async (c) => {
         await this.updateCharacterStamina(c.id);
       });
-    }, 3000);
-
-    this.slowPollIntervalId = setInterval(async () => {
-      await Promise.all([
-        this.setupWeaponDurabilities(),
-        this.fetchWaxBridgeDetails(),
-        this.fetchRewardsClaimTax(),
-      ]);
-    }, 10 * 1000);
+    }, 250000);
 
     this.doPollAccounts = true;
     const pollAccounts = async () => {
@@ -527,8 +513,6 @@ export default Vue.extend({
       } catch (e) {
         console.error(e);
       }
-
-      setTimeout(pollAccounts, 500);
     };
 
     pollAccounts();
@@ -598,6 +582,10 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
+.alt-text {
+  font-family: 'Oswald', sans-serif;
+}
+
 .info-divider {
   width: 100%;
   position: relative;
@@ -619,8 +607,7 @@ button,
 
 .blank-slate {
   width: calc(100vw - 36px);
-  height: calc(100vh - 56px);
-
+  height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -663,7 +650,7 @@ button,
 
 
 .tooltip{
-  z-index: 6;
+  z-index: 1051;
 }
 
 .popover .arrow{
@@ -779,6 +766,54 @@ button.close {
   border-color: #9e8a57 !important;
 }
 
+.character-modal {
+  background: #051126!important;
+  border: none !important;
+  border: 1px solid #43506A!important;
+  padding:3rem;
+}
+
+.character-modal header.modal-header{
+  background: #051126!important;
+  border: none;
+}
+
+.character-modal header h5{
+  text-transform: uppercase;
+  text-align: center;
+  font: normal normal bold 30px/38px Trajan;
+  width: 100%;
+}
+
+.character-modal div.modal-body {
+  background: #051126!important;
+  border: none;
+  color: #7F8693!important;
+  display: flex;
+  flex-direction: column;
+}
+
+.character-modal div.modal-body button {
+  background-color:#1168D0;
+  height: 56px;
+  border-radius: 3px;
+  margin-top: 1.5rem;
+  border: none;
+  outline: none;
+  color: #fff;
+}
+.character-modal div.modal-body .input {
+  background: #000E1D;
+  border: 1px solid #323E55;
+  border-radius: 5px;
+  height: 70px;
+  font: normal normal normal 18px/24px Roboto;
+  letter-spacing: 0px;
+  color: #7F8693;
+  display: flex;
+  height: 70px;
+}
+
 .modal-body {
   color: #9e8a57 !important;
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
@@ -847,6 +882,30 @@ div.bg-success {
   border: 2px solid #9e8a57 !important;
   background: rgb(61, 61, 64);
   background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
+}
+
+a.character-tab:hover,
+a.character-tab:focus {
+  text-shadow: none!important;
+}
+
+.nav.nav-pills .nav-link.character-tab{
+  border: 1px solid #404857!important;
+  background: transparent!important;
+  color: white!important;
+  text-transform: uppercase;
+  font-family: 'Oswald', sans-serif;
+  min-height:56px;
+  line-height: 38px;
+}
+
+ .nav.nav-pills .nav-link.character-tab.active {
+  border: 1px solid #404857!important;
+  background: #1168D0!important;
+}
+
+.character-wrapper{
+  flex: 1 1 0!important;
 }
 
 .multiselect *{

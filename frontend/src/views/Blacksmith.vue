@@ -120,7 +120,7 @@
       <div class="footer-close" v-if="modalType == 'successReforge'">
         <img src="../assets/separator.png" alt="">
         <span>{{$t('blacksmith.tapAnyWhere')}}</span>
-        <span class="close-icon"></span>
+        <span class="close-icon" @click="closeModal('succesful-reforge')"></span>
       </div>
     </b-modal>
 
@@ -251,7 +251,7 @@
                     <div class="footer-close">
                       <img src="../assets/separator.png" alt="">
                       <span>{{$t('blacksmith.tapAnyWhere')}}</span>
-                      <span class="close-icon"></span>
+                      <span class="close-icon" @click="closeModal('new-forge-weapon')"></span>
                     </div>
                   </b-modal>
 
@@ -534,7 +534,7 @@
                 @click="showMassDustConfirmation"
                 >
                   <span>{{$t('blacksmith.salvage').toUpperCase()}}</span>
-                  <span>({{burnCost * burnWeaponIds.length }} SKILL)</span>
+                  <span>({{(burnCost * burnWeaponIds.length).toFixed(4) }} SKILL)</span>
                 </button>
               </div>
             </div>
@@ -1128,6 +1128,10 @@ export default Vue.extend({
     removeBurnWeapon(id: number){
       this.hideWeapons.push(id.toString());
       this.burnWeaponIds = this.burnWeaponIds.filter(x => x !== id.toString());
+    },
+
+    closeModal(modalType: string){
+      (this.$refs[modalType] as BModal).hide();
     },
 
     viewNewWeapons(offset: number){

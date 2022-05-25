@@ -21,9 +21,11 @@
         v-if="!isCharacterInArena"
         :tierRewardsPool="tierRewardsPool"
         :tierTopRankers="tierTopRankers"
+        :untieredTopRankers="untieredTopRankers"
         :characterInformation="characterInformation"
         :entryWager="entryWager"
         :untieredEntryWager="untieredEntryWager"
+        :withdrawCost="withdrawCost"
         :availableWeaponIds="availableWeaponIds"
         :availableShieldIds="availableShieldIds"
         :ownedWeaponsWithInformation="ownedWeaponsWithInformation"
@@ -43,6 +45,9 @@
         :duelHistory="duelHistory"
         :currentRankedSeason="currentRankedSeason"
         :secondsBeforeNextSeason="secondsBeforeNextSeason"
+        :opponentInformation="opponentInformation"
+        :entryWager="entryWager"
+        :withdrawCost="withdrawCost"
         @enterMatchMaking="handleEnterMatchMaking"
         @leaveArena="leaveArena"
       />
@@ -55,6 +60,7 @@
         :opponentInformation="opponentInformation"
         :opponentActiveWeaponWithInformation="opponentActiveWeaponWithInformation"
         :opponentActiveShieldWithInformation="opponentActiveShieldWithInformation"
+        :withdrawCost="withdrawCost"
         @updateOpponentInformation="updateOpponentInformation"
         @clearOpponentInformation="clearOpponentInformation"
         @kickCharacterFromArena="kickCharacterFromArena"
@@ -116,6 +122,7 @@ export default {
         level: null,
         power: null,
         fullPower: null,
+        untieredFullPower: null,
         rank: null,
         element: null,
       },
@@ -139,6 +146,7 @@ export default {
         rank: null,
         power: null,
         fullPower: null,
+        untieredFullPower: null
       },
       opponentActiveWeaponWithInformation: {
         weaponId: null,
@@ -153,7 +161,7 @@ export default {
         characterId: null,
         kickedBy: null
       },
-
+      withdrawCost: null
     };
   },
 
@@ -182,6 +190,8 @@ export default {
       'getIsWeaponInArena',
       'getIsShieldInArena',
       'getIsCharacterInArena',
+      'getWithdrawFeePercent',
+      'getMatchByFinder',
       'getIsCharacterInOldArena',
       'getPvpCoreContract',
       'getPvpRankingsContract',
@@ -203,7 +213,8 @@ export default {
 
       const fighter = formatFighter(await this.getFighterByCharacter(this.currentCharacterId));
 
-      this.characterInformation.fullPower = await this.getCharacterFullPower(this.currentCharacterId);
+      this.characterInformation.fullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: this.characterInformation.tier});
+      this.characterInformation.untieredFullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: 20});
 
       this.activeWeaponWithInformation = {
         weaponId: fighter.weaponID,
@@ -253,7 +264,9 @@ export default {
 
       this.opponentInformation.power = await this.getCharacterPower(defenderId);
 
-      this.opponentInformation.fullPower = await this.getCharacterFullPower(defenderId);
+      this.opponentInformation.fullPower = await this.getCharacterFullPower({characterId: defenderId, tier: this.characterInformation.tier});
+
+      this.opponentInformation.untieredFullPower = await this.getCharacterFullPower({characterId: defenderId, tier: 20});
 
       const fighter = formatFighter(await this.getFighterByCharacter(defenderId));
 
@@ -270,7 +283,7 @@ export default {
       }
     },
 
-    async clearOpponentInformation() {
+    clearOpponentInformation() {
       this.opponentInformation = {
         id: null,
         element: '',
@@ -278,7 +291,8 @@ export default {
         level: null,
         rank: null,
         power: null,
-        fullPower: null
+        fullPower: null,
+        untieredFullPower: null,
       };
 
       this.opponentActiveWeaponWithInformation = {
@@ -449,6 +463,8 @@ export default {
 
       this.untieredEntryWager = await this.getEntryWagerByTier(0);
 
+      this.withdrawCost = this.entryWager * ((await this.getWithdrawFeePercent()) / 100);
+
       const weaponAvailability = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
         return {
           weaponId,
@@ -494,7 +510,8 @@ export default {
       if (this.isCharacterInArena) {
         const fighter = formatFighter(await this.getFighterByCharacter(this.currentCharacterId));
 
-        this.characterInformation.fullPower = await this.getCharacterFullPower(this.currentCharacterId);
+        this.characterInformation.fullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: this.characterInformation.tier});
+        this.characterInformation.untieredFullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: 20});
 
         this.activeWeaponWithInformation = {
           weaponId: fighter.weaponID,
@@ -506,6 +523,14 @@ export default {
             shieldId: fighter.shieldID,
             information: await this.getShieldInformation(fighter.shieldID)
           };
+        }
+
+        const { defenderID, createdAt } = (await this.getMatchByFinder(this.currentCharacterId));
+
+        if (+createdAt) {
+          await this.updateOpponentInformation(defenderID);
+        } else {
+          this.clearOpponentInformation();
         }
       }
 
@@ -586,6 +611,8 @@ export default {
 
         this.untieredEntryWager = await this.getEntryWagerByTier(0);
 
+        this.withdrawCost = this.entryWager * ((await this.getWithdrawFeePercent()) / 100);
+
         const weaponAvailability = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
           return {
             weaponId,
@@ -635,7 +662,9 @@ export default {
         if (this.isCharacterInArena) {
           const fighter = formatFighter(await this.getFighterByCharacter(value));
 
-          this.characterInformation.fullPower = await this.getCharacterFullPower(value);
+          this.characterInformation.fullPower = await this.getCharacterFullPower({characterId: value, tier: this.characterInformation.tier});
+
+          this.characterInformation.untieredFullPower = await this.getCharacterFullPower({characterId: value, tier: 20});
 
           this.activeWeaponWithInformation = {
             weaponId: fighter.weaponID,
@@ -652,6 +681,14 @@ export default {
               shieldId: null,
               information: {}
             };
+          }
+
+          const { defenderID, createdAt } = (await this.getMatchByFinder(value));
+
+          if (+createdAt) {
+            await this.updateOpponentInformation(defenderID);
+          } else {
+            this.clearOpponentInformation();
           }
         }
 

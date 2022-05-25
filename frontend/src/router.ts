@@ -1,6 +1,7 @@
 import VueRouter from 'vue-router';
 
-import Plaza from './views/Plaza.vue';
+// import Plaza from './views/Plaza.vue';
+import Character from './views/Character.vue';
 import Blacksmith from './views/Blacksmith.vue';
 import Combat from './views/Combat.vue';
 import SelectStakeType from './views/SelectStakeType.vue';
@@ -24,7 +25,7 @@ export default function createRouter() {
 
   const router = new VueRouter({
     routes: [
-      {path: '/', name: 'plaza', component: Plaza},
+      {path: '/', name: 'plaza', component: Character},
       {path: '/blacksmith', name: 'blacksmith', component: Blacksmith},
       {path: '/combat', name: 'combat', component: Combat},
       {path: '/leaderboard', name: 'leaderboard', component: Leaderboard},

@@ -5005,7 +5005,7 @@
     },
     "links": {},
     "address": "0x7926796795585701dde635bED20BD2286866e6f9",
-    "transactionHash": "0xd2e99d48d48081d9f94f1194cac662cab68d1c505485da18ee5068eb7f473ae0"
+    "transactionHash": "0x7ef8258395e00df2275c4bb9252aee09ea01be3a2297a3370c050b6cb54e0437"
   },
   "build/contracts/PvpRankings.json": {
     "events": {

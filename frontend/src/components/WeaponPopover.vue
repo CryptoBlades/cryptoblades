@@ -1,10 +1,10 @@
 <template>
   <b-popover
     :target="'weapon-'+weapon.id"
-    :placement="isMobile() ? 'auto' : 'leftbottom'"
+    :placement="isMobile() ? 'auto' : placement"
     style="z-index:999"
     class="weapon-popover"
-    triggers="hover focus click">
+    triggers="hover">
     <div class="weapon-popover-body">
       <img :src="getWeaponArt(weapon)">
       <div class="details">
@@ -68,7 +68,7 @@ import { getCleanName } from '../rename-censor';
 import { mapGetters, mapState } from 'vuex';
 
 export default {
-  props: ['weapon'],
+  props: ['weapon', 'placement'],
   methods: {
     getWeaponArt,
     getWeaponRarity,
