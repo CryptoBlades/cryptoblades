@@ -1,11 +1,11 @@
 <template>
   <b-navbar-nav>
-    <li class="character top-nav-links">
+    <li class="top-nav-links">
       <router-link :to="{ name: 'play-to-earn' }" exact class="nav-link">
         <div class="link-text play-to-earn-btn">{{ $t("PlayToEarn.playToEarn") }}</div>
       </router-link>
     </li>
-    <li class="character top-nav-links">
+    <li class="top-nav-links ml-4">
       <router-link :to="{ name: 'plaza' }" exact class="nav-link">
         <div class="icon"><img src="../assets/navbar-icons/plaza-icon.png" class="ui-link-icon" alt="Plaza"></div>
         <div class="link-text">{{ $t("viewLink.character") }}</div>
@@ -127,7 +127,7 @@ a {
   font-weight: bolder;
   white-space: nowrap;
   font-family: 'Oswald', 'serif';
-  font-size: clamp(0.8rem, 1vw, 1rem);
+  font-size: clamp(.5rem, 1vw, 1rem);
   color: #ffffff;
 }
 
@@ -150,7 +150,7 @@ a {
   color: #fff;
   font-size: 17px;
   margin: auto;
-  margin-right: -10px;
+  margin-right: -40px;
 }
 .disabled-link > div {
   cursor: not-allowed;

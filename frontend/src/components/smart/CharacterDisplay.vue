@@ -38,7 +38,9 @@
                     v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(filteredCharacter.id))">
                   </div>
                   <div class="char-level">
-                      {{$t('PlayToEarn.level')}} {{ filteredCharacter.level + 1}} <span> (STA {{ getCharacterStamina(filteredCharacter.id) }} / 200)</span>
+                      {{$t('PlayToEarn.level')}} {{ filteredCharacter.level + 1}} <span>
+                        (EXP {{ filteredCharacter.xp }} / {{RequiredXp(filteredCharacter.level)}})
+                        (STA {{ getCharacterStamina(filteredCharacter.id) }} / 200)</span>
                   </div>
                 </div>
               </div>
@@ -663,7 +665,7 @@ li.character-highlight{
 }
 
 .char-level{
-  font-size: 0.8vw;
+  font-size: 0.7vw;
   color: #fff;
   white-space: nowrap;
 }
