@@ -10,7 +10,7 @@
         />
       </div>
       <div class="shieldWrapper">
-        <img :src="getShieldArt(shieldId)" alt="shield image">
+        <img :src="getShieldArt(shieldFlag)" alt="shield image">
         <b-popover v-if="hasInfoPopover" ref="shield-info" :target="`${shieldId}-info-s`"
         triggers="hover" data-trigger="focus" placement="top right" custom-class="customPopover">
           <div v-if="shieldId" class="shield-icon-wrapper">
@@ -31,8 +31,8 @@
     </div>
   </div>
 </template>
-
 <script>
+import {mapActions} from 'vuex';
 import fire from '../../assets/elements/fire.png';
 import water from '../../assets/elements/water.png';
 import earth from '../../assets/elements/earth.png';
@@ -44,6 +44,16 @@ import { BPopover } from 'bootstrap-vue';
 export default {
   components: {
     'b-popover': BPopover,
+  },
+
+  data() {
+    return {
+      shieldFlag: 0,
+    };
+  },
+
+  async mounted() {
+    this.shieldFlag = await this.getShieldFlag(this.shieldId);
   },
 
   props: {
@@ -87,16 +97,14 @@ export default {
   },
 
   methods: {
-    getShieldArt(shieldId) {
-      if(shieldId <= 10000){
+    ...mapActions(
+      ['getShieldFlag']
+    ),
+    getShieldArt(shieldFlag) {
+      if(+shieldFlag === 1) {
         return foundersShield;
       }
-      else if (shieldId > 10000 || shieldId <= 25000){
-        return legendaryShield;
-      }
-      else{
-        return '';
-      }
+      else return legendaryShield;
     },
     getStatStyles(value) {
       return {
