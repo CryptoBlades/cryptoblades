@@ -252,7 +252,6 @@ export default Vue.extend({
       return false;
     },
     selectedPartneredProject(): SupportedProject | undefined {
-      console.log(this.getPartnerProjects);
       return this.getPartnerProjects.find(partnerProject => partnerProject.id.toString() === this.payoutCurrencyId.toString());
     },
     formattedXpRewardsBar(): ICharacterClaimableExp[] {
@@ -452,7 +451,7 @@ export default Vue.extend({
 }
 .claimable {
   text-align: center;
-  animation: claimable 1s ease-in-out infinite alternate;
+  animation: claimable 3s ease-in-out infinite alternate;
 }
 
 @keyframes claimable {
