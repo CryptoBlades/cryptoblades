@@ -29,6 +29,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     /* Quest rarities
     *   Quests templates rarities on (0 - common, 1 - uncommon, 2 - rare, 3 - epic, 4 - legendary)
     *   Promo quests arrays are accordingly (10 - common, 11 - uncommon, 12 - rare, 13 - epic, 14 - legendary)
+    *   Pickable quests on 20
     */
 
     /* Promo quest templates
@@ -84,7 +85,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256 reputationAmount;
     }
 
-    enum ItemType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, SOUL, RAID, EXPERIENCE, EXTERNAL, EXTERNAL_HOLD}
+    enum ItemType{NONE, WEAPON, JUNK, DUST, TRINKET, SHIELD, STAMINA, SOUL, RAID, EXPERIENCE, EXTERNAL, EXTERNAL_HOLD, CHARACTER}
     enum Rarity{COMMON, UNCOMMON, RARE, EPIC, LEGENDARY}
 
     uint256 public nextQuestID;
@@ -102,9 +103,11 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     mapping(address => mapping(uint256 => uint256)) public weeklyCompletions; //user to week to completions
     mapping(address => mapping(uint256 => bool)) public weeklyRewardClaimed;
     mapping(uint256 => Reward) public rewards;
-    mapping(uint256 => uint256) public weeklyRewards; //unused
+    mapping(uint256 => uint256) private weeklyRewards; //unused
     mapping(uint256 => uint256) public weeklyCompletionsGoal;
+    mapping(address => mapping(uint256 => uint256)) public walletQuestProgress; // wallet, questID, progress
     uint constant maxWeeksInAYear = 53;
+    uint constant pickableTier = 20;
 
     event QuestAssigned(uint256 indexed questID, uint256 indexed characterID);
     event QuestProgressed(uint256 indexed questID, uint256 indexed characterID);
@@ -188,6 +191,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return assignNewQuest(characterID);
     }
 
+    function requestPickableQuest(uint256 characterID, uint256 pickableIndex) public assertQuestsEnabled assertOwnsCharacter(characterID) assertOnQuest(characterID, false) returns (uint256) {
+        return setCharacterQuest(characterID, pickableTier, questTemplates[pickableIndex]);
+    }
+
     function assignNewQuest(uint256 characterID) private returns (uint256) {
         uint256 seed = safeRandoms.popSingleSeed(address(this), RandomUtil.combineSeeds(SEED_RANDOM_QUEST, characterID), true, true);
         uint256 currentReputation = characters.getNftVar(characterID, NFTVAR_REPUTATION);
@@ -224,6 +231,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             tier = vars[VAR_COMMON_TIER];
         }
         uint256 questID = generateNewQuest(tier, seed);
+        return setCharacterQuest(character, tier, questID);
+    }
+
+    function setCharacterQuest(uint256 characterID, uint256 tier, uint256 questID) private returns (uint256) {
         if (questSupplies[questID] > 0) {
             questSupplies[questID]--;
             if (questSupplies[questID] == 0) {
@@ -309,6 +320,11 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             burningManager.giveAwaySoul(msg.sender, quest.rewardAmount);
         } else if (quest.rewardType == ItemType.EXTERNAL) {
             partnerVault.transferReward(quest.rewardExternalAddress, msg.sender, quest.rewardAmount, seed);
+        } else if (quest.rewardType == ItemType.CHARACTER) {
+            for (uint8 i = 0; i < quest.rewardAmount; i++) {
+                characters.mint(msg.sender, seed);
+                seed = RandomUtil.combineSeeds(seed, i);
+            }
         }
         else {
             revert("Unknown reward type");
