@@ -152,9 +152,6 @@ interface StoreMappedActions {
   initializeStore: () => void,
   fetchCharacterStamina: (characterId: number) => void,
   pollAccountsAndNetwork: () => void,
-  setupWeaponDurabilities: () => void,
-  fetchWaxBridgeDetails: () => void,
-  fetchRewardsClaimTax: () => void,
   configureMetaMask: () => void,
 }
 
@@ -236,9 +233,6 @@ export default Vue.extend({
       'initializeStore',
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
-      'setupWeaponDurabilities',
-      'fetchWaxBridgeDetails',
-      'fetchRewardsClaimTax',
       'configureMetaMask',
     ]) as StoreMappedActions,
     ...mapMutations([
@@ -508,15 +502,7 @@ export default Vue.extend({
       this.ownGarrisonCharacters.forEach(async (c) => {
         await this.updateCharacterStamina(c.id);
       });
-    }, 3000);
-
-    this.slowPollIntervalId = setInterval(async () => {
-      await Promise.all([
-        this.setupWeaponDurabilities(),
-        this.fetchWaxBridgeDetails(),
-        this.fetchRewardsClaimTax(),
-      ]);
-    }, 10 * 1000);
+    }, 250000);
 
     this.doPollAccounts = true;
     const pollAccounts = async () => {
