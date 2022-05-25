@@ -2039,6 +2039,10 @@ export default new Vuex.Store<IState>({
 
       await dispatch('fetchWeaponDurability', weaponId);
 
+      await dispatch('updateCharacterStamina', characterId);
+
+      await dispatch('getCharacterStamina', characterId);
+
       return {
         isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
         playerRoll,
@@ -2460,7 +2464,7 @@ export default new Vuex.Store<IState>({
       return fightBaseline;
     },
 
-    async fetchFightRewardSkill({ state, commit, dispatch }) {
+    async fetchFightRewardSkill({ state, commit }) {
       const { CryptoBlades } = state.contracts();
       if(!CryptoBlades) return;
 
@@ -2473,27 +2477,10 @@ export default new Vuex.Store<IState>({
           commit('updateSkillRewards', { skillRewards });
 
           return skillRewards;
-        })(),
-        dispatch('fetchRewardsClaimTax')
+        })()
       ]);
 
       return skillRewards;
-    },
-
-    async fetchRewardsClaimTax({ state, commit }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-
-      const [rewardsClaimTax, maxRewardsClaimTax] = await Promise.all([
-        CryptoBlades.methods
-          .getOwnRewardsClaimTax()
-          .call(defaultCallOptions(state)),
-        CryptoBlades.methods
-          .REWARDS_CLAIM_TAX_MAX()
-          .call(defaultCallOptions(state))
-      ]);
-
-      commit('updateRewardsClaimTax', { maxRewardsClaimTax, rewardsClaimTax });
     },
 
     async fetchFightRewardXp({ state, commit }) {
