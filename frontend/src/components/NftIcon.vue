@@ -33,9 +33,7 @@
       <!-- show nft with id: nftId of type: nftfType (contract address?)
         either load properties here or wherever the list of nfts is created and pass in nft object-->
       <div v-if="nft.type === 'shield'" class="nft-details glow-container" ref="el" :class="['glow-' + (nft.stars || 0)]">
-        <img class="placeholder-shield" src="../assets/shield1.png" v-if="nft.id < 10000" />
-        <img class="placeholder-shield" src="../assets/shield2.png" v-if="nft.id >= 10000 && nft.id < 25000" />
-
+        <img class="placeholder-shield" :src="getShieldArt(shieldFlag)"/>
         <div class="trait">
           <span :class="nft.element.toLowerCase() + '-icon'"></span>
           <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
@@ -155,12 +153,14 @@
 </template>
 
 <script>
-import {mapGetters, mapState} from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import { getJunkArt } from '../junk-arts-placeholder';
 import { getTrinketArt } from '../trinket-arts-placeholder';
 import { getCleanName } from '../rename-censor';
 import { getWeaponArt } from '../weapon-arts-placeholder';
 import { Stat1PercentForChar, Stat2PercentForChar, Stat3PercentForChar } from '../interfaces';
+import foundersShield from '../assets/shield1.png';
+import legendaryShield from '../assets/shield2.png';
 
 export default {
   props: ['nft', 'isDefault', 'favorite', 'stars'],
@@ -258,19 +258,31 @@ export default {
       totalT3LandsToClaim: 0,
       fetchSupplyInterval: 0,
       quantityOwned: 0,
-      images: require.context('../assets/elements/', false, /\.png$/)
+      images: require.context('../assets/elements/', false, /\.png$/),
+      shieldFlag: 0,
     };
   },
-
+  async mounted(){
+    if(this.nft.type === 'shield') {
+      this.shieldFlag = await this.getShieldFlag(this.nft.id);
+    }
+  },
   methods: {
+    ...mapActions(
+      ['getShieldFlag']
+    ),
     getWeaponArt,
     getJunkArt,
     getTrinketArt,
-
+    getShieldArt(shieldFlag) {
+      if(+shieldFlag === 1) {
+        return foundersShield;
+      }
+      else return legendaryShield;
+    },
     imgPath(img) {
       return this.images('./' + img);
     },
-
     getCleanWeaponName(id, stars) {
       return getCleanName(this.getWeaponName(id, stars));
     }

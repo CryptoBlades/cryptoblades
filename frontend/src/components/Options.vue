@@ -38,7 +38,7 @@
 
             <router-link
               class="menu-icon"
-              :to="{ name: 'adventure' }"
+              :to="{ name: 'combat' }"
               exact
             >
               <img src="../assets/navbar-icons/combat-icon.png" alt="Adventure"/>

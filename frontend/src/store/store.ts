@@ -1521,7 +1521,11 @@ export default new Vuex.Store<IState>({
       ]);
       dispatch('fetchWeaponDurability', weaponId);
     },
-
+    async getShieldFlag({state}, shieldId){
+      const { Shields } = state.contracts();
+      if(!Shields || !state.defaultAccount) return;
+      return await Shields.methods.getNftVar(shieldId, 2).call(defaultCallOptions(state));
+    },
     async fetchShields({ dispatch }, shieldIds: (string | number)[]) {
       await Promise.all(shieldIds.map(id => dispatch('fetchShield', id)));
     },
