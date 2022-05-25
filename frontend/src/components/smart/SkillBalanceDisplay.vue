@@ -1,7 +1,7 @@
 <template>
   <div class="skill-balance-display d-flex flex-column flex-wrap p-2 custom-skill-balance-mobile">
-    <div class="d-flex justify-content-end align-items-center pr-2 pb-0">
-      <div size="sm" class="my-2 my-sm-0 mr-1 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
+    <div class="d-flex justify-content-end align-items-center pr-2 pb-1">
+      <div size="sm" class="my-2 my-sm-0 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
         <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
           <div class="buy-skill-modal">
             <h4 class="text-center mt-1 mb-4"> {{ $t('skillBalanceDisplay.buyWithCrypto') }} </h4>
@@ -17,7 +17,7 @@
             />
           </div>
         </b-modal>
-        <img src="../../assets/add-skill-icon.svg" class="add-button gtag-link-others" :style="isMobile() ? 'width: 20px':''"  tagname="buy_skill">
+        <img src="../../assets/add-skill-icon.svg" class="add-button gtag-link-others mr-1 mt-1" :style="isMobile() ? 'width: 10px':''"  tagname="buy_skill">
       </div>
       <div class="d-flex justify-content-between align-items-center balance-container mt-1">
         <div>
@@ -72,12 +72,6 @@
       </div>
       <div class="deposit-withdraw px-2">
         <span @click="claimSkill(ClaimStage.Summary)">WITHDRAW</span>
-      </div>
-      <div class="deposit-withdraw border-line-custom px-2">
-        <span>|</span>
-      </div>
-      <div class="deposit-withdraw px-2">
-        <span @click="showModal">DEPOSIT</span>
       </div>
       <div class="deposit-withdraw border-line-custom px-2" v-if="hasBnbAvailableToWithdraw">
         <span>|</span>
@@ -448,8 +442,9 @@ export default Vue.extend({
 <style scoped>
 @media (max-width: 576px) {
   .custom-skill-balance-mobile{
-    font-size: 13px !important;
+    font-size: 3.3vw !important;
     border-left: 1px solid #424A59;
+  font-size: clamp(.8rem, .7vw, 1rem) !important;
   }
   .none-mobile {
     display: none !important;
@@ -491,6 +486,7 @@ export default Vue.extend({
 }
 .skill-balance-display {
   border-right: 1px solid #424A59;
+  font-size: clamp(.9rem, .7vw, 1rem) !important;
 }
 
 .skill-tooltip > img{
@@ -504,7 +500,7 @@ export default Vue.extend({
 }
 
 .balance-container {
-  color: #b3b0a7;
+  color: #fff;
   text-align: right;
 }
 

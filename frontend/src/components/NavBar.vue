@@ -1,6 +1,6 @@
 <template>
   <div class="main-nav-div">
-    <b-navbar class="main-nav" toggleable="sm">
+    <b-navbar class="main-nav" toggleable="lg">
       <div class="nav-logo col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1">
         <router-link :to="{ name: 'plaza' }" exact class="game-ui-logo">
           <img
@@ -10,14 +10,6 @@
           />
         </router-link>
       </div>
-
-      <b-navbar-toggle target="navbar-toggle-collapse" class="none-mobile">
-        <template #default="{ expanded }">
-          <b-icon v-if="expanded" icon="chevron-bar-up"></b-icon>
-          <b-icon v-else icon="chevron-bar-down"></b-icon>
-        </template>
-      </b-navbar-toggle>
-
       <b-collapse id="navbar-toggle-collapse" class="none-mobile" is-nav>
         <view-links class="view-links"></view-links>
       </b-collapse>
@@ -26,10 +18,8 @@
       <options class="d-none d-sm-flex none-mobile"/>
 
       <!-- Render only on mobile view -->
-      <div class="d-flex d-sm-none right-details">
-        <skill-balance-display class="skill-display-mobile"/>
-        <options class="options-display-mobile"/>
-      </div>
+      <skill-balance-display class="skill-display-mobile d-sm-none"/>
+      <options class="options-display-mobile d-sm-none"/>
     </b-navbar>
   </div>
 </template>
@@ -99,9 +89,8 @@ a.router-link-active {
 }
 
 .view-links {
-  justify-content: space-between;
   align-items: center;
-  gap: 5rem;
+  gap: 3rem;
   padding: 0em 2em;
 }
 
