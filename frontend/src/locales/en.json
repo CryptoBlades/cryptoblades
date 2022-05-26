@@ -271,6 +271,7 @@
   "weaponIcon": {
     "durability": "Durability:",
     "durabilityTooltip": "Repairs 1 point every 50 minutes, durability will be full at:",
+    "durabilityTooltipFull": "Repairs 1 point every 50 minutes",
     "id": "ID",
     "bonusPower": "Bonus power:"
   },
