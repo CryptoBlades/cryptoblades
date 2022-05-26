@@ -1225,7 +1225,7 @@ h1 {
 .waitingForResult{
   height: 90vh;
   position: absolute;
-  width: 100%;
+  width: 99%;
   z-index: 98;
 }
 

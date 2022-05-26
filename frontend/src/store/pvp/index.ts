@@ -53,11 +53,11 @@ const pvp = {
       return characterLevel;
     },
 
-    async getCharacterFullPower({ rootState }: {rootState: IState}, characterId: number) {
+    async getCharacterFullPower({ rootState }: {rootState: IState}, {characterId, tier}: {characterId: number, tier: number}) {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const characterFullPower = await PvpCore.methods.getCharacterPower(characterId).call({ from: rootState.defaultAccount });
+      const characterFullPower = await PvpCore.methods.getCharacterPower(characterId, tier).call({ from: rootState.defaultAccount });
 
       return characterFullPower;
     },

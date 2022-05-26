@@ -527,8 +527,6 @@ export default Vue.extend({
       } catch (e) {
         console.error(e);
       }
-
-      setTimeout(pollAccounts, 500);
     };
 
     pollAccounts();
@@ -666,7 +664,7 @@ button,
 
 
 .tooltip{
-  z-index: 6;
+  z-index: 1051;
 }
 
 .popover .arrow{

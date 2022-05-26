@@ -2,11 +2,9 @@
   <div
     class="weapon-icon"
     v-bind:class="[(getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '')]"
-    v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
     @mouseover="hover = !isMobile() || true"
     @mouseleave="hover = !isMobile()"
   >
-
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
     </div>
@@ -14,7 +12,7 @@
     <div class="glow-container" ref="el" :class="['glow-' + (weapon.stars || 0)]">
       <div class="animation" v-bind:class="showCosmetics ? 'weapon-animation-applied-' + getWeaponCosmetic(weapon.id) : ''"/>
       <img v-if="showPlaceholder" v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
-        class="placeholder" :src="getWeaponArt(weapon)" />
+        class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)"/>
 
       <div class="stars-flex">
         <b-icon v-for="s in weapon.stars+1"  :key="s" class="star-stat" icon="star-fill" variant="warning" />
@@ -27,7 +25,7 @@
         || weapon.fourStarBurnPoints > 0
         || weapon.fiveStarBurnPoints > 0
         ? 'margin-top: -20px' : 'margin-top: 0px'">
-      <!-- <div class="weapon-details"> -->
+
         <div class="name">
           <div>
             <div class="id-number">{{$t('weaponIcon.id')}}: #{{ weapon.id }}</div>

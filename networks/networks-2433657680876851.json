@@ -3857,7 +3857,7 @@
     },
     "links": {},
     "address": "0x5Aa9f82e9DEE0b69DC1994245C206a2E17C70e60",
-    "transactionHash": "0xe2b6e09259709b98d2139f19952897704da97b04a1ff8cf7c9c24cea3988840e"
+    "transactionHash": "0xebc1e11247f12011dd6bd482c53027ace79764b44efdc33f7fca0fee02a6c75f"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -5058,7 +5058,7 @@
     },
     "links": {},
     "address": "0x4Ee8FBd60247a1b5A77e653935A13Ebfc9b00Ec4",
-    "transactionHash": "0xdc95d3ca38c54540ab3516039f0a2a2a6e2e8ed78104d4b0dd8ca8cfcf3ebe6b"
+    "transactionHash": "0x7200c0dec20dc008c2ede8c7f4f5d3617d0ec860646f715574aa68e64c68999a"
   },
   "build/contracts/Treasury.json": {
     "events": {},
