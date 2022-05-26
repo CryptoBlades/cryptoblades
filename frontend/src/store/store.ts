@@ -2039,10 +2039,6 @@ export default new Vuex.Store<IState>({
 
       await dispatch('fetchWeaponDurability', weaponId);
 
-      await dispatch('updateCharacterStamina', characterId);
-
-      await dispatch('getCharacterStamina', characterId);
-
       return {
         isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
         playerRoll,
