@@ -93,7 +93,8 @@
         <b-tabs pills fill nav-wrapper-class="mt-5 mb-4" >
           <upgrade-tab :soulBalance="soulBalance" @fetchSoulBalance="refreshData" />
           <skins-tab :availableSkins="availableSkins" @loadCosmeticsCount="loadCosmeticsCount" />
-          <options-tab @openTransferModal="openTransferModal" @onSendToGarrison="onSendToGarrison" @openChangeTrait="openChangeTrait" />
+          <options-tab @openTransferModal="openTransferModal" @onSendToGarrison="onSendToGarrison" @openChangeTrait="openChangeTrait"
+          @openTransferSoulModal="openTransferSoulModal" />
           <b-tab  disabled title-item-class="character-wrapper" title-link-class="character-tab">{{" "}}</b-tab>
         </b-tabs>
       </div>
@@ -139,6 +140,26 @@
         </div>
         <button :disabled="isSending || receiverAddress === ''" @click="transfer">Transfer</button>
         <button class="offset" @click="$refs['character-transfer-modal'].hide()">
+          {{$t('characterModal.close')}}
+          <img src="../../assets/close-btn.png"/>
+        </button>
+    </b-modal>
+    <!-- Character Soul Transfer Modal -->
+    <b-modal class="centered-modal" ref="character-transfer-soul-modal"
+      centered content-class="character-modal" hide-footer hide-header-close dialog-class="dialog-character" size="lg">
+      <template #modal-title>
+        {{$t('Character.transferSoul')}}
+      </template>
+        <b-form-input class="input" placeholder="Enter address" v-model="receiverAddress"/>
+        <div class="transferResultContainer">
+          <div class="loader" v-if="isSending">
+            <i class="fas fa-spinner fa-spin"></i>
+              Loading...
+          </div>
+          <span class="resultMsg text-center"> {{resultMsg}} </span>
+        </div>
+        <button :disabled="isSending || receiverAddress === ''" @click="transfer">Transfer</button>
+        <button class="offset" @click="$refs['character-transfer-soul-modal'].hide()">
           {{$t('characterModal.close')}}
           <img src="../../assets/close-btn.png"/>
         </button>
@@ -377,6 +398,9 @@ export default Vue.extend({
     ]) as StoreMappedActions,
     getCharacterArt,
     RequiredXp,
+    openTransferSoulModal(){
+      (this.$refs['character-transfer-soul-modal'] as BModal).show();
+    },
     openTransferModal(){
       (this.$refs['character-transfer-modal'] as BModal).show();
     },

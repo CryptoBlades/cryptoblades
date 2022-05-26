@@ -77,6 +77,8 @@
     "sendToGarrisonText": "You will not be able to use the character when in garrison.",
     "transfer": "Transfer",
     "transferText": "Transfer character to another address.",
+    "transferSoul": "Soul Transfer",
+    "transferSoulText": "Transfer soul to another address.",
     "change": "Change",
     "send": "Send",
     "max": "Max",

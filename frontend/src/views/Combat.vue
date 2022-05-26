@@ -428,7 +428,7 @@ export default {
           targetString: targetIndex,
           fightMultiplier: this.fightMultiplier,
         });
-
+        console.log(results);
         this.fightResults = results;
 
         await this.fetchFightRewardSkill();
