@@ -404,10 +404,9 @@
                   </div>
                   <div>
                     <input v-model="lesserDust" type="range" min="0" :max="getLesserDust()" value="0" steps="1">
-                    <div class="value right">{{lesserDust}}/{{getLesserDust()}}</div>
                   </div>
                   <div>
-                    <span>{{lesserDust}}</span>
+                    <span>{{lesserDust}}/{{getLesserDust()}}</span>
                     <span class="cursor-p" @click="lesserDust = getLesserDust()">{{$t('blacksmith.max')}}</span>
                   </div>
                 </div>
@@ -425,10 +424,9 @@
                   </div>
                   <div>
                     <input v-model="greaterDust" type="range" min="0" :max="getGreaterDust()" value="0" steps="1">
-                    <div class="value right">{{greaterDust}}/{{getGreaterDust()}}</div>
                   </div>
                   <div>
-                    <span>{{greaterDust}}</span>
+                    <span>{{greaterDust}}/{{getGreaterDust()}}</span>
                     <span class="cursor-p" @click="greaterDust = getGreaterDust()">{{$t('blacksmith.max')}}</span>
                   </div>
                 </div>
@@ -446,10 +444,9 @@
                   </div>
                   <div>
                     <input v-model="powerfulDust" type="range" min="0" :max="getPowerfulDust()" value="0" steps="1">
-                    <div class="value right">{{powerfulDust}}/{{getPowerfulDust()}}</div>
                   </div>
                   <div>
-                    <span>{{powerfulDust}}</span>
+                    <span>{{powerfulDust}}/{{getPowerfulDust()}}</span>
                     <span class="cursor-p" @click="powerfulDust = getPowerfulDust()">{{$t('blacksmith.max')}}</span>
                   </div>
                 </div>
@@ -2028,26 +2025,26 @@ export default Vue.extend({
 
 .dust-gauge > div:nth-child(3) > span:nth-child(1){
   border: 1px solid rgba(255, 255, 255, 0.205);
-  padding: 5px 20px;
+  padding: 5px 10px;
   color: #fff;
   font-family: Roboto;
   border-radius: 5px;
   font-size: 12px;
   max-width: 60px;
-  min-width: 60px;
+  min-width: 80px;
   text-align: center;
   margin-right: 10px;
 }
 
 .dust-gauge > div:nth-child(3) > span:nth-child(2){
   border: 1px solid rgba(255, 255, 255, 0.205);
-  padding: 5px 20px;
+  padding: 5px 5px;
   color: #fff;
   font-family: Roboto;
   border-radius: 5px;
   max-width: 60px;
   font-size: 12px;
-  min-width: 60px;
+  min-width: 80px;
   text-align: center;
 }
 
@@ -2064,6 +2061,10 @@ export default Vue.extend({
 
 .dust-gauge > div > div {
   padding-left: 15px;
+}
+
+.dust-gauge > div div:nth-child(2){
+   width:200px;
 }
 
 .dust-gauge > div > div > span{
