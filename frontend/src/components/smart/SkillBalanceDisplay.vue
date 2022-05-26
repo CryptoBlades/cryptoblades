@@ -146,6 +146,7 @@ import { ICharacter } from '@/interfaces';
 import { getCleanName } from '@/rename-censor';
 import ElementTrait from '@/components/smart/ElementTrait.vue';
 import { SupportedProject } from '@/views/Treasury.vue';
+import PartneredProject from '../PartneredProject.vue';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -433,7 +434,8 @@ export default Vue.extend({
 
   components: {
     BModal,
-    ElementTrait
+    ElementTrait,
+    PartneredProject,
   }
 });
 </script>
