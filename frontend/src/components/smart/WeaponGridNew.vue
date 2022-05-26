@@ -59,7 +59,6 @@
       <transition-group
         appear @before-enter="beforeEnter" @enter="enter"
         class="weapon-grid" tag="ul" name="list" ref="weapon-grid"
-        :style="gridStyling != [] ? gridStyling : ''"
         >
         <li
           class="weapon" :style="setBorderSelected(weapon.id) ? 'border: 2px solid #fff' : ''"
@@ -231,12 +230,6 @@ export default Vue.extend({
     titleType:{
       type: String,
       default: ''
-    },
-    gridStyling:{
-      type: Array as PropType<string[]>,
-      default() {
-        return [];
-      },
     },
     ignore: {
       type: Array as PropType<string[]>,

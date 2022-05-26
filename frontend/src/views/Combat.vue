@@ -297,7 +297,8 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp',
+      'fetchCharacterStamina','getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
       'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
@@ -432,6 +433,8 @@ export default {
 
         await this.fetchFightRewardSkill();
         await this.fetchFightRewardXp();
+
+        await this.fetchCharacterStamina(this.currentCharacterId);
 
         this.error = null;
       } catch (e) {
