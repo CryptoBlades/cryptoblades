@@ -22,13 +22,13 @@
               <span>|</span>
           </div>
           <div class="character-level">
-              <span>LEVEL {{this.characterInformation.level}}</span>
+              <span>{{$t('homePage.level')}} {{this.characterInformation.level}}</span>
           </div>
           <div class="character-data-divider">
               <span>|</span>
           </div>
           <div class="character-stamina">
-            <span>{{this.characterInformation.stamina}}/{{maxStamina}} STAMINA</span>
+            <span>{{this.characterInformation.stamina}}/{{maxStamina}} {{$t('homePage.stamina')}}</span>
           </div>
         </div>
         <div class="small-stamina-char"
@@ -37,7 +37,7 @@
         <div class="pvp-stats-container">
           <div class="pvp-wins-container">
             <div class="pvp-wins-label">
-              <span>PVP WINS</span>
+              <span>PVP {{$t('homePage.wins')}}</span>
             </div>
             <div class="pvp-wins-value">
               <span>{{numberWithCommas(this.characterInformation.pvpWins)}}</span>
@@ -45,7 +45,7 @@
           </div>
           <div class="pvp-rank-container">
             <div class="pvp-rank-label">
-              <span>PVP RANK</span>
+              <span>PVP {{$t('homePage.rank')}}</span>
             </div>
             <div class="pvp-rank-value">
               <span>{{numberWithCommas(this.characterInformation.rank)}}</span>
@@ -53,7 +53,7 @@
           </div>
           <div class="pvp-power-container">
             <div class="pvp-power-label">
-              <span>POWER</span>
+              <span>{{$t('homePage.power')}}</span>
             </div>
             <div class="pvp-power-value">
               <span>{{numberWithCommas(this.characterInformation.power)}}</span>
@@ -71,22 +71,20 @@
             <div class="raid-boss-element-container">
                 <div class="raid-element-frame">
                   <div>
-                    <span id="water-element"/>
-                    <!-- <span id="raid-fire-element"/> -->
+                    <span :id="traitNumberToName(this.raidData.bossTrait).toLowerCase()+'-element'"/>
                   </div>
                 </div>
             </div>
             <div class="raid-boss-name">
-              <span>ASWANG AT DIABLO </span>
-              <!-- <span>{{this.raidData.bossName}}</span> -->
+              <span>{{this.raidData.bossName}}</span>
               <p>{{$t('raid.title')}}</p>
             </div>
           </div>
           <div class="raid-boss-power-element-duration-container">
-            <img class="boss-images" :src="`${getBossArt(this.raidData.raidIndex)}`">
+            <span class="boss-images" :style="`content:url('${getBossArt(this.raidData.raidIndex)}')`"></span>
             <div class="raid-boss-power">
               <div>
-              <span class="raid-boss-label">Boss Power</span>
+              <span class="raid-boss-label">{{$t('homePage.bossPower')}}</span>
               </div>
               <div>
                 <span v-if="raidData.bossPower !== ''" class="raid-boss-value">{{this.raidData.bossPower}}</span>
@@ -95,7 +93,7 @@
             </div>
             <div class="raid-boss-element">
               <div>
-              <span class="raid-boss-label">Element</span>
+              <span class="raid-boss-label">{{$t('homePage.element')}}</span>
               </div>
               <div>
                 <span class="raid-boss-value">{{traitNumberToName(this.raidData.bossTrait).toUpperCase()}}</span>
@@ -103,7 +101,7 @@
             </div>
             <div class="raid-boss-duration">
               <div>
-              <span class="raid-boss-label">Registration Ends</span>
+              <span class="raid-boss-label">{{$t('homePage.registrationEnds')}}</span>
               </div>
               <div>
                 <span class="raid-boss-value" v-if="raidData.raidStatus === '0' || raidData.raidStatus === ''">00:00</span>
@@ -113,23 +111,26 @@
           </div>
           <div class="raid-boss-participants-total-power-container">
             <div>
-            <span class="raid-boss-label">Participants Total Power: </span>
+            <span class="raid-boss-label">{{$t('homePage.particapantsTotalPower')}}: </span>
             <span class="raid-boss-power-value">{{this.raidData.totalPower}} ({{(this.raidData.totalPower/this.raidData.bossPower)*100}}%)</span>
             </div>
-            <!-- <div class="participants-power"
+            <div class="participants-power"
               :style="`--power: ${(this.raidData.totalPower/this.raidData.bossPower)*100}%;`">
-            </div> -->
-            <div class="participants-power" style="--power:50%">
             </div>
           </div>
+          <router-link :to="{ name: 'raid' }" exact>
+            <div class="pve-button dashboard-btn mt-4 none-desktop">
+              <span>{{$t('homePage.joinRaid')}}</span>
+            </div>
+          </router-link>
           <div class="raid-boss-button-and-drops">
             <router-link :to="{ name: 'raid' }" exact>
-              <div class="pve-button dashboard-btn">
-                <span>JOIN RAID</span>
+              <div class="pve-button dashboard-btn joinRaid">
+                <span>{{$t('homePage.joinRaid')}}</span>
               </div>
             </router-link>
             <div>
-              <p>Chance to Drop</p>
+              <p>{{$t('homePage.chanceDrop')}}</p>
               <div class="raid-drops">
                  <img class="raid-img" src="../assets/trinkets/trinket1.png">
                 <img class="raid-img" src="../assets/junk/junk1.png">
@@ -142,41 +143,41 @@
       <div class="pvp-and-pve-container">
         <div class="pve-container">
           <div class="pve-title">
-            <span>ADVENTURE</span>
+            <span>{{$t('homePage.adventure')}}</span>
           </div>
           <div class="pve-description">
-            <span>Engage on PVE battles to earn rewards.</span>
+            <span>{{$t('homePage.engage')}}</span>
           </div>
           <router-link :to="{ name: 'combat' }" exact>
             <div class="pve-button dashboard-btn">
-              <span>Adventure</span>
+              <span>{{$t('homePage.adventure')}}</span>
             </div>
           </router-link>
         </div>
         <div class="pvp-container">
           <div class="pve-title">
-            <span>RANK MATCH</span>
+            <span>{{$t('homePage.rankMatch')}}</span>
           </div>
           <div class="pve-description">
-            <span>Defeat other Players on PVP battles to earn rewards.</span>
+            <span>{{$t('homePage.defeatRewards')}}.</span>
           </div>
           <router-link :to="{ name: 'pvp' }" exact>
             <div class="pve-button dashboard-btn">
-              <span>SIGN UP</span>
+              <span>{{$t('homePage.signUp')}}</span>
             </div>
           </router-link>
         </div>
       </div>
       </div>
     </div>
-    <div style="min-height: 100vh;" class="d-flex align-items-start justify-content-center" v-if="!haveCharacters">
+    <div style="min-height: 100vh;" class="noChar" v-if="!haveCharacters">
       <div style="z-index: 3;">
-        <span>Go to plaza to recruit your first character</span>
+        <span>{{$t('homePage.goRecruit')}}</span>
       </div>
       <div style="z-index: 3;">
         <router-link :to="{ name: 'plaza' }" exact>
           <div class="pve-button dashboard-btn">
-            <span>Go to Plaza</span>
+            <span>{{$t('homePage.gotoPlaza')}}</span>
           </div>
         </router-link>
       </div>
@@ -388,11 +389,13 @@ export default Vue.extend({
   flex-direction: column;
   height: 100%;
   z-index: 1;
+  overflow-x:hidden ;
 }
 
 .dashboard-container > div:nth-child(2){
   z-index: 2;
 }
+
 
 .overlay-bg {
   position: absolute;
@@ -403,6 +406,27 @@ export default Vue.extend({
   width: 100%;
   z-index: 1;
 }
+
+.noChar{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.noChar > div:nth-child(1) > span{
+  font-family: Trajan;
+  font-size: 2em;
+}
+
+.noChar > div:nth-child(1){
+  margin-bottom: 2em;
+}
+
+.noChar > div:nth-child(2){
+  margin-top: 2em;
+}
+
 
 .upper-body-container {
   background-color: transparent;
@@ -814,6 +838,10 @@ export default Vue.extend({
   border: 1px solid #343a40;
 }
 
+.none-desktop{
+  display: none;
+}
+
 @media screen and (max-width: 1280px)  {
 
   .overlay-bg {
@@ -847,6 +875,10 @@ export default Vue.extend({
     z-index: 3;
     padding-left: 20px;
     padding-right: 20px;
+  }
+
+  .joinRaid{
+    display: none;
   }
 
   .upper-body-container{
@@ -896,6 +928,7 @@ export default Vue.extend({
     grid-column-gap: 0px;
     grid-row-gap: 0px;
     z-index: 1;
+    overflow: hidden;
   }
 
   .raid-boss-power { grid-area: 1 / 1 / 2 / 2; width: 100%; }
@@ -960,6 +993,31 @@ export default Vue.extend({
   .pvp-and-pve-container {
     width: 100%;
     margin-top: 30px;
+  }
+
+  .none-desktop{
+    display: inline-block;
+  }
+}
+
+.pve-container:hover{
+  animation: animateBG 3s ease;
+}
+
+.pvp-container:hover{
+  animation: animateBG 3s ease;
+}
+
+.raid-container:hover{
+  animation: animateBG 3s ease;
+}
+
+@keyframes animateBG {
+  from{
+    background-size: 100%;
+  }
+  to{
+    background-size: 110%;
   }
 }
 </style>

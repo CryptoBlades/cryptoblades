@@ -112,6 +112,26 @@
     "youRolled": "You rolled:",
     "enemyRolled": "Enemy rolled:"
   },
+  "homePage":{
+    "level": "Level",
+    "stamina": "STAMINA",
+    "wins": "WINS",
+    "rank": "RANK",
+    "power": "POWER",
+    "bossPower": "Boss Power",
+    "element": "Element",
+    "registrationEnds": "Registration Ends",
+    "particapantsTotalPower": "Parcticipants Total Power",
+    "joinRaid": "JOIN RAID",
+    "chanceDrop": "Chance to Drop",
+    "adventure": "ADVENTURE",
+    "rankMatch": "RANK MATCH",
+    "defeatRewards": "Defeat other Players on PVP battles to earn rewards",
+    "goRecruit": "Go to plaza to recruit your first character",
+    "engage": "Engage on PVE battles to earn rewards.",
+    "signUp": "SIGN UP",
+    "gotoPlaza": "Go to Plaza"
+  },
   "nft": {
      "transferMenuItem": "Transfer",
      "transferOkButton": "Transfer!"
