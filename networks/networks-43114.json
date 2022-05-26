@@ -2442,7 +2442,7 @@
     },
     "links": {},
     "address": "0x46419526a59ec1d73b72620ae16da091bE8486bd",
-    "transactionHash": "0x7e74de52ec1f6b025ec3c264f60f1706892ea340f05415bee6f713c16c3e290e"
+    "transactionHash": "0xf339154540727694195befa352574c95e75f50c50911c34f7424babb6ff2e37a"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},
