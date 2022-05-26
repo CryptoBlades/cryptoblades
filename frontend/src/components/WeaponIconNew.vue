@@ -107,7 +107,7 @@ function transformModel(model, y) {
 export default {
   props: ['weapon', 'favorite', 'selected'],
   computed: {
-    ...mapState(['maxDurability']),
+    ...mapState(['maxDurability', 'specialWeaponArts']),
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',

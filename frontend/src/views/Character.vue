@@ -183,6 +183,7 @@ interface StoreMappedActions {
   fetchCharactersBurnCost(payload: string[]): Promise<string>;
   burnCharactersIntoSoul(payload: string[]): Promise<void>;
   burnCharactersIntoCharacter(payload: {burnIds: string[], targetId: string}): Promise<void>;
+  claimGarrisonXp(payload: string[]): Promise<void>;
 }
 
 interface StoreMappedGetters {
@@ -211,7 +212,8 @@ interface Data {
   targetCharacterId: string;
   remainingPowerLimit: number;
   burnOption: number;
-  isBurnInProgress: boolean
+  isBurnInProgress: boolean;
+  isClaimingXp: boolean;
 }
 
 export default Vue.extend({
@@ -238,7 +240,8 @@ export default Vue.extend({
       targetCharacterId: '',
       remainingPowerLimit: 0,
       burnOption: 0,
-      isBurnInProgress: false
+      isBurnInProgress: false,
+      isClaimingXp: false,
     };
   },
   computed: {
@@ -316,6 +319,7 @@ export default Vue.extend({
       'fetchCharactersBurnCost',
       'burnCharactersIntoSoul',
       'burnCharactersIntoCharacter',
+      'claimGarrisonXp',
     ]) as StoreMappedActions,
     ...mapGetters(['getExchangeTransakUrl']) as StoreMappedGetters,
     toggleGarrison() {
@@ -323,6 +327,15 @@ export default Vue.extend({
         this.setCurrentCharacter(this.ownedCharacterIds[0]);
       }
       this.garrison = !this.garrison;
+    },
+    async onClaimGarrisonXp() {
+      this.isClaimingXp = true;
+      try {
+        await this.claimGarrisonXp(this.ownedGarrisonCharacterIds.filter((id: string|number) => +this.xpRewards[id] > 0));
+      }
+      finally {
+        this.isClaimingXp = true;
+      }
     },
     async onMintCharacter() {
       try {

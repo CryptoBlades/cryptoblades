@@ -82,6 +82,7 @@ import {getConfigValue} from '@/contracts';
 import i18n from '@/i18n';
 import {TranslateResult} from 'vue-i18n';
 import '@/mixins/general';
+import Hint from '@/components/Hint.vue';
 
 interface CombatResult {
   isVictory: boolean;
@@ -93,6 +94,9 @@ interface CombatResult {
 }
 
 export default Vue.extend({
+  components: {
+    Hint
+  },
   props: {
     fightResults: {
       type: Object as PropType<CombatResult>,
