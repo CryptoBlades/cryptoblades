@@ -7,7 +7,7 @@
         <div class="character-element">
           <div class="element-frame">
             <div>
-              <span id="fire-element" />
+              <span :id="(this.characterInformation.element).toLowerCase()+'-element'" />
             </div>
           </div>
         </div>
@@ -40,7 +40,7 @@
               <span>PVP WINS</span>
             </div>
             <div class="pvp-wins-value">
-              <span>{{this.characterInformation.pvpWins}}</span>
+              <span>{{numberWithCommas(this.characterInformation.pvpWins)}}</span>
             </div>
           </div>
           <div class="pvp-rank-container">
@@ -48,7 +48,7 @@
               <span>PVP RANK</span>
             </div>
             <div class="pvp-rank-value">
-              <span>{{this.characterInformation.rank}}</span>
+              <span>{{numberWithCommas(this.characterInformation.rank)}}</span>
             </div>
           </div>
           <div class="pvp-power-container">
@@ -56,7 +56,7 @@
               <span>POWER</span>
             </div>
             <div class="pvp-power-value">
-              <span>{{this.characterInformation.power}}</span>
+              <span>{{numberWithCommas(this.characterInformation.power)}}</span>
             </div>
           </div>
         </div>
@@ -64,32 +64,33 @@
     </div>
     <div class="lower-body-container">
       <div class="raid-container">
-        <div class="raid-boss-image-container">
-          <img class="boss-image" :src="getBossArt(this.raidData.raidIndex)">
-        </div>
+        <div class="bg-blocking"></div>
+        <div class="raid-boss-image-container"  :style="`background:url('${getBossArt(this.raidData.raidIndex)}')`"></div>
         <div class="raid-info-container">
           <div class="raid-boss-name-element-container">
             <div class="raid-boss-element-container">
                 <div class="raid-element-frame">
                   <div>
-                    <span id="raid-fire-element"/>
+                    <span id="water-element"/>
+                    <!-- <span id="raid-fire-element"/> -->
                   </div>
                 </div>
             </div>
             <div class="raid-boss-name">
-              <span>{{this.raidData.bossName}}</span>
+              <span>ASWANG AT DIABLO </span>
+              <!-- <span>{{this.raidData.bossName}}</span> -->
+              <p>{{$t('raid.title')}}</p>
             </div>
           </div>
-          <div class="raid-divider">
-
-          </div>
           <div class="raid-boss-power-element-duration-container">
+            <img class="boss-images" :src="`${getBossArt(this.raidData.raidIndex)}`">
             <div class="raid-boss-power">
               <div>
               <span class="raid-boss-label">Boss Power</span>
               </div>
               <div>
-                <span class="raid-boss-value">{{this.raidData.bossPower}}</span>
+                <span v-if="raidData.bossPower !== ''" class="raid-boss-value">{{this.raidData.bossPower}}</span>
+                <span v-else class="raid-boss-value">0</span>
               </div>
             </div>
             <div class="raid-boss-element">
@@ -105,7 +106,8 @@
               <span class="raid-boss-label">Registration Ends</span>
               </div>
               <div>
-                <span class="raid-boss-value">{{this.remainingTime.minutes}}:{{this.remainingTime.seconds}}</span>
+                <span class="raid-boss-value" v-if="raidData.raidStatus === '0' || raidData.raidStatus === ''">00:00</span>
+                <span class="raid-boss-value" v-else>{{this.remainingTime.minutes}}:{{this.remainingTime.seconds}}</span>
               </div>
             </div>
           </div>
@@ -114,19 +116,24 @@
             <span class="raid-boss-label">Participants Total Power: </span>
             <span class="raid-boss-power-value">{{this.raidData.totalPower}} ({{(this.raidData.totalPower/this.raidData.bossPower)*100}}%)</span>
             </div>
-            <div class="participants-power"
+            <!-- <div class="participants-power"
               :style="`--power: ${(this.raidData.totalPower/this.raidData.bossPower)*100}%;`">
+            </div> -->
+            <div class="participants-power" style="--power:50%">
             </div>
           </div>
           <div class="raid-boss-button-and-drops">
             <div class="pve-button dashboard-btn">
               <span @click="goToRaid()">JOIN RAID</span>
             </div>
+            <div>
+              <p>Chance to Drop</p>
               <div class="raid-drops">
-                <img class="raid-img" src="../assets/trinkets/trinket1.png">
+                 <img class="raid-img" src="../assets/trinkets/trinket1.png">
                 <img class="raid-img" src="../assets/junk/junk1.png">
                 <img class="raid-img" src="../assets/placeholder/sword-placeholder-0.png">
               </div>
+            </div>
           </div>
         </div>
       </div>
@@ -164,6 +171,7 @@ import { characterFromContract as formatCharacter } from '../contract-models';
 import { duelResultFromContract as formatDuelResult } from '../contract-models';
 import {getBossArt} from '@/raid-boss-art-placeholder';
 import {traitNumberToName} from '@/contract-models';
+
 export default {
   inject: ['web3'],
 
@@ -249,6 +257,10 @@ export default {
       return dragonNames[+this.raidData.raidIndex % dragonNames.length];
     },
 
+    numberWithCommas(x) {
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    },
+
     getTimeRemaining(){
       setInterval(() => {
         const eventTime = this.raidData.expectedFinishTime.getTime();
@@ -307,7 +319,6 @@ export default {
     },
     async processRaidData() {
       const raidData = this.getRaidState;
-
       this.raidData.raidIndex = raidData.index;
       this.raidData.bossName = this.getBossName();
       this.raidData.raiderCount = raidData.raiderCount;
@@ -321,7 +332,11 @@ export default {
       this.raidData.bossPower = +raidData.bossPower;
       this.raidData.bossTrait = raidData.bossTrait;
       this.raidData.accountPower = +raidData.accountPower;
-
+    }
+  },
+  watch:{
+    async currentCharacterId(){
+      await this.fetchDashboardDetails(this.currentCharacterId);
     }
   },
 
@@ -331,14 +346,11 @@ export default {
     if(this.currentCharacterId === null){
       this.setCurrentCharacter(this.ownedCharacterIds[0]);
     }
-
     Promise.all([
       await this.fetchDashboardDetails(this.currentCharacterId),
       await this.fetchRaidState(),
       await this.processRaidData()
     ]);
-
-
   }
 
 };
@@ -369,7 +381,7 @@ export default {
 
 .lower-body-container {
   background-color: transparent;
-  height: 70%;
+  height: 68%;
 }
 
 .upper-body-container,
@@ -378,6 +390,7 @@ export default {
   flex-direction: row;
   z-index: 3;
   padding: 50px;
+  padding-top: 25px;
 }
 
 .pvp-and-pve-container {
@@ -430,10 +443,10 @@ export default {
 }
 
 .element-frame {
-  padding: 10px;
-  height: 10px;
-  width: 10px;
-  border: 2px solid #968E74;
+  padding: 15px;
+  height: 20px;
+  width: 20px;
+  border: 1px solid #968E74;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -455,22 +468,50 @@ export default {
 .raid-boss-name > span {
   color: #EDCD90;
   font-family: 'Trajan', serif;
-  font-weight: bold;
-  font-size: 25px;
+  font-weight: 500;
+  font-size: 1.5vw;
   text-transform: uppercase;
   letter-spacing: 0;
 }
 
+.raid-boss-name > p{
+  text-transform: capitalize;
+  font-family: Roboto;
+  color: #CEC198;
+  font-size: 0.75vw;
+}
+
 #fire-element {
   content: url("../assets/elements/icon-fire.png");
-  height: 20px;
-  width: 20px;
+  height: 25px;
+  width: 25px;
   background: rgba(0, 0, 0, 0.076);
 }
 
-.character-details-container {
-  width: 30%;
+#water-element {
+  content: url("../assets/elements/icon-water.png");
+  height: 25px;
+  width: 25px;
+  background: rgba(0, 0, 0, 0.076);
 }
+
+#lightning-element {
+  content: url("../assets/elements/icon-thunder.png");
+  height: 25px;
+  width: 25px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
+#earth-element {
+  content: url("../assets/elements/icon-earth.png");
+  height: 25px;
+  width: 25px;
+  background: rgba(0, 0, 0, 0.076);
+}
+
+/* .character-details-container {
+  width: 30%;
+} */
 
 .character-data-container {
   display: flex;
@@ -485,6 +526,17 @@ export default {
   column-gap: 20px;
 }
 
+.character-data-container > div {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.character-data-container > div > span {
+  text-transform: uppercase;
+  font-family: Roboto;
+  font-size: 0.75vw
+}
+
 .character-data-divider {
   color: #7F8693;
 }
@@ -495,7 +547,7 @@ export default {
   width: auto;
   border-radius: 2px;
   border: none;
-  background : linear-gradient(to right, #EDCD90 var(--staminaReady), #817D6D 0);
+  background : linear-gradient(to right, #EDCD90 var(--staminaReady), #484848 0);
 }
 
 .participants-power {
@@ -504,7 +556,7 @@ export default {
   width: auto;
   border-radius: 2px;
   border: none;
-  background : linear-gradient(to right, #EDCD90 var(--power), #817D6D 0);
+  background : linear-gradient(to right, #EDCD90 var(--power), #484848 0);
 }
 
 .pvp-stats-container {
@@ -519,7 +571,7 @@ export default {
   color: #CEC198;
   font-family: 'Roboto', serif;
   line-height: 17px;
-  font-size: 12px;
+  font-size: 0.75vw;
   font-style: normal;
   font-variant: normal;
   letter-spacing: 1px;
@@ -531,7 +583,7 @@ export default {
   color: #ffff;
   font-family: 'Oswald', serif;
   line-height: 60px;
-  font-size: 40px;
+  font-size: 2.2vw;
   font-style: normal;
   font-variant: normal;
   letter-spacing: 1px;
@@ -540,7 +592,7 @@ export default {
 .raid-boss-value {
   color: #ffff;
   font-family: 'Oswald', serif;
-  line-height: 60px;
+  line-height: 50px;
   font-size: 30px;
   font-style: normal;
   font-variant: normal;
@@ -549,12 +601,16 @@ export default {
 
 .raid-boss-power-value {
   color: #ffff;
-  font-family: 'Oswald', serif;
+  font-family: 'Roboto', serif;
   line-height: 17px;
-  font-size: 12px;
+  font-size: 0.9em;
   font-style: normal;
   font-variant: normal;
   letter-spacing: 0px;
+}
+
+.raid-boss-power-element-duration-container{
+  margin-bottom: 20px;
 }
 
 .dashboard-btn:hover{
@@ -562,7 +618,7 @@ export default {
 }
 
 .dashboard-btn > span{
-  background-image: url('../assets/btn-long.svg');
+  background-image: url('../assets/buttonOutline.svg');
   background-color: transparent;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -571,7 +627,7 @@ export default {
   border: none;
   font-family: 'Oswald';
   color: #fff;
-  font-size: 30px;
+  font-size: 1.2vw;
   text-align: center;
 }
 
@@ -580,14 +636,35 @@ export default {
   font: normal normal bold 20px/27px 'Trajan';
 }
 
+/* added this important coz there's a weird css issue that preventing the styling to applying in the div*/
+.lower-body-container > .raid-container > .raid-boss-image-container{
+  background-position-y: 30px !important;
+  background-position-x: -80px !important;
+  background-size: 130% !important;
+  background-repeat: no-repeat !important;
+}
+
+.lower-body-container > .bg-blocking{
+  background-color: rgba(0, 0, 0, 0.274);
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+}
+
 .raid-boss-image-container {
   width: 40%;
   height: 100%;
 }
 
 .boss-image {
-  width: 100%;
-  height: inherit;
+    width: 30vw;
+    /* height: inherit; */
+    height: auto;
+    position: absolute;
+    bottom: -90px;
+    left: -90px;
 }
 
 .raid-info-container {
@@ -598,10 +675,10 @@ export default {
 }
 
 .raid-element-frame {
-  padding: 10px;
+  padding: 18px;
   height: 30px;
   width: 30px;
-  border: 2px solid #968E74;
+  border: 1px solid #968E74;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -619,25 +696,29 @@ export default {
   transform: rotate(-45deg);
 }
 
-#raid-fire-element {
-  content: url("../assets/elements/icon-fire.png");
-  height: 20px;
-  width: 20px;
-  background: rgba(0, 0, 0, 0.076);
-}
-
 .raid-boss-name-element-container{
   display: flex;
   flex-direction: row;
   padding-top: 50px;
+  align-items: center;
   column-gap: 30px;
-  margin-bottom: 20px;
+  border-bottom: 1px solid #cec1985b;
+  margin-bottom: 30px;
+}
+
+.raid-element-frame > div > span{
+  width: 30px;
+  height: 30px;
 }
 
 .raid-divider {
-  border-bottom: 3px solid gray;
+  border-bottom: 1px solid gray;
   width: 100%;
   opacity: 0.5;
+}
+
+.pve-description{
+  margin-bottom: 20px;
 }
 
 .pve-description > span {
@@ -662,7 +743,7 @@ export default {
   color: #CEC198;
   font-family: 'Roboto', 'sans serif';
   line-height: 17px;
-  font-size: 12px;
+  font-size: 0.75vw;
   font-style: normal;
   font-variant: normal;
   letter-spacing: 0px;
@@ -672,6 +753,20 @@ export default {
   display: flex;
   flex-direction: row;
   column-gap: 10px;
+  margin-top: 40px;
+  align-items: center;
+}
+
+.raid-boss-button-and-drops > div:nth-child(2){
+  display: flex;
+  flex-direction: column;
+}
+
+.raid-boss-button-and-drops > div:nth-child(2) > p{
+  margin-bottom: 5px;
+  font-family: Roboto;
+  color: #CEC198;
+  font-size: 0.8em;
 }
 
 .raid-drops {
@@ -693,17 +788,146 @@ export default {
     background-color: rgba(0, 0, 0, 0.425);
   }
   .lower-body-container {
-  display: flex;
-  flex-direction: column;
-  row-gap: 10px;
-  width: 100%;
-  margin-top: 50px;
-}
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    width: 100%;
+    margin-top: 50px;
+  }
+
   .raid-container {
     width: 100%;
   }
   .pvp-and-pve-container {
     width: 100%;
+  }
+}
+
+.boss-images{
+  display: none;
+}
+
+@media all and (max-width: 600px) {
+  .upper-body-container,
+  .lower-body-container {
+    display: flex;
+    flex-direction: row;
+    z-index: 3;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .upper-body-container{
+    height: 15%;
+  }
+
+  .character-name > span,
+  .raid-boss-name > span {
+    font-size: 4.5vw;
+  }
+
+  .character-data-container > div > span {
+    font-size: 2.2vw
+  }
+
+  .pvp-wins-label > span,
+  .pvp-rank-label > span,
+  .pvp-power-label > span {
+    font-size: 2.5vw;
+  }
+
+  .raid-boss-button-and-drops > div:nth-child(1){
+    display: none;
+  }
+
+  .raid-boss-name-element-container{
+    padding-top: 10px;
+  }
+
+  .raid-container{
+    overflow: visible;
+  }
+
+  .raid-boss-image-container{
+    display: none;
+  }
+
+  .lower-body-container{
+    padding-top: 5px;
+    margin-top: 10px !important;
+  }
+
+  .raid-boss-power-element-duration-container{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    z-index: 1;
+  }
+
+  .raid-boss-power { grid-area: 1 / 1 / 2 / 2; width: 100%; }
+  .aid-boss-element { grid-area: 1 / 2 / 2 / 3; width: 100%;}
+  .raid-boss-duration { grid-area: 2 / 1 / 3 / 3; width: 100%;}
+
+  .pvp-wins-value > span,
+  .pvp-rank-value > span,
+  .pvp-power-value > span {
+    font-size: 5.5vw;
+    line-height: 7vw;
+  }
+
+  .raid-boss-name > p{
+    font-size: 3vw;
+  }
+
+  .dashboard-btn > span{
+    font-size: 5vw;
+  }
+
+
+  .small-stamina-char{
+    margin-top: 2px;
+    margin-bottom: 2px;
+  }
+
+  .raid-boss-label {
+    font-size: 3vw;
+  }
+
+  .raid-info-container{
+    width: 100%;
+  }
+
+
+   .overlay-bg {
+    background-color: rgba(0, 0, 0, 0.425);
+  }
+  .lower-body-container {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    width: 100%;
+    margin-top: 50px;
+  }
+
+  .raid-container {
+    width: 100%;
+  }
+
+  .boss-images{
+    display: inline;
+    position: absolute;
+    margin-top: -140px;
+    right: -100px;
+    width: 65vw;
+    z-index: 2;
+    height: auto;
+  }
+
+  .pvp-and-pve-container {
+    width: 100%;
+    margin-top: 30px;
   }
 }
 </style>

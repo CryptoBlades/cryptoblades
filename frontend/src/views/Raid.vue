@@ -860,7 +860,6 @@ export default Vue.extend({
     }
   },
 
-
   async mounted() {
     this.getTimeRemaining();
     const refreshRaidData = async () => {
