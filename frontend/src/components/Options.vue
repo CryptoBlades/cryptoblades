@@ -41,8 +41,8 @@
               :to="{ name: 'combat' }"
               exact
             >
-              <img src="../assets/navbar-icons/combat-icon.png" alt="Combat"/>
-              <span>{{ $t("viewLink.combat") }}</span>
+              <img src="../assets/navbar-icons/combat-icon.png" alt="Adventure"/>
+              <span>{{ $t("viewLink.adventure") }}</span>
             </router-link>
 
             <router-link

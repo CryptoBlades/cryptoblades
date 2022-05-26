@@ -9,7 +9,14 @@
         <span class="text">
           {{$t('pvp.rewardsPool')}}($SKILL)
         </span>
-        <span class="number">{{ formatedTierRewardsPool }}</span>
+        <div>
+          <span class="bigText">FFA: </span>
+          <span class="number">{{ formatedUntieredRewardsPool }}</span>
+        </div>
+        <div>
+          <span class="bigText">Tier {{ characterInformation.tier}}: </span>
+          <span class="number">{{ formatedTierRewardsPool }}</span>
+        </div>
       </div>
     </div>
     <ul class="topPlayersList">
@@ -122,6 +129,9 @@ export default {
     tierRewardsPool: {
       default: null
     },
+    untieredRewardsPool: {
+      default: null
+    },
     tierTopRankers: {
       default: []
     },
@@ -148,6 +158,9 @@ export default {
   computed: {
     formatedTierRewardsPool() {
       return new BN(this.tierRewardsPool).div(new BN(10).pow(18)).toFixed(3);
+    },
+    formatedUntieredRewardsPool() {
+      return new BN(this.untieredRewardsPool).div(new BN(10).pow(18)).toFixed(3);
     },
     daysText() {
       return i18n.t('pvp.days');
@@ -186,6 +199,11 @@ img {
     color: #cec198;
     font-size: 0.875rem;
     line-height: 1.25rem;
+  }
+  .bigText {
+    color: #cec198;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
   }
   .number {
     color: #ffffff;

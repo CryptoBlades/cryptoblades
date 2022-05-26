@@ -4577,7 +4577,7 @@
     },
     "links": {},
     "address": "0xf7c3D4e17aE07D88F47F1DAE5743701C2F207Bb3",
-    "transactionHash": "0xf87ee57f1f750df79372dadecb6f323d0a8948c358e9ce2deb7063e70ffe491b"
+    "transactionHash": "0xa4544a62aa7fbba1ca14d314bf3fcd626c083ed0b1b8b63da14f97a4550787ce"
   },
   "build/contracts/PvpRankings.json": {
     "events": {

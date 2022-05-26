@@ -71,6 +71,9 @@ const raid = {
         .send(defaultCallOptions(rootState));
 
       await dispatch('fetchSkillBalance');
+      await dispatch('updateCharacterStamina', characterId);
+
+      await dispatch('getCharacterStamina', characterId);
     },
 
     async fetchRaidState({ rootState, commit }: {rootState: IState, commit: Commit}) {
