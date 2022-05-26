@@ -39,7 +39,8 @@
         <b-row>
           <b-col class="earned">
             <h4>
-              {{formattedSkill}}  {{formattedUsd}}
+              {{formattedSkillNoIGO}} {{formattedInUsd(calculateSkillPriceInUsd(calculateSkillRewardNoIGO()).toFixed(4))}} UNCLAIMED SKILL AND
+              {{formattedSkillIGOReward}} {{formattedInUsd(calculateSkillPriceInUsd(calculateSkillIGOReward()).toFixed(4))}} IGO
               <Hint :text="$t('combatResults.hint')" />
             </h4>
             <h5>+ {{formattedXpGain}}</h5>
@@ -83,6 +84,7 @@ import i18n from '@/i18n';
 import {TranslateResult} from 'vue-i18n';
 import '@/mixins/general';
 import Hint from '@/components/Hint.vue';
+import { mapActions } from 'vuex';
 
 interface CombatResult {
   isVictory: boolean;
@@ -103,14 +105,19 @@ export default Vue.extend({
       default() {
         return {} as CombatResult;
       },
-    }
+    },
+    staminaUsed: {
+      type: Number,
+      default: 0,
+    },
   },
 
   data() {
     return {
       skillPrice: 0,
       gasToken: '',
-      showAds: false
+      showAds: false,
+      igoDefaultReward: 0,
     };
   },
 
@@ -119,11 +126,14 @@ export default Vue.extend({
       if(this.fightResults.isVictory) return i18n.t('combatResults.won');
       else return i18n.t('combatResults.lost');
     },
-    formattedUsd(): string {
-      return `$${(this.calculateSkillPriceInUsd()).toFixed(2)}`;
+    formattedSkillNoIGO(): string {
+      return `(${this.calculateSkillRewardNoIGO()} SKILL)`;
     },
-    formattedSkill(): string {
-      return `(${toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6)} SKILL)`;
+    formattedSkillIGOReward(): string {
+      return `(${this.calculateSkillIGOReward()} SKILL)`;
+    },
+    formattedStaminaUsed(): number {
+      return this.staminaUsed / 40;
     },
     formattedSkillTooltip(): string {
       return fromWeiEther(this.fightResults.skillGain)+' SKILL';
@@ -133,12 +143,22 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions(['fetchIgoRewardsPerFight']),
     async fetchPrices(): Promise<void> {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
       this.skillPrice = response.data?.cryptoblades.usd;
     },
-    calculateSkillPriceInUsd(): number {
-      return fromWeiEther(this.fightResults.skillGain) as unknown as number * this.skillPrice as unknown as number;
+    formattedInUsd(value: string): string {
+      return `$${value}`;
+    },
+    calculateSkillPriceInUsd(skill: number): number {
+      return (skill as unknown as number * this.skillPrice as unknown as number);
+    },
+    calculateSkillRewardNoIGO(): string{
+      return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10) - this.igoDefaultReward).toString())).toFixed(6);
+    },
+    calculateSkillIGOReward(): string{
+      return toBN(fromWeiEther((this.igoDefaultReward * this.formattedStaminaUsed).toString())).toFixed(6);
     },
     checkStorage() {
       if (process.env.NODE_ENV === 'development') this.showAds = false;
@@ -149,6 +169,7 @@ export default Vue.extend({
   async mounted() {
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
     await this.fetchPrices();
+    this.igoDefaultReward = await this.fetchIgoRewardsPerFight();
     await new Promise(f => setTimeout(f, 1000));
     this.checkStorage();
   },

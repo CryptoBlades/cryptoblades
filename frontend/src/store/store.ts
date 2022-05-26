@@ -1032,6 +1032,15 @@ export default new Vuex.Store<IState>({
   },
 
   actions: {
+    async fetchIgoRewardsPerFight({ state }) {
+      const { CryptoBlades } = state.contracts();
+      if(!CryptoBlades || !state.defaultAccount) return;
+
+      const igoDefaultReward = await CryptoBlades.methods
+        .vars(27)
+        .call(defaultCallOptions(state));
+      return igoDefaultReward;
+    },
     async initializeStore({ dispatch }) {
       await dispatch('setUpContracts');
       await dispatch('setUpContractEvents');
@@ -2018,6 +2027,8 @@ export default new Vuex.Store<IState>({
           fightMultiplier
         )
         .send({ from: state.defaultAccount, gas: '300000', gasPrice: getGasPrice() });
+
+      console.log(res);
 
       await dispatch('fetchTargets', { characterId, weaponId });
 
