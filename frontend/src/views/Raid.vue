@@ -38,7 +38,7 @@
                           <p>00</p>
                           <span>{{ remainingTime.days > 1 ? $t('raid.days') : $t('raid.day') }}</span>
                         </div>
-                        <div class="hoour">
+                        <div class="hour">
                           <p>00</p>
                           <span>{{ remainingTime.hours > 1 ? $t('raid.hrs') : $t('raid.hr')}}</span>
                         </div>
@@ -56,7 +56,7 @@
                           <p>{{ zeroPad(remainingTime.days, 2) }}</p>
                           <span>{{ remainingTime.days > 1 ? $t('raid.days') : $t('raid.day') }}</span>
                         </div>
-                        <div class="hoour">
+                        <div class="hour">
                           <p>{{ zeroPad(remainingTime.hours, 2)}}</p>
                           <span>{{ remainingTime.hours > 1 ? $t('raid.hrs') : $t('raid.hr')}}</span>
                         </div>
@@ -90,7 +90,7 @@
                       </div>
                       <div style="border-right:none">
                         <span>{{$t('pvp.power')}}</span>
-                        <p>{{ addCommas(currentCharacterPower) }}</p>
+                        <p>{{ currentCharacterPower.toLocaleString() }}</p>
                       </div>
                   </div>
                   <div class="col-lg-12 col-md-6 col-sm-12 drops">
@@ -149,19 +149,15 @@
                   <div class="col-lg-12 powers">
                       <div>
                         <span>{{$t('raid.numberOfRaiders')}}</span>
-                        <p>{{ addCommas(raiderCount) }}</p>
+                        <p>{{ raiderCount.toLocaleString() }}</p>
                       </div>
                       <div>
                         <span>{{$t('raid.totalPower')}}</span>
-                        <p>{{ addCommas(totalPower) }}</p>
+                        <p>{{ totalPower.toLocaleString() }}</p>
                       </div>
                       <div>
                         <span>{{$t('raid.bossPower')}}</span>
-                        <p>{{ addCommas(bossPower) }}</p>
-                      </div>
-                      <div>
-                        <span> {{$t('raid.victoryChance')}}</span>
-                        <p>{{formattedWinChance}}</p>
+                        <p>{{ bossPower.toLocaleString() }}</p>
                       </div>
                   </div>
                   <div class="col-lg-12 drops none-mobile">
@@ -489,15 +485,15 @@ export default Vue.extend({
       selectedWeapon: null,
       raidIndex: '',
       bossName: '',
-      raiderCount: '',
-      totalPower: '',
+      raiderCount: 0,
+      totalPower: 0,
       expectedFinishTime: new Date(),
       xpReward: '',
       staminaCost: '',
       durabilityCost: '',
       joinCost: '',
       raidStatus: '',
-      bossPower: '',
+      bossPower: 0,
       bossTrait: '',
       accountPower: '',
       rewardsRaidId: '',
@@ -523,11 +519,7 @@ export default Vue.extend({
   computed: {
     ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'ownedCharacterIds', 'defaultAccount']),
     ...mapGetters(['ownCharacters', 'ownWeapons', 'currentCharacter',
-      'currentCharacterStamina', 'getWeaponDurability', 'contracts', 'getCharacterName', 'getCharacterPower']),
-
-    claimButtonActive(): boolean {
-      return this.rewardIndexes !== null && this.rewardIndexes.length > 0;
-    },
+      'currentCharacterStamina', 'contracts', 'getCharacterName', 'getCharacterPower']),
 
     currentMultiplier(): string {
       if(!this.selectedWeaponId) return '0';
@@ -541,17 +533,9 @@ export default Vue.extend({
       return this.getCharacterPower(this.currentCharacter.id);
     },
 
-    getSelectedWeapon(): IWeapon {
-      return this.ownWeapons.find((weapon: IWeapon) => weapon.id === +this.selectedWeaponId);
-    },
-
     formatStaminaHours(): string {
       return staminaToHours(+this.staminaCost).toFixed(1);
     },
-
-    formattedWinChance(): string {
-      return `${this.calculateWinChance()}%`;
-    }
   },
 
   methods: {
@@ -577,20 +561,7 @@ export default Vue.extend({
     ...(mapGetters([
       'getRaidState',
     ]) as RaidMappedGetters),
-
-    calculateWinChance(): string {
-      return (Math.min(Math.max(+this.totalPower / +this.bossPower / 2 * 100, 0), 99.99) || 0).toFixed(2);
-    },
     getCharacterArt,
-    calculateProgressBarColor(): string {
-      if(+this.calculateWinChance() < 30){
-        return '#ccae4f';
-      } else if (+this.calculateWinChance() < 70){
-        return 'blue';
-      } else {
-        return 'green';
-      }
-    },
 
     changeEquipedWeapon(){
       Events.$emit('weapon-inventory', true);
@@ -627,37 +598,12 @@ export default Vue.extend({
       }, 1000);
     },
 
-    addCommas(nStr: any) {
-      nStr += '';
-      const x = nStr.split('.');
-      let x1 = x[0];
-      const x2 = x.length > 1 ? '.' + x[1] : '';
-      const rgx = /(\d+)(\d{3})/;
-      while (rgx.test(x1)) {
-        x1 = x1.replace(rgx, '$1' + ',' + '$2');
-      }
-      return x1 + x2;
-    },
-
-
     getCleanCharacterName(id: string): string {
       return getCleanName(this.getCharacterName(id));
     },
 
-    calculatePlayersProgressBarWidth(): string {
-      return `${Math.round(+this.calculateWinChance())}%`;
-    },
-
-    calculateBossProgressBarWidth(): string {
-      return `${Math.round(100 - +this.calculateWinChance())}%`;
-    },
-
     convertWeiToSkill(wei: string): string {
       return fromWeiEther(wei);
-    },
-
-    weaponHasDurability(id: number): boolean{
-      return this.getWeaponDurability(id) > 0;
     },
 
     async joinRaidMethod(): Promise<void> {
@@ -667,8 +613,6 @@ export default Vue.extend({
         this.notifyError = (i18n.t('raid.errors.cannotAffordRaid').toString());
         return;
       }
-
-
 
       if (!this.selectedWeaponId || (this.currentCharacterId < 0)) {
         (this as any).$bvModal.show('warningModal');
@@ -846,15 +790,15 @@ export default Vue.extend({
       const raidData = this.getRaidState();
       this.raidIndex = raidData.index;
       this.bossName = this.getBossName();
-      this.raiderCount = raidData.raiderCount;
-      this.totalPower = raidData.playerPower;
+      this.raiderCount = +raidData.raiderCount;
+      this.totalPower = +raidData.playerPower;
       this.expectedFinishTime = new Date(+raidData.expectedFinishTime * 1000);
       this.xpReward = raidData.xpReward;
       this.staminaCost = raidData.staminaCost;
       this.durabilityCost = raidData.durabilityCost;
       this.joinCost = raidData.joinSkill;
       this.raidStatus = raidData.status;
-      this.bossPower = raidData.bossPower;
+      this.bossPower = +raidData.bossPower;
       this.bossTrait = raidData.bossTrait;
       this.accountPower = raidData.accountPower;
     }
@@ -1889,7 +1833,7 @@ hr.divider {
   padding-left: 0px;
 }
 
-.powers > div:nth-child(1), .powers > div:nth-child(2), .powers > div:nth-child(3){
+.powers > div:nth-child(1), .powers > div:nth-child(2){
   border-right: 1px solid rgba(255, 255, 255, 0.433);
 }
 
