@@ -40,7 +40,7 @@
               <span>PVP {{$t('homePage.wins')}}</span>
             </div>
             <div class="pvp-wins-value">
-              <span>{{numberWithCommas(this.characterInformation.pvpWins)}}</span>
+              <span>{{this.characterInformation.pvpWins.toLocaleString()}}</span>
             </div>
           </div>
           <div class="pvp-rank-container">
@@ -48,7 +48,7 @@
               <span>PVP {{$t('homePage.rank')}}</span>
             </div>
             <div class="pvp-rank-value">
-              <span>{{numberWithCommas(this.characterInformation.rank)}}</span>
+              <span>{{this.characterInformation.rank.toLocaleString()}}</span>
             </div>
           </div>
           <div class="pvp-power-container">
@@ -56,7 +56,7 @@
               <span>{{$t('homePage.power')}}</span>
             </div>
             <div class="pvp-power-value">
-              <span>{{numberWithCommas(this.characterInformation.power)}}</span>
+              <span>{{this.characterInformation.power.toLocaleString()}}</span>
             </div>
           </div>
         </div>
@@ -278,11 +278,6 @@ export default Vue.extend({
       ];
 
       return raidBossNames[+this.raidData.raidIndex % raidBossNames.length];
-    },
-
-    numberWithCommas(x: number) {
-      if(!x) return;
-      else return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     },
 
     getTimeRemaining(){
