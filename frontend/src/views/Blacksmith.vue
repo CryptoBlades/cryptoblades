@@ -2107,6 +2107,7 @@ export default Vue.extend({
 .weapon-body{
   padding-left: 50px;
   width: 100%;
+  margin-top: 20px;
 }
 
 .equipment-body{
@@ -2481,8 +2482,19 @@ img.elements-modal:hover {
     width: 100%;
   }
 
-  .weapon-body,  .equipment-body, .dust-body, .land-body{
+  .weapon-body, .equipment-body, .dust-body, .land-body{
     padding: 0px 20px;
+    padding-top: 20px;
+  }
+
+  .equipment-body{
+    padding: 0px 20px;
+    padding-top: 30px;
+  }
+
+  .dust-body, .land-body{
+    padding: 0px 20px;
+    padding-top: 30px;
   }
 
   .blacksmith-page {
@@ -2568,8 +2580,11 @@ img.elements-modal:hover {
     padding: 10px 0px;
     align-items: center;
     background-color: rgba(20, 20, 20);
-    border-top: 1px solid rgba(255, 255, 255, 0.404);
     border-bottom: 1px solid rgba(255, 255, 255, 0.418);
+    z-index: 2;
+    position: absolute;
+    top:0;
+    width: 100%;
   }
 
   .mobile-menu > span{

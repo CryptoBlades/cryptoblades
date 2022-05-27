@@ -18,9 +18,9 @@
       <options class="d-none d-sm-flex none-mobile"/>
 
       <!-- Render only on mobile view -->
-      <skill-balance-display class="skill-display-mobile d-sm-none"/>
-      <options class="options-display-mobile d-sm-none"/>
+        <options class="options-display-mobile d-sm-none"/>
     </b-navbar>
+    <skill-balance-display class="skill-display-mobile d-sm-none"/>
   </div>
 </template>
 
@@ -317,6 +317,16 @@ a.router-link-active {
   .main-nav {
     height: 12vh;
   }
+
+  .main-nav > div:nth-child(1){
+    flex-grow: 11;
+  }
+
+  .main-nav > div.options-display-mobile{
+    border-left: 1px solid #707070;
+    height: 100%;
+  }
+
   .nav-logo {
     border: 0;
     margin: 0;

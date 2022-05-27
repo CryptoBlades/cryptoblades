@@ -28,7 +28,7 @@
 
       </div>
     </div>
-    <div class="p-5" v-else>
+    <div v-else class="char-content">
       <CharacterNav
         :garrison="garrison"
         :havePlazaCharacters="havePlazaCharacters"
@@ -38,7 +38,7 @@
         @mintCharacter="onMintCharacter"
       />
       <template v-if="!garrison && havePlazaCharacters">
-         <character />
+         <character class="char-info" />
       </template>
       <template v-else>
         <div v-if="!soulCreationActive" class="row mt-3 z-index-1">
@@ -527,4 +527,17 @@ export default Vue.extend({
   width: 100%;
 }
 
+.char-content{
+  padding: 50px;
+}
+
+
+@media (max-width: 600px) {
+  .char-content{
+    padding: 0px;
+  }
+  .char-info{
+    padding: 50px 40px;
+  }
+}
 </style>
