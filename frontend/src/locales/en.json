@@ -111,8 +111,8 @@
     "gasFee": "You spent {bnbGasUsed} {gasToken} on gas fees ",
     "youRolled": "You rolled:",
     "enemyRolled": "Enemy rolled:",
-    "earnedSkill": "<b>{noIGO} {inUSD}</b> <small>UNCLAIMED SKILL</small>",
-    "earnedIGOSkill": "<br/> <small>AND</small> <b>{IGO} {inUSD}</b> <small>IGO</small> "
+    "earnedSkill": "<b>{noIGO}</b> <small>UNCLAIMED SKILL</small> <b>{inUSD}</b> ",
+    "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> "
   },
   "nft": {
      "transferMenuItem": "Transfer",

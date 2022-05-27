@@ -133,13 +133,13 @@ export default Vue.extend({
       else return i18n.t('combatResults.lost');
     },
     formattedSkill(): string {
-      return `(${this.calculatedSkillReward()} SKILL)`;
+      return `${this.calculatedSkillReward()}`;
     },
     formattedSkillNoIGO(): string {
-      return `(${this.calculateSkillRewardNoIGO()} SKILL)`;
+      return `${this.calculateSkillRewardNoIGO()}`;
     },
     formattedSkillIGOReward(): string {
-      return `(${this.calculateSkillIGOReward()} SKILL)`;
+      return `${this.calculateSkillIGOReward()}`;
     },
     formattedStaminaUsed(): number {
       return this.staminaUsed / 40;
@@ -159,7 +159,7 @@ export default Vue.extend({
     },
     formattedInUsd(value: string): string {
       if(!value) return '';
-      return `$${value}`;
+      return `($${value})`;
     },
     calculateSkillPriceInUsd(skill: number): number {
       if(!skill) return 0;
