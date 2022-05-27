@@ -1037,7 +1037,7 @@ export default new Vuex.Store<IState>({
       if(!CryptoBlades || !state.defaultAccount) return;
 
       const igoDefaultReward = await CryptoBlades.methods
-        .vars(28)
+        .vars(27)
         .call(defaultCallOptions(state));
       return igoDefaultReward;
     },
