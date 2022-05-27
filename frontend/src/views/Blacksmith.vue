@@ -967,8 +967,6 @@ export default Vue.extend({
         this.disableForge = false;
         this.selectedElement = null;
       }
-      this.relayFunction(forgeMultiplier);
-
     },
 
     computeDust(operator: string,star: number, lesser: number,greater: number,powerful: number){
