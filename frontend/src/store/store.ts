@@ -2028,8 +2028,6 @@ export default new Vuex.Store<IState>({
         )
         .send({ from: state.defaultAccount, gas: '300000', gasPrice: getGasPrice() });
 
-      console.log(res);
-
       await dispatch('fetchTargets', { characterId, weaponId });
 
 
