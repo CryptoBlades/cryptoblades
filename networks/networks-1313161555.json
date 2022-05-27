@@ -2483,7 +2483,7 @@
     },
     "links": {},
     "address": "0xfe120E57849CE88A4ECaFae9b865F1B6839BEbe8",
-    "transactionHash": "0x1d38541dbfba930bcbc1dba13efb824978b72c92e99e89f23874817df03776bc|{\"gasBurned\":15004985491676,\"tx\":\"ETKqUgi7zo7hvfZAUV4URCXioaysQmAMBj25R54osuh5\"}"
+    "transactionHash": "0xb2ae0ebe6eb130c7272f35589f58fee090c4c860039d730607d15a89a121a0f8|{\"gasBurned\":14999667363228,\"tx\":\"DZJo31vFYNexE2BAVF4UZ6m5SfYq89ZE5RrmDWs9mw5F\"}"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {

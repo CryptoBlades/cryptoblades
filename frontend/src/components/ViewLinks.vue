@@ -34,8 +34,9 @@
     <li class="top-nav-links">
       <a :href="BazaarLink()" class="nav-link" target="_blank">
         <div class="icon"><img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar"></div>
-        <div class="link-text">{{ $t("viewLink.bazaar") }}
-          <b-icon-box-arrow-up-right scale="0.7"/>
+        <div class="link-text d-flex  justify-content-center align-items-center">
+          {{ $t("viewLink.bazaar") }}
+          <b-icon-box-arrow-up-right scale="0.8"/>
         </div>
       </a>
     </li>
