@@ -110,7 +110,9 @@
     "hint": "SKILL earned is based on gas costs of the network plus a factor of your power",
     "gasFee": "You spent {bnbGasUsed} {gasToken} on gas fees ",
     "youRolled": "You rolled:",
-    "enemyRolled": "Enemy rolled:"
+    "enemyRolled": "Enemy rolled:",
+    "earnedSkill": "<b>{noIGO} {inUSD}</b> <small>UNCLAIMED SKILL</small>",
+    "earnedIGOSkill": "<br/> <small>AND</small> <b>{IGO} {inUSD}</b> <small>IGO</small> "
   },
   "nft": {
      "transferMenuItem": "Transfer",

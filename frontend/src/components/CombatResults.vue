@@ -38,11 +38,17 @@
         </b-row>
         <b-row>
           <b-col class="earned">
-            <h4>
-              {{formattedSkillNoIGO}} {{formattedInUsd(calculateSkillPriceInUsd(calculateSkillRewardNoIGO()).toFixed(4))}} UNCLAIMED SKILL AND
-              {{formattedSkillIGOReward}} {{formattedInUsd(calculateSkillPriceInUsd(calculateSkillIGOReward()).toFixed(4))}} IGO
+            <p class="h5 text-white">
+              <span v-html="$t('combatResults.earnedSkill', {
+                  noIGO: +igoDefaultReward ? formattedSkillNoIGO : formattedSkill,
+                  inUSD: formattedInUsd(calculateSkillPriceInUsd(+igoDefaultReward ? calculateSkillRewardNoIGO() : calculatedSkillReward()).toFixed(4))
+                })"> </span>
+              <span v-if="+igoDefaultReward" v-html="$t('combatResults.earnedIGOSkill', {
+                  IGO: formattedSkillIGOReward,
+                  inUSD: formattedInUsd(calculateSkillPriceInUsd(calculateSkillIGOReward()).toFixed(4))
+                })"></span>
               <Hint :text="$t('combatResults.hint')" />
-            </h4>
+            </p>
             <h5>+ {{formattedXpGain}}</h5>
           </b-col>
         </b-row>
@@ -126,6 +132,9 @@ export default Vue.extend({
       if(this.fightResults.isVictory) return i18n.t('combatResults.won');
       else return i18n.t('combatResults.lost');
     },
+    formattedSkill(): string {
+      return `(${this.calculatedSkillReward()} SKILL)`;
+    },
     formattedSkillNoIGO(): string {
       return `(${this.calculateSkillRewardNoIGO()} SKILL)`;
     },
@@ -149,15 +158,21 @@ export default Vue.extend({
       this.skillPrice = response.data?.cryptoblades.usd;
     },
     formattedInUsd(value: string): string {
+      if(!value) return '';
       return `$${value}`;
     },
     calculateSkillPriceInUsd(skill: number): number {
+      if(!skill) return 0;
       return (skill as unknown as number * this.skillPrice as unknown as number);
+    },
+    calculatedSkillReward(): string {
+      return toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6);
     },
     calculateSkillRewardNoIGO(): string{
       return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10) - this.igoDefaultReward).toString())).toFixed(6);
     },
     calculateSkillIGOReward(): string{
+      if(!this.igoDefaultReward) return '';
       return toBN(fromWeiEther((this.igoDefaultReward * this.formattedStaminaUsed).toString())).toFixed(6);
     },
     checkStorage() {
