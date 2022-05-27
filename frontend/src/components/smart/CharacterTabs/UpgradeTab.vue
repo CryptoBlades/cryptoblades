@@ -8,7 +8,7 @@
           </div>
           <div class="col character-text">
             <p class="mb-0 text-white soul-title">{{$t(`Character.souls`)}}</p>
-            <p class="mb-0">{{ soulBalance }}</p>
+            <p class="mb-0">{{ soulBalance * 10 }}</p>
           </div>
         </div>
         <div class="w-100 d-block d-md-none"></div>
@@ -34,7 +34,7 @@
         </div>
       </div>
       <button class="upgrade-character-button mt-5" :disabled="powerAmount/10 === 0" @click="onUpgradeConfirm">
-        <span>{{$t('Character.upgrade')}}</span><br/>{{powerAmount}} {{$t(`Character.souls`)}}
+        <span>{{$t('Character.upgrade')}}</span><br/>{{powerAmount / 10}} {{$t(`Character.soul`)}}
       </button>
     </b-tab>
 </template>
@@ -97,12 +97,12 @@ export default Vue.extend({
       }
       this.powerAmount = Math.ceil((+e.target.value)/10)*10;
     },
-    handleSoulPowerValue(soulPowerValue: number): number{
-      if (soulPowerValue >= (this.soulBalance)) {
-        this.powerAmount = this.soulBalance;
-        return this.soulBalance;
+    handleSoulPowerValue(souls: number): number{
+      if (souls >= (this.soulBalance * 10)) {
+        this.powerAmount = this.soulBalance * 10;
+        return this.soulBalance * 10;
       }
-      return soulPowerValue;
+      return souls;
     },
     async onUpgradeConfirm() {
       if(!this.currentCharacterId || this.powerAmount === 0) return;

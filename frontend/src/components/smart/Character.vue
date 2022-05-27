@@ -79,11 +79,11 @@
         <div>
           <p class="mb-1">
           <span class="text-white"> {{$t(`Character.stamina`)}}:{{" "}}</span>
-          {{ characterStamina }}/200</p>
+          {{ getCharacterStamina(currentCharacterId) }}/200</p>
           <b-progress class="progress-custom">
             <b-progress-bar
               class="bar"
-              :value="characterStamina/2"
+              :value="getCharacterStamina(currentCharacterId)/2"
             ></b-progress-bar>
           </b-progress>
         </div>
@@ -228,6 +228,7 @@ interface StoreMappedActions {
   changeCharacterTraitLightning(payload: {id: string}): Promise<void>;
   renameCharacter(payload: {id: string; name: string;}): Promise<void>;
   fetchOwnedCharacterCosmetics(payload: {cosmetic: string}): Promise<number>;
+  getCharacterStamina(payload: string): Promise<number>;
   transferNFT(payload: {
     nftId: number;
     receiverAddress: string;
@@ -278,9 +279,9 @@ export default Vue.extend({
       'currentCharacterId',
       'characters',
       'characterStaminas',
-      'ownedGarrisonCharacterIds'
+      'ownedGarrisonCharacterIds',
     ]),
-    ...mapGetters(['getCharacterName', 'getCharacterPower']),
+    ...mapGetters(['getCharacterName', 'getCharacterPower', 'getCharacterStamina']),
     availableTraits(): string[] {
       const availableTraits = [];
       if(this.haveChangeTraitFire > 0) {

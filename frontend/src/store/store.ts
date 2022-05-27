@@ -1032,6 +1032,15 @@ export default new Vuex.Store<IState>({
   },
 
   actions: {
+    async fetchIgoRewardsPerFight({ state }) {
+      const { CryptoBlades } = state.contracts();
+      if(!CryptoBlades || !state.defaultAccount) return;
+
+      const igoDefaultReward = await CryptoBlades.methods
+        .vars(27)
+        .call(defaultCallOptions(state));
+      return igoDefaultReward;
+    },
     async initializeStore({ dispatch }) {
       await dispatch('setUpContracts');
       await dispatch('setUpContractEvents');
@@ -2038,10 +2047,6 @@ export default new Vuex.Store<IState>({
       const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
 
       await dispatch('fetchWeaponDurability', weaponId);
-
-      await dispatch('updateCharacterStamina', characterId);
-
-      await dispatch('getCharacterStamina', characterId);
 
       return {
         isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),

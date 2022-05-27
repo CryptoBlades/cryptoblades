@@ -5,7 +5,7 @@
             v-bind:class="[getIsInCombat ? 'disabled-li' : '', getIsCharacterViewExpanded ? '' : 'centered-list']">
               <div
                 :class="`${setListClassForSelChar(filteredCharacter.id, currentCharacterId)}`"
-                :style="`--staminaReady: ${(characterStamina(filteredCharacter.id) /maxStamina)*100}%;`"
+                :style="`--staminaReady: ${(getCharacterStamina(filteredCharacter.id)/maxStamina)*100}%;`"
                 v-for="filteredCharacter in filteredCharactersForList"
                 :key="filteredCharacter.id"
                 @click="(!getIfCharacterIsInRaid(filteredCharacter.id) || !filteredCharacter.pvpStatus === 'IN_ARENA'
@@ -34,13 +34,11 @@
                     {{ getCleanCharacterName(filteredCharacter.id) }}
                   </div>
                   <div class="small-stamina-char"
-                    :style="`--staminaReady: ${(characterStamina(filteredCharacter.id)/maxStamina)*100}%;`"
+                    :style="`--staminaReady: ${(getCharacterStamina(filteredCharacter.id)/maxStamina)*100}%;`"
                     v-tooltip.bottom="toolTipHtml(timeUntilCharacterHasMaxStamina(filteredCharacter.id))">
                   </div>
                   <div class="char-level">
-                      {{$t('PlayToEarn.level')}} {{ filteredCharacter.level + 1}} <span>
-                        (EXP {{ filteredCharacter.xp }} / {{RequiredXp(filteredCharacter.level)}})
-                        (STA {{ characterStamina(filteredCharacter.id) }} / 200)</span>
+                      {{$t('PlayToEarn.level')}} {{ filteredCharacter.level + 1}} <span> (STA {{ getCharacterStamina(filteredCharacter.id) }} / 200)</span>
                   </div>
                 </div>
               </div>
@@ -119,13 +117,7 @@ export default Vue.extend({
   props:['toggled','currentPath'],
   computed: {
     ...mapGetters(['charactersWithIds']) as Accessors<StoreMappedGetters>,
-    ...mapState([
-      'maxStamina',
-      'ownedCharacterIds',
-      'currentCharacterId',
-      'characters',
-      'characterStaminas',
-      'ownedGarrisonCharacterIds']),
+    ...mapState(['maxStamina', 'currentCharacterId', 'ownedCharacterIds']),
     ...mapGetters([
       'currentCharacter',
       'currentCharacterStamina',
@@ -219,17 +211,6 @@ export default Vue.extend({
       }
 
       else return 'character';
-    },
-
-    characterStamina(characterId: number): number {
-      return this.ownedGarrisonCharacterIds.includes(characterId)
-        ? this.characterStaminas[characterId]
-        : this.timestampToStamina(this.characters[characterId]?.staminaTimestamp ?? 0);
-    },
-
-    timestampToStamina(timestamp: number): number {
-      if(timestamp > Math.floor(Date.now()/1000)) return 0;
-      return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
     },
     getNftStatus(activeCharacter: any){
       this.composeCharacterData(activeCharacter.id).then(data => {
