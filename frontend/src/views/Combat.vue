@@ -6,7 +6,7 @@
       </div>
 
       <b-modal id="fightResultsModal" hide-footer hide-header>
-        <CombatResults v-if="resultsAvailable" :fightResults="fightResults" class="mb-3" />
+        <CombatResults v-if="resultsAvailable" :fightResults="fightResults" :staminaUsed="staminaPerFight" class="mb-3" />
         <div class="footer-close">
             <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
             <span class="tap" @click="$bvModal.hide('fightResultsModal')">
