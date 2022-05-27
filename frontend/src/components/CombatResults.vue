@@ -166,7 +166,7 @@ export default Vue.extend({
       return (skill as unknown as number * this.skillPrice as unknown as number);
     },
     calculatedSkillReward(): string {
-      return toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6);
+      return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10) - this.igoDefaultReward).toString())).toFixed(6);
     },
     calculateSkillRewardNoIGO(): string{
       return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10) - this.igoDefaultReward).toString())).toFixed(6);
