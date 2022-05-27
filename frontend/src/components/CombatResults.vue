@@ -186,6 +186,7 @@ export default Vue.extend({
   async mounted() {
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
     await this.fetchPrices();
+    this.igoDefaultReward = await this.fetchIgoRewardsPerFight();
     await new Promise(f => setTimeout(f, 1000));
     this.checkStorage();
   },
