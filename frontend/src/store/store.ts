@@ -4128,15 +4128,13 @@ export default new Vuex.Store<IState>({
 
       if(orderWithSkill) {
         const price = await SpecialWeaponsManager.methods.getSkillForgeCost(orderOption).call(defaultCallOptions(state));
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
+        await approveFeeWalletOnly(
           CryptoBlades,
           SkillToken,
           state.defaultAccount,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          new BigNumber(price),
-          state.skillRewards
+          new BigNumber(price)
         );
         await SpecialWeaponsManager.methods.orderSpecialWeaponWithSkill(eventId, orderOption).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
       }
