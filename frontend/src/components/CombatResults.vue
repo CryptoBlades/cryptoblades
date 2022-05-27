@@ -43,11 +43,11 @@
                   noIGO: +igoDefaultReward ? formattedSkillNoIGO : formattedSkill,
                   inUSD: formattedInUsd(calculateSkillPriceInUsd(+igoDefaultReward ? calculateSkillRewardNoIGO() : calculatedSkillReward()).toFixed(4))
                 })"> </span>
+              <Hint :text="$t('combatResults.hint')" />
               <span v-if="+igoDefaultReward" v-html="$t('combatResults.earnedIGOSkill', {
                   IGO: formattedSkillIGOReward,
                   inUSD: formattedInUsd(calculateSkillPriceInUsd(calculateSkillIGOReward()).toFixed(4))
                 })"></span>
-              <Hint :text="$t('combatResults.hint')" />
             </p>
             <h5>+ {{formattedXpGain}}</h5>
           </b-col>
