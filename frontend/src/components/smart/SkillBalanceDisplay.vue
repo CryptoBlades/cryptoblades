@@ -32,14 +32,14 @@
         </div>
         <div :class="isMobile() ? 'mr-2' : ''">
           <span>{{getUnclaimed()}}</span>
-          <span> UNCLAIMED SKILL</span>
+          <span> {{$t('ClaimRewardsBar.unclaimed')}}</span>
         </div>
       </div>
     </div>
     <div class="d-flex justify-content-end align-items-center animate-slide" v-if="!isMobile() || (isMobile() && isToggled)"
       :style="isToggled ? 'margin-top: -10px': ''">
       <div class="deposit-withdraw px-2">
-        <span id="claim-xp-popover" @click="onClaimXp" :class="!canClaimXp ? 'no-claimable' : ''">CLAIM EXP</span>
+        <span id="claim-xp-popover" @click="onClaimXp" :class="!canClaimXp ? 'no-claimable' : ''">{{$t('ClaimRewardsBar.claim').toUpperCase()}} EXP</span>
         <b-popover target="claim-xp-popover" custom-class="claim-exp-popover" triggers="hover" placement="bottom">
           <img class="position-absolute mt-1" width="233" :src="require('@/assets/separator.png')" />
           <div class="d-flex justify-content-center position-relative">
@@ -49,9 +49,9 @@
           </div>
           <div class="d-flex flex-column pb-1">
             <div class="d-flex justify-content-between">
-              <div class="px-2 custom-header-font">Character Name</div>
+              <div class="px-2 custom-header-font">{{$t('ClaimRewardsBar.characterName')}}</div>
               <div class="px-3"></div>
-              <div class="px-2 custom-header-font">Unclaimed EXP</div>
+              <div class="px-2 custom-header-font">{{$t('ClaimRewardsBar.unclaimedExp')}}</div>
             </div>
           </div>
           <div class="d-flex flex-column" v-for="charXp in formattedXpRewardsBar" :key="charXp.id">
@@ -72,7 +72,7 @@
         <span>|</span>
       </div>
       <div class="deposit-withdraw px-2">
-        <span @click="claimSkill(ClaimStage.Summary)">WITHDRAW</span>
+        <span @click="claimSkill(ClaimStage.Summary)">{{$t('ClaimRewardsBar.widthraw')}}</span>
       </div>
       <div class="deposit-withdraw border-line-custom px-2" v-if="hasBnbAvailableToWithdraw">
         <span>|</span>
