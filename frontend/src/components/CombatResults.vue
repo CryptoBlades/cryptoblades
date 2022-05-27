@@ -41,12 +41,12 @@
             <p class="h5 text-white">
               <span v-html="$t('combatResults.earnedSkill', {
                   noIGO: +igoDefaultReward ? formattedSkillNoIGO : formattedSkill,
-                  inUSD: formattedInUsd(calculateSkillPriceInUsd(+igoDefaultReward ? calculateSkillRewardNoIGO() : calculatedSkillReward()).toFixed(4))
+                  inUSD: formattedInUsd(calculateSkillPriceInUsd(+igoDefaultReward ? formattedSkillNoIGO : formattedSkill).toFixed(4))
                 })"> </span>
               <Hint :text="$t('combatResults.hint')" />
               <span v-if="+igoDefaultReward" v-html="$t('combatResults.earnedIGOSkill', {
                   IGO: formattedSkillIGOReward,
-                  inUSD: formattedInUsd(calculateSkillPriceInUsd(calculateSkillIGOReward()).toFixed(4))
+                  inUSD: formattedInUsd(calculateSkillPriceInUsd(formattedSkillIGOReward).toFixed(4))
                 })"></span>
             </p>
             <h5>+ {{formattedXpGain}}</h5>
@@ -133,13 +133,13 @@ export default Vue.extend({
       else return i18n.t('combatResults.lost');
     },
     formattedSkill(): string {
-      return `${this.calculatedSkillReward()}`;
+      return toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6);
     },
     formattedSkillNoIGO(): string {
-      return `${this.calculateSkillRewardNoIGO()}`;
+      return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10) - this.igoDefaultReward).toString())).toFixed(6);
     },
     formattedSkillIGOReward(): string {
-      return `${this.calculateSkillIGOReward()}`;
+      return toBN(fromWeiEther((this.igoDefaultReward * this.formattedStaminaUsed).toString())).toFixed(6);
     },
     formattedStaminaUsed(): number {
       return this.staminaUsed / 40;
@@ -180,7 +180,9 @@ export default Vue.extend({
       else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
   },
-
+  async beforeMount(){
+    this.igoDefaultReward = await this.fetchIgoRewardsPerFight();
+  },
   async mounted() {
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
     await this.fetchPrices();
