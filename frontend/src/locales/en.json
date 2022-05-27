@@ -110,7 +110,9 @@
     "hint": "SKILL earned is based on gas costs of the network plus a factor of your power",
     "gasFee": "You spent {bnbGasUsed} {gasToken} on gas fees ",
     "youRolled": "You rolled:",
-    "enemyRolled": "Enemy rolled:"
+    "enemyRolled": "Enemy rolled:",
+    "earnedSkill": "<b>{noIGO}</b> <small>UNCLAIMED SKILL</small> <b>{inUSD}</b> ",
+    "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> "
   },
   "nft": {
      "transferMenuItem": "Transfer",
@@ -271,6 +273,7 @@
   "weaponIcon": {
     "durability": "Durability:",
     "durabilityTooltip": "Repairs 1 point every 50 minutes, durability will be full at:",
+    "durabilityTooltipFull": "Repairs 1 point every 50 minutes",
     "id": "ID",
     "bonusPower": "Bonus power:"
   },

@@ -38,10 +38,17 @@
         </b-row>
         <b-row>
           <b-col class="earned">
-            <h4>
-              {{formattedSkill}}  {{formattedUsd}}
+            <p class="h5 text-white">
+              <span v-html="$t('combatResults.earnedSkill', {
+                  noIGO: +igoDefaultReward ? formattedSkillNoIGO : formattedSkill,
+                  inUSD: formattedInUsd(calculateSkillPriceInUsd(+igoDefaultReward ? calculateSkillRewardNoIGO() : calculatedSkillReward()).toFixed(4))
+                })"> </span>
               <Hint :text="$t('combatResults.hint')" />
-            </h4>
+              <span v-if="+igoDefaultReward" v-html="$t('combatResults.earnedIGOSkill', {
+                  IGO: formattedSkillIGOReward,
+                  inUSD: formattedInUsd(calculateSkillPriceInUsd(calculateSkillIGOReward()).toFixed(4))
+                })"></span>
+            </p>
             <h5>+ {{formattedXpGain}}</h5>
           </b-col>
         </b-row>
@@ -83,6 +90,7 @@ import i18n from '@/i18n';
 import {TranslateResult} from 'vue-i18n';
 import '@/mixins/general';
 import Hint from '@/components/Hint.vue';
+import { mapActions } from 'vuex';
 
 interface CombatResult {
   isVictory: boolean;
@@ -103,14 +111,19 @@ export default Vue.extend({
       default() {
         return {} as CombatResult;
       },
-    }
+    },
+    staminaUsed: {
+      type: Number,
+      default: 0,
+    },
   },
 
   data() {
     return {
       skillPrice: 0,
       gasToken: '',
-      showAds: false
+      showAds: false,
+      igoDefaultReward: 0,
     };
   },
 
@@ -119,11 +132,17 @@ export default Vue.extend({
       if(this.fightResults.isVictory) return i18n.t('combatResults.won');
       else return i18n.t('combatResults.lost');
     },
-    formattedUsd(): string {
-      return `$${(this.calculateSkillPriceInUsd()).toFixed(2)}`;
-    },
     formattedSkill(): string {
-      return `(${toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6)} SKILL)`;
+      return `${this.calculatedSkillReward()}`;
+    },
+    formattedSkillNoIGO(): string {
+      return `${this.calculateSkillRewardNoIGO()}`;
+    },
+    formattedSkillIGOReward(): string {
+      return `${this.calculateSkillIGOReward()}`;
+    },
+    formattedStaminaUsed(): number {
+      return this.staminaUsed / 40;
     },
     formattedSkillTooltip(): string {
       return fromWeiEther(this.fightResults.skillGain)+' SKILL';
@@ -133,12 +152,28 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions(['fetchIgoRewardsPerFight']),
     async fetchPrices(): Promise<void> {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
       this.skillPrice = response.data?.cryptoblades.usd;
     },
-    calculateSkillPriceInUsd(): number {
-      return fromWeiEther(this.fightResults.skillGain) as unknown as number * this.skillPrice as unknown as number;
+    formattedInUsd(value: string): string {
+      if(!value) return '';
+      return `($${value})`;
+    },
+    calculateSkillPriceInUsd(skill: number): number {
+      if(!skill) return 0;
+      return (skill as unknown as number * this.skillPrice as unknown as number);
+    },
+    calculatedSkillReward(): string {
+      return toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6);
+    },
+    calculateSkillRewardNoIGO(): string{
+      return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10) - this.igoDefaultReward).toString())).toFixed(6);
+    },
+    calculateSkillIGOReward(): string{
+      if(!this.igoDefaultReward) return '';
+      return toBN(fromWeiEther((this.igoDefaultReward * this.formattedStaminaUsed).toString())).toFixed(6);
     },
     checkStorage() {
       if (process.env.NODE_ENV === 'development') this.showAds = false;
@@ -149,6 +184,7 @@ export default Vue.extend({
   async mounted() {
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
     await this.fetchPrices();
+    this.igoDefaultReward = await this.fetchIgoRewardsPerFight();
     await new Promise(f => setTimeout(f, 1000));
     this.checkStorage();
   },

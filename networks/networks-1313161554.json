@@ -2377,7 +2377,7 @@
     },
     "links": {},
     "address": "0x3F715995647fe44Db45411bb9e81b7A1aD5A8387",
-    "transactionHash": "0x7a6f7981408f3216f89cc9228ad1a54739b591f75f6d73c2b3f0fecc8b80e955|{\"gasBurned\":15944378420972,\"tx\":\"NsrXoaPMjhkny2TD2Zua3BgcHfP7sdr919vPA6wHnQZ\"}"
+    "transactionHash": "0x35a7da1315055a6bafd8a9d044717faa490b1b4a0b1950a4083befd35d598fcb|{\"gasBurned\":14767486369644,\"tx\":\"EDbKrjiGhqrTZjK6JTq34WgXWt51XojN68UPspYW6fMe\"}"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},
