@@ -220,7 +220,22 @@
     "noWeaponsStored": "No Weapons stored!",
     "noCharactersStored": "No Characters stored!",
     "noShieldsStored" : "No Shields Stored!",
-    "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!"
+    "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!",
+    "incomingNfts": "Incoming NFTs",
+    "noIncomingNfts": "No incoming NFTs!",
+    "selectWeaponToWithdraw": "Select a weapon to withdraw",
+    "selectYourWeapon": "Select your Weapon",
+    "weaponId": "Weapon ID",
+    "fromChain": "from Chain",
+    "withdrawWeapon": "Withdraw Weapon",
+    "selectCharacterToWithdraw": "Select a character to withdraw",
+    "selectYourCharacter": "Select your Character",
+    "selectYourShieldToWithdraw": "Select shield to withdraw",
+    "selectYourShield" : "Select your Shield",
+    "shieldId" : "Shield ID",
+    "withdrawShield": "Withdraw Shield",
+    "characterId": "Character ID",
+    "withdrawCharacter": "Withdraw Character"
   },
   "characterList": {
     "level": "Level",
