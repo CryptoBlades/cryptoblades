@@ -615,7 +615,6 @@ export function createStore() {
       },
 
       updateUserDetails(state: IState, payload) {
-        console.log('update user details');
         const keysToAllow = ['ownedCharacterIds', 'ownedGarrisonCharacterIds', 'ownedWeaponIds', 'maxStamina', 'maxDurability',
           'ownedShieldIds', 'ownedTrinketIds', 'ownedJunkIds', 'ownedKeyLootboxIds'];
         for (const key of keysToAllow) {
@@ -663,7 +662,6 @@ export function createStore() {
       },
 
       addNewOwnedWeaponId(state: IState, weaponId: number) {
-        console.log('add new owned weapon id', weaponId);
         if (!state.ownedWeaponIds.includes(weaponId)) {
           state.ownedWeaponIds.push(weaponId);
         }
@@ -1163,11 +1161,10 @@ export function createStore() {
             const weaponId = data.returnValues.weapon;
 
             commit('addNewOwnedWeaponId', weaponId);
-            console.log('New weapon:', weaponId);
+
             await Promise.all([
               dispatch('fetchWeapon', weaponId),
               dispatch('fetchSkillBalance'),
-
             ]);
           })
         );
@@ -1280,7 +1277,6 @@ export function createStore() {
       },
 
       async fetchUserGameDetails({ state, dispatch, commit }) {
-        console.log('Fetching user game details');
         const [
           ownedCharacterIds,
           ownedGarrisonCharacterIds,
@@ -1332,7 +1328,6 @@ export function createStore() {
       },
 
       async updateWeaponIds({ dispatch, commit }) {
-        console.log('Updating weapon ids');
         const ownedWeaponIds = await dispatch('getAccountWeapons');
         commit('updateUserDetails', {
           ownedWeaponIds: Array.from(ownedWeaponIds)
@@ -1692,7 +1687,6 @@ export function createStore() {
         return (await state.contracts().Garrison!.methods.getUserCharacters().call(defaultCallOptions(state))).map((id) => Number(id));
       },
       async getAccountWeapons({state}) {
-        console.log('getAccountWeapons');
         if(!state.defaultAccount) return;
         const numberOfWeapons = parseInt(await state.contracts().Weapons!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
         const weapons = await Promise.all(
@@ -1793,12 +1787,7 @@ export function createStore() {
             { feeMultiplier: num * 4 * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
           );
 
-          const res =
           await CryptoBlades.methods.mintWeaponN(num, chosenElement, eventId).send({ from: state.defaultAccount, gas: '5000000', gasPrice: getGasPrice(), });
-          console.log(res);
-          const receipt = await state.web3.eth.getTransactionReceipt(res.transactionHash);
-          console.log(receipt);
-          // const weaponId = parseInt(receipt.logs.pop()!.topics[1],16);
         }
 
         await Promise.all([
@@ -1818,21 +1807,9 @@ export function createStore() {
         const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
         if(useStakedSkillOnly) {
-          const res = await CryptoBlades.methods
+          await CryptoBlades.methods
             .mintWeaponUsingStakedSkill(chosenElement, eventId)
             .send({ from: state.defaultAccount, gasPrice: getGasPrice(), });
-
-          const receipt = await state.web3.eth.getTransactionReceipt(res.transactionHash);
-          const weaponId = parseInt(receipt.logs.pop()!.topics[1],16);
-
-          await Promise.all([
-            dispatch('fetchSkillBalance'),
-            dispatch('fetchFightRewardSkill'),
-            dispatch('updateWeaponIds'),
-            dispatch('setupWeaponDurabilities'),
-            dispatch('fetchShardsSupply')
-          ]);
-          return weaponId;
         }
         else {
           await approveFee(
@@ -1846,21 +1823,16 @@ export function createStore() {
             { feeMultiplier: chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
           );
 
-          const res = await CryptoBlades.methods.mintWeapon(chosenElement, eventId).send({ from: state.defaultAccount, gasPrice: getGasPrice(), });
-          const receipt = await state.web3.eth.getTransactionReceipt(res.transactionHash);
-          const weaponId = parseInt(receipt.logs.pop()!.topics[1],16);
-
-          await Promise.all([
-            dispatch('fetchSkillBalance'),
-            dispatch('fetchFightRewardSkill'),
-            dispatch('updateWeaponIds'),
-            dispatch('setupWeaponDurabilities'),
-            dispatch('fetchShardsSupply')
-          ]);
-          return weaponId;
+          await CryptoBlades.methods.mintWeapon(chosenElement, eventId).send({ from: state.defaultAccount, gasPrice: getGasPrice(), });
         }
 
-
+        await Promise.all([
+          dispatch('fetchSkillBalance'),
+          dispatch('fetchFightRewardSkill'),
+          dispatch('updateWeaponIds'),
+          dispatch('setupWeaponDurabilities'),
+          dispatch('fetchShardsSupply')
+        ]);
       },
 
       async reforgeWeapon(
