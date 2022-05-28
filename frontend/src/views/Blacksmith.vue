@@ -914,33 +914,27 @@ export default Vue.extend({
     },
 
     async onForgeWeapon() {
-      if(this.disableForge) return;
-      (this.$refs['forge-element-selector-modal']as BModal)?.hide();
-
-      const forgeMultiplier = 1;
-
       this.disableForge = true;
-      // Incase the network or mm are having issues, after 1 min we reshow
-      const failbackTimeout = setTimeout(() => {
-        this.disableForge = false;
-      }, 30000);
-
+      console.log('onForgeWeaponx1');
+      (this.$refs['forge-element-selector-modal']as BModal)?.hide();
+      this.showModal = true;
+      this.spin = true;
+      this.modalType = 'forge';
       try {
-        await this.mintWeapon({
+        const weaponIds = await this.mintWeapon({
           useStakedSkillOnly: this.useStakedForForge,
           chosenElement: this.selectedElement || 100,
           eventId: this.selectedSpecialWeaponEventId,
           mintSlippageApproved: this.mintSlippageApproved
         });
+        this.viewNewWeapons([weaponIds]);
 
       } catch (e) {
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
       } finally {
-        clearTimeout(failbackTimeout);
         this.disableForge = false;
         this.selectedElement = null;
       }
-      this.relayFunction(forgeMultiplier);
     },
 
     async onForgeWeaponx10(){
@@ -972,17 +966,6 @@ export default Vue.extend({
         clearTimeout(failbackTimeout);
         this.disableForge = false;
         this.selectedElement = null;
-      }
-      this.relayFunction(forgeMultiplier);
-
-    },
-
-    relayFunction(offset: number){
-      try{
-        this.viewNewWeapons(offset);
-      } catch (e) {
-        console.error(e);
-        this.onError = true;
       }
     },
 
@@ -1134,25 +1117,11 @@ export default Vue.extend({
       (this.$refs[modalType] as BModal).hide();
     },
 
-    viewNewWeapons(offset: number){
-      this.newForged = [];
-      this.ownedWeaponIds.forEach(x => {
-        this.newForged.push(x);
-      });
-
-      this.newForged.splice(0, this.ownedWeaponIds.length - offset);
-
-      // eslint-disable-next-line no-constant-condition
-      if (this.newForged.length > 0 && !this.onError){
-        this.showModal = true;
-        this.modalType = 'forge';
-        this.spin = true;
-        setTimeout(() => {
-          this.showModal = false;
-          (this.$refs['new-forge-weapon'] as BModal).show();
-          this.spin = false;
-        }, 10000);
-      }
+    viewNewWeapons(weaponIds: number[]){
+      this.spin = false;
+      this.newForged = weaponIds;
+      this.showModal = false;
+      (this.$refs['new-forge-weapon'] as BModal).show();
     },
 
     getWeaponArt,
