@@ -150,7 +150,7 @@
             <big-button
               class="button"
               :mainText="$t('blacksmith.forgeSwordFor') + ` ${forgeCost} SKILL`"
-              @click="onForgeWeapon"
+              @click="onForgeWeapon(1)"
             />
           </div>
           <div class="mt-3" v-if="ownWeapons.length > 0 && !showReforge">
@@ -295,7 +295,7 @@
                         v-if="clickedForgeButton === 0"
                         variant="primary"
                         class="row justify-content-center forge-btns"
-                        @click="onForgeWeapon"
+                        @click="onForgeWeapon(1)"
                         :disabled="disableConfirmButton"
                         v-tooltip="$t('blacksmith.forgeNew')">
                           <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
@@ -309,7 +309,7 @@
                         v-if="clickedForgeButton === 1"
                         variant="primary"
                         class="row justify-content-center forge-btns"
-                        @click="onForgeWeaponx10"
+                        @click="onForgeWeapon(10)"
                         :disabled="disableConfirmButton"
                         v-tooltip="$t('blacksmith.forge10New')">
                           <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
@@ -913,59 +913,40 @@ export default Vue.extend({
       else if(type === 'bonusPower') return weaponActive.bonusPower;
     },
 
-    async onForgeWeapon() {
+    async onForgeWeapon(amount: number) {
       this.disableForge = true;
-      console.log('onForgeWeaponx1');
       (this.$refs['forge-element-selector-modal']as BModal)?.hide();
+      this.modalType = 'forge';
       this.showModal = true;
       this.spin = true;
-      this.modalType = 'forge';
       try {
-        const weaponIds = await this.mintWeapon({
-          useStakedSkillOnly: this.useStakedForForge,
-          chosenElement: this.selectedElement || 100,
-          eventId: this.selectedSpecialWeaponEventId,
-          mintSlippageApproved: this.mintSlippageApproved
-        });
-        this.viewNewWeapons([weaponIds]);
-
+        if(amount === 1){
+          await this.mintWeapon({
+            useStakedSkillOnly: this.useStakedForForge,
+            chosenElement: this.selectedElement || 100,
+            eventId: this.selectedSpecialWeaponEventId,
+            mintSlippageApproved: this.mintSlippageApproved
+          });
+        }
+        else{
+          await await this.mintWeaponN({
+            num: amount,
+            useStakedSkillOnly: this.useStakedForForge,
+            chosenElement: this.selectedElement,
+            eventId: this.selectedSpecialWeaponEventId,
+            mintSlippageApproved: this.mintSlippageApproved
+          });
+        }
+        this.newForged = this.ownedWeaponIds.splice(this.ownedWeaponIds.length - amount, this.ownedWeaponIds.length);
+        (this.$refs['new-forge-weapon'] as BModal).show();
       } catch (e) {
+        console.log('Error while forging:', e);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
       } finally {
         this.disableForge = false;
         this.selectedElement = null;
-      }
-    },
-
-    async onForgeWeaponx10(){
-      if(this.disableForge) return;
-
-      (this.$refs['forge-element-selector-modal']as BModal).hide();
-
-      this.disableForge = true;
-      const forgeMultiplier = 10;
-
-      // Incase the network or mm are having issues, after 1 min we reshow
-      const failbackTimeout = setTimeout(() => {
-        this.disableForge = false;
-      }, 30000);
-
-      try {
-        await await this.mintWeaponN({
-          num: forgeMultiplier,
-          useStakedSkillOnly: this.useStakedForForge,
-          chosenElement: this.selectedElement,
-          eventId: this.selectedSpecialWeaponEventId,
-          mintSlippageApproved: this.mintSlippageApproved
-        });
-
-      } catch (e) {
-        console.error(e);
-        (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
-      } finally {
-        clearTimeout(failbackTimeout);
-        this.disableForge = false;
-        this.selectedElement = null;
+        this.showModal = false;
+        this.spin = false;
       }
     },
 
@@ -1115,13 +1096,6 @@ export default Vue.extend({
 
     closeModal(modalType: string){
       (this.$refs[modalType] as BModal).hide();
-    },
-
-    viewNewWeapons(weaponIds: number[]){
-      this.spin = false;
-      this.newForged = weaponIds;
-      this.showModal = false;
-      (this.$refs['new-forge-weapon'] as BModal).show();
     },
 
     getWeaponArt,
