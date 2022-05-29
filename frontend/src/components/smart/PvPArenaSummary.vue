@@ -70,7 +70,7 @@
         </div>
       </div>
       <div class="characterImage">
-        <pvp-character :characterId="currentCharacterId" />
+        <pvp-character :characterTrait="characterInformation.element" />
       </div>
       <pvp-arena-information
         class="arenaInformation"
@@ -436,7 +436,6 @@ span, p, li, button, a {
   display: flex;
   width: 50%;
   padding: 3rem 0;
-  margin: 0 1rem;
   @media only screen and (min-width: 1440px) {
     width: 40%;
     margin: 0;
