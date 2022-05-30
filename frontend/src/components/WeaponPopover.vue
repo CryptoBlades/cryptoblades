@@ -6,7 +6,8 @@
     class="weapon-popover"
     triggers="hover">
     <div class="weapon-popover-body">
-      <img :src="getWeaponArt(weapon)">
+     <img v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
+        class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)"/>
       <div class="details">
         <span class="rarity" :class="'rarity-'+weapon.stars">{{getWeaponRarity(weapon.stars)}}</span>
         <h5>{{getCleanWeaponName(weapon.id, weapon.stars).toUpperCase()}}</h5>
@@ -69,19 +70,29 @@ import { mapGetters, mapState } from 'vuex';
 
 export default {
   props: ['weapon', 'placement'],
+
+  data() {
+    return {
+      showCosmetics: true,
+    };
+  },
   methods: {
     getWeaponArt,
     getWeaponRarity,
     getCleanWeaponName(id, stars) {
       return getCleanName(this.getWeaponName(id, stars));
     },
+    checkStorage() {
+      this.showCosmetics = localStorage.getItem('showCosmetics') !== 'false';
+    },
   },
   computed:{
-    ...mapState(['maxDurability']),
+    ...mapState(['maxDurability', 'specialWeaponArts']),
     ...mapGetters([
       'getWeaponDurability',
       'timeUntilWeaponHasMaxDurability',
       'getWeaponName',
+      'getWeaponCosmetic',
     ]),
   },
 };

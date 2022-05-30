@@ -132,7 +132,6 @@ export default Vue.extend({
       'fightBaseline',
       'getCharacterPower'
     ]),
-
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },
@@ -212,7 +211,6 @@ export default Vue.extend({
 
       else return 'character';
     },
-
     getNftStatus(activeCharacter: any){
       this.composeCharacterData(activeCharacter.id).then(data => {
         if (data.status !== undefined && data.status in NftStatus) {
@@ -662,7 +660,7 @@ li.character-highlight{
 }
 
 .char-level{
-  font-size: 0.8vw;
+  font-size: 0.7vw;
   color: #fff;
   white-space: nowrap;
 }

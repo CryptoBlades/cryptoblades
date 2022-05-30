@@ -1032,6 +1032,15 @@ export default new Vuex.Store<IState>({
   },
 
   actions: {
+    async fetchIgoRewardsPerFight({ state }) {
+      const { CryptoBlades } = state.contracts();
+      if(!CryptoBlades || !state.defaultAccount) return;
+
+      const igoDefaultReward = await CryptoBlades.methods
+        .vars(27)
+        .call(defaultCallOptions(state));
+      return igoDefaultReward;
+    },
     async initializeStore({ dispatch }) {
       await dispatch('setUpContracts');
       await dispatch('setUpContractEvents');
@@ -1521,7 +1530,11 @@ export default new Vuex.Store<IState>({
       ]);
       dispatch('fetchWeaponDurability', weaponId);
     },
-
+    async getShieldFlag({state}, shieldId){
+      const { Shields } = state.contracts();
+      if(!Shields || !state.defaultAccount) return;
+      return await Shields.methods.getNftVar(shieldId, 2).call(defaultCallOptions(state));
+    },
     async fetchShields({ dispatch }, shieldIds: (string | number)[]) {
       await Promise.all(shieldIds.map(id => dispatch('fetchShield', id)));
     },
@@ -2456,7 +2469,7 @@ export default new Vuex.Store<IState>({
       return fightBaseline;
     },
 
-    async fetchFightRewardSkill({ state, commit, dispatch }) {
+    async fetchFightRewardSkill({ state, commit }) {
       const { CryptoBlades } = state.contracts();
       if(!CryptoBlades) return;
 
@@ -2469,27 +2482,10 @@ export default new Vuex.Store<IState>({
           commit('updateSkillRewards', { skillRewards });
 
           return skillRewards;
-        })(),
-        dispatch('fetchRewardsClaimTax')
+        })()
       ]);
 
       return skillRewards;
-    },
-
-    async fetchRewardsClaimTax({ state, commit }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-
-      const [rewardsClaimTax, maxRewardsClaimTax] = await Promise.all([
-        CryptoBlades.methods
-          .getOwnRewardsClaimTax()
-          .call(defaultCallOptions(state)),
-        CryptoBlades.methods
-          .REWARDS_CLAIM_TAX_MAX()
-          .call(defaultCallOptions(state))
-      ]);
-
-      commit('updateRewardsClaimTax', { maxRewardsClaimTax, rewardsClaimTax });
     },
 
     async fetchFightRewardXp({ state, commit }) {
@@ -4137,15 +4133,13 @@ export default new Vuex.Store<IState>({
 
       if(orderWithSkill) {
         const price = await SpecialWeaponsManager.methods.getSkillForgeCost(orderOption).call(defaultCallOptions(state));
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
+        await approveFeeWalletOnly(
           CryptoBlades,
           SkillToken,
           state.defaultAccount,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          new BigNumber(price),
-          state.skillRewards
+          new BigNumber(price)
         );
         await SpecialWeaponsManager.methods.orderSpecialWeaponWithSkill(eventId, orderOption).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
       }

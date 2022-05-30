@@ -37,12 +37,14 @@
         <div>
           <div class="small-durability-bar"
             :style="`--durabilityReady: ${(getWeaponDurability(weapon.id)/maxDurability)*100}%;`"
-            v-tooltip.bottom="`${$t('weaponIcon.durability')} ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
-              ${$t('weaponIcon.durabilityTooltip')} ${timeUntilWeaponHasMaxDurability(weapon.id)}`">
+            v-tooltip.bottom="`
+              ${$t('weaponIcon.durability')} ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
+              ${getWeaponDurability(weapon.id) === maxDurability ?
+              $t('weaponIcon.durabilityTooltipFull') : `${$t('weaponIcon.durabilityTooltip')} ${timeUntilWeaponHasMaxDurability(weapon.id)}` }
+              `">
           </div>
         </div>
         <div class="bonus-pows">
-
           <div v-if="weapon.lowStarBurnPoints > 0">LB: {{ weapon.lowStarBurnPoints }}</div>
           <div v-if="weapon.fourStarBurnPoints > 0">4B: {{ weapon.fourStarBurnPoints }}</div>
           <div v-if="weapon.fiveStarBurnPoints > 0">5B: {{ weapon.fiveStarBurnPoints }}</div>
@@ -107,7 +109,7 @@ function transformModel(model, y) {
 export default {
   props: ['weapon', 'favorite', 'selected'],
   computed: {
-    ...mapState(['maxDurability']),
+    ...mapState(['maxDurability', 'specialWeaponArts']),
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',

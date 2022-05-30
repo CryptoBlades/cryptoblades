@@ -6,7 +6,7 @@
       </div>
 
       <b-modal id="fightResultsModal" hide-footer hide-header>
-        <CombatResults v-if="resultsAvailable" :fightResults="fightResults" class="mb-3" />
+        <CombatResults v-if="resultsAvailable" :fightResults="fightResults" :staminaUsed="staminaPerFight" class="mb-3" />
         <div class="footer-close">
             <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
             <span class="tap" @click="$bvModal.hide('fightResultsModal')">
@@ -297,7 +297,8 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp',
+      'fetchCharacterStamina','getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
       'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
@@ -432,6 +433,8 @@ export default {
 
         await this.fetchFightRewardSkill();
         await this.fetchFightRewardXp();
+
+        await this.fetchCharacterStamina(this.currentCharacterId);
 
         this.error = null;
       } catch (e) {

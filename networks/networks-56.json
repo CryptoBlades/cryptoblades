@@ -2137,7 +2137,7 @@
     },
     "links": {},
     "address": "0x39Bea96e13453Ed52A734B6ACEeD4c41F57B2271",
-    "transactionHash": "0xde862460932270c1993242ef4298485b24303d76cba97d9518e8f77326ebd961"
+    "transactionHash": "0x21457977caf0e8cdfe16adb89b04dcad5d00071a8690df60f889567ef47b180c"
   },
   "build/contracts/Garrison.json": {
     "events": {
@@ -3835,7 +3835,7 @@
     },
     "links": {},
     "address": "0x386088468D67333d393594C8427f15A64fa8896c",
-    "transactionHash": "0x271db7d03f4e5830b58c9f036ba11f635fb2d9e2b86aaa2c65f30c330f507dd7"
+    "transactionHash": "0xa418c408cf58c3a8fa9fe6c967880fa52fe0581a14db82b06c7c4fda7549a099"
   },
   "build/contracts/PvpRankings.json": {
     "events": {

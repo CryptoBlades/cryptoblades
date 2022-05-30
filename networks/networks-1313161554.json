@@ -2377,7 +2377,7 @@
     },
     "links": {},
     "address": "0x3F715995647fe44Db45411bb9e81b7A1aD5A8387",
-    "transactionHash": "0x7a6f7981408f3216f89cc9228ad1a54739b591f75f6d73c2b3f0fecc8b80e955|{\"gasBurned\":15944378420972,\"tx\":\"NsrXoaPMjhkny2TD2Zua3BgcHfP7sdr919vPA6wHnQZ\"}"
+    "transactionHash": "0x35a7da1315055a6bafd8a9d044717faa490b1b4a0b1950a4083befd35d598fcb|{\"gasBurned\":14767486369644,\"tx\":\"EDbKrjiGhqrTZjK6JTq34WgXWt51XojN68UPspYW6fMe\"}"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {},
@@ -3791,7 +3791,7 @@
     },
     "links": {},
     "address": "0x236777456dD5159Da6c38A0E24f46e30C6f9e326",
-    "transactionHash": "0x9b9c9995055667e6c8ac28811bea45b51d4b745d7491f4a04306247d0c26fab2|{\"gasBurned\":15517636286224,\"tx\":\"8NThFP1RQYASe8NJhqSHyBXYL1YJmMThNWBYpZjyboFH\"}"
+    "transactionHash": "0x85c4d688660f554b4caa2540e5d21afd86fbc65865698c1e1bc954c7bd1b1e4c|{\"gasBurned\":13871384505816,\"tx\":\"6HDANEEM1FGwCh8HHxtjyL5Ys3qAXRA9RmaP3cojQtgC\"}"
   },
   "build/contracts/PvpRankings.json": {
     "events": {

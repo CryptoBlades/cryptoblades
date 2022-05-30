@@ -110,7 +110,9 @@
     "hint": "SKILL earned is based on gas costs of the network plus a factor of your power",
     "gasFee": "You spent {bnbGasUsed} {gasToken} on gas fees ",
     "youRolled": "You rolled:",
-    "enemyRolled": "Enemy rolled:"
+    "enemyRolled": "Enemy rolled:",
+    "earnedSkill": "<b>{noIGO}</b> <small>UNCLAIMED SKILL</small> <b>{inUSD}</b> ",
+    "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> "
   },
   "homePage":{
     "level": "Level",
@@ -238,7 +240,22 @@
     "noWeaponsStored": "No Weapons stored!",
     "noCharactersStored": "No Characters stored!",
     "noShieldsStored" : "No Shields Stored!",
-    "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!"
+    "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!",
+    "incomingNfts": "Incoming NFTs",
+    "noIncomingNfts": "No incoming NFTs!",
+    "selectWeaponToWithdraw": "Select a weapon to withdraw",
+    "selectYourWeapon": "Select your Weapon",
+    "weaponId": "Weapon ID",
+    "fromChain": "from Chain",
+    "withdrawWeapon": "Withdraw Weapon",
+    "selectCharacterToWithdraw": "Select a character to withdraw",
+    "selectYourCharacter": "Select your Character",
+    "selectYourShieldToWithdraw": "Select shield to withdraw",
+    "selectYourShield" : "Select your Shield",
+    "shieldId" : "Shield ID",
+    "withdrawShield": "Withdraw Shield",
+    "characterId": "Character ID",
+    "withdrawCharacter": "Withdraw Character"
   },
   "characterList": {
     "level": "Level",
@@ -291,6 +308,7 @@
   "weaponIcon": {
     "durability": "Durability:",
     "durabilityTooltip": "Repairs 1 point every 50 minutes, durability will be full at:",
+    "durabilityTooltipFull": "Repairs 1 point every 50 minutes",
     "id": "ID",
     "bonusPower": "Bonus power:"
   },
@@ -1208,6 +1226,7 @@
       "availableInWallet": "Available in Wallet",
       "rewards": "Rewards",
       "claim": "Claim!",
+      "restake": "Restake!",
       "stake": "Stake",
       "unstake": "Unstake",
       "max": "MAX",
@@ -1347,7 +1366,7 @@
     "enterArenaWillCost": " Tiered arena entrance is {formattedEntryWager} $SKILL.",
     "enterUntieredArenaWillCost": " Free for all arena entrance is {formattedUntieredEntryWager} $SKILL.",
     "playersCanAttackYou": " Players can attack you while you are in the Arena.",
-    "leavingWillCost": " Leaving the Arena will cost you {leavingArenaCost} $SKILL.",
+    "leavingWillCost": " If in a match, leaving the Arena will deduct {formattedWithdrawCost} $SKILL from your wager.",
     "iUnderstand": "I understand.",
     "enterArena": "Enter Arena",
     "equipment": "Equipment",
