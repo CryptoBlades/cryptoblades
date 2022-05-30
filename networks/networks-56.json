@@ -84,7 +84,7 @@
     },
     "links": {},
     "address": "0x970Ea2c182199A38ed6d991B730A5a9638B1a399",
-    "transactionHash": "0x79c8aa8fafc4eaa6ce1e832744706f3043f4bc7ecd0042335fa7bfee9a0b5421"
+    "transactionHash": "0xaeb0d8c545c84782558e73eb76f2649373e846b848e9bd229aea99535d49cf14"
   },
   "build/contracts/BurningManager.json": {
     "events": {
@@ -3835,7 +3835,7 @@
     },
     "links": {},
     "address": "0x386088468D67333d393594C8427f15A64fa8896c",
-    "transactionHash": "0xa418c408cf58c3a8fa9fe6c967880fa52fe0581a14db82b06c7c4fda7549a099"
+    "transactionHash": "0x5b04de506a0457ec4bc46daea1c0637c52a697b23edc31a8c9be9bddf5f09c2b"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -3936,7 +3936,7 @@
     },
     "links": {},
     "address": "0x76f3Ba06d1C4994122cA81998dC405A17010AE81",
-    "transactionHash": "0x194d747732ec3d06c2ead45258155c6b52f0f4068a11235c26f3f919d5b64d95"
+    "transactionHash": "0xd5803d0c9219570b1684d2bebe1996f5bd529694718f52d2ca1518f54aacf1b6"
   },
   "build/contracts/Raid1.json": {
     "events": {},
