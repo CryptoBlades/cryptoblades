@@ -32,7 +32,7 @@ import {fromWeiEther, isValidWeb3Address} from '../../../utils/common';
 interface StoreMappedActions {
   giveAwaySoul(payload: { user: string, soulAmount: number }): Promise<void>;
 
-  getSoulMultiplier(): Promise<number>;
+  getSoulMultiplier(): Promise<string>;
 
   setSoulMultiplier(payload: { multiplier: number }): Promise<void>;
 }
