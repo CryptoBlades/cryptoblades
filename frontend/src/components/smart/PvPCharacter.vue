@@ -10,7 +10,7 @@ export default {
   props: {
     characterTrait: {
       default: '',
-      require: true
+      required: true
     }
   },
   computed: {
