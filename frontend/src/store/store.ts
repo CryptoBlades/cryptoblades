@@ -2430,7 +2430,7 @@ export default new Vuex.Store<IState>({
 
       const VAR_BURN_POWER_MULTIPLIER = await BurningManager.methods.VAR_BURN_POWER_MULTIPLIER().call(defaultCallOptions(state));
 
-      return await BurningManager.methods.setVar(VAR_BURN_POWER_MULTIPLIER, state.web3.utils.toBN(multiplier))
+      return await BurningManager.methods.setVar(VAR_BURN_POWER_MULTIPLIER, Web3.utils.toWei('' + multiplier))
         .send({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 

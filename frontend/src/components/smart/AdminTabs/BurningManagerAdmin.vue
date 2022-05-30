@@ -27,7 +27,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import {isValidWeb3Address} from '../../../utils/common';
+import {fromWeiEther, isValidWeb3Address} from '../../../utils/common';
 
 interface StoreMappedActions {
   giveAwaySoul(payload: { user: string, soulAmount: number }): Promise<void>;
@@ -124,7 +124,7 @@ export default Vue.extend({
     async fetchCurrentSoulMultiplier() {
       try {
         this.isLoading = true;
-        this.currentSoulMultiplier = await this.getSoulMultiplier();
+        this.currentSoulMultiplier = +fromWeiEther(await this.getSoulMultiplier());
       } finally {
         this.isLoading = false;
       }
