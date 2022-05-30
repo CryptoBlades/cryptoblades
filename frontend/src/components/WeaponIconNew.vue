@@ -9,7 +9,7 @@
       <i class="fas fa-spinner fa-spin"></i>
     </div>
 
-    <div class="glow-container" ref="el" :class="['glow-' + (weapon.stars || 0)]">
+    <div class="glow-container" ref="el" :class="selected ? 'selected-border' : ['glow-' + (weapon.stars || 0)]">
       <div class="animation" v-bind:class="showCosmetics ? 'weapon-animation-applied-' + getWeaponCosmetic(weapon.id) : ''"/>
       <img v-if="showPlaceholder" v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
         class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)"/>
@@ -510,6 +510,7 @@ export default {
 .glow-container {
   height: 100%;
   width: 100%;
+  background: rgb(26, 24, 24);
 }
 
 .glow-container > img{
@@ -599,6 +600,10 @@ export default {
 
 .name{
   margin-bottom: 10px;
+}
+
+.selected-border{
+  border: 2px solid #fff;
 }
 
 .star-stat{

@@ -61,7 +61,7 @@
         class="weapon-grid" tag="ul" name="list" ref="weapon-grid"
         >
         <li
-          class="weapon" :style="setBorderSelected(weapon.id) ? 'border: 2px solid #fff' : ''"
+          class="weapon"
           :class="{ selected: highlight !== null && weapon.id === highlight }"
           v-for="(weapon, i) in nonIgnoredWeapons.slice(((this.activePage*ItemPerPage)-ItemPerPage),((this.activePage*ItemPerPage)))"
           :key="weapon.id" :data-index="i"
@@ -69,7 +69,8 @@
           @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
           <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
           <div class="weapon-icon-wrapper">
-            <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" :id="'weapon-'+weapon.id"/>
+            <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" :id="'weapon-'+weapon.id"
+            :selected="setBorderSelected(weapon.id)"/>
             <weapon-popover :weapon="weapon" :placement="'right'"/>
           </div>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
@@ -653,8 +654,8 @@ export default Vue.extend({
       this.elementFilter = sessionStorage.getItem('weapon-elementfilter') || '';
     }
     this.haveRename = await this.fetchTotalWeaponRenameTags();
-    await this.loadCosmeticsCount();
     this.createPagination(this.activePage);
+    await this.loadCosmeticsCount();
   },
 });
 </script>
@@ -690,16 +691,13 @@ export default Vue.extend({
 }
 .weapon {
   width: 105%;
-  background: rgb(26, 24, 24);
   border-radius: 5px;
   cursor: pointer;
   position: relative;
   overflow: visible;
   margin-bottom: 15px;
 }
-.weapon.selected {
-  outline: solid currentcolor 2px;
-}
+
 .weapon-icon-wrapper {
   width: 13.5em;
   height: 18em;

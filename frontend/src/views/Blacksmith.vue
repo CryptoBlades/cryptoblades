@@ -295,6 +295,7 @@
                         v-if="clickedForgeButton === 0"
                         variant="primary"
                         class="row justify-content-center forge-btns"
+                        :class="disableConfirmButton ? 'disable-button' : ''"
                         @click="onForgeWeapon"
                         :disabled="disableConfirmButton"
                         v-tooltip="$t('blacksmith.forgeNew')">
@@ -309,6 +310,7 @@
                         v-if="clickedForgeButton === 1"
                         variant="primary"
                         class="row justify-content-center forge-btns"
+                        :class="disableConfirmButton ? 'disable-button' : ''"
                         @click="onForgeWeaponx10"
                         :disabled="disableConfirmButton"
                         v-tooltip="$t('blacksmith.forge10New')">
@@ -1032,7 +1034,9 @@ export default Vue.extend({
     },
 
     setChosenElement(ele: any, i: number) {
-      this.selectedElement = i;
+      if(i === this.selectedElement) this.selectedElement = null;
+      else this.selectedElement = i;
+
       this.chosenElementFee = i === 100 ? 1 : 2;
       ele.srcElement.classList.toggle('done');
       Array.from(ele.srcElement.parentNode.childNodes).forEach((child: any) => {
@@ -1608,7 +1612,7 @@ export default Vue.extend({
     margin-top: 30px;
   }
 
-  .button-div > button:hover, .forge-btns:hover{
+  .button-div > button:hover{
     margin-top: 30px;
   }
 }
@@ -2393,6 +2397,11 @@ img.elements-modal:hover {
 .buttons-panel {
   display: flex;
   justify-content: space-between;
+}
+
+.disable-button{
+  opacity: 0.5;
+  cursor:not-allowed;
 }
 
 .line-sep{

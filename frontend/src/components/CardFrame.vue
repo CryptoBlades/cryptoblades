@@ -1,5 +1,5 @@
 <template>
-  <svg class="frame-card" xmlns="http://www.w3.org/2000/svg" width="410.861" height="602.768" viewBox="0 0 410.861 602.768">
+  <svg class="frame-card" xmlns="http://www.w3.org/2000/svg" width="500.861" height="602.768" viewBox="0 0 410.861 602.768">
     <g id="enter-frame" transform="translate(-584.803 -285.44)">
       <g id="Group_7" data-name="Group 7" transform="translate(154 -23.94)">
         <g id="Group_2" data-name="Group 2" transform="translate(4.303 8.881)">

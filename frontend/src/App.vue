@@ -556,7 +556,7 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
 .set-normal{
   margin-left: auto;
   margin-right: auto;
-  transition: 1s all;
+  transition: 1s width;
   padding: 0px;
 }
 
