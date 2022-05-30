@@ -209,9 +209,9 @@ export default Vue.extend({
         durabilityCost: '',
         joinCost: '',
         raidStatus: '',
-        bossPower: '',
+        bossPower: 0,
         bossTrait: '',
-        accountPower: ''
+        accountPower: 0
       },
       remainingTime: {
         days: 0,
