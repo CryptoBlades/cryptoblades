@@ -228,6 +228,23 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
         ].add(amountToTransfer);
     }
 
+    function changeRankingRewards(
+        uint256 characterID,
+        uint256 amount
+    ) external restricted {
+        address playerToTransfer = characters.ownerOf(characterID);
+
+        _rankingRewardsByPlayer[playerToTransfer] = amount;
+    }
+
+    function getRankingRewards(
+        uint256 characterID
+    ) external restricted view returns (uint256) {
+        address player = characters.ownerOf(characterID);
+
+        return _rankingRewardsByPlayer[player];
+    }
+
     function clearTierTopCharacters(uint8 tier) external restricted {
         for (uint256 k = 0; k < _topRankingCharactersByTier[tier].length; k++) {
             rankingPointsByCharacter[_topRankingCharactersByTier[tier][k]] = 0;
