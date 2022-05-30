@@ -984,7 +984,9 @@
       "playerAddress": "Player address",
       "mintGiveawaySoul": "Mint giveaway soul",
       "soulAmount": "Soul amount",
-      "mintSoul": "Mint soul"
+      "mintSoul": "Mint soul",
+      "setSoulMultiplierCurrent": "Set soul multiplier (current: {multiplier})",
+      "setSoulMultiplier": "Set soul multiplier"
     },
     "partnerVault": {
       "pasteInValidERC721Address": "Paste in valid ERC721 address",
