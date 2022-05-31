@@ -101,7 +101,8 @@
     </div>
     <!--Character Change Trait Modal -->
     <b-modal class="centered-modal" ref="character-change-trait-modal"
-      centered content-class="character-modal" hide-footer hide-header-close dialog-class="dialog-character" size="lg">
+      centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
+      dialog-class="dialog-character" size="lg">
       <template #modal-title>
         {{$t('Character.changeTrait')}}
       </template>
@@ -126,7 +127,8 @@
     </b-modal>
     <!-- Character Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-modal"
-      centered content-class="character-modal" hide-footer hide-header-close dialog-class="dialog-character" size="lg">
+      centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
+      dialog-class="dialog-character" size="lg">
       <template #modal-title>
         {{$t('Character.transfer')}}
       </template>
@@ -146,7 +148,8 @@
     </b-modal>
     <!-- Character Soul Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-soul-modal"
-      centered content-class="character-modal" hide-footer hide-header-close dialog-class="dialog-character" size="lg">
+      centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
+      dialog-class="dialog-character" size="lg">
       <template #modal-title>
         {{$t('Character.transferSoul')}}
       </template>
@@ -164,7 +167,7 @@
             <div class="w-col col-md-6 d-flex flex-column">
               <input
                 v-model="soulAmountToTransfer"
-                class="range-character"
+                class="range-character py-3"
                 type="range"
                 min="0"
                 :max="soulBalance"
@@ -199,7 +202,8 @@
     </b-modal>
     <!-- Character Change Name Modal -->
     <b-modal class="centered-modal" ref="character-change-name-modal"
-      centered content-class="character-modal" hide-footer hide-header-close dialog-class="dialog-character" size="lg">
+      centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
+      dialog-class="dialog-character" size="lg">
       <template #modal-title>
         {{$t('Character.changeName')}}
       </template>
@@ -793,10 +797,11 @@ export default Vue.extend({
 }
 
 
-@media (max-width: 600px) {
+@media all and (max-width: 600px) {
   .characterWrapper{
     margin-top: 1rem;
   }
 }
+
 </style>>
 
