@@ -157,7 +157,6 @@ interface StoreMappedActions {
 
 interface StoreMappedMutations {
   setWeb3: (web3: Web3) => void,
-  updateCurrentChainSupportsMerchandise: () => void,
   updateCurrentChainSupportsPvP: () => void,
   updateCurrentChainSupportsQuests: () => void,
 }
@@ -237,7 +236,6 @@ export default Vue.extend({
     ]) as StoreMappedActions,
     ...mapMutations([
       'setWeb3',
-      'updateCurrentChainSupportsMerchandise',
       'updateCurrentChainSupportsPvP',
       'updateCurrentChainSupportsQuests'
     ])as StoreMappedMutations,
@@ -269,7 +267,6 @@ export default Vue.extend({
         localStorage.setItem('currentChain', paramChain);
         if(!this.isWalletConnect) await this.configureMetaMask();
       }
-      this.updateCurrentChainSupportsMerchandise();
       this.updateCurrentChainSupportsPvP();
       this.updateCurrentChainSupportsQuests();
     },
