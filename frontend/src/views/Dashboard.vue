@@ -400,7 +400,7 @@ export default Vue.extend({
   flex-direction: row;
   background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/raid-bg.png");
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 110%;
   width: 65%;
   height: 100%;
   border-radius: 10px;
@@ -414,7 +414,7 @@ export default Vue.extend({
   align-items: left;
   background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/arena-bg.png");
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 110%;
   width: 100%;
   height: 100%;
   border-radius: 10px;
@@ -427,7 +427,7 @@ export default Vue.extend({
   align-items: left;
   background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/adventure-bg.png");
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 110%;
   width: 100%;
   height: 100%;
   border-radius: 10px;
@@ -781,8 +781,32 @@ export default Vue.extend({
   display: none;
 }
 
-@media screen and (max-width: 1280px)  {
+.pve-container:hover,
+.pvp-container:hover,
+.raid-container:hover{
+  animation: animateBG 3s ease;
+}
 
+@keyframes animateBG {
+  from{
+    background-size: 110%;
+  }
+  to{
+    background-size: 120%;
+  }
+}
+
+@media screen and (max-width: 1280px)  {
+  .raid-container,
+  .pvp-container,
+  .pve-container {
+    background-size: cover;
+  }
+  .pve-container:hover,
+  .pvp-container:hover,
+  .raid-container:hover{
+    animation: none;
+  }
   .overlay-bg {
     background-color: rgba(0, 0, 0, 0.425);
   }
@@ -937,27 +961,6 @@ export default Vue.extend({
   .raid-info-container > a{
     display: flex;
     justify-content: center;
-  }
-}
-
-.pve-container:hover{
-  animation: animateBG 3s ease;
-}
-
-.pvp-container:hover{
-  animation: animateBG 3s ease;
-}
-
-.raid-container:hover{
-  animation: animateBG 3s ease;
-}
-
-@keyframes animateBG {
-  from{
-    background-size: 100%;
-  }
-  to{
-    background-size: 110%;
   }
 }
 </style>
