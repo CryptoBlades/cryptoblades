@@ -14,7 +14,7 @@
           }"
           >
               <template v-if="characterCosmetics[currentCharacterId] === cosmetic.id">
-                <span>Equipped</span>
+                <span>{{$t(`Character.equippedLabel`)}}</span>
               </template>
               <div v-bind:class="['character-cosmetic-applied-' + cosmetic.id, 'character-animation-applied-' + cosmetic.id]">
                   <div class="animation" />

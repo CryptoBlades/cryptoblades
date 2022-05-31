@@ -89,7 +89,8 @@
     "max": "Max",
     "upgrade": "Upgrade",
     "skins": "Skins",
-    "options": "Options"
+    "options": "Options",
+    "equippedLabel": "Equipped"
   },
   "characterModal": {
     "close": "Tap Anywhere To Close"
