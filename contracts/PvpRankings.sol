@@ -388,8 +388,8 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
             seasonByCharacter[characterID] = currentRankedSeason;
         }
 
-        if (_ownerByCharacter[characterID] != msg.sender) {
-            _ownerByCharacter[characterID] = msg.sender;
+        if (_ownerByCharacter[characterID] != tx.origin) {
+            _ownerByCharacter[characterID] = tx.origin;
         }
     }
 
@@ -399,8 +399,8 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
             seasonByCharacter[characterID] = currentRankedSeason;
         }
 
-        if (_ownerByCharacter[characterID] != msg.sender) {
-            _ownerByCharacter[characterID] = msg.sender;
+        if (_ownerByCharacter[characterID] != tx.origin) {
+            _ownerByCharacter[characterID] = tx.origin;
         }
     }
 
