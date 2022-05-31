@@ -105,9 +105,8 @@ export function getConfigValue(key: string, chain?: string): any {
     return process.env[key];
   }
 
-  // if(process.env.NODE_ENV === 'development') return '';
-  // const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
-  const env = 'test';
+  if(process.env.NODE_ENV === 'development') return '';
+  const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
 
   if(chain) return (config as Config).environments[env].chains[chain][key];
 
