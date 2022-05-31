@@ -585,7 +585,7 @@ export default Vue.extend({
   background-position-y: bottom;
   background-repeat: no-repeat;
   margin-top: 5rem;
-  padding-bottom: 2rem;
+  padding-bottom: 3rem;
 }
 .characterImg {
   width: 100%;
@@ -739,5 +739,10 @@ export default Vue.extend({
 }
 
 
+@media (max-width: 600px) {
+  .characterWrapper{
+    margin-top: 1rem;
+  }
+}
 </style>>
 

@@ -45,6 +45,10 @@
     "timeSince": "Time since last withdraw: n/a",
     "clickDetails": "Click to claim and see the details",
     "claim": "Claim",
+    "characterName": "Character Name",
+    "unclaimedExp": "Unclaimed EXP",
+    "unclaimed": "UNLCAIMED SKILL",
+    "widthraw": "WITHDRAW",
     "claimRewards": "Claim Rewards",
     "payoutCurrency": "Payout Currency",
     "partnerTokenClaimed": "This partner tokens have been claimed already.",
@@ -112,7 +116,9 @@
     "hint": "SKILL earned is based on gas costs of the network plus a factor of your power",
     "gasFee": "You spent {bnbGasUsed} {gasToken} on gas fees ",
     "youRolled": "You rolled:",
-    "enemyRolled": "Enemy rolled:"
+    "enemyRolled": "Enemy rolled:",
+    "earnedSkill": "<b>{noIGO}</b> <small>UNCLAIMED SKILL</small> <b>{inUSD}</b> ",
+    "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> "
   },
   "nft": {
      "transferMenuItem": "Transfer",
@@ -220,7 +226,22 @@
     "noWeaponsStored": "No Weapons stored!",
     "noCharactersStored": "No Characters stored!",
     "noShieldsStored" : "No Shields Stored!",
-    "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!"
+    "noRefundOfSpentSkill": "You will not get a refund of your spent SKILL fee when cancelling the transfer!",
+    "incomingNfts": "Incoming NFTs",
+    "noIncomingNfts": "No incoming NFTs!",
+    "selectWeaponToWithdraw": "Select a weapon to withdraw",
+    "selectYourWeapon": "Select your Weapon",
+    "weaponId": "Weapon ID",
+    "fromChain": "from Chain",
+    "withdrawWeapon": "Withdraw Weapon",
+    "selectCharacterToWithdraw": "Select a character to withdraw",
+    "selectYourCharacter": "Select your Character",
+    "selectYourShieldToWithdraw": "Select shield to withdraw",
+    "selectYourShield" : "Select your Shield",
+    "shieldId" : "Shield ID",
+    "withdrawShield": "Withdraw Shield",
+    "characterId": "Character ID",
+    "withdrawCharacter": "Withdraw Character"
   },
   "characterList": {
     "level": "Level",
@@ -273,6 +294,7 @@
   "weaponIcon": {
     "durability": "Durability:",
     "durabilityTooltip": "Repairs 1 point every 50 minutes, durability will be full at:",
+    "durabilityTooltipFull": "Repairs 1 point every 50 minutes",
     "id": "ID",
     "bonusPower": "Bonus power:"
   },
@@ -493,7 +515,6 @@
     "numberOfRaiders": "Number of Raiders",
     "totalPower": "Total Power",
     "bossPower": "Boss Power",
-    "victoryChance": "Victory chance",
     "drops": "Drops",
     "raid": "Raid",
     "clickAnywhere": "Click Anywhere to continue",
@@ -968,7 +989,9 @@
       "playerAddress": "Player address",
       "mintGiveawaySoul": "Mint giveaway soul",
       "soulAmount": "Soul amount",
-      "mintSoul": "Mint soul"
+      "mintSoul": "Mint soul",
+      "setSoulMultiplierCurrent": "Set soul multiplier (current: {multiplier})",
+      "setSoulMultiplier": "Set soul multiplier"
     },
     "partnerVault": {
       "pasteInValidERC721Address": "Paste in valid ERC721 address",

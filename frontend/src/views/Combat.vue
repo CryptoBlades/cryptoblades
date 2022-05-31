@@ -6,7 +6,7 @@
       </div>
 
       <b-modal id="fightResultsModal" hide-footer hide-header>
-        <CombatResults v-if="resultsAvailable" :fightResults="fightResults" class="mb-3" />
+        <CombatResults v-if="resultsAvailable" :fightResults="fightResults" :staminaUsed="staminaPerFight" class="mb-3" />
         <div class="footer-close">
             <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
             <span class="tap" @click="$bvModal.hide('fightResultsModal')">
@@ -973,6 +973,10 @@ h1 {
     height: auto;
   }
 
+  .weapon-selection {
+    align-self: flex-start;
+  }
+
   .hideMobile{
     display: inline;
   }
@@ -986,10 +990,14 @@ h1 {
   }
 
   .select-weapons{
-    font-size: 1.5em;
     align-self: left;
     margin-right: 20px;
   }
+
+  .select-weapons > div{
+    width: 100%;
+  }
+
 
   .combat-hints > div > .icon-border{
     height: 21px !important;
@@ -1005,6 +1013,14 @@ h1 {
   .selectedWeaponDetails > button  > img{
     width: 20px;
     margin-right: 15px;
+  }
+
+  .selectedWeaponDetails > div{
+    align-items: center;
+  }
+
+  .displayed-weapon{
+    margin-right: 10px;
   }
 
   .adventure{

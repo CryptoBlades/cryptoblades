@@ -1032,6 +1032,15 @@ export default new Vuex.Store<IState>({
   },
 
   actions: {
+    async fetchIgoRewardsPerFight({ state }) {
+      const { CryptoBlades } = state.contracts();
+      if(!CryptoBlades || !state.defaultAccount) return;
+
+      const igoDefaultReward = await CryptoBlades.methods
+        .vars(27)
+        .call(defaultCallOptions(state));
+      return igoDefaultReward;
+    },
     async initializeStore({ dispatch }) {
       await dispatch('setUpContracts');
       await dispatch('setUpContractEvents');
@@ -2404,6 +2413,25 @@ export default new Vuex.Store<IState>({
       if(!state.defaultAccount || !BurningManager) return;
 
       return await BurningManager.methods.giveAwaySoul(user, soulAmount).send({from: state.defaultAccount, gasPrice: getGasPrice()});
+    },
+
+    async getSoulMultiplier({state}) {
+      const {BurningManager} = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+
+      const VAR_BURN_POWER_MULTIPLIER = await BurningManager.methods.VAR_BURN_POWER_MULTIPLIER().call(defaultCallOptions(state));
+
+      return await BurningManager.methods.vars(VAR_BURN_POWER_MULTIPLIER).call(defaultCallOptions(state));
+    },
+
+    async setSoulMultiplier({state}, {multiplier}) {
+      const {BurningManager} = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+
+      const VAR_BURN_POWER_MULTIPLIER = await BurningManager.methods.VAR_BURN_POWER_MULTIPLIER().call(defaultCallOptions(state));
+
+      return await BurningManager.methods.setVar(VAR_BURN_POWER_MULTIPLIER, Web3.utils.toWei('' + multiplier))
+        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
     async fetchMarketNftPrice({ state }, { nftContractAddr, tokenId }) {
@@ -4124,15 +4152,13 @@ export default new Vuex.Store<IState>({
 
       if(orderWithSkill) {
         const price = await SpecialWeaponsManager.methods.getSkillForgeCost(orderOption).call(defaultCallOptions(state));
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
+        await approveFeeWalletOnly(
           CryptoBlades,
           SkillToken,
           state.defaultAccount,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          new BigNumber(price),
-          state.skillRewards
+          new BigNumber(price)
         );
         await SpecialWeaponsManager.methods.orderSpecialWeaponWithSkill(eventId, orderOption).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
       }

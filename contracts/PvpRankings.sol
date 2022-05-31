@@ -172,7 +172,88 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
             );
     }
 
-     function _processWinner(uint256 winnerID, uint8 tier) private {
+    // Requires 3 top characters, less than that will produce unintended consequences
+    // Short-term solution function, delete once used.
+    function forceRestartRankedSeason() external restricted {
+        uint256[] memory duelQueue = pvpcore.getDuelQueue();
+
+        if (duelQueue.length > 0) {
+            pvpcore.performDuels(duelQueue);
+        }
+
+        // NOTE: TIERS HARDCODED FOR SPECIFIC ERROR
+        for (uint8 i = 3; i <= 19; i++) {
+            if (_topRankingCharactersByTier[i].length == 0) {
+                continue;
+            }
+
+            // We assign rewards normally to all possible players
+            for (uint8 h = 0; h < prizePercentages.length; h++) {
+                _assignRewards(
+                    _topRankingCharactersByTier[i][h],
+                    h,
+                    rankingsPoolByTier[i]
+                );
+            }
+
+            // We reset ranking prize pools
+            rankingsPoolByTier[i] = 0;
+ 
+            // We reset top players' scores
+            for (uint256 k = 0; k < _topRankingCharactersByTier[i].length; k++) {
+                rankingPointsByCharacter[_topRankingCharactersByTier[i][k]] = 0;
+            }
+        }
+
+        currentRankedSeason = currentRankedSeason.add(1);
+        seasonStartedAt = block.timestamp;
+
+        emit SeasonRestarted(
+                currentRankedSeason,
+                seasonStartedAt
+            );
+    }
+
+    function forceAssignRewards(
+        uint256 characterID,
+        uint8 position,
+        uint256 pool
+    ) external restricted {
+        uint256 percentage = prizePercentages[position];
+        uint256 amountToTransfer = (pool.mul(percentage)).div(100);
+        address playerToTransfer = characters.ownerOf(characterID);
+
+        _rankingRewardsByPlayer[playerToTransfer] = _rankingRewardsByPlayer[
+            playerToTransfer
+        ].add(amountToTransfer);
+    }
+
+    function changeRankingRewards(
+        uint256 characterID,
+        uint256 amount
+    ) external restricted {
+        address playerToTransfer = characters.ownerOf(characterID);
+
+        _rankingRewardsByPlayer[playerToTransfer] = amount;
+    }
+
+    function getRankingRewards(
+        uint256 characterID
+    ) external restricted view returns (uint256) {
+        address player = characters.ownerOf(characterID);
+
+        return _rankingRewardsByPlayer[player];
+    }
+
+    function clearTierTopCharacters(uint8 tier) external restricted {
+        for (uint256 k = 0; k < _topRankingCharactersByTier[tier].length; k++) {
+            rankingPointsByCharacter[_topRankingCharactersByTier[tier][k]] = 0;
+        }
+        delete _topRankingCharactersByTier[tier];
+        rankingsPoolByTier[tier] = 0;
+    }
+
+    function _processWinner(uint256 winnerID, uint8 tier) private {
         uint256 rankingPoints = rankingPointsByCharacter[winnerID];
         uint256[] storage topRankingCharacters = _topRankingCharactersByTier[
             tier
