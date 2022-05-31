@@ -1,23 +1,35 @@
 <template>
   <div class="dashboard-container">
     <div class="overlay-bg"></div>
-    <div v-if="haveCharacters">
-    <div class="upper-body-container">
-      <div class="character-details-container">
-        <div class="character-element">
-          <div class="element-frame">
-            <div>
-              <span :id="(this.characterInformation.element).toLowerCase()+'-element'" />
+    <div style="min-height: 100vh;" class="noChar" v-if="!haveCharacters">
+      <div style="z-index: 3;">
+        <span>{{$t('homePage.goRecruit')}}</span>
+      </div>
+      <div style="z-index: 3;">
+        <router-link :to="{ name: 'plaza' }" exact>
+          <div class="pve-button dashboard-btn">
+            <span>{{$t('homePage.gotoPlaza')}}</span>
+          </div>
+        </router-link>
+      </div>
+    </div>
+      <div v-else>
+        <div class="upper-body-container">
+          <div class="character-details-container">
+            <div class="character-element">
+              <div class="element-frame">
+                <div>
+                  <span :id="(this.characterInformation.element).toLowerCase()+'-element'" />
+                </div>
+              </div>
             </div>
+          <div class="character-name">
+            <span>{{getCharacterName(currentCharacterId)}}</span>
           </div>
-        </div>
-        <div class="character-name">
-          <span>{{getCharacterName(currentCharacterId)}}</span>
-        </div>
-        <div class="character-data-container">
-          <div class="character-element-name">
+          <div class="character-data-container">
+            <div class="character-element-name">
               <span>{{this.characterInformation.element}}</span>
-          </div>
+            </div>
           <div class="character-data-divider">
               <span>|</span>
           </div>
@@ -56,7 +68,7 @@
               <span>{{$t('homePage.power')}}</span>
             </div>
             <div class="pvp-power-value">
-              <span>{{this.characterInformation.power.toLocaleString()}}</span>
+              <span>{{this.characterInformation.power}}</span>
             </div>
           </div>
         </div>
@@ -170,18 +182,6 @@
       </div>
       </div>
     </div>
-    <div style="min-height: 100vh;" class="noChar" v-if="!haveCharacters">
-      <div style="z-index: 3;">
-        <span>{{$t('homePage.goRecruit')}}</span>
-      </div>
-      <div style="z-index: 3;">
-        <router-link :to="{ name: 'plaza' }" exact>
-          <div class="pve-button dashboard-btn">
-            <span>{{$t('homePage.gotoPlaza')}}</span>
-          </div>
-        </router-link>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -222,8 +222,8 @@ export default Vue.extend({
       characterInformation: {
         name: '',
         level: 0,
-        power: null,
-        rank: null,
+        power: '',
+        rank: '',
         element: '',
         stamina: '',
         pvpWins: 0
@@ -244,16 +244,12 @@ export default Vue.extend({
     characterLvl(): number {
       return this.characters[this.currentCharacterId]?.level + 1 ?? 1;
     },
-    totalCharacterPower(): number {
-      return this.getCharacterPower(this.currentCharacterId);
-    },
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions([
       'getCharacter',
-      'getCharacterPower',
       'getCharacterLevel',
       'getPvpCoreContract',
       'getRankingPointsByCharacter',
@@ -374,6 +370,10 @@ export default Vue.extend({
   watch: {
     currentCharacterId(newId: string|number){
       this.fetchDashboardDetails(newId);
+    },
+    haveCharacters(){
+      this.setCurrentCharacter(this.ownedCharacterIds[0]);
+      this.fetchDashboardDetails(this.ownedCharacterIds[0]);
     }
   }
 });
