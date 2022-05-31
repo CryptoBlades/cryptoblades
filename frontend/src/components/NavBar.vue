@@ -2,7 +2,7 @@
   <div class="main-nav-div">
     <b-navbar class="main-nav" toggleable="lg">
       <div class="nav-logo col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1">
-        <router-link :to="{ name: 'plaza' }" exact class="game-ui-logo">
+        <router-link :to="{ name: 'dashboard' }" exact class="game-ui-logo">
           <img
             src="../assets/cb-logo.png"
             class="logo d-inline-block align-top"
