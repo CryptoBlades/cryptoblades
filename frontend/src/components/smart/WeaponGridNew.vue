@@ -514,6 +514,7 @@ export default Vue.extend({
       this.$emit('weapon-filters-changed');
     },
     onWeaponClick(id: number) {
+      this.$emit('hasSelected');
       this.setCurrentWeapon(id);
       this.$emit('chooseweapon', id);
       this.$emit('choose-weapon', id);
@@ -866,6 +867,7 @@ export default Vue.extend({
 .pagination{
   display: flex;
   justify-content: center;
+  margin-bottom: 5em;
 }
 
 .pagination > div {

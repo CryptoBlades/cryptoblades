@@ -857,13 +857,14 @@ export default Vue.extend({
   mounted(){
     (this as any).$router.push({ path: 'blacksmith', query: { tab: 'weapon' }});
     Events.$on('forge-weapon', (id: number) =>{
+      console.log(id);
       if(id === 0){
         this.onClickForge(id);
         (this.$refs['forge-element-selector-modal']as BModal).show();
       }else if(id === 1){
         this.onClickForge(id);
         (this.$refs['forge-element-selector-modal']as BModal).show();
-      }else if(id===2){
+      }else if(id === 2){
         Events.$emit('show-special-forge-modal');
       }else{
         this.displayDustReforge();
@@ -997,14 +998,14 @@ export default Vue.extend({
       (this.$refs['forge-element-selector-modal']as BModal).show();
     },
 
-    setChosenElement(ele: any, i: number) {
-      if(i === this.selectedElement) this.selectedElement = null;
-      else this.selectedElement = i;
+    setChosenElement(elementObject: any, selectedNumber: number) {
+      if(selectedNumber === this.selectedElement) this.selectedElement = null;
+      else this.selectedElement = selectedNumber;
 
-      this.chosenElementFee = i === 100 ? 1 : 2;
-      ele.srcElement.classList.toggle('done');
-      Array.from(ele.srcElement.parentNode.childNodes).forEach((child: any) => {
-        if (child !== ele.srcElement && child.classList.contains('done') === true){
+      this.chosenElementFee = selectedNumber === 100 ? 1 : 2;
+      elementObject.srcElement.classList.toggle('done');
+      Array.from(elementObject.srcElement.parentNode.childNodes).forEach((child: any) => {
+        if (child !== elementObject.srcElement && child.classList.contains('done') === true){
           child.classList.toggle('done');
         }
       });
