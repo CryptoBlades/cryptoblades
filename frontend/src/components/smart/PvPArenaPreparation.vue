@@ -187,7 +187,7 @@
         </div>
       </div>
       <div class="characterImage">
-        <pvp-character :characterId="currentCharacterId" />
+        <pvp-character :characterTrait="characterInformation.element" />
       </div>
       <pvp-arena-information
         class="arenaInformation"

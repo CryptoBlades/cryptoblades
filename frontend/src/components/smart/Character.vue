@@ -524,7 +524,7 @@ export default Vue.extend({
   background-position-y: bottom;
   background-repeat: no-repeat;
   margin-top: 5rem;
-  padding-bottom: 2rem;
+  padding-bottom: 3rem;
 }
 .characterImg {
   width: 100%;
