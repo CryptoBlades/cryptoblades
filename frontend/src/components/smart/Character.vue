@@ -678,5 +678,10 @@ export default Vue.extend({
 }
 
 
+@media (max-width: 600px) {
+  .characterWrapper{
+    margin-top: 1rem;
+  }
+}
 </style>>
 
