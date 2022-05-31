@@ -28,11 +28,14 @@
     <ul class="character-list">
       <li
         class="character"
+        :style="'border: 1px solid '+generateColor(c.traitName)"
         :class="[value === c.id ? 'selected' : '', showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(c.id) : '']"
         v-for="c in filteredCharacters"
         :key="c.id"
+        :id="c.traitName.toLowerCase()"
         @click="$emit('input', c.id)"
       >
+      <div class="backdrop-bg"></div>
         <div :class="nftDisplay ? 'above-wrapper-nft-display' : 'above-wrapper'" v-if="$slots.above || $scopedSlots.above">
           <slot name="above" :character="c"></slot>
         </div>
@@ -293,6 +296,14 @@ export default {
       this.$emit('character-filters-changed');
     },
 
+    generateColor(trait){
+      const el = trait.toLowerCase();
+      if(el === 'water') return '#3997F5';
+      if(el === 'fire') return '#DB0000';
+      if(el === 'earth') return '#24A24B';
+      if(el === 'lightning') return '#FEE200';
+    },
+
     async loadConsumablesCount() {
       this.haveRename = await this.fetchTotalRenameTags();
       this.haveChangeTraitFire = await this.fetchTotalCharacterFireTraitChanges();
@@ -466,28 +477,50 @@ export default {
   padding: 0;
   display: grid;
   padding: 0.5em;
-  grid-template-columns: repeat(auto-fit, 14em);
-  gap: 1.5em;
+  grid-template-columns: repeat(auto-fit, 16em);
+  gap: 2.5em;
 }
 
 .character {
   position: relative;
-  width: 14em;
-  height: 25em;
+  width: 17em;
+  height: 23em;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 115%;
-  background-color: #2e2e30cc;
-  background-image: url('../../assets/cardCharacterFrame.png');
+  /* background-color: #2e2e30cc; */
+  background-image: url('../../assets/background/earth-bg.png');
   border: 1px solid #a28d54;
-  border-radius: 15px;
-  padding: 0.5rem;
+  border-radius: 10px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   overflow: hidden;
+}
+
+.backdrop-bg{
+  /* background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.082),  rgba(0, 0, 0, 0.466), rgba(0, 0, 0, 0.466)); */
+  background-color: rgba(0, 0, 0, 0.267);
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#earth{
+  background-image: url('../../assets/background/earth-bg.png');
+}
+#water{
+  background-image: url('../../assets/background/water-bg.png');
+}
+#lightning{
+  background-image: url('../../assets/background/lightning-bg.png');
+}
+#fire{
+  background-image: url('../../assets/background/fire-bg.png');
 }
 
 .character .art {

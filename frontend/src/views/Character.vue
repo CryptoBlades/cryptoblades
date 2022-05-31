@@ -25,23 +25,23 @@
           <a v-bind:href="`${getExchangeUrl}`" target="_blank" rel="noopener noreferrer">{{$t("plaza.notEnoughSkillLink")}}</a>
         </i18n>
         <a :href="getExchangeTransakUrl()" target="_blank" rel="noopener noreferrer"> {{$t("plaza.buyBNBTransak")}}</a>.
-
       </div>
     </div>
     <div v-else class="char-content">
       <CharacterNav
-        :garrison="garrison"
+        :activeTab="activeTab"
         :havePlazaCharacters="havePlazaCharacters"
         @toggle="toggleGarrison"
         :recruitCost="recruitCost"
+        :soulBalance="soulBalance"
         :ownCharacters="ownCharacters"
         @mintCharacter="onMintCharacter"
       />
-      <template v-if="!garrison && havePlazaCharacters">
+      <template v-if="activeTab === 'info' && havePlazaCharacters">
          <character class="char-info" />
       </template>
-      <template v-else>
-        <div v-if="!soulCreationActive" class="row mt-3 z-index-1">
+      <template v-if="activeTab === 'garrison'">
+        <div v-if="!soulCreationActive" class="row mt-3 z-index-1 char-info">
           <div class="col">
             <div>
               <div class="d-flex flex-column flex-md-row justify-content-space-between">
@@ -83,8 +83,11 @@
             </div>
           </div>
         </div>
-        <div class="pt-5" v-else>
-          <div class="d-flex justify-content-space-between mb-3">
+      </template>
+      <template v-if="activeTab === 'burn'">
+        <!-- Character Burn -->
+        <div class="pt-5 char-info">
+          <!-- <div class="d-flex justify-content-space-between mb-3">
             <div class="d-flex justify-content-flex-end ml-auto">
               <b-button
                 variant="primary"
@@ -103,15 +106,15 @@
                 {{$t('plaza.cancelBurning')}}
               </b-button>
             </div>
-          </div>
+          </div> -->
           <div>
             <div class="col-md-12">
               <div class="row mobile-flip">
-                <div class="col-md-4 character-container" >
-                  <h1 align="center" class="text-center">{{$t('plaza.selectBurnCharacter')}}</h1>
+                <div class="col-md-4 character-container" ></div>
+                <div class="col-md-8 character-container" >
                   <character-list :showFilters="true" :showGivenCharacterIds="true" :characterIds="remainingCharactersIds" @input="addBurnCharacter"/>
                 </div>
-                <div class="col-md-4 character-container" >
+                <!-- <div class="col-md-4 character-container" >
                   <h1 class="text-center">{{$t('plaza.charactersToBurn')}}</h1>
                   <h1 class="text-center mt-3 mb-4">
                     <b-button
@@ -124,11 +127,12 @@
                     </b-button>
                   </h1>
                   <character-list class="mt-4" :showGivenCharacterIds="true" :characterIds="burnCharacterIds" @input="removeBurnCharacter"/>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
         </div>
+
       </template>
     </div>
     <b-modal class="centered-modal text-center" ref="burn-confirmation-modal" :title="$t('plaza.burnConfirmation')"
@@ -199,7 +203,7 @@ interface Data {
   mintCharacterPriceIncrease: string;
   mintCharacterMinPrice: string;
   soulCreationActive: boolean;
-  garrison: boolean;
+  activeTab: string;
   soulBalance: number;
   burnCost: number;
   burnPowerMultiplier: number;
@@ -219,7 +223,7 @@ interface Data {
 export default Vue.extend({
   data(): Data{
     return {
-      garrison: false,
+      activeTab: 'info',
       updateInterval: null as ReturnType<typeof setInterval> | null,
       recruitCost: '0',
       mintSlippageApproved: false,
@@ -322,11 +326,15 @@ export default Vue.extend({
       'claimGarrisonXp',
     ]) as StoreMappedActions,
     ...mapGetters(['getExchangeTransakUrl']) as StoreMappedGetters,
-    toggleGarrison() {
-      if (this.garrison && this.ownedGarrisonCharacterIds.includes(this.currentCharacterId)) {
+    toggleGarrison(tab: string) {
+      if (this.activeTab === 'info' && this.ownedGarrisonCharacterIds.includes(this.currentCharacterId)) {
         this.setCurrentCharacter(this.ownedCharacterIds[0]);
       }
-      this.garrison = !this.garrison;
+
+      if(this.activeTab === 'burn'){
+        this.toggleSoulCreation();
+      }
+      this.activeTab = tab;
     },
     async onClaimGarrisonXp() {
       this.isClaimingXp = true;
@@ -541,7 +549,18 @@ export default Vue.extend({
 }
 
 .char-content{
-  padding: 50px;
+   div.menu-nav{
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #424A59;
+    background-color:#1d1d1d;
+   }
+ }
+
+.char-info{
+  padding: 50px 40px;
 }
 
 
