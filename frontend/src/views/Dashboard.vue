@@ -272,6 +272,9 @@ export default Vue.extend({
 
     async fetchPvpDetails(characterId: string|number) {
       this.pvpRankingPoints = await this.getRankingPointsByCharacter(characterId);
+      if(this.pvpRankingPoints  === '0'){
+        this.pvpRankingPoints = '-';
+      }
     },
     async processRaidData() {
       const raidData = this.getRaidState;
