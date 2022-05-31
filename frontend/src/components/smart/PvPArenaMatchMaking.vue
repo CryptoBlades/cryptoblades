@@ -49,7 +49,7 @@
           <img :src="getCharacterElementSrc" alt="element" />
         </div>
         <div class="characterImageWrapper">
-          <pvp-character :characterId="currentCharacterId" />
+          <pvp-character :characterTrait="characterInformation.element" />
         </div>
         <div v-if="characterInformation" class="info">
           <h1 class="characterName">{{ characterInformation.name }}</h1>
@@ -134,7 +134,7 @@
           <img v-if="opponentInformation.id" :src="getOpponentElementSrc" alt="opponent element" />
         </div>
         <div v-if="opponentInformation.id" class="characterImageWrapper">
-          <pvp-character :characterId="opponentInformation.id" />
+          <pvp-character :characterTrait="opponentInformation.element" />
         </div>
         <div v-if="opponentInformation.id" class="info">
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
@@ -189,7 +189,7 @@
 
 <script>
 import BN from 'bignumber.js';
-import { mapState, mapActions } from 'vuex';
+import {mapActions, mapState } from 'vuex';
 import PvPWeapon from './PvPWeapon.vue';
 import PvPShield from './PvPShield.vue';
 import PvPSeparator from './PvPSeparator.vue';

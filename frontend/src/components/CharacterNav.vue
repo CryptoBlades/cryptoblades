@@ -1,25 +1,23 @@
 <template>
     <div class="d-flex flex-column flex-md-row">
-        <div role="button" :class="[
-           'd-flex gap-3 align-items-center link',
-           (!garrison && havePlazaCharacters) ? 'active' : ''
-         ]"
-          @click="$emit('toggle')"
-        >
+        <div class="mobile-menu">
+          <span :class="activeTab === 'info' ? 'active' : ''" @click="activeTab = 'info',$emit('toggle') ">
+          <span id="plaza"></span> {{$t('Character.info').toUpperCase()}}</span>
+          <span :class="activeTab === 'garrison' ? 'active' : ''" @click="activeTab = 'garrison',$emit('toggle')">
+            <span id="garisson"></span>{{$t('Character.garrison').toUpperCase()}}</span>
+        </div>
+        <div role="button" class="nav-char none-mobile" :class="['d-flex gap-3 align-items-center link',
+           (!garrison && havePlazaCharacters) ? 'active' : '']" @click="$emit('toggle')">
           <div class="img-nav">
             <div class="img-frame"></div>
             <img src="../assets/navbar-icons/plaza-icon.png"/>
           </div>
           <span class="main-font text-white fs-5">{{$t('Character.info')}}</span>
         </div>
-        <div class="w-100 d-block d-md-none"></div>
-        <div class="separator d-none d-md-block mx-3"></div>
-         <div role="button" :class="[
-           'd-flex gap-3 align-items-center link mt-4 mt-md-0',
-           (garrison || !havePlazaCharacters) ? 'active' : ''
-         ]"
-          @click="$emit('toggle')"
-         >
+        <div class="w-100 d-block d-md-none none-mobile"></div>
+        <div class="separator d-none d-md-block mx-3 none-mobile"></div>
+        <div role="button" class="none-mobile" :class="['d-flex gap-3 align-items-center link mt-4 mt-md-0',
+           (garrison || !havePlazaCharacters) ? 'active' : '']" @click="$emit('toggle')">
           <div class="img-nav">
             <div class="img-frame"></div>
               <div class="gar-container">
@@ -48,6 +46,11 @@ import Vue from 'vue';
 
 
 export default Vue.extend({
+  data(){
+    return{
+      activeTab: 'info'
+    };
+  },
   props: {
     garrison: {
       type: Boolean,
@@ -161,5 +164,63 @@ custom-recruit-text-size{
   }
 }
 
+.char-content{
+  padding: 50px;
+}
+
+.mobile-menu{
+  display: none;
+}
+
+
+@media (max-width: 600px) {
+   .mobile-menu{
+    display: flex;
+    justify-content: space-evenly;
+    padding: 10px 0px;
+    align-items: center;
+    background-color: rgba(20, 20, 20);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.418);
+    z-index: 5;
+  }
+
+  .mobile-menu > span{
+    font-family: Trajan;
+    color: rgba(255, 255, 255, 0.459);
+    display: flex;
+    align-items: center;
+  }
+
+  .mobile-menu > span.active{
+    font-family: Trajan;
+    color: #fff;
+    display: flex;
+    align-items: center;
+  }
+
+  .none-mobile{
+    display: none;
+  }
+
+  .char-content{
+    padding: 0px;
+  }
+
+  .char-info{
+    padding: 50px !important;
+  }
+}
+
+#plaza{
+  content: url('../assets/navbar-icons/plaza-icon.png');
+  height: 1.1em;
+  margin-right: 1em;
+}
+
+#garisson{
+  content: url('../assets/garisson.png');
+  height: 1.1em;
+  margin-right: 1em;
+}
 
 </style>

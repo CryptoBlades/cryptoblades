@@ -2415,6 +2415,25 @@ export default new Vuex.Store<IState>({
       return await BurningManager.methods.giveAwaySoul(user, soulAmount).send({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
+    async getSoulMultiplier({state}) {
+      const {BurningManager} = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+
+      const VAR_BURN_POWER_MULTIPLIER = await BurningManager.methods.VAR_BURN_POWER_MULTIPLIER().call(defaultCallOptions(state));
+
+      return await BurningManager.methods.vars(VAR_BURN_POWER_MULTIPLIER).call(defaultCallOptions(state));
+    },
+
+    async setSoulMultiplier({state}, {multiplier}) {
+      const {BurningManager} = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+
+      const VAR_BURN_POWER_MULTIPLIER = await BurningManager.methods.VAR_BURN_POWER_MULTIPLIER().call(defaultCallOptions(state));
+
+      return await BurningManager.methods.setVar(VAR_BURN_POWER_MULTIPLIER, Web3.utils.toWei('' + multiplier))
+        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
+    },
+
     async fetchMarketNftPrice({ state }, { nftContractAddr, tokenId }) {
       const { NFTMarket } = state.contracts();
       if(!NFTMarket) return;

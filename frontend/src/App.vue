@@ -772,6 +772,9 @@ button.close {
   border: 1px solid #43506A!important;
   padding:3rem;
 }
+.character-modal-mobile {
+  padding:2rem;
+}
 
 .character-modal header.modal-header{
   background: #051126!important;

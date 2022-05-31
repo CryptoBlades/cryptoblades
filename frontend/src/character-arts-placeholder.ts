@@ -1,16 +1,16 @@
 
-import img1 from './assets/placeholder/chara-0.png';
-import img2 from './assets/placeholder/chara-1.png';
-import img3 from './assets/placeholder/chara-2.png';
-import img4 from './assets/placeholder/chara-3.png';
+import WaterKnight from './assets/characters/KnightWater.png';
+import LightningKnight from './assets/characters/KnightLightning.png';
+import FireKnight from './assets/characters/KnightFire.png';
+import EarthKnight from './assets/characters/KnightEarth.png';
 import head1 from './assets/placeholder/chara-head-0.png';
 import head2 from './assets/placeholder/chara-head-1.png';
 import head3 from './assets/placeholder/chara-head-2.png';
 import head4 from './assets/placeholder/chara-head-3.png';
 
-import { ICharacter } from './interfaces';
+import { CharacterTrait, ICharacter } from './interfaces';
 
-const allImages = [img1, img2, img3, img4];
+const characterImages = {earth: EarthKnight, fire: FireKnight, water: WaterKnight, lightning: LightningKnight};
 
 const allHeadImages = [head1, head2, head3, head4];
 
@@ -19,15 +19,27 @@ export function getCharacterArt(character: ICharacter) {
     return null;
   }
 
-  return allImages[character.id % allImages.length];
+  switch (+character.trait) {
+  case CharacterTrait.Earth: return characterImages.earth;
+  case CharacterTrait.Fire: return characterImages.fire;
+  case CharacterTrait.Water: return characterImages.water;
+  case CharacterTrait.Lightning: return characterImages.lightning;
+  default: return characterImages.earth;
+  }
 }
 
-export function getCharacterArtById(characterId: number) {
-  if (!characterId && characterId !== 0) {
+export function getCharacterArtByTrait(characterTrait: string) {
+  if (!characterTrait) {
     return null;
   }
 
-  return allImages[characterId % allImages.length];
+  switch (characterTrait) {
+  case 'Earth': return characterImages.earth;
+  case 'Fire': return characterImages.fire;
+  case 'Water': return characterImages.water;
+  case 'Lightning': return characterImages.lightning;
+  default: return characterImages.earth;
+  }
 }
 
 export function getCharacterHeadArt(character: ICharacter){
