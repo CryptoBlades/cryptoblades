@@ -344,6 +344,7 @@ export default Vue.extend({
   height: 50%;
   width: 100%;
   z-index: 1;
+  border-bottom: 1px solid #404857;
 }
 
 .noChar{
