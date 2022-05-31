@@ -69,6 +69,7 @@
     "stamina": "Stamina",
     "loading": "Loading...",
     "souls": "Soul Power",
+    "soulTransferLabel": "Souls",
     "soul": "Soul",
     "changeTrait":"Change Trait",
     "changeTraitText": "Change your character's element.",
