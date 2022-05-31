@@ -138,7 +138,7 @@
               <div class="raid-drops">
                  <img class="raid-img" src="../assets/trinkets/trinket1.png">
                 <img class="raid-img" src="../assets/junk/junk1.png">
-                <img class="raid-img" src="../assets/placeholder/sword-placeholder-0.png">
+                <img class="raid-img" src="../assets/placeholder/weapon3.png">
               </div>
             </div>
           </div>
@@ -328,7 +328,7 @@ export default Vue.extend({
   flex-direction: column;
   height: 100%;
   z-index: 1;
-  overflow-x:hidden ;
+  overflow:hidden;
 }
 
 .dashboard-container > div:nth-child(2){
@@ -502,10 +502,6 @@ export default Vue.extend({
   background: rgba(0, 0, 0, 0.076);
 }
 
-/* .character-details-container {
-  width: 30%;
-} */
-
 .character-data-container {
   display: flex;
   flex-direction: row nowrap;
@@ -652,14 +648,12 @@ export default Vue.extend({
 }
 
 .boss-image {
-    width: 30vw;
-    /* height: inherit; */
-    height: auto;
-    position: absolute;
-    bottom: -90px;
-    left: -90px;
+  width: 30vw;
+  height: auto;
+  position: absolute;
+  bottom: -90px;
+  left: -90px;
 }
-
 
 .raid-info-container {
   display: flex;
@@ -730,7 +724,8 @@ export default Vue.extend({
 .raid-boss-duration {
   display: flex;
   flex-direction: column;
-  width: 30%;
+  width: clamp(200px, 30%, 100%);
+  margin-right:20px;
 }
 
 .raid-boss-label {
@@ -781,6 +776,10 @@ export default Vue.extend({
   display: none;
 }
 
+.boss-images{
+  display: none;
+}
+
 @media screen and (max-width: 1280px)  {
 
   .overlay-bg {
@@ -792,6 +791,7 @@ export default Vue.extend({
     row-gap: 10px;
     width: 100%;
     margin-top: 50px;
+    height: 80%;
   }
 
   .raid-container {
@@ -800,10 +800,6 @@ export default Vue.extend({
   .pvp-and-pve-container {
     width: 100%;
   }
-}
-
-.boss-images{
-  display: none;
 }
 
 @media all and (max-width: 600px) {
@@ -904,7 +900,7 @@ export default Vue.extend({
   }
 
 
-   .overlay-bg {
+  .overlay-bg {
     background-color: rgba(0, 0, 0, 0.425);
   }
   .lower-body-container {
@@ -922,9 +918,9 @@ export default Vue.extend({
   .boss-images{
     display: inline;
     position: absolute;
-    margin-top: -140px;
-    right: -100px;
-    width: 65vw;
+    margin-top: 50px;
+    right: 0;
+    width: 40vw;
     z-index: 2;
     height: auto;
   }
@@ -936,6 +932,10 @@ export default Vue.extend({
 
   .none-desktop{
     display: inline-block;
+  }
+  .raid-info-container > a{
+    display: flex;
+    justify-content: center;
   }
 }
 
