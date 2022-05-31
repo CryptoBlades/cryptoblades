@@ -1,7 +1,4 @@
 import axios from 'axios';
-import {MerchandiseOrder, Product} from '@/components/smart/MerchandiseList.vue';
-import {Country} from '@/components/smart/ShippingInfoModal.vue';
-import {ProductDetails} from '@/components/smart/VariantChoiceModal.vue';
 
 enum HttpMethod {
   GET = 'GET',
@@ -39,20 +36,5 @@ export default {
     }).then(req => {
       return req.data;
     });
-  },
-  getMerchandiseProducts(limit: number, offset: number): Promise<ApiResponse<Product[]>> {
-    return this.execute(HttpMethod.GET, '/merchant/products', undefined, {limit, offset});
-  },
-  getMerchandiseProductVariants(productId: number): Promise<ApiResponse<ProductDetails>> {
-    return this.execute(HttpMethod.GET, `/merchant/products/${productId}`);
-  },
-  getMerchandiseCountries(): Promise<ApiResponse<Country[]>> {
-    return this.execute(HttpMethod.GET, '/merchant/countries');
-  },
-  getShippingRates(merchandiseOrder: any): Promise<ApiResponse<any>> {
-    return this.execute(HttpMethod.POST, '/merchant/shipping/rates', merchandiseOrder);
-  },
-  createMerchandiseOrder(merchandiseOrder: MerchandiseOrder): Promise<ApiResponse<any>> {
-    return this.execute(HttpMethod.POST, '/merchant/create_order', merchandiseOrder);
   },
 };
