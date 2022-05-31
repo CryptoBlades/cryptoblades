@@ -69,6 +69,7 @@
     "stamina": "Stamina",
     "loading": "Loading...",
     "souls": "Soul Power",
+    "soulTransferLabel": "Souls",
     "soul": "Soul",
     "changeTrait":"Change Trait",
     "changeTraitText": "Change your character's element.",
@@ -81,12 +82,15 @@
     "sendToGarrisonText": "You will not be able to use the character when in garrison.",
     "transfer": "Transfer",
     "transferText": "Transfer character to another address.",
+    "transferSoul": "Soul Transfer",
+    "transferSoulText": "Transfer soul to another address.",
     "change": "Change",
     "send": "Send",
     "max": "Max",
     "upgrade": "Upgrade",
     "skins": "Skins",
-    "options": "Options"
+    "options": "Options",
+    "equippedLabel": "Equipped"
   },
   "characterModal": {
     "close": "Tap Anywhere To Close"
