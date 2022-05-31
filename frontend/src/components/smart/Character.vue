@@ -150,13 +150,48 @@
       <template #modal-title>
         {{$t('Character.transferSoul')}}
       </template>
-        <b-form-input class="input" placeholder="Enter address" v-model="receiverAddress"/>
-        <div class="transferResultContainer">
-          <div class="loader" v-if="isSending">
-            <i class="fas fa-spinner fa-spin"></i>
-              Loading...
+        <div class="d-flex flex-column">
+          <div>
+            <div class="row w-100 justify-content-between">
+              <div class="col col-md-3 d-flex flex-row">
+                <div class="soul-container">
+                  <img :src="require('@/assets/dusts/soulIcon.svg')" alt="soul"/>
+                </div>
+                <div class="col character-text">
+                  <p class="mb-0 text-white soul-title">{{$t(`Character.souls`)}}</p>
+                  <p class="mb-0">{{ soulBalance }}</p>
+                </div>
+              </div>
+              <div class="w-100 d-block d-md-none"></div>
+              <div class="w-col col-md-6 d-flex flex-column">
+                <input
+                  @change="handlePower"
+                  class="range-character"
+                  type="range"
+                  min="0"
+                  :max="soulBalance"
+                  :disabled="soulBalance <= 0"
+                  :value="handleSoulPowerValue(soulToTransfer)"
+                  steps="10"
+                />
+              </div>
+              <div class="w-100 d-block d-md-none"></div>
+              <div class="col col-md-3 character-text d-flex">
+                <input id="powerAmount" type="number" :value="powerAmount" @change="handleInput" />
+                <button class="mx-1 px-2"  @click="handleMax">{{$t(`Character.max`)}}</button>
+              </div>
+            </div>
           </div>
-          <span class="resultMsg text-center"> {{resultMsg}} </span>
+          <div>
+            <b-form-input class="input" placeholder="Enter address" v-model="receiverAddress"/>
+            <div class="transferResultContainer">
+              <div class="loader" v-if="isSending">
+                <i class="fas fa-spinner fa-spin"></i>
+                  Loading...
+              </div>
+              <span class="resultMsg text-center"> {{resultMsg}} </span>
+            </div>
+          </div>
         </div>
         <button :disabled="isSending || receiverAddress === ''" @click="transfer">Transfer</button>
         <button class="offset" @click="$refs['character-transfer-soul-modal'].hide()">
@@ -231,7 +266,8 @@ interface Data {
   isSending: boolean
   resultMsg: string
   receiverAddress: string
-  newName: string
+  newName: string,
+  soulToTransfer: 0
 }
 
 interface StoreMappedActions {
@@ -291,7 +327,8 @@ export default Vue.extend({
       isSending: false,
       resultMsg: '',
       receiverAddress: '',
-      newName: ''
+      newName: '',
+      soulToTransfer: 0,
     };
   },
   computed: {
