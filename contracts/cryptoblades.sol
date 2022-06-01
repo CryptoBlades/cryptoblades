@@ -15,6 +15,7 @@ import "./weapons.sol";
 import "./util.sol";
 import "./common.sol";
 import "./Blacksmith.sol";
+import "./SpecialWeaponsManager.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -48,6 +49,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_PARAM_HOURLY_MAX_POWER_PERCENT = 16;
     uint256 public constant VAR_PARAM_SIGNIFICANT_HOUR_FIGHTS = 17;
     uint256 public constant VAR_PARAM_HOURLY_PAY_ALLOWANCE = 18;
+    uint256 public constant VAR_MINT_WEAPON_FEE_DECREASE_SPEED = 19;
+    uint256 public constant VAR_MINT_CHARACTER_FEE_DECREASE_SPEED = 20;
+    uint256 public constant VAR_WEAPON_FEE_INCREASE = 21;
+    uint256 public constant VAR_CHARACTER_FEE_INCREASE = 22;
+    uint256 public constant VAR_MIN_WEAPON_FEE = 23;
+    uint256 public constant VAR_MIN_CHARACTER_FEE = 24;
+    uint256 public constant VAR_WEAPON_MINT_TIMESTAMP = 25;
+    uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 26;
+    uint256 public constant VAR_FIGHT_FLAT_IGO_BONUS = 27; // TEMP, do not reuse 27 later though
+
 
     // Mapped user variable(userVars[]) keys, one value per wallet
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
@@ -126,6 +137,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         rewardsClaimTaxDuration = 15 days;
     }
 
+    function migrateTo_e1fe97c(SpecialWeaponsManager _swm) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+
+        specialWeaponsManager = _swm;
+    }
+
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     uint characterLimit;
     // config vars
@@ -201,6 +218,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     mapping(uint256 => uint256) public vars;
     mapping(address => mapping(uint256 => uint256)) public userVars;
+
+    SpecialWeaponsManager public specialWeaponsManager;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -278,17 +297,17 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function fight(uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external
-        onlyNonContract() {
+        /*restricted*/ returns (uint256, uint256) {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
+            unpackFightData(characters.getFightDataAndDrainStamina(tx.origin,
                 char, staminaCostFight * fightMultiplier, false, 0));
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(msg.sender, wep, charTrait,
+            uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(tx.origin, wep, charTrait,
                 durabilityCostFight * fightMultiplier, false, 0);
 
         // dirty variable reuse to avoid stack limits
@@ -298,7 +317,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             target,
             now / 1 hours
         );
-        performFight(
+        return performFight(
             char,
             wep,
             Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
@@ -315,35 +334,42 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 traitsCWE, // could fit into uint8 since each trait is only stored on 2 bits (TODO)
         uint24 targetPower,
         uint8 fightMultiplier
-    ) private {
-        uint256 seed = uint256(keccak256(abi.encodePacked(now, msg.sender)));
+    ) private returns (uint256 tokens, uint256 expectedTokens) {
+        uint256 seed = uint256(keccak256(abi.encodePacked(now, tx.origin)));
         uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
 
         updateHourlyPayouts(); // maybe only check in trackIncome? (or do via bot)
 
         uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
-        uint256 tokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
+        tokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
+        expectedTokens = tokens;
 
-        if(playerRoll < monsterRoll) {
+        if(tokenRewards[tx.origin] == 0 && tokens > 0) {
+            _rewardsClaimTaxTimerStart[tx.origin] = block.timestamp;
+        }
+
+        if (playerRoll < monsterRoll) {
             tokens = 0;
             xp = 0;
         }
-
-        if(tokenRewards[msg.sender] == 0 && tokens > 0) {
-            _rewardsClaimTaxTimerStart[msg.sender] = block.timestamp;
+        //TEMP FOR EVENT
+        else {
+            _giveInGameOnlyFundsFromContractBalance(tx.origin, vars[VAR_FIGHT_FLAT_IGO_BONUS] * fightMultiplier);
         }
+        //^ TEMP
 
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
-        tokenRewards[msg.sender] += tokens;
+        tokenRewards[tx.origin] += tokens;
         vars[VAR_UNCLAIMED_SKILL] += tokens;
         vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
         xpRewards[char] += xp;
+        
 
         vars[VAR_HOURLY_FIGHTS] += fightMultiplier;
         vars[VAR_HOURLY_POWER_SUM] += playerFightPower * fightMultiplier;
 
-        emit FightOutcome(msg.sender, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
+        emit FightOutcome(tx.origin, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, (tokens + vars[VAR_FIGHT_FLAT_IGO_BONUS] * fightMultiplier));
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
@@ -463,7 +489,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             );
         require(skillToken.balanceOf(msg.sender) >= fromUserWallet && promos.getBit(msg.sender, 4) == false);
 
-        uint256 convertedAmount = usdToSkill(mintCharacterFee);
+        uint256 convertedAmount = usdToSkill(getMintCharacterFee());
         _payContractTokenOnly(msg.sender, convertedAmount);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
@@ -471,147 +497,81 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
-            weapons.performMintWeapon(msg.sender,
-                weapons.getRandomProperties(0, RandomUtil.combineSeeds(seed,100), 100),
-                weapons.getRandomStat(4, 200, seed, 101),
-                0, // stat2
-                0, // stat3
-                RandomUtil.combineSeeds(seed,102)
-            );
+            weapons.mintWeaponWithStars(msg.sender, 0, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), 100);
         }
+
+        _updateCharacterMintFee();
     }
 
-    function mintWeaponN(uint32 num, uint8 chosenElement)
+    function mintWeaponN(uint32 num, uint8 chosenElement, uint256 eventId)
         external
         onlyNonContract
         oncePerBlock(msg.sender)
     {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * num * chosenElementFee));
-        _mintWeaponNLogic(num, chosenElement);
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(getMintWeaponFee() * num * chosenElementFee));
+        _mintWeaponNLogic(num, chosenElement, eventId);
     }
 
-    function mintWeapon(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
+    function mintWeapon(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee * chosenElementFee));
-        _mintWeaponLogic(chosenElement);
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(getMintWeaponFee() * chosenElementFee));
+        _mintWeaponLogic(chosenElement, eventId);
     }
 
-    function mintWeaponNUsingStakedSkill(uint32 num, uint8 chosenElement)
+    function mintWeaponNUsingStakedSkill(uint32 num, uint8 chosenElement, uint256 eventId)
         external
         onlyNonContract
         oncePerBlock(msg.sender)
     {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
-            mintWeaponFee
+            getMintWeaponFee()
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
                 .mul(ABDKMath64x64.fromUInt(num))
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
         _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
 
-        _mintWeaponNLogic(num, chosenElement);
+        _mintWeaponNLogic(num, chosenElement, eventId);
     }
 
-    function mintWeaponUsingStakedSkill(uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
+    function mintWeaponUsingStakedSkill(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
-            mintWeaponFee
+            getMintWeaponFee()
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
         _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
 
-        _mintWeaponLogic(chosenElement);
+        _mintWeaponLogic(chosenElement, eventId);
     }
 
-    function _mintWeaponNLogic(uint32 num, uint8 chosenElement) internal {
+    function _mintWeaponNLogic(uint32 num, uint8 chosenElement, uint256 eventId) internal {
         require(num > 0 && num <= 10);
-        for (uint i = 0; i < num; i++) {
-            weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, i))), chosenElement);
+        if(eventId > 0) {
+            specialWeaponsManager.addShards(msg.sender, eventId, num);
         }
+        _updateWeaponMintFee(num);
+        weapons.mintN(msg.sender, num, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
-    function _mintWeaponLogic(uint8 chosenElement) internal {
+    function _mintWeaponLogic(uint8 chosenElement, uint256 eventId) internal {
         //uint256 seed = randoms.getRandomSeed(msg.sender);
+        if(eventId > 0) {
+            specialWeaponsManager.addShards(msg.sender, eventId, 1);
+        }
+        _updateWeaponMintFee(1);
         weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
     }
 
-    function burnWeapon(uint256 burnID) external isWeaponOwner(burnID) {
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(burnWeaponFee));
-
-        _burnWeaponLogic(burnID);
+    function _updateWeaponMintFee(uint256 num) internal {
+        mintWeaponFee = getMintWeaponFee() + ABDKMath64x64.divu(vars[VAR_WEAPON_FEE_INCREASE].mul(num), 1e18);
+        vars[VAR_WEAPON_MINT_TIMESTAMP] = block.timestamp;
     }
 
-    function burnWeapons(uint256[] calldata burnIDs) external isWeaponsOwner(burnIDs) {
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(burnWeaponFee.mul(ABDKMath64x64.fromUInt(burnIDs.length))));
-
-        _burnWeaponsLogic(burnIDs);
-    }
-
-    function reforgeWeapon(uint256 reforgeID, uint256 burnID) external isWeaponOwner(reforgeID) isWeaponOwner(burnID) {
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(reforgeWeaponFee));
-
-        _reforgeWeaponLogic(reforgeID, burnID);
-    }
-
-    function reforgeWeaponWithDust(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) external isWeaponOwner(reforgeID) {
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(reforgeWeaponWithDustFee));
-
-        _reforgeWeaponWithDustLogic(reforgeID, amountLB, amount4B, amount5B);
-    }
-
-    function burnWeaponUsingStakedSkill(uint256 burnID) external isWeaponOwner(burnID) {
-        int128 discountedBurnWeaponFee =
-            burnWeaponFee.mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedBurnWeaponFee));
-
-        _burnWeaponLogic(burnID);
-    }
-
-    function burnWeaponsUsingStakedSkill(uint256[] calldata burnIDs) external isWeaponsOwner(burnIDs) {
-        int128 discountedBurnWeaponFee =
-            burnWeaponFee
-                .mul(ABDKMath64x64.fromUInt(burnIDs.length))
-                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedBurnWeaponFee));
-
-        _burnWeaponsLogic(burnIDs);
-    }
-
-    function reforgeWeaponUsingStakedSkill(uint256 reforgeID, uint256 burnID) external isWeaponOwner(reforgeID) isWeaponOwner(burnID) {
-        int128 discountedReforgeWeaponFee =
-            reforgeWeaponFee
-                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedReforgeWeaponFee));
-
-        _reforgeWeaponLogic(reforgeID, burnID);
-    }
-
-    function reforgeWeaponWithDustUsingStakedSkill(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) external isWeaponOwner(reforgeID) {
-        int128 discountedReforgeWeaponWithDustFee =
-            reforgeWeaponWithDustFee
-                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT);
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedReforgeWeaponWithDustFee));
-
-        _reforgeWeaponWithDustLogic(reforgeID, amountLB, amount4B, amount5B);
-    }
-
-    function _burnWeaponLogic(uint256 burnID) internal {
-        weapons.burn(burnID);
-    }
-
-    function _burnWeaponsLogic(uint256[] memory burnIDs) internal {
-        for(uint i = 0; i < burnIDs.length; i++) {
-            weapons.burn(burnIDs[i]);
-        }
-    }
-
-    function _reforgeWeaponLogic(uint256 reforgeID, uint256 burnID) internal {
-        weapons.reforge(reforgeID, burnID);
-    }
-
-    function _reforgeWeaponWithDustLogic(uint256 reforgeID, uint8 amountLB, uint8 amount4B, uint8 amount5B) internal {
-        weapons.reforgeWithDust(reforgeID, amountLB, amount4B, amount5B);
+    function _updateCharacterMintFee() internal {
+        mintCharacterFee = getMintCharacterFee() + ABDKMath64x64.divu(vars[VAR_CHARACTER_FEE_INCREASE], 1e18);
+        vars[VAR_CHARACTER_MINT_TIMESTAMP] = block.timestamp;
     }
 
     function migrateRandoms(IRandoms _newRandoms) external {
@@ -727,6 +687,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
     }
 
+    function payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) external restricted 
+        returns (
+            uint256 _fromInGameOnlyFunds,
+            uint256 _fromTokenRewards,
+            uint256 _fromUserWallet,
+            uint256 _fromStaked
+        ) {
+        return _payContractConvertedSupportingStaked(playerAddress, convertedAmount);
+    }
+
     function _payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) internal
         returns (
             uint256 _fromInGameOnlyFunds,
@@ -761,6 +731,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function _payContractStakedOnly(address playerAddress, uint256 convertedAmount) internal {
         stakeFromGameImpl.unstakeToGame(playerAddress, convertedAmount);
         _trackIncome(convertedAmount);
+    }
+
+    function payContractStakedOnly(address playerAddress, uint256 convertedAmount) external restricted {
+        _payContractStakedOnly(playerAddress, convertedAmount);
     }
 
     function _deductPlayerSkillStandard(
@@ -803,6 +777,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function deductAfterPartnerClaim(uint256 amount, address player) external restricted {
         tokenRewards[player] = tokenRewards[player].sub(amount);
+        vars[VAR_UNCLAIMED_SKILL] -= amount;
         _trackIncome(amount);
     }
 
@@ -857,22 +832,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function setWeaponMintValue(uint256 cents) public restricted {
         mintWeaponFee = ABDKMath64x64.divu(cents, 100);
-    }
-
-    function setBurnWeaponValue(uint256 cents) public restricted {
-        burnWeaponFee = ABDKMath64x64.divu(cents, 100);
-    }
-
-    function setReforgeWeaponValue(uint256 cents) public restricted {
-        int128 newReforgeWeaponFee = ABDKMath64x64.divu(cents, 100);
-        require(newReforgeWeaponFee > burnWeaponFee);
-        reforgeWeaponWithDustFee = newReforgeWeaponFee - burnWeaponFee;
-        reforgeWeaponFee = newReforgeWeaponFee;
-    }
-
-    function setReforgeWeaponWithDustValue(uint256 cents) public restricted {
-        reforgeWeaponWithDustFee = ABDKMath64x64.divu(cents, 100);
-        reforgeWeaponFee = burnWeaponFee + reforgeWeaponWithDustFee;
     }
 
     function setStaminaCostFight(uint8 points) public restricted {
@@ -1068,6 +1027,30 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getOwnRewardsClaimTax() public view returns (int128) {
         return _getRewardsClaimTax(msg.sender);
+    }
+
+    function getMintWeaponFee() public view returns (int128) {
+        int128 decrease = ABDKMath64x64.divu(block.timestamp.sub(vars[VAR_WEAPON_MINT_TIMESTAMP]).mul(vars[VAR_MINT_WEAPON_FEE_DECREASE_SPEED]), 1e18);
+        int128 weaponFeeMin = ABDKMath64x64.divu(vars[VAR_MIN_WEAPON_FEE], 100);
+        if(decrease > mintWeaponFee) {
+            return weaponFeeMin;
+        }
+        if(mintWeaponFee - decrease < weaponFeeMin) {
+            return weaponFeeMin;
+        }
+        return mintWeaponFee.sub(decrease);
+    }
+
+    function getMintCharacterFee() public view returns (int128) {
+        int128 decrease = ABDKMath64x64.divu(block.timestamp.sub(vars[VAR_CHARACTER_MINT_TIMESTAMP]).mul(vars[VAR_MINT_CHARACTER_FEE_DECREASE_SPEED]), 1e18);
+        int128 characterFeeMin = ABDKMath64x64.divu(vars[VAR_MIN_CHARACTER_FEE], 100);
+        if(decrease > mintCharacterFee) {
+            return characterFeeMin;
+        }
+        if(mintCharacterFee - decrease < characterFeeMin) {
+            return characterFeeMin;
+        }
+        return mintCharacterFee.sub(decrease);
     }
 
 }

@@ -3,13 +3,30 @@
     <div v-if="loading">
         <img class="loadingSpinner" src="../../assets/loadingSpinner.svg" />
     </div>
+    <div v-else-if="!loading && isCharacterInOldArena">
+      <p>
+        {{$t('pvp.leaveOldArena')}}
+      </p>
+      <div class="buttonWrapper">
+        <pvp-button
+          @click="leaveOldArena"
+          :disabled="loading"
+          :buttonText="$t('pvp.leaveArena')"
+          secondary
+        />
+      </div>
+    </div>
     <div v-else>
       <pvp-arena-preparation
         v-if="!isCharacterInArena"
         :tierRewardsPool="tierRewardsPool"
+        :untieredRewardsPool="untieredRewardsPool"
         :tierTopRankers="tierTopRankers"
+        :untieredTopRankers="untieredTopRankers"
         :characterInformation="characterInformation"
         :entryWager="entryWager"
+        :untieredEntryWager="untieredEntryWager"
+        :withdrawCost="withdrawCost"
         :availableWeaponIds="availableWeaponIds"
         :availableShieldIds="availableShieldIds"
         :ownedWeaponsWithInformation="ownedWeaponsWithInformation"
@@ -21,14 +38,20 @@
       <pvp-arena-summary
         v-else-if="isCharacterInArena && !isMatchMaking"
         :tierRewardsPool="tierRewardsPool"
+        :untieredRewardsPool="untieredRewardsPool"
         :tierTopRankers="tierTopRankers"
+        :untieredTopRankers="untieredTopRankers"
         :characterInformation="characterInformation"
         :activeWeaponWithInformation="activeWeaponWithInformation"
         :activeShieldWithInformation="activeShieldWithInformation"
         :duelHistory="duelHistory"
         :currentRankedSeason="currentRankedSeason"
         :secondsBeforeNextSeason="secondsBeforeNextSeason"
+        :opponentInformation="opponentInformation"
+        :entryWager="entryWager"
+        :withdrawCost="withdrawCost"
         @enterMatchMaking="handleEnterMatchMaking"
+        @leaveArena="leaveArena"
       />
       <!-- Should use router -->
       <pvp-arena-matchmaking
@@ -39,6 +62,7 @@
         :opponentInformation="opponentInformation"
         :opponentActiveWeaponWithInformation="opponentActiveWeaponWithInformation"
         :opponentActiveShieldWithInformation="opponentActiveShieldWithInformation"
+        :withdrawCost="withdrawCost"
         @updateOpponentInformation="updateOpponentInformation"
         @clearOpponentInformation="clearOpponentInformation"
         @kickCharacterFromArena="kickCharacterFromArena"
@@ -60,6 +84,7 @@ import PvPArenaPreparation from './PvPArenaPreparation.vue';
 import PvPArenaSummary from './PvPArenaSummary.vue';
 import PvPArenaMatchMaking from './PvPArenaMatchMaking.vue';
 import PvPKickedModal from './PvPKickedModal.vue';
+import PvPButton from './PvPButton.vue';
 import { weaponFromContract as formatWeapon } from '../../contract-models';
 import { shieldFromContract as formatShield } from '../../contract-models';
 import { pvpFighterFromContract as formatFighter } from '../../contract-models';
@@ -69,23 +94,26 @@ import { characterKickedEventFromContract as formatCharacterKickedEvent } from '
 
 
 export default {
-  inject: ['web3'],
-
   components: {
     'pvp-arena-preparation': PvPArenaPreparation,
     'pvp-arena-summary': PvPArenaSummary,
     'pvp-arena-matchmaking': PvPArenaMatchMaking,
-    'pvp-kicked-modal': PvPKickedModal
+    'pvp-kicked-modal': PvPKickedModal,
+    'pvp-button': PvPButton,
   },
 
   data() {
     return {
       loading: true,
       isCharacterInArena: false,
+      isCharacterInOldArena: false,
       entryWager: null,
+      untieredEntryWager: null,
       isMatchMaking: false,
       tierRewardsPool: null,
+      untieredRewardsPool: null,
       tierTopRankers: [],
+      untieredTopRankers: [],
       currentRankedSeason: null,
       seasonStartedAt: null,
       seasonDuration: null,
@@ -96,6 +124,8 @@ export default {
         name: '',
         level: null,
         power: null,
+        fullPower: null,
+        untieredFullPower: null,
         rank: null,
         element: null,
       },
@@ -117,7 +147,9 @@ export default {
         name: '',
         level: null,
         rank: null,
-        power: null
+        power: null,
+        fullPower: null,
+        untieredFullPower: null
       },
       opponentActiveWeaponWithInformation: {
         weaponId: null,
@@ -132,12 +164,12 @@ export default {
         characterId: null,
         kickedBy: null
       },
-
+      withdrawCost: null
     };
   },
 
   computed: {
-    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds']),
+    ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds', 'web3']),
     ...mapGetters(['getCharacterName'])
   },
 
@@ -152,16 +184,22 @@ export default {
       'getSeasonDuration',
       'getCharacterLevel',
       'getCharacterPower',
+      'getCharacterFullPower',
       'getRankingPointsByCharacter',
       'getRankingsPoolByTier',
       'getTierTopCharacters',
       'getArenaTier',
-      'getEntryWager',
+      'getEntryWagerByTier',
       'getIsWeaponInArena',
       'getIsShieldInArena',
       'getIsCharacterInArena',
-      'getPvpContract',
-      'getRename'
+      'getWithdrawFeePercent',
+      'getMatchByFinder',
+      'getIsCharacterInOldArena',
+      'getPvpCoreContract',
+      'getPvpRankingsContract',
+      'getRename',
+      'withdrawFromOldArena'
     ]),
 
     async getWeaponInformation(weaponId) {
@@ -177,6 +215,9 @@ export default {
       this.isCharacterInArena = true;
 
       const fighter = formatFighter(await this.getFighterByCharacter(this.currentCharacterId));
+
+      this.characterInformation.fullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: this.characterInformation.tier});
+      this.characterInformation.untieredFullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: 20});
 
       this.activeWeaponWithInformation = {
         weaponId: fighter.weaponID,
@@ -226,6 +267,10 @@ export default {
 
       this.opponentInformation.power = await this.getCharacterPower(defenderId);
 
+      this.opponentInformation.fullPower = await this.getCharacterFullPower({characterId: defenderId, tier: this.characterInformation.tier});
+
+      this.opponentInformation.untieredFullPower = await this.getCharacterFullPower({characterId: defenderId, tier: 20});
+
       const fighter = formatFighter(await this.getFighterByCharacter(defenderId));
 
       this.opponentActiveWeaponWithInformation = {
@@ -241,14 +286,16 @@ export default {
       }
     },
 
-    async clearOpponentInformation() {
+    clearOpponentInformation() {
       this.opponentInformation = {
         id: null,
         element: '',
         name: '',
         level: null,
         rank: null,
-        power: null
+        power: null,
+        fullPower: null,
+        untieredFullPower: null,
       };
 
       this.opponentActiveWeaponWithInformation = {
@@ -278,10 +325,12 @@ export default {
     },
 
     async getKickedEvents(pvpContract, blockToScanFrom) {
-      let fromBlock = blockToScanFrom;
+      let fromBlock;
 
       if (!blockToScanFrom) {
         fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 1800, 0);
+      } else {
+        fromBlock = Math.max(blockToScanFrom, await this.web3.eth.getBlockNumber() - 1800);
       }
 
       const kickedEvents = await pvpContract.getPastEvents('CharacterKicked', {
@@ -301,7 +350,7 @@ export default {
         blockToScanFrom = lastKickedBlock;
       }
 
-      const kickedEvents = await this.getKickedEvents(await this.getPvpContract(), blockToScanFrom);
+      const kickedEvents = await this.getKickedEvents(await this.getPvpCoreContract(), blockToScanFrom);
 
       if (kickedEvents.length && !this.isCharacterInArena) {
         const formattedResult = formatCharacterKickedEvent(kickedEvents[kickedEvents.length - 1].returnValues);
@@ -346,9 +395,22 @@ export default {
 
           this.tierRewardsPool = await this.getRankingsPoolByTier(this.characterInformation.tier);
 
+          this.untieredRewardsPool = await this.getRankingsPoolByTier(20);
+
           const tierTopRankersIds = await this.getTierTopCharacters(this.characterInformation.tier);
 
+          const untieredTopRankersIds = await this.getTierTopCharacters(20);
+
           this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
+            const rename = await this.getRename(rankerId);
+            return {
+              rankerId,
+              name: rename ? rename : this.getCharacterName(rankerId),
+              rank: await this.getRankingPointsByCharacter(rankerId)
+            };
+          }));
+
+          this.untieredTopRankers = await Promise.all(untieredTopRankersIds.map(async (rankerId) => {
             const rename = await this.getRename(rankerId);
             return {
               rankerId,
@@ -362,7 +424,21 @@ export default {
       });
 
       this.restartEventSubscription = subscription;
-    }
+    },
+
+    async leaveOldArena() {
+      this.loading = true;
+
+      try {
+        await this.withdrawFromOldArena(this.currentCharacterId);
+
+        this.isCharacterInOldArena = false;
+      } catch (err) {
+        console.log('leave old arena error: ', err.message);
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 
   async created() {
@@ -370,7 +446,7 @@ export default {
 
     await this.updateSecondsBeforeSeason();
 
-    await this.listenForSeasonRestart(await this.getPvpContract(), currentBlock);
+    await this.listenForSeasonRestart(await this.getPvpRankingsContract(), currentBlock);
 
     // Note: currentCharacterId can be 0
     if (this.currentCharacterId !== null) {
@@ -388,7 +464,11 @@ export default {
 
       this.characterInformation.element = formatCharacter(this.currentCharacterId, await this.getCharacter(this.currentCharacterId)).traitName;
 
-      this.entryWager = await this.getEntryWager(this.currentCharacterId);
+      this.entryWager = await this.getEntryWagerByTier(this.characterInformation.tier);
+
+      this.untieredEntryWager = await this.getEntryWagerByTier(0);
+
+      this.withdrawCost = this.entryWager * ((await this.getWithdrawFeePercent()) / 100);
 
       const weaponAvailability = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
         return {
@@ -428,8 +508,15 @@ export default {
         this.isCharacterInArena = true;
       }
 
+      if (await this.getIsCharacterInOldArena(this.currentCharacterId)) {
+        this.isCharacterInOldArena = true;
+      }
+
       if (this.isCharacterInArena) {
         const fighter = formatFighter(await this.getFighterByCharacter(this.currentCharacterId));
+
+        this.characterInformation.fullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: this.characterInformation.tier});
+        this.characterInformation.untieredFullPower = await this.getCharacterFullPower({characterId: this.currentCharacterId, tier: 20});
 
         this.activeWeaponWithInformation = {
           weaponId: fighter.weaponID,
@@ -442,15 +529,35 @@ export default {
             information: await this.getShieldInformation(fighter.shieldID)
           };
         }
+
+        const { defenderID, createdAt } = (await this.getMatchByFinder(this.currentCharacterId));
+
+        if (+createdAt) {
+          await this.updateOpponentInformation(defenderID);
+        } else {
+          this.clearOpponentInformation();
+        }
       }
 
       this.tierRewardsPool = await this.getRankingsPoolByTier(this.characterInformation.tier);
 
+      this.untieredRewardsPool = await this.getRankingsPoolByTier(20);
+
       const tierTopRankersIds = await this.getTierTopCharacters(this.characterInformation.tier);
+
+      const untieredTopRankersIds = await this.getTierTopCharacters(20);
 
       this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
         const rename = await this.getRename(rankerId);
+        return {
+          rankerId,
+          name: rename ? rename : this.getCharacterName(rankerId),
+          rank: await this.getRankingPointsByCharacter(rankerId)
+        };
+      }));
 
+      this.untieredTopRankers = await Promise.all(untieredTopRankersIds.map(async (rankerId) => {
+        const rename = await this.getRename(rankerId);
         return {
           rankerId,
           name: rename ? rename : this.getCharacterName(rankerId),
@@ -460,7 +567,7 @@ export default {
 
       const fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 1800, 0);
 
-      const previousDuels = await (await this.getPvpContract()).getPastEvents('DuelFinished', {
+      const previousDuels = await (await this.getPvpCoreContract()).getPastEvents('DuelFinished', {
         filter: {attacker: this.currentCharacterId},
         toBlock: 'latest',
         fromBlock,
@@ -507,7 +614,11 @@ export default {
 
         this.characterInformation.element = formatCharacter(value, await this.getCharacter(value)).traitName;
 
-        this.entryWager = await this.getEntryWager(this.currentCharacterId);
+        this.entryWager = await this.getEntryWagerByTier(this.characterInformation.tier);
+
+        this.untieredEntryWager = await this.getEntryWagerByTier(0);
+
+        this.withdrawCost = this.entryWager * ((await this.getWithdrawFeePercent()) / 100);
 
         const weaponAvailability = await Promise.all(this.ownedWeaponIds.map(async (weaponId) => {
           return {
@@ -549,8 +660,18 @@ export default {
           this.isCharacterInArena = false;
         }
 
+        if (await this.getIsCharacterInOldArena(value)) {
+          this.isCharacterInOldArena = true;
+        } else {
+          this.isCharacterInOldArena = false;
+        }
+
         if (this.isCharacterInArena) {
           const fighter = formatFighter(await this.getFighterByCharacter(value));
+
+          this.characterInformation.fullPower = await this.getCharacterFullPower({characterId: value, tier: this.characterInformation.tier});
+
+          this.characterInformation.untieredFullPower = await this.getCharacterFullPower({characterId: value, tier: 20});
 
           this.activeWeaponWithInformation = {
             weaponId: fighter.weaponID,
@@ -568,11 +689,23 @@ export default {
               information: {}
             };
           }
+
+          const { defenderID, createdAt } = (await this.getMatchByFinder(value));
+
+          if (+createdAt) {
+            await this.updateOpponentInformation(defenderID);
+          } else {
+            this.clearOpponentInformation();
+          }
         }
 
         this.tierRewardsPool = await this.getRankingsPoolByTier(this.characterInformation.tier);
 
+        this.untieredRewardsPool = await this.getRankingsPoolByTier(20);
+
         const tierTopRankersIds = await this.getTierTopCharacters(this.characterInformation.tier);
+
+        const untieredTopRankersIds = await this.getTierTopCharacters(20);
 
         this.tierTopRankers = await Promise.all(tierTopRankersIds.map(async (rankerId) => {
           return {
@@ -582,9 +715,17 @@ export default {
           };
         }));
 
+        this.untieredTopRankers = await Promise.all(untieredTopRankersIds.map(async (rankerId) => {
+          return {
+            rankerId,
+            name: this.getCharacterName(rankerId),
+            rank: await this.getRankingPointsByCharacter(rankerId)
+          };
+        }));
+
         const fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 1800, 0);
 
-        const previousDuels = await (await this.getPvpContract()).getPastEvents('DuelFinished', {
+        const previousDuels = await (await this.getPvpCoreContract()).getPastEvents('DuelFinished', {
           filter: {attacker: value},
           toBlock: 'latest',
           fromBlock,
@@ -621,5 +762,12 @@ export default {
         transform: rotate(360deg);
       }
     }
+  }
+  .buttonWrapper {
+    margin-top: 2rem;
+    margin-left: auto;
+    margin-right: auto;
+    height: 3rem;
+    width: 60%;
   }
 </style>

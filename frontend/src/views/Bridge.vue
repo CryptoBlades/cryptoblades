@@ -211,7 +211,8 @@
           <span>{{ $t('bridge.noRefundOfSpentSkill') }}</span>
         </b-modal>
       </b-tab>
-      <b-tab :title="$t('bridge.incomingNfts')" @click="getIncoming(); selectedNftId = ''">
+      <!-- OLD BRIDGE: This tab is only useful for people who didn't withdraw their NFTs from the earlier bridge version -->
+      <b-tab v-if="incomingNftIds.length !== 0" :title="$t('bridge.incomingNfts')" @click="getIncoming(); selectedNftId = ''">
         <div v-if="incomingNftIds.length === 0">
           <h3 class="text-center p-4">{{$t('bridge.noIncomingNfts')}}</h3>
         </div>
@@ -281,7 +282,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
-import {isNftType, Nft, TransferedNft, NftTransfer} from '@/interfaces/Nft';
+import {isNftType, Nft, NftTransfer, TransferedNft} from '@/interfaces/Nft';
 import {Accessors} from 'vue/types/options';
 import {Contract, Contracts, IState} from '@/interfaces';
 import {NftIdType} from '@/components/smart/NftList.vue';
@@ -484,10 +485,10 @@ export default Vue.extend({
     },
   },
   created(){
-    this.supportedChains = config.supportedChains;
+    this.supportedChains = window.location.href.startsWith('https://test') ? config.testSupportedChains : config.supportedChains;
 
     //remove currentChain from chains to send to
-    this.currentChain = localStorage.getItem('currentChain') || 'BSC';
+    this.currentChain = localStorage.getItem('currentChain') || 'BNB';
     this.chainsToSendTo = this.supportedChains.filter(item => item !== this.currentChain);
 
     //check current net by checking url
@@ -501,6 +502,7 @@ export default Vue.extend({
     if (!this.contracts.NFTStorage) return;
     this.bridgeFee = await this.contracts.NFTStorage.methods.getBridgeFee().call({ from: this.defaultAccount });
     await this.showStorage();
+    await this.getIncoming();
     this.refreshIntervall = window.setInterval(async () => await this.showStorage(), 5000);
   },
   beforeDestroy(){
@@ -591,17 +593,13 @@ export default Vue.extend({
       this.incomingWeapons = [];
       this.incomingChars = [];
       this.incomingShields = [];
-
       //get incoming nft ids
       this.incomingNftIds = await this.getReceivedNFTs();
-
       for(let i = 0; i < this.incomingNftIds.length; i++){
         const incomingNft: TransferedNft  = await this.getReceivedNFT({
           tokenId: +this.incomingNftIds[i]
         });
-
         incomingNft.targetId = +this.incomingNftIds[i];
-
         if(incomingNft.nftType === 1) this.incomingWeapons.push(incomingNft);
         if(incomingNft.nftType === 2) this.incomingChars.push(incomingNft);
         if(incomingNft.nftType === 3) this.incomingShields.push(incomingNft);

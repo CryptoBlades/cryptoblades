@@ -8,13 +8,23 @@
         <p>
           {{$t('pvp.enterAndWin')}}
           ($SKILL).</p>
-        <div></div>
-        <div class="buttonWrapper">
-          <pvp-button
-            class="pvpButton"
-            @click="handleEnterArenaClick()"
-            :buttonText="$t('pvp.enterArena')"
-          />
+        <div class="buttonsWrapper">
+          <div class="buttonWrapper">
+            <pvp-button
+              class="pvpButton"
+              @click="handleEnterArenaClick"
+              :buttonText="$t('pvp.enterArena')"
+            />
+          </div>
+          <div class="buttonWrapperSecondary">
+            <pvp-button
+              @click="leaveArena"
+              :disabled="loading"
+              :buttonText="$t('pvp.leaveArena')"
+              :buttonsubText="opponentInformation.fullPower ? '$SKILL: ' + formattedWithdrawCost : $t('pvp.free')"
+              secondary
+            />
+          </div>
         </div>
         <div class="bottomWrapper">
           <div class="bottomWrapperNav">
@@ -52,7 +62,7 @@
                 </li>
                 <li v-for="duel in duelHistory" :key="`${duel.attackerId}-${duel.timestamp}`">
                   <span class="date">{{ dayjs(new Date(duel.timestamp * 1000)).format('YYYY/MM/DD') }}</span>
-                  <span :class="{'lost': !duel.attackerWon}" class="result">{{ duel.attackerWon ? i18n.t('pvp.win') : i18n.t('pvp.lose') }}</span>
+                  <span :class="{'lost': !duel.attackerWon}" class="result">{{ duel.attackerWon ? $t('pvp.win') : $t('pvp.lose') }}</span>
                 </li>
               </ul>
             </div>
@@ -60,28 +70,33 @@
         </div>
       </div>
       <div class="characterImage">
-        <pvp-character :characterId="currentCharacterId" />
+        <pvp-character :characterTrait="characterInformation.element" />
       </div>
       <pvp-arena-information
         class="arenaInformation"
         :tierRewardsPool="tierRewardsPool"
-        :tierTopRankers="tierTopRankers"
+        :untieredRewardsPool="untieredRewardsPool"
+        :tierTopRankers="isUntiered ? untieredTopRankers : tierTopRankers"
         :currentRankedSeason="currentRankedSeason"
         :secondsBeforeNextSeason="secondsBeforeNextSeason"
         :characterInformation="characterInformation"
+        :isUntiered="isUntiered"
+        insideArena
       />
     </div>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import BN from 'bignumber.js';
+import { mapState, mapActions } from 'vuex';
 import PvPWeapon from './PvPWeapon.vue';
 import PvPShield from './PvPShield.vue';
 import PvPButton from './PvPButton.vue';
 import PvPCharacter from './PvPCharacter.vue';
 import dayjs from 'dayjs';
 import PvPArenaInfo from './PvPArenaInfo.vue';
+import i18n from '../../i18n';
 
 export default {
   components: {
@@ -96,7 +111,13 @@ export default {
     tierRewardsPool: {
       default: null
     },
+    untieredRewardsPool: {
+      default: null
+    },
     tierTopRankers: {
+      default: []
+    },
+    untieredTopRankers: {
       default: []
     },
     currentRankedSeason: {
@@ -111,6 +132,8 @@ export default {
         name: '',
         level: null,
         power: null,
+        fullPower: null,
+        untieredFullPower: null,
         rank: null,
         element: null,
       }
@@ -127,6 +150,20 @@ export default {
         information: {}
       }
     },
+    opponentInformation: {
+      default: {
+        if: null,
+        element: '',
+        name: '',
+        level: null,
+        rank: null,
+        power: null,
+        fullPower: null,
+      }
+    },
+    withdrawCost: {
+      default: null
+    },
     duelHistory: {
       default: []
     }
@@ -135,23 +172,97 @@ export default {
   data() {
     return {
       tab: 0,
-      dayjs
+      dayjs,
+      loading: false,
+      duelQueue: [],
+      isCharacterInDuelQueue: false,
+      isUntiered: false
     };
   },
 
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount']),
+    formattedWithdrawCost() {
+      return new BN(this.withdrawCost).div(new BN(10).pow(18)).toFixed(2);
+    },
   },
 
   methods: {
+    ...mapActions([
+      'withdrawFromArena',
+      'getDuelQueue',
+      'getPreviousTierByCharacter'
+    ]),
+
     setTab(tabNumber) {
       this.tab = tabNumber;
+    },
+
+    handleErrorMessage(value, errorMessage, returnedMessage) {
+      if (value.includes(`reverted with reason string '${errorMessage}'`)) {
+        return this.$dialog.notify.error(returnedMessage);
+      }
+      return this.$dialog.notify.error(i18n.t('pvp.genericError'));
     },
 
     async handleEnterArenaClick() {
       this.$emit('enterMatchMaking');
     },
+
+    async leaveArena() {
+      this.loading = true;
+
+      if (this.isCharacterInDuelQueue) {
+        alert(i18n.t('pvp.currentlyInDuel'));
+        this.loading = false;
+        return;
+      }
+
+      try {
+        await this.withdrawFromArena(this.currentCharacterId);
+
+        this.$emit('leaveArena');
+      } catch (err) {
+        console.log('leave arena error: ', err.message);
+
+        this.handleErrorMessage(err.message, 'N', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.duelInProcess'));
+      } finally {
+        this.loading = false;
+      }
+    },
   },
+
+  async created() {
+    this.loading = true;
+
+    this.isUntiered = await this.getPreviousTierByCharacter(this.currentCharacterId) === '20';
+
+    try {
+      this.duelQueue = await this.getDuelQueue();
+
+      if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
+        this.isCharacterInDuelQueue = true;
+      }
+    } catch (err) {
+      console.log('get duel queue error: ', err.message);
+      this.handleErrorMessage();
+    }
+
+    this.loading = false;
+  },
+
+  watch: {
+    async currentCharacterId(value) {
+      this.loading = true;
+
+      if (value !== null) {
+        this.isUntiered = this.getPreviousTierByCharacter(value) === '20';
+      }
+
+      this.loading = false;
+    }
+  }
 };
 </script>
 
@@ -206,13 +317,24 @@ span, p, li, button, a {
       color: #cec198;
     }
   }
-  .buttonWrapper {
-    margin-top: 2.25rem;
-    height: 5rem;
-    width: 80%;
+  .buttonsWrapper {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    .buttonWrapper {
+      margin-top: 2.25rem;
+      height: 5rem;
+      width: 80%;
 
-    .pvpButton {
-      text-transform: uppercase;
+      .pvpButton {
+        text-transform: uppercase;
+      }
+    }
+    .buttonWrapperSecondary {
+      margin-top: 2rem;
+      margin-left: 10%;
+      height: 3rem;
+      width: 60%;
     }
   }
 }
@@ -314,7 +436,6 @@ span, p, li, button, a {
   display: flex;
   width: 50%;
   padding: 3rem 0;
-  margin: 0 1rem;
   @media only screen and (min-width: 1440px) {
     width: 40%;
     margin: 0;

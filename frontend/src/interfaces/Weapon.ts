@@ -36,6 +36,7 @@ export interface IWeapon {
   fourStarBurnPoints: number;
   fiveStarBurnPoints: number;
   bonusPower: number;
+  weaponType: number;
 }
 
 function AdjustStatForTrait(statValue: number, statTrait: number, charTrait: number) {

@@ -5,7 +5,12 @@
         {{$t('pvp.arena')}}
       </div>
       <div class="navStats">
-        <div>
+        <div v-if="isUntiered">
+          <span>
+            {{$t('pvp.untiered')}}
+          </span>
+        </div>
+        <div v-else>
           <span>
             {{$t('pvp.arenaTier')}}
           </span>
@@ -19,13 +24,32 @@
         </div>
       </div>
     </nav>
+    <a tabindex="0" class="infoPopover" id="duel-popover">
+      <span>{{$t('pvp.battleOdds')}}</span>
+      <div v-if="opponentInformation.fullPower" class="icon">!</div>
+      <b-popover
+        v-if="opponentInformation.fullPower"
+        ref="popover"
+        target="duel-popover"
+        triggers="hover blur"
+        placement="bottom"
+        custom-class="popoverWrapper"
+      >
+        <span class="popoverTitle">{{$t('pvp.battleOdds')}}</span>
+        <div class="oddsWrapper">
+          <p>{{$t('pvp.winChance')}}: {{ winChance }}%</p>
+          <p>{{$t('pvp.rankToEarn')}}: {{ rankPlusBonus }}</p>
+          <p class="goodLuck">{{$t('pvp.goodLuck')}}</p>
+        </div>
+      </b-popover>
+    </a>
     <div class="bottom">
       <div class="characterWrapper">
         <div class="elementWrapper">
           <img :src="getCharacterElementSrc" alt="element" />
         </div>
         <div class="characterImageWrapper">
-          <pvp-character :characterId="currentCharacterId" />
+          <pvp-character :characterTrait="characterInformation.element" />
         </div>
         <div v-if="characterInformation" class="info">
           <h1 class="characterName">{{ characterInformation.name }}</h1>
@@ -90,8 +114,9 @@
           <pvp-button
             @click="reRollCharacterOpponent" :disabled="loading || !isInMatch || isCharacterInDuelQueue"
             :buttonText="$t('pvp.reRoll')"
-            :buttonsubText="'$SKILL: ' + formattedReRollCost"
+            :buttonsubText="!hasSpecialWeapon || !freeRerollReady ? '$SKILL: ' + formattedReRollCost : $t('pvp.free')"
             :secondary="true"
+            v-tooltip="hasSpecialWeapon && !freeRerollReady ? `${$t('pvp.freeRerollIn')} ${freeRerollLocalTimestamp}` : ''"
           />
         </div>
         <div class="leaveArenaButtonWrapper">
@@ -99,6 +124,7 @@
             @click="leaveArena"
             :disabled="loading || isCharacterInDuelQueue"
             :buttonText="$t('pvp.leaveArena')"
+            :buttonsubText="opponentInformation.fullPower ? '$SKILL: ' + formattedWithdrawCost : $t('pvp.free')"
             :secondary="true"
           />
         </div>
@@ -108,7 +134,7 @@
           <img v-if="opponentInformation.id" :src="getOpponentElementSrc" alt="opponent element" />
         </div>
         <div v-if="opponentInformation.id" class="characterImageWrapper">
-          <pvp-character :characterId="opponentInformation.id" />
+          <pvp-character :characterTrait="opponentInformation.element" />
         </div>
         <div v-if="opponentInformation.id" class="info">
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
@@ -149,7 +175,7 @@
       :defenderPower="duelResult.defenderPower"
       :defenderRoll="duelResult.defenderRoll"
       :skillEarned="duelResult.skillDifference"
-      :rankVariation="duelResult.result === 'win' ? '+5' : '-3'"
+      :rankVariation="duelResult.result === 'win' ? `+${this.duelResult.bonusRank ? 5 + +this.duelResult.bonusRank : 5}` : '0'"
       :userCurrentRank="duelResult.rankDifference"
       @close-modal="handleCloseModal"
     />
@@ -163,7 +189,7 @@
 
 <script>
 import BN from 'bignumber.js';
-import { mapState, mapActions } from 'vuex';
+import {mapActions, mapState } from 'vuex';
 import PvPWeapon from './PvPWeapon.vue';
 import PvPShield from './PvPShield.vue';
 import PvPSeparator from './PvPSeparator.vue';
@@ -176,10 +202,9 @@ import lightningIcon from '../../assets/elements/lightning.png';
 import PvPDuelModal from './PvPDuelModal.vue';
 import PvPUnderAttackModal from './PvPUnderAttackModal.vue';
 import { duelResultFromContract as formatDuelResult } from '../../contract-models';
+import i18n from '../../i18n';
 
 export default {
-  inject: ['web3'],
-
   components: {
     'pvp-weapon': PvPWeapon,
     'pvp-shield': PvPShield,
@@ -197,6 +222,8 @@ export default {
         name: '',
         level: null,
         power: null,
+        fullPower: null,
+        untieredFullPower: null,
         rank: null,
         element: null
       }
@@ -220,7 +247,9 @@ export default {
         name: '',
         level: null,
         rank: null,
-        power: null
+        power: null,
+        fullPower: null,
+        untieredFullPower: null,
       }
     },
     opponentActiveWeaponWithInformation: {
@@ -235,6 +264,9 @@ export default {
         information: {}
       }
     },
+    withdrawCost: {
+      default: null
+    }
   },
 
   data() {
@@ -260,15 +292,18 @@ export default {
         rankDifference: null,
         result: '',
         attackerPower: null,
-        defenderPower: null
+        defenderPower: null,
+        bonusRank: null
       },
       matchablePlayersCount: null,
       duelOffsetCost: null,
+      specialWeaponFreeRerollTimestamp: null,
+      isUntiered: false
     };
   },
 
   computed: {
-    ...mapState(['contracts', 'currentCharacterId', 'defaultAccount']),
+    ...mapState(['contracts', 'currentCharacterId', 'defaultAccount', 'web3']),
 
     formattedWager() {
       return new BN(this.wager).div(new BN(10).pow(18)).toFixed(2);
@@ -281,6 +316,11 @@ export default {
     formattedReRollCost() {
       return new BN(this.reRollCost).div(new BN(10).pow(18)).toFixed(2);
     },
+
+    formattedWithdrawCost() {
+      return new BN(this.withdrawCost).div(new BN(10).pow(18)).toFixed(2);
+    },
+
     formattedMatchablePlayersCount(){
       // TODO subtract from this number the player's other characters that are locked in the arena
       const formattedMatchablePlayersCount = this.matchablePlayersCount - 1;
@@ -315,6 +355,45 @@ export default {
       }
       return lightningIcon;
     },
+
+    freeRerollReady() {
+      if(!this.hasSpecialWeapon) return false;
+      return +this.specialWeaponFreeRerollTimestamp <= Date.now()/1000;
+    },
+
+    hasSpecialWeapon() {
+      return +this.activeWeaponWithInformation.information.weaponType >= 1;
+    },
+
+    freeRerollLocalTimestamp() {
+      return new Date(this.specialWeaponFreeRerollTimestamp * 1000).toLocaleString();
+    },
+
+    winChance() {
+      const characterFullPower = this.isUntiered ? this.characterInformation.untieredFullPower : this.characterInformation.fullPower;
+      const opponentFullPower = this.isUntiered ? this.opponentInformation.untieredFullPower : this.opponentInformation.fullPower;
+
+      if (characterFullPower === opponentFullPower) {
+        return 50;
+      }
+
+      if (characterFullPower < opponentFullPower) {
+        const weakerPower = characterFullPower;
+        const strongerPower = opponentFullPower;
+        return (this.getWinChance(weakerPower, strongerPower)).toFixed(1);
+      } else {
+        const weakerPower = opponentFullPower;
+        const strongerPower = characterFullPower;
+        return ((100 - this.getWinChance(weakerPower, strongerPower))).toFixed(1);
+      }
+    },
+
+    rankPlusBonus() {
+      if (this.winChance > 50) {
+        return 5;
+      }
+      return (this.getBonusRank(50 - this.winChance) + 5).toFixed(0);
+    }
   },
 
   methods: {
@@ -331,17 +410,49 @@ export default {
       'getDecisionSeconds',
       'getDuelCost',
       'getReRollFeePercent',
+      'getWithdrawFeePercent',
       'approvePvpSkillSpending',
-      'getPvpContract',
+      'getPvpCoreContract',
       'getFighterByCharacter',
-      'getDuelOffsetCost'
+      'getDuelOffsetCost',
+      'fetchFreeOpponentRerollTimestamp',
+      'getPreviousTierByCharacter'
     ]),
+
+    getWinChance(weakerPower, strongerPower) {
+      // Formula hard-copied from common.sol due to contract size limitations in PvPArena.sol
+      const strongerMinRoll = Math.floor(strongerPower * 0.9);
+      const strongerMaxRoll = Math.floor(strongerPower * 1.1);
+
+      const weakerMinRoll = Math.floor(weakerPower * 0.9);
+      const weakerMaxRoll = Math.floor(weakerPower * 1.1);
+
+      const strongerRollSpread = strongerMaxRoll - strongerMinRoll;
+      const weakerRollSpread = weakerMaxRoll - weakerMinRoll;
+
+      const rollOverlap = weakerMaxRoll - strongerMinRoll;
+
+      const strongerRollChanceToOverlap = Math.floor(rollOverlap * 100 / strongerRollSpread);
+
+      const weakerRollChanceToOverlap = Math.floor(rollOverlap * 100 / weakerRollSpread);
+
+      return strongerRollChanceToOverlap * weakerRollChanceToOverlap / 200;
+    },
+
+    getBonusRank(processedWinChance) {
+      // Formula hard-copied from common.sol due to contract size limitations in PvPArena.sol
+      if (processedWinChance <= 40) {
+        return Math.floor((53**processedWinChance) / (50**processedWinChance));
+      } else {
+        return Math.floor(((3**((Math.floor(processedWinChance * 1.3)) - 48)) / (2**((Math.floor(processedWinChance * 1.3)) - 48))) + 7);
+      }
+    },
 
     handleErrorMessage(value, errorMessage, returnedMessage) {
       if (value.includes(`reverted with reason string '${errorMessage}'`)) {
         return this.$dialog.notify.error(returnedMessage);
       }
-      return 'There has been an error. Try again.';
+      return this.$dialog.notify.error(i18n.t('pvp.genericError'));
     },
 
     async leaveArena() {
@@ -354,8 +465,8 @@ export default {
       } catch (err) {
         console.log('leave arena error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'Char not in arena', 'The character is not in the arena');
-        this.handleErrorMessage(err.message, 'Defender duel in process', 'Duel already in process');
+        this.handleErrorMessage(err.message, 'N', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.duelInProcess'));
       }
 
       this.loading = false;
@@ -374,11 +485,10 @@ export default {
       } catch (err) {
         console.log('find match error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'No enemy found', 'No opponent has been found. Try again.');
-        this.handleErrorMessage(err.message, 'Already in match', 'An opponent has already been requested.');
-        this.handleErrorMessage(err.message, 'No enemy in tier', 'No opponents available in this tier.');
-        this.handleErrorMessage(err.message, 'Char dueling', 'The character is already in a duel queue.');
-        this.handleErrorMessage(err.message, 'Char not in arena', 'The character is not in the arena.');
+        this.handleErrorMessage(err.message, 'E', i18n.t('pvp.noEnemyFound'));
+        this.handleErrorMessage(err.message, 'M', i18n.t('pvp.alreadyInMatch'));
+        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.charDueling'));
+        this.handleErrorMessage(err.message, 'N', i18n.t('pvp.charNotInArena'));
 
         this.loading = false;
         return;
@@ -398,16 +508,17 @@ export default {
       this.loading = true;
 
       try {
-        await this.approvePvpSkillSpending(this.reRollCost.toFixed(0));
+        if(!this.freeRerollReady) {
+          await this.approvePvpSkillSpending(this.reRollCost.toFixed(0));
+        }
 
         await this.reRollOpponent(this.currentCharacterId);
       } catch (err) {
         console.log('reroll opponent error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'No enemy found', 'No opponent has been found. Try again.');
-        this.handleErrorMessage(err.message, 'Not in match', 'The character is not in a match. Try again.');
-        this.handleErrorMessage(err.message, 'No enemy in tier', 'No opponents available in this tier.');
-        this.handleErrorMessage(err.message, 'Char dueling', 'The character is already in a duel queue.');
+        this.handleErrorMessage(err.message, 'E', i18n.t('pvp.noEnemyFound'));
+        this.handleErrorMessage(err.message, 'M', i18n.t('pvp.notInMatch'));
+        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.charDueling'));
 
         this.loading = false;
 
@@ -431,20 +542,23 @@ export default {
 
         if (duelFinishedResult.length) {
           const formattedResult = formatDuelResult(duelFinishedResult[duelFinishedResult.length - 1].returnValues);
-          this.duelResult.defenderPower = this.opponentInformation.power;
-          this.duelResult.attackerPower = this.characterInformation.power;
+          this.duelResult.defenderPower = this.isUntiered ? this.opponentInformation.untieredFullPower : this.opponentInformation.fullPower;
+          this.duelResult.attackerPower = this.isUntiered ? this.characterInformation.untieredFullPower : this.characterInformation.fullPower;
           this.duelResult.result = formattedResult.attackerWon ? 'win' : 'lose';
           this.duelResult.attackerRoll = formattedResult.attackerRoll;
           this.duelResult.defenderRoll = formattedResult.defenderRoll;
+          this.duelResult.bonusRank = formattedResult.bonusRank;
           this.duelResult.skillDifference = formattedResult.attackerWon ?
             +this.formattedDuelCost * 0.7 :
             this.formattedDuelCost;
           // TODO: Make this prettier
           this.duelResult.rankDifference = formattedResult.attackerWon ?
-            +this.characterInformation.rank + 5 :
-            +this.characterInformation.rank - 3 <= 0 ?
-              0 :
-              +this.characterInformation.rank - 3;
+            +this.characterInformation.rank + 5 + +this.duelResult.bonusRank :
+            // Mute ranking loss
+            // +this.characterInformation.rank - 3 <= 0 ?
+            //   0 :
+            //   +this.characterInformation.rank - 3;
+            +this.characterInformation.rank;
 
           subscription.unsubscribe((error, result) => {
             if (!error) {
@@ -460,15 +574,15 @@ export default {
     async prepareCharacterDuel() {
       this.loading = true;
       try {
-        await this.listenForDuel(await this.getPvpContract());
+        await this.listenForDuel(await this.getPvpCoreContract());
 
         await this.prepareDuel({characterId: this.currentCharacterId, duelOffsetCost: this.duelOffsetCost});
       } catch (err) {
         console.log('prepare perform duel error: ', err.message);
 
-        this.handleErrorMessage(err.message, 'Decision time expired', 'Decision time expired.');
-        this.handleErrorMessage(err.message, 'Char in duel queue', 'The character is already waiting for an opponent.');
-        this.handleErrorMessage(err.message, 'Not in match', 'The character is not in a duel. Try again.');
+        this.handleErrorMessage(err.message, 'D', i18n.t('pvp.decisionTimeExpired'));
+        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.charDueling'));
+        this.handleErrorMessage(err.message, 'M', i18n.t('pvp.notInMatch'));
 
         this.loading = false;
 
@@ -490,7 +604,8 @@ export default {
         rankDifference: null,
         result: '',
         attackerPower: null,
-        defenderPower: null
+        defenderPower: null,
+        bonusRank: null,
       };
     },
 
@@ -510,7 +625,7 @@ export default {
 
       this.wager = (await this.getFighterByCharacter(this.currentCharacterId)).wager;
 
-      if (this.wager < this.duelCost) {
+      if (+this.formattedWager < +this.formattedDuelCost) {
         this.$emit('kickCharacterFromArena');
       }
 
@@ -525,6 +640,8 @@ export default {
   async created() {
     this.loading = true;
 
+    this.isUntiered = await this.getPreviousTierByCharacter(this.currentCharacterId) === '20';
+
     this.isInMatch = (await this.getMatchByFinder(this.currentCharacterId)).createdAt !== '0';
 
     this.duelQueue = await this.getDuelQueue();
@@ -534,7 +651,7 @@ export default {
     if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
       this.isCharacterInDuelQueue = true;
 
-      await this.listenForDuel(await this.getPvpContract());
+      await this.listenForDuel(await this.getPvpCoreContract());
     }
 
     this.decisionSeconds = await this.getDecisionSeconds();
@@ -574,7 +691,15 @@ export default {
 
     this.duelOffsetCost = await this.getDuelOffsetCost();
 
+    this.specialWeaponFreeRerollTimestamp = await this.fetchFreeOpponentRerollTimestamp(this.activeWeaponWithInformation.weaponId);
+
     this.loading = false;
+  },
+
+  beforeDestroy() {
+    if(this.timer) {
+      clearInterval(this.timer);
+    }
   },
 
   watch: {
@@ -617,11 +742,67 @@ export default {
 span, p, li, button {
   font-family: 'Roboto';
 }
+.infoPopover {
+  display: flex;
+  margin: 0 auto;
+  margin-bottom: 2rem;
+  align-items: center;
+  vertical-align: middle;
+  place-content: center;
+  font-size: .85rem;
+  &:hover {
+    text-shadow: none;
+  }
+  span {
+    font-family: 'Trajan';
+  }
+  .icon {
+    display: flex;
+    height: 1.25rem;
+    width: 1.25rem;
+    margin-left: 0.25rem;
+    align-items: center;
+    vertical-align: middle;
+    place-content: center;
+    border-radius: 9999px;
+    background: #cec198;
+    color: black;
+    font-weight: 700;
+  }
+}
+.popoverWrapper, .permanent {
+  padding: 1rem 1rem 0.5rem 1rem;
+  border: 1px solid #cec198;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  background-color: #141414;
+  .popoverTitle {
+    font-family: 'Trajan';
+    color: #cec198;
+  }
+  .oddsWrapper {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+  }
+  p {
+    color: #b4b0a7;
+    font-size: .8rem;
+  }
+  p:last-of-type {
+    margin-bottom: .5rem;
+    color: #cec198;
+    font-size: .9rem;
+    font-family: 'Trajan';
+  }
+  .goodLuck {
+    margin: 0 auto;
+  }
+}
   nav {
     display: flex;
     width: 100%;
     justify-content: space-between;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid #363636;
     .navTitle {

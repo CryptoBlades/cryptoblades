@@ -23,7 +23,10 @@ module.exports = async function (deployer, network, accounts) {
     || network === 'okextestnet'
     || network === 'polygontestnet'
     || network === 'avaxtestnet'
-    || network === 'avaxtestnet-fork') {
+    || network === 'avaxtestnet-fork'
+    || network === 'auroratestnet'
+    || network === 'kavatestnet'
+    || network === 'skaletestnet') {
         let randoms;
 
         if (network === "development" || network === "development-fork") {

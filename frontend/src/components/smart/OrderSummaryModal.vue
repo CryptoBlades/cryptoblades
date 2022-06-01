@@ -176,7 +176,7 @@ export default Vue.extend({
         items: orderItems,
         shipping: this.selectedShippingRate.id,
         wallet: this.defaultAccount,
-        currentChain: localStorage.getItem('currentChain') || 'BSC',
+        currentChain: localStorage.getItem('currentChain') || 'BNB',
       };
 
       try {
@@ -249,9 +249,12 @@ export default Vue.extend({
         this.showModal = true;
         this.skillPrice = +await this.currentSkillPrice();
         await this.calculateTotalPrice();
-        this.areShippingRatesLoading = true;
-        await this.getShippingRates();
-        this.areShippingRatesLoading = false;
+        try {
+          this.areShippingRatesLoading = true;
+          await this.getShippingRates();
+        } finally {
+          this.areShippingRatesLoading = false;
+        }
         await this.calculateTotalPrice();
       } else {
         this.showModal = false;

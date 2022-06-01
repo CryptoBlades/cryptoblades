@@ -15,7 +15,7 @@
       <!-- below use of weapon.id is for test purpose, should be replaced with getWeaponCosmetic(weapon.id) -->
       <div class="animation" v-bind:class="showCosmetics ? 'weapon-animation-applied-' + getWeaponCosmetic(weapon.id) : ''"/>
       <img v-if="showPlaceholder" v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
-        class="placeholder" :src="getWeaponArt(weapon)" />
+           class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)" />
 
       <div class="trait">
         <span :class="weapon.element.toLowerCase() + '-icon'"></span>
@@ -101,7 +101,10 @@ export default {
   props: ['weapon', 'favorite'],
 
   computed: {
-    ...mapState(['maxDurability']),
+    ...mapState([
+      'maxDurability',
+      'specialWeaponArts',
+    ]),
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',
@@ -448,7 +451,7 @@ export default {
   mounted() {
     this.checkStorage();
     Events.$on('setting:showCosmetics', () => this.checkStorage());
-    if(localStorage.getItem('useGraphics') === 'false') {
+    if (localStorage.getItem('useGraphics') === 'false') {
       this.allLoaded = true;
       this.showPlaceholder = true;
       return;
@@ -534,8 +537,8 @@ export default {
 .placeholder {
   max-width: 180px;
   max-height: 180px;
-  margin-left: 10px;
-  margin-top: 5px;
+  margin: auto;
+  display: block;
 
   transform: scale(0.7);
 }

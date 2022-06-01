@@ -32,7 +32,7 @@
                   <input class="stat-slider" type="range" min="1" max="255" v-model="levelSliderValue" />
                   <b-form-input class="stat-input" type="number" v-model="levelSliderValue" :min="1" :max="255" />
                 </div>
-                <span>Stamina</span>
+                <span>{{$t('stamina')}}</span>
                 <select class="form-control wep-trait-form" v-model="staminaSelectValue">
                   <option v-for="x in [40,80,120,160,200]" :value="x" :key="x">{{ x }}</option>
                 </select>

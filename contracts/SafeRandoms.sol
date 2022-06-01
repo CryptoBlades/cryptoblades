@@ -14,20 +14,20 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
     */
 
     /* Usage:
-    *   
+    *
     *   Transaction #1: Have the user pay costs (if applicable) and request the seed
     *   Transaction #2: Pop the seed (will revert if not ready, use check if necessary)
-    *   
+    *
     *   After popping, you can use one seed for multiple outcomes (ie 10 weapon seeds)
     *   Just make sure to re-encode with keccak256(abi.encodePacked(seed,value...))
     *   ONLY with values that won't change over time:
     *   ie. block.number: NO
     *   1,2,3 etc: YES, IF seeds aren't shared under the same action identifier
     *    (so 1x weapons produce different requestIDs than 10x weapons)
-    *   
+    *
     *   You can use the requestNext boolean for pop calls to request the next seed already,
     *   This allows you to have a new secure seed ready for every transaction (except the first)
-    *   
+    *
     *   Resolve booleans of functions contribute to seed resolution,
     *   (sending false can be used to save gas if necessary)
     *    Check costs ~2k gas, resolution costs 35k (+3.1k for event + 1.7k for event check)
@@ -43,28 +43,28 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
     *    These seeds can be salted after without popping to produce expectable results if tolerable
     *     (this saves gas if the initial action needed security but the following ones don't)
     *     ! Salted seeds are stored separately, the original one-at-a-time seed will be available raw
-    *   
+    *
     *   Queued seeds:
     *    More than one seed request can be piled up (costs ~15-20k more gas than single seeds)
     *    Example use: Ordering multiple batches of weapons without requiring the first batch to complete
     *    MUST HAVE a full upfront cost to avoid abuse! (ie skill cost to mint an NFT)
-    *   
+    *
     *   !!! IMPORTANT !!!!
     *    Seed types are not to be mixed for the same action type!
     *    Requesting a queued seed and popping a one-timer won't work, and vice versa
     */
 
     /* RequestIDs
-    *   
+    *
     *   Request ID is a unique value to identify the exact action a random seed is requested for.
     *   A seed requested for 1x weapon mint must be different than for 10x weapon mints etc.
-    *   
+    *
     *   Produce clean looking request IDs for two properties:
     *    RandomUtil.combineSeeds(SEED_WEAPON_MINT, amount)
-    *   
+    *
     *   Or dirtier / for many properties: (you can slap arrays into encodePacked directly)
     *    uint(keccak256(abi.encodePacked(SEED_WEAPON_MINT, amount, special_weapon_series)))
-    *   
+    *
     *   !!! DO NOT USE SIMPLE CONSTANT VALUES FOR THE ACTION IDENTIFIER (1,2,3) !!!
     *   USE ENCODED STRING CONSTANTS FOR EXAMPLE:
     *   uint256 public constant SEED_WEAPON_MINT = uint(keccak256("SEED_WEAPON_MINT"));
@@ -99,7 +99,7 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
         seedIndexBlockNumber = block.number;
         firstRequestBlockNumber = block.number-1; // save 15k gas for very first user
     }
-    
+
     modifier restricted() {
         _restricted();
         _;
@@ -113,11 +113,23 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
 
     function requestSingleSeed(address user, uint256 requestID) public restricted {
         _resolveSeedPublic(user);
-        _requestSingleSeed(user, requestID);
+        _requestSingleSeedAssert(user, requestID);
     }
 
-    function _requestSingleSeed(address user, uint256 requestID) internal {
+    function requestSingleSeed(address user, uint256 requestID, bool force) public restricted {
+        _resolveSeedPublic(user);
+        if(force)
+            _requestSingleSeed(user, requestID);
+        else
+            _requestSingleSeedAssert(user, requestID);
+    }
+
+    function _requestSingleSeedAssert(address user, uint256 requestID) internal {
         require(singleSeedRequests[user][requestID] == 0);
+        _requestSingleSeed(user, requestID);
+    }
+    
+    function _requestSingleSeed(address user, uint256 requestID) internal {
         singleSeedRequests[user][requestID] = currentSeedIndex;
         if(firstRequestBlockNumber < seedIndexBlockNumber)
             firstRequestBlockNumber = block.number;
@@ -172,8 +184,7 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
         if(resolve)
             _resolveSeedPublic(user);
 
-        seed = readSingleSeed(user, requestID, false);
-        require(seed != 0);
+        seed = readSingleSeed(user, requestID, false); // reverts on zero
         delete singleSeedRequests[user][requestID];
 
         if(emitPopEvent)
@@ -184,8 +195,16 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
     }
 
     function readSingleSeed(address user, uint256 requestID, bool allowZero) public view returns (uint256 seed) {
-        seed = uint(seedHashes[singleSeedRequests[user][requestID]]);
-        require(allowZero || seed != 0);
+        if(seedHashes[singleSeedRequests[user][requestID]] == 0) {
+            require(allowZero);
+            // seed stays 0 by default if allowed
+        }
+        else {
+            seed = uint256(keccak256(abi.encodePacked(
+                seedHashes[singleSeedRequests[user][requestID]],
+                user, requestID
+            )));
+        }
     }
 
     function saltSingleSeed(address user, uint256 requestID, bool resolve) public restricted returns (uint256 seed) {
@@ -238,7 +257,7 @@ contract SafeRandoms is Initializable, AccessControlUpgradeable {
     function getQueuedRequestCount(uint256 requestID) public view returns (uint256) {
         return queuedSeedRequests[msg.sender][requestID].length;
     }
-    
+
     function encode(uint256[] calldata requestData) external pure returns (uint256) {
         return uint256(keccak256(abi.encodePacked(requestData)));
     }

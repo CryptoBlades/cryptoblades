@@ -10,13 +10,11 @@
     <div class="d-flex w-100 align-items-baseline mt-3">
       <h5>{{$t('Treasury.payoutCurrency')}}:</h5>
       <b-form-select class="w-25 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
-        <b-form-select-option v-for="p in supportedProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
+        <b-form-select-option v-for="p in this.getPartnerProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
       </b-form-select>
     </div>
     <div class="d-flex w-100 pt-2 pb-2 flex-wrap projects-container">
-      <partnered-project v-for="p in supportedProjects" :key="p.id" :id="p.id" :name="p.name" :tokenSymbol="p.tokenSymbol"
-        :tokenSupply="p.tokenSupply" :tokenPrice="p.tokenPrice" :logoFileName="getLogoFile(p.name)"
-        :tokenAddress="p.tokenAddress"/>
+      <PartneredProject v-for="partnerProject in this.getPartnerProjects" :key="partnerProject.id" :partnerProject="partnerProject" />
     </div>
     <b-modal ok-only class="centered-modal" ref="formula-details-modal" :title="$t('Treasury.formulaDetailsTitle')">
       <span class="white-space">{{$t('Treasury.payoutFormulaExplanation')}}</span>
@@ -31,14 +29,18 @@ import {Accessors} from 'vue/types/options';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 
 export interface SupportedProject {
-  id: string;
+  id: number;
   name: string;
   tokenSymbol: string;
   tokenAddress: string;
-  tokenSupply: string;
-  tokensClaimed: string;
-  tokenPrice: string;
+  tokenSupply: number;
+  tokensClaimed: number;
+  tokenPrice: number;
   isActive: boolean;
+  logo: string;
+  details: string;
+  website: string;
+  note: string;
 }
 
 interface StoreMappedGetters {
@@ -70,21 +72,6 @@ export default Vue.extend({
   computed: {
     ...(mapGetters(['getPartnerProjects']) as Accessors<StoreMappedGetters>),
     ...(mapState(['payoutCurrencyId', 'currentNetworkId']) as Accessors<StoreMappedState>),
-
-    supportedProjects(): SupportedProject[] {
-      return this.getPartnerProjects.map(p => {
-        return {
-          id: p.id,
-          name: p.name,
-          tokenSymbol: p.tokenSymbol,
-          tokenAddress: p.tokenAddress,
-          tokenSupply: p.tokenSupply,
-          tokensClaimed: p.tokensClaimed,
-          tokenPrice: p.tokenPrice,
-          isActive: p.isActive
-        };
-      });
-    }
   },
 
   methods: {

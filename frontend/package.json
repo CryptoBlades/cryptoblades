@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build && npm run crush-images && npm run copy:abi && npm run copy:abiinterface && npm run copy:appconfig",
+    "setup-app-config": "node scripts/setup-app-config.js",
+    "build": "npm run setup-app-config && vue-cli-service build && npm run crush-images && npm run copy:abi && npm run copy:abiinterface && npm run copy:appconfig",
     "lint": "vue-cli-service lint",
     "start": "npm run serve",
     "crush-images": "node scripts/crush-images",
@@ -16,6 +17,7 @@
     "@chenfengyuan/vue-countdown": "^1.1.5",
     "@metamask/onboarding": "^1.0.1",
     "@types/three": "^0.129.0",
+    "@walletconnect/web3-provider": "^1.7.8",
     "@waxio/waxjs": "^0.0.15",
     "axios": "^0.21.1",
     "bignumber.js": "^9.0.1",
@@ -58,8 +60,11 @@
     "copyfiles": "^2.4.1",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "fs-extra": "^7.0.1",
+    "node-fetch": "^2.6.7",
     "sass-loader": "^10.1.1",
     "typescript": "~4.1.5",
+    "vue-multiselect": "^2.1.6",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {

@@ -15,16 +15,10 @@
             maxPower: 3 * baseCharacterPower
           })"/>
       </div>
-      <div class="w-100" :style="{
+      <div class="w-100 h-100" :style="{
         'background-image': 'url(' + getCharacterArt(character) + ')',
-      }"
-      :class="{
-        'h-100': !isMarket,
-        'h-75': isMarket
       }">
-
       </div>
-      <!--<small-button class="button" :text="`Purchase`" v-if="isMarket"/>-->
     </div>
 
     <div class="loading-container" v-if="!allLoaded">
@@ -35,7 +29,7 @@
       <div class="name black-outline" v-if="!portrait">{{ getCleanCharacterName(character.id) }} </div>
       <div v-if="!portrait">Lv.<span class="white">{{ character.level + 1 }}</span></div>
     </div>
-    <div class="score-id-container">
+    <div class="score-id-container" :class="hideIdContainer ? 'visibility: hidden' : undefined">
     <div class="black-outline" v-if="!portrait">{{$t('CharacterArt.id')}} <span class="white">{{ character.id }}</span></div>
     <div class="black-outline" v-if="!portrait">
       {{$t('CharacterArt.score')}} <span class="white">{{ heroScore.toLocaleString() }}</span>
@@ -43,13 +37,13 @@
     </div>
     </div>
 
-    <div v-if="!portrait && (isMarket || isGarrison)" class="small-stamina-char"
+    <div v-if="!portrait && isGarrison" class="small-stamina-char"
       :style="`--staminaReady: ${(characterStamina/maxStamina)*100}%;`"
       v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
       <div class="stamina-text black-outline">{{$t('CharacterArt.staminaShort')}} {{ characterStamina }} / 200</div>
     </div>
 
-    <div class="xp" v-if="!portrait">
+    <div class="xp" v-if="!portrait" :class="hideXpBar ? 'visibility: hidden' : undefined">
       <b-progress :max="RequiredXp(character.level)" variant="success"
       v-tooltip.bottom="` ${$t('CharacterArt.claimableXP')} ${this.getCharacterUnclaimedXp(character.id)}`">
         <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} {{$t('CharacterArt.xp')}}</strong>
@@ -92,7 +86,7 @@ function transformModel(model) {
 }
 
 export default {
-  props: ['character', 'portrait', 'isMarket', 'isGarrison'],
+  props: ['character', 'portrait', 'isGarrison', 'hideXpBar', 'hideIdContainer'],
   components: {
     //SmallButton,
   },
@@ -170,9 +164,7 @@ export default {
       return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
     },
 
-    getCharacterArt,
-
-    init() {
+    getCharacterArt,init() {
       const container = this.$refs.el;
 
       this.camera = new Three.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 0.01, 1000);
@@ -562,10 +554,6 @@ export default {
   flex-direction: column;
 }
 
-.xp {
-  position: absolute;
-}
-
 .trait {
   top: -30px;
   justify-self: center;
@@ -595,6 +583,7 @@ export default {
 }
 
 .xp {
+  position: absolute;
   bottom: -30px;
   left: 30px;
   width: 150px;
