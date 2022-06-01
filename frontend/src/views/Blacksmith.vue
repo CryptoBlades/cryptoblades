@@ -857,7 +857,6 @@ export default Vue.extend({
   mounted(){
     (this as any).$router.push({ path: 'blacksmith', query: { tab: 'weapon' }});
     Events.$on('forge-weapon', (id: number) =>{
-      console.log(id);
       if(id === 0){
         this.onClickForge(id);
         (this.$refs['forge-element-selector-modal']as BModal).show();
