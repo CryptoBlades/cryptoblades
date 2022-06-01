@@ -389,9 +389,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         incrementCharacterQuestProgress(characterID, questID, tokenIds.length);
     }
 
-    function submitWalletProgress(uint256 questID, uint256[] memory tokenIds) public {
+    function submitWalletProgress(uint256 questID, uint256 indexInTier, uint256[] memory tokenIds) public {
         _submitProgress(questID, tokenIds);
-        incrementWalletQuestProgress(questID, tokenIds.length);
+        incrementWalletQuestProgress(questID, indexInTier, tokenIds.length);
     }
 
     function _submitProgress(uint256 questID, uint256[] memory tokenIds) private assertQuestsEnabled {
@@ -438,9 +438,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         incrementCharacterQuestProgress(characterID, questID, amount);
     }
 
-    function submitWalletProgressAmount(uint256 questID, uint256 amount) public {
+    function submitWalletProgressAmount(uint256 questID, uint256 indexInTier, uint256 amount) public {
         _submitProgressAmount(questID, SEED_REWARD_WALLET_QUEST/*hack number to avoid bumping 0 accidentally*/, amount);
-        incrementWalletQuestProgress(questID, amount);
+        incrementWalletQuestProgress(questID, indexInTier, amount);
     }
 
     function _submitProgressAmount(uint256 questID, uint256 characterID, uint256 amount) private assertQuestsEnabled {
@@ -472,8 +472,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function incrementWalletQuestProgress(uint256 questID, uint256 progress) private {
+    function incrementWalletQuestProgress(uint256 questID, uint256 indexInTier, uint256 progress) private {
         require(progress > 0);
+        require(questID == quests[questTemplates[walletTier][indexInTier]].id); // wallet quest check
         uint totalProgress = walletQuestProgress[msg.sender][questID] + progress;
         walletQuestProgress[msg.sender][questID] = totalProgress;
         emit WalletQuestProgressed(questID, msg.sender);
