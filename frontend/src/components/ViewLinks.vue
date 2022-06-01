@@ -132,6 +132,11 @@ a {
   color: #ffffff;
 }
 
+.link-text > svg{
+  margin-top: -1px;
+  margin-left: 5px;
+}
+
 .play-to-earn-btn{
   display: flex;
   flex-direction: column;

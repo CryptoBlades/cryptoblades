@@ -46,13 +46,13 @@ export default {
           iconName: 'forge-icon-x10'
         },
         {
-          id: 3,
+          id: 2,
           title: 'SPECIAL',
           isActive: false,
           iconName: 'special'
         },
         {
-          id: 4,
+          id: 3,
           title: 'REFORGE',
           isActive: false,
           iconName: 'reforge'
@@ -84,14 +84,13 @@ export default {
   mounted(){
     Events.$on('hasSelected', () =>{
       this.menuItem.forEach(x => {
-        if(x.id === 4){
+        if(x.id === 3){
           x.isActive = true;
         }else{
           x.isActive = false;
         }
       });
     });
-
   }
 };
 </script>

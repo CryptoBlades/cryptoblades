@@ -556,7 +556,7 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
 .set-normal{
   margin-left: auto;
   margin-right: auto;
-  transition: 1s all;
+  transition: 1s width;
   padding: 0px;
 }
 
@@ -771,6 +771,9 @@ button.close {
   border: none !important;
   border: 1px solid #43506A!important;
   padding:3rem;
+}
+.character-modal-mobile {
+  padding:2rem;
 }
 
 .character-modal header.modal-header{
