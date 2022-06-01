@@ -399,7 +399,7 @@ import WeaponInventory from '../components/WeaponInvetory.vue';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
 import {GetTotalMultiplierForTrait, IWeapon} from '@/interfaces/Weapon';
 import {IRaidState, IState} from '@/interfaces';
-import {getBossArt} from '@/raid-boss-art-placeholder';
+import {getBossArt, getBossName} from '@/raid-boss-art-placeholder';
 import {traitNumberToName} from '@/contract-models';
 import {fromWeiEther, toBN} from '@/utils/common';
 import {staminaToHours} from '@/utils/date-time';
@@ -433,50 +433,6 @@ interface RaidMappedGetters {
 }
 
 let interval: number;
-
-const dragonNames = [
-  'Fudbringer',
-  'HODL Lord',
-  'Skill Eater',
-  'Chain Congester',
-  'Swap Guardian',
-  'Blade Hoarder',
-  'Centralizer',
-  'Exchange Tormentor',
-  'Eater of Stakes',
-
-  // 'M13',
-  // 'Ste1n',
-  // 'Moneth',
-  // 'Skulpin',
-  // 'Plitszkin',
-
-  // 'KokMhei',
-  // 'kocuZe',
-  // 'Jestinsane',
-  // 'Krypton',
-  // 'Richard Melics',
-];
-
-const bossImages = [
-  '../assets/raid-bosses/CB_Hellborn Brute.gif',
-  '../assets/raid-bosses/CB_Hellborn Executioner.gif',
-  '../assets/raid-bosses/CB_Hellborn Marauder.gif',
-  '../assets/raid-bosses/CB_Hellborn Overlord.gif',
-  '../assets/raid-bosses/CB_Hellborn Shaman.gif',
-
-  // '../assets/raid-bosses/CB_Hellborn M13.gif',
-  // '../assets/raid-bosses/CB_Hellborn Ste1n.gif',
-  // '../assets/raid-bosses/CB_Hellborn Moneth.gif',
-  // '../assets/raid-bosses/CB_Hellborn Skulpin.gif',
-  // '../assets/raid-bosses/CB_Hellborn Plitszkin.gif',
-
-  // '../assets/raid-bosses/KokMhei.gif',
-  // '../assets/raid-bosses/KocuZe.gif',
-  // '../assets/raid-bosses/Jestinsane.gif',
-  // '../assets/raid-bosses/Krypton.gif',
-  // '../assets/raid-bosses/Melics.gif',
-];
 
 export default Vue.extend({
   data() {
@@ -771,15 +727,12 @@ export default Vue.extend({
 
       await this.fetchCharacters(this.ownedCharacterIds);
     },
-
     getBossName(): string {
-      return dragonNames[+this.raidIndex % dragonNames.length];
+      return getBossName(+this.raidIndex);
     },
-
     getBossImage(): string {
-      return bossImages[+this.raidIndex % bossImages.length];
+      return getBossArt(+this.raidIndex);
     },
-
     zeroPad(num: any, places: any) {
       const zero = places - num.toString().length + 1;
       return Array(+(zero > 0 && zero)).join('0') + num;
