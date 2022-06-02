@@ -50,7 +50,7 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
     }
 
     modifier isCharacterOwner(uint256 id) {
-        require(characterOwner[id] == msg.sender);
+        require(characterOwner[id] == tx.origin);
         _;
     }
 
@@ -128,7 +128,7 @@ contract Garrison is Initializable, IERC721ReceiverUpgradeable, AccessControlUpg
         isInGarrison(id)
     {
         delete characterOwner[id];
-        userGarrison[msg.sender].remove(id);
+        userGarrison[tx.origin].remove(id);
         allCharactersInGarrison.remove(id);
         characters.safeTransferFrom(address(this), receiver, id);
     }
