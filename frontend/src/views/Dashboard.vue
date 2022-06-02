@@ -19,48 +19,40 @@
             <div class="character-element">
               <div class="element-frame">
                 <div>
-                  <span :id="(this.characterInformation.element).toLowerCase()+'-element'" />
+                  <span :class="characterTrait.toLowerCase() + '-icon circle-element'"></span>
                 </div>
               </div>
             </div>
           <div class="character-name">
-            <span>{{getCharacterName(currentCharacterId)}}</span>
+            <span>{{characterName}}</span>
           </div>
           <div class="character-data-container">
             <div class="character-element-name">
-              <span>{{this.characterInformation.element}}</span>
+              <span>{{characterTrait}}</span>
             </div>
           <div class="character-data-divider">
               <span>|</span>
           </div>
           <div class="character-level">
-              <span>{{$t('homePage.level')}} {{this.characterInformation.level}}</span>
+              <span>{{$t('homePage.level')}} {{characterLvl}}</span>
           </div>
           <div class="character-data-divider">
               <span>|</span>
           </div>
           <div class="character-stamina">
-            <span>{{this.characterInformation.stamina}}/{{maxStamina}} {{$t('homePage.stamina')}}</span>
+            <span>{{characterStamina}}/{{maxStamina}} {{$t('homePage.stamina')}}</span>
           </div>
         </div>
         <div class="small-stamina-char"
-              :style="`--staminaReady: ${(this.characterInformation.stamina/maxStamina)*100}%;`">
+              :style="`--staminaReady: ${(characterStamina/maxStamina)*100}%;`">
         </div>
         <div class="pvp-stats-container">
-          <div class="pvp-wins-container">
-            <div class="pvp-wins-label">
-              <span>PVP {{$t('homePage.wins')}}</span>
-            </div>
-            <div class="pvp-wins-value">
-              <span>{{this.characterInformation.pvpWins.toLocaleString()}}</span>
-            </div>
-          </div>
           <div class="pvp-rank-container">
             <div class="pvp-rank-label">
               <span>PVP {{$t('homePage.rank')}}</span>
             </div>
             <div class="pvp-rank-value">
-              <span>{{this.characterInformation.rank.toLocaleString()}}</span>
+              <span>{{this.pvpRankingPoints || 0}}</span>
             </div>
           </div>
           <div class="pvp-power-container">
@@ -68,7 +60,7 @@
               <span>{{$t('homePage.power')}}</span>
             </div>
             <div class="pvp-power-value">
-              <span>{{this.characterInformation.power}}</span>
+              <span>{{totalCharacterPower}}</span>
             </div>
           </div>
         </div>
@@ -124,7 +116,7 @@
           <div class="raid-boss-participants-total-power-container">
             <div>
             <span class="raid-boss-label">{{$t('homePage.particapantsTotalPower')}}: </span>
-            <span class="raid-boss-power-value">{{this.raidData.totalPower}} ({{(this.raidData.totalPower/this.raidData.bossPower)*100}}%)</span>
+            <span class="raid-boss-power-value">{{this.raidData.totalPower}}</span>
             </div>
             <div class="participants-power"
               :style="`--power: ${(this.raidData.totalPower/this.raidData.bossPower)*100}%;`">
@@ -146,7 +138,7 @@
               <div class="raid-drops">
                  <img class="raid-img" src="../assets/trinkets/trinket1.png">
                 <img class="raid-img" src="../assets/junk/junk1.png">
-                <img class="raid-img" src="../assets/placeholder/sword-placeholder-0.png">
+                <img class="raid-img" src="../assets/placeholder/weapon3.png">
               </div>
             </div>
           </div>
@@ -188,11 +180,10 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
-import { characterFromContract as formatCharacter } from '../contract-models';
-import { duelResultFromContract as formatDuelResult } from '../contract-models';
-import {getBossArt} from '@/raid-boss-art-placeholder';
+import {getBossArt, getBossName} from '@/raid-boss-art-placeholder';
 import {traitNumberToName} from '@/contract-models';
 import { Nft } from '@/interfaces/Nft';
+import { CharacterTrait } from '@/interfaces';
 
 export default Vue.extend({
   data() {
@@ -219,22 +210,14 @@ export default Vue.extend({
         minutes: 0,
         seconds: 0
       },
-      characterInformation: {
-        name: '',
-        level: 0,
-        power: '',
-        rank: '',
-        element: '',
-        stamina: '',
-        pvpWins: 0
-      }
+      pvpRankingPoints: '',
     };
   },
 
   computed: {
     ...mapState(['characters', 'currentCharacterId', 'maxStamina', 'ownedCharacterIds', 'web3', 'ownedGarrisonCharacterIds',]),
-    ...mapGetters(['getCharacterName', 'currentCharacterStamina', 'getRaidState', 'ownCharacters',
-      'getCharacterPower', 'getCharacterRank', 'getCharacterElement', 'getCharacterPvpWins', 'ownGarrisonCharacters']),
+    ...mapGetters(['getCharacterName', 'getRaidState', 'ownCharacters','getCharacterPower', 'getCharacterRank',
+      'getCharacterElement', 'ownGarrisonCharacters', 'getCharacterStamina']),
     selectedCharacter(): Nft{
       return this.characters[this.currentCharacterId];
     },
@@ -244,38 +227,34 @@ export default Vue.extend({
     characterLvl(): number {
       return this.characters[this.currentCharacterId]?.level + 1 ?? 1;
     },
+    totalCharacterPower(): number {
+      return this.getCharacterPower(this.currentCharacterId);
+    },
+    characterTrait(): string {
+      const characterWithId = this.characters[this.currentCharacterId];
+      return CharacterTrait[characterWithId?.trait] ?? '';
+    },
+    characterStamina(): string {
+      return this.getCharacterStamina(this.currentCharacterId);
+    },
+    characterName(): string {
+      return this.getCharacterName(this.currentCharacterId);
+    },
   },
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
     ...mapActions([
       'getCharacter',
-      'getCharacterLevel',
-      'getPvpCoreContract',
       'getRankingPointsByCharacter',
-      'getRename',
-      'fetchCharacterStamina',
       'fetchRaidState'
     ]),
 
     getBossArt,
     traitNumberToName,
-    getBossName() {
-      const raidBossNames = [
-        'Fudbringer',
-        'HODL Lord',
-        'Skill Eater',
-        'Chain Congester',
-        'Swap Guardian',
-        'Blade Hoarder',
-        'Centralizer',
-        'Exchange Tormentor',
-        'Eater of Stakes',
-      ];
-
-      return raidBossNames[+this.raidData.raidIndex % raidBossNames.length];
+    getBossName(): string {
+      return getBossName(+this.raidData.raidIndex);
     },
-
     getTimeRemaining(){
       setInterval(() => {
         const eventTime = this.raidData.expectedFinishTime.getTime();
@@ -291,41 +270,11 @@ export default Vue.extend({
       }, 1000);
     },
 
-    async fetchDashboardDetails(characterId: string|number) {
-      this.characterInformation.level = Number(await this.getCharacterLevel(characterId)) + 1;
-
-      this.characterInformation.power = await this.getCharacterPower(characterId);
-
-      this.characterInformation.rank = await this.getRankingPointsByCharacter(characterId);
-
-      this.characterInformation.element = formatCharacter(characterId, await this.getCharacter(characterId)).traitName;
-
-      await this.fetchCharacterStamina(characterId);
-
-      this.characterInformation.stamina = this.currentCharacterStamina;
-
-      const fromBlock = Math.max(await this.web3.eth.getBlockNumber() - 1800, 0);
-
-      const previousDuels = await (await this.getPvpCoreContract()).getPastEvents('DuelFinished', {
-        filter: {attacker: characterId},
-        toBlock: 'latest',
-        fromBlock,
-      });
-
-      previousDuels.push({
-        attackerId: '1',
-        defenderId: characterId,
-        timestamp: '',
-        attackerRoll: '100',
-        defenderRoll: '1000',
-        attackerWon: true,
-        bonusRank: '0'
-      });
-
-      this.duelHistory = previousDuels.map((duel: [string, string, string, string, string, boolean, string]) => {
-        return formatDuelResult(duel);
-      });
-
+    async fetchPvpDetails(characterId: string|number) {
+      this.pvpRankingPoints = await this.getRankingPointsByCharacter(characterId);
+      if(this.pvpRankingPoints  === '0'){
+        this.pvpRankingPoints = '-';
+      }
     },
     async processRaidData() {
       const raidData = this.getRaidState;
@@ -356,25 +305,19 @@ export default Vue.extend({
       await refreshRaidData();
     }, 3000);
 
-    if(this.currentCharacterId === null){
-      this.setCurrentCharacter(this.ownedCharacterIds[0]);
-      this.fetchDashboardDetails(this.ownedCharacterIds[0]);
-    }
-
     Promise.all([
-      await this.fetchDashboardDetails(this.currentCharacterId),
+      await this.fetchPvpDetails(this.currentCharacterId),
       await this.fetchRaidState(),
       await this.processRaidData()
     ]);
   },
   watch: {
     currentCharacterId(newId: string|number){
-      this.fetchDashboardDetails(newId);
+      this.fetchPvpDetails(newId);
+      if(this.currentCharacterId === null){
+        this.setCurrentCharacter(this.ownedCharacterIds[0]);
+      }
     },
-    haveCharacters(){
-      this.setCurrentCharacter(this.ownedCharacterIds[0]);
-      this.fetchDashboardDetails(this.ownedCharacterIds[0]);
-    }
   }
 });
 </script>
@@ -385,7 +328,7 @@ export default Vue.extend({
   flex-direction: column;
   height: 100%;
   z-index: 1;
-  overflow-x:hidden ;
+  overflow:hidden;
 }
 
 .dashboard-container > div:nth-child(2){
@@ -401,6 +344,7 @@ export default Vue.extend({
   height: 50%;
   width: 100%;
   z-index: 1;
+  border-bottom: 1px solid #404857;
 }
 
 .noChar{
@@ -456,7 +400,7 @@ export default Vue.extend({
   flex-direction: row;
   background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/raid-bg.png");
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 110%;
   width: 65%;
   height: 100%;
   border-radius: 10px;
@@ -470,7 +414,7 @@ export default Vue.extend({
   align-items: left;
   background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/arena-bg.png");
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 110%;
   width: 100%;
   height: 100%;
   border-radius: 10px;
@@ -483,7 +427,7 @@ export default Vue.extend({
   align-items: left;
   background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/adventure-bg.png");
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 110%;
   width: 100%;
   height: 100%;
   border-radius: 10px;
@@ -558,10 +502,6 @@ export default Vue.extend({
   width: 25px;
   background: rgba(0, 0, 0, 0.076);
 }
-
-/* .character-details-container {
-  width: 30%;
-} */
 
 .character-data-container {
   display: flex;
@@ -709,14 +649,12 @@ export default Vue.extend({
 }
 
 .boss-image {
-    width: 30vw;
-    /* height: inherit; */
-    height: auto;
-    position: absolute;
-    bottom: -90px;
-    left: -90px;
+  width: 30vw;
+  height: auto;
+  position: absolute;
+  bottom: -90px;
+  left: -90px;
 }
-
 
 .raid-info-container {
   display: flex;
@@ -787,7 +725,8 @@ export default Vue.extend({
 .raid-boss-duration {
   display: flex;
   flex-direction: column;
-  width: 30%;
+  width: clamp(200px, 30%, 100%);
+  margin-right:20px;
 }
 
 .raid-boss-label {
@@ -838,8 +777,36 @@ export default Vue.extend({
   display: none;
 }
 
-@media screen and (max-width: 1280px)  {
+.boss-images{
+  display: none;
+}
 
+.pve-container:hover,
+.pvp-container:hover,
+.raid-container:hover{
+  animation: animateBG 3s ease;
+}
+
+@keyframes animateBG {
+  from{
+    background-size: 110%;
+  }
+  to{
+    background-size: 120%;
+  }
+}
+
+@media screen and (max-width: 1280px)  {
+  .raid-container,
+  .pvp-container,
+  .pve-container {
+    background-size: cover;
+  }
+  .pve-container:hover,
+  .pvp-container:hover,
+  .raid-container:hover{
+    animation: none;
+  }
   .overlay-bg {
     background-color: rgba(0, 0, 0, 0.425);
   }
@@ -849,6 +816,7 @@ export default Vue.extend({
     row-gap: 10px;
     width: 100%;
     margin-top: 50px;
+    height: 80%;
   }
 
   .raid-container {
@@ -857,10 +825,6 @@ export default Vue.extend({
   .pvp-and-pve-container {
     width: 100%;
   }
-}
-
-.boss-images{
-  display: none;
 }
 
 @media all and (max-width: 600px) {
@@ -961,7 +925,7 @@ export default Vue.extend({
   }
 
 
-   .overlay-bg {
+  .overlay-bg {
     background-color: rgba(0, 0, 0, 0.425);
   }
   .lower-body-container {
@@ -979,9 +943,9 @@ export default Vue.extend({
   .boss-images{
     display: inline;
     position: absolute;
-    margin-top: -140px;
-    right: -100px;
-    width: 65vw;
+    margin-top: 50px;
+    right: 0;
+    width: 40vw;
     z-index: 2;
     height: auto;
   }
@@ -994,26 +958,9 @@ export default Vue.extend({
   .none-desktop{
     display: inline-block;
   }
-}
-
-.pve-container:hover{
-  animation: animateBG 3s ease;
-}
-
-.pvp-container:hover{
-  animation: animateBG 3s ease;
-}
-
-.raid-container:hover{
-  animation: animateBG 3s ease;
-}
-
-@keyframes animateBG {
-  from{
-    background-size: 100%;
-  }
-  to{
-    background-size: 110%;
+  .raid-info-container > a{
+    display: flex;
+    justify-content: center;
   }
 }
 </style>

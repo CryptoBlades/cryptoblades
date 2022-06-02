@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import {merchandise, portal, pvp, quests, raid} from '@/feature-flags';
+import {portal, pvp, quests, raid} from '@/feature-flags';
 import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
 
@@ -66,22 +66,17 @@ export default Vue.extend({
       portal,
       pvp,
       quests,
-      merchandise,
     };
   },
 
   computed: {
     ...mapState(['defaultAccount']),
     ...mapGetters([
-      'getCurrentChainSupportsMerchandise',
       'getCurrentChainSupportsPvP',
       'getCurrentChainSupportsQuests',
       'getHasAdminAccess',
       'getHasMinterAccess',
     ]),
-    supportsMerchandise() {
-      return this.getCurrentChainSupportsMerchandise;
-    },
     supportsPvP() {
       return this.getCurrentChainSupportsPvP;
     },
@@ -130,6 +125,11 @@ a {
   font-family: 'Oswald', 'serif';
   font-size: clamp(.5rem, 1vw, 1rem);
   color: #ffffff;
+}
+
+.link-text > svg{
+  margin-top: -1px;
+  margin-left: 5px;
 }
 
 .play-to-earn-btn{
