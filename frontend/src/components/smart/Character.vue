@@ -115,8 +115,8 @@
           <option class="text-body" v-if="availableTraits.length === 0" value="">{{ $t('Character.noTraits') }}</option>
         </select>
         <div class="inputImage">
-          <img src="../../assets/elements/potion_05_te.png" />
-          <span class="main-font">{{availableTraits.length}}/1</span>
+          <img :src="require(`@/assets/elements/${targetTrait}_Potion.png`)" />
+          <span class="main-font">{{currentTraitTotal()}}</span>
         </div>
       </div>
       <button @click="changeCharacterTraitCall">Change</button>
@@ -364,7 +364,7 @@ export default Vue.extend({
       return availableTraits;
     },
     totalTraits(): number {
-      return this.haveChangeTraitFire + this.haveChangeTraitEarth + this.haveChangeTraitWater + this.haveChangeTraitLightning;
+      return +this.haveChangeTraitFire + +this.haveChangeTraitEarth + +this.haveChangeTraitWater + +this.haveChangeTraitLightning;
     },
     reputation(): number {
       return this.quest?.reputation ?? 0;
@@ -410,7 +410,7 @@ export default Vue.extend({
           availableSkins.push(this.haveCharacterCosmetics[i]);
         }
       }
-
+      console.log(this.characterCosmetics);
       return availableSkins;
     },
     characterLvl(): number {
@@ -451,6 +451,20 @@ export default Vue.extend({
       this.soulAmountToTransfer = 0;
       this.receiverAddress = '';
       (this.$refs['character-transfer-soul-modal'] as BModal).hide();
+    },
+    currentTraitTotal() {
+      switch(this.targetTrait){
+      case 'Fire':
+        return +this.haveChangeTraitFire;
+      case 'Earth':
+        return +this.haveChangeTraitEarth;
+      case 'Water':
+        return +this.haveChangeTraitWater;
+      case 'Lightning':
+        return +this.haveChangeTraitLightning;
+      default:
+        return 0;
+      }
     },
     handleMax(){
       this.soulAmountToTransfer = this.soulBalance;
@@ -579,6 +593,7 @@ export default Vue.extend({
   async mounted(){
     await this.refreshData();
     await this.fetchCharacterQuestData();
+    await this.loadConsumablesCount();
   },
 });
 </script>
