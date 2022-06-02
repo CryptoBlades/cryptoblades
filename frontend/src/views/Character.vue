@@ -38,13 +38,20 @@
         @mintCharacter="onMintCharacter"
       />
       <template v-if="activeTab === 'info' && havePlazaCharacters">
-         <character class="char-info" />
+        <div class="d-flex justify-content-end pr-5 pt-4 slippage-checkbox">
+          <b-checkbox v-if="ownCharacters.length === 4"  variant="primary"  v-model="mintSlippageApproved">
+            <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
+            <b-icon-question-circle class="ml-1 centered-icon" v-tooltip.bottom="$t('plaza.dynamicPricesDetails',
+              { decreaseAmount: mintPriceDecreasePerHour, increaseAmount: mintCharacterPriceIncrease, minimumPrice: mintCharacterMinPrice})"/>
+          </b-checkbox>
+        </div>
+        <character class="char-info" />
       </template>
       <template v-if="activeTab === 'garrison'">
         <div v-if="!soulCreationActive" class="row mt-3 z-index-1 char-info">
           <div class="col">
             <div>
-              <div class="d-flex flex-column flex-md-row justify-content-space-between">
+              <div class="d-flex flex-column flex-md-row justify-content-space-between garrisson-content">
                 <h1>{{$t('characters')}} ({{ ownedGarrisonCharacterIds.length }})</h1>
                 <div class="d-flex justify-content-flex-end ml-md-auto">
                   <b-button
@@ -55,24 +62,6 @@
                     @click="onClaimGarrisonXp">
                     {{isClaimingXp ? `${$t('plaza.claiming')}` : $t('plaza.claimXp')}}
                   </b-button>
-                  <b-button
-                    v-if="burningEnabled"
-                    :disabled="!haveCharacters"
-                    variant="primary"
-                    class="ml-3 gtag-link-others"
-                    @click="toggleSoulCreation"
-                    v-tooltip="$t('plaza.recruitNew')">
-                    {{$t('plaza.burn')}}
-                  </b-button>
-                  <b-checkbox
-                    v-if="ownCharacters.length === 4"
-                    variant="primary"
-                    class="mx-3 my-auto"
-                    v-model="mintSlippageApproved">
-                    <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
-                    <b-icon-question-circle class="ml-1 centered-icon" v-tooltip.bottom="$t('plaza.dynamicPricesDetails',
-                      { decreaseAmount: mintPriceDecreasePerHour, increaseAmount: mintCharacterPriceIncrease, minimumPrice: mintCharacterMinPrice})"/>
-                  </b-checkbox>
                 </div>
               </div>
               <character-list
@@ -87,47 +76,46 @@
       <template v-if="activeTab === 'burn'">
         <!-- Character Burn -->
         <div class="pt-5 char-info">
-          <!-- <div class="d-flex justify-content-space-between mb-3">
-            <div class="d-flex justify-content-flex-end ml-auto">
-              <b-button
-                variant="primary"
-                class="ml-3 garrison-buttons"
-                @click="showBurnConfirmation"
-                v-tooltip="$t('plaza.burnSelected')"
-                :disabled="burnCharacterIds.length === 0 || powerLimitExceeded || (burnOption === 1 && !targetCharacterId) || !canBurn() || isBurnInProgress">
-                {{isBurnInProgress ? `${$t('plaza.burning')}` : `${$t('plaza.burn')}: ${this.burnCharacterIds.length} ${$t('characters')}`}}<br>
-                ({{burnCost }} SKILL)
-              </b-button>
-              <b-button
-                variant="primary"
-                class="ml-3 gtag-link-others garrison-buttons"
-                @click="toggleSoulCreation"
-                v-tooltip="$t('plaza.cancelBurning')">
-                {{$t('plaza.cancelBurning')}}
-              </b-button>
-            </div>
-          </div> -->
           <div>
             <div class="col-md-12">
               <div class="row mobile-flip">
-                <div class="col-md-4 character-container" ></div>
-                <div class="col-md-8 character-container" >
-                  <character-list :showFilters="true" :showGivenCharacterIds="true" :characterIds="remainingCharactersIds" @input="addBurnCharacter"/>
+                <div class="col-md-4 character-container" >
+                  <div class="magic-circle">
+                    <div class="spinning-circle"></div>
+                    <div class="soul-container">
+                      <div class="soul-img" :class="glowImage ? 'glowUp' : ''"></div>
+                      <p>+{{totalSoul.toLocaleString()}}</p>
+                    </div>
+                  </div>
+                  <div class="btn-container">
+                      <div class="ml-3 mt-4 mt-md-0 ml-md-auto recruit-btn text-uppercase"
+                      :style="
+                        burnCharacterIds.length === 0 ||
+                        powerLimitExceeded ||
+                        (burnOption === 1 && !targetCharacterId) ||
+                        !canBurn() ||
+                        isBurnInProgress ? 'opacity: 0.5' : ''"
+                      v-tooltip="$t('plaza.burnSelected')"
+                      @click="showBurnConfirmation">
+                        <span v-if="isBurnInProgress" class="gtag-link-others custom-recruit-text"> {{$t('plaza.burning')}}</span>
+                        <span v-else class="gtag-link-others custom-recruit-text"> <p>{{$t('plaza.burn')}}</p>  {{burnCost }} SKILL</span>
+                      </div>
+                  </div>
+                  <div class="scroll" v-if="isMobile()">
+                    <h5>{{$t('Character.scrollDown')}}</h5>
+                    <div>
+                      <p> &#8811;</p>
+                    </div>
+                  </div>
                 </div>
-                <!-- <div class="col-md-4 character-container" >
-                  <h1 class="text-center">{{$t('plaza.charactersToBurn')}}</h1>
-                  <h1 class="text-center mt-3 mb-4">
-                    <b-button
-                      class="mt-2 mb-1"
-                      variant="primary"
-                      @click="clearAllBurn()"
-                      v-tooltip="$t('blacksmith.clearAll')"
-                      :disabled="burnCharacterIds === []">
-                      {{$t('blacksmith.clearAll')}}
-                    </b-button>
-                  </h1>
-                  <character-list class="mt-4" :showGivenCharacterIds="true" :characterIds="burnCharacterIds" @input="removeBurnCharacter"/>
-                </div> -->
+                <div class="col-md-8 character-container" >
+                  <character-list
+                  :showFilters="true"
+                  :showGivenCharacterIds="true"
+                  :toBurn="burnCharacterIds"
+                  :characterIds="remainingCharactersIds"
+                  @input="addBurnCharacter"/>
+                </div>
               </div>
             </div>
           </div>
@@ -167,6 +155,8 @@ import BigButton from '@/components/BigButton.vue';
 import CharacterList from '@/components/smart/CharacterList.vue';
 import CharacterNav from '@/components/CharacterNav.vue';
 import Character from '@/components/smart/Character.vue';
+import Events from '@/events';
+
 
 import { fromWeiEther, toBN } from '../utils/common';
 import {
@@ -218,6 +208,8 @@ interface Data {
   burnOption: number;
   isBurnInProgress: boolean;
   isClaimingXp: boolean;
+  totalSoul: number;
+  glowImage: boolean;
 }
 
 export default Vue.extend({
@@ -246,6 +238,8 @@ export default Vue.extend({
       burnOption: 0,
       isBurnInProgress: false,
       isClaimingXp: false,
+      totalSoul: 0,
+      glowImage: false
     };
   },
   computed: {
@@ -331,6 +325,10 @@ export default Vue.extend({
         this.setCurrentCharacter(this.ownedCharacterIds[0]);
       }
 
+      if(this.activeTab === 'garrison'){
+        this.toggleSoulCreation();
+      }
+
       if(this.activeTab === 'burn'){
         this.toggleSoulCreation();
       }
@@ -358,8 +356,14 @@ export default Vue.extend({
         (this as any).$dialog.notify.error(i18n.t('plaza.busyInArena'));
         return;
       }
-      this.burnCharacterIds.push(id.toString());
-      this.remainingCharactersIds = this.remainingCharactersIds.filter(val => !this.burnCharacterIds.includes(val.toString()));
+
+      if(!this.burnCharacterIds.includes(id.toString())){
+        this.burnCharacterIds.push(id.toString());
+        this.totalSoul += this.getCharacterPower(id)/10;
+      }else{
+        this.burnCharacterIds = this.burnCharacterIds.filter(val => !val.includes(id.toString()));
+        this.totalSoul -= this.getCharacterPower(id)/10;
+      }
       await this.updateBurnCost();
     },
     async removeBurnCharacter(id: number) {
@@ -373,7 +377,10 @@ export default Vue.extend({
       return balance.isGreaterThanOrEqualTo(cost);
     },
     showBurnConfirmation() {
-      (this.$refs['burn-confirmation-modal'] as BModal).show();
+      if(!(this.burnCharacterIds.length === 0 ||  this.powerLimitExceeded || (this.burnOption === 1 && !this.targetCharacterId)
+      || !this.canBurn() || this.isBurnInProgress)){
+        (this.$refs['burn-confirmation-modal'] as BModal).show();
+      }
     },
     async toggleSoulCreation() {
       this.soulCreationActive = !this.soulCreationActive;
@@ -385,12 +392,25 @@ export default Vue.extend({
       }
       this.isUpgrading = false;
     },
+    async selectAll(){
+      await this.computeSoul();
+      await this.updateBurnCost();
+    },
+    computeSoul(){
+      this.totalSoul = 0;
+      this.remainingCharactersIds.forEach(id=> {
+        this.burnCharacterIds.push(id.toString());
+        console.log('ID'+ id + ':: '+this.getCharacterPower(id)/10);
+        this.totalSoul += this.getCharacterPower(id)/10;
+      });
+    },
     clearAllBurn(){
       this.burnCharacterIds = [];
       this.remainingCharactersIds = (this.ownCharacters.map((x: { id: string; }) => x.id.toString())
         .concat(this.ownedGarrisonCharacterIds) as string[])
         .filter(x => x.toString() !== this.targetCharacterId);
       this.burnCost = 0;
+      this.totalSoul = 0;
     },
     setMaxSoulAmount() {
       if (this.isTransferring) {
@@ -449,10 +469,22 @@ export default Vue.extend({
   },
   async mounted(){
     this.checkStorage();
+    Events.$on('select-all', ()=>{
+      this.selectAll();
+    });
+    Events.$on('deselect-all', ()=>{
+      this.clearAllBurn();
+    });
   },
   watch: {
     async ownedCharacterIds(){
       await this.updateMintCharacterFee();
+    },
+    totalSoul(){
+      this.glowImage = true;
+      setTimeout(() => {
+        this.glowImage = false;
+      }, 500);
     }
   },
   async created(){
@@ -540,6 +572,127 @@ export default Vue.extend({
   transform: scale(0.97);
 }
 
+.spinning-circle{
+  content: url('../assets/magic-defender.png');
+  position: absolute;
+  z-index: 1;
+  width: 90%;
+  height: auto;
+  animation-name: spin;
+  animation-duration: 30s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes spin {
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(360deg);
+    }
+}
+
+.soul-container{
+  z-index: 2;
+}
+
+.magic-circle{
+  background-position: center;
+  background-size:contain;
+  background-repeat: no-repeat;
+  background-color: rgba(255, 255, 255, 0);
+  height: auto;
+  padding: 10em ;
+  width: 23vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.magic-circle > .soul-container{
+  background-color: #0F0F0F;
+  border: 1px solid #3c3c3c;
+  height: 100%;
+  width: 100%;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding:0.7em 0px;
+  flex-direction: column;
+}
+
+
+.magic-circle >.soul-container > p{
+  font-family: Roboto;
+  font-size: 1em;
+  color: #fff;
+  margin-bottom: 0px;
+}
+
+.soul-img{
+  content: url('../assets/soul-icon.png');
+  width: 50px;
+  height: auto;
+  -webkit-filter: drop-shadow(0px 0px 7px rgba(255, 255, 255, 0.521));
+}
+
+.glowUp{
+  -webkit-filter: drop-shadow(0px 0px 15px rgb(255, 255, 255));
+  transition: all 0.3s ease;
+}
+
+
+.recruit-btn{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin-right: 15px;
+  align-items: center;
+  vertical-align: middle;
+  justify-content: center;
+  background-image: url('../assets/buttonOutline.svg');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  object-fit: fill;
+  padding: 10px 40px 10px 40px;
+  border: none;
+  font-family: Oswald;
+  color: #fff;
+  font-size: 17px;
+  margin: auto;
+  margin-right: -10px;
+  cursor: pointer;
+}
+
+.btn-container{
+  padding-right: 2em;
+  margin-top: 3em;
+}
+
+.btn-container > div{
+  text-align: center;
+}
+
+.btn-container > div > span > p {
+  margin: 0px;
+  font-family: Oswald;
+  color: #fff;
+  font-size: 1.3em;
+}
+
+.btn-container > div > span{
+  margin: 0px;
+  font-family: Roboto;
+  color: #F0E2B6;
+  font-size: 1;
+}
+
+
+
 .navbar-staking {
   display: flex;
   border: 1px solid #3c3c3c;
@@ -550,6 +703,7 @@ export default Vue.extend({
 
 .char-content{
    div.menu-nav{
+    height: 60px;
     padding-left: 50px;
     padding-right: 50px;
     padding-top: 10px;
@@ -563,6 +717,14 @@ export default Vue.extend({
   padding: 50px 40px;
 }
 
+.garrisson-content > h1{
+  font-family: Trajan;
+  color: #9e8a57;
+  margin-top: -20px;
+  font-size: 2em;
+  margin-bottom: 1em;
+}
+
 
 @media (max-width: 600px) {
   .char-content{
@@ -570,6 +732,87 @@ export default Vue.extend({
   }
   .char-info{
     padding: 50px 40px;
+  }
+  .magic-circle{
+    padding: 1em;
+    width: 100%;
+    margin-top: 2em;
+  }
+
+  .garrisson-content > h1{
+    font-family: Trajan;
+    color: #9e8a57;
+    font-size: 1.5em;
+    margin-top: -50px;
+    margin-bottom: 1em;
+  }
+
+  .slippage-checkbox{
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .spinning-circle{
+    width: 110%;
+  }
+
+  .magic-circle > .soul-container{
+    width: 70%;
+    .soul-img{
+      width: 40px;
+    }
+  }
+
+  .scroll > h5{
+    font-family: Roboto;
+    color: rgba(255, 255, 255, 0.521);
+    font-size: 0.9em;
+    text-align: center;
+    font-weight: 400;
+  }
+
+  .scroll > div {
+    transform: rotate(90deg);
+    animation: upDown 1s infinite alternate-reverse;
+    text-align: center;
+    p{
+      font-size: 2em;
+    }
+  }
+
+
+  @keyframes upDown {
+    from{
+      margin-top: 0px;
+    }
+    to{
+      margin-top: 20px;
+    }
+  }
+
+  .btn-container{
+    padding-right: 0px;
+    margin-top: 5em;
+    margin-bottom: 2em;
+  }
+
+  .btn-container > div {
+    padding: 7px 20px 7px 20px;
+    padding-right: 20px;
+    span{
+      font-size: 0.8em;
+    }
+  }
+
+  .char-content{
+    div.menu-nav{
+      padding-left: 0px;
+      padding-right: 0px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #424A59;
+      background-color:#1d1d1d;
+    }
   }
 }
 </style>

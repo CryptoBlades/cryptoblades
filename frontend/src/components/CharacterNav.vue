@@ -5,8 +5,8 @@
           <span id="plaza"></span> {{$t('Character.info').toUpperCase()}}</span>
           <span :class="activeTab === 'garrison' ? 'active' : ''" @click="$emit('toggle', 'garrison')">
             <span id="garisson"></span>{{$t('Character.garrison').toUpperCase()}}</span>
-          <span :class="activeTab === 'garrison' ? 'active' : ''" @click="$emit('toggle', 'burn')">
-            <span id="burn"></span>BURN</span>
+          <span :class="activeTab === 'burn' ? 'active' : ''" @click="$emit('toggle', 'burn')">
+            <span id="burn"></span>{{$t('Character.burn').toUpperCase()}}</span>
         </div>
         <div role="button" class="nav-char none-mobile" :class="['d-flex gap-3 align-items-center link',
            (activeTab === 'info' && havePlazaCharacters) ? 'active' : '']" @click="$emit('toggle', 'info')">
@@ -39,11 +39,10 @@
             <div class="img-frame"></div>
             <img src="../assets/soul.png"/>
           </div>
-          <span class="main-font text-white fs-5">Character Burn</span>
+          <span class="main-font text-white fs-5">{{$t('Character.characterBurn')}}</span>
         </div>
         <div class="w-100 d-block d-md-none"></div>
-        <div
-            v-if="ownCharacters.length <= 4 && activeTab === 'info'"
+        <div v-if="ownCharacters.length <= 4 && activeTab === 'info'"
             class="ml-3 mt-4 mt-md-0 ml-md-auto recruit-btn text-uppercase custom-recruit-text-size mint-character"
             @click="$emit('mintCharacter')"
             v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
@@ -68,9 +67,6 @@ import Vue from 'vue';
 
 
 export default Vue.extend({
-  // data(){
-  //   return{activeTab: 'info'};
-  // },
   props: {
     soulBalance: {
       type: Number,
@@ -105,6 +101,7 @@ custom-recruit-text-size{
 .custom-recruit-text{
   color: #e9c97a;
 }
+
 .recruit-btn{
   display: flex;
   flex-direction: column;
@@ -255,7 +252,7 @@ custom-recruit-text-size{
    .mobile-menu{
     display: flex;
     justify-content: space-evenly;
-    padding: 10px 0px;
+    padding: 0px 0px 10px 0px;
     align-items: center;
     background-color: rgba(20, 20, 20);
     border-bottom: 1px solid rgba(255, 255, 255, 0.418);
@@ -270,7 +267,40 @@ custom-recruit-text-size{
   }
 
   .recruit-btn{
-    background-image: url('../assets/btn-long.svg');
+    background-image: url('../assets/recruit-btn.svg');
+  }
+
+  .recruit-btn{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin-right: 15px;
+    align-items: center;
+    vertical-align: middle;
+    justify-content: center;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    object-fit: fill;
+    padding: 7px 40px 7px 40px;
+    border: none;
+    font-family: Oswald;
+    color: #fff;
+    font-size: 17px;
+    margin: auto;
+    margin-right: -10px;
+    cursor: pointer;
+  }
+
+  .recruit-btn > span {
+    font-size: 0.8em;
+    span{
+      font-size: 0.9em;
+    }
+  }
+
+  .char-content div.menu-nav{
+    height: 100% !important;
   }
 
   .mobile-menu > span.active{
@@ -278,8 +308,15 @@ custom-recruit-text-size{
     color: #fff;
     display: flex;
     align-items: center;
+    font-size: 0.8em;
   }
 
+  .mobile-menu > span{
+    font-family: Trajan;
+    display: flex;
+    align-items: center;
+    font-size: 0.8em;
+  }
   .none-mobile{
     display: none;
   }

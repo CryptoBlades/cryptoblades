@@ -65,11 +65,15 @@
     "element": "Element",
     "reputation": "Reputation",
     "exp": "EXP",
+    "burn": "BURN",
     "expNeeded": "Exp needed to level",
     "stamina": "Stamina",
     "loading": "Loading...",
     "souls": "Soul Power",
     "soul": "Soul",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "characterBurn": "Character Burn",
     "changeTrait":"Change Trait",
     "changeTraitText": "Change your character's element.",
     "changeName": "Change Name",
@@ -77,6 +81,8 @@
     "garrison": "Garrison",
     "info": "Info",
     "owned": "Owned",
+    "filterCharacter": "Filter Character",
+    "characterLevel": "Character Level",
     "sendToGarrison": "Send to Garrison",
     "sendToGarrisonText": "You will not be able to use the character when in garrison.",
     "transfer": "Transfer",
@@ -86,7 +92,8 @@
     "max": "Max",
     "upgrade": "Upgrade",
     "skins": "Skins",
-    "options": "Options"
+    "options": "Options",
+    "scrollDown": "Scroll Down and Select a Character"
   },
   "characterModal": {
     "close": "Tap Anywhere To Close"

@@ -5,15 +5,7 @@
       <div class="character-id">
         # {{ character.id }}
       </div>
-      <!-- <div class="character-power">
-        {{totalCharacterPower}} PWR
-        <b-icon-question-circle v-if="burningManager" class="centered-icon" scale="0.8"
-          v-tooltip.bottom="$t('CharacterArt.powerTooltip', {
-            basePower: baseCharacterPower,
-            bonusPower: totalCharacterPower - baseCharacterPower,
-            maxPower: 3 * baseCharacterPower
-          })"/>
-      </div> -->
+      <span v-if="isSelected" class="rounded-check"></span>
       <div class="char-bg" :style="{
         'background-image': 'url(' + getCharacterArt(character) + ')',
       }">
@@ -36,13 +28,17 @@
         <div>
           <div>
             <span class="pow"></span>
-            <span class="lbl-title">Power</span>
+            <span class="lbl-title"  v-tooltip.bottom="$t('CharacterArt.powerTooltip', {
+              basePower: baseCharacterPower,
+              bonusPower: totalCharacterPower - baseCharacterPower,
+              maxPower: 3 * baseCharacterPower
+            })">Power</span>
             <div class="stamina-bar">
               <div class="stamina" :style="'width:'+(totalCharacterPower/totalCharacterPower)*100+'%'"></div>
             </div>
             <span class="lbl-value">{{totalCharacterPower.toLocaleString()}}</span>
           </div>
-          <div>
+          <div v-tooltip.bottom="` ${$t('CharacterArt.claimableXP')} ${this.getCharacterUnclaimedXp(character.id)}`">
             <span class="exp"></span>
             <span class="lbl-title">Exp</span>
             <div class="stamina-bar">
@@ -50,7 +46,7 @@
             </div>
             <span class="lbl-value">{{RequiredXp(character.level).toLocaleString()}}</span>
           </div>
-          <div>
+          <div v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
             <span class="stam"></span>
             <span class="lbl-title">Stamina</span>
             <div class="stamina-bar">
@@ -61,32 +57,6 @@
         </div>
       </div>
     </div>
-
-    <!-- <div class="name-lvl-container">
-      <div class="name black-outline" v-if="!portrait">{{ getCleanCharacterName(character.id) }} </div>
-      <div v-if="!portrait">Lv.<span class="white">{{ character.level + 1 }}</span></div>
-    </div>
-    <div class="score-id-container" :class="hideIdContainer ? 'visibility: hidden' : undefined">
-      <div class="black-outline" v-if="!portrait">{{$t('CharacterArt.id')}} <span class="white">{{ character.id }}</span></div>
-      <div class="black-outline" v-if="!portrait">
-        {{$t('CharacterArt.score')}} <span class="white">{{ heroScore.toLocaleString() }}</span>
-        <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="$t('CharacterArt.scoreTooltip')"/>
-      </div>
-    </div>
-
-    <div v-if="!portrait && isGarrison" class="small-stamina-char"
-      :style="`--staminaReady: ${(characterStamina/maxStamina)*100}%;`"
-      v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
-      <div class="stamina-text black-outline">{{$t('CharacterArt.staminaShort')}} {{ characterStamina }} / 200</div>
-    </div>
-
-    <div class="xp" v-if="!portrait" :class="hideXpBar ? 'visibility: hidden' : undefined">
-      <b-progress :max="RequiredXp(character.level)" variant="success"
-      v-tooltip.bottom="` ${$t('CharacterArt.claimableXP')} ${this.getCharacterUnclaimedXp(character.id)}`">
-        <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} {{$t('CharacterArt.xp')}}</strong>
-        <b-progress-bar :value="character.xp || 0"></b-progress-bar>
-      </b-progress>
-    </div> -->
   </div>
 </template>
 
@@ -105,7 +75,7 @@ import { mapGetters, mapState } from 'vuex';
 import { getCleanName } from '../rename-censor';
 import { CharacterPower } from '@/interfaces';
 import { burningManager } from './../feature-flags';
-//import SmallButton from './SmallButton.vue';
+
 
 const headCount = 13;
 const armsCount = 45;
@@ -123,10 +93,7 @@ function transformModel(model) {
 }
 
 export default {
-  props: ['character', 'portrait', 'isGarrison', 'hideXpBar', 'hideIdContainer'],
-  components: {
-    //SmallButton,
-  },
+  props: ['character', 'portrait', 'isGarrison', 'hideXpBar', 'hideIdContainer', 'isSelected'],
   watch: {
     character() {
       this.clearScene();
@@ -691,6 +658,19 @@ export default {
   display: flex;
   flex-direction: column;
 }
+
+
+
+.rounded-check{
+  content: url('../assets/check-round.svg');
+  height: 1.5em;
+  width: 1.5em;
+  z-index: 3;
+  right: 20px;
+  top: -5px;
+  position: absolute;
+}
+
 
 .stats-info > div:nth-child(1) >span:nth-child(2){
   color: #fff;

@@ -1,34 +1,43 @@
 <template>
-  <div>
-    <div class="filters row mt-2 pl-2" v-if="showFilters" @change="saveFilters()">
-      <div class="col-sm-5 col-md-5 col-lg-3 mb-3">
-        <strong>{{$t('characterList.level')}}</strong>
-        <select class="form-control" v-model="levelFilter">
-          <option v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
-            {{ x ? `${x} - ${x + 9}` : $t('characterList.sorts.any') }}
-          </option>
-        </select>
+  <div class="character-list-container">
+    <div class="filters row mt-2 pl-2" v-if="showFilters && !isMobile()" @change="saveFilters()">
+      <div>
+        <div class="select-wrapper-no" :data-content="$t('characterList.level')">
+          <select class="form-control" v-model="levelFilter">
+            <option v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
+              {{ x ? `${x} - ${x + 9}` : $t('characterList.sorts.any') }}
+            </option>
+          </select>
+        </div>
+        <div class="select-wrapper-element" :data-content="$t('characterList.element')">
+          <select class="form-control" v-model="elementFilter">
+            <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+            :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('characterList.sorts.any') }}</option>
+          </select>
+        </div>
       </div>
 
-      <div class="col-sm-5 col-md-5 col-lg-3 mb-3">
-        <strong>{{$t('characterList.element')}}</strong>
-        <select class="form-control" v-model="elementFilter">
-          <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
-          :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('characterList.sorts.any') }}</option>
-        </select>
-      </div>
-
-      <b-button variant="primary" class="clear-filters-button mb-3" @click="clearFilters" >
+      <div>
+        <button class="clear-filters-button" @click="selectAll">
+          <span>
+            {{allSelected ? $t('Character.deselectAll') : $t('Character.selectAll')}}
+          </span>
+        </button>
+        <button class="clear-filters-button" @click="clearFilters" >
           <span>
             {{$t('characterList.clearFilters')}}
           </span>
-        </b-button>
+        </button>
+      </div>
+    </div>
+    <div class="mobile-filter" v-if="showFilters && isMobile()" @click="openFilter">
+      <span class="filter"></span>
     </div>
 
     <ul class="character-list">
       <li
         class="character"
-        :style="'border: 1px solid '+generateColor(c.traitName)"
+        :style="toBurn.includes(c.id.toString()) ? 'border: 1px solid #EDCD90' : 'border: 1px solid '+generateColor(c.traitName)"
         :class="[value === c.id ? 'selected' : '', showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(c.id) : '']"
         v-for="c in filteredCharacters"
         :key="c.id"
@@ -45,10 +54,51 @@
         <div class="art" >
           <div class="animation" />
           <CharacterArt :class="[showCosmetics ? 'character-cosmetic-applied-' + getCharacterCosmetic(c.id) : '']"
-            :character="c" :isGarrison="isGarrison"/>
+            :character="c" :isGarrison="isGarrison" :isSelected="toBurn.includes(c.id.toString())"/>
         </div>
       </li>
     </ul>
+
+    <b-modal class="centered-modal" ref="filter-modal" hide-footer hide-header>
+      <div class="row">
+        <div class="col-sm-12 filter-title">
+          <h4>{{$t('Character.filterCharacter')}}</h4>
+        </div>
+        <div class="col-sm-6 mt-1 mb-2">
+          <div class="select-wrapper-no">
+            <span>{{$t('Character.characterLevel')}}}</span>
+            <select class="form-control mt-2" v-model="levelFilter">
+              <option v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
+                {{ x ? `${x} - ${x + 9}` : $t('characterList.sorts.any') }}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="col-sm-6 mt-3 mb-2">
+          <div class="select-wrapper-element">
+            <span>{{$t('Character.element')}}}</span>
+            <select class="form-control mt-2" v-model="elementFilter">
+              <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+              :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('characterList.sorts.any') }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-sm-6 mt-3 mb-2">
+          <button class="clear-filters-button" @click="selectAll">
+            <span>
+              {{allSelected ? $t('Character.deselectAll') : $t('Character.selectAll')}}
+            </span>
+          </button>
+        </div>
+        <div class="col-sm-6 mt-1 mb-2">
+          <button class="clear-filters-button" @click="clearFilters" >
+            <span>
+              {{$t('characterList.clearFilters')}}
+            </span>
+          </button>
+        </div>
+      </div>
+    </b-modal>
 
     <b-modal class="centered-modal" ref="character-rename-modal"
       @ok="renameCharacterCall">
@@ -132,6 +182,10 @@ export default {
       type: Boolean,
       default: false
     },
+    toBurn:{
+      type: Array,
+      default() { return []; }
+    },
     showNftOptions: {
       type: Boolean,
       default: false
@@ -139,7 +193,7 @@ export default {
     isGarrison: {
       type: Boolean,
       default: false
-    }
+    },
   },
 
   data() {
@@ -161,6 +215,7 @@ export default {
       haveCharacterCosmetics: [0],
       targetSkin: '',
       showCosmetics: true,
+      allSelected: false,
       characterCosmeticsNames: [
         'Character Grayscale','Character Contrast',
         'Character Sepia','Character Invert',
@@ -284,6 +339,15 @@ export default {
       sessionStorage.setItem('character-elementfilter', this.elementFilter);
 
       this.$emit('character-filters-changed');
+    },
+
+    selectAll(){
+      this.allSelected = !this.allSelected;
+      if(this.allSelected) Events.$emit('select-all');
+      else Events.$emit('deselect-all');
+    },
+    openFilter(){
+      (this.$refs['filter-modal']).show();
     },
 
     clearFilters() {
@@ -462,9 +526,8 @@ export default {
 <style scoped>
 @import '../../styles/character-cosmetics.css';
 .filters {
-   justify-content: center;
+   justify-content: space-between;
    width: 100%;
-   max-width: 900px;
    margin: 0 auto;
    align-content: center;
    border-bottom: 0.2px solid rgba(102, 80, 80, 0.1);
@@ -479,6 +542,89 @@ export default {
   padding: 0.5em;
   grid-template-columns: repeat(auto-fit, 16em);
   gap: 2.5em;
+  padding-left: 2em;
+  padding-right: 2em;
+  justify-content: center;
+  padding-bottom: 2em;
+}
+
+.character-list-container{
+  border: 1px solid #333;
+  border-radius: 10px;
+}
+
+.character-list-container > .filters{
+  border-bottom: 1px solid #333;
+}
+
+.character-list-container > .row.filters{
+  max-width: 100%;
+}
+
+.filters > div {
+  display: flex;
+  gap: 2em;
+  padding:1em;
+}
+
+.filters > div:nth-child(2){
+  gap: 0em;
+  justify-content: flex-end;
+}
+
+.select-wrapper-no > select.form-control,
+.select-wrapper-element > select.form-control{
+  background-color: rgba(0, 0, 0, 0);
+  width: 200px;
+  font-family: Roboto;
+  color: rgb(128, 128, 128);
+}
+
+.select-wrapper-no:after {
+  content: attr(data-content);
+  width: 0;
+  height: 0;
+  border-top: 6px solid #666;
+  position: absolute;
+  left: 55px;
+  top: 27px;
+  font-family: Roboto;
+  color: rgba(255, 255, 255, 0.541);
+}
+
+.select-wrapper-element:after {
+  content: attr(data-content);
+  width: 0;
+  height: 0;
+  border-top: 6px solid #666;
+  position: absolute;
+  margin-left: 10px;
+  top: 27px;
+  font-family: Roboto;
+  color: rgba(255, 255, 255, 0.541);
+}
+
+.select-wrapper-no > select.form-control option,
+.select-wrapper-element > select.form-control option{
+  background-color: #171617;
+  padding: 1px;
+  color: #fff;
+  font-family: Roboto;
+  text-align: right;
+}
+
+.mobile-filter{
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+
+.mobile-filter > span.filter{
+  content: url('../../assets/filter-circle.svg');
+  height: 2em;
+  width: 2em;
+  margin-top: 1em;
 }
 
 .character {
@@ -564,6 +710,18 @@ export default {
   flex-direction: row;
   align-self: flex-end;
   margin:0 15px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border:1px solid #EDCD90;
+  background-color: rgba(255, 255, 255, 0);
+  font-family: Roboto;
+  color: #fff;
+  padding: 5px 20px;
+}
+
+.clear-filters-button:hover{
+  background: rgba(0, 0, 0, 0) !important;
+  border: 1px solid #fff !important;
 }
 
 @media (max-width: 576px) {
@@ -573,10 +731,37 @@ export default {
     align-items: center;
     justify-content: center;
   }
+
   .clear-filters-button {
     width: 100%;
     text-align: center;
     justify-content: center;
+    margin: 0px;
+    padding: 8px 20px;
+  }
+
+  .clear-filters-button > span{
+    font-family: Roboto;
+  }
+
+  .select-wrapper-no > select.form-control, .select-wrapper-element > select.form-control {
+    background-color: rgba(0, 0, 0, 0);
+    width: 100%;
+    font-family: Roboto;
+    color: rgb(128, 128, 128);
+  }
+
+  .filter-title > h4{
+    font-family: Trajan;
+    color: #EDCD90;
+    text-align: center;
+  }
+
+  .select-wrapper-no > span,.select-wrapper-element > span{
+    font-size: 0.9em;
+    font-family: Roboto;
+    color: #fff;
+    margin-bottom: 10px;
   }
 }
 

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="416" height="416" viewBox="0 0 416 416">
+  <g id="filter-circle" transform="translate(-48 -48)">
+    <path id="Path_2" data-name="Path 2" d="M448,256c0-106-86-192-192-192S64,150,64,256s86,192,192,192S448,362,448,256Z" fill="none" stroke="#fff" stroke-miterlimit="10" stroke-width="32"/>
+    <line id="Line_1" data-name="Line 1" x2="224" transform="translate(144 208)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/>
+    <line id="Line_2" data-name="Line 2" x2="160" transform="translate(176 272)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/>
+    <line id="Line_3" data-name="Line 3" x2="64" transform="translate(224 336)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/>
+  </g>
+</svg>
