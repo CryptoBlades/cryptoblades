@@ -115,7 +115,7 @@
           <option class="text-body" v-if="availableTraits.length === 0" value="">{{ $t('Character.noTraits') }}</option>
         </select>
         <div class="inputImage">
-          <img :src="require(`@/assets/elements/${targetTrait}_Potion.png`)" />
+          <img :src="targetTrait ? require(`@/assets/elements/${targetTrait}_Potion.png`) : require(`@/assets/elements/Lightning_Potion.png`)" />
           <span class="main-font">{{currentTraitTotal()}}</span>
         </div>
       </div>
@@ -410,7 +410,6 @@ export default Vue.extend({
           availableSkins.push(this.haveCharacterCosmetics[i]);
         }
       }
-      console.log(this.characterCosmetics);
       return availableSkins;
     },
     characterLvl(): number {
