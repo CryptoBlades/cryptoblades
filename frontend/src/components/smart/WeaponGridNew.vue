@@ -68,10 +68,8 @@
           @click="(!checkForDurability || getWeaponDurability(weapon.id) > 0) && onWeaponClick(weapon.id)"
           @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
           <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
-          <div class="weapon-icon-wrapper">
             <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" :id="'weapon-'+weapon.id"/>
             <weapon-popover :weapon="weapon" :placement="'right'"/>
-          </div>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
             <slot name="above" :weapon="weapon"></slot>
           </div>
@@ -701,8 +699,6 @@ export default Vue.extend({
   outline: solid currentcolor 2px;
 }
 .weapon-icon-wrapper {
-  width: 13.5em;
-  height: 18em;
 }
 .above-wrapper {
   padding: 0.1rem;
