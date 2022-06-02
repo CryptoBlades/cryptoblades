@@ -72,6 +72,7 @@
             <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" :id="'weapon-'+weapon.id"
             :selected="setBorderSelected(weapon.id)"/>
             <weapon-popover :weapon="weapon" :placement="'right'"/>
+          </div>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
             <slot name="above" :weapon="weapon"></slot>
           </div>
