@@ -510,15 +510,13 @@ export default {
 .glow-container {
   height: 100%;
   width: 100%;
+  border-radius: 5px;
+  z-index: 540;
+  padding: 5px 25px;
 }
 
 .glow-container > img{
   margin-top: 10px;
-}
-
-.glow-container {
-  border-radius: 5px;
-  z-index: 540;
 }
 
 .loading-container {
