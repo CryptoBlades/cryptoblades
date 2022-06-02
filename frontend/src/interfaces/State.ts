@@ -156,7 +156,6 @@ export interface IState {
   ownedKeyLootboxIds: number[];
   maxStamina: number;
   ownedDust: string[];
-  currentChainSupportsMerchandise: boolean;
   currentChainSupportsPvP: boolean;
   currentChainSupportsQuests: boolean;
   hasAdminAccess: boolean;

@@ -295,6 +295,7 @@
                         v-if="clickedForgeButton === 0"
                         variant="primary"
                         class="row justify-content-center forge-btns"
+                        :class="disableConfirmButton ? 'disable-button' : ''"
                         @click="onForgeWeapon(1)"
                         :disabled="disableConfirmButton"
                         v-tooltip="$t('blacksmith.forgeNew')">
@@ -309,10 +310,11 @@
                         v-if="clickedForgeButton === 1"
                         variant="primary"
                         class="row justify-content-center forge-btns"
+                        :class="disableConfirmButton ? 'disable-button' : ''"
                         @click="onForgeWeapon(10)"
                         :disabled="disableConfirmButton"
                         v-tooltip="$t('blacksmith.forge10New')">
-                          <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                        <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
                             {{$t('blacksmith.forge').toUpperCase()}}
                           </span>
                       </button>
@@ -861,7 +863,7 @@ export default Vue.extend({
       }else if(id === 1){
         this.onClickForge(id);
         (this.$refs['forge-element-selector-modal']as BModal).show();
-      }else if(id===2){
+      }else if(id === 2){
         Events.$emit('show-special-forge-modal');
       }else{
         this.displayDustReforge();
@@ -995,12 +997,14 @@ export default Vue.extend({
       (this.$refs['forge-element-selector-modal']as BModal).show();
     },
 
-    setChosenElement(ele: any, i: number) {
-      this.selectedElement = i;
-      this.chosenElementFee = i === 100 ? 1 : 2;
-      ele.srcElement.classList.toggle('done');
-      Array.from(ele.srcElement.parentNode.childNodes).forEach((child: any) => {
-        if (child !== ele.srcElement && child.classList.contains('done') === true){
+    setChosenElement(elementObject: any, selectedNumber: number) {
+      if(selectedNumber === this.selectedElement) this.selectedElement = null;
+      else this.selectedElement = selectedNumber;
+
+      this.chosenElementFee = selectedNumber === 100 ? 1 : 2;
+      elementObject.srcElement.classList.toggle('done');
+      Array.from(elementObject.srcElement.parentNode.childNodes).forEach((child: any) => {
+        if (child !== elementObject.srcElement && child.classList.contains('done') === true){
           child.classList.toggle('done');
         }
       });
@@ -1551,7 +1555,7 @@ export default Vue.extend({
     margin-top: 30px;
   }
 
-  .button-div > button:hover, .forge-btns:hover{
+  .button-div > button:hover{
     margin-top: 30px;
   }
 }
@@ -2337,6 +2341,11 @@ img.elements-modal:hover {
 .buttons-panel {
   display: flex;
   justify-content: space-between;
+}
+
+.disable-button{
+  opacity: 0.5;
+  cursor:not-allowed;
 }
 
 .line-sep{

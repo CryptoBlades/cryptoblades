@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, {isUndefined, values} from 'lodash';
-import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests, gasUsedToBnb, toBN} from '@/utils/common';
+import {bnMinimum, currentChainSupportsPvP, currentChainSupportsQuests, gasUsedToBnb, toBN} from '@/utils/common';
 
 import {getConfigValue, setUpContracts} from '@/contracts';
 
@@ -65,7 +65,6 @@ IState, 'waxBridgeWithdrawableBnb' | 'waxBridgeRemainingWithdrawableBnbDuringPer
 import bridge from './bridge';
 import pvp from './pvp';
 import quests from './quests';
-import merchandise from './merchandise';
 import raid from './raid';
 import staking from './staking';
 import land from './land';
@@ -77,7 +76,6 @@ export default new Vuex.Store<IState>({
     bridge,
     pvp,
     quests,
-    merchandise,
     raid,
     staking,
     land
@@ -112,7 +110,6 @@ export default new Vuex.Store<IState>({
     maxStamina: 0,
     currentCharacterId: null,
     ownedDust: [],
-    currentChainSupportsMerchandise: false,
     currentChainSupportsPvP: false,
     currentChainSupportsQuests: false,
     hasAdminAccess: false,
@@ -361,10 +358,6 @@ export default new Vuex.Store<IState>({
         const dust = state.ownedDust[1];
         return dust;
       };
-    },
-
-    getCurrentChainSupportsMerchandise(state) {
-      return state.currentChainSupportsMerchandise;
     },
 
     getCurrentChainSupportsPvP(state) {
@@ -672,10 +665,6 @@ export default new Vuex.Store<IState>({
       if (!state.ownedShieldIds.includes(shieldId)) {
         state.ownedShieldIds.push(shieldId);
       }
-    },
-
-    updateCurrentChainSupportsMerchandise(state: IState) {
-      state.currentChainSupportsMerchandise = currentChainSupportsMerchandise();
     },
 
     updateCurrentChainSupportsPvP(state: IState) {
