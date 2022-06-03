@@ -25,6 +25,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         string imageUrl;
         address fundingTokenAddress;
         uint256 phase;
+        bool commitOnly;
     }
 
     // VARS
@@ -34,6 +35,8 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_FUNDING_PERIOD_PHASE_2 = 3;
     uint256 public constant VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER = 4;
     uint256 public constant VAR_UNCLAIMED_ALLOCATION_PERCENTAGE = 5;
+    uint256 public constant VAR_UNCLAIMED_COMMIT_WINDOW = 6;
+    uint256 public constant VAR_UNCLAIMED_COMMIT_START_OFFSET = 7;
     
 
     // TIERS INFO
@@ -55,6 +58,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     mapping(uint256 => mapping(address => uint256)) public launchUserInvestment;
     mapping(uint256 => mapping(address => uint256)) public launchUserUnclaimedSkillCommittedValue;
     mapping(uint256 => uint256) public launchTotalUnclaimedSkillCommittedValue;
+    mapping(uint256 => mapping(address => uint256)) public launchUserTotalUnclaimedSkillCommittedValue;
 
     // VESTING INFO
     mapping(uint256 => uint256[]) launchPeriodicVestingsPercentages;
@@ -63,7 +67,6 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public launchLinearVestingsStartTimestamps;
     mapping(address => mapping(uint256 => uint256)) public userLinearVestingClaimTimestamp;
     mapping(address => mapping(uint256 => mapping(uint256 => bool))) public userClaimedVestingPortion;
-
 
     uint256 public nextLaunchId;
     uint256 public skillPrice;
@@ -81,7 +84,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     event LaunchAdded(uint256 indexed launchId, uint256 phase);
     event Invested(address indexed user, uint256 amount);
-    event SkillCommitted(address indexed user, uint256 indexed launchId, uint256 amount);
+    event SkillCommitted(address indexed user, address indexed targetWallet, uint256 indexed launchId, uint256 amount);
     event PeriodicVestingClaimed(address indexed user, uint256 indexed launchId, uint256 indexed vestingId, uint256 amount);
     event LinearVestingClaimed(address indexed user, uint256 indexed launchId, uint256 amount);
     event FundsWithdrawn(uint256 indexed launchId, uint256 amount);
@@ -107,13 +110,13 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         require(launchId % 2 == 1, "Usable only on phase 1");
     }
 
-    modifier isWhitelistedFor(uint256 launchId) {
-        _isWhitelistedFor(launchId);
+    modifier isUserWhitelistedForLaunch(address user, uint256 launchId) {
+        _isUserWhitelistedForLaunch(user, launchId);
         _;
     }
 
-    function _isWhitelistedFor(uint256 launchId) internal view {
-        require(isSenderWhitelisted(launchId), "Not whitelisted");
+    function _isUserWhitelistedForLaunch(address user, uint256 launchId) internal view {
+        require(isUserWhitelisted(user, launchId), "Not whitelisted");
     }
 
     modifier isTokenAddressSet(uint256 launchId) {
@@ -131,7 +134,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     }
 
     function _launchNotStarted(uint256 launchId) internal view {
-        require(launchStartTime[launchId] > block.timestamp, "Launch started");
+        require(launchStartTime[launchId] == 0 || launchStartTime[launchId] > block.timestamp, "Launch started");
     }
 
     // VIEWS
@@ -157,7 +160,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         else {
             maxAllocation = getLaunchAllocationForTier(launchId, getTierForStakedAmount(launchUserStakedAmountSnapshot[launchId][user]));
         }
-        maxAllocation += launchUserUnclaimedSkillCommittedValue[launchId][user].mul(vars[VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER]);
+        maxAllocation += launchUserTotalUnclaimedSkillCommittedValue[launchId][user].mul(vars[VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER]);
         maxAllocation = maxAllocation.sub(launchUserInvestment[launchId][user]);
     }
 
@@ -204,9 +207,9 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         return getLaunchAllocationForTier(launchId, vars[VAR_TIERS_AMOUNT]);
     }
 
-    function isSenderWhitelisted(uint256 launchId) public view returns (bool) {
+    function isUserWhitelisted(address user, uint256 launchId) public view returns (bool) {
         if(launchId % 2 == 0) launchId = launchId.sub(1);
-        return launchEligibleUsersSnapshot[launchId].contains(msg.sender);
+        return launchEligibleUsersSnapshot[launchId].contains(user);
     }
 
     function getTotalUnlockedPercentage(uint256 launchId) public view returns (uint256 totalUnlockedPercentage) {
@@ -266,7 +269,8 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         string calldata tokenSymbol,
         string calldata detailsJsonUri,
         string calldata imageUrl,
-        address fundingTokenAddress
+        address fundingTokenAddress,
+        bool commitOnly
     ) external restricted {
         launches[nextLaunchId] = Launch(
             name,
@@ -274,7 +278,8 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
             detailsJsonUri,
             imageUrl,
             fundingTokenAddress,
-            1
+            1,
+            commitOnly
         );
 
         emit LaunchAdded(nextLaunchId, 1);
@@ -294,7 +299,8 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
             lp.detailsJsonUri,
             lp.imageUrl,
             lp.fundingTokenAddress,
-            2
+            2,
+            lp.commitOnly
         );
         
         launchStartTime[launchId + 1] = startTime;
@@ -336,6 +342,10 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     function updateLaunchFundingTokenAddress(uint256 launchId, address fundingTokenAddress) external launchNotStarted(launchId) restricted {
         launches[launchId].fundingTokenAddress = fundingTokenAddress;
+    }
+
+    function updateLaunchIsCommitOnly(uint256 launchId, bool commitOnly) external launchNotStarted(launchId) restricted {
+        launches[launchId].commitOnly = commitOnly;
     }
 
     function updateLaunchTokenPrice(uint256 launchId, uint256 tokenPrice) external launchNotStarted(launchId) restricted {
@@ -405,6 +415,17 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         launchBaseAllocation[launchId] = launchFundsToRaise[launchId].div(totalWeight);
     }
 
+    function setTotalUnclaimedCommitted(uint256 launchId, address[] calldata users, uint256[] calldata totalCommittedValues) external onlyPhase1(launchId) launchNotStarted(launchId) restricted {
+        require(nextLaunchId >= launchId, "Wrong ID");
+        require(users.length > 0 && users.length == totalCommittedValues.length, "Bad input");
+        uint256 unclaimedCommittedValue = 0;
+        for(uint i = 0; i < users.length; i++) {
+            launchUserTotalUnclaimedSkillCommittedValue[launchId][users[i]] = totalCommittedValues[i];
+            unclaimedCommittedValue += totalCommittedValues[i];
+        }
+        launchBaseAllocation[launchId] = launchBaseAllocation[launchId].sub(launchBaseAllocation[launchId].mul(unclaimedCommittedValue).div(launchFundsToRaise[launchId]));
+    }
+
     // WITHDRAW RAISED FUNDS
 
     function withdrawRaisedFunds(uint256 launchId) external onlyPhase1(launchId) {
@@ -439,8 +460,9 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     // USER FUNCTIONS
 
-    function invest(uint256 launchId, uint256 amount) external isWhitelistedFor(launchId) {
+    function invest(uint256 launchId, uint256 amount) external isUserWhitelistedForLaunch(msg.sender, launchId) {
         Launch memory lp = launches[launchId];
+        require(!lp.commitOnly, "Invest on diff chain");
         require(launchStartTime[launchId] != 0 && block.timestamp > launchStartTime[launchId], "Launch not started");
         require((lp.phase == 1 && block.timestamp < launchStartTime[launchId] + vars[VAR_FUNDING_PERIOD_PHASE_1])
             || (lp.phase == 2 && block.timestamp < launchStartTime[launchId] + vars[VAR_FUNDING_PERIOD_PHASE_2]), "Launch ended");
@@ -476,14 +498,15 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         emit LinearVestingClaimed(msg.sender, launchId, claimAmount);
     }
 
-    function commitUnclaimedSkill(uint256 launchId, uint256 amount) external isWhitelistedFor(launchId) launchNotStarted(launchId) {
+    function commitUnclaimedSkill(uint256 launchId, uint256 amount, address whitelistedWallet) external isUserWhitelistedForLaunch(whitelistedWallet, launchId) launchNotStarted(launchId) onlyPhase1(launchId) {
+        uint256 windowStartTime = launchStartTime[launchId].sub(vars[VAR_UNCLAIMED_COMMIT_START_OFFSET]);
+        require(block.timestamp >= windowStartTime && block.timestamp <= windowStartTime.add(vars[VAR_UNCLAIMED_COMMIT_WINDOW]), "Not a commit window");
         uint256 committingValue = amount.mul(skillPrice).div(1e18);
         require((launchTotalUnclaimedSkillCommittedValue[launchId].add(committingValue)).mul(vars[VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER]) <= vars[VAR_UNCLAIMED_ALLOCATION_PERCENTAGE].mul(launchFundsToRaise[launchId]).div(100), "Unclaimed limit reached");
         _game.deductAfterPartnerClaim(amount, msg.sender);
-        launchUserUnclaimedSkillCommittedValue[launchId][msg.sender] += committingValue;
+        launchUserUnclaimedSkillCommittedValue[launchId][whitelistedWallet] += committingValue;
         launchTotalUnclaimedSkillCommittedValue[launchId] += committingValue;
-        launchBaseAllocation[launchId] = launchBaseAllocation[launchId].sub(launchBaseAllocation[launchId].mul(launchTotalUnclaimedSkillCommittedValue[launchId]).div(launchFundsToRaise[launchId]));
         
-        emit SkillCommitted(msg.sender, launchId, amount);
+        emit SkillCommitted(msg.sender, whitelistedWallet, launchId, amount);
     }
 }
