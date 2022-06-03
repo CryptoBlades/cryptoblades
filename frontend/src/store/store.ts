@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, {isUndefined, values} from 'lodash';
-import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests, gasUsedToBnb, toBN} from '@/utils/common';
+import {bnMinimum, currentChainSupportsPvP, currentChainSupportsQuests, gasUsedToBnb, toBN} from '@/utils/common';
 
 import {getConfigValue, setUpContracts} from '@/contracts';
 
@@ -65,7 +65,6 @@ IState, 'waxBridgeWithdrawableBnb' | 'waxBridgeRemainingWithdrawableBnbDuringPer
 import bridge from './bridge';
 import pvp from './pvp';
 import quests from './quests';
-import merchandise from './merchandise';
 import raid from './raid';
 import staking from './staking';
 import land from './land';
@@ -77,7 +76,6 @@ export default new Vuex.Store<IState>({
     bridge,
     pvp,
     quests,
-    merchandise,
     raid,
     staking,
     land
@@ -112,7 +110,6 @@ export default new Vuex.Store<IState>({
     maxStamina: 0,
     currentCharacterId: null,
     ownedDust: [],
-    currentChainSupportsMerchandise: false,
     currentChainSupportsPvP: false,
     currentChainSupportsQuests: false,
     hasAdminAccess: false,
@@ -361,10 +358,6 @@ export default new Vuex.Store<IState>({
         const dust = state.ownedDust[1];
         return dust;
       };
-    },
-
-    getCurrentChainSupportsMerchandise(state) {
-      return state.currentChainSupportsMerchandise;
     },
 
     getCurrentChainSupportsPvP(state) {
@@ -672,10 +665,6 @@ export default new Vuex.Store<IState>({
       if (!state.ownedShieldIds.includes(shieldId)) {
         state.ownedShieldIds.push(shieldId);
       }
-    },
-
-    updateCurrentChainSupportsMerchandise(state: IState) {
-      state.currentChainSupportsMerchandise = currentChainSupportsMerchandise();
     },
 
     updateCurrentChainSupportsPvP(state: IState) {
@@ -1032,6 +1021,15 @@ export default new Vuex.Store<IState>({
   },
 
   actions: {
+    async fetchIgoRewardsPerFight({ state }) {
+      const { CryptoBlades } = state.contracts();
+      if(!CryptoBlades || !state.defaultAccount) return;
+
+      const igoDefaultReward = await CryptoBlades.methods
+        .vars(27)
+        .call(defaultCallOptions(state));
+      return igoDefaultReward;
+    },
     async initializeStore({ dispatch }) {
       await dispatch('setUpContracts');
       await dispatch('setUpContractEvents');
@@ -2404,6 +2402,25 @@ export default new Vuex.Store<IState>({
       if(!state.defaultAccount || !BurningManager) return;
 
       return await BurningManager.methods.giveAwaySoul(user, soulAmount).send({from: state.defaultAccount, gasPrice: getGasPrice()});
+    },
+
+    async getSoulMultiplier({state}) {
+      const {BurningManager} = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+
+      const VAR_BURN_POWER_MULTIPLIER = await BurningManager.methods.VAR_BURN_POWER_MULTIPLIER().call(defaultCallOptions(state));
+
+      return await BurningManager.methods.vars(VAR_BURN_POWER_MULTIPLIER).call(defaultCallOptions(state));
+    },
+
+    async setSoulMultiplier({state}, {multiplier}) {
+      const {BurningManager} = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+
+      const VAR_BURN_POWER_MULTIPLIER = await BurningManager.methods.VAR_BURN_POWER_MULTIPLIER().call(defaultCallOptions(state));
+
+      return await BurningManager.methods.setVar(VAR_BURN_POWER_MULTIPLIER, Web3.utils.toWei('' + multiplier))
+        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
     async fetchMarketNftPrice({ state }, { nftContractAddr, tokenId }) {
@@ -4124,15 +4141,13 @@ export default new Vuex.Store<IState>({
 
       if(orderWithSkill) {
         const price = await SpecialWeaponsManager.methods.getSkillForgeCost(orderOption).call(defaultCallOptions(state));
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
+        await approveFeeWalletOnly(
           CryptoBlades,
           SkillToken,
           state.defaultAccount,
           defaultCallOptions(state),
           defaultCallOptions(state),
-          new BigNumber(price),
-          state.skillRewards
+          new BigNumber(price)
         );
         await SpecialWeaponsManager.methods.orderSpecialWeaponWithSkill(eventId, orderOption).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
       }

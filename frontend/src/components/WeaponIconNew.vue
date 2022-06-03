@@ -9,7 +9,7 @@
       <i class="fas fa-spinner fa-spin"></i>
     </div>
 
-    <div class="glow-container" ref="el" :class="['glow-' + (weapon.stars || 0)]">
+    <div class="glow-container" ref="el" :class="selected ? 'selected-border' : ['glow-' + (weapon.stars || 0)]">
       <div class="animation" v-bind:class="showCosmetics ? 'weapon-animation-applied-' + getWeaponCosmetic(weapon.id) : ''"/>
       <img v-if="showPlaceholder" v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
         class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)"/>
@@ -37,12 +37,14 @@
         <div>
           <div class="small-durability-bar"
             :style="`--durabilityReady: ${(getWeaponDurability(weapon.id)/maxDurability)*100}%;`"
-            v-tooltip.bottom="`${$t('weaponIcon.durability')} ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
-              ${$t('weaponIcon.durabilityTooltip')} ${timeUntilWeaponHasMaxDurability(weapon.id)}`">
+            v-tooltip.bottom="`
+              ${$t('weaponIcon.durability')} ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
+              ${getWeaponDurability(weapon.id) === maxDurability ?
+              $t('weaponIcon.durabilityTooltipFull') : `${$t('weaponIcon.durabilityTooltip')} ${timeUntilWeaponHasMaxDurability(weapon.id)}` }
+              `">
           </div>
         </div>
         <div class="bonus-pows">
-
           <div v-if="weapon.lowStarBurnPoints > 0">LB: {{ weapon.lowStarBurnPoints }}</div>
           <div v-if="weapon.fourStarBurnPoints > 0">4B: {{ weapon.fourStarBurnPoints }}</div>
           <div v-if="weapon.fiveStarBurnPoints > 0">5B: {{ weapon.fiveStarBurnPoints }}</div>
@@ -508,6 +510,7 @@ export default {
 .glow-container {
   height: 100%;
   width: 100%;
+  background: rgb(26, 24, 24);
 }
 
 .glow-container > img{
@@ -597,6 +600,10 @@ export default {
 
 .name{
   margin-bottom: 10px;
+}
+
+.selected-border{
+  border: 2px solid #fff;
 }
 
 .star-stat{

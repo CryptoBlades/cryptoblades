@@ -16,7 +16,7 @@
                   <p>{{$t('PlayToEarn.adventureDesc')}}</p>
                   <div class="btn-join">{{$t('PlayToEarn.btnCombat')}}</div>
                 </div>
-                <card-frame v-if="!isMobile()"/>
+                <component v-bind:is="!isMobile() && !isToggled ? 'card-frame' : 'card-frame-toggled'"></component>
             </router-link>
 
             <router-link :to="{ name: 'raid' }" exact class="raid navs">
@@ -25,7 +25,7 @@
                   <p>{{$t('PlayToEarn.raidDesc')}}</p>
                   <div class="btn-join">{{$t('PlayToEarn.btnJoin')}}</div>
                 </div>
-                <card-frame v-if="!isMobile()"/>
+                <component v-bind:is="!isMobile() && !isToggled ? 'card-frame' : 'card-frame-toggled'"></component>
             </router-link>
 
             <router-link :to="{ name: 'pvp' }" exact class="arena navs">
@@ -34,7 +34,7 @@
                   <p>{{$t('PlayToEarn.arenaDesc')}}</p>
                   <div class="btn-join">{{$t('PlayToEarn.btnPvp')}}</div>
                 </div>
-                <card-frame v-if="!isMobile()"/>
+                <component v-bind:is="!isMobile() && !isToggled ? 'card-frame' : 'card-frame-toggled'"></component>
             </router-link>
           </div>
       </div>
@@ -46,6 +46,8 @@
 
 import Events from '../events';
 import CardFrame from '../components/CardFrame.vue';
+import CardFrameToggled from '../components/CardFrameToggled.vue';
+
 export default {
   data() {
     return {
@@ -56,11 +58,15 @@ export default {
     Events.$on('setWeaponId', (id) =>{
       this.selectedWeaponId = id;
     });
+    Events.$on('toggle-sideBar', (bol) =>{
+      this.isToggled = bol;
+    });
   },
   methods: {
   },
   components: {
-    CardFrame
+    'card-frame': CardFrame,
+    'card-frame-toggled' : CardFrameToggled
   },
 };
 </script>

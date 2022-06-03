@@ -259,7 +259,6 @@ export default Vue.extend({
     ...mapMutations([
       'setNetworkId',
       'updatePayoutCurrencyId',
-      'updateCurrentChainSupportsMerchandise',
       'updateCurrentChainSupportsPvP',
       'updateCurrentChainSupportsQuests',
       'setWeb3',
@@ -336,7 +335,6 @@ export default Vue.extend({
 
     async setCurrentChain() {
       localStorage.setItem('currentChain', this.currentChain);
-      this.updateCurrentChainSupportsMerchandise();
       this.updateCurrentChainSupportsPvP();
       this.updateCurrentChainSupportsQuests();
       Events.$emit('setting:currentChain', { value: this.currentChain });

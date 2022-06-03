@@ -35,6 +35,9 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     uint256 public constant LINK_SKILL_ORACLE_2 = 1; // technically second skill oracle (it's separate)
     uint256 public constant LINK_KING_ORACLE = 2;
 
+    uint256 public constant CURRENCY_SKILL = 0;
+    //uint256 public constant CURRENCY_KING = 1; // not referenced atm
+
     /* ========== STATE VARIABLES ========== */
 
     Weapons public weapons;
@@ -134,7 +137,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
             require(numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] > 0);
             numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] -= 1;
         }
-        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_SHIELD]);
+        payCurrency(msg.sender, itemFlatPrices[ITEM_SHIELD], CURRENCY_SKILL);
         shields.mint(msg.sender, shieldType,
             uint256(keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1)))));
     }
@@ -232,13 +235,13 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function purchaseCharacterRenameTag(uint256 paying) public {
         require(paying == itemFlatPrices[ITEM_CHARACTER_RENAME], 'Invalid price');
-        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_RENAME]);
+        payCurrency(msg.sender, itemFlatPrices[ITEM_CHARACTER_RENAME], CURRENCY_SKILL);
         Consumables(itemAddresses[ITEM_CHARACTER_RENAME]).giveItem(msg.sender, 1);
     }
 
     function purchaseCharacterRenameTagDeal(uint256 paying) public { // 4 for the price of 3
         require(paying == itemFlatPrices[ITEM_CHARACTER_RENAME] * 3, 'Invalid price');
-        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_RENAME] * 3);
+        payCurrency(msg.sender, itemFlatPrices[ITEM_CHARACTER_RENAME] * 3, CURRENCY_SKILL);
         Consumables(itemAddresses[ITEM_CHARACTER_RENAME]).giveItem(msg.sender, 4);
     }
 
@@ -255,13 +258,13 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function purchaseWeaponRenameTag(uint256 paying) public {
         require(paying == itemFlatPrices[ITEM_WEAPON_RENAME], 'Invalid price');
-        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_WEAPON_RENAME]);
+        payCurrency(msg.sender, itemFlatPrices[ITEM_WEAPON_RENAME], CURRENCY_SKILL);
         Consumables(itemAddresses[ITEM_WEAPON_RENAME]).giveItem(msg.sender, 1);
     }
 
     function purchaseWeaponRenameTagDeal(uint256 paying) public { // 4 for the price of 3
         require(paying == itemFlatPrices[ITEM_WEAPON_RENAME] * 3, 'Invalid price');
-        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_WEAPON_RENAME] * 3);
+        payCurrency(msg.sender, itemFlatPrices[ITEM_WEAPON_RENAME] * 3, CURRENCY_SKILL);
         Consumables(itemAddresses[ITEM_WEAPON_RENAME]).giveItem(msg.sender, 4);
     }
 
@@ -281,25 +284,25 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function purchaseCharacterFireTraitChange(uint256 paying) public {
         require(paying == itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_FIRE], 'Invalid price');
-        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_FIRE]);
+        payCurrency(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_FIRE], CURRENCY_SKILL);
         Consumables(itemAddresses[ITEM_CHARACTER_TRAITCHANGE_FIRE]).giveItem(msg.sender, 1);
     }
 
     function purchaseCharacterEarthTraitChange(uint256 paying) public {
         require(paying == itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_EARTH], 'Invalid price');
-        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_EARTH]);
+        payCurrency(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_EARTH], CURRENCY_SKILL);
         Consumables(itemAddresses[ITEM_CHARACTER_TRAITCHANGE_EARTH]).giveItem(msg.sender, 1);
     }
 
     function purchaseCharacterWaterTraitChange(uint256 paying) public {
         require(paying == itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_WATER], 'Invalid price');
-        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_WATER]);
+        payCurrency(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_WATER], CURRENCY_SKILL);
         Consumables(itemAddresses[ITEM_CHARACTER_TRAITCHANGE_WATER]).giveItem(msg.sender, 1);
     }
 
     function purchaseCharacterLightningTraitChange(uint256 paying) public {
         require(paying == itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING], 'Invalid price');
-        game.payContractTokenOnly(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING]);
+        payCurrency(msg.sender, itemFlatPrices[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING], CURRENCY_SKILL);
         Consumables(itemAddresses[ITEM_CHARACTER_TRAITCHANGE_LIGHTNING]).giveItem(msg.sender, 1);
     }
 
@@ -316,7 +319,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function purchaseWeaponCosmetic(uint32 cosmetic, uint256 paying) public {
         require(paying > 0 && paying == itemSeriesFlatPrices[ITEM_COSMETIC_WEAPON][cosmetic], 'Invalid price');
-        game.payContractTokenOnly(msg.sender, itemSeriesFlatPrices[ITEM_COSMETIC_WEAPON][cosmetic]);
+        payCurrency(msg.sender, itemSeriesFlatPrices[ITEM_COSMETIC_WEAPON][cosmetic], CURRENCY_SKILL);
         Cosmetics(itemAddresses[ITEM_COSMETIC_WEAPON]).giveCosmetic(msg.sender, cosmetic, 1);
     }
 
@@ -332,7 +335,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function purchaseCharacterCosmetic(uint32 cosmetic, uint256 paying) public {
         require(paying > 0 && paying == itemSeriesFlatPrices[ITEM_COSMETIC_CHARACTER][cosmetic], 'Invalid price');
-        game.payContractTokenOnly(msg.sender, itemSeriesFlatPrices[ITEM_COSMETIC_CHARACTER][cosmetic]);
+        payCurrency(msg.sender, itemSeriesFlatPrices[ITEM_COSMETIC_CHARACTER][cosmetic], CURRENCY_SKILL);
         Cosmetics(itemAddresses[ITEM_COSMETIC_CHARACTER]).giveCosmetic(msg.sender, cosmetic, 1);
     }
 
@@ -369,7 +372,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     }
 
     function getOracledTokenPerUSD(uint256 currency) public view returns (uint256) {
-        if(currency == 0) {
+        if(currency == CURRENCY_SKILL) {
             return IPriceOracle(links[LINK_SKILL_ORACLE_2]).currentPrice();
         }
         else {
@@ -384,8 +387,8 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     }
 
     function payCurrency(address payer, uint256 paying, uint256 currency) internal {
-        if(currency == 0){
-             game.payContractTokenOnly(payer, paying, true);
+        if(currency == CURRENCY_SKILL){
+             game.payContractConvertedSupportingStaked(payer, paying);
         }
         else {
             IERC20(currencies[currency]).transferFrom(payer, address(this), paying);

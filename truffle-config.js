@@ -69,6 +69,7 @@ module.exports = {
       confirmations: 10,
       timeoutBlocks: 200,
       gas: 10000000,//8000000,
+      gasPrice: 10000000000,
       skipDryRun: true
     },
     bscmainnet: {
@@ -165,7 +166,7 @@ module.exports = {
           providerOrUrl: process.env.POLYGON_MAINNET_RPC_URL || 'https://polygon-rpc.com/'
         }
       )),
-      gasPrice: 50000000000,
+      gasPrice: 100000000000,
       network_id: 137,
       confirmations: 10,
       timeoutBlocks: 200,

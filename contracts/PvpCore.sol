@@ -779,7 +779,6 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     function getCharacterPower(uint256 characterID, uint8 tier)
         public
         view
-        characterInArena(characterID)
         returns (uint24) 
     {
         int128 bonusShieldStats;

@@ -93,14 +93,16 @@
         <b-tabs pills fill nav-wrapper-class="mt-5 mb-4" >
           <upgrade-tab :soulBalance="soulBalance" @fetchSoulBalance="refreshData" />
           <skins-tab :availableSkins="availableSkins" @loadCosmeticsCount="loadCosmeticsCount" />
-          <options-tab @openTransferModal="openTransferModal" @onSendToGarrison="onSendToGarrison" @openChangeTrait="openChangeTrait" />
+          <options-tab @openTransferModal="openTransferModal" @onSendToGarrison="onSendToGarrison" @openChangeTrait="openChangeTrait"
+          @openTransferSoulModal="openTransferSoulModal" />
           <b-tab  disabled title-item-class="character-wrapper" title-link-class="character-tab">{{" "}}</b-tab>
         </b-tabs>
       </div>
     </div>
     <!--Character Change Trait Modal -->
-    <b-modal class="centered-modal" ref="character-change-trait-modal"
-      centered content-class="character-modal" hide-footer hide-header-close dialog-class="dialog-character" size="lg">
+    <b-modal @hide="removeErrors" class="centered-modal" ref="character-change-trait-modal"
+      centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
+      dialog-class="dialog-character" size="lg">
       <template #modal-title>
         {{$t('Character.changeTrait')}}
       </template>
@@ -109,15 +111,22 @@
       </span>
       <div class="input">
         <select class="form-control" v-model="targetTrait" :disabled="availableTraits.length === 0">
-          <option class="text-body" v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
           <option class="text-body" v-if="availableTraits.length === 0" value="">{{ $t('Character.noTraits') }}</option>
+          <option class="text-body" v-else value="" disabled selected hidden>Please select a trait</option>
+          <option class="text-body" v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
         </select>
-        <div class="inputImage">
-          <img src="../../assets/elements/potion_05_te.png" />
-          <span class="main-font">{{availableTraits.length}}/1</span>
+        <div class="inputImage" v-if="targetTrait">
+          <img :src="targetTrait ? require(`@/assets/elements/${targetTrait}_Potion.png`) : require(`@/assets/elements/Lightning_Potion.png`)" />
+          <span class="main-font">{{currentTraitTotal()}}</span>
         </div>
       </div>
-      <button @click="changeCharacterTraitCall">Change</button>
+      <div class="transferResultContainer">
+        <small class="resultMsg text-center"> {{resultMsg}} </small>
+      </div>
+      <button class="modal-btn" :disabled="isSending || targetTrait === ''" @click="changeCharacterTraitCall">
+          <span v-if="isSending"><i class="fas fa-spinner fa-spin"></i> Loading</span>
+          <span v-else>Change</span>
+      </button>
       <button class="offset" @click="$refs['character-change-trait-modal'].hide()">
           {{$t('characterModal.close')}}
           <img src="../../assets/close-btn.png"/>
@@ -125,7 +134,8 @@
     </b-modal>
     <!-- Character Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-modal"
-      centered content-class="character-modal" hide-footer hide-header-close dialog-class="dialog-character" size="lg">
+      centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
+      dialog-class="dialog-character" size="lg">
       <template #modal-title>
         {{$t('Character.transfer')}}
       </template>
@@ -143,9 +153,64 @@
           <img src="../../assets/close-btn.png"/>
         </button>
     </b-modal>
+    <!-- Character Soul Transfer Modal -->
+    <b-modal class="centered-modal" ref="character-transfer-soul-modal"
+      centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
+      dialog-class="dialog-character" size="lg">
+      <template #modal-title>
+        {{$t('Character.transferSoul')}}
+      </template>
+        <div class="d-flex flex-column">
+          <div class="row d-flex justify-content-between align-items-center mb-4">
+            <div class="col col-md-3 d-flex justify-content-center align-items-center">
+              <div class="soul-container mr-2">
+                <img :src="require('@/assets/dusts/soulIcon.svg')" alt="soul"/>
+              </div>
+              <div class="character-text">
+                <p class="mb-0 text-white soul-title">{{$t(`Character.soulTransferLabel`)}}</p>
+                <p class="mb-0">{{ soulBalance }}</p>
+              </div>
+            </div>
+            <div class="w-col col-md-6 d-flex flex-column">
+              <input
+                v-model="soulAmountToTransfer"
+                class="range-character py-3"
+                type="range"
+                min="0"
+                :max="soulBalance"
+                :disabled="soulBalance <= 0"
+                steps="10"
+              />
+            </div>
+            <div class="col col-md-3 character-text d-flex justify-content-center align-items-center">
+              <input id="powerAmount" type="number" v-model="soulAmountToTransfer" :min="0" :max="soulBalance"/>
+              <button class="mx-1 px-2"  @click="handleMax">{{$t(`Character.max`)}}</button>
+            </div>
+          </div>
+          <div class="custom-to mb-4 text-center">
+            <h5>to</h5>
+          </div>
+          <div>
+            <b-form-input class="input" placeholder="Enter address" v-model="receiverAddress"/>
+            <div class="transferResultContainer">
+              <div class="loader" v-if="isSending">
+                <i class="fas fa-spinner fa-spin"></i>
+                  Loading...
+              </div>
+              <span class="resultMsg text-center"> {{resultMsg}} </span>
+            </div>
+          </div>
+        </div>
+        <button :disabled="isSending || receiverAddress === ''" @click="onSoulTransferConfirm">Transfer</button>
+        <button class="offset" @click="$refs['character-transfer-soul-modal'].hide()">
+          {{$t('characterModal.close')}}
+          <img src="../../assets/close-btn.png"/>
+        </button>
+    </b-modal>
     <!-- Character Change Name Modal -->
     <b-modal class="centered-modal" ref="character-change-name-modal"
-      centered content-class="character-modal" hide-footer hide-header-close dialog-class="dialog-character" size="lg">
+      centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
+      dialog-class="dialog-character" size="lg">
       <template #modal-title>
         {{$t('Character.changeName')}}
       </template>
@@ -184,6 +249,7 @@ import { Nft } from '@/interfaces/Nft';
 import { getCharacterArt } from '@/character-arts-placeholder';
 import { Quest, ReputationLevelRequirements, ReputationTier } from '@/views/Quests.vue';
 import { CharacterTrait, RequiredXp } from '@/interfaces';
+import { isValidWeb3Address } from '@/utils/common';
 
 
 interface Skin {
@@ -210,7 +276,9 @@ interface Data {
   isSending: boolean
   resultMsg: string
   receiverAddress: string
-  newName: string
+  newName: string,
+  soulToTransfer: number,
+  soulAmountToTransfer: number
 }
 
 interface StoreMappedActions {
@@ -235,6 +303,7 @@ interface StoreMappedActions {
     nftType: string;
   }): Promise<void>;
   sendToGarrison(id: string): Promise<void>;
+  transferSoul(payload: {targetAddress: string, soulAmount: number}): Promise<void>;
 }
 
 export default Vue.extend({
@@ -270,7 +339,9 @@ export default Vue.extend({
       isSending: false,
       resultMsg: '',
       receiverAddress: '',
-      newName: ''
+      newName: '',
+      soulToTransfer: 0,
+      soulAmountToTransfer: 0,
     };
   },
   computed: {
@@ -300,7 +371,7 @@ export default Vue.extend({
       return availableTraits;
     },
     totalTraits(): number {
-      return this.haveChangeTraitFire + this.haveChangeTraitEarth + this.haveChangeTraitWater + this.haveChangeTraitLightning;
+      return +this.haveChangeTraitFire + +this.haveChangeTraitEarth + +this.haveChangeTraitWater + +this.haveChangeTraitLightning;
     },
     reputation(): number {
       return this.quest?.reputation ?? 0;
@@ -346,7 +417,6 @@ export default Vue.extend({
           availableSkins.push(this.haveCharacterCosmetics[i]);
         }
       }
-
       return availableSkins;
     },
     characterLvl(): number {
@@ -374,9 +444,43 @@ export default Vue.extend({
       'sendToGarrison',
       'fetchOwnedCharacterCosmetics',
       'fetchTotalRenameTags',
+      'transferSoul',
     ]) as StoreMappedActions,
     getCharacterArt,
     RequiredXp,
+    removeErrors(){
+      this.resultMsg = '';
+    },
+    async onSoulTransferConfirm() {
+      if(!isValidWeb3Address(this.receiverAddress) || this.soulAmountToTransfer === 0) return;
+      this.isSending = true;
+      await this.transferSoul({ targetAddress: this.receiverAddress, soulAmount: this.soulAmountToTransfer });
+      this.isSending = false;
+      this.soulBalance = await this.fetchSoulBalance();
+      this.soulAmountToTransfer = 0;
+      this.receiverAddress = '';
+      (this.$refs['character-transfer-soul-modal'] as BModal).hide();
+    },
+    currentTraitTotal() {
+      switch(this.targetTrait){
+      case 'Fire':
+        return +this.haveChangeTraitFire;
+      case 'Earth':
+        return +this.haveChangeTraitEarth;
+      case 'Water':
+        return +this.haveChangeTraitWater;
+      case 'Lightning':
+        return +this.haveChangeTraitLightning;
+      default:
+        return 0;
+      }
+    },
+    handleMax(){
+      this.soulAmountToTransfer = this.soulBalance;
+    },
+    openTransferSoulModal(){
+      (this.$refs['character-transfer-soul-modal'] as BModal).show();
+    },
     openTransferModal(){
       (this.$refs['character-transfer-modal'] as BModal).show();
     },
@@ -433,24 +537,35 @@ export default Vue.extend({
       if(!this.targetTrait) {
         bvModalEvt.preventDefault();
       }
-      switch(this.targetTrait) {
-      case 'Fire':
-        await this.changeCharacterTraitFire({ id: this.currentCharacterId });
-        this.haveChangeTraitFire = await this.fetchTotalCharacterFireTraitChanges();
-        break;
-      case 'Earth' :
-        await this.changeCharacterTraitEarth({ id: this.currentCharacterId });
-        this.haveChangeTraitEarth = await this.fetchTotalCharacterEarthTraitChanges();
-        break;
-      case 'Water':
-        await this.changeCharacterTraitWater({ id: this.currentCharacterId });
-        this.haveChangeTraitWater = await this.fetchTotalCharacterWaterTraitChanges();
-        break;
-      case 'Lightning':
-        await this.changeCharacterTraitLightning({ id: this.currentCharacterId });
-        this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
-        break;
+      this.isSending = true;
+      try{
+        switch(this.targetTrait) {
+        case 'Fire':
+          await this.changeCharacterTraitFire({ id: this.currentCharacterId });
+          this.haveChangeTraitFire = await this.fetchTotalCharacterFireTraitChanges();
+          break;
+        case 'Earth' :
+          await this.changeCharacterTraitEarth({ id: this.currentCharacterId });
+          this.haveChangeTraitEarth = await this.fetchTotalCharacterEarthTraitChanges();
+          break;
+        case 'Water':
+          await this.changeCharacterTraitWater({ id: this.currentCharacterId });
+          this.haveChangeTraitWater = await this.fetchTotalCharacterWaterTraitChanges();
+          break;
+        case 'Lightning':
+          await this.changeCharacterTraitLightning({ id: this.currentCharacterId });
+          this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
+          break;
+        }
+      }catch(e: any){
+        if(e.code as number === 4001) this.resultMsg = (this as any).$t('Character.cancelledTransaction');
+        else this.resultMsg = (this as any).$t('Character.changeTraitError');
+        this.isSending = false;
+        return;
       }
+      this.isSending = false;
+      this.resultMsg = '';
+      this.targetTrait = '';
       (this.$refs['character-change-trait-modal'] as BModal).hide();
     },
     async transfer(bvModalEvt: Event) {
@@ -498,13 +613,55 @@ export default Vue.extend({
   async mounted(){
     await this.refreshData();
     await this.fetchCharacterQuestData();
+    await this.loadConsumablesCount();
   },
 });
 </script>
 
 <style lang="scss" scoped>
 @import '../../styles/character-cosmetics.css';
+.modal-btn{
+  font-family: Roboto;
+}
+.custom-to{
+  color: #9e8a57 !important;
+  text-transform: uppercase;
+  font: normal normal bold 30px/38px Trajan;
+  width: 100%;
+}
+.character-text{
+  color: #7F8693;
+}
 
+.character-text input {
+  background: #000E1D 0% 0% no-repeat padding-box;
+  border: 1px solid #404857;
+  border-radius: 3px;
+  color: #fff;
+  width: 53px;
+  height: 32px;
+  text-align: center;
+}
+
+.character-text button {
+  background: #1E293C 0% 0% no-repeat padding-box !important;
+  border: 1px solid #1E293C !important;
+  border-radius: 3px !important;
+  color: #fff !important;
+  height: 32px !important;
+  margin-top: 0px !important;
+}
+/* Chrome, Safari, Edge, Opera */
+.character-text input::-webkit-outer-spin-button,
+.character-text input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.character-text input[type=number] {
+  -moz-appearance: textfield;
+}
 
 .character-container {
   display: grid;
@@ -524,7 +681,7 @@ export default Vue.extend({
   background-position-y: bottom;
   background-repeat: no-repeat;
   margin-top: 5rem;
-  padding-bottom: 2rem;
+  padding-bottom: 3rem;
 }
 .characterImg {
   width: 100%;
@@ -677,6 +834,12 @@ export default Vue.extend({
   color: #B9BFCC;
 }
 
+
+@media all and (max-width: 600px) {
+  .characterWrapper{
+    margin-top: 1rem;
+  }
+}
 
 </style>>
 

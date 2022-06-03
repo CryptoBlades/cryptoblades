@@ -25,6 +25,14 @@
           <div class="w-100 d-block d-md-none"></div>
           <button @click="$emit('openTransferModal')" class="options-button main-font mt-2 mt-md-0 col-md-2">{{$t('Character.transfer')}}</button>
         </div>
+        <div class="row py-4 options-border">
+          <div class="options-text main-font col">
+            <h3>{{$t('Character.transferSoul')}}</h3>
+            <p>{{$t('Character.transferSoulText')}}</p>
+          </div>
+          <div class="w-100 d-block d-md-none"></div>
+          <button @click="$emit('openTransferSoulModal')" class="options-button main-font mt-2 mt-md-0 col-md-2">{{$t('Character.transferSoul')}}</button>
+        </div>
       </div>
     </b-tab>
 </template>

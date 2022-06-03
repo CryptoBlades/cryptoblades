@@ -660,7 +660,7 @@ export default {
           this.isCharacterInArena = false;
         }
 
-        if (await this.getIsCharacterOldInArena(value)) {
+        if (await this.getIsCharacterInOldArena(value)) {
           this.isCharacterInOldArena = true;
         } else {
           this.isCharacterInOldArena = false;

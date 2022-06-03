@@ -9,8 +9,7 @@
                 v-for="filteredCharacter in filteredCharactersForList"
                 :key="filteredCharacter.id"
                 @click="(!getIfCharacterIsInRaid(filteredCharacter.id) || !filteredCharacter.pvpStatus === 'IN_ARENA'
-                || !getIsInCombat) && setCurrentCharacter(filteredCharacter.id) && alert(filteredCharacter.id) ">
-                <!--------  IN RAID ----------------IN ARENA ---------------------IN COMBAT ------------>
+                || !getIsInCombat) && setCurrentCharacter(filteredCharacter.id) && alert(filteredCharacter.id)">
               <div class="character-element">
                 <div class="element-frame">
                     <div>

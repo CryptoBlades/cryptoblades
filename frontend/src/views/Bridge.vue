@@ -56,8 +56,7 @@
         </div>
 
         <div class="sell-grid" v-if="nftType === 'shield'">
-          <nft-list v-model="selectedNftId" :isBridge="true"
-          />
+          <nft-list v-model="selectedNftId" showGivenNftIdTypes :nftIdTypes="ownedShieldIds.map(id => { return { id: id, type: 'shield' };})"/>
         </div>
 
         <div class="outcome" v-if="transferingToStorage">
@@ -211,13 +210,78 @@
           <span>{{ $t('bridge.noRefundOfSpentSkill') }}</span>
         </b-modal>
       </b-tab>
+      <!-- OLD BRIDGE: This tab is only useful for people who didn't withdraw their NFTs from the earlier bridge version -->
+      <b-tab v-if="incomingNftIds.length !== 0" :title="$t('bridge.incomingNfts')" @click="getIncoming(); selectedNftId = ''">
+        <div v-if="incomingNftIds.length === 0">
+          <h3 class="text-center p-4">{{$t('bridge.noIncomingNfts')}}</h3>
+        </div>
+        <div v-else>
+          <div class="d-flex flex-row flex-wrap bd-highlight mb-3 justify-content-center">
+            <div v-if="incomingWeapons.length !== 0" class="p-4 w-20">
+              <h4 class="text-center withdrawText">{{$t('bridge.selectWeaponToWithdraw')}}</h4>
+              <select class="form-control withdrawSelect" v-model="weaponIdToWithdraw">
+                <option value="" disabled selected>{{$t('bridge.selectYourWeapon')}}</option>
+                <option v-for="weapon in incomingWeapons"
+                :value="weapon.targetId"
+                :key="weapon.sourceId">
+                  {{$t('bridge.weaponId')}}: {{ weapon.sourceId }}
+                  {{$t('bridge.fromChain')}}: {{supportedChains[supportedChainIds.indexOf(weapon.sourceChain)]}}
+                </option>
+              </select>
+              <div class="mt-2 text-center">
+                <b-button :disabled="!weaponIdToWithdraw" variant="primary" @click="withdrawBridge(weaponIdToWithdraw)"
+                          class="gtag-link-others withdrawBtn" tagname="click_transfer_bridge"> {{ $t('bridge.withdrawWeapon') }}
+                </b-button>
+              </div>
+            </div>
+            <div v-if="incomingChars.length !== 0" class="p-4 w-20">
+              <h4 class="text-center withdrawText">{{$t('bridge.selectCharacterToWithdraw')}}</h4>
+              <select class="form-control withdrawSelect" v-model="characterIdToWithdraw">
+                <option value="" disabled selected>{{$t('bridge.selectYourCharacter')}}</option>
+                <option v-for="character in incomingChars"
+                :value="character.targetId"
+                :key="character.sourceId">
+                  {{$t('bridge.characterId')}}: {{ character.sourceId }} {{$t('bridge.fromChain')}}:
+                  {{supportedChains[supportedChainIds.indexOf(character.sourceChain)]}}
+                </option>
+              </select>
+              <div class="mt-2 text-center">
+                <b-button :disabled="!characterIdToWithdraw" variant="primary"
+                  @click="withdrawBridge(characterIdToWithdraw)" class="gtag-link-others withdrawBtn"
+                  tagname="click_transfer_bridge">{{$t('bridge.withdrawCharacter')}}</b-button>
+              </div>
+            </div>
+            <div v-if="incomingShields.length !== 0" class="p-4 w-20">
+              <h4 class="text-center withdrawText">{{$t('bridge.selectYourShieldToWithdraw')}}</h4>
+              <select class="form-control withdrawSelect" v-model="shieldIdToWithdraw">
+                <option value="" disabled selected>{{$t('bridge.selectYourShield')}}</option>
+                <option v-for="shield in incomingShields"
+                :value="shield.targetId"
+                :key="shield.sourceId">
+                  {{$t('bridge.shieldId')}}: {{ shield.sourceId }}
+                  {{$t('bridge.fromChain')}}: {{supportedChains[supportedChainIds.indexOf(shield.sourceChain)]}}
+                </option>
+              </select>
+              <div class="mt-2 text-center">
+                <b-button :disabled="!shieldIdToWithdraw" variant="primary" @click="withdrawBridge(shieldIdToWithdraw)"
+                          class="gtag-link-others withdrawBtn" tagname="click_transfer_bridge"> {{$t('bridge.withdrawShield')}}
+                </b-button>
+              </div>
+            </div>
+          </div>
+          <div class="outcome" v-if="withdrawingFromBridge">
+            <i class="fas fa-spinner fa-spin"></i>
+            {{$t('bridge.loading')}}
+          </div>
+        </div>
+      </b-tab>
     </b-tabs>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
-import {isNftType, Nft, NftTransfer} from '@/interfaces/Nft';
+import {isNftType, Nft, NftTransfer, TransferedNft} from '@/interfaces/Nft';
 import {Accessors} from 'vue/types/options';
 import {Contract, Contracts, IState} from '@/interfaces';
 import {NftIdType} from '@/components/smart/NftList.vue';
@@ -229,7 +293,7 @@ import CurrencyConverter from '../components/CurrencyConverter.vue';
 import {fromWeiEther, toBN} from '@/utils/common';
 import config from '../../app-config.json';
 
-type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards'>;
+type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds' | 'ownedShieldIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards'>;
 
 interface StoreMappedGetters {
   contracts: Contracts;
@@ -267,6 +331,10 @@ interface StoreMappedActions {
     tokenId: number;
   }): Promise<void>;
   cancelBridge(): Promise<void>;
+  getReceivedNFTs(): Promise<number[]>;
+  getReceivedNFT(payload: {
+    tokenId: number;
+  }): Promise<TransferedNft>;
   chainEnabled(payload: {
     chainId: number;
   }): Promise<boolean>;
@@ -316,6 +384,10 @@ export default Vue.extend({
       currentTransferNFTType: '',
       currentTransferChain: '',
       chainsToSendTo: [] as string[],
+      incomingNftIds: [] as number[],
+      incomingWeapons: [] as TransferedNft[],
+      incomingChars: [] as TransferedNft[],
+      incomingShields: [] as TransferedNft[],
       weaponIdToWithdraw: '',
       characterIdToWithdraw: '',
       shieldIdToWithdraw: '',
@@ -429,6 +501,7 @@ export default Vue.extend({
     if (!this.contracts.NFTStorage) return;
     this.bridgeFee = await this.contracts.NFTStorage.methods.getBridgeFee().call({ from: this.defaultAccount });
     await this.showStorage();
+    await this.getIncoming();
     this.refreshIntervall = window.setInterval(async () => await this.showStorage(), 5000);
   },
   beforeDestroy(){
@@ -449,6 +522,8 @@ export default Vue.extend({
       'getBridgeTransferId',
       'withdrawFromBridge',
       'cancelBridge',
+      'getReceivedNFTs',
+      'getReceivedNFT',
       'chainEnabled',
     ]) as StoreMappedActions),
     convertWeiToSkill(wei: string): string {
@@ -504,12 +579,29 @@ export default Vue.extend({
       try{
         await this.withdrawFromBridge({
           tokenId });
+        await this.getIncoming();
         this.withdrawingFromBridge = false;
         this.weaponIdToWithdraw = '';
         this.characterIdToWithdraw = '';
         this.shieldIdToWithdraw = '';
       } catch(e){
         this.withdrawingFromBridge = false;
+      }
+    },
+    async getIncoming(){
+      this.incomingWeapons = [];
+      this.incomingChars = [];
+      this.incomingShields = [];
+      //get incoming nft ids
+      this.incomingNftIds = await this.getReceivedNFTs();
+      for(let i = 0; i < this.incomingNftIds.length; i++){
+        const incomingNft: TransferedNft  = await this.getReceivedNFT({
+          tokenId: +this.incomingNftIds[i]
+        });
+        incomingNft.targetId = +this.incomingNftIds[i];
+        if(incomingNft.nftType === 1) this.incomingWeapons.push(incomingNft);
+        if(incomingNft.nftType === 2) this.incomingChars.push(incomingNft);
+        if(incomingNft.nftType === 3) this.incomingShields.push(incomingNft);
       }
     },
     async getChainId(tokenId: number){
