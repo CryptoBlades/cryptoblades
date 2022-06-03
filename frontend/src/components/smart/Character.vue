@@ -100,7 +100,7 @@
       </div>
     </div>
     <!--Character Change Trait Modal -->
-    <b-modal class="centered-modal" ref="character-change-trait-modal"
+    <b-modal @hide="removeErrors" class="centered-modal" ref="character-change-trait-modal"
       centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
       dialog-class="dialog-character" size="lg">
       <template #modal-title>
@@ -121,7 +121,7 @@
         </div>
       </div>
       <div class="transferResultContainer">
-        <span class="resultMsg text-center"> {{resultMsg}} </span>
+        <small class="resultMsg text-center"> {{resultMsg}} </small>
       </div>
       <button class="modal-btn" :disabled="isSending || targetTrait === ''" @click="changeCharacterTraitCall">
           <span v-if="isSending"><i class="fas fa-spinner fa-spin"></i> Loading</span>
@@ -448,6 +448,9 @@ export default Vue.extend({
     ]) as StoreMappedActions,
     getCharacterArt,
     RequiredXp,
+    removeErrors(){
+      this.resultMsg = '';
+    },
     async onSoulTransferConfirm() {
       if(!isValidWeb3Address(this.receiverAddress) || this.soulAmountToTransfer === 0) return;
       this.isSending = true;
