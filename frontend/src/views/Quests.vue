@@ -182,6 +182,13 @@ export enum ReputationTier {
   PEASANT, TRADESMAN, NOBLE, KNIGHT, KING
 }
 
+export enum QuestTemplateType {
+  QUEST,
+  PROMO=10,
+  WALLET=20,
+  PICKABLE=30
+}
+
 export interface ReputationLevelRequirements {
   level2: number;
   level3: number;
@@ -219,6 +226,8 @@ interface StoreMappedActions {
   claimWeeklyReward(): Promise<number[]>;
 
   isUsingPromoQuests(): Promise<boolean>;
+
+  getWalletQuestData(): Promise<Quest[]>;
 }
 
 interface StoreMappedGetters {
@@ -290,6 +299,7 @@ export default Vue.extend({
     ...mapActions([
       'fetchCharacters',
       'getCharacterQuestData',
+      'getWalletQuestData',
       'getReputationLevelRequirements',
       'nextWeeklyQuestCompletionGoalReset',
       'getWeeklyCompletions',
@@ -337,6 +347,7 @@ export default Vue.extend({
           character.quest = await this.getCharacterQuestData({characterId: character.id});
           return character;
         }));
+        this.getWalletQuestData();
       } finally {
         this.isLoading = false;
       }
