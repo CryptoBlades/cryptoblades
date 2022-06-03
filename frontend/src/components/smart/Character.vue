@@ -112,7 +112,7 @@
       <div class="input">
         <select class="form-control" v-model="targetTrait" :disabled="availableTraits.length === 0">
           <option class="text-body" v-if="availableTraits.length === 0" value="">{{ $t('Character.noTraits') }}</option>
-          <option class="text-body" v-else value="" disabled selected>Please select a trait</option>
+          <option class="text-body" v-else value="" disabled selected hidden>Please select a trait</option>
           <option class="text-body" v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
         </select>
         <div class="inputImage" v-if="targetTrait">
