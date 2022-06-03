@@ -148,6 +148,7 @@ export enum RewardType {
   SHIELD,
   EXPERIENCE = 9,
   SOUL = 7,
+  CHARACTER,
   EXTERNAL = 10,
 }
 
@@ -165,6 +166,7 @@ export enum QuestItemType {
   EXPERIENCE,
   EXTERNAL,
   EXTERNAL_HOLD,
+  CHARACTER,
   REPUTATION = 99
 }
 
@@ -178,6 +180,13 @@ export enum DustRarity {
 
 export enum ReputationTier {
   PEASANT, TRADESMAN, NOBLE, KNIGHT, KING
+}
+
+export enum QuestTemplateType {
+  QUEST,
+  PROMO=10,
+  WALLET=20,
+  PICKABLE=30
 }
 
 export interface ReputationLevelRequirements {
@@ -217,6 +226,8 @@ interface StoreMappedActions {
   claimWeeklyReward(): Promise<number[]>;
 
   isUsingPromoQuests(): Promise<boolean>;
+
+  getWalletQuestData(): Promise<Quest[]>;
 }
 
 interface StoreMappedGetters {
@@ -288,6 +299,7 @@ export default Vue.extend({
     ...mapActions([
       'fetchCharacters',
       'getCharacterQuestData',
+      'getWalletQuestData',
       'getReputationLevelRequirements',
       'nextWeeklyQuestCompletionGoalReset',
       'getWeeklyCompletions',
@@ -335,6 +347,7 @@ export default Vue.extend({
           character.quest = await this.getCharacterQuestData({characterId: character.id});
           return character;
         }));
+        this.getWalletQuestData();
       } finally {
         this.isLoading = false;
       }
