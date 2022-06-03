@@ -285,7 +285,7 @@
              :title="$t('quests.addNew')+` `+$t(`quests.questTemplateType.${QuestTemplateType[questTemplateType]}`)">
       <div class="d-flex flex-column align-items-center">
         <h4 class="text-center">
-          {{ promoQuestTemplates ? $t('quests.areYouSureAddPromoQuest') : $t('quests.areYouSureAddQuest') }}
+          {{ $t('quests.areYouSureAdd', {questType: $t(`quests.questTemplateType.${QuestTemplateType[questTemplateType]}`)})}}
         </h4>
         <div class="quest-row p-3">
           <QuestRequirements :quest="questTemplate"/>
