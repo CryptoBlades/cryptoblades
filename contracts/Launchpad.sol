@@ -138,7 +138,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     }
 
     function _launchNotStarted(uint256 launchId) internal view {
-        require(launchStartTime[launchId] > block.timestamp, "Launch started");
+        require(launchStartTime[launchId] == 0 || launchStartTime[launchId] > block.timestamp, "Launch started");
     }
 
     // VIEWS
