@@ -58,6 +58,7 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     mapping(uint256 => mapping(address => uint256)) public launchUserInvestment;
     mapping(uint256 => mapping(address => uint256)) public launchUserUnclaimedSkillCommittedValue;
     mapping(uint256 => uint256) public launchTotalUnclaimedSkillCommittedValue;
+    mapping(uint256 => mapping(address => uint256)) public launchUserTotalUnclaimedSkillCommittedValue;
 
     // VESTING INFO
     mapping(uint256 => uint256[]) launchPeriodicVestingsPercentages;
@@ -67,15 +68,10 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     mapping(address => mapping(uint256 => uint256)) public userLinearVestingClaimTimestamp;
     mapping(address => mapping(uint256 => mapping(uint256 => bool))) public userClaimedVestingPortion;
 
-
     uint256 public nextLaunchId;
     uint256 public skillPrice;
 
     CryptoBlades _game;
-
-    // USER INFO UPGRADE
-    mapping(uint256 => mapping(address => uint256)) public launchUserTotalUnclaimedSkillCommittedValue;
-
 
     function initialize(CryptoBlades game) public initializer {
         __AccessControl_init_unchained();
