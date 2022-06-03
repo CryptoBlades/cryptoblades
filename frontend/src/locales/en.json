@@ -58,6 +58,8 @@
     "realWithdrawValueClaimable": "Currently you'll receive approximately {actualAmount} {tokenSymbol} for withdrawing {skillAmount} SKILL."
   },
   "Character": {
+    "cancelledTransaction": "You cancelled the transaction.",
+    "changeTraitError": "Error while changing the character trait.",
     "upgradeText": "Upgrading is the process of spending SKILL tokens to upgrade a character's power using souls. The target character receives bonus power, and the souls used will disappear.",
     "level": "Level",
     "power": "Power",
