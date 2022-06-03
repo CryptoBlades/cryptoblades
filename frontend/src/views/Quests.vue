@@ -8,7 +8,21 @@
         </b-button>
         <b-modal v-model="showQuestsListModal" :title="$t('quests.availableQuests')" hide-footer
                  @hide="showQuestsListModal = false; tier = undefined" size="xl">
-          <div class="d-flex align-items-center gap-3">
+          <div class="d-flex justify-content-center align-items-center gap-3">
+            <b-form-group class="m-3">
+              <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.QUEST">
+                {{ $t('quests.questsTitle') }}
+              </b-form-radio>
+              <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.PROMO">
+                {{ $t('quests.questTemplateType.PROMO') }}
+              </b-form-radio>
+              <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.WALLET">
+                {{ $t('quests.questTemplateType.WALLET') }}
+              </b-form-radio>
+              <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.PICKABLE">
+                {{ $t('quests.questTemplateType.PICKABLE') }}
+              </b-form-radio>
+            </b-form-group>
             <b-form-select class="mt-2 mb-2" v-model="tier">
               <b-form-select-option :value="undefined" disabled>
                 {{ $t('quests.pleaseSelectQuestTier') }}
@@ -18,7 +32,7 @@
               </b-form-select-option>
             </b-form-select>
           </div>
-          <QuestsList v-if="tier !== undefined" :tier="usePromoQuests ? tier + 10 : tier"/>
+          <QuestsList v-if="tier !== undefined" :tier="tier + tierOffset"/>
         </b-modal>
       </div>
       <div v-if="weeklyReward && weeklyReward.id && currentWeeklyCompletions !== undefined && weeklyReward.completionsGoal"
@@ -249,6 +263,7 @@ interface Data {
   rarities: Rarity[];
   tier?: Rarity;
   usePromoQuests: boolean;
+  questTemplateType: QuestTemplateType;
 }
 
 export default Vue.extend({
@@ -279,6 +294,8 @@ export default Vue.extend({
       hourglass,
       QuestItemType,
       Rarity,
+      QuestTemplateType,
+      questTemplateType: QuestTemplateType.QUEST,
     } as Data;
   },
 
@@ -293,6 +310,19 @@ export default Vue.extend({
     weeklyGoalReached(): boolean {
       return this.currentWeeklyCompletions >= this.weeklyReward?.completionsGoal!;
     },
+
+    tierOffset(): number {
+      switch(this.questTemplateType){
+      default:
+        return 0;
+      case QuestTemplateType.PROMO:
+        return 10;
+      case QuestTemplateType.PICKABLE:
+        return 20;
+      case QuestTemplateType.WALLET:
+        return 30;
+      }
+    }
   },
 
   methods: {
@@ -452,6 +482,13 @@ export default Vue.extend({
   transform: rotate(15deg);
   font-weight: bold;
   text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+}
+
+.form-group *{
+  white-space: nowrap;
+}
+.custom-select {
+  max-width: 500px;
 }
 
 @media (max-width: 576px) {
