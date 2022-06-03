@@ -785,6 +785,7 @@
     "rewardType": {
       "NONE": "None",
       "WEAPON": "Weapon",
+      "CHARACTER": "Character",
       "JUNK": "Junk",
       "TRINKET": "Trinket",
       "SHIELD": "Shield",
@@ -806,7 +807,8 @@
       "EXTERNAL": "External",
       "EXTERNAL_HOLD": "External Hold",
       "EXPERIENCE": "Experience",
-      "REPUTATION": "Reputation"
+      "REPUTATION": "Reputation",
+      "CHARACTER": "Character"
     },
     "reputationTier": {
       "PEASANT": "Peasant",

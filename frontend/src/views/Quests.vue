@@ -148,6 +148,7 @@ export enum RewardType {
   SHIELD,
   EXPERIENCE = 9,
   SOUL = 7,
+  CHARACTER,
   EXTERNAL = 10,
 }
 
@@ -165,6 +166,7 @@ export enum QuestItemType {
   EXPERIENCE,
   EXTERNAL,
   EXTERNAL_HOLD,
+  CHARACTER,
   REPUTATION = 99
 }
 

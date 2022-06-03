@@ -91,7 +91,8 @@
           <b-form-select
             v-else-if="questTemplate.rewardType !== RewardType.EXPERIENCE
             && questTemplate.rewardType !== RewardType.SOUL
-            && questTemplate.rewardType !== RewardType.EXTERNAL"
+            && questTemplate.rewardType !== RewardType.EXTERNAL
+            && questTemplate.rewardType !== RewardType.CHARACTER"
             class="mt-2 mb-2"
             v-model="questTemplate.rewardRarity"
             :disabled="questTemplate.rewardType === undefined">
@@ -409,11 +410,12 @@ export default Vue.extend({
       rewardTypes: [RewardType.WEAPON, RewardType.JUNK,
         RewardType.DUST, RewardType.TRINKET,
         RewardType.SHIELD, RewardType.EXPERIENCE,
-        RewardType.SOUL, RewardType.EXTERNAL],
+        RewardType.SOUL, RewardType.EXTERNAL,
+        RewardType.CHARACTER],
       weeklyRewardTypes: [RewardType.WEAPON, RewardType.JUNK,
         RewardType.DUST, RewardType.TRINKET,
         RewardType.SHIELD, RewardType.SOUL,
-        RewardType.EXTERNAL],
+        RewardType.EXTERNAL, RewardType.CHARACTER],
       promoQuestTemplates: false,
       isLoading: false,
       showTemplateConfirmationModal: false,
@@ -574,7 +576,8 @@ export default Vue.extend({
         || (this.questTemplate.rewardRarity === undefined
           && this.questTemplate.rewardType !== RewardType.EXPERIENCE
           && this.questTemplate.rewardType !== RewardType.SOUL
-          && this.questTemplate.rewardType !== RewardType.EXTERNAL)
+          && this.questTemplate.rewardType !== RewardType.EXTERNAL
+          && this.questTemplate.rewardType !== RewardType.CHARACTER)
         || !this.questTemplate.rewardAmount
         || this.questTemplate.reputationAmount === undefined
         || (this.timestamp && !this.supply)
