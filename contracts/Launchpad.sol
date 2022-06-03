@@ -418,12 +418,12 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
     function setTotalUnclaimedCommitted(uint256 launchId, address[] calldata users, uint256[] calldata totalCommittedValues) external onlyPhase1(launchId) launchNotStarted(launchId) restricted {
         require(nextLaunchId >= launchId, "Wrong ID");
         require(users.length > 0 && users.length == totalCommittedValues.length, "Bad input");
-        launchTotalUnclaimedSkillCommittedValue[launchId] = 0;
+        uint256 unclaimedCommittedValue = 0;
         for(uint i = 0; i < users.length; i++) {
             launchUserTotalUnclaimedSkillCommittedValue[launchId][users[i]] = totalCommittedValues[i];
-            launchTotalUnclaimedSkillCommittedValue[launchId] += totalCommittedValues[i];
+            unclaimedCommittedValue += totalCommittedValues[i];
         }
-        launchBaseAllocation[launchId] = launchBaseAllocation[launchId].sub(launchBaseAllocation[launchId].mul(launchTotalUnclaimedSkillCommittedValue[launchId]).div(launchFundsToRaise[launchId]));
+        launchBaseAllocation[launchId] = launchBaseAllocation[launchId].sub(launchBaseAllocation[launchId].mul(unclaimedCommittedValue).div(launchFundsToRaise[launchId]));
     }
 
     // WITHDRAW RAISED FUNDS
