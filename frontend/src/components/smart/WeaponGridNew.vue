@@ -700,8 +700,6 @@ export default Vue.extend({
 }
 
 .weapon-icon-wrapper {
-  width: 13.5em;
-  height: 18em;
 }
 .above-wrapper {
   padding: 0.1rem;
