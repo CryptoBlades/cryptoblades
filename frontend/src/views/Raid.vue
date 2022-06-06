@@ -980,10 +980,6 @@ hr.divider {
   padding-left: 20px;
 }
 
-.weapon-info{
-  margin-top: 10px;
-}
-
 .outline-box > div > p{
   margin: 0px;
   font-size: 15px;
