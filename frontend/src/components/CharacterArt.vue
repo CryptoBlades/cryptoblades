@@ -32,7 +32,7 @@
               basePower: baseCharacterPower,
               bonusPower: totalCharacterPower - baseCharacterPower,
               maxPower: 3 * baseCharacterPower
-            })">Power</span>
+            })">{{$t('homePage.power')}}</span>
             <div class="stamina-bar">
               <div class="stamina" :style="'width:'+(totalCharacterPower/totalCharacterPower)*100+'%'"></div>
             </div>
@@ -40,7 +40,7 @@
           </div>
           <div v-tooltip.bottom="` ${$t('CharacterArt.claimableXP')} ${this.getCharacterUnclaimedXp(character.id)}`">
             <span class="exp"></span>
-            <span class="lbl-title">Exp</span>
+            <span class="lbl-title">{{$t('Character.exp')}}</span>
             <div class="stamina-bar">
               <div class="stamina" :style="'width:'+((character.xp || 0) / (RequiredXp(character.level)))*100+'%'"></div>
             </div>
@@ -48,7 +48,7 @@
           </div>
           <div v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
             <span class="stam"></span>
-            <span class="lbl-title">Stamina</span>
+            <span class="lbl-title">{{$t('homePage.stamina')}}</span>
             <div class="stamina-bar">
               <div class="stamina" :style="'width:'+(characterStamina/maxStamina)*100+'%'"></div>
             </div>

@@ -400,7 +400,6 @@ export default Vue.extend({
       this.totalSoul = 0;
       this.remainingCharactersIds.forEach(id=> {
         this.burnCharacterIds.push(id.toString());
-        console.log('ID'+ id + ':: '+this.getCharacterPower(id)/10);
         this.totalSoul += this.getCharacterPower(id)/10;
       });
     },
@@ -436,7 +435,6 @@ export default Vue.extend({
     },
     async updateMintCharacterFee() {
       const recruitCost = await this.fetchMintCharacterFee();
-      console.log({recruitCost});
       const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
       this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
     },
