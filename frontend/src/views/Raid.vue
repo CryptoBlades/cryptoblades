@@ -178,7 +178,11 @@
                       $t('raid.rewardsFromPrevious'): $t('raid.noAvailableRewards')">
                       {{$t('raid.claimRewards').toUpperCase()}}
                     </button>
-                    <button v-if="!isMobile()" class="btn-raid"  v-tooltip="$t('raid.joiningCostStamina', {formatStaminaHours})" @click="joinRaidMethod()">
+                    <button v-if="!isMobile()" class="btn-raid"
+                    v-tooltip="!isRaidStarted ? $t('raid.errors.raidNotStarted') :
+                    (!this.selectedWeaponId ? $t('raid.errors.selection') : $t('raid.joiningCostStamina', {formatStaminaHours}))"
+                    @click="joinRaidMethod()"
+                    :class="!isRaidStarted || !this.selectedWeaponId ? 'opacity-0': 'opacity-1'">
                       {{$t('raid.joinRaid')}}
                     </button>
                      <button v-else class="btn-raid"  v-tooltip="$t('raid.joiningCostStamina', {formatStaminaHours})" @click="openEquipItems()">
