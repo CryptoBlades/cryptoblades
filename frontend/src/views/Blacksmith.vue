@@ -195,19 +195,19 @@
                     <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
                     <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
                       <span>{{$t('blacksmith.forge').toUpperCase()}} x1</span> <br>
-                      ({{ forgeCost }} SKILL)
+                      {{ forgeCost }} SKILL
                     </span>
                   </button>
 
                   <button
-                          class="ml-3"
-                          @click="onClickForge(1)"
-                          :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
-                          v-tooltip="$t('blacksmith.forge10New')">
+                    class="ml-3"
+                    @click="onClickForge(1)"
+                    :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
+                    v-tooltip="$t('blacksmith.forge10New')">
                     <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
                     <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
                       <span>{{$t('blacksmith.forge').toUpperCase()}} x10</span><br>
-                      ({{ (forgeCost*10).toFixed(4) }} SKILL)
+                      {{ (forgeCost*10).toFixed(4) }} SKILL
                     </span>
                   </button>
 
@@ -1511,38 +1511,19 @@ export default Vue.extend({
 }
 
 .button-div > button{
-  display: flex;
-  flex-direction: column;
-  border: none;
-  width: 10rem;
-  height: 70px;
-  align-items: center;
-  vertical-align: middle;
-  justify-content: center;
-  background-image: url('../assets/buttonOutline.svg');
-  background-color: transparent;
+  width: 200px;
+  height: 80px;
+  background: transparent;
+  background-image: url('../assets/btn-join.png');
+  background-size: contain;
+  background-position: center;
   background-repeat: no-repeat;
-  background-size: 100% 100%;
-  -o-object-fit: fill;
-  object-fit: fill;
-  border: none !important;
-}
-
-
-/* TO TEMPORARILY OVERRIDE THE PRIMARY BUTTON HOVER EFFECT */
-.button-div > button:hover, .forge-btns:hover{
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  vertical-align: middle !important;
-  justify-content: center !important;
-  background-image: url('../assets/buttonOutline.svg') !important;
-  background-color: transparent !important;
-  background-repeat: no-repeat !important;
-  background-size: 100% 100% !important;
-  -o-object-fit: fill !important;
-  object-fit: fill !important;
-  border: 0px !important;
+  border: none;
+  outline: none;
+  color: #F0E2B6;
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  text-transform: uppercase;
 }
 
 @media (max-width: 1200px) {
@@ -1571,7 +1552,8 @@ export default Vue.extend({
 }
 
 .button-div > button >span{
- color: #e9c97a;
+  color: #e9c97a;
+  font-family: "Roboto", sans-serif;
 }
 
 .reforgeDust > span{
