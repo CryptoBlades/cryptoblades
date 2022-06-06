@@ -173,7 +173,9 @@
                       </div>
                   </div>
                   <div class="col-lg-12 join-raid">
-                    <button class="claim-btn" @click="promptRewardClaim()" v-tooltip="'Rewards from Previous Raid'">
+                    <button class="claim-btn" :class="rewardIndexes !== null && rewardIndexes.length > 0 ? 'opacity-1': 'opacity-0'"
+                      @click="promptRewardClaim()" v-tooltip="rewardIndexes !== null && rewardIndexes.length > 0 ?
+                      $t('raid.rewardsFromPrevious'): $t('raid.noAvailableRewards')">
                       {{$t('raid.claimRewards').toUpperCase()}}
                     </button>
                     <button v-if="!isMobile()" class="btn-raid"  v-tooltip="$t('raid.joiningCostStamina', {formatStaminaHours})" @click="joinRaidMethod()">
@@ -1733,6 +1735,16 @@ hr.divider {
   margin-left: 1px;
   font-size: 13px;
    /* margin-top: 10px; */
+}
+
+.opacity-0{
+  opacity: 0.4;
+  cursor:not-allowed;
+}
+
+.opacity-1{
+  opacity: 1;
+  cursor: pointer;
 }
 
 .char-info > div:nth-child(2){

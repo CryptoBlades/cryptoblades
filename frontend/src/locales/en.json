@@ -540,6 +540,8 @@
     "bossPower": "Boss Power",
     "drops": "Drops",
     "raid": "Raid",
+    "rewardsFromPrevious": "Rewards from Previous Raid",
+    "noAvailableRewards": "No Available Rewards",
     "clickAnywhere": "Click Anywhere to continue",
     "dropChance": "Drop Chance",
     "allRewardRemove": "All rewards will be removed if unclaimed for seven days",
