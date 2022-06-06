@@ -58,6 +58,8 @@
     "realWithdrawValueClaimable": "Currently you'll receive approximately {actualAmount} {tokenSymbol} for withdrawing {skillAmount} SKILL."
   },
   "Character": {
+    "cancelledTransaction": "You cancelled the transaction.",
+    "changeTraitError": "Error while changing the character trait.",
     "upgradeText": "Upgrading is the process of spending SKILL tokens to upgrade a character's power using souls. The target character receives bonus power, and the souls used will disappear.",
     "level": "Level",
     "power": "Power",
@@ -793,6 +795,7 @@
     "rewardType": {
       "NONE": "None",
       "WEAPON": "Weapon",
+      "CHARACTER": "Character",
       "JUNK": "Junk",
       "TRINKET": "Trinket",
       "SHIELD": "Shield",
@@ -814,7 +817,8 @@
       "EXTERNAL": "External",
       "EXTERNAL_HOLD": "External Hold",
       "EXPERIENCE": "Experience",
-      "REPUTATION": "Reputation"
+      "REPUTATION": "Reputation",
+      "CHARACTER": "Character"
     },
     "reputationTier": {
       "PEASANT": "Peasant",
@@ -828,6 +832,12 @@
       "IN_ARENA": "In arena",
       "IN_RAID": "In raid",
       "BUSY": "Busy"
+    },
+    "questTemplateType":{
+      "QUEST": "Quest",
+      "PROMO": "Promo Quest",
+      "WALLET": "Wallet Quest",
+      "PICKABLE": "Pickable Quest"
     },
     "tier": "Tier",
     "level": "Level {level}",
@@ -874,17 +884,13 @@
     "howMuchToTurnIn": "How much to turn in?",
     "whatIdsToTurnIn": "What IDs to turn in?",
     "setRequiredAmount": "Set required amount",
-    "createNewQuest": "Create new quest",
+    "createNewQuest": "Create new",
     "addNewWeeklyReward": "Add new weekly reward",
     "updateUsePromoQuestTemplates": "Update use promo quest templates",
     "togglePromoQuestsUsage": "Toggle promo quests usage",
     "usePromoQuestTemplates": "Use promo quest templates",
-    "createNewPromoQuest": "Create new promo quest",
-    "promoQuests": "Promo quests",
-    "questTemplates": "Quest templates",
-    "promoQuestTemplates": "Promo quest templates",
-    "addNewQuest": "Add new quest",
-    "addNewPromoQuest": "Add new promo quest",
+    "templates": "Templates",
+    "addNew": "Add new",
     "addNewTurnOnPromoQuestsUsage": "Are you sure that you want to turn ON promo quests usage?",
     "addNewTurnOffPromoQuestsUsage": "Are you sure that you want to turn OFF promo quests usage",
     "areYouSureAddQuest": "Are you sure you want to add this quest?",

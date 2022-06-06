@@ -205,7 +205,7 @@
     },
     "links": {},
     "address": "0x7f63d22f5d8f42B78EACCF59AeB9518F5C5F7453",
-    "transactionHash": "0x604876e714ff135ba1ade889ae0853c78bf50c2bb2f521011376d3845c3bba8e"
+    "transactionHash": "0x596afe14d1e41a7fdf8904edfc1bdb7099ca741ff4f59b7bab02a664671e7334"
   },
   "build/contracts/BurningManager.json": {
     "events": {
@@ -2120,7 +2120,7 @@
     },
     "links": {},
     "address": "0xdf45c650a7494a889fbd2E77b53Da9EE69b631D0",
-    "transactionHash": "0xa8af4e465b2dfd0e65314f7c0dbe46b37f619fe2c97ad653a4d09c37469e33b8"
+    "transactionHash": "0xd37aed54d1a66933c63d3de0f0fc6948a658a81b72a35a36741f3a35988031f2"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -2699,7 +2699,7 @@
     },
     "links": {},
     "address": "0x81Cf70E8D62Ec8903FA0364aB2147349AC1F2125",
-    "transactionHash": "0x6e652546fd74a965f3ccc51621fadf1e5b396b6ab30af3bc56dd82e4ecdd7440"
+    "transactionHash": "0xa34302a68361c4900a02956b59f509dffca797adc4bddeabf179d39818738644"
   },
   "build/contracts/Junk.json": {
     "events": {
@@ -3157,8 +3157,8 @@
   "build/contracts/Launchpad.json": {
     "events": {},
     "links": {},
-    "address": "0x66486a0d042492892D13B5E13e99e914401979d9",
-    "transactionHash": "0x6f35767500eccfa114885de20d185c57c5b27546954204ddff8e00d90b6c79ec"
+    "address": "0x9F24eE34b714a4302adb1a0c139a9225e3161dB7",
+    "transactionHash": "0x58b8db47f46bb9d05c4c10ec9a69e41ceca32faee688c3da5195696c47b62533"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
@@ -4088,7 +4088,7 @@
     },
     "links": {},
     "address": "0x4CfCf604Ce8bcc6d5AEdB8362Da2C49cbD781F24",
-    "transactionHash": "0xd4bd82e5685c333818c68147595c54cd12211e46bfb3b8bae1618443cdac4eb9"
+    "transactionHash": "0xdb9a4f3bd16d050135a4f8c5ac770866492c764801f0b39049f9b549a71c014d"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -4189,7 +4189,7 @@
     },
     "links": {},
     "address": "0xC5706839db8946b53D3DC986EdA789a25A91e676",
-    "transactionHash": "0xad5425bce309ee3133549e2cbde0bd82775ca553c9f1ffaae8ae53aaedf1a383"
+    "transactionHash": "0x5f26f07eaf5b005c62ddd91bf41c8a22e32408aec57efe94ae3b1e96ed358b48"
   },
   "build/contracts/Raid1.json": {
     "events": {},
@@ -5052,7 +5052,7 @@
     },
     "links": {},
     "address": "0x77e4100f80B8eF7B486986160255fa8AEB6E3864",
-    "transactionHash": "0x67f8ad7549fb527c64b8b710d868fafcc5da40503a2691913cb60a2e12c9631f"
+    "transactionHash": "0x363740a180f085158a760d862180d019201b34478edd9df799e2ef8f200f59a1"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},
