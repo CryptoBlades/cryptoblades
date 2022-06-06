@@ -279,6 +279,11 @@
       "address": "0xf7c3D4e17aE07D88F47F1DAE5743701C2F207Bb3",
       "txHash": "0xaf0c72af26f2a905481269db866fcc7ce2b0a23ae2ae12a616b88e465a13065c",
       "kind": "transparent"
+    },
+    {
+      "address": "0xe3027D22E43ffc7fcB19658130b52bc402519A4c",
+      "txHash": "0xc7dd34ce87e783af81c5198c1d1e26495a1bdd19818ec06f8c463c571a287f58",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -45901,6 +45906,358 @@
           },
           "t_bool": {
             "label": "bool"
+          }
+        }
+      }
+    },
+    "2700f92d5e0b36ff5fec3e7ffa0dadd33aedc7fd41edb08fae15e1495ad69e2d": {
+      "address": "0xC2E3405143b41685590C7549Ab89407cc1C84b85",
+      "txHash": "0xf553bdb893dfc9bd17d05d7d7a9d3eaf9c27399fa0a2327c19cd417f69a29346",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)56625_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "vars",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:32"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "tierStakingRequirement",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:43"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "tierAllocationWeight",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:44"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launches",
+            "type": "t_mapping(t_uint256,t_struct(Launch)10234_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:47"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchTokenPrice",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:48"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchStartTime",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:49"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchFundsToRaise",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:50"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchBaseAllocation",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:51"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchTotalRaised",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:52"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchTokenAddress",
+            "type": "t_mapping(t_uint256,t_address)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:53"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchEligibleUsersSnapshot",
+            "type": "t_mapping(t_uint256,t_struct(AddressSet)62750_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:56"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchUserStakedAmountSnapshot",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:57"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchUserInvestment",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:58"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchUserUnclaimedSkillCommittedValue",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:59"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchTotalUnclaimedSkillCommittedValue",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:60"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchUserTotalUnclaimedSkillCommittedValue",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:61"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchPeriodicVestingsPercentages",
+            "type": "t_mapping(t_uint256,t_array(t_uint256)dyn_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:64"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchPeriodicVestingsStartTimestamps",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:65"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchLinearVestingsDurations",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:66"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "launchLinearVestingsStartTimestamps",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:67"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "userLinearVestingClaimTimestamp",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:68"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "userClaimedVestingPortion",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_uint256,t_bool)))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:69"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "nextLaunchId",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:71"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "skillPrice",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:72"
+          },
+          {
+            "contract": "Launchpad",
+            "label": "_game",
+            "type": "t_contract(CryptoBlades)41860",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Launchpad.sol:74"
+          }
+        ],
+        "types": {
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_uint256,t_struct(Launch)10234_storage)": {
+            "label": "mapping(uint256 => struct Launchpad.Launch)"
+          },
+          "t_struct(Launch)10234_storage": {
+            "label": "struct Launchpad.Launch",
+            "members": [
+              {
+                "label": "name",
+                "type": "t_string_storage"
+              },
+              {
+                "label": "tokenSymbol",
+                "type": "t_string_storage"
+              },
+              {
+                "label": "detailsJsonUri",
+                "type": "t_string_storage"
+              },
+              {
+                "label": "imageUrl",
+                "type": "t_string_storage"
+              },
+              {
+                "label": "fundingTokenAddress",
+                "type": "t_address"
+              },
+              {
+                "label": "phase",
+                "type": "t_uint256"
+              },
+              {
+                "label": "commitOnly",
+                "type": "t_bool"
+              }
+            ]
+          },
+          "t_string_storage": {
+            "label": "string"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)"
+          },
+          "t_mapping(t_uint256,t_struct(AddressSet)62750_storage)": {
+            "label": "mapping(uint256 => struct EnumerableSet.AddressSet)"
+          },
+          "t_struct(AddressSet)62750_storage": {
+            "label": "struct EnumerableSet.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)62485_storage"
+              }
+            ]
+          },
+          "t_struct(Set)62485_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(uint256 => mapping(address => uint256))"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_mapping(t_uint256,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(uint256 => uint256[])"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(uint256 => mapping(uint256 => uint256))"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_mapping(t_uint256,t_bool)))": {
+            "label": "mapping(address => mapping(uint256 => mapping(uint256 => bool)))"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_bool))": {
+            "label": "mapping(uint256 => mapping(uint256 => bool))"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          },
+          "t_contract(CryptoBlades)41860": {
+            "label": "contract CryptoBlades"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)56625_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_struct(RoleData)56625_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)59820_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)59820_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)59555_storage"
+              }
+            ]
+          },
+          "t_struct(Set)59555_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
           }
         }
       }
