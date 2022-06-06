@@ -100,7 +100,7 @@
                             .
                         </div>
                         <div>
-                          <p class="name bold character-name"> {{getCleanCharacterName(currentCharacterId)}} </p>
+                          <p class="name character-name"> {{getCleanCharacterName(currentCharacterId).toUpperCase()}} </p>
                           <span class="subtext subtext-stats">
                             <p style="text-transform:capitalize"><span :class="traitNumberToName(currentCharacter.trait).toLowerCase()
                             + '-icon trait-icon char-icon'" /> {{ traitNumberToName(currentCharacter.trait).toLowerCase() }} {{$t('raid.element')}}</p>
