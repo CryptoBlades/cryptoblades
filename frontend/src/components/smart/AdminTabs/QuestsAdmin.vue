@@ -34,8 +34,14 @@
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectRequirementType') }}
             </b-form-select-option>
-            <b-form-select-option v-for="requirementType in requirementTypes" :key="requirementType"
-                                  :value="requirementType">
+            <b-form-select-option
+              v-for="requirementType in requirementTypes"
+              :key="requirementType"
+              :value="requirementType"
+              :disabled="
+              (requirementType === RequirementType.STAMINA || requirementType === RequirementType.RAID)
+              && questTemplateType === QuestTemplateType.WALLET"
+              >
               {{ $t(`quests.requirementType.${RequirementType[requirementType]}`) }}
             </b-form-select-option>
           </b-form-select>
@@ -77,7 +83,9 @@
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectRewardType') }}
             </b-form-select-option>
-            <b-form-select-option v-for="rewardType in rewardTypes" :key="rewardType" :value="rewardType">
+            <b-form-select-option v-for="rewardType in rewardTypes" :key="rewardType" :value="rewardType"
+            :disabled="questTemplateType === QuestTemplateType.WALLET && rewardType === RewardType.EXPERIENCE"
+            >
               {{ $t(`quests.rewardType.${RewardType[rewardType]}`) }}
             </b-form-select-option>
           </b-form-select>
@@ -113,7 +121,11 @@
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reputation') }}</label>
         <div class="d-flex align-items-center gap-3">
-          <b-form-input v-model="questTemplate.reputationAmount" type="number" number :min="0"/>
+          <b-form-input
+            v-model="questTemplate.reputationAmount"
+            type="number" number
+            :min=" questTemplateType === QuestTemplateType.WALLET ? 0 : 0"
+            />
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.limitedOptional') }}</label>
         <div class="d-flex align-items-center gap-3 mt-2">
@@ -131,7 +143,7 @@
         {{$t('quests.addNew')}} {{$t(`quests.questTemplateType.${QuestTemplateType[questTemplateType]}`)}}
       </b-button>
     </b-form>
-    <QuestTemplatesDisplay :questTemplateType="questTemplateType"/>
+    <QuestTemplatesDisplay/>
     <h2 class="mt-2">{{ $t('quests.setWeeklyRewardCurrent', {weekNumber: currentWeekNumber}) }}</h2>
     <b-form class="d-flex flex-column gap-3">
       <div class="grid-container gap-3">
@@ -290,8 +302,8 @@
         <div class="quest-row p-3">
           <QuestRequirements :quest="questTemplate"/>
           <QuestRewards :quest="questTemplate"/>
-          <QuestActions :quest="questTemplate" :key="questTemplate.id" showSupply :deadline="timestamp"
-                        :questSupply="supply"/>
+          <QuestActions :quest="questTemplate" :questTemplateType="questTemplateType" :key="questTemplate.id" showSupply :deadline="timestamp"
+                        :questSupply="supply" :showActions="false"/>
         </div>
       </div>
     </b-modal>
@@ -523,7 +535,7 @@ export default Vue.extend({
         this.isLoading = true;
         await this.addQuestTemplate({
           questTemplate: this.questTemplate,
-          tierOffset: this.tierOffset,
+          tierOffset: this.questTemplateType,
           supply: this.supply ? this.supply : 0,
           deadline: this.timestamp ? this.timestamp : 0,
         });
@@ -609,7 +621,8 @@ export default Vue.extend({
         || (this.questTemplate.rewardType === RewardType.EXTERNAL
           && this.questTemplate.rewardExternalAddress
           && !isValidWeb3Address(this.questTemplate.rewardExternalAddress))
-        || this.showTemplateConfirmationModal || this.isLoading;
+        || this.showTemplateConfirmationModal || this.isLoading
+        || (this.questTemplateType === QuestTemplateType.WALLET && this.questTemplate.reputationAmount === 0);
     },
 
     addNewWeeklyRewardDisabled() {
@@ -693,5 +706,8 @@ export default Vue.extend({
   border: 1px solid #60583E;
   border-radius: 10px;
   align-items: center;
+}
+.custom-select{
+  color:#000;
 }
 </style>

@@ -26,7 +26,7 @@
         </b-form-select-option>
       </b-form-select>
     </b-form>
-    <QuestsList v-if="templatesTier !== undefined" :tier="questTemplateTier" deletable/>
+    <QuestsList v-if="templatesTier !== undefined" :tier="questTemplateTier" :questTemplateType="questTemplateType" deletable/>
   </div>
 </template>
 
@@ -53,7 +53,6 @@ interface Data {
 }
 
 export default Vue.extend({
-
   components: {QuestsList},
 
   data() {
@@ -62,17 +61,17 @@ export default Vue.extend({
       questTemplates: [],
       templatesTier: undefined,
       QuestTemplateType,
-      questTemplateType: QuestTemplateType.QUEST,
+      questTemplateType: QuestTemplateType.WALLET,
       isLoading: false,
       Rarity,
     } as Data;
   },
   computed: {
     questTemplateTier(): number | undefined {
-      if(!this.templatesTier) {
+      if(this.templatesTier === undefined) {
         return undefined;
       }
-      else if(this.questTemplateType === QuestTemplateType.PROMO) {
+      if(this.questTemplateType === QuestTemplateType.PROMO) {
         return this.templatesTier + 10;
       }
       else if(this.questTemplateType === QuestTemplateType.PICKABLE) {
@@ -81,9 +80,10 @@ export default Vue.extend({
       else if(this.questTemplateType === QuestTemplateType.WALLET) {
         return this.templatesTier + 30;
       }
-      else {
+      else if(this.questTemplateType === QuestTemplateType.QUEST) {
         return this.templatesTier;
       }
+      return this.templatesTier;
     }
   },
   methods: {
@@ -107,14 +107,12 @@ export default Vue.extend({
       }
     },
   },
-
   async mounted() {
     await this.refreshQuestTemplates();
     this.$root.$on('refresh-quest-templates', async () => {
       await this.refreshQuestTemplates();
     });
   }
-
 });
 </script>
 
