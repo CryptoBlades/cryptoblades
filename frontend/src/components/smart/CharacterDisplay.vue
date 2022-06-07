@@ -336,25 +336,6 @@ export default Vue.extend({
   width: 100%;
 }
 
-.character-portrait {
-  width: 6.5em;
-  height: 6.5em;
-  background: gray;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 4px rgba(0, 0, 0, 0.5) inset;
-  background: url("../../assets/chara-bg.png") center bottom -4px no-repeat;
-  background-size: auto 140%;
-  background-clip: border-box;
-  margin-right: 0.625em;
-}
-
-.character-portrait img {
-  max-height: 100%;
-  max-width: 100%;
-}
-
 .character-data-column {
   display: flex;
   flex-direction: column;
