@@ -4,14 +4,14 @@
       <div>
         <div class="select-wrapper-no" :data-content="$t('characterList.level')">
           <select class="form-control" v-model="levelFilter">
-            <option class="text-right" v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
+            <option v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
               {{ x ? `${x} - ${x + 9}` : $t('characterList.sorts.any') }}
             </option>
           </select>
         </div>
         <div class="select-wrapper-element" :data-content="$t('characterList.element')">
           <select class="form-control" v-model="elementFilter">
-            <option class="text-right" v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+            <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
             :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('characterList.sorts.any') }}</option>
           </select>
         </div>
@@ -610,6 +610,10 @@ export default {
   padding: 1px;
   color: #fff;
   font-family: Roboto;
+  text-align: right;
+}
+
+.select-wrapper-no > select.form-control, .select-wrapper-element > select.form-control {
   text-align: right;
 }
 
