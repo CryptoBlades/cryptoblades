@@ -14,8 +14,14 @@
       <img v-if="showPlaceholder" v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
         class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)"/>
 
-      <div class="stars-flex">
-        <b-icon v-for="s in weapon.stars+1"  :key="s" class="star-stat" icon="star-fill" variant="warning" />
+      <div class="d-flex flex-column align-items-end stars-flex">
+        <div class="round" v-if="selected">
+          <input type="checkbox" checked id="checkbox" />
+          <label for="checkbox"></label>
+        </div>
+        <div>
+          <b-icon v-for="s in weapon.stars+1"  :key="s" class="star-stat" icon="star-fill" variant="warning" />
+        </div>
       </div>
 
       <div class="favorite">
@@ -479,6 +485,47 @@ export default {
 
 <style scoped>
 @import '../styles/weapon-cosmetics.css';
+.round {
+  position: relative;
+}
+
+.round label {
+  background-color: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  height: 28px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 28px;
+}
+
+.round label:after {
+  border: 2px solid #fff;
+  border-top: none;
+  border-right: none;
+  content: "";
+  height: 6px;
+  left: 7px;
+  opacity: 0;
+  position: absolute;
+  top: 8px;
+  transform: rotate(-45deg);
+  width: 12px;
+}
+
+.round input[type="checkbox"] {
+  visibility: hidden;
+}
+
+.round input[type="checkbox"]:checked + label {
+  background-color: #EDCD90;
+  border-color: #EDCD90;
+}
+
+.round input[type="checkbox"]:checked + label:after {
+  opacity: 1;
+}
 
 .small-durability-bar {
   position: relative;
@@ -546,8 +593,6 @@ export default {
 }
 
 .stars-flex{
-  display: flex;
-  justify-content: center;
   position: absolute;
   top:27px;
   right: 20px;
