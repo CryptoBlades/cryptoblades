@@ -172,8 +172,10 @@
                         <nft-icon :isDefault="true" :nft="{ type: '5bdust' }"/>
                       </div>
                   </div>
+                  <!-- :class="rewardIndexes !== null && rewardIndexes.length > 0 ? 'opacity-1': 'opacity-0'" -->
                   <div class="col-lg-12 join-raid">
-                    <button class="claim-btn" :class="rewardIndexes !== null && rewardIndexes.length > 0 ? 'opacity-1': 'opacity-0'"
+                    <button class="claim-btn"
+                      :disabled="noRewards"
                       @click="promptRewardClaim()" v-tooltip="rewardIndexes !== null && rewardIndexes.length > 0 ?
                       $t('raid.rewardsFromPrevious'): $t('raid.noAvailableRewards')">
                       {{$t('raid.claimRewards').toUpperCase()}}
@@ -526,6 +528,10 @@ export default Vue.extend({
 
     changeEquipedWeapon(){
       Events.$emit('weapon-inventory', true);
+    },
+
+    noRewards(){
+      return this.rewardIndexes === null && this.rewardIndexes.length === 0;
     },
 
     closeRewardPicker(id: any){
