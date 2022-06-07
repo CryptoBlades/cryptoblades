@@ -613,6 +613,10 @@ export default {
   text-align: right;
 }
 
+.select-wrapper-no > select.form-control, .select-wrapper-element > select.form-control {
+  text-align: right;
+}
+
 .mobile-filter{
   display: flex;
   align-items: center;
