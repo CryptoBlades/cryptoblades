@@ -4,14 +4,14 @@
       <div>
         <div class="select-wrapper-no" :data-content="$t('characterList.level')">
           <select class="form-control" v-model="levelFilter">
-            <option v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
+            <option class="text-right" v-for="x in ['', 1, 11, 21, 31, 41, 51, 61, 71, 81, 91]" :value="x" :key="x">
               {{ x ? `${x} - ${x + 9}` : $t('characterList.sorts.any') }}
             </option>
           </select>
         </div>
         <div class="select-wrapper-element" :data-content="$t('characterList.element')">
           <select class="form-control" v-model="elementFilter">
-            <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+            <option class="text-right" v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
             :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('characterList.sorts.any') }}</option>
           </select>
         </div>

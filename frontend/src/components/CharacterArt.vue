@@ -38,14 +38,16 @@
             </div>
             <span class="lbl-value">{{totalCharacterPower.toLocaleString()}}</span>
           </div>
+
           <div v-tooltip.bottom="` ${$t('CharacterArt.claimableXP')} ${this.getCharacterUnclaimedXp(character.id)}`">
             <span class="exp"></span>
             <span class="lbl-title">{{$t('Character.exp')}}</span>
             <div class="stamina-bar">
-              <div class="stamina" :style="'width:'+((character.xp || 0) / (RequiredXp(character.level)))*100+'%'"></div>
+              <div class="stamina" :style="'width:'+((character.xp || 0) / (RequiredXp(character.level + 1 || 0) || 1))*100+'%'"></div>
             </div>
-            <span class="lbl-value">{{RequiredXp(character.level).toLocaleString()}}</span>
+            <span class="lbl-value">{{RequiredXp(character.level + 1 || 1).toLocaleString()}}</span>
           </div>
+
           <div v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
             <span class="stam"></span>
             <span class="lbl-title">{{$t('homePage.stamina')}}</span>

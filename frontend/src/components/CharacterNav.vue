@@ -19,7 +19,7 @@
         <div class="w-100 d-block d-md-none none-mobile"></div>
         <div class="separator d-none d-md-block mx-3 none-mobile"></div>
         <div role="button" class="none-mobile" :class="['d-flex gap-3 align-items-center link mt-4 mt-md-0',
-           (activeTab === 'garrison' || !havePlazaCharacters) ? 'active' : '']" @click="$emit('toggle', 'garrison')">
+           (activeTab === 'garrison') ? 'active' : '']" @click="$emit('toggle', 'garrison')">
           <div class="img-nav">
             <div class="img-frame"></div>
               <div class="gar-container">
@@ -34,7 +34,7 @@
         </div>
         <div class="separator d-none d-md-block mx-3 none-mobile"></div>
         <div role="button" class="nav-char none-mobile" :class="['d-flex gap-3 align-items-center link',
-           (activeTab === 'burn' && havePlazaCharacters) ? 'active' : '']" @click="$emit('toggle', 'burn')">
+           (activeTab === 'burn') ? 'active' : '']" @click="$emit('toggle', 'burn')">
           <div class="img-nav">
             <div class="img-frame"></div>
             <img src="../assets/soul.png"/>

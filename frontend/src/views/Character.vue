@@ -48,7 +48,7 @@
         <character class="char-info" />
       </template>
       <template v-if="activeTab === 'garrison'">
-        <div v-if="!soulCreationActive" class="row mt-3 z-index-1 char-info">
+        <div class="row mt-3 z-index-1 char-info ml-0 mr-0">
           <div class="col">
             <div>
               <div class="d-flex flex-column flex-md-row justify-content-space-between garrisson-content">
@@ -164,8 +164,6 @@ import {
 } from '../feature-flags';
 
 
-
-
 interface StoreMappedActions {
   fetchMintCharacterFee(): Promise<string>;
   mintCharacter(value: boolean): Promise<void>;
@@ -192,7 +190,6 @@ interface Data {
   mintPriceDecreasePerHour: string;
   mintCharacterPriceIncrease: string;
   mintCharacterMinPrice: string;
-  soulCreationActive: boolean;
   activeTab: string;
   soulBalance: number;
   burnCost: number;
@@ -223,7 +220,6 @@ export default Vue.extend({
       mintCharacterPriceIncrease: '0',
       mintCharacterMinPrice: '0',
       showAds: false,
-      soulCreationActive: false,
       soulBalance: 0,
       burnCost: 0,
       burnPowerMultiplier: 1,
@@ -325,13 +321,6 @@ export default Vue.extend({
         this.setCurrentCharacter(this.ownedCharacterIds[0]);
       }
 
-      if(this.activeTab === 'garrison'){
-        this.toggleSoulCreation();
-      }
-
-      if(this.activeTab === 'burn'){
-        this.toggleSoulCreation();
-      }
       this.activeTab = tab;
     },
     async onClaimGarrisonXp() {
@@ -383,11 +372,10 @@ export default Vue.extend({
       }
     },
     async toggleSoulCreation() {
-      this.soulCreationActive = !this.soulCreationActive;
       this.soulBalance = +(await this.fetchSoulBalance());
       await this.updateBurnCost();
       this.burnPowerMultiplier = +fromWeiEther(await this.fetchBurnPowerMultiplier());
-      if(this.soulCreationActive) {
+      if(this.activeTab === 'burn') {
         this.remainingCharactersIds = this.ownCharacters.map((x: { id: string; }) => x.id.toString()).concat(this.ownedGarrisonCharacterIds as string[]);
       }
       this.isUpgrading = false;
@@ -463,6 +451,7 @@ export default Vue.extend({
       this.soulBalance = +(await this.fetchSoulBalance());
       this.burnCharacterIds = [];
       this.burnCost = 0;
+      this.toggleSoulCreation();
     },
   },
   async mounted(){
@@ -475,6 +464,11 @@ export default Vue.extend({
     });
   },
   watch: {
+    activeTab(){
+      if(this.activeTab !== 'info'){
+        this.toggleSoulCreation();
+      }
+    },
     async ownedCharacterIds(){
       await this.updateMintCharacterFee();
     },
