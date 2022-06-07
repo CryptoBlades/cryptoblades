@@ -182,6 +182,9 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         if(block.timestamp < effectiveClaimTimestamp) {
             effectiveClaimTimestamp = block.timestamp;
         }
+        if(lastClaimTimestamp > effectiveClaimTimestamp) {
+            lastClaimTimestamp = effectiveClaimTimestamp;
+        }
         
         claimAmount = totalUserInvestment.mul(1e18).div(launchTokenPrice[launchId]).mul(effectiveClaimTimestamp.sub(lastClaimTimestamp)).div(launchLinearVestingsDurations[launchId]);
         claimAmount = Common.adjustDecimals(claimAmount, decimals);
@@ -308,7 +311,6 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         launchFundsToRaise[launchId + 1] = launchFundsToRaise[launchId].sub(launchTotalRaised[launchId]);
         launchBaseAllocation[launchId + 1] = launchBaseAllocation[launchId];
         launchTokenAddress[launchId + 1] = launchTokenAddress[launchId];
-        launchBaseAllocation[launchId + 1] = launchBaseAllocation[launchId];
 
         emit LaunchAdded(launchId + 1, 2);
     }

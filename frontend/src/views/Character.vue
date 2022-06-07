@@ -184,6 +184,7 @@ interface StoreMappedActions {
   burnCharactersIntoSoul(payload: string[]): Promise<void>;
   burnCharactersIntoCharacter(payload: {burnIds: string[], targetId: string}): Promise<void>;
   claimGarrisonXp(payload: string[]): Promise<void>;
+  fetchUsdSkillValue(payload: string | number): Promise<string | number>;
 }
 
 interface StoreMappedGetters {
@@ -320,6 +321,7 @@ export default Vue.extend({
       'burnCharactersIntoSoul',
       'burnCharactersIntoCharacter',
       'claimGarrisonXp',
+      'fetchUsdSkillValue',
     ]) as StoreMappedActions,
     ...mapGetters(['getExchangeTransakUrl']) as StoreMappedGetters,
     toggleGarrison() {
@@ -408,8 +410,7 @@ export default Vue.extend({
     },
     async updateMintCharacterFee() {
       const recruitCost = await this.fetchMintCharacterFee();
-      console.log({recruitCost});
-      const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
+      const skillRecruitCost = await this.fetchUsdSkillValue(recruitCost);
       this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
     },
     updatedRemainingPowerLimit() {

@@ -152,7 +152,7 @@ interface StoreMappedActions {
   initializeStore: () => void,
   fetchCharacterStamina: (characterId: number) => void,
   pollAccountsAndNetwork: () => void,
-  configureMetaMask: () => void,
+  configureMetaMask: () => Promise<void>,
 }
 
 interface StoreMappedMutations {
