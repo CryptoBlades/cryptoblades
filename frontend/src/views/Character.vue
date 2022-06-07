@@ -576,6 +576,7 @@ export default Vue.extend({
   z-index: 1;
   width: 90%;
   height: auto;
+  max-width: 500px;
   animation-name: spin;
   animation-duration: 30s;
   animation-iteration-count: infinite;
@@ -614,6 +615,7 @@ export default Vue.extend({
   border: 1px solid #3c3c3c;
   height: 100%;
   width: 100%;
+  max-width: 150px;
   border-radius: 10px;
   display: flex;
   justify-content: center;
