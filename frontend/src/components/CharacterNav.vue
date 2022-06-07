@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column flex-md-row menu-nav">
+    <div class="d-flex flex-column flex-md-row menu-nav justify-content-between">
         <div class="mobile-menu">
           <span :class="activeTab === 'info' ? 'active' : ''" @click="$emit('toggle', 'info')">
           <span id="plaza"></span> {{$t('Character.info').toUpperCase()}}</span>
@@ -8,56 +8,58 @@
           <span :class="activeTab === 'burn' ? 'active' : ''" @click="$emit('toggle', 'burn')">
             <span id="burn"></span>{{$t('Character.burn').toUpperCase()}}</span>
         </div>
-        <div role="button" class="nav-char none-mobile" :class="['d-flex gap-3 align-items-center link',
-           (activeTab === 'info' && havePlazaCharacters) ? 'active' : '']" @click="$emit('toggle', 'info')">
-          <div class="img-nav">
-            <div class="img-frame"></div>
-            <img src="../assets/navbar-icons/plaza-icon.png"/>
+        <div class="d-flex flex-column flex-md-row">
+          <div role="button" class="nav-char none-mobile" :class="['d-flex gap-3 align-items-center link',
+            (activeTab === 'info' && havePlazaCharacters) ? 'active' : '']" @click="$emit('toggle', 'info')">
+            <div class="img-nav">
+              <div class="img-frame"></div>
+              <img src="../assets/navbar-icons/plaza-icon.png"/>
+            </div>
+            <span class="main-font text-white fs-5">{{$t('Character.info')}}</span>
           </div>
-          <span class="main-font text-white fs-5">{{$t('Character.info')}}</span>
-        </div>
-        <div class="w-100 d-block d-md-none none-mobile"></div>
-        <div class="separator d-none d-md-block mx-3 none-mobile"></div>
-        <div role="button" class="none-mobile" :class="['d-flex gap-3 align-items-center link mt-4 mt-md-0',
-           (activeTab === 'garrison') ? 'active' : '']" @click="$emit('toggle', 'garrison')">
-          <div class="img-nav">
-            <div class="img-frame"></div>
-              <div class="gar-container">
-                <img class="gar" src="../assets/navbar-icons/plaza-icon.png"/>
-              </div>
-              <div class="gar-container" >
-                <img class="gar" src="../assets/navbar-icons/plaza-icon.png"/>
-                <img class="gar" src="../assets/navbar-icons/plaza-icon.png"/>
-              </div>
+          <div class="w-100 d-block d-md-none none-mobile"></div>
+          <div class="separator d-none d-md-block mx-3 none-mobile"></div>
+          <div role="button" class="none-mobile" :class="['d-flex gap-3 align-items-center link mt-4 mt-md-0',
+            (activeTab === 'garrison') ? 'active' : '']" @click="$emit('toggle', 'garrison')">
+            <div class="img-nav">
+              <div class="img-frame"></div>
+                <div class="gar-container">
+                  <img class="gar" src="../assets/navbar-icons/plaza-icon.png"/>
+                </div>
+                <div class="gar-container" >
+                  <img class="gar" src="../assets/navbar-icons/plaza-icon.png"/>
+                  <img class="gar" src="../assets/navbar-icons/plaza-icon.png"/>
+                </div>
+            </div>
+            <span  class="main-font text-white fs-5">{{$t('Character.garrison')}}</span>
           </div>
-          <span  class="main-font text-white fs-5">{{$t('Character.garrison')}}</span>
-        </div>
-        <div class="separator d-none d-md-block mx-3 none-mobile"></div>
-        <div role="button" class="nav-char none-mobile" :class="['d-flex gap-3 align-items-center link',
-           (activeTab === 'burn') ? 'active' : '']" @click="$emit('toggle', 'burn')">
-          <div class="img-nav">
-            <div class="img-frame"></div>
-            <img src="../assets/soul.png"/>
+          <div class="separator d-none d-md-block mx-3 none-mobile"></div>
+          <div role="button" class="nav-char none-mobile" :class="['d-flex gap-3 align-items-center link',
+            (activeTab === 'burn') ? 'active' : '']" @click="$emit('toggle', 'burn')">
+            <div class="img-nav">
+              <div class="img-frame"></div>
+              <img src="../assets/soul.png"/>
+            </div>
+            <span class="main-font text-white fs-5">{{$t('Character.characterBurn')}}</span>
           </div>
-          <span class="main-font text-white fs-5">{{$t('Character.characterBurn')}}</span>
         </div>
-        <div class="w-100 d-block d-md-none"></div>
-        <div v-if="ownCharacters.length <= 4 && activeTab === 'info'"
-            class="ml-3 mt-4 mt-md-0 ml-md-auto recruit-btn text-uppercase custom-recruit-text-size mint-character"
-            @click="$emit('mintCharacter')"
-            v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
-            <span class="gtag-link-others custom-recruit-text"> <span>{{$t('plaza.recruit')}}</span> ({{ recruitCost }} NON-IGO SKILL)</span>
-        </div>
-        <div
-            v-if="ownCharacters.length <= 4 && activeTab === 'burn'"
-            class="ml-3 mt-4 mt-md-0 ml-md-auto soul-border text-uppercase custom-recruit-text-size mint-character"
-            @click="$emit('mintCharacter')"
-            v-tooltip="'Soul Balance'" tagname="recruit_character">
-            <span class="gtag-link-others custom-recruit-text">
-              <span class="soul-icon"></span>
-              {{ soulBalance.toLocaleString() }}
-              <span class="add-skill"></span>
-            </span>
+        <div class="d-flex flex-column flex-md-row justify-contenct-center">
+          <div v-if="ownCharacters.length <= 4 && activeTab === 'info'"
+              class="ml-3 mt-4 mt-md-0 ml-md-auto recruit-btn text-uppercase custom-recruit-text-size mint-character"
+              @click="$emit('mintCharacter')"
+              v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
+              <span class="gtag-link-others custom-recruit-text"> <span>{{$t('plaza.recruit')}}</span> ({{ recruitCost }} NON-IGO SKILL)</span>
+          </div>
+          <div
+              class="ml-3 mt-4 mt-md-0 ml-md-auto soul-border text-uppercase custom-recruit-text-size mint-character"
+              @click="$emit('changeTab', 'burn')"
+              v-tooltip="'Soul Balance'" tagname="recruit_character">
+              <span class="gtag-link-others custom-recruit-text">
+                <span class="soul-icon"></span>
+                {{ soulBalance.toLocaleString() }}
+                <span class="add-skill"></span>
+              </span>
+          </div>
         </div>
     </div>
 </template>
