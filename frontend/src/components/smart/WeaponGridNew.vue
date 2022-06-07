@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="filters px-4 pb-4" v-if="!newWeapon" @change="saveFilters()">
+    <div class="filters flex-wrap px-4 pb-4" v-if="!newWeapon" @change="saveFilters()">
       <div v-if="titleType!='combat'" class="d-flex flex-column align-items-start" style="flex-grow:0.6" >
           <h3 v-if="!noTitle && titleType=='burn-weapon'">{{$t('nftList.selected')}} ({{ ignore.length }})</h3>
           <h3 v-if="!noTitle && titleType=='weapon-list'">{{$t('weapons')}} ({{ ownWeapons }})</h3>
@@ -27,8 +27,8 @@
           </div>
         </div>
         <div class="p-2 d-flex flex-row">
-          <div class="pr-4">
-            <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('weaponGrid.selectAll')}}</button>
+          <div class="pr-4" v-if="!showNftOptions">
+            <button class="btn-clear-filter" @click="$emit('selectAllWeapons')">{{selectWeaponsBtnLabel}}</button>
           </div>
           <div>
             <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
@@ -214,6 +214,7 @@ interface Data {
   noOfPages: number;
   noOfItemsPerRow: number;
   ItemPerPage: number;
+  selectWeaponsBtnLabel: string;
 }
 const sorts = [
   { name: i18n.t('weaponGrid.sorts.any'), dir: '' },
@@ -362,7 +363,8 @@ export default Vue.extend({
       activePage: 1,
       pageSet: [],
       noOfPages: 0,
-      ItemPerPage: 20
+      ItemPerPage: 20,
+      selectWeaponsBtnLabel: (this as any).$t('weaponGrid.selectAll')
     } as Data;
   },
   components: {
@@ -649,6 +651,13 @@ export default Vue.extend({
     }
   },
   async mounted() {
+    this.$root.$on('select-all-button-labeler', (bool: boolean) => {
+      if(bool){
+        this.selectWeaponsBtnLabel = (this as any).$t('weaponGrid.deSelectAll');
+      }else{
+        this.selectWeaponsBtnLabel = (this as any).$t('weaponGrid.selectAll');
+      }
+    });
     this.checkStorageFavorite();
     Events.$on('weapon:newFavorite', () => this.checkStorageFavorite());
     if(this.isMarket) {

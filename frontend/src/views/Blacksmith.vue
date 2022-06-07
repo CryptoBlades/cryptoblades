@@ -493,7 +493,7 @@
             </div>
             <div class="weapon-content pr-0 pl-0">
               <weapon-grid v-model="burnWeaponId" :ignore="burnWeaponIds" :noTitle="false" titleType="burn-weapon"
-                      :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon"  />
+                      :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon" @selectAllWeapons="selectAllForBurn" />
             </div>
           </div>
           <div class="col-md-3 col-xl-3 col-lg-5 dust-area none-mobile">
@@ -798,6 +798,9 @@ export default Vue.extend({
   },
 
   watch: {
+    burnWeaponIds(data){
+      this.$root.$emit('select-all-button-labeler', data.length > 0);
+    },
     reforgeWeaponId() {
       Events.$emit('hasSelected');
       this.showReforge = false;
@@ -1076,23 +1079,43 @@ export default Vue.extend({
       }
     },
 
+    selectAllForBurn(){
+      if(this.burnWeaponIds.length > 0){
+        this.burnWeaponIds.forEach(id => {
+          this.ctr += 1;
+          const weaponDetails = this.ownWeapons.find(y => {
+            if(y && +y.id === +id){
+              return y;
+            }
+          });
+          if(weaponDetails){
+            this.computeDust('sub',(weaponDetails.stars + 1), weaponDetails.lowStarBurnPoints, weaponDetails.fourStarBurnPoints,
+              weaponDetails.fiveStarBurnPoints);
+          }
+        });
+        this.burnWeaponIds = [];
+        return;
+      }
+      this.ownedWeaponIds.map(id => this.burnWeaponIds.push(id));
+      this.burnWeaponIds.forEach(id => {
+        this.ctr += 1;
+        const weaponDetails = this.ownWeapons.find(y => +y.id === +id);
+        this.computeDust('add',(weaponDetails.stars + 1), weaponDetails.lowStarBurnPoints, weaponDetails.fourStarBurnPoints, weaponDetails.fiveStarBurnPoints);
+      });
+    },
+
     addBurnWeapon(id: number){
       this.ctr += 1;
-      if(this.burnWeaponIds.includes(id.toString())){
-        this.burnWeaponIds = this.burnWeaponIds.filter(val => val !==  id.toString());
+      if(this.burnWeaponIds.includes(+id)){
+        this.burnWeaponIds = this.burnWeaponIds.filter(val => +val !== +id);
         const weaponDetails = this.ownWeapons.find(y => y.id === id);
-        this.computeDust('subs',(weaponDetails.stars + 1), weaponDetails.lowStarBurnPoints, weaponDetails.fourStarBurnPoints, weaponDetails.fiveStarBurnPoints);
+        this.computeDust('sub',(weaponDetails.stars + 1), weaponDetails.lowStarBurnPoints, weaponDetails.fourStarBurnPoints, weaponDetails.fiveStarBurnPoints);
       }else{
-        this.burnWeaponIds.push(id.toString());
-        const weaponDetails = this.ownWeapons.find(y => y.id === id);
+        this.burnWeaponIds.push(+id);
+        const weaponDetails = this.ownWeapons.find(y => +y.id === +id);
         this.computeDust('add',(weaponDetails.stars + 1), weaponDetails.lowStarBurnPoints, weaponDetails.fourStarBurnPoints, weaponDetails.fiveStarBurnPoints);
       }
       this.burnWeaponId = null;
-    },
-
-    removeBurnWeapon(id: number){
-      this.hideWeapons.push(id.toString());
-      this.burnWeaponIds = this.burnWeaponIds.filter(x => x !== id.toString());
     },
 
     closeModal(modalType: string){

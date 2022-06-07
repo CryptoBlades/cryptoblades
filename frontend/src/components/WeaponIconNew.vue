@@ -616,7 +616,7 @@ export default {
 }
 
 .selected-border{
-  border: 2px solid #fff;
+  border: 1px solid rgb(237, 205, 144);
 }
 
 .star-stat{
