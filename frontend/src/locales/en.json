@@ -302,6 +302,7 @@
     "showReforged": "Show reforged",
     "showFavorite": "Show Favorite",
     "clearFilters": "Clear Filters",
+    "selectAll": "Select All",
     "sorts": {
       "any": "Any",
       "lowToHigh": "Price: Low -> High",

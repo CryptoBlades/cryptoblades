@@ -1,30 +1,39 @@
 <template>
   <div>
-    <div class="filters" v-if="!newWeapon" @change="saveFilters()">
-      <h3 class="ml-4" v-if="!noTitle && titleType=='weapon-list'">{{$t('weapons')}} ({{ ownWeapons }})</h3>
-      <h3 class="ml-4" v-if="!noTitle && titleType=='burn-weapon'">{{$t('nftList.selected')}} ({{ ignore.length }})</h3>
-      <span class="filter-icon" @click="showFilter"></span>
-      <div v-if="titleType!='combat'" class="row d-flex align-items-center none-mobile" style="flex-grow:0.6" >
-          <div class="col-sm-12 col-md-3 col-lg-3 none-mobile">
-            <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
-          </div>
-          <div class="col-sm-12 col-md-3 col-lg-3 d-flex none-mobile">
-            <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
-              <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
-              <strong>{{$t('weaponGrid.showFavorite')}}</strong>
+    <div class="filters px-4 pb-4" v-if="!newWeapon" @change="saveFilters()">
+      <div v-if="titleType!='combat'" class="d-flex flex-column align-items-start" style="flex-grow:0.6" >
+          <h3 v-if="!noTitle && titleType=='burn-weapon'">{{$t('nftList.selected')}} ({{ ignore.length }})</h3>
+          <h3 v-if="!noTitle && titleType=='weapon-list'">{{$t('weapons')}} ({{ ownWeapons }})</h3>
+          <div class="d-flex flex-row">
+            <div class="none-mobile select-wrapper-star pr-4" :data-content="$t('nftList.star')"  id="blacksmith1">
+              <select class="form-control" v-model="starFilter" >
+                <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+              </select>
+            </div>
+            <div class="none-mobile select-wrapper-element" :data-content="$t('nftList.element')" id="blacksmith2">
+              <select class="form-control" v-model="elementFilter" >
+                <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+                :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+              </select>
             </div>
           </div>
-          <div class="col-sm-6 col-md-3 col-lg-3 mb-3 none-mobile select-wrapper-star" :data-content="$t('nftList.star')"  id="blacksmith1">
-            <select class="form-control" v-model="starFilter" >
-              <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
-            </select>
+      </div>
+      <span class="filter-icon ml-4" @click="showFilter"></span>
+      <div class="none-mobile d-flex flex-column align-items-end">
+        <div class="px=2 pt-2 pb-2">
+          <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
+            <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
+            <strong>{{$t('weaponGrid.showFavorite')}}</strong>
           </div>
-          <div class="col-sm-6 col-md-3 col-lg-3 mb-3 none-mobile select-wrapper-element" :data-content="$t('nftList.element')" id="blacksmith2">
-            <select class="form-control" v-model="elementFilter" >
-              <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
-              :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
-            </select>
+        </div>
+        <div class="p-2 d-flex flex-row">
+          <div class="pr-4">
+            <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('weaponGrid.selectAll')}}</button>
           </div>
+          <div>
+            <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
+          </div>
+        </div>
       </div>
       <div v-if="titleType=='combat'" class="none-mobile filter-combat">
         <div>
@@ -735,7 +744,6 @@ export default Vue.extend({
 }
 
 .select-wrapper-star > select{
-  padding-right: 20px;
   text-align: right;
 }
 
