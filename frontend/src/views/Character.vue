@@ -36,6 +36,7 @@
         :soulBalance="soulBalance"
         :ownCharacters="ownCharacters"
         @mintCharacter="onMintCharacter"
+        @changeTab="onChangeTab"
       />
       <template v-if="activeTab === 'info' && havePlazaCharacters">
         <div class="d-flex justify-content-end pr-5 pt-4 slippage-checkbox">
@@ -316,6 +317,10 @@ export default Vue.extend({
       'claimGarrisonXp',
     ]) as StoreMappedActions,
     ...mapGetters(['getExchangeTransakUrl']) as StoreMappedGetters,
+
+    onChangeTab(tab: string) {
+      this.activeTab = tab;
+    },
     toggleGarrison(tab: string) {
       if (this.activeTab === 'info' && this.ownedGarrisonCharacterIds.includes(this.currentCharacterId)) {
         this.setCurrentCharacter(this.ownedCharacterIds[0]);
@@ -465,9 +470,7 @@ export default Vue.extend({
   },
   watch: {
     activeTab(){
-      if(this.activeTab !== 'info'){
-        this.toggleSoulCreation();
-      }
+      this.toggleSoulCreation();
     },
     async ownedCharacterIds(){
       await this.updateMintCharacterFee();
@@ -484,6 +487,7 @@ export default Vue.extend({
     this.mintCharacterPriceIncrease = new BN(await this.fetchCharacterMintIncreasePrice()).div(new BN(10).pow(18)).toFixed(6);
     this.mintCharacterMinPrice = new BN(await this.fetchMintCharacterMinPrice()).div(new BN(10).pow(18)).toFixed(4);
     this.updateMintCharacterFee();
+    this.toggleSoulCreation();
   },
   components:{
     BigButton,
