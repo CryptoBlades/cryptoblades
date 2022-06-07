@@ -476,6 +476,7 @@ export default Vue.extend({
     },
     async ownedCharacterIds(){
       await this.updateMintCharacterFee();
+      this.toggleSoulCreation();
     },
     totalSoul(){
       this.glowImage = true;
@@ -489,7 +490,6 @@ export default Vue.extend({
     this.mintCharacterPriceIncrease = new BN(await this.fetchCharacterMintIncreasePrice()).div(new BN(10).pow(18)).toFixed(6);
     this.mintCharacterMinPrice = new BN(await this.fetchMintCharacterMinPrice()).div(new BN(10).pow(18)).toFixed(4);
     this.updateMintCharacterFee();
-    this.toggleSoulCreation();
   },
   components:{
     BigButton,
