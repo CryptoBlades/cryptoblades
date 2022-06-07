@@ -603,7 +603,6 @@ export default Vue.extend({
   background-color: rgba(255, 255, 255, 0);
   height: auto;
   padding: 10em ;
-  width: 23vw;
   display: flex;
   justify-content: center;
   align-items: center;
