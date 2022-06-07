@@ -141,6 +141,10 @@
             </select>
           </div>
            <div class="col-sm-12 col-md-6 col-lg-4 d-flex">
+            <div class="show-reforged">
+              <b-check class="show-reforged-checkbox" v-model="mobileSelectAllBool" @change="$emit('selectAllWeapons')"/>
+              <strong>{{selectWeaponsBtnLabel}}</strong>
+            </div>
             <div v-if="showReforgedToggle" class="show-reforged">
               <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
               <strong>{{$t('weaponGrid.showReforged')}}</strong>
@@ -215,6 +219,7 @@ interface Data {
   noOfItemsPerRow: number;
   ItemPerPage: number;
   selectWeaponsBtnLabel: string;
+  mobileSelectAllBool: boolean;
 }
 const sorts = [
   { name: i18n.t('weaponGrid.sorts.any'), dir: '' },
@@ -364,7 +369,8 @@ export default Vue.extend({
       pageSet: [],
       noOfPages: 0,
       ItemPerPage: 20,
-      selectWeaponsBtnLabel: (this as any).$t('weaponGrid.selectAll')
+      selectWeaponsBtnLabel: (this as any).$t('weaponGrid.selectAll'),
+      mobileSelectAllBool: false,
     } as Data;
   },
   components: {
@@ -652,6 +658,7 @@ export default Vue.extend({
   },
   async mounted() {
     this.$root.$on('select-all-button-labeler', (bool: boolean) => {
+      this.mobileSelectAllBool = bool;
       if(bool){
         this.selectWeaponsBtnLabel = (this as any).$t('weaponGrid.deSelectAll');
       }else{
