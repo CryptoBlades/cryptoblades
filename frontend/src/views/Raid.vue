@@ -173,19 +173,18 @@
                       </div>
                   </div>
                   <!-- :class="rewardIndexes !== null && rewardIndexes.length > 0 ? 'opacity-1': 'opacity-0'" -->
+                  <!-- :class="!isRaidStarted || !this.selectedWeaponId ? 'opacity-0': 'opacity-1' -->
                   <div class="col-lg-12 join-raid">
                     <button class="claim-btn"
                       :disabled="noRewards"
-                      @click="promptRewardClaim()" v-tooltip="rewardIndexes !== null && rewardIndexes.length > 0 ?
-                      $t('raid.rewardsFromPrevious'): $t('raid.noAvailableRewards')">
-                      {{$t('raid.claimRewards').toUpperCase()}}
+                      @click="promptRewardClaim()">
+                      <span v-tooltip="noRewards ? $t('raid.noAvailableRewards') :
+                      $t('raid.rewardsFromPrevious')">{{$t('raid.claimRewards').toUpperCase()}}</span>
                     </button>
                     <button v-if="!isMobile()" class="btn-raid"
-                    v-tooltip="!isRaidStarted ? $t('raid.errors.raidNotStarted') :
-                    (!this.selectedWeaponId ? $t('raid.errors.selection') : $t('raid.joiningCostStamina', {formatStaminaHours}))"
                     @click="joinRaidMethod()"
-                    :class="!isRaidStarted || !this.selectedWeaponId ? 'opacity-0': 'opacity-1'">
-                      {{$t('raid.joinRaid')}}
+                    :disabled="raidStart()">
+                     <span v-tooltip="generateTooltip()">{{$t('raid.joinRaid')}}</span>
                     </button>
                      <button v-else class="btn-raid"  v-tooltip="$t('raid.joiningCostStamina', {formatStaminaHours})" @click="openEquipItems()">
                       {{$t('raid.signup')}}
@@ -324,7 +323,7 @@
       </div>
       </div>
       <div class="footer-close d-flex justify-content-center">
-        <button class="btn-raid btn-modal"  v-tooltip="$t('raid.joiningCostStamina', {formatStaminaHours})" @click="joinRaidMethod()">
+        <button class="btn-raid btn-modal"  v-tooltip="generateTooltip()" @click="joinRaidMethod()">
           {{$t('raid.joinRaid')}}
         </button>
       </div>
@@ -476,7 +475,8 @@ export default Vue.extend({
       },
       traits:'',
       notifyError: '',
-      isLoading: false
+      isLoading: false,
+      raidStarted: false
     };
   },
 
@@ -531,7 +531,24 @@ export default Vue.extend({
     },
 
     noRewards(){
-      return this.rewardIndexes === null && this.rewardIndexes.length === 0;
+      return this.rewardIndexes === null || this.rewardIndexes.length === 0;
+    },
+
+    raidStart(){
+      return !this.raidStarted || !this.selectedWeaponId;
+    },
+
+    generateTooltip(){
+      const staminaHrs = this.formatStaminaHours;
+      if(this.raidStarted){
+        if(!this.selectedWeaponId){
+          return (i18n.t('raid.errors.selection').toString());
+        }else{
+          return (i18n.t('raid.joiningCostStamina', {staminaHrs}).toString());
+        }
+      }else{
+        return (i18n.t('raid.errors.raidNotStarted').toString());
+      }
     },
 
     closeRewardPicker(id: any){
@@ -776,8 +793,10 @@ export default Vue.extend({
       (this as any).processRaidData();
       await (this as any).getParticipatingCharacters();
       await (this as any).getParticipatingWeapons();
+      this.raidStarted = await this.fetchIsRaidStarted();
     };
     await refreshRaidData();
+    this.raidStarted = await this.fetchIsRaidStarted();
     interval = window.setInterval(async () => {
       await refreshRaidData();
     }, 3000);
@@ -1228,6 +1247,31 @@ hr.divider {
   color: #fff;
   font-size: 20px;
 }
+
+.claim-btn > span{
+  font-family: Oswald;
+  color: #fff;
+  font-size: 20px;
+}
+
+.join-raid > .btn-raid > span{
+  font-family: Oswald;
+  color: #fff;
+  font-size: 20px;
+}
+
+.claim-btn:disabled{
+  opacity: 0.4;
+}
+
+.btn-rewards:disabled{
+  opacity: 0.4;
+}
+
+.btn-raid:disabled{
+  opacity: 0.4;
+}
+
 
 .btn-rewards {
   display: flex;
@@ -2153,6 +2197,7 @@ hr.divider {
   }
 }
 
+
 @media (max-width: 1200px) {
   .boss-col {
     display: block;
@@ -2167,6 +2212,7 @@ hr.divider {
     word-spacing: normal;
     white-space: nowrap;
   }
+
 
   powers > div > p {
       color: #fff;
