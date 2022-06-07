@@ -303,7 +303,7 @@
     "showFavorite": "Show Favorite",
     "clearFilters": "Clear Filters",
     "selectAll": "Select All",
-    "deSelectAll": "De-Select All",
+    "deSelectAll": "Deselect All",
     "sorts": {
       "any": "Any",
       "lowToHigh": "Price: Low -> High",
