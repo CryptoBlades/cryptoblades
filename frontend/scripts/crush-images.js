@@ -4,9 +4,9 @@ const pngquant = require('imagemin-pngquant');
 
 const init = async () => {
   await imagemin([
-    'dist/img/*.png'
+    'src/assets/background/*.png'
   ], {
-    destination: 'dist/img',
+    destination: 'src/assets/background',
     plugins: [
       pngquant({ 
         quality: [0.1, 0.2] 
