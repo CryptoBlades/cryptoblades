@@ -79,7 +79,7 @@
           <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
           <div class="weapon-icon-wrapper">
             <weapon-icon class="weapon-icon" :hasNftOptions="showNftOptions" :weapon="weapon" :favorite="isFavorite(weapon.id)" :id="'weapon-'+weapon.id"
-            :selected="setBorderSelected(weapon.id)"/>
+            :selected="showNftOptions ? highlight === weapon.id : setBorderSelected(weapon.id)"/>
             <weapon-popover :weapon="weapon" :placement="'right'"/>
           </div>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
