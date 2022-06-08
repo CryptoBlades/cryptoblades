@@ -18,7 +18,9 @@
 
     <div class="char-details">
       <h4>{{ getCleanCharacterName(character.id).toUpperCase() }}</h4>
-      <p>Knight</p>
+      <p>
+        {{$t(`quests.reputationTier.${ReputationTier[getReputationLevel(reputation)] || ''}`)}}
+      </p>
       <div class="sep-line"></div>
       <div class="stats-info">
         <div>
@@ -73,10 +75,11 @@ import torsos from '../assets/characterWardrobe_torso.json';
 import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
-import { mapGetters, mapState } from 'vuex';
 import { getCleanName } from '../rename-censor';
 import { CharacterPower } from '@/interfaces';
 import { burningManager } from './../feature-flags';
+import { ReputationTier } from '@/views/Quests.vue';
+import { mapState, mapGetters, mapActions } from 'vuex';
 
 
 const headCount = 13;
@@ -100,11 +103,15 @@ export default {
     character() {
       this.clearScene();
       this.setupModel();
+      this.refreshData();
     },
   },
 
   data() {
     return {
+      ReputationTier,
+      reputationLevelRequirements: undefined,
+      quest: null,
       allLoaded: false,
       allLoadStarted: false,
       camera: null,
@@ -135,6 +142,10 @@ export default {
       'getCharacterPower'
     ]),
 
+    reputation() {
+      return this.quest?.reputation ?? 0;
+    },
+
     characterTrait() {
       const characterWithId = this.charactersWithIds &&
         this.isGarrison ? this.garrisonCharactersWithIds([this.character.id])[0] : this.charactersWithIds([this.character.id])[0];
@@ -155,6 +166,10 @@ export default {
   },
 
   methods: {
+    ...mapActions([
+      'getReputationLevelRequirements',
+      'getCharacterQuestData'
+    ]),
     RequiredXp,
 
     getCleanCharacterName(id) {
@@ -168,6 +183,24 @@ export default {
     timestampToStamina(timestamp) {
       if(timestamp > Math.floor(Date.now()/1000)) return 0;
       return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
+    },
+    getReputationLevel(reputation) {
+      if (!this.reputationLevelRequirements) return;
+      if (reputation < this.reputationLevelRequirements.level2) {
+        return ReputationTier.PEASANT;
+      } else if (reputation < this.reputationLevelRequirements.level3) {
+        return ReputationTier.TRADESMAN;
+      } else if (reputation < this.reputationLevelRequirements.level4) {
+        return ReputationTier.NOBLE;
+      } else if (reputation < this.reputationLevelRequirements.level5) {
+        return ReputationTier.KNIGHT;
+      } else {
+        return ReputationTier.KING;
+      }
+    },
+    async refreshData(){
+      this.reputationLevelRequirements =  await this.getReputationLevelRequirements();
+      this.quest = await this.getCharacterQuestData({characterId: this.character.id});
     },
 
     getCharacterArt,init() {
@@ -522,21 +555,9 @@ export default {
         this.renderer.render(this.scene, this.camera);
       }
     },
-
-    async fetchScore() {
-      /*
-      try {
-        const scoreData = await fetch(`https://api.cryptoblades.io/static/character/score/${this.character.id}`);
-        const { score } = await scoreData.json();
-        this.heroScore = score;
-      } catch {
-        console.error(`Could not fetch score for ID ${this.character.id}`);
-      }
-      */
-    }
   },
-  mounted() {
-    this.fetchScore();
+  async mounted() {
+    await this.refreshData();
 
     if(localStorage.getItem('useGraphics') === 'false') {
       this.allLoaded = true;
@@ -760,8 +781,8 @@ export default {
 }
 
 .circle-element {
-  width: 1.6em;
-  height: 1.6em;
+  width: 1.7em;
+  height: 1.7em;
   border-radius: 50%;
   border: 2px solid #EDCD90;
   padding: 4px;
