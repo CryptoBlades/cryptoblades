@@ -357,7 +357,7 @@ export default Vue.extend({
         this.burnCharacterIds.push(id.toString());
         this.totalSoul += this.getCharacterPower(id)/10;
       }else{
-        this.burnCharacterIds = this.burnCharacterIds.filter(val => !val.includes(id.toString()));
+        this.burnCharacterIds = this.burnCharacterIds.filter(val => val !== id.toString());
         this.totalSoul -= this.getCharacterPower(id)/10;
       }
       await this.updateBurnCost();
