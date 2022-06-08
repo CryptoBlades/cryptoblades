@@ -325,19 +325,25 @@ export default {
     },
     filteredCharacters(){
       this.filteredCharacters.every(filteredCharacter => {
-        if(!this.toBurn.includes((filteredCharacter.id).toString())){
+        // convert id string to integer
+        const idToBurn = this.toBurn.map(id => Number(id));
+        if(!idToBurn.includes(filteredCharacter.id)){
           this.allSelected = false;
           return false;
         }
+
         return true;
       });
     },
     toBurn(){
       this.filteredCharacters.every(filteredCharacter => {
-        if(!this.toBurn.includes((filteredCharacter.id).toString())){
+        // convert id string to integer
+        const idToBurn = this.toBurn.map(id => Number(id));
+        if(!idToBurn.includes(filteredCharacter.id)){
           this.allSelected = false;
           return false;
         }
+
         return true;
       });
     }
