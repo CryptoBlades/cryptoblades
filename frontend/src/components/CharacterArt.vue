@@ -110,6 +110,8 @@ export default {
   data() {
     return {
       ReputationTier,
+      reputationLevelRequirements: undefined,
+      quest: null,
       allLoaded: false,
       allLoadStarted: false,
       camera: null,
@@ -166,6 +168,7 @@ export default {
   methods: {
     ...mapActions([
       'getReputationLevelRequirements',
+      'getCharacterQuestData'
     ]),
     RequiredXp,
 
@@ -181,7 +184,6 @@ export default {
       if(timestamp > Math.floor(Date.now()/1000)) return 0;
       return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
     },
-
     getReputationLevel(reputation) {
       if (!this.reputationLevelRequirements) return;
       if (reputation < this.reputationLevelRequirements.level2) {
@@ -198,6 +200,7 @@ export default {
     },
     async refreshData(){
       this.reputationLevelRequirements =  await this.getReputationLevelRequirements();
+      this.quest = await this.getCharacterQuestData({characterId: this.character.id});
     },
 
     getCharacterArt,init() {
