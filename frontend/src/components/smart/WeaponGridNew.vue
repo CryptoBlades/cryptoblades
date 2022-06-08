@@ -7,13 +7,13 @@
           <div class="d-flex flex-row">
             <div class="none-mobile select-wrapper-star pr-4" :data-content="$t('nftList.star')"  id="blacksmith1">
               <select class="form-control" v-model="starFilter" >
-                <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+                <option v-for="starOption in starsOptions" :value="starOption" :key="starOption">{{ starOption || $t('nftList.sorts.any') }}</option>
               </select>
             </div>
             <div class="none-mobile select-wrapper-element" :data-content="$t('nftList.element')" id="blacksmith2">
               <select class="form-control" v-model="elementFilter" >
-                <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
-                :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+                <option v-for="(element, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+                :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="element">{{ element || $t('nftList.sorts.any') }}</option>
               </select>
             </div>
           </div>
@@ -39,7 +39,7 @@
         <div>
           <div class="select-wrapper-star" :data-content="$t('nftList.star')">
             <select class="form-control" v-model="starFilter" >
-            <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+            <option v-for="starOption in starsOptions" :value="starOption" :key="starOption">{{ starOption || $t('nftList.sorts.any') }}</option>
           </select>
           </div>
           <div class="select-wrapper-element" :data-content="$t('nftList.element')">
@@ -120,7 +120,7 @@
         {{$t('weaponGrid.pickSkin')}}
       </span>
       <select class="form-control" v-model="targetSkin">
-        <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+        <option v-for="skin in availableSkins" :value="skin" :key="skin">{{ skin }}</option>
       </select>
     </b-modal>
     <b-modal ref="open-filter" id="open-filter" hide-footer hide-header>
@@ -129,15 +129,15 @@
           <div class="col-sm-6 col-md-6 col-lg-3 mb-3">
             <strong>{{$t('weaponGrid.stars')}}</strong>
             <select class="form-control" v-model="starFilter" >
-              <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+              <option v-for="starOption in starsOptions" :value="starOption" :key="starOption">{{ starOption || $t('nftList.sorts.any') }}</option>
             </select>
           </div>
 
           <div class="col-sm-6 col-md-6 col-lg-3 mb-3">
             <strong>{{$t('weaponGrid.element')}}</strong>
             <select class="form-control" v-model="elementFilter" >
-              <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
-              :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+              <option v-for="(trait, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+              :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="trait">{{ trait || $t('nftList.sorts.any') }}</option>
             </select>
           </div>
            <div class="col-sm-12 col-md-6 col-lg-4 d-flex">
@@ -448,6 +448,9 @@ export default Vue.extend({
     },
   },
   watch: {
+    nonIgnoredWeapons(data){
+      this.$emit('currentFilteredWeapons', data);
+    },
     async weaponIdsToDisplay(newWeaponIds: string[]) {
       await this.fetchWeapons(newWeaponIds);
       console.log('weapon forged');
