@@ -9,13 +9,18 @@
       <i class="fas fa-spinner fa-spin"></i>
     </div>
 
-    <div class="glow-container" ref="el" :class="['glow-' + (weapon.stars || 0)]">
+    <div class="glow-container" ref="el" :class="selected ? 'selected-border' : ['glow-' + (weapon.stars || 0)]">
       <div class="animation" v-bind:class="showCosmetics ? 'weapon-animation-applied-' + getWeaponCosmetic(weapon.id) : ''"/>
       <img v-if="showPlaceholder" v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
         class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)"/>
 
-      <div class="stars-flex">
-        <b-icon v-for="s in weapon.stars+1"  :key="s" class="star-stat" icon="star-fill" variant="warning" />
+      <div class="d-flex flex-column align-items-end stars-flex" :class="!hasNftOptions ? 'stars-flex-extend' : ''">
+        <div>
+          <b-icon v-for="s in weapon.stars+1"  :key="s" class="star-stat" icon="star-fill" variant="warning" />
+        </div>
+        <div v-if="selected">
+          <span class="rounded-check"></span>
+        </div>
       </div>
 
       <div class="favorite">
@@ -107,7 +112,7 @@ function transformModel(model, y) {
 }
 
 export default {
-  props: ['weapon', 'favorite', 'selected'],
+  props: ['weapon', 'favorite', 'selected', 'hasNftOptions'],
   computed: {
     ...mapState(['maxDurability', 'specialWeaponArts']),
     ...mapGetters([
@@ -479,6 +484,15 @@ export default {
 
 <style scoped>
 @import '../styles/weapon-cosmetics.css';
+.rounded-check{
+  content: url('../assets/check-round.svg');
+  height: 1.5em;
+  width: 1.5em;
+  z-index: 3;
+  right: -3px;
+  top: 25px;
+  position: absolute;
+}
 
 .small-durability-bar {
   position: relative;
@@ -510,15 +524,14 @@ export default {
 .glow-container {
   height: 100%;
   width: 100%;
+  border-radius: 5px;
+  z-index: 540;
+  padding: 5px 25px;
+  background: rgb(26, 24, 24);
 }
 
 .glow-container > img{
   margin-top: 10px;
-}
-
-.glow-container {
-  border-radius: 5px;
-  z-index: 540;
 }
 
 .loading-container {
@@ -547,11 +560,12 @@ export default {
 }
 
 .stars-flex{
-  display: flex;
-  justify-content: center;
   position: absolute;
   top:27px;
   right: 20px;
+}
+.stars-flex-extend{
+  top: 9px;
 }
 
 .battle-p{
@@ -599,6 +613,10 @@ export default {
 
 .name{
   margin-bottom: 10px;
+}
+
+.selected-border{
+  border: 1px solid rgb(237, 205, 144);
 }
 
 .star-stat{

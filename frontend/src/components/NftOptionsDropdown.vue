@@ -143,7 +143,7 @@ export default Vue.extend({
 }
 .resultMsg{
   color: rgb(197, 48, 48);
-  font-size: 1.5rem;
+  font-size: .8rem;
 }
 .success{
   color: rgb(0, 128, 0);

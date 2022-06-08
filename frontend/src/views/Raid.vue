@@ -38,7 +38,7 @@
                           <p>00</p>
                           <span>{{ remainingTime.days > 1 ? $t('raid.days') : $t('raid.day') }}</span>
                         </div>
-                        <div class="hoour">
+                        <div class="hour">
                           <p>00</p>
                           <span>{{ remainingTime.hours > 1 ? $t('raid.hrs') : $t('raid.hr')}}</span>
                         </div>
@@ -56,7 +56,7 @@
                           <p>{{ zeroPad(remainingTime.days, 2) }}</p>
                           <span>{{ remainingTime.days > 1 ? $t('raid.days') : $t('raid.day') }}</span>
                         </div>
-                        <div class="hoour">
+                        <div class="hour">
                           <p>{{ zeroPad(remainingTime.hours, 2)}}</p>
                           <span>{{ remainingTime.hours > 1 ? $t('raid.hrs') : $t('raid.hr')}}</span>
                         </div>
@@ -90,7 +90,7 @@
                       </div>
                       <div style="border-right:none">
                         <span>{{$t('pvp.power')}}</span>
-                        <p>{{ addCommas(currentCharacterPower) }}</p>
+                        <p>{{ currentCharacterPower.toLocaleString() }}</p>
                       </div>
                   </div>
                   <div class="col-lg-12 col-md-6 col-sm-12 drops">
@@ -100,7 +100,7 @@
                             .
                         </div>
                         <div>
-                          <p class="name bold character-name"> {{getCleanCharacterName(currentCharacterId)}} </p>
+                          <p class="name character-name"> {{getCleanCharacterName(currentCharacterId).toUpperCase()}} </p>
                           <span class="subtext subtext-stats">
                             <p style="text-transform:capitalize"><span :class="traitNumberToName(currentCharacter.trait).toLowerCase()
                             + '-icon trait-icon char-icon'" /> {{ traitNumberToName(currentCharacter.trait).toLowerCase() }} {{$t('raid.element')}}</p>
@@ -149,19 +149,15 @@
                   <div class="col-lg-12 powers">
                       <div>
                         <span>{{$t('raid.numberOfRaiders')}}</span>
-                        <p>{{ addCommas(raiderCount) }}</p>
+                        <p>{{ raiderCount.toLocaleString() }}</p>
                       </div>
                       <div>
                         <span>{{$t('raid.totalPower')}}</span>
-                        <p>{{ addCommas(totalPower) }}</p>
+                        <p>{{ totalPower.toLocaleString() }}</p>
                       </div>
                       <div>
                         <span>{{$t('raid.bossPower')}}</span>
-                        <p>{{ addCommas(bossPower) }}</p>
-                      </div>
-                      <div>
-                        <span> {{$t('raid.victoryChance')}}</span>
-                        <p>{{formattedWinChance}}</p>
+                        <p>{{ bossPower.toLocaleString() }}</p>
                       </div>
                   </div>
                   <div class="col-lg-12 drops none-mobile">
@@ -176,12 +172,19 @@
                         <nft-icon :isDefault="true" :nft="{ type: '5bdust' }"/>
                       </div>
                   </div>
+                  <!-- :class="rewardIndexes !== null && rewardIndexes.length > 0 ? 'opacity-1': 'opacity-0'" -->
+                  <!-- :class="!isRaidStarted || !this.selectedWeaponId ? 'opacity-0': 'opacity-1' -->
                   <div class="col-lg-12 join-raid">
-                    <button class="claim-btn" @click="promptRewardClaim()" v-tooltip="'Rewards from Previous Raid'">
-                      {{$t('raid.claimRewards').toUpperCase()}}
+                    <button class="claim-btn"
+                      :disabled="noRewards"
+                      @click="promptRewardClaim()">
+                      <span v-tooltip="noRewards ? $t('raid.noAvailableRewards') :
+                      $t('raid.rewardsFromPrevious')">{{$t('raid.claimRewards').toUpperCase()}}</span>
                     </button>
-                    <button v-if="!isMobile()" class="btn-raid"  v-tooltip="$t('raid.joiningCostStamina', {formatStaminaHours})" @click="joinRaidMethod()">
-                      {{$t('raid.joinRaid')}}
+                    <button v-if="!isMobile()" class="btn-raid"
+                    @click="joinRaidMethod()"
+                    :disabled="raidStart()">
+                     <span v-tooltip="generateTooltip()">{{$t('raid.joinRaid')}}</span>
                     </button>
                      <button v-else class="btn-raid"  v-tooltip="$t('raid.joiningCostStamina', {formatStaminaHours})" @click="openEquipItems()">
                       {{$t('raid.signup')}}
@@ -320,7 +323,7 @@
       </div>
       </div>
       <div class="footer-close d-flex justify-content-center">
-        <button class="btn-raid btn-modal"  v-tooltip="$t('raid.joiningCostStamina', {formatStaminaHours})" @click="joinRaidMethod()">
+        <button class="btn-raid btn-modal"  v-tooltip="generateTooltip()" @click="joinRaidMethod()">
           {{$t('raid.joinRaid')}}
         </button>
       </div>
@@ -403,7 +406,7 @@ import WeaponInventory from '../components/WeaponInvetory.vue';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
 import {GetTotalMultiplierForTrait, IWeapon} from '@/interfaces/Weapon';
 import {IRaidState, IState} from '@/interfaces';
-import {getBossArt} from '@/raid-boss-art-placeholder';
+import {getBossArt, getBossName} from '@/raid-boss-art-placeholder';
 import {traitNumberToName} from '@/contract-models';
 import {fromWeiEther, toBN} from '@/utils/common';
 import {staminaToHours} from '@/utils/date-time';
@@ -438,50 +441,6 @@ interface RaidMappedGetters {
 
 let interval: number;
 
-const dragonNames = [
-  'Fudbringer',
-  'HODL Lord',
-  'Skill Eater',
-  'Chain Congester',
-  'Swap Guardian',
-  'Blade Hoarder',
-  'Centralizer',
-  'Exchange Tormentor',
-  'Eater of Stakes',
-
-  // 'M13',
-  // 'Ste1n',
-  // 'Moneth',
-  // 'Skulpin',
-  // 'Plitszkin',
-
-  // 'KokMhei',
-  // 'kocuZe',
-  // 'Jestinsane',
-  // 'Krypton',
-  // 'Richard Melics',
-];
-
-const bossImages = [
-  '../assets/raid-bosses/CB_Hellborn Brute.gif',
-  '../assets/raid-bosses/CB_Hellborn Executioner.gif',
-  '../assets/raid-bosses/CB_Hellborn Marauder.gif',
-  '../assets/raid-bosses/CB_Hellborn Overlord.gif',
-  '../assets/raid-bosses/CB_Hellborn Shaman.gif',
-
-  // '../assets/raid-bosses/CB_Hellborn M13.gif',
-  // '../assets/raid-bosses/CB_Hellborn Ste1n.gif',
-  // '../assets/raid-bosses/CB_Hellborn Moneth.gif',
-  // '../assets/raid-bosses/CB_Hellborn Skulpin.gif',
-  // '../assets/raid-bosses/CB_Hellborn Plitszkin.gif',
-
-  // '../assets/raid-bosses/KokMhei.gif',
-  // '../assets/raid-bosses/KocuZe.gif',
-  // '../assets/raid-bosses/Jestinsane.gif',
-  // '../assets/raid-bosses/Krypton.gif',
-  // '../assets/raid-bosses/Melics.gif',
-];
-
 export default Vue.extend({
   data() {
     return {
@@ -489,15 +448,15 @@ export default Vue.extend({
       selectedWeapon: null,
       raidIndex: '',
       bossName: '',
-      raiderCount: '',
-      totalPower: '',
+      raiderCount: 0,
+      totalPower: 0,
       expectedFinishTime: new Date(),
       xpReward: '',
       staminaCost: '',
       durabilityCost: '',
       joinCost: '',
       raidStatus: '',
-      bossPower: '',
+      bossPower: 0,
       bossTrait: '',
       accountPower: '',
       rewardsRaidId: '',
@@ -516,18 +475,14 @@ export default Vue.extend({
       },
       traits:'',
       notifyError: '',
-      isLoading: false
+      isLoading: false,
+      raidStarted: false
     };
   },
 
   computed: {
-    ...mapState(['characters', 'maxStamina', 'currentCharacterId', 'ownedCharacterIds', 'defaultAccount']),
-    ...mapGetters(['ownCharacters', 'ownWeapons', 'currentCharacter',
-      'currentCharacterStamina', 'getWeaponDurability', 'contracts', 'getCharacterName', 'getCharacterPower']),
-
-    claimButtonActive(): boolean {
-      return this.rewardIndexes !== null && this.rewardIndexes.length > 0;
-    },
+    ...mapState(['characters', 'currentCharacterId', 'ownedCharacterIds']),
+    ...mapGetters(['ownWeapons', 'currentCharacter', 'getCharacterName', 'getCharacterPower']),
 
     currentMultiplier(): string {
       if(!this.selectedWeaponId) return '0';
@@ -541,17 +496,9 @@ export default Vue.extend({
       return this.getCharacterPower(this.currentCharacter.id);
     },
 
-    getSelectedWeapon(): IWeapon {
-      return this.ownWeapons.find((weapon: IWeapon) => weapon.id === +this.selectedWeaponId);
-    },
-
     formatStaminaHours(): string {
       return staminaToHours(+this.staminaCost).toFixed(1);
     },
-
-    formattedWinChance(): string {
-      return `${this.calculateWinChance()}%`;
-    }
   },
 
   methods: {
@@ -577,23 +524,31 @@ export default Vue.extend({
     ...(mapGetters([
       'getRaidState',
     ]) as RaidMappedGetters),
-
-    calculateWinChance(): string {
-      return (Math.min(Math.max(+this.totalPower / +this.bossPower / 2 * 100, 0), 99.99) || 0).toFixed(2);
-    },
     getCharacterArt,
-    calculateProgressBarColor(): string {
-      if(+this.calculateWinChance() < 30){
-        return '#ccae4f';
-      } else if (+this.calculateWinChance() < 70){
-        return 'blue';
-      } else {
-        return 'green';
-      }
-    },
 
     changeEquipedWeapon(){
       Events.$emit('weapon-inventory', true);
+    },
+
+    noRewards(){
+      return this.rewardIndexes === null || this.rewardIndexes.length === 0;
+    },
+
+    raidStart(){
+      return !this.raidStarted || !this.selectedWeaponId;
+    },
+
+    generateTooltip(){
+      const staminaHrs = this.formatStaminaHours;
+      if(this.raidStarted){
+        if(!this.selectedWeaponId){
+          return (i18n.t('raid.errors.selection').toString());
+        }else{
+          return (i18n.t('raid.joiningCostStamina', {staminaHrs}).toString());
+        }
+      }else{
+        return (i18n.t('raid.errors.raidNotStarted').toString());
+      }
     },
 
     closeRewardPicker(id: any){
@@ -627,37 +582,12 @@ export default Vue.extend({
       }, 1000);
     },
 
-    addCommas(nStr: any) {
-      nStr += '';
-      const x = nStr.split('.');
-      let x1 = x[0];
-      const x2 = x.length > 1 ? '.' + x[1] : '';
-      const rgx = /(\d+)(\d{3})/;
-      while (rgx.test(x1)) {
-        x1 = x1.replace(rgx, '$1' + ',' + '$2');
-      }
-      return x1 + x2;
-    },
-
-
     getCleanCharacterName(id: string): string {
       return getCleanName(this.getCharacterName(id));
     },
 
-    calculatePlayersProgressBarWidth(): string {
-      return `${Math.round(+this.calculateWinChance())}%`;
-    },
-
-    calculateBossProgressBarWidth(): string {
-      return `${Math.round(100 - +this.calculateWinChance())}%`;
-    },
-
     convertWeiToSkill(wei: string): string {
       return fromWeiEther(wei);
-    },
-
-    weaponHasDurability(id: number): boolean{
-      return this.getWeaponDurability(id) > 0;
     },
 
     async joinRaidMethod(): Promise<void> {
@@ -667,8 +597,6 @@ export default Vue.extend({
         this.notifyError = (i18n.t('raid.errors.cannotAffordRaid').toString());
         return;
       }
-
-
 
       if (!this.selectedWeaponId || (this.currentCharacterId < 0)) {
         (this as any).$bvModal.show('warningModal');
@@ -828,15 +756,12 @@ export default Vue.extend({
 
       await this.fetchCharacters(this.ownedCharacterIds);
     },
-
     getBossName(): string {
-      return dragonNames[+this.raidIndex % dragonNames.length];
+      return getBossName(+this.raidIndex);
     },
-
     getBossImage(): string {
-      return bossImages[+this.raidIndex % bossImages.length];
+      return getBossArt(+this.raidIndex);
     },
-
     zeroPad(num: any, places: any) {
       const zero = places - num.toString().length + 1;
       return Array(+(zero > 0 && zero)).join('0') + num;
@@ -846,20 +771,19 @@ export default Vue.extend({
       const raidData = this.getRaidState();
       this.raidIndex = raidData.index;
       this.bossName = this.getBossName();
-      this.raiderCount = raidData.raiderCount;
-      this.totalPower = raidData.playerPower;
+      this.raiderCount = +raidData.raiderCount;
+      this.totalPower = +raidData.playerPower;
       this.expectedFinishTime = new Date(+raidData.expectedFinishTime * 1000);
       this.xpReward = raidData.xpReward;
       this.staminaCost = raidData.staminaCost;
       this.durabilityCost = raidData.durabilityCost;
       this.joinCost = raidData.joinSkill;
       this.raidStatus = raidData.status;
-      this.bossPower = raidData.bossPower;
+      this.bossPower = +raidData.bossPower;
       this.bossTrait = raidData.bossTrait;
       this.accountPower = raidData.accountPower;
     }
   },
-
 
   async mounted() {
     this.getTimeRemaining();
@@ -869,8 +793,10 @@ export default Vue.extend({
       (this as any).processRaidData();
       await (this as any).getParticipatingCharacters();
       await (this as any).getParticipatingWeapons();
+      this.raidStarted = await this.fetchIsRaidStarted();
     };
     await refreshRaidData();
+    this.raidStarted = await this.fetchIsRaidStarted();
     interval = window.setInterval(async () => {
       await refreshRaidData();
     }, 3000);
@@ -1077,10 +1003,6 @@ hr.divider {
 
 .outline-box > div:nth-child(2) {
   padding-left: 20px;
-}
-
-.weapon-info{
-  margin-top: 10px;
 }
 
 .outline-box > div > p{
@@ -1325,6 +1247,31 @@ hr.divider {
   color: #fff;
   font-size: 20px;
 }
+
+.claim-btn > span{
+  font-family: Oswald;
+  color: #fff;
+  font-size: 20px;
+}
+
+.join-raid > .btn-raid > span{
+  font-family: Oswald;
+  color: #fff;
+  font-size: 20px;
+}
+
+.claim-btn:disabled{
+  opacity: 0.4;
+}
+
+.btn-rewards:disabled{
+  opacity: 0.4;
+}
+
+.btn-raid:disabled{
+  opacity: 0.4;
+}
+
 
 .btn-rewards {
   display: flex;
@@ -1840,6 +1787,16 @@ hr.divider {
    /* margin-top: 10px; */
 }
 
+.opacity-0{
+  opacity: 0.4;
+  cursor:not-allowed;
+}
+
+.opacity-1{
+  opacity: 1;
+  cursor: pointer;
+}
+
 .char-info > div:nth-child(2){
   margin-left: 20px;
 }
@@ -1889,7 +1846,7 @@ hr.divider {
   padding-left: 0px;
 }
 
-.powers > div:nth-child(1), .powers > div:nth-child(2), .powers > div:nth-child(3){
+.powers > div:nth-child(1), .powers > div:nth-child(2){
   border-right: 1px solid rgba(255, 255, 255, 0.433);
 }
 
@@ -2240,6 +2197,7 @@ hr.divider {
   }
 }
 
+
 @media (max-width: 1200px) {
   .boss-col {
     display: block;
@@ -2254,6 +2212,7 @@ hr.divider {
     word-spacing: normal;
     white-space: nowrap;
   }
+
 
   powers > div > p {
       color: #fff;

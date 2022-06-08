@@ -428,7 +428,6 @@ export default {
           targetString: targetIndex,
           fightMultiplier: this.fightMultiplier,
         });
-
         this.fightResults = results;
 
         await this.fetchFightRewardSkill();
@@ -973,6 +972,10 @@ h1 {
     height: auto;
   }
 
+  .weapon-selection {
+    align-self: flex-start;
+  }
+
   .hideMobile{
     display: inline;
   }
@@ -986,10 +989,14 @@ h1 {
   }
 
   .select-weapons{
-    font-size: 1.5em;
     align-self: left;
     margin-right: 20px;
   }
+
+  .select-weapons > div{
+    width: 100%;
+  }
+
 
   .combat-hints > div > .icon-border{
     height: 21px !important;
@@ -1005,6 +1012,14 @@ h1 {
   .selectedWeaponDetails > button  > img{
     width: 20px;
     margin-right: 15px;
+  }
+
+  .selectedWeaponDetails > div{
+    align-items: center;
+  }
+
+  .displayed-weapon{
+    margin-right: 10px;
   }
 
   .adventure{

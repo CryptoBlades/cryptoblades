@@ -1,6 +1,6 @@
 import VueRouter from 'vue-router';
 
-// import Plaza from './views/Plaza.vue';
+import Dashboard from './views/Dashboard.vue';
 import Character from './views/Character.vue';
 import Blacksmith from './views/Blacksmith.vue';
 import Combat from './views/Combat.vue';
@@ -17,15 +17,15 @@ import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
 import PlayToEarn from './views/PlayToEarn.vue';
 
-import {merchandise, portal, pvp, quests, raid} from './feature-flags';
-import Merchandise from '@/components/smart/Merchandise.vue';
-import {currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
+import { portal, pvp, quests, raid} from './feature-flags';
+import { currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 export default function createRouter() {
 
   const router = new VueRouter({
     routes: [
-      {path: '/', name: 'plaza', component: Character},
+      {path: '/', name: 'dashboard', component: Dashboard},
+      {path: '/plaza', name: 'plaza', component: Character},
       {path: '/blacksmith', name: 'blacksmith', component: Blacksmith},
       {path: '/combat', name: 'combat', component: Combat},
       {path: '/leaderboard', name: 'leaderboard', component: Leaderboard},
@@ -68,17 +68,6 @@ export default function createRouter() {
       }
     };
     router.addRoute(pvpRoute);
-  }
-
-  if (merchandise) {
-    const merchandiseRoute = {
-      path: '/merchandise', name: 'merchandise', component: Merchandise,
-      beforeEnter: (to: any, from: any, next: any) => {
-        if (to.name === 'merchandise' && !currentChainSupportsMerchandise()) next(from);
-        else next();
-      }
-    };
-    router.addRoute(merchandiseRoute);
   }
 
   return router;

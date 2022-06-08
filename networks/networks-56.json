@@ -2987,6 +2987,12 @@
     "links": {},
     "address": "0x6fc3E5CE3Acf1eC9abDbc25cA2ad909E5EbAa3BA"
   },
+  "build/contracts/Launchpad.json": {
+    "events": {},
+    "links": {},
+    "address": "0x2E3CAb5BDa349F59dE08776FE174D0d3972a22cd",
+    "transactionHash": "0xf6ee649bccf40c88a9806a937055decaa4554f1836d073c90d0bdedfb38feceb"
+  },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
     "links": {},
@@ -3936,7 +3942,7 @@
     },
     "links": {},
     "address": "0x76f3Ba06d1C4994122cA81998dC405A17010AE81",
-    "transactionHash": "0xd5803d0c9219570b1684d2bebe1996f5bd529694718f52d2ca1518f54aacf1b6"
+    "transactionHash": "0xbc6f0aa95f68caa19c035c45a172615a8c97b82992796e506ad84f9bd2cc2dfb"
   },
   "build/contracts/Raid1.json": {
     "events": {},

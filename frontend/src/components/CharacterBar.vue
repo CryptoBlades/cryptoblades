@@ -23,6 +23,7 @@ import Vue from 'vue';
 import CharacterDisplay from './smart/CharacterDisplay.vue';
 import '@/mixins/general';
 
+
 export default Vue.extend({
   props: ['isToggled', 'sidebarType'],
   components: {
@@ -62,6 +63,7 @@ export default Vue.extend({
   },
   async mounted() {
     this.checkStorage();
+    this.currentPath = (this as any).$route.path;
   },
   watch:{
     $route (to){

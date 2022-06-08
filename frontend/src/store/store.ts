@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _, {isUndefined, values} from 'lodash';
-import {bnMinimum, currentChainSupportsMerchandise, currentChainSupportsPvP, currentChainSupportsQuests, gasUsedToBnb, toBN} from '@/utils/common';
+import {bnMinimum, currentChainSupportsPvP, currentChainSupportsQuests, gasUsedToBnb, toBN} from '@/utils/common';
 
 import {getConfigValue, setUpContracts} from '@/contracts';
 
@@ -65,7 +65,6 @@ IState, 'waxBridgeWithdrawableBnb' | 'waxBridgeRemainingWithdrawableBnbDuringPer
 import bridge from './bridge';
 import pvp from './pvp';
 import quests from './quests';
-import merchandise from './merchandise';
 import raid from './raid';
 import staking from './staking';
 import land from './land';
@@ -77,7 +76,6 @@ export default new Vuex.Store<IState>({
     bridge,
     pvp,
     quests,
-    merchandise,
     raid,
     staking,
     land
@@ -112,7 +110,6 @@ export default new Vuex.Store<IState>({
     maxStamina: 0,
     currentCharacterId: null,
     ownedDust: [],
-    currentChainSupportsMerchandise: false,
     currentChainSupportsPvP: false,
     currentChainSupportsQuests: false,
     hasAdminAccess: false,
@@ -361,10 +358,6 @@ export default new Vuex.Store<IState>({
         const dust = state.ownedDust[1];
         return dust;
       };
-    },
-
-    getCurrentChainSupportsMerchandise(state) {
-      return state.currentChainSupportsMerchandise;
     },
 
     getCurrentChainSupportsPvP(state) {
@@ -672,10 +665,6 @@ export default new Vuex.Store<IState>({
       if (!state.ownedShieldIds.includes(shieldId)) {
         state.ownedShieldIds.push(shieldId);
       }
-    },
-
-    updateCurrentChainSupportsMerchandise(state: IState) {
-      state.currentChainSupportsMerchandise = currentChainSupportsMerchandise();
     },
 
     updateCurrentChainSupportsPvP(state: IState) {
@@ -1032,6 +1021,11 @@ export default new Vuex.Store<IState>({
   },
 
   actions: {
+    async fetchUsdSkillValue({state}, payload){
+      const { CryptoBlades } = state.contracts();
+      if(!CryptoBlades || !state.defaultAccount) return;
+      return await CryptoBlades.methods.usdToSkill(payload).call(defaultCallOptions(state));
+    },
     async fetchIgoRewardsPerFight({ state }) {
       const { CryptoBlades } = state.contracts();
       if(!CryptoBlades || !state.defaultAccount) return;
@@ -1081,7 +1075,6 @@ export default new Vuex.Store<IState>({
 
       if(refreshUserDetails) {
         await Promise.all([
-          dispatch('setUpContractEvents'),
           dispatch('fetchUserDetails')
         ]);
       }
@@ -1103,18 +1096,19 @@ export default new Vuex.Store<IState>({
 
 
 
-    setUpContractEvents({ state, dispatch, commit }) {
+    async setUpContractEvents({ state, dispatch, commit }) {
+      const { Characters, Weapons, Garrison, Shields, CryptoBlades } = state.contracts();
       state.eventSubscriptions().forEach(sub => sub.unsubscribe());
 
       const emptySubsPayload: SetEventSubscriptionsPayload = { eventSubscriptions: () => [] };
       commit('setEventSubscriptions', emptySubsPayload);
 
-      if(!state.defaultAccount) return;
+      if(!state.defaultAccount || !Characters || !Weapons || !Shields || !CryptoBlades || !Garrison) return;
 
       const subscriptions: IWeb3EventSubscription[] = [];
 
       subscriptions.push(
-        state.contracts().Characters!.events.NewCharacter(
+        Characters.events.NewCharacter(
           { filter: { minter: state.defaultAccount } },
           async (err: Error, data: any) => {
             if (err) {
@@ -1137,7 +1131,7 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        state.contracts().Garrison!.events.CharacterReceived(
+        Garrison.events.CharacterReceived(
           { filter: { minter: state.defaultAccount } },
           async (err: Error, data: any) => {
             if (err) {
@@ -1162,7 +1156,7 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        state.contracts().Weapons!.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
+        Weapons.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
           if (err) {
             console.error(err, data);
             return;
@@ -1180,7 +1174,7 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        state.contracts().Shields!.events.NewShield({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
+        Shields.events.NewShield({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
           if (err) {
             console.error(err, data);
             return;
@@ -1199,7 +1193,7 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        state.contracts().CryptoBlades!.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
+        CryptoBlades.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
           if (err) {
             console.error(err, data);
             return;
@@ -1213,7 +1207,7 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        state.contracts().CryptoBlades!.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
+        CryptoBlades.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
           if (err) {
             console.error(err, data);
             return;

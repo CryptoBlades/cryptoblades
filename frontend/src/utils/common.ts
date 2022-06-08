@@ -120,12 +120,6 @@ export const isValidWeb3Address = (walletAddress: string) => {
   return Web3.utils.isAddress(walletAddress);
 };
 
-export const currentChainSupportsMerchandise = () => {
-  const supportedFeatures = getConfigValue('featureSupport');
-
-  return supportedFeatures.merch;
-};
-
 export const currentChainSupportsPvP = () => {
   const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
   const contractAddress = process.env.VUE_APP_PVP_CONTRACT_ADDRESS ||

@@ -9,13 +9,12 @@
                 v-for="filteredCharacter in filteredCharactersForList"
                 :key="filteredCharacter.id"
                 @click="(!getIfCharacterIsInRaid(filteredCharacter.id) || !filteredCharacter.pvpStatus === 'IN_ARENA'
-                || !getIsInCombat) && setCurrentCharacter(filteredCharacter.id) && alert(filteredCharacter.id) ">
-                <!--------  IN RAID ----------------IN ARENA ---------------------IN COMBAT ------------>
+                || !getIsInCombat) && setCurrentCharacter(filteredCharacter.id) && alert(filteredCharacter.id)">
               <div class="character-element">
                 <div class="element-frame">
                     <div>
                       <span
-                        :id="`${setIdForElement(filteredCharacter.trait, filteredCharacter.isSelected)}`"
+                        :id="`${setIdForElement(filteredCharacter.trait, filteredCharacter.id === currentCharacterId)}`"
                       />
                       <span v-if="toggled && getIfCharacterIsInRaid(filteredCharacter.id)" class="raid-indicator"></span>
                       <span v-if="toggled && filteredCharacter.pvpStatus === 'IN_ARENA'" class="pvp-indicator"></span>
