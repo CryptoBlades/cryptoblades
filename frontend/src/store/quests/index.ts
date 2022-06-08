@@ -104,7 +104,7 @@ const quests = {
 
     async addQuestTemplate(
       { rootState }: {rootState: IState},
-      {questTemplate, isPromo, supply, deadline}: {questTemplate: Quest, isPromo: boolean, supply: number, deadline: number}){
+      {questTemplate, tierOffset, supply, deadline}: {questTemplate: Quest, tierOffset: number, supply: number, deadline: number}){
       const {SimpleQuests} = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;
 
@@ -142,11 +142,7 @@ const quests = {
         }
       }
 
-      let tier = questTemplate.tier;
-      if (isPromo) {
-        tier! += 10;
-      }
-
+      const tier = questTemplate.tier! + tierOffset;
       return await SimpleQuests.methods.addNewQuestTemplate(tier!,
         questTemplate.requirementType!, questTemplate.requirementRarity!, requirementAmount, questTemplate.requirementExternalAddress,
         questTemplate.rewardType!, questTemplate.rewardRarity!, rewardAmount, questTemplate.rewardExternalAddress,
@@ -619,6 +615,40 @@ const quests = {
 
       return await SimpleQuests.methods.submitProgressAmount(characterID, amountTimesDecimals.toString()).send(defaultCallOptions(rootState));
     },
+    async getWalletQuestData({ rootState }: {rootState: IState}) {
+      const { SimpleQuests } = rootState.contracts();
+      if(!SimpleQuests || !rootState.defaultAccount) return;
+
+      const res =  await SimpleQuests.methods.walletQuestProgress('0x03d68B1331Cd1c49D69b1CB1133c89Ecbab2eaC7', 0).call(defaultCallOptions(rootState));
+      console.log(res);
+    },
+    async submitWalletProgress(
+      { rootState }: {rootState: IState}, {questID, indexInTier, tokenIds}: {questID: number, indexInTier: number, tokenIds: string[]}) {
+      const { SimpleQuests } = rootState.contracts();
+      if(!SimpleQuests || !rootState.defaultAccount) return;
+
+
+      return await SimpleQuests.methods.submitWalletProgress(questID, indexInTier, tokenIds).send(defaultCallOptions(rootState));
+    },
+    async submitWalletProgressAmount(
+      { rootState }: {rootState: IState}, {questID, indexInTier, amount}: {questID: number, indexInTier: number, amount: number}) {
+      const { SimpleQuests } = rootState.contracts();
+      if(!SimpleQuests || !rootState.defaultAccount) return;
+
+      return await SimpleQuests.methods.submitWalletProgressAmount(questID, indexInTier, amount).send(defaultCallOptions(rootState));
+    },
+    async completeWalletQuest({ rootState }: {rootState: IState}, {questID}: {questID: number}) {
+      const { SimpleQuests } = rootState.contracts();
+      if(!SimpleQuests || !rootState.defaultAccount) return;
+
+      return await SimpleQuests.methods.completeWalletQuest(questID).send(defaultCallOptions(rootState));
+    },
+    async hasRandomWalletQuestRewardSeedRequested({ rootState }: {rootState: IState}, {questID}: {questID: number}) {
+      const { SimpleQuests } = rootState.contracts();
+      if(!SimpleQuests || !rootState.defaultAccount) return;
+
+      return await SimpleQuests.methods.hasRandomWalletQuestRewardSeedRequested(questID).call(defaultCallOptions(rootState));
+    }
   },
 };
 

@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import {merchandise, portal, pvp, quests, raid} from '@/feature-flags';
+import {portal, pvp, quests, raid} from '@/feature-flags';
 import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
 
@@ -66,22 +66,17 @@ export default Vue.extend({
       portal,
       pvp,
       quests,
-      merchandise,
     };
   },
 
   computed: {
     ...mapState(['defaultAccount']),
     ...mapGetters([
-      'getCurrentChainSupportsMerchandise',
       'getCurrentChainSupportsPvP',
       'getCurrentChainSupportsQuests',
       'getHasAdminAccess',
       'getHasMinterAccess',
     ]),
-    supportsMerchandise() {
-      return this.getCurrentChainSupportsMerchandise;
-    },
     supportsPvP() {
       return this.getCurrentChainSupportsPvP;
     },

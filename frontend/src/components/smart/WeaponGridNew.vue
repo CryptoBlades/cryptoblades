@@ -1,36 +1,45 @@
 <template>
   <div>
-    <div class="filters" v-if="!newWeapon" @change="saveFilters()">
-      <h3 class="ml-4" v-if="!noTitle && titleType=='weapon-list'">{{$t('weapons')}} ({{ ownWeapons }})</h3>
-      <h3 class="ml-4" v-if="!noTitle && titleType=='burn-weapon'">{{$t('nftList.selected')}} ({{ ignore.length }})</h3>
-      <span class="filter-icon" @click="showFilter"></span>
-      <div v-if="titleType!='combat'" class="row d-flex align-items-center none-mobile" style="flex-grow:0.6" >
-          <div class="col-sm-12 col-md-3 col-lg-3 none-mobile">
-            <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
-          </div>
-          <div class="col-sm-12 col-md-3 col-lg-3 d-flex none-mobile">
-            <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
-              <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
-              <strong>{{$t('weaponGrid.showFavorite')}}</strong>
+    <div class="filters flex-wrap px-4 pb-4 remove-flex-wrap-mobile" v-if="!newWeapon" @change="saveFilters()">
+      <div v-if="titleType!='combat'" class="d-flex flex-column align-items-start" style="flex-grow:0.6" >
+          <h3 v-if="!noTitle && titleType=='burn-weapon'">{{$t('nftList.selected')}} ({{ ignore.length }})</h3>
+          <h3 v-if="!noTitle && titleType=='weapon-list'">{{$t('weapons')}} ({{ ownWeapons }})</h3>
+          <div class="d-flex flex-row">
+            <div class="none-mobile select-wrapper-star pr-4" :data-content="$t('nftList.star')"  id="blacksmith1">
+              <select class="form-control" v-model="starFilter" >
+                <option v-for="starOption in starsOptions" :value="starOption" :key="starOption">{{ starOption || $t('nftList.sorts.any') }}</option>
+              </select>
+            </div>
+            <div class="none-mobile select-wrapper-element" :data-content="$t('nftList.element')" id="blacksmith2">
+              <select class="form-control" v-model="elementFilter" >
+                <option v-for="(element, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+                :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="element">{{ element || $t('nftList.sorts.any') }}</option>
+              </select>
             </div>
           </div>
-          <div class="col-sm-6 col-md-3 col-lg-3 mb-3 none-mobile select-wrapper-star" :data-content="$t('nftList.star')"  id="blacksmith1">
-            <select class="form-control" v-model="starFilter" >
-              <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
-            </select>
+      </div>
+      <span class="filter-icon ml-4" @click="showFilter"></span>
+      <div class="none-mobile d-flex flex-column align-items-end">
+        <div class="px=2 pt-2 pb-2">
+          <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
+            <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
+            <strong>{{$t('weaponGrid.showFavorite')}}</strong>
           </div>
-          <div class="col-sm-6 col-md-3 col-lg-3 mb-3 none-mobile select-wrapper-element" :data-content="$t('nftList.element')" id="blacksmith2">
-            <select class="form-control" v-model="elementFilter" >
-              <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
-              :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
-            </select>
+        </div>
+        <div class="p-2 d-flex flex-row">
+          <div class="pr-4" v-if="!showNftOptions">
+            <button class="btn-clear-filter" @click="$emit('selectAllWeapons')">{{selectWeaponsBtnLabel}}</button>
           </div>
+          <div>
+            <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
+          </div>
+        </div>
       </div>
       <div v-if="titleType=='combat'" class="none-mobile filter-combat">
         <div>
           <div class="select-wrapper-star" :data-content="$t('nftList.star')">
             <select class="form-control" v-model="starFilter" >
-            <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+            <option v-for="starOption in starsOptions" :value="starOption" :key="starOption">{{ starOption || $t('nftList.sorts.any') }}</option>
           </select>
           </div>
           <div class="select-wrapper-element" :data-content="$t('nftList.element')">
@@ -69,8 +78,8 @@
           @contextmenu="canFavorite && toggleFavorite($event, weapon.id)" @dblclick="canFavorite && toggleFavorite($event, weapon.id)">
           <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
           <div class="weapon-icon-wrapper">
-            <weapon-icon class="weapon-icon" :weapon="weapon" :favorite="isFavorite(weapon.id)" :id="'weapon-'+weapon.id"
-            :selected="setBorderSelected(weapon.id)"/>
+            <weapon-icon class="weapon-icon" :hasNftOptions="showNftOptions" :weapon="weapon" :favorite="isFavorite(weapon.id)" :id="'weapon-'+weapon.id"
+            :selected="showNftOptions ? highlight === weapon.id : setBorderSelected(weapon.id)"/>
             <weapon-popover :weapon="weapon" :placement="'right'"/>
           </div>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
@@ -111,7 +120,7 @@
         {{$t('weaponGrid.pickSkin')}}
       </span>
       <select class="form-control" v-model="targetSkin">
-        <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+        <option v-for="skin in availableSkins" :value="skin" :key="skin">{{ skin }}</option>
       </select>
     </b-modal>
     <b-modal ref="open-filter" id="open-filter" hide-footer hide-header>
@@ -120,18 +129,22 @@
           <div class="col-sm-6 col-md-6 col-lg-3 mb-3">
             <strong>{{$t('weaponGrid.stars')}}</strong>
             <select class="form-control" v-model="starFilter" >
-              <option v-for="x in starsOptions" :value="x" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+              <option v-for="starOption in starsOptions" :value="starOption" :key="starOption">{{ starOption || $t('nftList.sorts.any') }}</option>
             </select>
           </div>
 
           <div class="col-sm-6 col-md-6 col-lg-3 mb-3">
             <strong>{{$t('weaponGrid.element')}}</strong>
             <select class="form-control" v-model="elementFilter" >
-              <option v-for="(x, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
-              :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
+              <option v-for="(trait, index) in ['', $t('traits.earth'), $t('traits.fire'), $t('traits.lightning'), $t('traits.water')]"
+              :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="trait">{{ trait || $t('nftList.sorts.any') }}</option>
             </select>
           </div>
            <div class="col-sm-12 col-md-6 col-lg-4 d-flex">
+            <div class="show-reforged">
+              <b-check class="show-reforged-checkbox" v-model="mobileSelectAllBool" @change="$emit('selectAllWeapons')"/>
+              <strong>{{selectWeaponsBtnLabel}}</strong>
+            </div>
             <div v-if="showReforgedToggle" class="show-reforged">
               <b-check class="show-reforged-checkbox" v-model="showReforgedWeapons" />
               <strong>{{$t('weaponGrid.showReforged')}}</strong>
@@ -205,6 +218,8 @@ interface Data {
   noOfPages: number;
   noOfItemsPerRow: number;
   ItemPerPage: number;
+  selectWeaponsBtnLabel: string;
+  mobileSelectAllBool: boolean;
 }
 const sorts = [
   { name: i18n.t('weaponGrid.sorts.any'), dir: '' },
@@ -353,7 +368,9 @@ export default Vue.extend({
       activePage: 1,
       pageSet: [],
       noOfPages: 0,
-      ItemPerPage: 20
+      ItemPerPage: 20,
+      selectWeaponsBtnLabel: (this as any).$t('weaponGrid.selectAll'),
+      mobileSelectAllBool: false,
     } as Data;
   },
   components: {
@@ -431,6 +448,9 @@ export default Vue.extend({
     },
   },
   watch: {
+    nonIgnoredWeapons(data){
+      this.$emit('currentFilteredWeapons', data);
+    },
     async weaponIdsToDisplay(newWeaponIds: string[]) {
       await this.fetchWeapons(newWeaponIds);
       console.log('weapon forged');
@@ -640,6 +660,14 @@ export default Vue.extend({
     }
   },
   async mounted() {
+    this.$root.$on('select-all-button-labeler', (bool: boolean) => {
+      this.mobileSelectAllBool = bool;
+      if(bool){
+        this.selectWeaponsBtnLabel = (this as any).$t('weaponGrid.deSelectAll');
+      }else{
+        this.selectWeaponsBtnLabel = (this as any).$t('weaponGrid.selectAll');
+      }
+    });
     this.checkStorageFavorite();
     Events.$on('weapon:newFavorite', () => this.checkStorageFavorite());
     if(this.isMarket) {
@@ -700,8 +728,6 @@ export default Vue.extend({
 }
 
 .weapon-icon-wrapper {
-  width: 13.5em;
-  height: 18em;
 }
 .above-wrapper {
   padding: 0.1rem;
@@ -737,7 +763,6 @@ export default Vue.extend({
 }
 
 .select-wrapper-star > select{
-  padding-right: 20px;
   text-align: right;
 }
 
@@ -983,6 +1008,9 @@ export default Vue.extend({
 }
 /* Needed to adjust weapon list */
 @media all and (max-width: 767.98px) {
+  .remove-flex-wrap-mobile{
+    flex-wrap: nowrap !important;
+  }
   .weapon-grid {
     padding-left: 2em;
     justify-content: center;

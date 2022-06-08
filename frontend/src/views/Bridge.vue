@@ -56,8 +56,7 @@
         </div>
 
         <div class="sell-grid" v-if="nftType === 'shield'">
-          <nft-list v-model="selectedNftId" :isBridge="true"
-          />
+          <nft-list v-model="selectedNftId" showGivenNftIdTypes :nftIdTypes="ownedShieldIds.map(id => { return { id: id, type: 'shield' };})"/>
         </div>
 
         <div class="outcome" v-if="transferingToStorage">
@@ -294,7 +293,7 @@ import CurrencyConverter from '../components/CurrencyConverter.vue';
 import {fromWeiEther, toBN} from '@/utils/common';
 import config from '../../app-config.json';
 
-type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards'>;
+type StoreMappedState = Pick<IState, 'defaultAccount'| 'ownedWeaponIds' | 'ownedShieldIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards'>;
 
 interface StoreMappedGetters {
   contracts: Contracts;
