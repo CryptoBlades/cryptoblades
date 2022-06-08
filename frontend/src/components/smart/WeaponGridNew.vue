@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="filters flex-wrap px-4 pb-4" v-if="!newWeapon" @change="saveFilters()">
+    <div class="filters flex-wrap px-4 pb-4 remove-flex-wrap-mobile" v-if="!newWeapon" @change="saveFilters()">
       <div v-if="titleType!='combat'" class="d-flex flex-column align-items-start" style="flex-grow:0.6" >
           <h3 v-if="!noTitle && titleType=='burn-weapon'">{{$t('nftList.selected')}} ({{ ignore.length }})</h3>
           <h3 v-if="!noTitle && titleType=='weapon-list'">{{$t('weapons')}} ({{ ownWeapons }})</h3>
@@ -1008,6 +1008,9 @@ export default Vue.extend({
 }
 /* Needed to adjust weapon list */
 @media all and (max-width: 767.98px) {
+  .remove-flex-wrap-mobile{
+    flex-wrap: nowrap !important;
+  }
   .weapon-grid {
     padding-left: 2em;
     justify-content: center;
