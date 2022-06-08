@@ -20,6 +20,7 @@
       <pvp-arena-preparation
         v-if="!isCharacterInArena"
         :tierRewardsPool="tierRewardsPool"
+        :untieredRewardsPool="untieredRewardsPool"
         :tierTopRankers="tierTopRankers"
         :untieredTopRankers="untieredTopRankers"
         :characterInformation="characterInformation"
@@ -37,6 +38,7 @@
       <pvp-arena-summary
         v-else-if="isCharacterInArena && !isMatchMaking"
         :tierRewardsPool="tierRewardsPool"
+        :untieredRewardsPool="untieredRewardsPool"
         :tierTopRankers="tierTopRankers"
         :untieredTopRankers="untieredTopRankers"
         :characterInformation="characterInformation"
@@ -109,6 +111,7 @@ export default {
       untieredEntryWager: null,
       isMatchMaking: false,
       tierRewardsPool: null,
+      untieredRewardsPool: null,
       tierTopRankers: [],
       untieredTopRankers: [],
       currentRankedSeason: null,
@@ -392,6 +395,8 @@ export default {
 
           this.tierRewardsPool = await this.getRankingsPoolByTier(this.characterInformation.tier);
 
+          this.untieredRewardsPool = await this.getRankingsPoolByTier(20);
+
           const tierTopRankersIds = await this.getTierTopCharacters(this.characterInformation.tier);
 
           const untieredTopRankersIds = await this.getTierTopCharacters(20);
@@ -536,6 +541,8 @@ export default {
 
       this.tierRewardsPool = await this.getRankingsPoolByTier(this.characterInformation.tier);
 
+      this.untieredRewardsPool = await this.getRankingsPoolByTier(20);
+
       const tierTopRankersIds = await this.getTierTopCharacters(this.characterInformation.tier);
 
       const untieredTopRankersIds = await this.getTierTopCharacters(20);
@@ -653,7 +660,7 @@ export default {
           this.isCharacterInArena = false;
         }
 
-        if (await this.getIsCharacterOldInArena(value)) {
+        if (await this.getIsCharacterInOldArena(value)) {
           this.isCharacterInOldArena = true;
         } else {
           this.isCharacterInOldArena = false;
@@ -693,6 +700,8 @@ export default {
         }
 
         this.tierRewardsPool = await this.getRankingsPoolByTier(this.characterInformation.tier);
+
+        this.untieredRewardsPool = await this.getRankingsPoolByTier(20);
 
         const tierTopRankersIds = await this.getTierTopCharacters(this.characterInformation.tier);
 

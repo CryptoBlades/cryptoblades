@@ -150,7 +150,7 @@
             <big-button
               class="button"
               :mainText="$t('blacksmith.forgeSwordFor') + ` ${forgeCost} SKILL`"
-              @click="onForgeWeapon"
+              @click="onForgeWeapon(1)"
             />
           </div>
           <div class="mt-3" v-if="ownWeapons.length > 0 && !showReforge">
@@ -195,19 +195,19 @@
                     <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
                     <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
                       <span>{{$t('blacksmith.forge').toUpperCase()}} x1</span> <br>
-                      ({{ forgeCost }} SKILL)
+                      {{ forgeCost }} SKILL
                     </span>
                   </button>
 
                   <button
-                          class="ml-3"
-                          @click="onClickForge(1)"
-                          :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
-                          v-tooltip="$t('blacksmith.forge10New')">
+                    class="ml-3"
+                    @click="onClickForge(1)"
+                    :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
+                    v-tooltip="$t('blacksmith.forge10New')">
                     <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
                     <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
                       <span>{{$t('blacksmith.forge').toUpperCase()}} x10</span><br>
-                      ({{ (forgeCost*10).toFixed(4) }} SKILL)
+                      {{ (forgeCost*10).toFixed(4) }} SKILL
                     </span>
                   </button>
 
@@ -295,7 +295,8 @@
                         v-if="clickedForgeButton === 0"
                         variant="primary"
                         class="row justify-content-center forge-btns"
-                        @click="onForgeWeapon"
+                        :class="disableConfirmButton ? 'disable-button' : ''"
+                        @click="onForgeWeapon(1)"
                         :disabled="disableConfirmButton"
                         v-tooltip="$t('blacksmith.forgeNew')">
                           <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
@@ -309,10 +310,11 @@
                         v-if="clickedForgeButton === 1"
                         variant="primary"
                         class="row justify-content-center forge-btns"
-                        @click="onForgeWeaponx10"
+                        :class="disableConfirmButton ? 'disable-button' : ''"
+                        @click="onForgeWeapon(10)"
                         :disabled="disableConfirmButton"
                         v-tooltip="$t('blacksmith.forge10New')">
-                          <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                        <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
                             {{$t('blacksmith.forge').toUpperCase()}}
                           </span>
                       </button>
@@ -404,10 +406,9 @@
                   </div>
                   <div>
                     <input v-model="lesserDust" type="range" min="0" :max="getLesserDust()" value="0" steps="1">
-                    <div class="value right">{{lesserDust}}/{{getLesserDust()}}</div>
                   </div>
                   <div>
-                    <span>{{lesserDust}}</span>
+                    <span>{{lesserDust}}/{{getLesserDust()}}</span>
                     <span class="cursor-p" @click="lesserDust = getLesserDust()">{{$t('blacksmith.max')}}</span>
                   </div>
                 </div>
@@ -425,10 +426,9 @@
                   </div>
                   <div>
                     <input v-model="greaterDust" type="range" min="0" :max="getGreaterDust()" value="0" steps="1">
-                    <div class="value right">{{greaterDust}}/{{getGreaterDust()}}</div>
                   </div>
                   <div>
-                    <span>{{greaterDust}}</span>
+                    <span>{{greaterDust}}/{{getGreaterDust()}}</span>
                     <span class="cursor-p" @click="greaterDust = getGreaterDust()">{{$t('blacksmith.max')}}</span>
                   </div>
                 </div>
@@ -446,10 +446,9 @@
                   </div>
                   <div>
                     <input v-model="powerfulDust" type="range" min="0" :max="getPowerfulDust()" value="0" steps="1">
-                    <div class="value right">{{powerfulDust}}/{{getPowerfulDust()}}</div>
                   </div>
                   <div>
-                    <span>{{powerfulDust}}</span>
+                    <span>{{powerfulDust}}/{{getPowerfulDust()}}</span>
                     <span class="cursor-p" @click="powerfulDust = getPowerfulDust()">{{$t('blacksmith.max')}}</span>
                   </div>
                 </div>
@@ -864,7 +863,7 @@ export default Vue.extend({
       }else if(id === 1){
         this.onClickForge(id);
         (this.$refs['forge-element-selector-modal']as BModal).show();
-      }else if(id===2){
+      }else if(id === 2){
         Events.$emit('show-special-forge-modal');
       }else{
         this.displayDustReforge();
@@ -913,76 +912,40 @@ export default Vue.extend({
       else if(type === 'bonusPower') return weaponActive.bonusPower;
     },
 
-    async onForgeWeapon() {
-      if(this.disableForge) return;
+    async onForgeWeapon(amount: number) {
+      this.disableForge = true;
       (this.$refs['forge-element-selector-modal']as BModal)?.hide();
-
-      const forgeMultiplier = 1;
-
-      this.disableForge = true;
-      // Incase the network or mm are having issues, after 1 min we reshow
-      const failbackTimeout = setTimeout(() => {
-        this.disableForge = false;
-      }, 30000);
-
+      this.modalType = 'forge';
+      this.showModal = true;
+      this.spin = true;
       try {
-        await this.mintWeapon({
-          useStakedSkillOnly: this.useStakedForForge,
-          chosenElement: this.selectedElement || 100,
-          eventId: this.selectedSpecialWeaponEventId,
-          mintSlippageApproved: this.mintSlippageApproved
-        });
-
+        if(amount === 1){
+          await this.mintWeapon({
+            useStakedSkillOnly: this.useStakedForForge,
+            chosenElement: this.selectedElement || 100,
+            eventId: this.selectedSpecialWeaponEventId,
+            mintSlippageApproved: this.mintSlippageApproved
+          });
+        }
+        else{
+          await await this.mintWeaponN({
+            num: amount,
+            useStakedSkillOnly: this.useStakedForForge,
+            chosenElement: this.selectedElement,
+            eventId: this.selectedSpecialWeaponEventId,
+            mintSlippageApproved: this.mintSlippageApproved
+          });
+        }
+        this.newForged = this.ownedWeaponIds.splice(this.ownedWeaponIds.length - amount, this.ownedWeaponIds.length);
+        (this.$refs['new-forge-weapon'] as BModal).show();
       } catch (e) {
+        console.log('Error while forging:', e);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
       } finally {
-        clearTimeout(failbackTimeout);
         this.disableForge = false;
         this.selectedElement = null;
-      }
-      this.relayFunction(forgeMultiplier);
-    },
-
-    async onForgeWeaponx10(){
-      if(this.disableForge) return;
-
-      (this.$refs['forge-element-selector-modal']as BModal).hide();
-
-      this.disableForge = true;
-      const forgeMultiplier = 10;
-
-      // Incase the network or mm are having issues, after 1 min we reshow
-      const failbackTimeout = setTimeout(() => {
-        this.disableForge = false;
-      }, 30000);
-
-      try {
-        await await this.mintWeaponN({
-          num: forgeMultiplier,
-          useStakedSkillOnly: this.useStakedForForge,
-          chosenElement: this.selectedElement,
-          eventId: this.selectedSpecialWeaponEventId,
-          mintSlippageApproved: this.mintSlippageApproved
-        });
-
-      } catch (e) {
-        console.error(e);
-        (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
-      } finally {
-        clearTimeout(failbackTimeout);
-        this.disableForge = false;
-        this.selectedElement = null;
-      }
-      this.relayFunction(forgeMultiplier);
-
-    },
-
-    relayFunction(offset: number){
-      try{
-        this.viewNewWeapons(offset);
-      } catch (e) {
-        console.error(e);
-        this.onError = true;
+        this.showModal = false;
+        this.spin = false;
       }
     },
 
@@ -1034,12 +997,14 @@ export default Vue.extend({
       (this.$refs['forge-element-selector-modal']as BModal).show();
     },
 
-    setChosenElement(ele: any, i: number) {
-      this.selectedElement = i;
-      this.chosenElementFee = i === 100 ? 1 : 2;
-      ele.srcElement.classList.toggle('done');
-      Array.from(ele.srcElement.parentNode.childNodes).forEach((child: any) => {
-        if (child !== ele.srcElement && child.classList.contains('done') === true){
+    setChosenElement(elementObject: any, selectedNumber: number) {
+      if(selectedNumber === this.selectedElement) this.selectedElement = null;
+      else this.selectedElement = selectedNumber;
+
+      this.chosenElementFee = selectedNumber === 100 ? 1 : 2;
+      elementObject.srcElement.classList.toggle('done');
+      Array.from(elementObject.srcElement.parentNode.childNodes).forEach((child: any) => {
+        if (child !== elementObject.srcElement && child.classList.contains('done') === true){
           child.classList.toggle('done');
         }
       });
@@ -1132,27 +1097,6 @@ export default Vue.extend({
 
     closeModal(modalType: string){
       (this.$refs[modalType] as BModal).hide();
-    },
-
-    viewNewWeapons(offset: number){
-      this.newForged = [];
-      this.ownedWeaponIds.forEach(x => {
-        this.newForged.push(x);
-      });
-
-      this.newForged.splice(0, this.ownedWeaponIds.length - offset);
-
-      // eslint-disable-next-line no-constant-condition
-      if (this.newForged.length > 0 && !this.onError){
-        this.showModal = true;
-        this.modalType = 'forge';
-        this.spin = true;
-        setTimeout(() => {
-          this.showModal = false;
-          (this.$refs['new-forge-weapon'] as BModal).show();
-          this.spin = false;
-        }, 10000);
-      }
     },
 
     getWeaponArt,
@@ -1567,38 +1511,19 @@ export default Vue.extend({
 }
 
 .button-div > button{
-  display: flex;
-  flex-direction: column;
-  border: none;
-  width: 10rem;
-  height: 70px;
-  align-items: center;
-  vertical-align: middle;
-  justify-content: center;
-  background-image: url('../assets/buttonOutline.svg');
-  background-color: transparent;
+  width: 200px;
+  height: 80px;
+  background: transparent;
+  background-image: url('../assets/btn-join.png');
+  background-size: contain;
+  background-position: center;
   background-repeat: no-repeat;
-  background-size: 100% 100%;
-  -o-object-fit: fill;
-  object-fit: fill;
-  border: none !important;
-}
-
-
-/* TO TEMPORARILY OVERRIDE THE PRIMARY BUTTON HOVER EFFECT */
-.button-div > button:hover, .forge-btns:hover{
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  vertical-align: middle !important;
-  justify-content: center !important;
-  background-image: url('../assets/buttonOutline.svg') !important;
-  background-color: transparent !important;
-  background-repeat: no-repeat !important;
-  background-size: 100% 100% !important;
-  -o-object-fit: fill !important;
-  object-fit: fill !important;
-  border: 0px !important;
+  border: none;
+  outline: none;
+  color: #F0E2B6;
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  text-transform: uppercase;
 }
 
 @media (max-width: 1200px) {
@@ -1611,7 +1536,7 @@ export default Vue.extend({
     margin-top: 30px;
   }
 
-  .button-div > button:hover, .forge-btns:hover{
+  .button-div > button:hover{
     margin-top: 30px;
   }
 }
@@ -1627,7 +1552,8 @@ export default Vue.extend({
 }
 
 .button-div > button >span{
- color: #e9c97a;
+  color: #e9c97a;
+  font-family: "Roboto", sans-serif;
 }
 
 .reforgeDust > span{
@@ -2028,26 +1954,26 @@ export default Vue.extend({
 
 .dust-gauge > div:nth-child(3) > span:nth-child(1){
   border: 1px solid rgba(255, 255, 255, 0.205);
-  padding: 5px 20px;
+  padding: 5px 10px;
   color: #fff;
   font-family: Roboto;
   border-radius: 5px;
   font-size: 12px;
   max-width: 60px;
-  min-width: 60px;
+  min-width: 80px;
   text-align: center;
   margin-right: 10px;
 }
 
 .dust-gauge > div:nth-child(3) > span:nth-child(2){
   border: 1px solid rgba(255, 255, 255, 0.205);
-  padding: 5px 20px;
+  padding: 5px 5px;
   color: #fff;
   font-family: Roboto;
   border-radius: 5px;
   max-width: 60px;
   font-size: 12px;
-  min-width: 60px;
+  min-width: 80px;
   text-align: center;
 }
 
@@ -2064,6 +1990,10 @@ export default Vue.extend({
 
 .dust-gauge > div > div {
   padding-left: 15px;
+}
+
+.dust-gauge > div div:nth-child(2){
+   width:200px;
 }
 
 .dust-gauge > div > div > span{
@@ -2107,6 +2037,7 @@ export default Vue.extend({
 .weapon-body{
   padding-left: 50px;
   width: 100%;
+  margin-top: 20px;
 }
 
 .equipment-body{
@@ -2394,6 +2325,11 @@ img.elements-modal:hover {
   justify-content: space-between;
 }
 
+.disable-button{
+  opacity: 0.5;
+  cursor:not-allowed;
+}
+
 .line-sep{
   width: 2vw;
   height: 2px;
@@ -2481,8 +2417,19 @@ img.elements-modal:hover {
     width: 100%;
   }
 
-  .weapon-body,  .equipment-body, .dust-body, .land-body{
+  .weapon-body, .equipment-body, .dust-body, .land-body{
     padding: 0px 20px;
+    padding-top: 20px;
+  }
+
+  .equipment-body{
+    padding: 0px 20px;
+    padding-top: 30px;
+  }
+
+  .dust-body, .land-body{
+    padding: 0px 20px;
+    padding-top: 30px;
   }
 
   .blacksmith-page {
@@ -2568,8 +2515,11 @@ img.elements-modal:hover {
     padding: 10px 0px;
     align-items: center;
     background-color: rgba(20, 20, 20);
-    border-top: 1px solid rgba(255, 255, 255, 0.404);
     border-bottom: 1px solid rgba(255, 255, 255, 0.418);
+    z-index: 2;
+    position: absolute;
+    top:0;
+    width: 100%;
   }
 
   .mobile-menu > span{

@@ -6,7 +6,7 @@
       </div>
 
       <b-modal id="fightResultsModal" hide-footer hide-header>
-        <CombatResults v-if="resultsAvailable" :fightResults="fightResults" class="mb-3" />
+        <CombatResults v-if="resultsAvailable" :fightResults="fightResults" :staminaUsed="staminaPerFight" class="mb-3" />
         <div class="footer-close">
             <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
             <span class="tap" @click="$bvModal.hide('fightResultsModal')">
@@ -297,7 +297,8 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
+    ...mapActions(['fetchTargets', 'doEncounter', 'fetchFightRewardSkill', 'fetchFightRewardXp',
+      'fetchCharacterStamina','getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
       'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
@@ -427,11 +428,12 @@ export default {
           targetString: targetIndex,
           fightMultiplier: this.fightMultiplier,
         });
-
         this.fightResults = results;
 
         await this.fetchFightRewardSkill();
         await this.fetchFightRewardXp();
+
+        await this.fetchCharacterStamina(this.currentCharacterId);
 
         this.error = null;
       } catch (e) {
@@ -970,6 +972,10 @@ h1 {
     height: auto;
   }
 
+  .weapon-selection {
+    align-self: flex-start;
+  }
+
   .hideMobile{
     display: inline;
   }
@@ -983,10 +989,14 @@ h1 {
   }
 
   .select-weapons{
-    font-size: 1.5em;
     align-self: left;
     margin-right: 20px;
   }
+
+  .select-weapons > div{
+    width: 100%;
+  }
+
 
   .combat-hints > div > .icon-border{
     height: 21px !important;
@@ -1002,6 +1012,14 @@ h1 {
   .selectedWeaponDetails > button  > img{
     width: 20px;
     margin-right: 15px;
+  }
+
+  .selectedWeaponDetails > div{
+    align-items: center;
+  }
+
+  .displayed-weapon{
+    margin-right: 10px;
   }
 
   .adventure{

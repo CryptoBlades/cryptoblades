@@ -28,6 +28,22 @@ const allImages = [
   // aprilFools3, aprilFools1, aprilFools2,
 ];
 
+const raidBossNames = [
+  'Fudbringer',
+  'HODL Lord',
+  'Skill Eater',
+  'Chain Congester',
+  'Swap Guardian',
+  'Blade Hoarder',
+  'Centralizer',
+  'Exchange Tormentor',
+  'Eater of Stakes',
+];
+
 export function getBossArt(id: number) {
   return allImages[id % allImages.length];
+}
+
+export function getBossName(raidData: number) {
+  return raidBossNames[+raidData % raidBossNames.length];
 }

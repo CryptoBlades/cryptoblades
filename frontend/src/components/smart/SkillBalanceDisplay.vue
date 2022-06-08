@@ -1,5 +1,5 @@
 <template>
-  <div class="skill-balance-display d-flex flex-column flex-wrap p-2 custom-skill-balance-mobile">
+  <div class="skill-balance-display d-flex flex-column flex-wrap p-2 custom-skill-balance-mobile" :style="isToggled ? 'padding-bottom: 10px !important': '' ">
     <div class="d-flex justify-content-end align-items-center pr-2 pb-1">
       <div size="sm" class="my-2 my-sm-0 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
         <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
@@ -17,7 +17,7 @@
             />
           </div>
         </b-modal>
-        <img src="../../assets/add-skill-icon.svg" class="add-button gtag-link-others mr-1" :style="isMobile() ? 'width: 10px':''"  tagname="buy_skill">
+        <img src="../../assets/add-skill-icon.svg" class="add-button gtag-link-others mr-1" :style="isMobile() ? 'width: 20px':''"  tagname="buy_skill">
       </div>
       <div class="d-flex justify-content-between align-items-center balance-container mt-1">
         <div>
@@ -30,15 +30,16 @@
         <div class="mx-2 mb-1">
           <span class="border-line-custom"> | </span>
         </div>
-        <div>
+        <div :class="isMobile() ? 'mr-2' : ''">
           <span>{{getUnclaimed()}}</span>
-          <span> UNCLAIMED SKILL</span>
+          <span> {{$t('ClaimRewardsBar.unclaimed')}}</span>
         </div>
       </div>
     </div>
-    <div class="d-flex justify-content-end align-items-center">
+    <div class="d-flex justify-content-end align-items-center animate-slide" v-if="!isMobile() || (isMobile() && isToggled)"
+      :style="isToggled ? 'margin-top: -10px': ''">
       <div class="deposit-withdraw px-2">
-        <span id="claim-xp-popover" @click="onClaimXp" :class="!canClaimXp ? 'no-claimable' : ''">CLAIM EXP</span>
+        <span id="claim-xp-popover" @click="onClaimXp" :class="!canClaimXp ? 'no-claimable' : ''">{{$t('ClaimRewardsBar.claim').toUpperCase()}} EXP</span>
         <b-popover target="claim-xp-popover" custom-class="claim-exp-popover" triggers="hover" placement="bottom">
           <img class="position-absolute mt-1" width="233" :src="require('@/assets/separator.png')" />
           <div class="d-flex justify-content-center position-relative">
@@ -48,9 +49,9 @@
           </div>
           <div class="d-flex flex-column pb-1">
             <div class="d-flex justify-content-between">
-              <div class="px-2 custom-header-font">Character Name</div>
+              <div class="px-2 custom-header-font">{{$t('ClaimRewardsBar.characterName')}}</div>
               <div class="px-3"></div>
-              <div class="px-2 custom-header-font">Unclaimed EXP</div>
+              <div class="px-2 custom-header-font">{{$t('ClaimRewardsBar.unclaimedExp')}}</div>
             </div>
           </div>
           <div class="d-flex flex-column" v-for="charXp in formattedXpRewardsBar" :key="charXp.id">
@@ -71,7 +72,7 @@
         <span>|</span>
       </div>
       <div class="deposit-withdraw px-2">
-        <span @click="claimSkill(ClaimStage.Summary)">WITHDRAW</span>
+        <span @click="claimSkill(ClaimStage.Summary)">{{$t('ClaimRewardsBar.widthraw')}}</span>
       </div>
       <div class="deposit-withdraw border-line-custom px-2" v-if="hasBnbAvailableToWithdraw">
         <span>|</span>
@@ -146,6 +147,7 @@ import { ICharacter } from '@/interfaces';
 import { getCleanName } from '@/rename-censor';
 import ElementTrait from '@/components/smart/ElementTrait.vue';
 import { SupportedProject } from '@/views/Treasury.vue';
+import PartneredProject from '../PartneredProject.vue';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -208,6 +210,7 @@ export default Vue.extend({
       remainingTokenClaimAmountPreTax: '0',
       skillAmount: 0,
       slippage: 0,
+      isToggled: true
     };
   },
   computed: {
@@ -433,7 +436,8 @@ export default Vue.extend({
 
   components: {
     BModal,
-    ElementTrait
+    ElementTrait,
+    PartneredProject,
   }
 });
 </script>
@@ -443,10 +447,50 @@ export default Vue.extend({
   .custom-skill-balance-mobile{
     font-size: 3.3vw !important;
     border-left: 1px solid #424A59;
-  font-size: clamp(.8rem, .7vw, 1rem) !important;
+    font-size: clamp(.8rem, .7vw, 1rem) !important;
   }
   .none-mobile {
     display: none !important;
+  }
+
+  .skill-balance-display{
+    border-bottom: 1px solid #707070;
+    border-left: 0px;
+    padding: 0px !important;
+  }
+
+  .balance-container > div > span{
+    font-family: Roboto;
+  }
+
+  .balance-container > div > span:nth-child(2){
+    color: #949494;
+  }
+
+  .deposit-withdraw:nth-child(1),
+  .deposit-withdraw:nth-child(3){
+    border: 1px solid #bfa76565;
+    border-radius: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+
+  .deposit-withdraw > span{
+    font-family: Roboto;
+    font-size: 1em;
+  }
+
+  .animate-slide{
+    transition: 0.4s all ease;
+  }
+
+  .toggler{
+    transform: rotate(89deg);
+  }
+
+  .toggler > span{
+    font-size: 30px;
+    color: #EDCD90;
   }
 }
 

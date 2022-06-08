@@ -205,7 +205,7 @@
     },
     "links": {},
     "address": "0x81D04c184865f32218880d94add228D38aEe7148",
-    "transactionHash": "0xa64a2f36a03159a2a514b65d865479f434b9189bc1edce6e9f2f2ab9b4cb5d8f"
+    "transactionHash": "0x022b719e61c61b139d909c0d941ae1e36066933e6a7c94729c16e6f58ea1251c"
   },
   "build/contracts/BurningManager.json": {
     "events": {
@@ -2120,7 +2120,7 @@
     },
     "links": {},
     "address": "0x2BA963ca7dE9D99eDf5644bE94fc90118d74d92A",
-    "transactionHash": "0x590ffd4cc7656836a2c2b9fa3aae4c2953fbdc73cdb24dda92e8c69fa93b38e0"
+    "transactionHash": "0x5022491b7bb4488228161032f92b9e84e424f0eb617acbd87fc188d52a4cc096"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -2484,7 +2484,7 @@
     },
     "links": {},
     "address": "0xf055e7F7cbed74821A857D80Dd0E5b45576a41BD",
-    "transactionHash": "0xcbdc40435aee3b415229642b6dff9402eff885c717ddbc9885519e0aafe4749e"
+    "transactionHash": "0xcd00c973af750355d7b17279afbf836258357d03b679f1815b835d7d3168573a"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -2699,7 +2699,7 @@
     },
     "links": {},
     "address": "0x7de27C2a2A44636Fdb52d642862Aa0C8607d2AD3",
-    "transactionHash": "0xa1ae9543635e98c538d8edffd73dc1362c5c7ecc849966992723dad7c8e3ab1a"
+    "transactionHash": "0x22060d71908b77873cea71c78d9e537cf00559308db7868a9c880b324368981f"
   },
   "build/contracts/Junk.json": {
     "events": {
@@ -3412,10 +3412,42 @@
         ],
         "name": "SkillCommitted",
         "type": "event"
+      },
+      "0xc41de2d6f2a9b2a36a9852a734ce57886aa31eeb4dc7495987593c1fceabcb28": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "targetWallet",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "launchId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "SkillCommitted",
+        "type": "event"
       }
     },
     "links": {},
-    "address": "0x3Fca7c6AFE6CE504da09fD4c8C26298Ce82C4688"
+    "address": "0x653feAF671378De40054c5E92bb940fa7ca93eD6",
+    "transactionHash": "0xb8630c4d7bb893386da7da1015a3bd424e9307bb36ae152b8d4d330e7b4ab4dc"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {
@@ -5005,7 +5037,7 @@
     },
     "links": {},
     "address": "0x7926796795585701dde635bED20BD2286866e6f9",
-    "transactionHash": "0x7ef8258395e00df2275c4bb9252aee09ea01be3a2297a3370c050b6cb54e0437"
+    "transactionHash": "0x4d48eb18a37fc40d054d127c79a4c90142cdb4a7d9cf638cc6ff90743eb85c28"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -5106,7 +5138,7 @@
     },
     "links": {},
     "address": "0x6F8CF580359234096c619Df5aA2f9cf078f1d469",
-    "transactionHash": "0x347ef82184ce4944224003bc77ba90c6b00518f2644455974456967412ac32a8"
+    "transactionHash": "0x8dc8ffe92f827c814c8b8cdc6c08af19e405fc91244364e3209cd0dc86b0e22f"
   },
   "build/contracts/Raid1.json": {
     "events": {
@@ -6395,11 +6427,74 @@
         ],
         "name": "WeeklyRewardSet",
         "type": "event"
+      },
+      "0x645b576ea1b70b2a340735005c6d0c3302b40b8079e0cc149f1db4d606be382d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "questID",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          }
+        ],
+        "name": "WalletQuestComplete",
+        "type": "event"
+      },
+      "0x3a75beb9093482f20af9201d383d16205421572864f41cae38bb6ba6328efe75": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "questID",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          }
+        ],
+        "name": "WalletQuestProgressed",
+        "type": "event"
+      },
+      "0x52790295db8a9172d05ce63d6a89c332757ae1a1760f64d9543133b0efcc623f": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "questID",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256[]",
+            "name": "rewards",
+            "type": "uint256[]"
+          }
+        ],
+        "name": "WalletQuestRewarded",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0x7907c3345a645A494d5fF4924CDc89e5d892c800",
-    "transactionHash": "0xc7b2db85cc6d30b64d7a541277471156e6e2ad2e66e27989e63c17ccc17f2986"
+    "transactionHash": "0xf61bca60d88246c30ff471c2efef201181fe322c6efa24f20ee3e5fb26d5626d"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {

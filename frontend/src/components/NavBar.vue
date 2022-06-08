@@ -2,7 +2,7 @@
   <div class="main-nav-div">
     <b-navbar class="main-nav bg-dark border-bottom border-gray" toggleable="lg">
       <div class="nav-logo col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1">
-        <router-link :to="{ name: 'plaza' }" exact class="game-ui-logo">
+        <router-link :to="{ name: 'dashboard' }" exact class="game-ui-logo">
           <img
             src="../assets/cb-logo.png"
             class="logo d-inline-block align-top"
@@ -18,9 +18,9 @@
       <options class="d-none d-sm-flex none-mobile"/>
 
       <!-- Render only on mobile view -->
-      <skill-balance-display class="skill-display-mobile d-sm-none"/>
-      <options class="options-display-mobile d-sm-none"/>
+        <options class="options-display-mobile d-sm-none"/>
     </b-navbar>
+    <skill-balance-display class="skill-display-mobile d-sm-none"/>
   </div>
 </template>
 
@@ -317,6 +317,16 @@ a.router-link-active {
   .main-nav {
     height: 12vh;
   }
+
+  .main-nav > div:nth-child(1){
+    flex-grow: 11;
+  }
+
+  .main-nav > div.options-display-mobile{
+    border-left: 1px solid #707070;
+    height: 100%;
+  }
+
   .nav-logo {
     border: 0;
     margin: 0;

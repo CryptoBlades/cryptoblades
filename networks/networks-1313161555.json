@@ -204,7 +204,7 @@
     },
     "links": {},
     "address": "0x1BE34946b13F9493E0d3b94A4196C6Fc5F16D2B2",
-    "transactionHash": "0xd5b5e8ad86b4a358a56259adb77644e2fed8c84d35f9d185211a248365993543"
+    "transactionHash": "0xbf685eae4fa6a72b9ae70194dfba919ea0a3380e6e1bfabc6d13e1cd254bb6b2|{\"gasBurned\":12592366105316,\"tx\":\"2zqxYcVdC6jL83YYP1TTWtzLhYAV3z6Rt7PkoBT7Kq1e\"}"
   },
   "build/contracts/BurningManager.json": {
     "events": {
@@ -2119,7 +2119,7 @@
     },
     "links": {},
     "address": "0x38BFf8C60444B56D5cf0E08819E2518DB91B45c5",
-    "transactionHash": "0x03c21391378d0c1a76ab11d3ee12e8f8a2b5a62a08bc8f2906986da34360d620|{\"gasBurned\":16421367009870,\"tx\":\"3WmPv1SxZLpk942rrHEFUVxhe2yQwVUXUpcn3AXhhnBq\"}"
+    "transactionHash": "0x273f336681dea6c80fdb0d1ef0c61b54fe5d85147a0f2f3240660205cba9e291|{\"gasBurned\":14742752458732,\"tx\":\"CtGyuRSmXRGDjfRe74h24mDXWssHXSCgU8ZLzXWwDBCp\"}"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -2483,7 +2483,7 @@
     },
     "links": {},
     "address": "0xfe120E57849CE88A4ECaFae9b865F1B6839BEbe8",
-    "transactionHash": "0x1d38541dbfba930bcbc1dba13efb824978b72c92e99e89f23874817df03776bc|{\"gasBurned\":15004985491676,\"tx\":\"ETKqUgi7zo7hvfZAUV4URCXioaysQmAMBj25R54osuh5\"}"
+    "transactionHash": "0xb2ae0ebe6eb130c7272f35589f58fee090c4c860039d730607d15a89a121a0f8|{\"gasBurned\":14999667363228,\"tx\":\"DZJo31vFYNexE2BAVF4UZ6m5SfYq89ZE5RrmDWs9mw5F\"}"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -2698,7 +2698,7 @@
     },
     "links": {},
     "address": "0x0A01d92795662D851589b652C4aAFB0Ee195aB7d",
-    "transactionHash": "0x5d0fcfd5568b9e2e15a9d28a0356d4e94412013f240ac1ed584638df1deee2c4|{\"gasBurned\":11811812957512,\"tx\":\"HbNw4fpk7eixwyJa1Mz3iqhyHAh4B3Yr7rp1NEGBhVNX\"}"
+    "transactionHash": "0xbdffcaef4f475778c62843adf2d433ebaf63033c22de3215604d0acadc388a75|{\"gasBurned\":10121564863438,\"tx\":\"8ocD8uuchAzdrCNDESCntMEzdoTfjXQGCbFLZJJWDyBy\"}"
   },
   "build/contracts/Junk.json": {
     "events": {
@@ -3156,8 +3156,8 @@
   "build/contracts/Launchpad.json": {
     "events": {},
     "links": {},
-    "address": "0x96F13811da03983B07b151db473C574ff735b9A8",
-    "transactionHash": "0x2c949587881034cbd3a6c65fe8ca6522fb896b8e20127912a31ce01af4cab86d|{\"gasBurned\":14460852890592,\"tx\":\"3cdtaAFZjQfqLDXxGdLVJEv57xNqxVECL4GWGbvU1kde\"}"
+    "address": "0x34336e4A477b2F4230C2de635fb8ca93F892320d",
+    "transactionHash": "0x7f50e478dc7cbfa88cfdf664ca53f9afc6d46b7acbec47afb010686ef2586a47|{\"gasBurned\":14898983370780,\"tx\":\"6fVPigXBJ8QCTwfJYHrXb1766vPu9waVjN3Bh8BkuAjX\"}"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
@@ -4085,7 +4085,7 @@
     },
     "links": {},
     "address": "0xD7cE59E5914FFa1787AaBB806c2b449569bF69cC",
-    "transactionHash": "0x88b546f4a5f9c71f8f5247a17042026b5bea6210a78a957aabbf77c22bad9144|{\"gasBurned\":14149701997344,\"tx\":\"BiyvmxjBbkJzFvQH9ZXYJJztWGNavaR4mypcFW6yLjJy\"}"
+    "transactionHash": "0xd309e8b0780f65f98d070d34c02db738969bbee4c3fd3112d2dbbcd2462799bc|{\"gasBurned\":14140503404330,\"tx\":\"CqvFAB4Z1bcz8LDeZ1gqPKpaoY8rCQx1fQP1BfYgi6Zo\"}"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -4186,7 +4186,7 @@
     },
     "links": {},
     "address": "0xEaFc2720137C24C9e87f90C16A0e64Ce5b64c653",
-    "transactionHash": "0xf7597cd266c30adf79d66e164dbc75889e30f9776d5d9bb6fed462e5d97b8509|{\"gasBurned\":10891325029534,\"tx\":\"BNiasgFLEu28PU6eNLCyKBLAD4DH5juTzm7z5kJiXhxn\"}"
+    "transactionHash": "0xa84a7a39b20dbebf70eae03ce186fe9c5df38c7c8b4ab18e50f0c172be9d01bd|{\"gasBurned\":10944042336622,\"tx\":\"4EEu3eQpANX44eksBXqoo9bvW5tFUz6e6MaLL8n5ew4m\"}"
   },
   "build/contracts/Raid1.json": {
     "events": {},
@@ -5048,7 +5048,7 @@
     },
     "links": {},
     "address": "0x6959FDCb55040511fE606afe5f98aa1bFaEd41df",
-    "transactionHash": "0xda24e45473bff405e05e5a0c1bb37810148e770064b2cdc4541ecc5869527314|{\"gasBurned\":16606966244242,\"tx\":\"4qd8zL6tKCaYu3qRhr6bJ9DRU3mDeTKs8PrsvJ13xyWC\"}"
+    "transactionHash": "0x57368040e3838e43446cee85a80fbca3c37773e5214cd78bda59288f6f683871|{\"gasBurned\":14972332393766,\"tx\":\"EYFG3xA55h1oAcR78pmikXz8wy1FZAZGBh7ZWsAWEhC\"}"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},
