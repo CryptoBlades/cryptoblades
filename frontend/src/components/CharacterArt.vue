@@ -778,8 +778,8 @@ export default {
 }
 
 .circle-element {
-  width: 1.6em;
-  height: 1.6em;
+  width: 1.7em;
+  height: 1.7em;
   border-radius: 50%;
   border: 2px solid #EDCD90;
   padding: 4px;
