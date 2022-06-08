@@ -176,9 +176,9 @@
                   <!-- :class="!isRaidStarted || !this.selectedWeaponId ? 'opacity-0': 'opacity-1' -->
                   <div class="col-lg-12 join-raid">
                     <button class="claim-btn"
-                      :disabled="noRewards"
+                      :disabled="noRewards()"
                       @click="promptRewardClaim()">
-                      <span v-tooltip="noRewards ? $t('raid.noAvailableRewards') :
+                      <span v-tooltip="noRewards() ? $t('raid.noAvailableRewards') :
                       $t('raid.rewardsFromPrevious')">{{$t('raid.claimRewards').toUpperCase()}}</span>
                     </button>
                     <button v-if="!isMobile()" class="btn-raid"
