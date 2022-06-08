@@ -363,9 +363,8 @@ export default Vue.extend({
       await this.updateBurnCost();
     },
     async removeBurnCharacter(id: number) {
-      this.remainingCharactersIds.push(id.toString());
-      this.burnCharacterIds = this.burnCharacterIds.filter(x => x !== id.toString());
-      await this.updateBurnCost();
+      this.burnCharacterIds = this.burnCharacterIds.filter(val => !val.includes(id.toString()));
+      this.totalSoul -= this.getCharacterPower(id)/10;
     },
     canBurn() {
       const cost = toBN(this.burnCost);
@@ -387,15 +386,16 @@ export default Vue.extend({
       }
       this.isUpgrading = false;
     },
-    async selectAll(){
-      await this.computeSoul();
+    async selectAll(filterCharacter: any){
+      await this.computeSoul(filterCharacter);
       await this.updateBurnCost();
     },
-    computeSoul(){
-      this.totalSoul = 0;
-      this.remainingCharactersIds.forEach(id=> {
-        this.burnCharacterIds.push(id.toString());
-        this.totalSoul += this.getCharacterPower(id)/10;
+    computeSoul(filterCharacters: any){
+      filterCharacters.forEach((filterCharacter: { id: { toString: () => string; }; })=> {
+        if(!this.burnCharacterIds.includes(filterCharacter.id.toString())){
+          this.burnCharacterIds.push(filterCharacter.id.toString());
+          this.totalSoul += this.getCharacterPower(filterCharacter.id)/10;
+        }
       });
     },
     clearAllBurn(){
@@ -463,11 +463,15 @@ export default Vue.extend({
   },
   async mounted(){
     this.checkStorage();
-    Events.$on('select-all', ()=>{
-      this.selectAll();
+    Events.$on('select-all', (filteredCharacters: any[])=>{
+      this.selectAll(filteredCharacters);
     });
-    Events.$on('deselect-all', ()=>{
-      this.clearAllBurn();
+    Events.$on('deselect-all', async (deselectedIds: any[])=>{
+      deselectedIds.forEach(deselectedId => {
+        this.removeBurnCharacter(deselectedId.id);
+      });
+
+      await this.updateBurnCost();
     });
   },
   watch: {

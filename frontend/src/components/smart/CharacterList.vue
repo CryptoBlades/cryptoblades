@@ -322,6 +322,24 @@ export default {
   watch: {
     async characterIdsToDisplay(characterIds) {
       await this.fetchCharacters(characterIds);
+    },
+    filteredCharacters(){
+      this.filteredCharacters.every(filteredCharacter => {
+        if(!this.toBurn.includes((filteredCharacter.id).toString())){
+          this.allSelected = false;
+          return false;
+        }
+        return true;
+      });
+    },
+    toBurn(){
+      this.filteredCharacters.every(filteredCharacter => {
+        if(!this.toBurn.includes((filteredCharacter.id).toString())){
+          this.allSelected = false;
+          return false;
+        }
+        return true;
+      });
     }
   },
 
@@ -343,8 +361,8 @@ export default {
 
     selectAll(){
       this.allSelected = !this.allSelected;
-      if(this.allSelected) Events.$emit('select-all');
-      else Events.$emit('deselect-all');
+      if(this.allSelected) Events.$emit('select-all', this.filteredCharacters);
+      else Events.$emit('deselect-all', this.filteredCharacters);
     },
     openFilter(){
       (this.$refs['filter-modal']).show();
