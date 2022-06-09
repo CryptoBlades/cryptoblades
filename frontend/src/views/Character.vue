@@ -717,7 +717,7 @@ export default Vue.extend({
     padding-top: 10px;
     padding-bottom: 10px;
     border-bottom: 1px solid #424A59;
-    background-color:#1d1d1d;
+    background-color:#010D22;
    }
  }
 

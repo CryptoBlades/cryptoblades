@@ -1580,7 +1580,7 @@ export default Vue.extend({
 }
 
 .weapon-content{
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 9, 26, 0.5);
   margin-top: 50px;
   border-radius: 5px;
 }
