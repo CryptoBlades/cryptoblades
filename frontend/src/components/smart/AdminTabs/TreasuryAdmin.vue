@@ -87,7 +87,7 @@ interface SelectedPartnerProject {
   propertyStringValue: string;
 }
 
-interface NewPartnerProject {
+export interface NewPartnerProject {
   name: string;
   tokenSymbol: string;
   tokenAddress: string;
