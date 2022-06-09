@@ -64,7 +64,6 @@
 
     <b-modal ref="succesful-reforge" hide-footer hide-header @hide="clearDust">
       <div class="forge-header" v-if="modalType == 'successReforge'">
-        <img src="../assets/header-line.png" alt="">
         <h3>{{$t('blacksmith.reforgeSucces')}}</h3>
       </div>
       <div class="forge-content">
@@ -113,10 +112,8 @@
             </b-row>
           </div>
       </div>
-      <div class="footer-close" v-if="modalType == 'successReforge'">
-        <img src="../assets/separator.png" alt="">
-        <span>{{$t('blacksmith.tapAnyWhere')}}</span>
-        <span class="close-icon" @click="closeModal('succesful-reforge')"></span>
+      <div class="footer-btn mb-4" v-if="modalType == 'successReforge'">
+        <button class="close-btn"   @click="closeModal('succesful-reforge')">{{$t('blacksmith.confirm')}}</button>
       </div>
     </b-modal>
 
