@@ -493,7 +493,8 @@
             </div>
             <div class="weapon-content pr-0 pl-0">
               <weapon-grid v-model="burnWeaponId" :ignore="burnWeaponIds" :noTitle="false" titleType="burn-weapon"
-                      :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon"  />
+                      :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon" @selectAllWeapons="selectAllForBurn"
+                      @currentFilteredWeapons="passFilteredItems"/>
             </div>
           </div>
           <div class="col-md-3 col-xl-3 col-lg-5 dust-area none-mobile">
@@ -717,6 +718,7 @@ interface Data {
   mintWeaponPriceIncrease: string;
   mintWeaponMinPrice: string;
   cooling: boolean;
+  currentFilteredWeapons: any[];
 }
 
 export default Vue.extend({
@@ -770,7 +772,8 @@ export default Vue.extend({
       mintPriceDecreasePerHour: '0',
       mintWeaponPriceIncrease: '0',
       mintWeaponMinPrice: '0',
-      cooling: false
+      cooling: false,
+      currentFilteredWeapons: [],
     } as Data;
   },
 
@@ -785,7 +788,9 @@ export default Vue.extend({
       'getWeaponName'
     ]),
     ...(mapGetters('staking', ['stakedSkillBalanceThatCanBeSpent'])) as Accessors<{ stakedSkillBalanceThatCanBeSpent: BN }>,
-
+    currentFilteredWeaponsIds(): string[] {
+      return this.currentFilteredWeapons.map(w => w.id);
+    },
     totalSkillBalance(): BN {
       console.log(toBN(fromWeiEther(this.skillRewards)).plus(toBN(fromWeiEther(this.inGameOnlyFunds))).plus(toBN(fromWeiEther(this.skillBalance))).toString());
       return toBN(fromWeiEther(this.skillRewards)).plus(toBN(fromWeiEther(this.inGameOnlyFunds))).plus(toBN(fromWeiEther(this.skillBalance)));
@@ -798,6 +803,14 @@ export default Vue.extend({
   },
 
   watch: {
+    currentFilteredWeapons(){
+      const currentFilteredForBuringIds = this.currentFilteredWeaponsIds.filter(id => this.burnWeaponIds.includes(id));
+      this.$root.$emit('select-all-button-labeler', currentFilteredForBuringIds.length > 0);
+    },
+    burnWeaponIds(data){
+      const currentFilteredForBuringIds = this.currentFilteredWeaponsIds.filter(id => data.includes(id));
+      this.$root.$emit('select-all-button-labeler', currentFilteredForBuringIds.length > 0);
+    },
     reforgeWeaponId() {
       Events.$emit('hasSelected');
       this.showReforge = false;
@@ -882,7 +895,9 @@ export default Vue.extend({
       'fetchMintWeaponPriceDecreasePerSecond', 'fetchWeaponMintIncreasePrice',
       'fetchMintWeaponMinPrice', 'fetchMintWeaponFee']),
     ...mapMutations(['updateSpecialWeaponEventId']),
-
+    passFilteredItems(data: any[]){
+      this.currentFilteredWeapons = data;
+    },
     toggleCheckbox() {
       this.useStakedForForge = !this.useStakedForForge;
       if (this.useStakedForForge) localStorage.setItem('useStakedForForge', 'true');
@@ -1076,23 +1091,46 @@ export default Vue.extend({
       }
     },
 
+    selectAllForBurn(){
+      const currentFilteredForBuringIds = this.currentFilteredWeaponsIds.filter(id => this.burnWeaponIds.includes(id));
+      if(currentFilteredForBuringIds.length > 0){
+        currentFilteredForBuringIds.forEach(id => {
+          console.log(id);
+          this.ctr += 1;
+          const weaponDetails = this.ownWeapons.find(y => {
+            if(y && +y.id === +id){
+              return y;
+            }
+          });
+          if(weaponDetails){
+            this.computeDust('sub',(weaponDetails.stars + 1), weaponDetails.lowStarBurnPoints, weaponDetails.fourStarBurnPoints,
+              weaponDetails.fiveStarBurnPoints);
+          }
+          this.burnWeaponIds = this.burnWeaponIds.filter(e => e !== id);
+        });
+        return;
+      }
+      const currentFilteredNotForBuringIds = this.currentFilteredWeaponsIds.filter(id => !this.burnWeaponIds.includes(id));
+      currentFilteredNotForBuringIds.forEach(id => {
+        this.burnWeaponIds.push(id);
+        this.ctr += 1;
+        const weaponDetails = this.ownWeapons.find(y => +y.id === +id);
+        this.computeDust('add',(weaponDetails.stars + 1), weaponDetails.lowStarBurnPoints, weaponDetails.fourStarBurnPoints, weaponDetails.fiveStarBurnPoints);
+      });
+    },
+
     addBurnWeapon(id: number){
       this.ctr += 1;
-      if(this.burnWeaponIds.includes(id.toString())){
-        this.burnWeaponIds = this.burnWeaponIds.filter(val => val !==  id.toString());
+      if(this.burnWeaponIds.includes(+id)){
+        this.burnWeaponIds = this.burnWeaponIds.filter(val => +val !== +id);
         const weaponDetails = this.ownWeapons.find(y => y.id === id);
-        this.computeDust('subs',(weaponDetails.stars + 1), weaponDetails.lowStarBurnPoints, weaponDetails.fourStarBurnPoints, weaponDetails.fiveStarBurnPoints);
+        this.computeDust('sub',(weaponDetails.stars + 1), weaponDetails.lowStarBurnPoints, weaponDetails.fourStarBurnPoints, weaponDetails.fiveStarBurnPoints);
       }else{
-        this.burnWeaponIds.push(id.toString());
-        const weaponDetails = this.ownWeapons.find(y => y.id === id);
+        this.burnWeaponIds.push(+id);
+        const weaponDetails = this.ownWeapons.find(y => +y.id === +id);
         this.computeDust('add',(weaponDetails.stars + 1), weaponDetails.lowStarBurnPoints, weaponDetails.fourStarBurnPoints, weaponDetails.fiveStarBurnPoints);
       }
       this.burnWeaponId = null;
-    },
-
-    removeBurnWeapon(id: number){
-      this.hideWeapons.push(id.toString());
-      this.burnWeaponIds = this.burnWeaponIds.filter(x => x !== id.toString());
     },
 
     closeModal(modalType: string){
@@ -1542,7 +1580,7 @@ export default Vue.extend({
 }
 
 .weapon-content{
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 9, 26, 0.5);
   margin-top: 50px;
   border-radius: 5px;
 }

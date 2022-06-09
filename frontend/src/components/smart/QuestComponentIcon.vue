@@ -19,7 +19,6 @@ import greaterDust from '@/assets/dusts/greaterDust.png';
 import powerfulDust from '@/assets/dusts/powerfulDust.png';
 import soul from '@/assets/dusts/soulDust.png';
 import sword from '@/assets/placeholder/sword-placeholder-1.png';
-import character from '@/assets/placeholder/chara-head-0.png';
 import junk from '@/assets/junk/junk3.png';
 import reputation from '@/assets/reputation.png';
 import stamina from '@/assets/stamina.png';
@@ -87,8 +86,6 @@ export default Vue.extend({
       this.icon = reputation;
     } else if (this.questItemType === QuestItemType.WEAPON) {
       this.icon = sword;
-    } else if (this.questItemType === QuestItemType.CHARACTER) {
-      this.icon = character;
     } else if (this.questItemType === QuestItemType.JUNK) {
       this.icon = junk;
     } else if (this.questItemType === QuestItemType.DUST) {

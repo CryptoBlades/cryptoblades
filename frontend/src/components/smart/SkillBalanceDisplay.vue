@@ -504,7 +504,7 @@ export default Vue.extend({
 }
 .claim-exp-popover{
   font-family: 'Trajan' !important;
-  background: rgba(33,35,30, .7);
+  background: rgba(0, 14, 41, .7);
 }
 .unclaimed-text{
   color: #ffc107;
