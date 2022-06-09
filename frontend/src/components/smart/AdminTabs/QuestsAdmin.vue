@@ -124,7 +124,6 @@
           <b-form-input
             v-model="questTemplate.reputationAmount"
             type="number" number
-            :min=" questTemplateType === QuestTemplateType.WALLET ? 0 : 0"
             />
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.limitedOptional') }}</label>
@@ -622,7 +621,7 @@ export default Vue.extend({
           && this.questTemplate.rewardExternalAddress
           && !isValidWeb3Address(this.questTemplate.rewardExternalAddress))
         || this.showTemplateConfirmationModal || this.isLoading
-        || (this.questTemplateType === QuestTemplateType.WALLET && this.questTemplate.reputationAmount === 0);
+        || (this.questTemplateType === QuestTemplateType.WALLET && this.questTemplate.reputationAmount !== 0);
     },
 
     addNewWeeklyRewardDisabled() {
