@@ -1,18 +1,12 @@
 <template>
   <div>
-    <h2>{{$t(`quests.questTemplateType.${QuestTemplateType[questTemplateType]}`)}} {{ $t('quests.templates')}}</h2>
+    <h2 class="pt-3">{{ promoQuestTemplates ? $t('quests.promoQuestTemplates') : $t('quests.questTemplates') }}</h2>
     <b-form-group class="m-3">
-      <b-form-radio v-model="questTemplateType" @change="refreshQuestTemplates" :value="QuestTemplateType.QUEST">
+      <b-form-radio v-model="promoQuestTemplates" @change="refreshQuestTemplates" :value="false">
         {{ $t('quests.questsTitle') }}
       </b-form-radio>
-      <b-form-radio v-model="questTemplateType" @change="refreshQuestTemplates" :value="QuestTemplateType.PROMO">
-        {{ $t('quests.questTemplateType.PROMO') }}
-      </b-form-radio>
-      <b-form-radio v-model="questTemplateType" @change="refreshQuestTemplates" :value="QuestTemplateType.WALLET">
-        {{ $t('quests.questTemplateType.WALLET') }}
-      </b-form-radio>
-      <b-form-radio v-model="questTemplateType" @change="refreshQuestTemplates" :value="QuestTemplateType.PICKABLE">
-        {{ $t('quests.questTemplateType.PICKABLE') }}
+      <b-form-radio v-model="promoQuestTemplates" @change="refreshQuestTemplates" :value="true">
+        {{ $t('quests.promoQuests') }}
       </b-form-radio>
     </b-form-group>
     <b-form inline>
@@ -26,14 +20,15 @@
         </b-form-select-option>
       </b-form-select>
     </b-form>
-    <QuestsList v-if="templatesTier !== undefined" :tier="questTemplateTier" deletable/>
+    <QuestsList v-if="templatesTier !== undefined" :tier="promoQuestTemplates ? templatesTier + 10 : templatesTier"
+                deletable/>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import {Quest, Rarity, QuestTemplateType} from '@/views/Quests.vue';
+import {Quest, Rarity} from '@/views/Quests.vue';
 import QuestsList from './QuestsList.vue';
 
 interface StoreMappedActions {
@@ -48,8 +43,8 @@ interface Data {
   tiers: Rarity[];
   questTemplates: Quest[];
   templatesTier?: Rarity;
+  promoQuestTemplates: boolean;
   isLoading: boolean;
-  questTemplateType: QuestTemplateType;
 }
 
 export default Vue.extend({
@@ -61,31 +56,12 @@ export default Vue.extend({
       tiers: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
       questTemplates: [],
       templatesTier: undefined,
-      QuestTemplateType,
-      questTemplateType: QuestTemplateType.QUEST,
+      promoQuestTemplates: false,
       isLoading: false,
       Rarity,
     } as Data;
   },
-  computed: {
-    questTemplateTier(): number | undefined {
-      if(!this.templatesTier) {
-        return undefined;
-      }
-      else if(this.questTemplateType === QuestTemplateType.PROMO) {
-        return this.templatesTier + 10;
-      }
-      else if(this.questTemplateType === QuestTemplateType.PICKABLE) {
-        return this.templatesTier + 20;
-      }
-      else if(this.questTemplateType === QuestTemplateType.WALLET) {
-        return this.templatesTier + 30;
-      }
-      else {
-        return this.templatesTier;
-      }
-    }
-  },
+
   methods: {
     ...mapActions([
       'getQuestTemplates',
@@ -94,10 +70,15 @@ export default Vue.extend({
     ]) as StoreMappedActions,
 
     async refreshQuestTemplates() {
-      if (!this.templatesTier|| !this.questTemplateTier) return;
+      if (this.templatesTier === undefined) return;
       try {
         this.isLoading = true;
-        this.questTemplates = await this.getQuestTemplates({tier: this.questTemplateTier});
+        if (this.promoQuestTemplates) {
+          const promoTier = this.templatesTier + 10;
+          this.questTemplates = await this.getQuestTemplates({tier: promoTier});
+        } else {
+          this.questTemplates = await this.getQuestTemplates({tier: this.templatesTier});
+        }
         for (const quest of this.questTemplates) {
           quest.deadline = +await this.getQuestDeadline({questID: quest.id});
           quest.supply = +await this.getQuestSupply({questID: quest.id});

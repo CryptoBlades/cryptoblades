@@ -1,5 +1,5 @@
 <template>
-   <div class="row">
+   <div class="row ml-0 mr-0">
     <!-- Character Image -->
     <div class="col col-md-4">
       <div class="characterWrapper">

@@ -1,21 +1,12 @@
 <template>
   <div class="character-art" ref="el">
-    <div class="trait" v-if="!portrait">
-      <span :class="characterTrait.toLowerCase() + '-icon circle-element'"></span>
-    </div>
-
-    <div class="placeholder d-flex align-items-start justify-content-center p-1"
-      >
-      <div class="character-power">
-        {{totalCharacterPower}} PWR
-        <b-icon-question-circle v-if="burningManager" class="centered-icon" scale="0.8"
-          v-tooltip.bottom="$t('CharacterArt.powerTooltip', {
-            basePower: baseCharacterPower,
-            bonusPower: totalCharacterPower - baseCharacterPower,
-            maxPower: 3 * baseCharacterPower
-          })"/>
+    <!-- CHAR IMAGE -->
+    <div class="placeholder d-flex align-items-start justify-content-center p-1">
+      <div class="character-id">
+        # {{ character.id }}
       </div>
-      <div class="w-100 h-100" :style="{
+      <span v-if="isSelected" class="rounded-check"></span>
+      <div class="char-bg" :style="{
         'background-image': 'url(' + getCharacterArt(character) + ')',
       }">
       </div>
@@ -25,30 +16,50 @@
       <i class="fas fa-spinner fa-spin"></i>
     </div>
 
-    <div class="name-lvl-container">
-      <div class="name black-outline" v-if="!portrait">{{ getCleanCharacterName(character.id) }} </div>
-      <div v-if="!portrait">Lv.<span class="white">{{ character.level + 1 }}</span></div>
-    </div>
-    <div class="score-id-container" :class="hideIdContainer ? 'visibility: hidden' : undefined">
-    <div class="black-outline" v-if="!portrait">{{$t('CharacterArt.id')}} <span class="white">{{ character.id }}</span></div>
-    <div class="black-outline" v-if="!portrait">
-      {{$t('CharacterArt.score')}} <span class="white">{{ heroScore.toLocaleString() }}</span>
-      <b-icon-question-circle class="centered-icon" scale="0.8" v-tooltip.bottom="$t('CharacterArt.scoreTooltip')"/>
-    </div>
-    </div>
+    <div class="char-details">
+      <h4>{{ getCleanCharacterName(character.id).toUpperCase() }}</h4>
+      <p>
+        {{$t(`quests.reputationTier.${ReputationTier[getReputationLevel(reputation)] || ''}`)}}
+      </p>
+      <div class="sep-line"></div>
+      <div class="stats-info">
+        <div>
+          <span :class="characterTrait.toLowerCase() + '-icon circle-element'"></span>
+          <span>{{ character.level + 1 }}</span>
+        </div>
+        <div>
+          <div>
+            <span class="pow"></span>
+            <span class="lbl-title"  v-tooltip.bottom="$t('CharacterArt.powerTooltip', {
+              basePower: baseCharacterPower,
+              bonusPower: totalCharacterPower - baseCharacterPower,
+              maxPower: 3 * baseCharacterPower
+            })">{{$t('homePage.power')}}</span>
+            <div class="stamina-bar">
+              <div class="stamina" :style="'width:'+(totalCharacterPower/totalCharacterPower)*100+'%'"></div>
+            </div>
+            <span class="lbl-value">{{totalCharacterPower.toLocaleString()}}</span>
+          </div>
 
-    <div v-if="!portrait && isGarrison" class="small-stamina-char"
-      :style="`--staminaReady: ${(characterStamina/maxStamina)*100}%;`"
-      v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
-      <div class="stamina-text black-outline">{{$t('CharacterArt.staminaShort')}} {{ characterStamina }} / 200</div>
-    </div>
+          <div v-tooltip.bottom="` ${$t('CharacterArt.claimableXP')} ${this.getCharacterUnclaimedXp(character.id)}`">
+            <span class="exp"></span>
+            <span class="lbl-title">{{$t('Character.exp')}}</span>
+            <div class="stamina-bar">
+              <div class="stamina" :style="'width:'+((character.xp || 0) / (RequiredXp(character.level + 1 || 0) || 1))*100+'%'"></div>
+            </div>
+            <span class="lbl-value">{{RequiredXp(character.level + 1 || 1).toLocaleString()}}</span>
+          </div>
 
-    <div class="xp" v-if="!portrait" :class="hideXpBar ? 'visibility: hidden' : undefined">
-      <b-progress :max="RequiredXp(character.level)" variant="success"
-      v-tooltip.bottom="` ${$t('CharacterArt.claimableXP')} ${this.getCharacterUnclaimedXp(character.id)}`">
-        <strong class="outline xp-text">{{ character.xp || 0 }} / {{ RequiredXp(character.level) }} {{$t('CharacterArt.xp')}}</strong>
-        <b-progress-bar :value="character.xp || 0"></b-progress-bar>
-      </b-progress>
+          <div v-tooltip.bottom="staminaToolTipHtml(timeUntilCharacterHasMaxStamina(character.id))">
+            <span class="stam"></span>
+            <span class="lbl-title">{{$t('homePage.stamina')}}</span>
+            <div class="stamina-bar">
+              <div class="stamina" :style="'width:'+(characterStamina/maxStamina)*100+'%'"></div>
+            </div>
+            <span class="lbl-value">{{ characterStamina }}</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -64,11 +75,12 @@ import torsos from '../assets/characterWardrobe_torso.json';
 import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
-import { mapGetters, mapState } from 'vuex';
 import { getCleanName } from '../rename-censor';
 import { CharacterPower } from '@/interfaces';
 import { burningManager } from './../feature-flags';
-//import SmallButton from './SmallButton.vue';
+import { ReputationTier } from '@/views/Quests.vue';
+import { mapState, mapGetters, mapActions } from 'vuex';
+
 
 const headCount = 13;
 const armsCount = 45;
@@ -86,19 +98,20 @@ function transformModel(model) {
 }
 
 export default {
-  props: ['character', 'portrait', 'isGarrison', 'hideXpBar', 'hideIdContainer'],
-  components: {
-    //SmallButton,
-  },
+  props: ['character', 'portrait', 'isGarrison', 'hideXpBar', 'hideIdContainer', 'isSelected'],
   watch: {
     character() {
       this.clearScene();
       this.setupModel();
+      this.refreshData();
     },
   },
 
   data() {
     return {
+      ReputationTier,
+      reputationLevelRequirements: undefined,
+      quest: null,
       allLoaded: false,
       allLoadStarted: false,
       camera: null,
@@ -129,6 +142,10 @@ export default {
       'getCharacterPower'
     ]),
 
+    reputation() {
+      return this.quest?.reputation ?? 0;
+    },
+
     characterTrait() {
       const characterWithId = this.charactersWithIds &&
         this.isGarrison ? this.garrisonCharactersWithIds([this.character.id])[0] : this.charactersWithIds([this.character.id])[0];
@@ -149,6 +166,10 @@ export default {
   },
 
   methods: {
+    ...mapActions([
+      'getReputationLevelRequirements',
+      'getCharacterQuestData'
+    ]),
     RequiredXp,
 
     getCleanCharacterName(id) {
@@ -162,6 +183,24 @@ export default {
     timestampToStamina(timestamp) {
       if(timestamp > Math.floor(Date.now()/1000)) return 0;
       return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
+    },
+    getReputationLevel(reputation) {
+      if (!this.reputationLevelRequirements) return;
+      if (reputation < this.reputationLevelRequirements.level2) {
+        return ReputationTier.PEASANT;
+      } else if (reputation < this.reputationLevelRequirements.level3) {
+        return ReputationTier.TRADESMAN;
+      } else if (reputation < this.reputationLevelRequirements.level4) {
+        return ReputationTier.NOBLE;
+      } else if (reputation < this.reputationLevelRequirements.level5) {
+        return ReputationTier.KNIGHT;
+      } else {
+        return ReputationTier.KING;
+      }
+    },
+    async refreshData(){
+      this.reputationLevelRequirements =  await this.getReputationLevelRequirements();
+      this.quest = await this.getCharacterQuestData({characterId: this.character.id});
     },
 
     getCharacterArt,init() {
@@ -516,21 +555,9 @@ export default {
         this.renderer.render(this.scene, this.camera);
       }
     },
-
-    async fetchScore() {
-      /*
-      try {
-        const scoreData = await fetch(`https://api.cryptoblades.io/static/character/score/${this.character.id}`);
-        const { score } = await scoreData.json();
-        this.heroScore = score;
-      } catch {
-        console.error(`Could not fetch score for ID ${this.character.id}`);
-      }
-      */
-    }
   },
-  mounted() {
-    this.fetchScore();
+  async mounted() {
+    await this.refreshData();
 
     if(localStorage.getItem('useGraphics') === 'false') {
       this.allLoaded = true;
@@ -548,9 +575,9 @@ export default {
 .character-art {
   width: 100%;
   height: 100%;
-  position: relative;
+  /* position: relative; */
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   flex-direction: column;
 }
 
@@ -598,7 +625,7 @@ export default {
 }
 
 .placeholder {
-  max-width: 100%;
+  max-width: 200%;
   top: -15px;
   position: relative;
   height: 75%;
@@ -607,8 +634,148 @@ export default {
   object-fit: contain;
 }
 
+.char-details{
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.123), rgba(0, 0, 0, 0.897));
+  height: 40%;
+  width: 100%;
+  z-index: 2;
+  bottom: 0;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 20px;
+  padding-bottom: 0px;
+}
+
+.char-details > h4, .char-details > p{
+  margin: 0;
+  padding: 0;
+}
+
+.char-details >  h4{
+  font-size: 1.2em;
+  font-weight: 400;
+  color: #fff;
+  font-family: Oswald;
+}
+
+.char-details > p{
+  font-family: Roboto;
+  font-size: 0.9em;
+  color: #EDCD90;
+}
+
+.sep-line{
+  height: 1px;
+  width: 100%;
+  background-color:#edcc9069;
+  margin: 7px 0px;
+}
+
+.stats-info{
+  display: flex;
+  gap: 0.5em;
+}
+
+.stats-info > div:nth-child(1){
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+.rounded-check{
+  content: url('../assets/check-round.svg');
+  height: 1.5em;
+  width: 1.5em;
+  z-index: 3;
+  right: 20px;
+  top: -5px;
+  position: absolute;
+}
+
+
+.stats-info > div:nth-child(1) >span:nth-child(2){
+  color: #fff;
+  font-family: Roboto;
+  border: 2px solid #EDCD90;
+  height: 28px;
+  width: 28px;
+  margin-top: 5px;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 0.78em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats-info > div:nth-child(2){
+  flex-grow: 2;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+.stats-info > div:nth-child(2) > div{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.stats-info > div:nth-child(2) > div > .lbl-title,
+.stats-info > div:nth-child(2) > div > .lbl-value{
+  width: 50%;
+}
+
+.stamina-bar{
+  height: 3px;
+  width: 100%;
+  background-color:cadetblue;
+  border-radius: 5px;
+}
+
+.stamina{
+  position: relative;
+  height: 3px;
+  width: 0%;
+  background-color: #EDCD90;
+  border-radius: 5px;
+}
+
+.lbl-value, .lbl-title{
+  font-size: 0.7em;
+  color: #fff;
+  font-family: Roboto;
+}
+
+.lbl-value{
+  color: rgba(255, 255, 255, 0.411);
+  text-align: right;
+}
+
+.character-id{
+  position: absolute;
+  padding: 2px 10px;
+  background-color: rgba(0, 0, 0, 0.308);
+  color: rgba(255, 255, 255, 0.589);
+  border-radius: 5px;
+  font-family: Roboto;
+  font-size: 0.8em;
+  left: 1.3em;
+  top: -13px;
+  margin-top: -30px;
+}
+
+.char-bg{
+  height: 220%;
+  width: 300%;
+}
+
 .placeholder div{
-  background-size: contain;
+  margin-top: 5px;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
 }
@@ -617,6 +784,8 @@ export default {
   width: 1.7em;
   height: 1.7em;
   border-radius: 50%;
+  border: 2px solid #EDCD90;
+  padding: 4px;
 }
 
 .name-lvl-container, .score-id-container {
@@ -657,4 +826,23 @@ export default {
   top: 4px;
   font-size: 0.82em;
 }
+
+.pow{
+  content: url('../assets/pow-icon.svg');
+  height: 0.7em;
+  width: 0.7em;
+}
+
+.exp{
+  content: url('../assets/exp-icon.svg');
+  height: 0.7em;
+  width: 0.7em;
+}
+
+.stam{
+  content: url('../assets/stamina-icon.svg');
+  height: 0.7em;
+  width: 0.7em;
+}
+
 </style>
