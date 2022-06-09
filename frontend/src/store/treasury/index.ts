@@ -16,7 +16,7 @@ const treasury = {
         partnerProject.name,
         partnerProject.tokenSymbol,
         partnerProject.tokenAddress,
-        partnerProject?.tokenSupply,
+        partnerProject.tokenSupply!,
         Web3.utils.toWei(partnerProject?.tokenPrice?.toString()!, 'ether').toString(),
         partnerProject.distributionTime!,
         partnerProject.isActive,
