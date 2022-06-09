@@ -8,10 +8,10 @@
       <b-modal id="fightResultsModal" hide-footer hide-header>
         <CombatResults v-if="resultsAvailable" :fightResults="fightResults" :staminaUsed="staminaPerFight" class="mb-3" />
         <div class="footer-close">
-            <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
+            <!-- <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
             <span class="tap" @click="$bvModal.hide('fightResultsModal')">
               <img style="width: 40px; margin-left: 215px;" src="../assets/close-btn.png" alt="">
-              </span>
+              </span> -->
         </div>
       </b-modal>
 
@@ -175,7 +175,6 @@
     </b-modal>
     <div class="blank-slate" v-if="ownWeapons.length === 0 || ownCharacters.length === 0">
       <div v-if="ownWeapons.length === 0">{{$t('combat.noWeapons')}}</div>
-
       <div v-if="ownCharacters.length === 0">{{$t('combat.noCharacters')}}</div>
     </div>
   </div>

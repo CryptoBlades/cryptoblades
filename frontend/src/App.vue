@@ -602,6 +602,30 @@ button,
   cursor: pointer;
 }
 
+.footer-btn{
+  text-align: center;
+  padding-top: 2.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.footer-btn > .close-btn{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 0.6em;
+  padding-bottom: 0.6em;
+  font-family: Roboto;
+  background-color: #EDCD90;
+  border-radius: 2px;
+  border: none;
+  color: rgb(26, 26, 26);
+  text-transform: capitalize;
+}
+
 .blank-slate {
   width: calc(100vw - 36px);
   height: calc(100vh - 120px);
@@ -817,6 +841,7 @@ button.close {
 .modal-body {
   color: #9e8a57 !important;
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  border: 1px solid #ffffff50;
 }
 
 .modal-footer {
