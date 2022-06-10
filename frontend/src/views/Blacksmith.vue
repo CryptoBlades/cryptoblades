@@ -1699,6 +1699,9 @@ export default Vue.extend({
   width: 80%;
 }
 
+.none-mobile > button > span{
+  font-family: Oswald;
+}
 
 
 .weapon-menu > div > div > .details > span{

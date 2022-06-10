@@ -616,14 +616,18 @@ button,
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 0.6em;
-  padding-bottom: 0.6em;
+  padding-top: 0.8em;
+  padding-bottom: 0.8em;
   font-family: Roboto;
   background-color: #EDCD90;
   border-radius: 2px;
   border: none;
   color: rgb(26, 26, 26);
   text-transform: capitalize;
+}
+
+.close-btn.cancel{
+  background-color: #e9be6edc;
 }
 
 .blank-slate {
@@ -795,6 +799,10 @@ button.close {
 }
 .character-modal-mobile {
   padding:2rem;
+}
+
+#modal-container > .modal-dialog.modal-md {
+  max-width: 700px;
 }
 
 .character-modal header.modal-header{

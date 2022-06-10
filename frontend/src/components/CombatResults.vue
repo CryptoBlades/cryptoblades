@@ -59,9 +59,6 @@
       </h6>
     </div>
   </div>
-  <div class="footer-btn">
-    <button class="close-btn" @click="$bvModal.hide('fightResultsModal')">Close</button>
-  </div>
     <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
       <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
         <div class="coinzilla" data-zone="C-316621de2f7b8b25140"></div>

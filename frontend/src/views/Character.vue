@@ -124,15 +124,24 @@
 
       </template>
     </div>
-    <b-modal class="centered-modal text-center" ref="burn-confirmation-modal" :title="$t('plaza.burnConfirmation')"
-      @ok="onBurnConfirm" :ok-disabled="burnCharacterIds.length === 0">
-      <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" />
+
+    <b-modal hide-header hide-footer class="centered-modal text-center"
+      id="burn-confirmation-modal" ref="burn-confirmation-modal"
+      :title="$t('plaza.burnConfirmation')">
+      <h3 class="confirmation-title">{{$t('plaza.burnConfirmation')}}</h3>
+      <div class="text-center burn-content mt-4">
+        <b-icon icon="exclamation-circle" variant="warning" />
         {{ $t('plaza.burnWarning', { characterAmount: burnCharacterIds.length })}}<br>
         {{ $t('plaza.cantBeUndone')}}
       </div>
-      <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" /> {{ $t('plaza.noRefunds')}}
+      <div class="text-center burn-content">
+        <b-icon icon="exclamation-circle" variant="warning" />
+        {{ $t('plaza.noRefunds')}}
+      </div>
+       <div class="footer-btn">
+        <button class="close-btn cancel" v-if="!isBurnInProgress" @click="$bvModal.hide('burn-confirmation-modal')">{{$t('blacksmith.cancel')}}</button>
+        <button class="close-btn" :disabled="burnCharacterIds.length === 0" @click="onBurnConfirm">
+          {{isBurnInProgress ? 'Burning..' : $t('blacksmith.confirm')}}</button>
       </div>
     </b-modal>
     <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
@@ -453,6 +462,7 @@ export default Vue.extend({
         }
       }
       finally {
+        (this.$refs['burn-confirmation-modal'] as BModal).hide();
         this.isBurnInProgress = false;
       }
       this.soulBalance = +(await this.fetchSoulBalance());
@@ -572,6 +582,26 @@ export default Vue.extend({
 .switch_active:hover,
 .switch:hover {
   transform: scale(0.97);
+}
+
+.confirmation-title{
+  text-align: center;
+  font-family: Trajan;
+}
+
+.footer-btn{
+  flex-direction: row;
+  gap: 1em;
+}
+
+.footer-btn > button{
+  width: 50%;
+}
+
+.burn-content{
+  color: #fff;
+  font-family: Roboto;
+  font-size: 0.9em;
 }
 
 .spinning-circle{
