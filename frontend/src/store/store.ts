@@ -2398,13 +2398,6 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchWaxBridgeDetails');
     },
 
-    async fetchTotalShieldSupply({ state }) {
-      const { Shields } = state.contracts();
-      if(!Shields || !state.defaultAccount) return;
-
-      return await Shields.methods.totalSupply().call(defaultCallOptions(state));
-    },
-
     async fetchTotalRenameTags({ state }) {
       const { CharacterRenameTagConsumables } = state.contracts();
       if(!CharacterRenameTagConsumables || !state.defaultAccount) return;
