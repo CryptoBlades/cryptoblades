@@ -6,11 +6,73 @@ import {SpecialWeaponsEvent, OrderOption} from '@/components/smart/AdminTabs/Spe
 import {approveFeeWalletOnly} from '@/contract-call-utils';
 import BigNumber from 'bignumber.js';
 import Vue from 'vue';
+interface ISpecialWeaponEvent {
+  name: string;
+  weaponElement: string;
+  endTime: string;
+  supply: string;
+  orderedCount: string;
+  ordered: boolean;
+  forged: boolean;
+  art: string;
+  details: string;
+  website: string;
+  note: string;
+}
+export interface ISpecialWeaponsManagerState {
+  activeSpecialWeaponEventsIds: number[];
+  inactiveSpecialWeaponEventsIds: number[];
+  specialWeaponEvents: Record<number, ISpecialWeaponEvent>;
+  specialWeaponEventId: string;
+  specialWeaponArts: string[];
+  shardsSupply: Record<number, number>;
+}
 
 const specialWeaponsManager = {
-  mutattions: {
-    updateShardsSupply(state: IState, { eventId, shardsSupply }: {eventId: number, shardsSupply: BigNumber}) {
+  namespaced: true,
+  state: {
+    activeSpecialWeaponEventsIds: [],
+    inactiveSpecialWeaponEventsIds: [],
+    specialWeaponEvents: {},
+    specialWeaponArts: [],
+    specialWeaponEventId: localStorage.getItem('specialWeaponEventId') || '0',
+    shardsSupply: {}
+  } as ISpecialWeaponsManagerState,
+  mutations: {
+    updateShardsSupply(state: ISpecialWeaponsManagerState, { eventId, shardsSupply }: {eventId: number, shardsSupply: BigNumber}) {
       Vue.set(state.shardsSupply, eventId, shardsSupply);
+    },
+    updateSpecialWeaponEventsInfo(state: ISpecialWeaponsManagerState, {eventId, eventInfo}: {eventId: number, eventInfo: string}) {
+      Vue.set(state.specialWeaponEvents, eventId, eventInfo);
+    },
+
+    updateSpecialWeaponArt(state: ISpecialWeaponsManagerState, {eventId, art}: {eventId: number, art: string}) {
+      Vue.set(state.specialWeaponArts, eventId, art);
+    },
+
+    updateActiveSpecialWeaponEventsIds(state: ISpecialWeaponsManagerState, eventsIds: number[]) {
+      Vue.set(state, 'activeSpecialWeaponEventsIds', eventsIds);
+      if(!eventsIds.find((id: { toString: () => string; }) => id.toString() === state.specialWeaponEventId)) {
+        state.specialWeaponEventId = '0';
+      }
+    },
+
+    updateInactiveSpecialWeaponEventsIds(state: ISpecialWeaponsManagerState, eventsIds: number[]) {
+      Vue.set(state, 'inactiveSpecialWeaponEventsIds', eventsIds);
+    },
+
+    updateSpecialWeaponEventId(state: ISpecialWeaponsManagerState, newSpecialWeaponEventId: number) {
+      localStorage.setItem('specialWeaponEventId', newSpecialWeaponEventId.toString());
+      state.specialWeaponEventId = newSpecialWeaponEventId.toString();
+    },
+
+    updateForgingStatus(state: ISpecialWeaponsManagerState, { eventId, ordered, forged }: {eventId: number, ordered: boolean, forged: boolean}) {
+      Vue.set(state.specialWeaponEvents[eventId], 'ordered', ordered);
+      Vue.set(state.specialWeaponEvents[eventId], 'forged', forged);
+    },
+
+    updateEventTotalOrderedCount(state: ISpecialWeaponsManagerState, { eventId, orderedCount }: {eventId: number, orderedCount: number}) {
+      Vue.set(state.specialWeaponEvents[eventId], 'orderedCount', orderedCount);
     },
   },
   actions: {
@@ -150,11 +212,11 @@ const specialWeaponsManager = {
       await dispatch('fetchShardsSupply');
     },
 
-    async fetchSpecialWeaponArts({ rootState, commit }: {rootState: IState, commit: Commit}) {
+    async fetchSpecialWeaponArts({ rootState, state, commit }: {rootState: IState, state: ISpecialWeaponsManagerState, commit: Commit}) {
       const { SpecialWeaponsManager } = rootState.contracts();
       if(!SpecialWeaponsManager || !rootState.defaultAccount) return;
 
-      const allSpecialWeaponEventsIds = rootState.activeSpecialWeaponEventsIds.concat(rootState.inactiveSpecialWeaponEventsIds);
+      const allSpecialWeaponEventsIds = state.activeSpecialWeaponEventsIds.concat(state.inactiveSpecialWeaponEventsIds);
       for (let i = 0; i < allSpecialWeaponEventsIds.length; i++) {
         const eventId = allSpecialWeaponEventsIds[i];
         const art = await SpecialWeaponsManager.methods.specialWeaponArt(eventId).call(defaultCallOptions(rootState));

@@ -67,20 +67,6 @@ export interface IPartnerProject {
   tokenPrice: string;
   isActive: boolean;
 }
-
-export interface ISpecialWeaponEvent {
-  name: string;
-  weaponElement: string;
-  endTime: string;
-  supply: string;
-  orderedCount: string;
-  ordered: boolean;
-  forged: boolean;
-  art: string;
-  details: string;
-  website: string;
-  note: string;
-}
 export interface IState {
   web3: Web3;
   contracts: () => Contracts;
@@ -154,11 +140,4 @@ export interface IState {
   partnerProjectRatios: Record<number, string>;
   payoutCurrencyId: string;
   defaultSlippage: string;
-
-  activeSpecialWeaponEventsIds: number[];
-  inactiveSpecialWeaponEventsIds: number[];
-  specialWeaponEvents: Record<number, ISpecialWeaponEvent>;
-  specialWeaponEventId: string;
-  specialWeaponArts: string[];
-  shardsSupply: Record<number, number>;
 }

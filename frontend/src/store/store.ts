@@ -153,13 +153,6 @@ export default new Vuex.Store<IState>({
     partnerProjectRatios: {},
     payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1',
     defaultSlippage: '0',
-
-    activeSpecialWeaponEventsIds: [],
-    inactiveSpecialWeaponEventsIds: [],
-    specialWeaponEvents: {},
-    specialWeaponArts: [],
-    specialWeaponEventId: localStorage.getItem('specialWeaponEventId') || '0',
-    shardsSupply: {},
   },
 
   getters: {
@@ -749,39 +742,6 @@ export default new Vuex.Store<IState>({
       localStorage.setItem('payoutCurrencyId', newPayoutCurrencyId);
       state.payoutCurrencyId = newPayoutCurrencyId;
     },
-
-    updateSpecialWeaponEventsInfo(state: IState, {eventId, eventInfo}) {
-      Vue.set(state.specialWeaponEvents, eventId, eventInfo);
-    },
-
-    updateSpecialWeaponArt(state: IState, {eventId, art}) {
-      Vue.set(state.specialWeaponArts, eventId, art);
-    },
-
-    updateActiveSpecialWeaponEventsIds(state: IState, eventsIds) {
-      Vue.set(state, 'activeSpecialWeaponEventsIds', eventsIds);
-      if(!eventsIds.find((id: { toString: () => string; }) => id.toString() === state.specialWeaponEventId)) {
-        state.specialWeaponEventId = '0';
-      }
-    },
-
-    updateInactiveSpecialWeaponEventsIds(state: IState, eventsIds) {
-      Vue.set(state, 'inactiveSpecialWeaponEventsIds', eventsIds);
-    },
-
-    updateSpecialWeaponEventId(state: IState, newSpecialWeaponEventId) {
-      localStorage.setItem('specialWeaponEventId', newSpecialWeaponEventId.toString());
-      state.specialWeaponEventId = newSpecialWeaponEventId.toString();
-    },
-
-    updateForgingStatus(state: IState, { eventId, ordered, forged }) {
-      Vue.set(state.specialWeaponEvents[eventId], 'ordered', ordered);
-      Vue.set(state.specialWeaponEvents[eventId], 'forged', forged);
-    },
-
-    updateEventTotalOrderedCount(state: IState, { eventId, orderedCount }) {
-      Vue.set(state.specialWeaponEvents[eventId], 'orderedCount', orderedCount);
-    },
   },
 
   actions: {
@@ -814,8 +774,8 @@ export default new Vuex.Store<IState>({
       await dispatch('setupWeaponRenames');
       await dispatch('setupWeaponCosmetics');
 
-      await dispatch('fetchSpecialWeaponEvents');
-      await dispatch('fetchSpecialWeaponArts');
+      await dispatch('specialWeaponsManager/fetchSpecialWeaponEvents');
+      await dispatch('specialWeaponsManager/fetchSpecialWeaponArts');
 
       await dispatch('fetchHasAdminAccess');
       await dispatch('fetchHasMinterAccess');
@@ -1037,7 +997,12 @@ export default new Vuex.Store<IState>({
     },
 
     async fetchUserDetails({ dispatch }) {
-      const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails'), dispatch('fetchDustBalance'), dispatch('fetchShardsSupply')];
+      const promises = [
+        dispatch('fetchSkillBalance'),
+        dispatch('fetchWaxBridgeDetails'),
+        dispatch('fetchDustBalance'),
+        dispatch('specialWeaponsManager/fetchShardsSupply')
+      ];
 
       promises.push(dispatch('fetchUserGameDetails'));
 
@@ -1551,7 +1516,7 @@ export default new Vuex.Store<IState>({
         dispatch('fetchFightRewardSkill'),
         dispatch('updateWeaponIds'),
         dispatch('setupWeaponDurabilities'),
-        dispatch('fetchShardsSupply')
+        dispatch('specialWeaponsManager/fetchShardsSupply')
       ]);
     },
 
@@ -1587,7 +1552,7 @@ export default new Vuex.Store<IState>({
         dispatch('fetchFightRewardSkill'),
         dispatch('updateWeaponIds'),
         dispatch('setupWeaponDurabilities'),
-        dispatch('fetchShardsSupply')
+        dispatch('specialWeaponsManager/fetchShardsSupply')
       ]);
     },
 

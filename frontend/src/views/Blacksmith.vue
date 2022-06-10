@@ -652,6 +652,7 @@ import WeaponIcon from '../components/WeaponIconNew.vue';
 import { BModal } from 'bootstrap-vue';
 import NftList from '@/components/smart/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
+import { ISpecialWeaponsManagerState } from '@/store/specialWeaponsManager';
 import { Accessors } from 'vue/types/options';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
@@ -659,8 +660,9 @@ import i18n from '@/i18n';
 import Events from '../events';
 import SpecialWeaponForgeModal from '@/components/smart/SpecialWeaponForgeModal.vue';
 
-type StoreMappedState = Pick<IState, 'defaultAccount' | 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards' |
-'specialWeaponEvents' | 'activeSpecialWeaponEventsIds' | 'specialWeaponEventId'>;
+type StoreMappedState = Pick<IState, 'defaultAccount' | 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards' >;
+
+type StoreMappedSpecialWeaponsManagerState = Pick<ISpecialWeaponsManagerState, 'specialWeaponEvents' | 'activeSpecialWeaponEventsIds' | 'specialWeaponEventId'>;
 
 interface StoreMappedGetters {
   contracts: Contracts;
@@ -778,8 +780,10 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds','skillBalance', 'inGameOnlyFunds', 'skillRewards',
-      'activeSpecialWeaponEventsIds', 'specialWeaponEvents', 'specialWeaponEventId']) as Accessors<StoreMappedState>),
+    ...mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds','skillBalance', 'inGameOnlyFunds', 'skillRewards',
+      'activeSpecialWeaponEventsIds', 'specialWeaponEvents', 'specialWeaponEventId']) as Accessors<StoreMappedState>,
+    ...mapState('specialWeaponsManager',
+      (['specialWeaponEvents', 'activeSpecialWeaponEventsIds','specialWeaponEventId'])) as Accessors<StoreMappedSpecialWeaponsManagerState>,
     ...(mapGetters([
       'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
       'getPowerfulDust', 'getGreaterDust', 'getLesserDust',
@@ -890,10 +894,11 @@ export default Vue.extend({
 
   methods: {
     ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN',
-      'burnWeapon', 'massBurnWeapons', 'fetchSpecialWeaponEvents',
-      'reforgeWeaponWithDust', 'massBurnWeapons', 'fetchSpecialWeaponEvents',
+      'burnWeapon', 'massBurnWeapons',
+      'reforgeWeaponWithDust', 'massBurnWeapons',
       'fetchMintWeaponPriceDecreasePerSecond', 'fetchWeaponMintIncreasePrice',
       'fetchMintWeaponMinPrice', 'fetchMintWeaponFee']),
+    ...mapActions('specialWeaponsManager', ['fetchSpecialWeaponEvents']),
     ...mapMutations(['updateSpecialWeaponEventId']),
     passFilteredItems(data: any[]){
       this.currentFilteredWeapons = data;
