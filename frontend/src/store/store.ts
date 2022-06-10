@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
-import _, {isUndefined, values} from 'lodash';
+import _, {isUndefined} from 'lodash';
 import {bnMinimum, currentChainSupportsPvP, currentChainSupportsQuests, gasUsedToBnb, toBN} from '@/utils/common';
 
 import {getConfigValue, setUpContracts} from '@/contracts';
@@ -18,7 +18,6 @@ import {
 import {
   CharacterPower,
   Contract,
-  IPartnerProject,
   isStakeType,
   IState,
   IWeb3EventSubscription,
@@ -147,12 +146,6 @@ export default new Vuex.Store<IState>({
     waxBridgeWithdrawableBnb: '0',
     waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
     waxBridgeTimeUntilLimitExpires: 0,
-
-    partnerProjects: {},
-    partnerProjectMultipliers: {},
-    partnerProjectRatios: {},
-    payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1',
-    defaultSlippage: '0',
   },
 
   getters: {
@@ -478,9 +471,6 @@ export default new Vuex.Store<IState>({
       return bnMinimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
     },
 
-    getPartnerProjects(state): IPartnerProject[] {
-      return values(state.partnerProjects);
-    }
   },
 
   mutations: {
@@ -720,27 +710,6 @@ export default new Vuex.Store<IState>({
     setCurrentNft(state: IState, payload: {type: string, id: number} ) {
       state.currentNftType = payload.type;
       state.currentNftId = payload.id;
-    },
-
-    updatePartnerProjectsState(state: IState, { partnerProjectId, partnerProject }) {
-      Vue.set(state.partnerProjects, partnerProjectId, partnerProject);
-    },
-
-    updateDefaultSlippage(state: IState, slippage) {
-      state.defaultSlippage = slippage;
-    },
-
-    updatePartnerProjectMultiplier(state: IState, { partnerProjectId, multiplier }) {
-      Vue.set(state.partnerProjectMultipliers, partnerProjectId, multiplier);
-    },
-
-    updatePartnerProjectRatio(state: IState, { partnerProjectId, ratio }) {
-      Vue.set(state.partnerProjectRatios, partnerProjectId, ratio);
-    },
-
-    updatePayoutCurrencyId(state: IState, newPayoutCurrencyId) {
-      localStorage.setItem('payoutCurrencyId', newPayoutCurrencyId);
-      state.payoutCurrencyId = newPayoutCurrencyId;
     },
   },
 
