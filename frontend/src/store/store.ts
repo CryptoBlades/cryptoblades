@@ -25,7 +25,7 @@ import {
   StakeType
 } from '@/interfaces';
 import {getCharacterNameFromSeed} from '@/character-name';
-import {approveFee, approveFeeDynamic, approveFeeWalletOnly, approveFeeWalletOrRewards, getFeeInSkillFromUsd} from '@/contract-call-utils';
+import {approveFee, approveFeeDynamic, approveFeeWalletOrRewards, getFeeInSkillFromUsd} from '@/contract-call-utils';
 
 import {burningManager as featureFlagBurningManager} from '@/feature-flags';
 import {ERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
@@ -33,7 +33,6 @@ import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from '@/stake-types';
 import {Nft} from '@/interfaces/Nft';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
-import {abi as ierc20Abi} from '@/../../build/contracts/IERC20.json';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';
 import {abi as erc721Abi} from '@/../../build/contracts/IERC721.json';
 import BigNumber from 'bignumber.js';
@@ -1865,137 +1864,6 @@ export default new Vuex.Store<IState>({
         .call(defaultCallOptions(state));
     },
 
-    async purchaseT1CBKLand({state}, {price, currency}) {
-      const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
-      if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
-
-      if(currency === 0) {
-        await approveFeeWalletOnly(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          price
-        );
-      } else {
-        const tokenAddress = await Blacksmith.methods
-          .getCurrency(currency)
-          .call(defaultCallOptions(state));
-
-        await new state.web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
-          .approve(Blacksmith.options.address, price)
-          .send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-      }
-
-      return await Blacksmith.methods
-        .purchaseT1CBKLand(price, currency)
-        .send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-    },
-
-    async purchaseT2CBKLand({state}, {price, chunkId, currency}) {
-      const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
-      if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
-
-      if(currency === 0) {
-        await approveFeeWalletOnly(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          price
-        );
-      } else {
-        const tokenAddress = await Blacksmith.methods
-          .getCurrency(currency)
-          .call(defaultCallOptions(state));
-
-        await new state.web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
-          .approve(Blacksmith.options.address, price)
-          .send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-      }
-
-      return await Blacksmith.methods
-        .purchaseT2CBKLand(price, chunkId, currency).send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-    },
-
-    async purchaseT3CBKLand({state}, {price, chunkId, currency}) {
-      const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
-      if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
-
-      if(currency === 0) {
-        await approveFeeWalletOnly(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          price
-        );
-      } else {
-        const tokenAddress = await Blacksmith.methods
-          .getCurrency(currency)
-          .call(defaultCallOptions(state));
-
-        await new state.web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
-          .approve(Blacksmith.options.address, price)
-          .send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-      }
-
-      return await Blacksmith.methods
-        .purchaseT3CBKLand(price, chunkId, currency).send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-    },
-
-    async getCBKLandPrice({state}, {tier, currency}) {
-      const Blacksmith = state.contracts().Blacksmith!;
-
-      return await Blacksmith.methods
-        .getCBKLandPrice(tier, currency)
-        .call(defaultCallOptions(state));
-    },
-
-    async getChunkPopulation({state}, {chunkIds}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      return await CBKLandSale.methods
-        .getChunkPopulation(chunkIds)
-        .call(defaultCallOptions(state));
-    },
-
-    async getPurchase({state}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      if(!state.defaultAccount) return;
-
-      const res = await CBKLandSale.methods
-        .getPurchase()
-        .call(defaultCallOptions(state));
-
-      const tier = res[0];
-      const chunkId = res[1];
-
-      return { tier, chunkId };
-    },
-
     async getAvailableLand({state}) {
       const CBKLandSale = state.contracts().CBKLandSale!;
 
@@ -2008,58 +1876,6 @@ export default new Vuex.Store<IState>({
       const t3Land = res[2];
 
       return { t1Land, t2Land, t3Land };
-    },
-
-    async getReservedChunksIds({state}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      return await CBKLandSale.methods
-        .getReservedChunksIds()
-        .call(defaultCallOptions(state));
-    },
-
-    async getPlayerReservedLand({state}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-      if (!state.defaultAccount || !CBKLandSale) return;
-
-      return await CBKLandSale.methods
-        .getPlayerReservedLand(state.defaultAccount)
-        .call(defaultCallOptions(state));
-    },
-
-    async getChunksOfReservation({state}, {reservationId}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      return await CBKLandSale.methods
-        .getChunksOfReservations(reservationId)
-        .call(defaultCallOptions(state));
-    },
-
-    async getTakenT3Chunks({state}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      return await CBKLandSale.methods
-        .getTakenT3Chunks()
-        .call(defaultCallOptions(state));
-    },
-
-    async claimPlayerReservedLand({state}, {reservationId, chunkId, tier}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      return await CBKLandSale.methods
-        .claimPlayerReservedLand(reservationId, chunkId, tier)
-        .send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-    },
-
-    async reservedSalesAllowed({state}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      return await CBKLandSale.methods
-        .reservedSalesAllowed()
-        .call(defaultCallOptions(state));
     },
 
     async getOwnedLands({state}) {
@@ -2285,33 +2101,6 @@ export default new Vuex.Store<IState>({
       await Promise.all([
         dispatch('fetchGarrisonCharacters', state.ownedGarrisonCharacterIds),
         dispatch('fetchGarrisonCharactersXp')
-      ]);
-    },
-
-    async purchaseShield({ state, dispatch }) {
-      const { CryptoBlades, SkillToken, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !Blacksmith || !state.defaultAccount) return;
-
-      await approveFeeWalletOrRewards(
-        CryptoBlades,
-        CryptoBlades,
-        SkillToken,
-        state.defaultAccount,
-        defaultCallOptions(state),
-        defaultCallOptions(state),
-        new BigNumber(state.web3.utils.toWei('100', 'ether')),
-        state.skillRewards
-      );
-
-      await Blacksmith.methods.purchaseShield().send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchTotalShieldSupply'),
-        dispatch('updateShieldIds'),
       ]);
     },
 
@@ -2687,68 +2476,6 @@ export default new Vuex.Store<IState>({
       if(!CharacterRenameTagConsumables || !state.defaultAccount) return;
       return await CharacterRenameTagConsumables.methods.getItemCount().call(defaultCallOptions(state));
     },
-    async purchaseRenameTag({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterRenameTag(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice(),
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalRenameTags')
-      ]);
-    },
-    async purchaseRenameTagDeal({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterRenameTagDeal(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice(),
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalRenameTags')
-      ]);
-    },
     async renameCharacter({ state, dispatch}, {id, name}) {
       const { CryptoBlades, SkillToken, CharacterRenameTagConsumables } = state.contracts();
       if(!CryptoBlades || !SkillToken || !CharacterRenameTagConsumables || !state.defaultAccount) return;
@@ -2769,68 +2496,6 @@ export default new Vuex.Store<IState>({
       const { WeaponRenameTagConsumables } = state.contracts();
       if(!WeaponRenameTagConsumables || !state.defaultAccount) return;
       return await WeaponRenameTagConsumables.methods.getItemCount().call(defaultCallOptions(state));
-    },
-    async purchaseWeaponRenameTag({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseWeaponRenameTag(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice(),
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalWeaponRenameTags')
-      ]);
-    },
-    async purchaseWeaponRenameTagDeal({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseWeaponRenameTagDeal(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice(),
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalRenameTags')
-      ]);
     },
     async renameWeapon({ state, dispatch}, {id, name}) {
       const { CryptoBlades, SkillToken, WeaponRenameTagConsumables } = state.contracts();
@@ -2854,37 +2519,6 @@ export default new Vuex.Store<IState>({
       if(!CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
       return await CharacterFireTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
     },
-    async purchaseCharacterFireTraitChange({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterFireTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterFireTraitChange(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice(),
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalCharacterFireTraitChanges')
-      ]);
-    },
     async changeCharacterTraitFire({ state, dispatch}, { id }) {
       const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables } = state.contracts();
       if(!CryptoBlades || !SkillToken || !CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
@@ -2906,37 +2540,6 @@ export default new Vuex.Store<IState>({
       const { CharacterEarthTraitChangeConsumables } = state.contracts();
       if(!CharacterEarthTraitChangeConsumables || !state.defaultAccount) return;
       return await CharacterEarthTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
-    },
-    async purchaseCharacterEarthTraitChange({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, CharacterEarthTraitChangeConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterEarthTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterEarthTraitChange(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalCharacterEarthTraitChanges')
-      ]);
     },
     async changeCharacterTraitEarth({ state, dispatch}, { id }) {
       const { CryptoBlades, SkillToken, CharacterEarthTraitChangeConsumables } = state.contracts();
@@ -2960,37 +2563,6 @@ export default new Vuex.Store<IState>({
       if(!CharacterWaterTraitChangeConsumables || !state.defaultAccount) return;
       return await CharacterWaterTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
     },
-    async purchaseCharacterWaterTraitChange({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, CharacterWaterTraitChangeConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterWaterTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterWaterTraitChange(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice(),
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalCharacterWaterTraitChanges')
-      ]);
-    },
     async changeCharacterTraitWater({ state, dispatch}, { id }) {
       const { CryptoBlades, SkillToken, CharacterWaterTraitChangeConsumables } = state.contracts();
       if(!CryptoBlades || !SkillToken || !CharacterWaterTraitChangeConsumables || !state.defaultAccount) return;
@@ -3013,37 +2585,6 @@ export default new Vuex.Store<IState>({
       if(!CharacterLightningTraitChangeConsumables || !state.defaultAccount) return;
       return await CharacterLightningTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
     },
-    async purchaseCharacterLightningTraitChange({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, CharacterLightningTraitChangeConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterLightningTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterLightningTraitChange(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalCharacterLightningTraitChanges')
-      ]);
-    },
     async changeCharacterTraitLightning({ state, dispatch}, { id }) {
       const { CryptoBlades, SkillToken, CharacterLightningTraitChangeConsumables } = state.contracts();
       if(!CryptoBlades || !SkillToken || !CharacterLightningTraitChangeConsumables || !state.defaultAccount) return;
@@ -3064,36 +2605,6 @@ export default new Vuex.Store<IState>({
       const { WeaponCosmetics } = state.contracts();
       if(!WeaponCosmetics || !state.defaultAccount) return;
       return await WeaponCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
-    },
-    async purchaseWeaponCosmetic({ state, dispatch }, {cosmetic, price}) {
-      const { CryptoBlades, SkillToken, WeaponCosmetics, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !WeaponCosmetics || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(state.web3.utils.toWei('' + price, 'ether')),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseWeaponCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill')
-      ]);
     },
     async changeWeaponCosmetic({ state, dispatch}, { id, cosmetic }) {
       const { CryptoBlades, SkillToken, WeaponCosmetics } = state.contracts();
@@ -3131,36 +2642,6 @@ export default new Vuex.Store<IState>({
       const { CharacterCosmetics } = state.contracts();
       if(!CharacterCosmetics || !state.defaultAccount) return;
       return await CharacterCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
-    },
-    async purchaseCharacterCosmetic({ state, dispatch }, {cosmetic, price}) {
-      const { CryptoBlades, SkillToken, CharacterCosmetics, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterCosmetics || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(state.web3.utils.toWei('' + price, 'ether')),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill')
-      ]);
     },
     async changeCharacterCosmetic({ state, dispatch}, { id, cosmetic }) {
       const { CryptoBlades, SkillToken, CharacterCosmetics } = state.contracts();
