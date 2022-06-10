@@ -40,35 +40,35 @@ const treasury = {
       return projects;
     },
 
-    async setPartnerProjectLogo({ rootState }: {rootState: IState}, {id, logo}: {id: string, logo: string}) {
+    async setPartnerProjectLogo({ rootState }: {rootState: IState}, {id, logo}: {id: number | string, logo: string}) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
 
       await Treasury.methods.setProjectLogo(id, logo).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
     },
 
-    async setPartnerProjectDetails({ rootState }: {rootState: IState}, {id, details}: {id: string, details: string}) {
+    async setPartnerProjectDetails({ rootState }: {rootState: IState}, {id, details}: {id: number | string, details: string}) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
 
       await Treasury.methods.setProjectDetails(id, details).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
     },
 
-    async setPartnerProjectWebsite({ rootState }: {rootState: IState}, {id, website}: {id: string, website: string}) {
+    async setPartnerProjectWebsite({ rootState }: {rootState: IState}, {id, website}: {id: number | string, website: string}) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
 
       await Treasury.methods.setProjectWebsite(id, website).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
     },
 
-    async setPartnerProjectNote({ rootState }: {rootState: IState}, {id, note}: {id: string, note: string}) {
+    async setPartnerProjectNote({ rootState }: {rootState: IState}, {id, note}: {id: number | string, note: string}) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
 
       await Treasury.methods.setProjectNote(id, note).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
     },
 
-    async setPartnerProjectIsActive({ rootState }: {rootState: IState}, {id, isActive}: {id: string, isActive: boolean}) {
+    async setPartnerProjectIsActive({ rootState }: {rootState: IState}, {id, isActive}: {id: number | string, isActive: boolean}) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
 
@@ -80,6 +80,7 @@ const treasury = {
       if(!Treasury || !rootState.defaultAccount) return;
 
       const activePartnerProjectIds = await Treasury.methods.getActivePartnerProjectsIds().call(defaultCallOptions(rootState));
+      console.log(activePartnerProjectIds);
       activePartnerProjectIds.forEach(async (id: string) => {
         await dispatch('fetchPartnerProject', id);
       });
@@ -87,10 +88,11 @@ const treasury = {
       await dispatch('fetchDefaultSlippage');
     },
 
-    async fetchPartnerProject({ rootState, commit }: {rootState: IState, commit: Commit},{id}: {id: string}) {
+    async fetchPartnerProject({ rootState, commit }: {rootState: IState, commit: Commit}, id: number | string) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
-
+      console.log(typeof(id));
+      console.log(id);
       const partnerProjectRaw = await Treasury.methods.partneredProjects(id).call(defaultCallOptions(rootState));
       const tokensClaimed = await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(rootState));
       const data = await Treasury.methods.getProjectData(id).call(defaultCallOptions(rootState));
@@ -122,7 +124,7 @@ const treasury = {
       commit('updateDefaultSlippage', slippage);
     },
 
-    async getPartnerProjectMultiplier({ rootState, commit }: {rootState: IState, commit: Commit}, {id}: {id: string}) {
+    async getPartnerProjectMultiplier({ rootState, commit }: {rootState: IState, commit: Commit}, id: number | string) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
 
@@ -132,21 +134,21 @@ const treasury = {
       return multiplier;
     },
 
-    async getPartnerProjectDistributionTime({ rootState }: {rootState: IState}, {id}: {id: string}) {
+    async getPartnerProjectDistributionTime({ rootState }: {rootState: IState}, id: number | string) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
 
       return await Treasury.methods.projectDistributionTime(id).call(defaultCallOptions(rootState));
     },
 
-    async getPartnerProjectClaimedAmount({ rootState }: {rootState: IState}, {id}: {id: string}) {
+    async getPartnerProjectClaimedAmount({ rootState }: {rootState: IState}, id: number | string) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
 
       return await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(rootState));
     },
 
-    async getSkillToPartnerRatio({ rootState, commit }: {rootState: IState, commit: Commit}, {id}: {id: string}) {
+    async getSkillToPartnerRatio({ rootState, commit }: {rootState: IState, commit: Commit}, id: number | string) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
 
