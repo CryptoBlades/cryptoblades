@@ -1,12 +1,56 @@
-import {IState} from '@/interfaces';
+import {IState, IPartnerProject} from '@/interfaces';
 import {Dispatch, Commit} from 'vuex';
 import Web3 from 'web3';
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
 import {getGasPrice} from '../store';
 import {SupportedProject} from '@/views/Treasury.vue';
 import {NewPartnerProject} from '@/components/smart/AdminTabs/TreasuryAdmin.vue';
+import {values} from 'lodash';
+import Vue from 'vue';
+
+export interface ITreasuryState {
+  partnerProjects: Record<number, IPartnerProject>;
+  partnerProjectMultipliers: Record<number, string>;
+  partnerProjectRatios: Record<number, string>;
+  defaultSlippage: string;
+  payoutCurrencyId: string;
+}
 
 const treasury = {
+  namespaced: true,
+  state: {
+    partnerProjects: {},
+    partnerProjectMultipliers: {},
+    partnerProjectRatios: {},
+    defaultSlippage: '0',
+    payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1',
+  } as ITreasuryState,
+  getters: {
+    getPartnerProjects(state: ITreasuryState): IPartnerProject[] {
+      return values(state.partnerProjects);
+    }
+  },
+  mutations: {
+    updatePartnerProjectsState(state: ITreasuryState, { partnerProjectId, partnerProject }: { partnerProjectId: number, partnerProject: IPartnerProject }) {
+      Vue.set(state.partnerProjects, partnerProjectId, partnerProject);
+    },
+
+    updateDefaultSlippage(state: ITreasuryState, slippage: string) {
+      state.defaultSlippage = slippage;
+    },
+
+    updatePartnerProjectMultiplier(state: ITreasuryState, { partnerProjectId, multiplier }: { partnerProjectId: number, multiplier: string }) {
+      Vue.set(state.partnerProjectMultipliers, partnerProjectId, multiplier);
+    },
+
+    updatePartnerProjectRatio(state: ITreasuryState, { partnerProjectId, ratio }: { partnerProjectId: number, ratio: string }) {
+      Vue.set(state.partnerProjectRatios, partnerProjectId, ratio);
+    },
+    updatePayoutCurrencyId(state: ITreasuryState, newPayoutCurrencyId: string) {
+      localStorage.setItem('payoutCurrencyId', newPayoutCurrencyId);
+      state.payoutCurrencyId = newPayoutCurrencyId;
+    },
+  },
   actions: {
     async addPartnerProject({ rootState }: {rootState: IState}, {partnerProject}: {partnerProject: NewPartnerProject}) {
       const { Treasury } = rootState.contracts();
@@ -80,7 +124,6 @@ const treasury = {
       if(!Treasury || !rootState.defaultAccount) return;
 
       const activePartnerProjectIds = await Treasury.methods.getActivePartnerProjectsIds().call(defaultCallOptions(rootState));
-      console.log(activePartnerProjectIds);
       activePartnerProjectIds.forEach(async (id: string) => {
         await dispatch('fetchPartnerProject', id);
       });
@@ -91,8 +134,6 @@ const treasury = {
     async fetchPartnerProject({ rootState, commit }: {rootState: IState, commit: Commit}, id: number | string) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
-      console.log(typeof(id));
-      console.log(id);
       const partnerProjectRaw = await Treasury.methods.partneredProjects(id).call(defaultCallOptions(rootState));
       const tokensClaimed = await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(rootState));
       const data = await Treasury.methods.getProjectData(id).call(defaultCallOptions(rootState));

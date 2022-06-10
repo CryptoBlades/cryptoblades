@@ -157,6 +157,9 @@ interface StoreMappedState {
   waxBridgeTimeUntilLimitExpires: number;
   ownedCharacterIds: string[];
   xpRewards: Record<string, string>;
+}
+
+interface StoreMappedTreasuryState {
   payoutCurrencyId: string;
   partnerProjectMultipliers: Record<number, string>;
   partnerProjectRatios: Record<number, string>;
@@ -170,6 +173,9 @@ interface StoreMappedGetters {
   availableBNB: string;
   currentCharacter: ICharacter | null;
   getCharacterName(id: number): string;
+}
+
+interface StoreMappedTreasuryGetters {
   getPartnerProjects: SupportedProject[];
 }
 
@@ -177,13 +183,16 @@ interface StoreMappedActions {
   addMoreSkill(skillToAdd: string): Promise<void>;
   withdrawBnbFromWaxBridge(): Promise<void>;
   claimXpRewards(): Promise<void>;
-  fetchPartnerProjects(): Promise<void>;
   fetchRemainingTokenClaimAmountPreTax(): Promise<string>;
+  claimTokenRewards(): Promise<void>;
+}
+
+interface StoreMappedTreasuryActions{
+  fetchPartnerProjects(): Promise<void>;
   getPartnerProjectMultiplier(id: number): Promise<string>;
   claimPartnerToken(
     {id, skillAmount, currentMultiplier, slippage}:
     {id: number, skillAmount: string, currentMultiplier: string, slippage: string}): Promise<void>;
-  claimTokenRewards(): Promise<void>;
 }
 
 interface ICharacterClaimableExp{
@@ -215,16 +224,17 @@ export default Vue.extend({
   },
   computed: {
     ...(mapState(['skillRewards', 'skillBalance', 'inGameOnlyFunds', 'waxBridgeWithdrawableBnb',
-      'waxBridgeTimeUntilLimitExpires', 'ownedCharacterIds', 'xpRewards', 'payoutCurrencyId',
-      'partnerProjectMultipliers', 'partnerProjectRatios','defaultSlippage']) as Accessors<StoreMappedState>),
+      'waxBridgeTimeUntilLimitExpires', 'ownedCharacterIds', 'xpRewards']) as Accessors<StoreMappedState>),
+    ...(mapState('treasury',
+      ['payoutCurrencyId','partnerProjectMultipliers', 'partnerProjectRatios','defaultSlippage'])as Accessors<StoreMappedTreasuryState>),
     ...(mapGetters({
       availableBNB: 'waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod',
       getExchangeUrl: 'getExchangeUrl',
       getExchangeTransakUrl: 'getExchangeTransakUrl',
       ownCharacters: 'ownCharacters',
       getCharacterName: 'getCharacterName',
-      getPartnerProjects: 'getPartnerProjects',
     }) as Accessors<StoreMappedGetters>),
+    ...(mapGetters('treasury', ['getPartnerProjects']) as Accessors<StoreMappedTreasuryGetters>),
     isNoProjectAvailable(): boolean {
       this.choosePayoutCurrencyIfNotChosenBefore();
       return this.payoutCurrencyId === '-1';
@@ -353,8 +363,9 @@ export default Vue.extend({
 
   methods: {
     ...(mapActions(['addMoreSkill', 'withdrawBnbFromWaxBridge',
-      'claimXpRewards', 'fetchPartnerProjects', 'fetchRemainingTokenClaimAmountPreTax',
-      'getPartnerProjectMultiplier', 'claimPartnerToken', 'claimTokenRewards']) as StoreMappedActions),
+      'claimXpRewards','fetchRemainingTokenClaimAmountPreTax', 'claimTokenRewards']) as StoreMappedActions),
+    ...(mapActions(['fetchPartnerProjects',
+      'getPartnerProjectMultiplier', 'claimPartnerToken']) as StoreMappedTreasuryActions),
     ...(mapMutations(['updatePayoutCurrencyId']) as StoreMappedMutations),
     async onClaimTokens() {
       if(this.payoutCurrencyId !== '-1') {
