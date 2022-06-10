@@ -81,53 +81,6 @@ export interface ISpecialWeaponEvent {
   website: string;
   note: string;
 }
-
-export interface IItemPrices {
-  itemWeaponRenamePrice: string;
-  itemCharacterRenamePrice: string;
-  itemCharacterTraitChangeFirePrice: string;
-  itemCharacterTraitChangeEarthPrice: string;
-  itemCharacterTraitChangeWaterPrice: string;
-  itemCharacterTraitChangeLightningPrice: string;
-  itemWeaponCosmeticGrayscalePrice: string;
-  itemWeaponCosmeticContrastPrice: string;
-  itemWeaponCosmeticSepiaPrice: string;
-  itemWeaponCosmeticInvertPrice: string;
-  itemWeaponCosmeticBlurPrice: string;
-  itemWeaponCosmeticFireGlowPrice: string;
-  itemWeaponCosmeticEarthGlowPrice: string;
-  itemWeaponCosmeticLightningGlowPrice: string;
-  itemWeaponCosmeticWaterGlowPrice: string;
-  itemWeaponCosmeticRainbowGlowPrice: string;
-  itemWeaponCosmeticDarkGlowPrice: string;
-  itemWeaponCosmeticGhostPrice: string;
-  itemWeaponCosmeticPoliceLightsPrice: string;
-  itemWeaponCosmeticNeonBorderPrice: string;
-  itemWeaponCosmeticRotatingNeonBorderPrice: string;
-  itemWeaponCosmeticDiamondBorderPrice: string;
-  itemWeaponCosmeticGoldBorderPrice: string;
-  itemWeaponCosmeticSilverBorderPrice: string;
-  itemWeaponCosmeticBronzeBorderPrice: string;
-  itemCharacterCosmeticGrayscalePrice: string;
-  itemCharacterCosmeticContrastPrice: string;
-  itemCharacterCosmeticSepiaPrice: string;
-  itemCharacterCosmeticInvertPrice: string;
-  itemCharacterCosmeticBlurPrice: string;
-  itemCharacterCosmeticFireGlowPrice: string;
-  itemCharacterCosmeticEarthGlowPrice: string;
-  itemCharacterCosmeticLightningGlowPrice: string;
-  itemCharacterCosmeticWaterGlowPrice: string;
-  itemCharacterCosmeticRainbowGlowPrice: string;
-  itemCharacterCosmeticDarkGlowPrice: string;
-  itemCharacterCosmeticGhostPrice: string;
-  itemCharacterCosmeticPoliceLightsPrice: string;
-  itemCharacterCosmeticNeonBorderPrice: string;
-  itemCharacterCosmeticDiamondBorderPrice: string;
-  itemCharacterCosmeticGoldBorderPrice: string;
-  itemCharacterCosmeticSilverBorderPrice: string;
-  itemCharacterCosmeticBronzeBorderPrice: string;
-}
-
 export interface IState {
   web3: Web3;
   contracts: () => Contracts;
@@ -208,6 +161,4 @@ export interface IState {
   specialWeaponEventId: string;
   specialWeaponArts: string[];
   shardsSupply: Record<number, number>;
-
-  itemPrices: IItemPrices;
 }
