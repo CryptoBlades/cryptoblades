@@ -12,6 +12,7 @@
     </b-dropdown>
 
     <b-modal
+      hide-header hide-footer
       class="centered-modal"
       ref="character-transfer-modal"
       :ok-title="$t('nft.transferOkButton')"
@@ -19,17 +20,21 @@
       :ok-disabled="!isValidAddress || receiverAddress === ''  || isSending"
       :cancel-disabled="isSending"
       >
-      <template #modal-title>
-        Send your {{nftType}} to another account
-      </template>
-      <b-form-input placeholder="Receiver Address" v-model="receiverAddress"/>
-      <div class="transferResultContainer">
-        <div class="loader" v-if="isSending">
-          <i class="fas fa-spinner fa-spin"></i>
-            Loading...
+      <div class="p-4">
+        <h3 class="confirmation-title mb-5">{{$t('blacksmith.sendYour')}} {{nftType}} {{$t('blacksmith.toAnother')}} </h3>
+        <b-form-input class="transfer-input" placeholder="Receiver Address" v-model="receiverAddress"/>
+        <div class="transferResultContainer">
+          <div class="loader" v-if="isSending">
+            <i class="fas fa-spinner fa-spin"></i>
+              Loading...
+          </div>
+          <span class="resultMsg text-center"> {{(!isValidAddress && receiverAddress !== '') ? 'Invalid address' : ''}} </span>
+          <span class="resultMsg text-center"> {{resultMsg}} </span>
         </div>
-        <span class="resultMsg text-center"> {{(!isValidAddress && receiverAddress !== '') ? 'Invalid address' : ''}} </span>
-        <span class="resultMsg text-center"> {{resultMsg}} </span>
+        <div class="footer-btn">
+          <button class="close-btn" @click="transfer">
+            {{isBurnInProgress ? 'Sending..' : $t('plaza.transfer')}}</button>
+        </div>
       </div>
     </b-modal>
 
@@ -141,9 +146,18 @@ export default Vue.extend({
   margin-top: 20px;
   overflow: hidden;
 }
+
+.transfer-input.form-control{
+  background-color: #1a1a1a;
+  border: 1px solid #545b62;
+  color: rgba(255, 255, 255, 0.753);
+  font-family: Roboto;
+  height: 3em;
+}
 .resultMsg{
-  color: rgb(197, 48, 48);
-  font-size: .8rem;
+  color: rgb(255, 91, 91);
+  font-size: .9rem;
+  font-family: Roboto;
 }
 .success{
   color: rgb(0, 128, 0);

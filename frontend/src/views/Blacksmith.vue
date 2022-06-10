@@ -1687,6 +1687,7 @@ export default Vue.extend({
   left: 20px;
 }
 
+
 .weapon-menu > div > div > h2{
   font-family: Trajan;
   font-weight: 500;

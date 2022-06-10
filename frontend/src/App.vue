@@ -817,6 +817,11 @@ button.close {
   width: 100%;
 }
 
+.confirmation-title{
+  text-align: center;
+  font-family: Trajan;
+}
+
 .character-modal div.modal-body {
   background: #051126!important;
   border: none;
