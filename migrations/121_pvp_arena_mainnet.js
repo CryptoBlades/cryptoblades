@@ -20,8 +20,10 @@ module.exports = async function (deployer, network, accounts) {
     || network === 'hecomainnet'
     || network === 'okexmainnet'
     || network === 'polygonmainnet'
-    || network === 'avaxmainnet' || network === 'auroramainnet'
-    || network === 'avaxmainnet-fork') {
+    || network === 'avaxmainnet'
+    || network === 'avaxmainnet-fork'
+    || network === 'auroramainnet'
+    || network === 'skalemainnet') {
         let randoms = await ChainlinkRandoms.deployed();
 
         const pvpArena = await deployProxy(
