@@ -769,14 +769,14 @@ export default Vue.extend({
 .select-wrapper-items > select,
 .select-wrapper-element > select,
 .select-wrapper-star > select{
-  background-color: rgba(255, 255, 255, 0);
+  background-color: rgba(1, 13, 34, 0);
   color: #fff;
 }
 
 .select-wrapper-element > select option,
 .select-wrapper-items > select option,
 .select-wrapper-star > select option{
-  background-color: #171617;
+  background-color: #010D22;
   padding: 1px;
   color: #fff;
 }

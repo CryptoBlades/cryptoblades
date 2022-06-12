@@ -2044,8 +2044,8 @@ export default Vue.extend({
   width: max-content;
   border-radius: 5px;
   padding: 8px 10px;
-  background-color: #000;
-  border: 1px solid rgba(255, 255, 255, 0.425);
+  background-color: #010D22;
+  border: 1px solid rgba(0, 162, 255, 0.425);
 }
 
 .dust-img-lesser{

@@ -695,7 +695,7 @@ export default Vue.extend({
 .title {
   text-transform: uppercase;
   font-family: 'Trajan', serif;
-  font-weight: bold;
+  font-weight: 700;
   line-height: 38px;
   font-size: 30px;
 }

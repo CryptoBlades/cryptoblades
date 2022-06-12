@@ -718,7 +718,7 @@ button.close {
 }
 
 .btn {
-  border: 2px solid #6c5f38 !important;
+  border: 1px solid $border !important;
   border-radius: 0.1em !important;
 }
 
@@ -733,20 +733,19 @@ button.close {
 }
 
 .btn:not(.disabled):not(:disabled):hover {
-  border: 2px solid #9e8a57 !important;
-  background: rgb(61, 61, 64);
-  background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
+  transform: translate3d(0px, -1px, 0px);
+  border: 1px solid #1168D0 !important;
+  background: transparent;
 }
 
 .btn-primary {
-  color: $primary !important;
-  background: rgb(31, 31, 34);
-  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  font-family: Roboto;
+  color: $body-color !important;
+  background: #1E293C;
 }
 
-
 .btn-outline-primary {
-  color: #9e8a57 !important;
+  color: $border !important;
 }
 
 .modal-header {

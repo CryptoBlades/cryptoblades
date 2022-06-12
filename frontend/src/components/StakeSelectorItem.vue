@@ -699,7 +699,7 @@ export default Vue.extend({
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style scoped>
 .container {
-  background: rgb(22, 22, 22); /* change to: background: #000E1D; */
+  background: #051126; /* change to: background: #000E1D; */
   padding: 45px 40px;
   display: flex;
   flex-direction: column;
@@ -809,7 +809,7 @@ export default Vue.extend({
 .stake-button{
   font: normal 16px/21px Roboto;
   text-align: center;
-  background: #9E8A57; /* change to: #1168D0; */
+  background: #1168D0; /* change to: #1168D0; */
   border-radius: 5px;
   border:none;
   color: #FFFFFF;
@@ -836,7 +836,7 @@ export default Vue.extend({
 }
 
 .btn_active{
-  background: hsl(43, 15%, 18%);
+  background: #404857;
   color: #fff;
 }
 
@@ -890,7 +890,7 @@ export default Vue.extend({
 .stake-type-title {
   font: bold 20px/25px Trajan;
   align-self: flex-start;
-  color: #EDCD90;
+  color: #FFF;
 }
 
 .inputSection{

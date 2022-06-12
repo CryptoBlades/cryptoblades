@@ -12,6 +12,7 @@ import store from './store/store';
 import createRouter from './router';
 
 import App from './App.vue';
+import ButtonNew from '@/components/ButtonNew.vue';
 
 import {
   raid as featureFlagRaid,
@@ -34,6 +35,7 @@ Vue.use(VueRouter);
 Vue.use(VTooltip);
 Vue.use(BootstrapVue);
 Vue.use(BootstrapVueDialog);
+Vue.component('ButtonNew', ButtonNew);
 
 Vue.use(BootstrapVueIcons);
 
