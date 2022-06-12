@@ -23,6 +23,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public tokensClaimed;
     uint256 public skillPrice;
 
+    event TreasuryClaimed(address indexed sender, uint256 indexed partnerId, uint256 claimedAmount, uint256 currentMultiplier);
+
     struct PartnerProject {
         uint256 id;
         string name;
@@ -181,6 +183,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         IERC20(partneredProjects[partnerId].tokenAddress).safeTransfer(msg.sender, getAmountWithAdjustedDecimals(partnerTokenAmount, partnerTokenDecimals));
 
         multiplierTimestamp[partnerId] = multiplierTimestamp[partnerId].add(partnerTokenAmount.div(partneredProjects[partnerId].tokenSupply.div(projectDistributionTime[partnerId])).div(uint(1e18).div(multiplierUnit)));
+
+        emit TreasuryClaimed(msg.sender, partnerId, partnerTokenAmount, currentMultiplier);
     }
 
     // Setters
