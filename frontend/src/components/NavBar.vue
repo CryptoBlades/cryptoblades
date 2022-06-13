@@ -254,11 +254,6 @@ a.router-link-active {
   align-items: center;
 }
 
-/* .navbar {
-  background: linear-gradient(45deg, #141414, #242720);
-  border-bottom: 2px solid #404857;
-} */
-
 .main-nav > .view-links {
   flex: 2.3;
 }
