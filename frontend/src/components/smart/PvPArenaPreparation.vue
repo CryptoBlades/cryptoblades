@@ -165,12 +165,12 @@
         </div>
         <div class="enterButtonsWrapper">
           <div class="enterArenaButtonWrapper">
-            <button-new class="custom-enter-arena-btn" :title="$t('pvp.enterArena')" :subTitle="$t('pvp.untiered')" @clickEvent="handleEnterArenaClick(true)"
+            <cb-button class="custom-enter-arena-btn" :title="$t('pvp.enterArena')" :subTitle="$t('pvp.untiered')" @clickEvent="handleEnterArenaClick(true)"
             :isDisabled="!this.checkBoxAgreed || !this.selectedWeaponId"
             />
           </div>
           <div class="enterArenaButtonWrapper">
-            <button-new class="custom-enter-arena-btn" :title="$t('pvp.enterArena')" :subTitle="$t('pvp.tiered')" @clickEvent="handleEnterArenaClick(false)"
+            <cb-button class="custom-enter-arena-btn" :title="$t('pvp.enterArena')" :subTitle="$t('pvp.tiered')" @clickEvent="handleEnterArenaClick(false)"
             :isDisabled="!this.checkBoxAgreed || !this.selectedWeaponId"
             />
           </div>

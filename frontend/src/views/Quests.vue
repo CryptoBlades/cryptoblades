@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between w-100 weekly-progress-container">
       <div class="d-flex flex-column justify-content-between gap-2">
         <h5 class="quests-title">{{ $t('quests.quest') }}</h5>
-        <button-new class="custom-available-quest-button" :title="$t('quests.availableQuests')" @clickEvent="showQuestsListModal = true"></button-new>
+        <cb-button class="custom-available-quest-button" :title="$t('quests.availableQuests')" @clickEvent="showQuestsListModal = true"></cb-button>
         <b-modal v-model="showQuestsListModal" :title="$t('quests.availableQuests')" hide-footer
                  @hide="showQuestsListModal = false; tier = undefined" size="xl">
           <div class="d-flex align-items-center gap-3">
@@ -49,9 +49,9 @@
                                 :amount="weeklyReward.reputationAmount"/>
           </div>
         </div>
-        <button-new class="custom-claim-weekly-reward-btn" v-if="!weeklyClaimed"
+        <cb-button class="custom-claim-weekly-reward-btn" v-if="!weeklyClaimed"
         :isDisabled="isLoading || !canClaimWeeklyReward" @clickEvent="claimWeekly"
-          :toolTip="!canClaimWeeklyReward ? $t('quests.cannotClaimWeeklyTooltip') : ''" :title="$t('quests.claimWeeklyReward')"></button-new>
+          :toolTip="!canClaimWeeklyReward ? $t('quests.cannotClaimWeeklyTooltip') : ''" :title="$t('quests.claimWeeklyReward')"></cb-button>
       </div>
     </div>
     <div v-for="character in characters" :key="character.id" class="d-flex w-100">
