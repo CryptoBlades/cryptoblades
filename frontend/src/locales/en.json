@@ -17,7 +17,7 @@
     "settings": "Settings",
     "nftbridge": "NFT Bridge",
     "wiki": "Wiki",
-    "nftDisplay": "Nft Display",
+    "nftDisplay": "NFT Display",
     "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
   },
   "sideBar": {
