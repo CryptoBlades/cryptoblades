@@ -57,6 +57,7 @@ export default Vue.extend({
 .custom-subtitle-font{
   color: #e9c97a;
   font-family: "Roboto", sans-serif;
+  font-weight: normal;
 }
 .button-new {
   display: flex;
@@ -76,7 +77,6 @@ export default Vue.extend({
   font-family: Oswald;
   text-transform: uppercase;
   color: #fff;
-  font-size: 15px;
   margin: auto;
   margin-right: -40px;
   font-weight: bolder;

@@ -22,7 +22,7 @@
       <div class="none-mobile d-flex flex-column align-items-end">
         <div class="px=2 pt-2 pb-2">
           <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
-            <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
+            <b-check variant="info" class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
             <strong>{{$t('weaponGrid.showFavorite')}}</strong>
           </div>
         </div>

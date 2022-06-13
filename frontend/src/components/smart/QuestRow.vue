@@ -105,6 +105,7 @@ export default Vue.extend({
   border: 1px solid #404857;
   border-radius: 10px;
   align-items: center;
+  font-family: Roboto;
 }
 
 .busy-quest-row {

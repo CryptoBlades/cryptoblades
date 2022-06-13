@@ -2,7 +2,7 @@
   <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container gap-4">
     <div class="d-flex justify-content-between w-100 weekly-progress-container">
       <div class="d-flex flex-column justify-content-between gap-2">
-        <span class="quests-title">{{ $t('quests.quest') }}</span>
+        <h5 class="quests-title">{{ $t('quests.quest') }}</h5>
         <button-new class="custom-available-quest-button" :title="$t('quests.availableQuests')" @clickEvent="showQuestsListModal = true"></button-new>
         <b-modal v-model="showQuestsListModal" :title="$t('quests.availableQuests')" hide-footer
                  @hide="showQuestsListModal = false; tier = undefined" size="xl">
@@ -398,8 +398,10 @@ export default Vue.extend({
 }
 
 .quests-title {
-  font: normal normal bold 30px/38px Trajan;
-  color: #DABE75;
+  font-family: 'Trajan', serif;
+  font-size: 35px;
+  font-weight: 400;
+  color: #EDCD90;
 }
 
 .next-reset {

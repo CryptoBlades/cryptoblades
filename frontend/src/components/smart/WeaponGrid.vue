@@ -28,7 +28,6 @@
 
       <b-button
         v-if="!newWeapon"
-        variant="primary"
         class="clear-filters-button mb-3"
         @click="clearFilters"
       >

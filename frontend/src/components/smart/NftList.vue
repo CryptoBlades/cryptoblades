@@ -246,7 +246,6 @@
         </div>
 
         <b-button
-          variant="primary"
           class="ml-3 clear-filters-button"
           @click="clearFilters"
         >

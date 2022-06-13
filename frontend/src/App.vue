@@ -717,35 +717,41 @@ button.close {
    font-size: clamp(24px, 2vw, 40px);
 }
 
-.btn {
-  border: 1px solid $border !important;
-  border-radius: 0.1em !important;
+.clear-filters-button {
+  height: fit-content;
+  display: flex;
+  flex-direction: row;
+  align-self: flex-end;
+  margin:0 15px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border:1px solid #EDCD90;
+  background-color: rgba(255, 255, 255, 0);
+  font-family: Roboto;
+  color: #fff;
+  padding: 5px 20px;
 }
 
+.clear-filters-button:hover{
+  background: rgba(0, 0, 0, 0) !important;
+  border: 1px solid #fff !important;
+}
+
+.btn {
+  border-radius: 0.1em !important;
+}
 .common-width-button {
   margin: 0.8rem;
   width: 22%;
 }
-
 .btn.disabled,
 .btn:disabled {
   cursor: auto;
 }
-
-.btn:not(.disabled):not(:disabled):hover {
-  transform: translate3d(0px, -1px, 0px);
-  border: 1px solid #1168D0 !important;
-  background: transparent;
-}
-
 .btn-primary {
-  font-family: Roboto;
-  color: $body-color !important;
-  background: #1E293C;
-}
-
-.btn-outline-primary {
-  color: $border !important;
+  color: $primary !important;
+  background: rgb(31, 31, 34);
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
 
 .modal-header {
@@ -834,19 +840,19 @@ button.close {
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
   border-color: #9e8a576e;
 }
-.nav-tabs {
-  border-bottom: 2px solid #9e8a57 !important;
+.nav-tabs .nav-link{
+  border: 1px solid #404857!important;
+  background: transparent!important;
+  color: white!important;
+  text-transform: uppercase;
+  font-family: 'Oswald', sans-serif;
+  min-height:56px;
+  line-height: 38px;
+  border-radius: 0px;
 }
-
 .nav-tabs .nav-link.active {
-  color: #9e8a57 !important;
-  border: 2px solid #9e8a57 !important;
-  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
-}
-
-.nav-tabs .nav-link:hover,
-.nav-tabs .nav-link:focus {
-  border-color: #9e8a57 #9e8a57 #9e8a57 !important;
+  border: 1px solid #404857!important;
+  background: #1168D0!important;
 }
 
 .outline {

@@ -6,7 +6,7 @@
     <div class="d-flex align-items-center gap-3 flex-wrap">
       <b-form-input v-model="newCharacterMintValue" type="number" number
                     :placeholder="$t('admin.cryptoblades.newValueInCents')"/>
-      <b-button @click="setNewCharacterMintValue()" :disabled="setCharacterMintValueButtonDisabled" variant="primary"
+      <b-button @click="setNewCharacterMintValue()" :disabled="setCharacterMintValueButtonDisabled" variant="info"
                 class="text-nowrap">
         {{ $t('admin.cryptoblades.setCharacterMintValue') }}
       </b-button>
@@ -15,7 +15,7 @@
     <div class="d-flex align-items-center gap-3 flex-wrap">
       <b-form-input v-model="newWeaponMintValue" type="number" number
                     :placeholder="$t('admin.cryptoblades.newValueInCents')"/>
-      <b-button @click="setNewWeaponMintValue()" :disabled="setWeaponMintValueButtonDisabled" variant="primary"
+      <b-button @click="setNewWeaponMintValue()" :disabled="setWeaponMintValueButtonDisabled" variant="info"
                 class="text-nowrap">
         {{ $t('admin.cryptoblades.setWeaponMintValue') }}
       </b-button>
@@ -24,7 +24,7 @@
     <div class="d-flex align-items-center gap-3">
       <b-form-input v-model="newFightXpGain" :placeholder="$t('admin.cryptoblades.fightXpGain')" number type="number"/>
       <b-button @click="setNewFightXpGain()" :disabled="setNewFightXpGainButtonDisabled"
-                variant="primary" class="text-nowrap">
+                variant="info" class="text-nowrap">
         {{ $t('admin.cryptoblades.setFightXpGain') }}
       </b-button>
     </div>

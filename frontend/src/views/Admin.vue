@@ -95,4 +95,10 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="scss">
+.tabs{
+  padding: 3rem !important;
+}
+::v-deep *{
+  font-family: Roboto;
+}
 </style>
