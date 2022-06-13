@@ -1,5 +1,5 @@
 <template>
-  <div class="character-list-container">
+  <div class="character-list-container pt-4">
     <div class="filters row mt-2 pl-2" v-if="showFilters && !isMobile()" @change="saveFilters()">
       <div>
         <div class="select-wrapper-no" :data-content="$t('characterList.level')">
@@ -611,7 +611,7 @@ export default {
   border-top: 6px solid #666;
   position: absolute;
   left: 55px;
-  top: 27px;
+  top: 50px;
   font-family: Roboto;
   color: rgba(255, 255, 255, 0.541);
 }
@@ -623,7 +623,7 @@ export default {
   border-top: 6px solid #666;
   position: absolute;
   margin-left: 10px;
-  top: 27px;
+  top: 50px;
   font-family: Roboto;
   color: rgba(255, 255, 255, 0.541);
 }
@@ -730,26 +730,6 @@ export default {
 
 .above-wrapper-nft-display {
   top: 220px;
-}
-
-.clear-filters-button {
-  height: fit-content;
-  display: flex;
-  flex-direction: row;
-  align-self: flex-end;
-  margin:0 15px;
-  margin-bottom: 15px;
-  border-radius: 5px;
-  border:1px solid #EDCD90;
-  background-color: rgba(255, 255, 255, 0);
-  font-family: Roboto;
-  color: #fff;
-  padding: 5px 20px;
-}
-
-.clear-filters-button:hover{
-  background: rgba(0, 0, 0, 0) !important;
-  border: 1px solid #fff !important;
 }
 
 @media (max-width: 576px) {

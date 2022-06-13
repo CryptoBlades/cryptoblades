@@ -20,13 +20,13 @@
       <b-form-input v-model="newEvent.website" :placeholder="$t('admin.specialWeaponsManager.website')"/>
       <b-form-input v-model="newEvent.note" :placeholder="$t('admin.specialWeaponsManager.noteOptional')"/>
       <b-button @click="startNewSpecialWeaponsEvent()" :disabled="startNewSpecialWeaponsEventButtonDisabled"
-                variant="primary" class="text-nowrap">
+                variant="info" class="text-nowrap">
         {{ $t('admin.specialWeaponsManager.startNewEvent') }}
       </b-button>
     </div>
     <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.findActiveSpecialWeaponsEvents') }}</h2>
     <div class="d-flex align-items-center gap-3 flex-wrap">
-      <b-button @click="getActiveEvents()" :disabled="isLoading" variant="primary"
+      <b-button @click="getActiveEvents()" :disabled="isLoading" variant="info"
                 class="text-nowrap">
         {{ $t('admin.specialWeaponsManager.findActiveSpecialWeaponsEvents') }}
       </b-button>
@@ -59,7 +59,7 @@
       <b-form-input v-model="selectedSpecialWeaponsEvent.value"
                     :placeholder="$t('admin.specialWeaponsManager.propertyValue')"/>
       <b-button @click="setSpecialWeaponsEventProperty()" :disabled="setSpecialWeaponsEventPropertyButtonDisabled"
-                variant="primary" class="text-nowrap">
+                variant="info" class="text-nowrap">
         {{ $t('admin.specialWeaponsManager.setSpecialWeaponsEventProperty') }}
       </b-button>
     </div>
@@ -71,7 +71,7 @@
       <b-form-input v-model="newAddShardsUser.shardsAmount" type="number" number min="0"
                     :placeholder="$t('admin.specialWeaponsManager.shardsAmount')"/>
       <b-button @click="addShardsForUser()" :disabled="addShardsForUserButtonDisabled"
-                variant="primary" class="text-nowrap">
+                variant="info" class="text-nowrap">
         {{ $t('admin.specialWeaponsManager.addShards') }}
       </b-button>
     </div>
@@ -90,7 +90,7 @@
         </b-form-select-option>
       </b-form-select>
       <b-button @click="onNewPrivatePartnerOrder()" :disabled="onNewPrivatePartnerOrderButtonDisabled"
-                variant="primary" class="text-nowrap">
+                variant="info" class="text-nowrap">
         {{ $t('admin.specialWeaponsManager.privatePartnerOrder') }}
       </b-button>
     </div>
@@ -109,7 +109,7 @@
         </b-form-select-option>
       </b-form-select>
       <b-button @click="onNewPrivatePartnerMint()" :disabled="onNewPrivatePartnerMintButtonDisabled"
-                variant="primary" class="text-nowrap">
+                variant="info" class="text-nowrap">
         {{ $t('admin.specialWeaponsManager.privatePartnerMint') }}
       </b-button>
     </div>
@@ -130,13 +130,13 @@
       <b-form-input v-model="newReserveForGiveaways.amount" type="number" number min="0"
                     :placeholder="$t('admin.amount')"/>
       <b-button @click="onNewReserveForGiveaways()" :disabled="onNewReserveForGiveawaysButtonDisabled"
-                variant="primary" class="text-nowrap">
+                variant="info" class="text-nowrap">
         {{ $t('admin.specialWeaponsManager.reserveForGiveaways') }}
       </b-button>
     </div>
     <h2 class="mt-3">{{ $t('admin.specialWeaponsManager.incrementEventCountBeCareful') }}</h2>
     <div class="d-flex align-items-center gap-3 flex-wrap">
-      <b-button @click="incrementEventCountModal = !incrementEventCountModal" :disabled="isLoading" variant="primary"
+      <b-button @click="incrementEventCountModal = !incrementEventCountModal" :disabled="isLoading" variant="info"
                 class="text-nowrap">
         {{ $t('admin.specialWeaponsManager.incrementEventCount') }}
       </b-button>

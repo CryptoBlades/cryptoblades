@@ -141,7 +141,7 @@
       </div>
     </Transition>
 
-      <div class="bg-tint"></div>
+      <div class="bg-tint bg-dark"></div>
         <div class="weapon-body" v-if="$route.query.tab === 'weapon'">
           <div class="blank-slate" v-if="ownWeapons.length === 0">
             <span v-html="$t('blacksmith.noWeapons')"/>
@@ -1580,7 +1580,7 @@ export default Vue.extend({
 }
 
 .weapon-content{
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 9, 26, 0.5);
   margin-top: 50px;
   border-radius: 5px;
 }
@@ -1681,7 +1681,7 @@ export default Vue.extend({
   height: 100%;
   position: absolute;
   top: 0;
-  background-color: rgba(0, 0, 0, 0.555);
+  opacity: 0.5;
 }
 
 
@@ -2044,8 +2044,8 @@ export default Vue.extend({
   width: max-content;
   border-radius: 5px;
   padding: 8px 10px;
-  background-color: #000;
-  border: 1px solid rgba(255, 255, 255, 0.425);
+  background-color: #010D22;
+  border: 1px solid rgba(0, 162, 255, 0.425);
 }
 
 .dust-img-lesser{

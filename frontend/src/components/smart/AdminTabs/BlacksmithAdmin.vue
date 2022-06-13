@@ -12,7 +12,7 @@
       </b-form-select>
       <b-form-input v-model="selectedNonSeriesItem.price" :placeholder="$t('admin.blacksmith.nonSeriesItemPrice')"/>
       <b-button @click="setPriceOfNonSeriesItem()" :disabled="setFlatPriceOfNonSeriesItemButtonDisabled"
-                variant="primary"
+                variant="info"
                 class="text-nowrap">
         {{ $t('admin.blacksmith.setFlatPriceOfItem') }}
       </b-button>
@@ -46,7 +46,7 @@
                         type="number"/>
         </div>
       </div>
-      <b-button @click="setPriceOfSeriesItems()" :disabled="setFlatPriceOfSeriesItemButtonDisabled" variant="primary"
+      <b-button @click="setPriceOfSeriesItems()" :disabled="setFlatPriceOfSeriesItemButtonDisabled" variant="info"
                 class="text-nowrap">
         {{ $t('admin.blacksmith.setFlatPriceOfItemSeries') }}
       </b-button>

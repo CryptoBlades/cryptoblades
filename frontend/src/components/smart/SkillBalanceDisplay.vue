@@ -448,6 +448,7 @@ export default Vue.extend({
     font-size: 3.3vw !important;
     border-left: 1px solid #424A59;
     font-size: clamp(.8rem, .7vw, 1rem) !important;
+    background-color: #000E29;
   }
   .none-mobile {
     display: none !important;
@@ -504,7 +505,7 @@ export default Vue.extend({
 }
 .claim-exp-popover{
   font-family: 'Trajan' !important;
-  background: rgba(33,35,30, .7);
+  background: rgba(0, 14, 41, .7);
 }
 .unclaimed-text{
   color: #ffc107;

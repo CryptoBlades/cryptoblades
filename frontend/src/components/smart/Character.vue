@@ -24,12 +24,12 @@
     <div class="col col-md-8">
       <!-- Character Name Heading -->
       <div class="mb-5 d-flex">
-        <h1 class="title mb-0">{{ getCharacterName(currentCharacterId) }}</h1>
+        <h1 class="title text-primary mb-0">{{ getCharacterName(currentCharacterId) }}</h1>
         <button class="edit-icon" @click="openChangeNameModal" ><img src="../../assets/edit-icon.svg" /></button>
         <span class="ml-auto align-self-end">#{{currentCharacterId}}</span>
       </div>
       <!-- Character chart info -->
-      <div class="row mb-5">
+      <div class="row mb-5 text-primary">
         <div class="col cell">
           <div class="table-bg"></div>
           <span class="main-font cell-title text-white">{{$t(`Character.level`)}}</span>
@@ -60,7 +60,7 @@
         <!-- EXP STAMINA -->
       <div>
         <div class="mb-4 main-font text">
-          <p class="mb-1">
+          <p class="mb-1 text-primary">
             <span class="text-white">
             {{$t(`Character.exp`)}}:{{" "}}
             </span>
@@ -77,7 +77,7 @@
           </b-progress>
         </div>
         <div>
-          <p class="mb-1">
+          <p class="mb-1 text-primary">
           <span class="text-white"> {{$t(`Character.stamina`)}}:{{" "}}</span>
           {{ getCharacterStamina(currentCharacterId) }}/200</p>
           <b-progress class="progress-custom">
@@ -695,7 +695,7 @@ export default Vue.extend({
 .title {
   text-transform: uppercase;
   font-family: 'Trajan', serif;
-  font-weight: bold;
+  font-weight: 700;
   line-height: 38px;
   font-size: 30px;
 }
