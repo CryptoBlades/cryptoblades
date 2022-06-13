@@ -21,7 +21,8 @@ module.exports = async function (deployer, network, accounts) {
     || network === 'polygonmainnet'
     || network === 'avaxmainnet'
     || network === 'avaxmainnet-fork'
-    || network === 'auroramainnet') {
+    || network === 'auroramainnet'
+    || network === 'skalemainnet') {
         let randoms = await ChainlinkRandoms.deployed();
 
         const pvpRankings = await deployProxy(

@@ -11,7 +11,7 @@ module.exports = async function (deployer, network, accounts) {
     || network === 'polygonmainnet'
     || network === 'avaxmainnet'
     || network === 'avaxmainnet-fork'
-    || network === 'auroramainnet') {
+    || network === 'auroramainnet' || network === 'skalemainnet') {
     const game = await CryptoBlades.deployed();
     const launchpad = await deployProxy(Launchpad, [game.address], { deployer });
     const GAME_ADMIN = await game.GAME_ADMIN();
