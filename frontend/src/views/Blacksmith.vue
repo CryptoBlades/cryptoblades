@@ -193,19 +193,20 @@
                     :disabled="disableForge"
                     v-tooltip="$t('blacksmith.forgeNew')">
                     <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                    <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                    <span v-else class="gtag-link-others" tagname="forge_weapon">
                       <span>{{$t('blacksmith.forge').toUpperCase()}} x1</span> <br>
                       {{ forgeCost }} SKILL
                     </span>
                   </button>
 
                   <button
-                    class="ml-3"
+                    class="ml-3 gtag-link-others"
                     @click="onClickForge(1)"
                     :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
-                    v-tooltip="$t('blacksmith.forge10New')">
+                    v-tooltip="$t('blacksmith.forge10New')"
+                    tagname="forge_weapon">
                     <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                    <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                    <span v-else>
                       <span>{{$t('blacksmith.forge').toUpperCase()}} x10</span><br>
                       {{ (forgeCost*10).toFixed(4) }} SKILL
                     </span>
