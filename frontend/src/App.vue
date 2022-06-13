@@ -438,27 +438,6 @@ export default Vue.extend({
     Events.$on('toggle-sideBar', (bol: boolean) =>{
       this.toggleSideBar = bol;
     });
-
-    document.body.addEventListener('click', (e: MouseEvent) => {
-      if(e !== null){
-        const tagname = (e.target as HTMLInputElement).getAttribute('tagname');
-        if (!tagname) return;
-
-        if ((e.target as HTMLInputElement).nodeName === 'BUTTON') {
-          (window as any).gtag('event', 'button_clicked', {
-            value: tagname,
-          });
-        }
-
-        if ((e.target as HTMLInputElement).className.includes('gtag-link-others')) {
-          (window as any).gtag('event', 'nav', {
-            event_category: 'navigation',
-            event_label: 'navbar',
-            value: tagname,
-          });
-        }
-      }
-    });
     this.showWarningDialog();
     if(this.hideWalletWarning) {
       this.configureMetamask();
