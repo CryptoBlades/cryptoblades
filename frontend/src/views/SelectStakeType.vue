@@ -1,7 +1,12 @@
 <template>
   <div class="body main-font">
     <h1 class="text-center">{{$t('stake.staking')}}</h1>
-    <ul class="stake-select-list">
+    <ul class="stake-select-list m-1" v-if="isLoading">
+      <li v-for="itemCount in 5" :key="itemCount">
+        <skeleton-loader/>
+      </li>
+    </ul>
+    <ul class="stake-select-list" v-else>
       <li class="stake-select-item" v-for="e in entries" :key="e.stakeType">
         <stake-selector-item
           :stakeTitle="e.stakeTitle"
@@ -28,15 +33,22 @@ import _ from 'lodash';
 BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 import StakeSelectorItem from '../components/StakeSelectorItem.vue';
+import SkeletonLoader from '../components/SkeletonLoader.vue';
 import Vue from 'vue';
 import { humanReadableDetailsForStakeTypes, humanReadableDetailsForNftStakeTypes } from '../stake-types';
 import { isNftStakeType } from '@/interfaces';
 
+
 export default Vue.extend({
   components: {
     StakeSelectorItem,
+    SkeletonLoader
   },
-
+  data() {
+    return {
+      isLoading: false,
+    };
+  },
   computed: {
     ...mapState('staking', ['staking', 'stakeOverviews']),
     ...mapGetters('staking', ['availableStakeTypes', 'availableNftStakeTypes']),
@@ -83,12 +95,15 @@ export default Vue.extend({
       if(isNftStakeType(stakeType)) {
         return estYield.dividedBy(BN(10).pow(18));
       }
+
       return estYield;
     }
   },
 
   async mounted() {
+    this.isLoading = true;
     await this.fetchStakeOverviewData();
+    this.isLoading = false;
   }
 });
 </script>
