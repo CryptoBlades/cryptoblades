@@ -152,6 +152,7 @@
           {{$t('characterModal.close')}}
           <img src="../../assets/close-btn.png"/>
         </button>
+        <span>{{$t(blacksmith.tapAnyWhere)}}</span>
     </b-modal>
     <!-- Character Soul Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-soul-modal"

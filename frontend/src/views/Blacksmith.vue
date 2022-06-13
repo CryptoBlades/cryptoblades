@@ -59,6 +59,7 @@
         </div>
         <button class="close-btn"  @click="onReforgeWeaponWithDust()">{{$t('blacksmith.confirm')}}</button>
       </div>
+      <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
     </b-modal>
 
 
@@ -115,6 +116,7 @@
       <div class="footer-btn mb-4" v-if="modalType == 'successReforge'">
         <button class="close-btn"   @click="closeModal('succesful-reforge')">{{$t('blacksmith.confirm')}}</button>
       </div>
+      <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
     </b-modal>
 
     <Transition name="slide-fade">
@@ -231,6 +233,7 @@
                     <div>
                       {{$t('blacksmith.forgePercentage.1star')}}
                     </div>
+                    <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
                   </b-modal>
 
                   <b-modal size="lg" hide-footer hide-header ref="new-forge-weapon">
@@ -244,7 +247,6 @@
                     <div class="footer-close">
                       <img src="../assets/separator.png" alt="">
                       <span>{{$t('blacksmith.tapAnyWhere')}}</span>
-                      <span class="close-icon" @click="closeModal('new-forge-weapon')"></span>
                     </div>
                   </b-modal>
 
@@ -315,6 +317,7 @@
                         class="ml-4 centered-icon" v-tooltip.bottom="$t('blacksmith.dynamicPricesDetails',
                           { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
                     </div>
+                    <p class="tapAny mt-3 mb-0">{{$t('blacksmith.tapAnyWhere')}}</p>
                   </b-modal>
                 </div>
               </div>

@@ -139,10 +139,10 @@
         {{ $t('plaza.noRefunds')}}
       </div>
        <div class="footer-btn">
-        <button class="close-btn cancel" v-if="!isBurnInProgress" @click="$bvModal.hide('burn-confirmation-modal')">{{$t('blacksmith.cancel')}}</button>
         <button class="close-btn" :disabled="burnCharacterIds.length === 0" @click="onBurnConfirm">
           {{isBurnInProgress ? 'Burning..' : $t('blacksmith.confirm')}}</button>
       </div>
+      <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
     </b-modal>
     <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
       <script2 async src="https://coinzillatag.com/lib/sticky.js"></script2>
@@ -595,7 +595,7 @@ export default Vue.extend({
 }
 
 .footer-btn > button{
-  width: 50%;
+  width: 100%;
 }
 
 .burn-content{

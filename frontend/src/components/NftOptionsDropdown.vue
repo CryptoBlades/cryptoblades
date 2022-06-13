@@ -36,6 +36,7 @@
             {{isBurnInProgress ? 'Sending..' : $t('plaza.transfer')}}</button>
         </div>
       </div>
+      <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
     </b-modal>
 
   </div>

@@ -27,6 +27,7 @@
         </script2>
       </div>
     </div>
+    <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
   </b-modal>
 </template>
 
