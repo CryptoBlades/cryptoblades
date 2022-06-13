@@ -193,7 +193,7 @@ interface SelectedSpecialWeaponsEvent {
   value: string;
 }
 
-enum OrderOption {
+export enum OrderOption {
   THREE_FIVE = 1,
   FOUR_FIVE = 2,
   FIVE = 3,
@@ -220,7 +220,7 @@ enum Element {
   LIGHTNING = 3,
 }
 
-interface SpecialWeaponsEvent {
+export interface SpecialWeaponsEvent {
   id?: number;
   name?: string;
   element?: Element;

@@ -87,7 +87,7 @@ interface SelectedPartnerProject {
   propertyStringValue: string;
 }
 
-interface NewPartnerProject {
+export interface NewPartnerProject {
   name: string;
   tokenSymbol: string;
   tokenAddress: string;
@@ -102,7 +102,7 @@ interface NewPartnerProject {
   note: string;
 }
 
-interface StoreMappedActions {
+interface StoreMappedTreasuryActions {
   addPartnerProject(payload: { partnerProject: NewPartnerProject }): Promise<void>;
 
   getActivePartnerProjects(): Promise<NewPartnerProject[]>;
@@ -183,15 +183,16 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions([
-      'addPartnerProject',
-      'getActivePartnerProjects',
-      'setPartnerProjectLogo',
-      'setPartnerProjectDetails',
-      'setPartnerProjectWebsite',
-      'setPartnerProjectNote',
-      'setPartnerProjectIsActive',
-    ]) as StoreMappedActions,
+    ...mapActions('treasury',
+      [
+        'addPartnerProject',
+        'getActivePartnerProjects',
+        'setPartnerProjectLogo',
+        'setPartnerProjectDetails',
+        'setPartnerProjectWebsite',
+        'setPartnerProjectNote',
+        'setPartnerProjectIsActive',
+      ]) as StoreMappedTreasuryActions,
 
     async getActiveProjects() {
       try {
