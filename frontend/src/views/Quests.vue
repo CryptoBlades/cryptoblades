@@ -2,10 +2,8 @@
   <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container gap-4">
     <div class="d-flex justify-content-between w-100 weekly-progress-container">
       <div class="d-flex flex-column justify-content-between gap-2">
-        <span class="quests-title">{{ $t('quests.quest') }}</span>
-        <b-button variant="primary" @click="showQuestsListModal = true">
-          {{ $t('quests.availableQuests') }}
-        </b-button>
+        <h5 class="quests-title">{{ $t('quests.quest') }}</h5>
+        <cb-button class="custom-available-quest-button" :title="$t('quests.availableQuests')" @clickEvent="showQuestsListModal = true"></cb-button>
         <b-modal v-model="showQuestsListModal" :title="$t('quests.availableQuests')" hide-footer
                  @hide="showQuestsListModal = false; tier = undefined" size="xl">
           <div class="d-flex align-items-center gap-3">
@@ -51,11 +49,9 @@
                                 :amount="weeklyReward.reputationAmount"/>
           </div>
         </div>
-        <b-button v-if="!weeklyClaimed" :disabled="isLoading || !canClaimWeeklyReward" variant="primary"
-                  @click="claimWeekly">
-          {{ $t('quests.claimWeeklyReward') }}
-          <Hint v-if="!canClaimWeeklyReward" class="hint" :text="$t('quests.cannotClaimWeeklyTooltip')"/>
-        </b-button>
+        <cb-button class="custom-claim-weekly-reward-btn" v-if="!weeklyClaimed"
+        :isDisabled="isLoading || !canClaimWeeklyReward" @clickEvent="claimWeekly"
+          :toolTip="!canClaimWeeklyReward ? $t('quests.cannotClaimWeeklyTooltip') : ''" :title="$t('quests.claimWeeklyReward')"></cb-button>
       </div>
     </div>
     <div v-for="character in characters" :key="character.id" class="d-flex w-100">
@@ -90,7 +86,6 @@ import QuestRow from '@/components/smart/QuestRow.vue';
 import QuestComponentIcon from '@/components/smart/QuestComponentIcon.vue';
 import QuestReward from '@/components/smart/QuestReward.vue';
 import QuestsList from '@/components/smart/QuestsList.vue';
-import Hint from '@/components/Hint.vue';
 import hourglass from '@/assets/hourglass.png';
 import {getTimeRemaining} from '@/utils/common';
 import {NftIdType} from '@/components/smart/NftList.vue';
@@ -241,7 +236,7 @@ interface Data {
 }
 
 export default Vue.extend({
-  components: {QuestRow, QuestComponentIcon, QuestReward, QuestsList, Hint},
+  components: {QuestRow, QuestComponentIcon, QuestReward, QuestsList},
 
   props: {
     showCosmetics: {
@@ -383,15 +378,30 @@ export default Vue.extend({
 
 <style scoped lang="scss">
 @import '../styles/character-cosmetics.css';
-
+.custom-available-quest-button{
+  margin-top: 25px !important;
+}
+.custom-claim-weekly-reward-btn{
+  font-size: 11px !important;
+  margin-right: 0px !important;
+  margin-top: 8px !important;
+}
 .quests-container {
-  background: transparent url("../../src/assets/questsBackground.png") 0 0 no-repeat padding-box;
+  background-image: url('../../src/assets/questsBackground.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  min-height: 95vh;
+  min-width: 100%;
+  display: inline-flex;
   padding: 3rem;
 }
 
 .quests-title {
-  font: normal normal bold 30px/38px Trajan;
-  color: #DABE75;
+  font-family: 'Trajan', serif;
+  font-size: 35px;
+  font-weight: 400;
+  color: #EDCD90;
 }
 
 .next-reset {
@@ -442,6 +452,12 @@ export default Vue.extend({
 }
 
 @media (max-width: 576px) {
+  .custom-claim-weekly-reward-btn{
+    margin-right: -25px !important;
+  }
+  .custom-available-quest-button{
+    margin-right: -20px !important;
+  }
   .quests-container {
     padding: 1rem;
     margin-bottom: 3rem;

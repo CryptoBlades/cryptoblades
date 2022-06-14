@@ -255,6 +255,19 @@ module.exports = {
       gasPrice: 0,
       timeoutBlocks: 200,
       skipDryRun: true
+    },
+    skalemainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.SKALE_MAINNET_PRIVATE_KEY,
+        process.env.SKALE_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.SKALE_MAINNET_RPC_URL || 'https://mainnet.skalenodes.com/v1/affectionate-immediate-pollux'
+        }
+      )),
+      network_id: 1026062157,
+      gasPrice: 0,
+      timeoutBlocks: 200,
+      skipDryRun: true
     }
     // Another network with more advanced options...
     // advanced: {

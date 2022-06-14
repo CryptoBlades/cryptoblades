@@ -136,7 +136,7 @@
       </div>
     </Transition>
 
-      <div class="bg-tint"></div>
+      <div class="bg-tint bg-dark"></div>
         <div class="weapon-body" v-if="$route.query.tab === 'weapon'">
           <div class="blank-slate" v-if="ownWeapons.length === 0">
             <span v-html="$t('blacksmith.noWeapons')"/>
@@ -188,19 +188,20 @@
                     :disabled="disableForge"
                     v-tooltip="$t('blacksmith.forgeNew')">
                     <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                    <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                    <span v-else class="gtag-link-others" tagname="forge_weapon">
                       <span>{{$t('blacksmith.forge').toUpperCase()}} x1</span> <br>
                       {{ forgeCost }} SKILL
                     </span>
                   </button>
 
                   <button
-                    class="ml-3"
+                    class="ml-3 gtag-link-others"
                     @click="onClickForge(1)"
                     :disabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
-                    v-tooltip="$t('blacksmith.forge10New')">
+                    v-tooltip="$t('blacksmith.forge10New')"
+                    tagname="forge_weapon">
                     <span v-if="disableForge">{{$t('blacksmith.coolingForge')}}</span>
-                    <span v-if="!disableForge" class="gtag-link-others" tagname="forge_weapon">
+                    <span v-else>
                       <span>{{$t('blacksmith.forge').toUpperCase()}} x10</span><br>
                       {{ (forgeCost*10).toFixed(4) }} SKILL
                     </span>
@@ -648,6 +649,7 @@ import WeaponIcon from '../components/WeaponIconNew.vue';
 import { BModal } from 'bootstrap-vue';
 import NftList from '@/components/smart/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
+import { ISpecialWeaponsManagerState } from '@/store/specialWeaponsManager';
 import { Accessors } from 'vue/types/options';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
@@ -655,8 +657,9 @@ import i18n from '@/i18n';
 import Events from '../events';
 import SpecialWeaponForgeModal from '@/components/smart/SpecialWeaponForgeModal.vue';
 
-type StoreMappedState = Pick<IState, 'defaultAccount' | 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards' |
-'specialWeaponEvents' | 'activeSpecialWeaponEventsIds' | 'specialWeaponEventId'>;
+type StoreMappedState = Pick<IState, 'defaultAccount' | 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards' >;
+
+type StoreMappedSpecialWeaponsManagerState = Pick<ISpecialWeaponsManagerState, 'specialWeaponEvents' | 'activeSpecialWeaponEventsIds' | 'specialWeaponEventId'>;
 
 interface StoreMappedGetters {
   contracts: Contracts;
@@ -774,8 +777,10 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds','skillBalance', 'inGameOnlyFunds', 'skillRewards',
-      'activeSpecialWeaponEventsIds', 'specialWeaponEvents', 'specialWeaponEventId']) as Accessors<StoreMappedState>),
+    ...mapState(['defaultAccount','ownedWeaponIds','ownedShieldIds','skillBalance', 'inGameOnlyFunds', 'skillRewards',
+      'activeSpecialWeaponEventsIds', 'specialWeaponEvents', 'specialWeaponEventId']) as Accessors<StoreMappedState>,
+    ...mapState('specialWeaponsManager',
+      (['specialWeaponEvents', 'activeSpecialWeaponEventsIds','specialWeaponEventId'])) as Accessors<StoreMappedSpecialWeaponsManagerState>,
     ...(mapGetters([
       'contracts', 'ownWeapons', 'nftsCount', 'ownShields',
       'getPowerfulDust', 'getGreaterDust', 'getLesserDust',
@@ -886,10 +891,11 @@ export default Vue.extend({
 
   methods: {
     ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN',
-      'burnWeapon', 'massBurnWeapons', 'fetchSpecialWeaponEvents',
-      'reforgeWeaponWithDust', 'massBurnWeapons', 'fetchSpecialWeaponEvents',
+      'burnWeapon', 'massBurnWeapons',
+      'reforgeWeaponWithDust', 'massBurnWeapons',
       'fetchMintWeaponPriceDecreasePerSecond', 'fetchWeaponMintIncreasePrice',
       'fetchMintWeaponMinPrice', 'fetchMintWeaponFee']),
+    ...mapActions('specialWeaponsManager', ['fetchSpecialWeaponEvents']),
     ...mapMutations(['updateSpecialWeaponEventId']),
     passFilteredItems(data: any[]){
       this.currentFilteredWeapons = data;
@@ -1576,7 +1582,7 @@ export default Vue.extend({
 }
 
 .weapon-content{
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 9, 26, 0.5);
   margin-top: 50px;
   border-radius: 5px;
 }
@@ -1677,7 +1683,7 @@ export default Vue.extend({
   height: 100%;
   position: absolute;
   top: 0;
-  background-color: rgba(0, 0, 0, 0.555);
+  opacity: 0.5;
 }
 
 
@@ -2044,8 +2050,8 @@ export default Vue.extend({
   width: max-content;
   border-radius: 5px;
   padding: 8px 10px;
-  background-color: #000;
-  border: 1px solid rgba(255, 255, 255, 0.425);
+  background-color: #010D22;
+  border: 1px solid rgba(0, 162, 255, 0.425);
 }
 
 .dust-img-lesser{

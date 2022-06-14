@@ -597,7 +597,7 @@ export default Vue.extend({
   height: 100vh;
   width: 450px;
   z-index: 5;
-  background-color: rgb(27, 29, 24);
+  background-color: rgb(1, 13, 34);
 }
 
 .cw-content h4{

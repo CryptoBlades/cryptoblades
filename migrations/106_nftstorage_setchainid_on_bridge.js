@@ -25,7 +25,7 @@ module.exports = async function (deployer, network, accounts) {
 	else if(network === 'kavatestnet') {
 		await storage.setLocalChainPrefix('KAVA');
 	}
-	else if(network === 'skaletestnet') {
+	else if(network === 'skaletestnet' || network === 'skalemainnet') {
 		await storage.setLocalChainPrefix('SKALE');
 	}
 	else {

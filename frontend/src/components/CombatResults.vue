@@ -307,13 +307,6 @@ export default Vue.extend({
 
 .top-bg-img > img, .bot-bg-img > img {
     width: 69% !important;
-    margin-bottom: -70px;
-
-}
-
-
-.tob-bg-img > img{
-  margin-top: -40px !important;
 }
 
 

@@ -1,8 +1,8 @@
 
 <template>
-  <div class="background-image">
-    <div class="blind-background"></div>
-    <div v-if="!haveCharacters" class="blank-slate">
+  <div class="position-relative background-image">
+    <div class="blind-background position-absolute w-100 h-100 opacity-75"></div>
+    <div v-if="!haveCharacters" class="blank-slate position-relative content">
       <div class="initial-recruitment">
         <div class="tob-bg-img promotion-decoration">
           <img class="vertical-decoration bottom" src="../assets/border-element.png">
@@ -36,11 +36,12 @@
         :soulBalance="soulBalance"
         :ownCharacters="ownCharacters"
         @mintCharacter="onMintCharacter"
+        @onClaimGarrisonXp="onClaimGarrisonXp"
         @changeTab="onChangeTab"
       />
       <template v-if="activeTab === 'info' && havePlazaCharacters">
-        <div class="d-flex justify-content-end pr-5 pt-4 slippage-checkbox">
-          <b-checkbox v-if="ownCharacters.length === 4"  variant="primary"  v-model="mintSlippageApproved">
+        <div class="d-flex justify-content-end pr-5 pt-4 slippage-checkbox" v-if="ownCharacters.length === 4">
+          <b-checkbox variant="primary" v-model="mintSlippageApproved">
             <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
             <b-icon-question-circle class="ml-1 centered-icon" v-tooltip.bottom="$t('plaza.dynamicPricesDetails',
               { decreaseAmount: mintPriceDecreasePerHour, increaseAmount: mintCharacterPriceIncrease, minimumPrice: mintCharacterMinPrice})"/>
@@ -54,16 +55,6 @@
             <div>
               <div class="d-flex flex-column flex-md-row justify-content-space-between garrisson-content">
                 <h1>{{$t('characters')}} ({{ ownedGarrisonCharacterIds.length }})</h1>
-                <div class="d-flex justify-content-flex-end ml-md-auto">
-                  <b-button
-                    v-if="canClaimGarrisonXp"
-                    :disabled="isClaimingXp"
-                    variant="primary"
-                    class="ml-3 gtag-link-others"
-                    @click="onClaimGarrisonXp">
-                    {{isClaimingXp ? `${$t('plaza.claiming')}` : $t('plaza.claimXp')}}
-                  </b-button>
-                </div>
               </div>
               <character-list
                 :showNftOptions="true"
@@ -522,6 +513,11 @@ export default Vue.extend({
   background-position: top right;
   min-height: calc(100vh - 120px);
   height: 100%;
+  z-index: 0;
+}
+.content {
+  z-index: 10;
+  position: relative;
 }
 
 .background-image > div:nth-child(1){
@@ -742,7 +738,7 @@ export default Vue.extend({
     padding-top: 10px;
     padding-bottom: 10px;
     border-bottom: 1px solid #424A59;
-    background-color:#1d1d1d;
+    background-color:#000E29;
    }
  }
 
@@ -844,7 +840,7 @@ export default Vue.extend({
       padding-top: 10px;
       padding-bottom: 10px;
       border-bottom: 1px solid #424A59;
-      background-color:#1d1d1d;
+      background-color:#000E29;
     }
   }
 }

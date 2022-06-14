@@ -10,7 +10,7 @@
       <b-form-input v-model="reseller" :placeholder="$t('admin.cbkLand.reseller')"></b-form-input>
       <b-form-input v-model="quantity" :placeholder="$t('admin.cbkLand.quantityOptional')" type="number" number
                     min="1"></b-form-input>
-      <b-button @click="mintLand()" :disabled="mintLandButtonDisabled()" variant="primary" class="text-nowrap">
+      <b-button @click="mintLand()" :disabled="mintLandButtonDisabled()" variant="info" class="text-nowrap">
         {{ quantity > 1 ? $t('admin.cbkLand.mintLands') : $t('admin.cbkLand.mintLand') }}
       </b-button>
     </div>
@@ -20,7 +20,7 @@
       <b-form-input v-model="updateChunkIdentifier" :placeholder="$t('admin.cbkLand.updateChunkIdentifier')"
                     type="number" number
                     min="1"/>
-      <b-button @click="updateId()" :disabled="updateIdsButtonDisabled()" variant="primary" class="text-nowrap">
+      <b-button @click="updateId()" :disabled="updateIdsButtonDisabled()" variant="info" class="text-nowrap">
         {{ quantity > 1 ? $t('admin.cbkLand.updateChunkIds') : $t('admin.cbkLand.updateChunkId') }}
       </b-button>
     </div>

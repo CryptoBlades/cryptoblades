@@ -228,6 +228,7 @@
 import Vue from 'vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '@/interfaces';
+import { ISpecialWeaponsManagerState } from '@/store/specialWeaponsManager';
 import { Accessors } from 'vue/types/options';
 import Events from '../../events';
 import { secondsToDDHHMMSS } from '@/utils/date-time';
@@ -237,14 +238,17 @@ import forgingGif from '../../assets/special-weapons/forging.gif';
 import WeaponIcon from '../WeaponIcon.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
 
-type StoreMappedState = Pick<IState,'activeSpecialWeaponEventsIds' | 'inactiveSpecialWeaponEventsIds' |
-'specialWeaponEvents' | 'specialWeaponEventId' | 'shardsSupply' | 'ownedWeaponIds' |'skillBalance' | 'skillRewards'>;
+type StoreMappedState = Pick<IState,'ownedWeaponIds' |'skillBalance' | 'skillRewards'>;
+
+type StoreMappedSpecialWeaponsManagerState = Pick<ISpecialWeaponsManagerState,
+'specialWeaponEvents' | 'activeSpecialWeaponEventsIds' | 'specialWeaponEventId' | 'shardsSupply' | 'inactiveSpecialWeaponEventsIds'>;
+
 
 interface StoreMappedGetters {
   weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
 }
 
-interface StoreMappedActions {
+interface StoreMappedSpecialWeaponsManagerActions {
   fetchSpecialWeaponEvents(): Promise<void>;
   fetchForgeCosts(): Promise<number[]>;
   fetchShardsConvertDenominator(): Promise<number>;
@@ -315,15 +319,18 @@ export default Vue.extend({
 
   computed: {
     ...(mapState([
-      'activeSpecialWeaponEventsIds',
-      'inactiveSpecialWeaponEventsIds',
-      'specialWeaponEvents',
-      'specialWeaponEventId',
-      'shardsSupply',
       'ownedWeaponIds',
       'skillBalance',
       'skillRewards'
     ]) as Accessors<StoreMappedState>),
+    ...mapState('specialWeaponsManager',
+      ([
+        'specialWeaponEvents',
+        'activeSpecialWeaponEventsIds',
+        'specialWeaponEventId',
+        'shardsSupply',
+        'inactiveSpecialWeaponEventsIds'
+      ])) as Accessors<StoreMappedSpecialWeaponsManagerState>,
     ...(mapGetters(['weaponsWithIds']) as Accessors<StoreMappedGetters>),
 
     eventDetails(): string {
@@ -473,9 +480,18 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['fetchSpecialWeaponEvents', 'fetchForgeCosts', 'convertShards', 'fetchShardsConvertDenominator',
-      'orderSpecialWeapon', 'forgeSpecialWeapon', 'fetchEventTotalOrderedCount', 'fetchShardsStakingRewards',
-      'claimShardsStakingRewards']) as StoreMappedActions,
+    ...mapActions('specialWeaponsManager',
+      [
+        'fetchSpecialWeaponEvents',
+        'fetchForgeCosts',
+        'convertShards',
+        'fetchShardsConvertDenominator',
+        'orderSpecialWeapon',
+        'forgeSpecialWeapon',
+        'fetchEventTotalOrderedCount',
+        'fetchShardsStakingRewards',
+        'claimShardsStakingRewards'
+      ]) as StoreMappedSpecialWeaponsManagerActions,
     ...mapMutations(['updateSpecialWeaponEventId']) as StoreMappedMutations,
 
     imgPath(img: string): string {

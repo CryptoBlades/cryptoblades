@@ -16,7 +16,7 @@
       <b-form-input v-model="amount4B" :placeholder="$t('admin.weapons.amount4B')" type="number" number min="0"/>
       <b-form-input v-model="amount5B" :placeholder="$t('admin.weapons.amount5B')" type="number" number min="0"/>
       <b-button @click="incrementDust ? incrementSupplies() : decrementSupplies()" :disabled="suppliesButtonDisabled"
-                variant="primary"
+                variant="info"
                 class="text-nowrap">
         {{ incrementDust ? $t('admin.weapons.incrementDustSupplies') : $t('admin.weapons.decrementDustSupplies') }}
       </b-button>
@@ -40,7 +40,7 @@
           {{ $t(`admin.weapons.elements.${Element[element]}`) }}
         </b-form-select-option>
       </b-form-select>
-      <b-button @click="mintWeapon()" :disabled="mintWeaponButtonDisabled" variant="primary" class="text-nowrap">
+      <b-button @click="mintWeapon()" :disabled="mintWeaponButtonDisabled" variant="info" class="text-nowrap">
         {{ $t('admin.weapons.mintWeapon') }}
       </b-button>
     </div>
@@ -50,7 +50,7 @@
     <div class="d-flex align-items-center gap-3">
       <b-form-input v-model="newBurnPointMultiplier" :placeholder="$t('admin.weapons.multiplier')" number type="number"/>
       <b-button @click="setNewBurnPointMultiplier()" :disabled="setNewBurnPointMultiplierButtonDisabled"
-                variant="primary" class="text-nowrap">
+                variant="info" class="text-nowrap">
         {{ $t('admin.weapons.setBurnPointMultiplier') }}
       </b-button>
     </div>

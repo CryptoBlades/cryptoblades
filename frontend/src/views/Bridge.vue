@@ -18,25 +18,25 @@
       <b-tab :title="$t('bridge.inventory')">
         <div class="btnRow d-flex flex-row justify-content-center">
           <div class="p-2">
-            <b-button variant="primary" @click="showNft('weapon')" class="gtag-link-others"
+            <b-button variant="info" @click="showNft('weapon')" class="gtag-link-others"
               tagname="show_weapons_bridge" :disabled="nftType === 'weapon'">
               {{$t('bridge.showWeapons')}}
             </b-button>
           </div>
           <div class="p-2">
-            <b-button variant="primary" @click="showNft('character')" class="gtag-link-others"
+            <b-button variant="info" @click="showNft('character')" class="gtag-link-others"
               tagname="show_characters_bridge" :disabled="nftType === 'character'">
               {{$t('bridge.showCharacters')}}
             </b-button>
           </div>
           <div class="p-2">
-            <b-button variant="primary" @click="showNft('shield')" class="gtag-link-others"
+            <b-button variant="info" @click="showNft('shield')" class="gtag-link-others"
               tagname="show_shields_bridge" :disabled="nftType === 'shield'">
               {{$t('bridge.showShields')}}
             </b-button>
           </div>
           <div class="p-2">
-            <b-button :disabled="selectedNftId === ''" variant="primary"
+            <b-button :disabled="selectedNftId === ''" variant="info"
             @click="nftType === 'character' ? $refs['character-warning-modal'].show() : transferToStorage()"
               class="gtag-link-others" tagname="click_transfer_bridge">{{$t('bridge.moveNftToStorage')}}</b-button>
           </div>
@@ -73,37 +73,37 @@
       <b-tab :title="$t('bridge.storage')" @click="showStorage(); selectedNftId = ''; targetChain = ''">
         <div class="btnRow d-flex flex-row justify-content-center" v-if="loadedStorage">
           <div class="p-2">
-            <b-button variant="primary" @click="showNft('weapon'); getStoredIds();"
+            <b-button variant="info" @click="showNft('weapon'); getStoredIds();"
               class="gtag-link-others" tagname="show_weapons_bridge" :disabled="nftType === 'weapon'">
               {{$t('bridge.showWeapons')}}
             </b-button>
           </div>
           <div class="p-2">
-            <b-button variant="primary" @click="showNft('character'); getStoredIds();"
+            <b-button variant="info" @click="showNft('character'); getStoredIds();"
               class="gtag-link-others" tagname="show_characters_bridge" :disabled="nftType === 'character'">
               {{$t('bridge.showCharacters')}}
             </b-button>
           </div>
           <div class="p-2">
-            <b-button variant="primary" @click="showNft('shield'); getStoredIds();"
+            <b-button variant="info" @click="showNft('shield'); getStoredIds();"
               class="gtag-link-others" tagname="show_shield_bridge" :disabled="nftType === 'shield'">
               {{$t('bridge.showShields')}}
             </b-button>
           </div>
           <div class="p-2">
             <b-button :disabled="!canWithdraw"
-            variant="primary"
+            variant="info"
             @click="withdrawItem()" class="gtag-link-others"
             tagname="click_transfer_bridge">{{$t('bridge.withdrawFromStorage')}}</b-button>
           </div>
           <div class="p-2">
-            <b-button :disabled="!canBridge" variant="primary" @click="requestBridge()" class="gtag-link-others"
+            <b-button :disabled="!canBridge" variant="info" @click="requestBridge()" class="gtag-link-others"
                       tagname="click_transfer_bridge"> {{ $t('bridge.requestTransfer') }} <br> <span
               :style="canAffordBridge ? '' : 'color:red;'"> (<CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/>) </span>
             </b-button>
           </div>
           <div class="p-2">
-            <b-button :disabled="transferStatus !== transferStates.pending" variant="primary" @click="$refs['refund-warning-modal'].show()"
+            <b-button :disabled="transferStatus !== transferStates.pending" variant="info" @click="$refs['refund-warning-modal'].show()"
                       class="gtag-link-others" tagname="click_transfer_bridge">{{$t('bridge.cancelTransferRequest')}}</b-button>
           </div>
         </div>
@@ -229,7 +229,7 @@
                 </option>
               </select>
               <div class="mt-2 text-center">
-                <b-button :disabled="!weaponIdToWithdraw" variant="primary" @click="withdrawBridge(weaponIdToWithdraw)"
+                <b-button :disabled="!weaponIdToWithdraw" variant="info" @click="withdrawBridge(weaponIdToWithdraw)"
                           class="gtag-link-others withdrawBtn" tagname="click_transfer_bridge"> {{ $t('bridge.withdrawWeapon') }}
                 </b-button>
               </div>
@@ -246,7 +246,7 @@
                 </option>
               </select>
               <div class="mt-2 text-center">
-                <b-button :disabled="!characterIdToWithdraw" variant="primary"
+                <b-button :disabled="!characterIdToWithdraw" variant="info"
                   @click="withdrawBridge(characterIdToWithdraw)" class="gtag-link-others withdrawBtn"
                   tagname="click_transfer_bridge">{{$t('bridge.withdrawCharacter')}}</b-button>
               </div>
@@ -263,7 +263,7 @@
                 </option>
               </select>
               <div class="mt-2 text-center">
-                <b-button :disabled="!shieldIdToWithdraw" variant="primary" @click="withdrawBridge(shieldIdToWithdraw)"
+                <b-button :disabled="!shieldIdToWithdraw" variant="info" @click="withdrawBridge(shieldIdToWithdraw)"
                           class="gtag-link-others withdrawBtn" tagname="click_transfer_bridge"> {{$t('bridge.withdrawShield')}}
                 </b-button>
               </div>
@@ -694,6 +694,13 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+::v-deep .select-wrapper-element:after{
+  top: 363px !important;
+}
+::v-deep .select-wrapper-no:after{
+  top: 363px !important;
+  left: 40px !important;
+}
 .btnRow{
   flex-wrap: wrap;
 }
@@ -721,5 +728,14 @@ export default Vue.extend({
 .withdrawSelect, .withdrawBtn{
   width: clamp(200px, 20vw, 300px);
   margin:0 auto;
+}
+@media (max-width: 576px){
+  ::v-deep .select-wrapper-element:after{
+    top: 443px !important;
+  }
+  ::v-deep .select-wrapper-no:after{
+    top: 443px !important;
+    left: 40px !important;
+  }
 }
 </style>
