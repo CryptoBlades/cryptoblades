@@ -98,6 +98,10 @@
           </button>
         </div>
       </div>
+      <div class="footer-close" @click="$refs['filter-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
     <b-modal class="centered-modal" ref="character-rename-modal"
@@ -114,6 +118,10 @@
         {{$t('characterList.renameCharacterProfanityWarning')}}
          <em>{{cleanRename}}</em>
       </span>
+      <div class="footer-close" @click="$refs['character-rename-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
     <b-modal class="centered-modal" ref="character-change-trait-modal"
@@ -127,19 +135,25 @@
       <select class="form-control" v-model="targetTrait">
         <option v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
       </select>
+      <div class="footer-close" @click="$refs['character-change-trait-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
     <b-modal class="centered-modal" ref="character-change-skin-modal"
-      @ok="changeCharacterSkinCall">
-      <template #modal-title>
-        {{$t('characterList.changeCharacterSkin')}}
-      </template>
+      hide-header cancel-disabled@ok="changeCharacterSkinCall">
+      <h3 class="confirmation-title">   {{$t('characterList.changeCharacterSkin')}}</h3>
       <span >
         {{$t('characterList.pickSkin')}}
       </span>
       <select class="form-control" v-model="targetSkin">
         <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
       </select>
+      <div class="footer-close" @click="$refs['character-change-skin-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
   </div>
 </template>
