@@ -19,6 +19,11 @@
           </div>
         </div>
         <div class="d-flex flex-column flex-md-row justify-contenct-center" v-if="activeTab === 'forge'" >
+          <cb-button v-if="reforgeWeaponId !== null && ownWeapons.length > 0" class="custom-cb-btn custom-reforge-btn" tagname="weapon_special_forge"
+            :title="$t('blacksmith.reforgeWithDust')"
+            @clickEvent="$emit('displayDustReforge')"
+            :toolTip="$t('blacksmith.useDust')"
+          />
           <cb-button class="custom-cb-btn custom-special-forge-btn" tagname="weapon_special_forge" :title="$t('blacksmith.specialForge')"
             @clickEvent="$emit('onClickSpecialForge')"
             :toolTip="$t('blacksmith.specialForgeTooltip')"
@@ -80,23 +85,42 @@ export default Vue.extend({
       required: false,
       default: false
     },
+    ownWeapons: {
+      type: Array,
+      required: true,
+    },
+    reforgeWeaponId: {
+      type: String,
+      required: false,
+      default: null
+    },
   },
 
 });
 
 </script>
 <style scoped lang="scss">
+*{
+  z-index: 1;
+}
+.custom-reforge-btn{
+  margin-right: -5px !important;
+}
+.custom-special-forge-btn{
+  margin-right: 15px !important;
+}
 .custom-staking-checkbox{
-  font-size: 10px !important;
+  font-size: 8px !important;
+  margin-right: 15px !important;
 }
 .custom-cb-btn{
   height: 120% !important;
   font-weight: normal !important;
-  margin-right: 15px !important;
   margin-top: -3px !important;
 }
 .custom-forge-btn{
-  font-size: 13px !important;
+  margin-right: 15px !important;
+  font-size: 11px !important;
 }
 .custom-padding-claim-garrison-xp{
   padding: 10px 40px 10px 40px !important;
