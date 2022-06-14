@@ -28,10 +28,10 @@
         </div>
         <div class="p-2 d-flex flex-row">
           <div class="pr-4" v-if="!showNftOptions">
-            <button class="btn-clear-filter" @click="$emit('selectAllWeapons')">{{selectWeaponsBtnLabel}}</button>
+            <button class="btn-clear-filter none-mobile" @click="$emit('selectAllWeapons')">{{selectWeaponsBtnLabel}}</button>
           </div>
           <div>
-            <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
+            <button class="btn-clear-filter none-mobile"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
           </div>
         </div>
       </div>
