@@ -541,7 +541,6 @@ export default {
 
   components: {
     Hint,
-    // CombatResults,
     WeaponInventory,
     WeaponGrid,
     ModalContainer

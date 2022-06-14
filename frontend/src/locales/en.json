@@ -512,6 +512,7 @@
     "warning": "WARNING",
     "error": "Error:",
     "close": "Close",
+    "back": "Back",
     "errors": {
       "needToSelectChar": "You need to select a character to do battle.",
       "notEnoughDurability": "This weapon does not have enough durability.",

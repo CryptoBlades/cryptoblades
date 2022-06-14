@@ -116,7 +116,7 @@
       </template>
     </div>
 
-    <b-modal hide-header hide-footer class="centered-modal text-center"
+    <b-modal centered hide-header hide-footer class="centered-modal text-center"
       id="burn-confirmation-modal" ref="burn-confirmation-modal"
       :title="$t('plaza.burnConfirmation')">
       <h3 class="confirmation-title">{{$t('plaza.burnConfirmation')}}</h3>
@@ -541,6 +541,10 @@ export default Vue.extend({
   align-items: center;
   justify-content: center;
   padding: 0 16px;
+}
+
+.modal-body {
+  border: 0px !important;
 }
 
 .switch {

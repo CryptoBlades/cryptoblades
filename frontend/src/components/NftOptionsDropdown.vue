@@ -12,6 +12,7 @@
     </b-dropdown>
 
     <b-modal
+      centered
       hide-header hide-footer
       class="centered-modal"
       ref="character-transfer-modal"
@@ -33,7 +34,7 @@
         </div>
         <div class="footer-btn">
           <button class="close-btn" @click="transfer">
-            {{isBurnInProgress ? 'Sending..' : $t('plaza.transfer')}}</button>
+            {{isSending ? 'Sending..' : $t('plaza.transfer')}}</button>
         </div>
       </div>
       <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
@@ -149,9 +150,9 @@ export default Vue.extend({
 }
 
 .transfer-input.form-control{
-  background-color: #1a1a1a;
-  border: 1px solid #545b62;
-  color: rgba(255, 255, 255, 0.753);
+  background-color: #000E1D;
+  border: 1px solid #323E55;
+  color: rgb(255, 255, 255);
   font-family: Roboto;
   height: 3em;
 }

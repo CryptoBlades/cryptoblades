@@ -2,7 +2,7 @@
   <div>
   <div class="results-panel">
     <div class="float-center">
-      <h1 class="text-center outcome p-4">{{ formattedOutcome.toUpperCase() }}</h1>
+      <h1 class="text-center outcome result-title">{{ formattedOutcome.toUpperCase() }}</h1>
       <b-container>
         <b-row class="power-rolled">
           <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
@@ -196,13 +196,18 @@ export default Vue.extend({
   margin: auto;
   text-align: center;
 }
+
+.result-title{
+  margin-bottom: 3em;
+  color: #EDCD90;
+}
+
 .outcome {
   font-family: Trajan;
   font-size: 2em;
-  font-weight: bold;
   padding: 0.1em;
   margin-top: 0.25em;
-  margin-bottom: 0;
+  margin-bottom: 1em;
 }
 .expander-divider {
   width: 100%;

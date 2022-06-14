@@ -2,7 +2,7 @@
   <b-modal id="modal-info" ref="modal-info" class="md" hide-footer hide-header>
     <div class="to-back" v-if="!noBack">
       <span class="arrow-icon"></span>
-      <span>Back</span>
+      <span>{{$t('blacksmith.tapAnyWhere')}}</span>
     </div>
     <div class="modal-wrapper">
       <div class="header" v-if="headerContent">
@@ -27,7 +27,7 @@
         </script2>
       </div>
     </div>
-    <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
+    <p v-if="modalType != 'combat-result'" class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
   </b-modal>
 </template>
 

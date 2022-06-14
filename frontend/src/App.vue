@@ -591,10 +591,10 @@ button,
   padding-top: 0.8em;
   padding-bottom: 0.8em;
   font-family: Roboto;
-  background-color: #EDCD90;
+  background-color: #1168D0;
   border-radius: 2px;
   border: none;
-  color: rgb(26, 26, 26);
+  color: rgb(255, 255, 255);
   text-transform: capitalize;
 }
 
@@ -769,10 +769,10 @@ button.close {
 }
 
 .character-modal {
-  background: #051126!important;
+  background: #05112600!important;
   border: none !important;
-  border: 1px solid #43506A!important;
-  padding:3rem;
+  border: 1px solid #43506a00!important;
+  padding:2rem;
 }
 .character-modal-mobile {
   padding:2rem;
@@ -783,7 +783,7 @@ button.close {
 }
 
 .character-modal header.modal-header{
-  background: #051126!important;
+  background: #05112600!important;
   border: none;
 }
 
@@ -830,7 +830,7 @@ button.close {
 
 .tapAny{
   font-family: Roboto;
-  color: #9E8A57;
+  color: #fffffe70;
   text-align: center;
   font-size: 0.9em;
   align-self: center;
@@ -839,9 +839,10 @@ button.close {
 }
 
 .modal-body {
-  color: #9e8a57 !important;
-  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
-  border: 1px solid #ffffff50;
+  background: #051126!important;
+  border: none !important;
+  border: 1px solid #43506A!important;
+  padding:2rem;
 }
 
 .modal-footer {

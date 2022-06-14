@@ -9,7 +9,7 @@
     <right-menu :activeTab="activeTab" :dusts="{lesser: lesser,greater: greater, powerful: powerful}"  :key="ctr" :showReforgeDust="showReforgeDust" />
 
     <!-- MODAL NEW UI -->
-    <b-modal size="md" ref="confirm-reforge" hide-footer hide-header>
+    <b-modal size="md" class="centered-modal" centered ref="confirm-reforge" hide-footer hide-header>
       <div class="header-close">
         <h4>{{$t('blacksmith.dustConfirm')}}</h4>
       </div>
@@ -63,7 +63,7 @@
     </b-modal>
 
 
-    <b-modal ref="succesful-reforge" hide-footer hide-header @hide="clearDust">
+    <b-modal ref="succesful-reforge" class="centered-modal" centered hide-footer hide-header @hide="clearDust">
       <div class="forge-header" v-if="modalType == 'successReforge'">
         <h3>{{$t('blacksmith.reforgeSucces')}}</h3>
       </div>
@@ -218,7 +218,7 @@
                   <b-icon-question-circle class="centered-icon" scale="1.5"
                     v-on:click="onShowForgeDetails" v-tooltip.bottom="$t('blacksmith.clickForForgePercentages')"/>
 
-                  <b-modal hide-footer ref="forge-details-modal" :title="$t('blacksmith.forgePercentages')">
+                  <b-modal hide-footer class="centered-modal" centered aria-label="" ref="forge-details-modal" :title="$t('blacksmith.forgePercentages')">
                     <div>
                       {{$t('blacksmith.forgePercentage.5star')}} {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
                     </div>
@@ -237,7 +237,7 @@
                     <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
                   </b-modal>
 
-                  <b-modal size="lg" hide-footer hide-header ref="new-forge-weapon">
+                  <b-modal size="lg" class="centered-modal" centered hide-footer hide-header ref="new-forge-weapon">
                     <div class="row new-weapons">
                       <img src="../assets/header-line.png" alt="">
                       <h3>{{$t('blacksmith.dwarvesForge')}}</h3>
@@ -251,7 +251,7 @@
                     </div>
                   </b-modal>
 
-                  <b-modal size="lg" hide-footer hide-header ref="forge-element-selector-modal">
+                  <b-modal class="centered-modal" centered size="lg" hide-footer hide-header ref="forge-element-selector-modal">
                     <div class="row justify-content-center">
                       <h4 class="select-el">{{$t('blacksmith.selectElement')}}</h4>
                     </div>
@@ -462,7 +462,7 @@
                   </button>
                   <div class="back-btn" @click="displayBlacksmith()">
                     <span class="menu-btn"></span>
-                    <span>{{$t('blacksmith.changeEquipment')}}</span>
+                    <span class="text-uppercase">{{$t('blacksmith.changeEquipment')}}</span>
                   </div>
                 </div>
               </div>
@@ -560,7 +560,7 @@
           </div>
         </div>
       </b-col>
-    <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
+    <b-modal centered class="centered-modal text-center" ref="dustreforge-confirmation-modal"
              :title="$t('blacksmith.dustReforgeConfirmation')" @ok="onReforgeWeaponWithDust">
       <div class="row">
         <div>
@@ -592,7 +592,7 @@
       </div>
     </b-modal>
 
-    <b-modal class="centered-modal text-center" size="lg" ref="mass-dust-confirmation-modal" hide-footer hide-header>
+    <b-modal centered class="centered-modal text-center" size="lg" ref="mass-dust-confirmation-modal" hide-footer hide-header>
       <div class="dust-confirm">
         <h4>{{$t('blacksmith.createDustConfirm')}}</h4>
         <b-icon icon="exclamation-circle" variant="warning" />
@@ -614,7 +614,7 @@
       </div>
     </b-modal>
 
-    <b-modal class="centered-text-modal" ref="reforge-bonuses-modal" :title="$t('blacksmith.reforgeBonuses')">
+    <b-modal centered class="centered-text-modal" ref="reforge-bonuses-modal" :title="$t('blacksmith.reforgeBonuses')">
       <div>
         {{ $t('blacksmith.reforgeBonus.5star')}}
       </div>
@@ -1472,7 +1472,9 @@ export default Vue.extend({
   font-family: Trajan;
   width: 30vw;
   margin: auto;
-  font-weight: 600;
+  font-weight: 500;
+  color: #EDCD90;
+  text-transform: uppercase;
   margin-top: 1.1em;
   margin-bottom: 1.5em;
 }
@@ -1627,6 +1629,7 @@ export default Vue.extend({
   font-size: 28px;
   margin-bottom: 30px;
   color: #e9c97a;
+  text-transform: uppercase;
 }
 
 .line{
