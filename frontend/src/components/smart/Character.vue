@@ -152,7 +152,7 @@
           {{$t('characterModal.close')}}
           <img src="../../assets/close-btn.png"/>
         </button>
-        <span>{{$t(blacksmith.tapAnyWhere)}}</span>
+        <span>{{$t('blacksmith.tapAnyWhere')}}</span>
     </b-modal>
     <!-- Character Soul Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-soul-modal"
@@ -230,10 +230,12 @@
           <span class="resultMsg text-center"> {{resultMsg}} </span>
         </div>
         <button :disabled="isSending || newName === ''" @click="renameCharacterCall">Change</button>
-        <button class="offset" @click="$refs['character-change-name-modal'].hide()">
+        <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
+
+        <!-- <button class="offset" @click="$refs['character-change-name-modal'].hide()">
           {{$t('characterModal.close')}}
           <img src="../../assets/close-btn.png"/>
-        </button>
+        </button> -->
     </b-modal>
   </div>
 </template>
