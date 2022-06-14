@@ -125,7 +125,10 @@
           <span v-if="isSending"><i class="fas fa-spinner fa-spin"></i> Loading</span>
           <span v-else>Change</span>
       </button>
-      <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+      <div class="footer-close" @click="$refs['character-change-trait-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
     <!-- Character Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-modal"
@@ -141,7 +144,10 @@
           <span class="resultMsg text-center"> {{resultMsg}} </span>
         </div>
         <button :disabled="isSending || receiverAddress === ''" @click="transfer">Transfer</button>
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <div class="footer-close" @click="$refs['character-transfer-modal'].hide()">
+          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="close-icon"></p>
+        </div>
     </b-modal>
     <!-- Character Soul Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-soul-modal"
@@ -190,7 +196,10 @@
           </div>
         </div>
         <button :disabled="isSending || receiverAddress === ''" @click="onSoulTransferConfirm">Transfer</button>
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <div class="footer-close" @click="$refs['character-transfer-soul-modal'].hide()">
+          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="close-icon"></p>
+        </div>
     </b-modal>
     <!-- Character Change Name Modal -->
     <b-modal class="centered-modal" ref="character-change-name-modal"
@@ -214,12 +223,10 @@
           <span class="resultMsg text-center"> {{resultMsg}} </span>
         </div>
         <button :disabled="isSending || newName === ''" @click="renameCharacterCall">Change</button>
-        <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
-
-        <!-- <button class="offset" @click="$refs['character-change-name-modal'].hide()">
-          {{$t('characterModal.close')}}
-          <img src="../../assets/close-btn.png"/>
-        </button> -->
+        <div class="footer-close" @click="$refs['character-change-name-modal'].hide()">
+          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="close-icon"></p>
+        </div>
     </b-modal>
   </div>
 </template>

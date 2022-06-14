@@ -59,7 +59,10 @@
         </div>
         <button class="close-btn"  @click="onReforgeWeaponWithDust()">{{$t('blacksmith.confirm')}}</button>
       </div>
-      <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
+      <div class="footer-close" @click="$refs['confirm-reforge'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
 
@@ -116,7 +119,10 @@
       <div class="footer-btn mb-4" v-if="modalType == 'successReforge'">
         <button class="close-btn"   @click="closeModal('succesful-reforge')">{{$t('blacksmith.confirm')}}</button>
       </div>
-      <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
+      <div class="footer-close" @click="$refs['succesful-reforge'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
     <Transition name="slide-fade">
@@ -234,7 +240,10 @@
                     <div>
                       {{$t('blacksmith.forgePercentage.1star')}}
                     </div>
-                    <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
+                    <div class="footer-close" @click="$refs['forge-details-modal'].hide()">
+                      <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+                      <p class="close-icon"></p>
+                    </div>
                   </b-modal>
 
                   <b-modal size="lg" class="centered-modal" centered hide-footer hide-header ref="new-forge-weapon">
@@ -245,9 +254,9 @@
                     <div class="weapon-list">
                       <weapon-grid :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true" :noPagination="true"/>
                     </div>
-                    <div class="footer-close">
-                      <img src="../assets/separator.png" alt="">
-                      <span>{{$t('blacksmith.tapAnyWhere')}}</span>
+                    <div class="footer-close" @click="$refs['new-forge-weapon'].hide()">
+                      <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+                      <p class="close-icon"></p>
                     </div>
                   </b-modal>
 
@@ -318,7 +327,10 @@
                         class="ml-4 centered-icon" v-tooltip.bottom="$t('blacksmith.dynamicPricesDetails',
                           { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
                     </div>
-                    <p class="tapAny mt-3 mb-0">{{$t('blacksmith.tapAnyWhere')}}</p>
+                    <div class="footer-close" @click="$refs['forge-element-selector-modal'].hide()">
+                      <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+                      <p class="close-icon"></p>
+                    </div>
                   </b-modal>
                 </div>
               </div>
@@ -612,6 +624,10 @@
             </span>
         </button>
       </div>
+      <div class="footer-close" @click="$refs['mass-dust-confirmation-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
     <b-modal centered class="centered-text-modal" ref="reforge-bonuses-modal" :title="$t('blacksmith.reforgeBonuses')">
@@ -629,6 +645,10 @@
       </div>
       <div>
         {{ $t('blacksmith.reforgeBonus.1star')}}
+      </div>
+      <div class="footer-close" @click="$refs['reforge-bonuses-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
       </div>
     </b-modal>
     <SpecialWeaponForgeModal />
@@ -1416,7 +1436,7 @@ export default Vue.extend({
   justify-content: center;
 }
 
-.footer-close {
+.footer-close-forge {
   margin: auto;
   display: flex;
   flex-direction: column;
@@ -1486,13 +1506,13 @@ export default Vue.extend({
   width: 30px;
 }
 
-.footer-close > span{
+.footer-close-forge > span{
   font-family: Roboto;
   color: #fff;
   margin-top: 20px;
 }
 
-.footer-close > h3{
+.footer-close-forge > h3{
   font-family: Trajan;
   width: 30vw;
   margin: auto;
@@ -2536,11 +2556,11 @@ img.elements-modal:hover {
     display: none;
   }
 
-  .footer-close{
+  .footer-close-forge{
     width: '';
   }
 
-  .footer-close > img, .new-weapons > img{
+  .footer-close-forge > img, .new-weapons > img{
     width: 90vw;
   }
 

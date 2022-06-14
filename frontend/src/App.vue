@@ -797,6 +797,8 @@ button.close {
 .confirmation-title{
   text-align: center;
   font-family: Trajan;
+  text-transform: uppercase;
+  color: #EDCD90;
 }
 
 .character-modal div.modal-body {
@@ -830,12 +832,40 @@ button.close {
 
 .tapAny{
   font-family: Roboto;
-  color: #fffffe70;
+  color: #fffffe;
   text-align: center;
-  font-size: 0.9em;
+  font-size: 1em;
   align-self: center;
   font-weight: 500;
   margin-bottom: 0px;
+  cursor: pointer;
+}
+
+.footer-close{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  margin-bottom: -7.5em;
+  cursor: pointer;
+}
+
+.close-icon{
+  margin-top: 1.3em;
+  content: url('assets/close-btn.png');
+  width: 2em;
+  height: auto;
+}
+
+.tapAny:hover{
+  color: #fffffed2;
 }
 
 .modal-body {

@@ -11,7 +11,7 @@
       <div class="content-details">
         <component :is="componentHolder" v-bind="componentProps"/>
       </div>
-      <div class="footer-btn">
+      <div class="footer-btn" v-if="button.length > 0">
         <button class="close-btn" @click="$bvModal.hide('modal-info')">Close</button>
       </div>
       <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
@@ -27,7 +27,10 @@
         </script2>
       </div>
     </div>
-    <p v-if="modalType != 'combat-result'" class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
+    <div class="footer-close" @click="$refs['modal-info'].hide()">
+      <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+      <p class="close-icon"></p>
+    </div>
   </b-modal>
 </template>
 
@@ -44,6 +47,7 @@ export default Vue.extend({
     return {
       showAds: false,
       componentHolder: '',
+      button: []
     };
   },
   mounted(){

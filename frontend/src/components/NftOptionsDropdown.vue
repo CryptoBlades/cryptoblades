@@ -37,7 +37,10 @@
             {{isSending ? 'Sending..' : $t('plaza.transfer')}}</button>
         </div>
       </div>
-      <p class="tapAny">{{$t('blacksmith.tapAnyWhere')}}</p>
+      <div class="footer-close" @click="$refs['character-transfer-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
   </div>

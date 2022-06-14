@@ -133,7 +133,10 @@
         <button class="close-btn" :disabled="burnCharacterIds.length === 0" @click="onBurnConfirm">
           {{isBurnInProgress ? 'Burning..' : $t('blacksmith.confirm')}}</button>
       </div>
-      <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+      <div class="footer-close" @click="$refs['burn-confirmation-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
     <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
       <script2 async src="https://coinzillatag.com/lib/sticky.js"></script2>
