@@ -1,7 +1,7 @@
 <template>
   <div class="body main-font" style="inline-flex">
-    <div class="blind-background"></div>
-    <div>
+    <div class="blind-background bg-dark"></div>
+    <div class="custom-padding">
       <div>
           <div class="col-lg-6 col-sm-12 adventure">
             <h5>{{$t('PlayToEarn.playToEarn')}}</h5>
@@ -73,11 +73,13 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
-
+.custom-padding{
+  padding: 60px !important;
+}
 h5{
-  font-family: Trajan;
+  font-family: 'Trajan', serif;
   font-size: 25px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .play-to-earn{
@@ -195,6 +197,7 @@ h5{
 
 .adventure{
     text-align: left;
+    color: #EDCD90;
   }
 
 

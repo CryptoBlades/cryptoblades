@@ -1,5 +1,6 @@
 <template>
-  <b-modal v-model="showModal" hide-footer size="lg" class="centered-text-modal" ref="special-forge-modal" :title="$t('blacksmith.specialForge')">
+  <b-modal v-model="showModal" hide-footer hide-header size="lg" class="centered-text-modal" ref="special-forge-modal">
+      <h3 class="confirmation-title mb-3">  {{$t('blacksmith.specialForge')}}</h3>
       <b-tabs justified>
         <b-tab :title="$t('blacksmith.forge')">
           <div class="d-flex justify-content-center mt-3" v-if="isLoading">
@@ -221,6 +222,10 @@
           </div>
         </b-tab>
       </b-tabs>
+      <div class="footer-close" @click="$refs['special-forge-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 </template>
 
@@ -228,6 +233,7 @@
 import Vue from 'vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '@/interfaces';
+import { ISpecialWeaponsManagerState } from '@/store/specialWeaponsManager';
 import { Accessors } from 'vue/types/options';
 import Events from '../../events';
 import { secondsToDDHHMMSS } from '@/utils/date-time';
@@ -237,14 +243,17 @@ import forgingGif from '../../assets/special-weapons/forging.gif';
 import WeaponIcon from '../WeaponIcon.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
 
-type StoreMappedState = Pick<IState,'activeSpecialWeaponEventsIds' | 'inactiveSpecialWeaponEventsIds' |
-'specialWeaponEvents' | 'specialWeaponEventId' | 'shardsSupply' | 'ownedWeaponIds' |'skillBalance' | 'skillRewards'>;
+type StoreMappedState = Pick<IState,'ownedWeaponIds' |'skillBalance' | 'skillRewards'>;
+
+type StoreMappedSpecialWeaponsManagerState = Pick<ISpecialWeaponsManagerState,
+'specialWeaponEvents' | 'activeSpecialWeaponEventsIds' | 'specialWeaponEventId' | 'shardsSupply' | 'inactiveSpecialWeaponEventsIds'>;
+
 
 interface StoreMappedGetters {
   weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
 }
 
-interface StoreMappedActions {
+interface StoreMappedSpecialWeaponsManagerActions {
   fetchSpecialWeaponEvents(): Promise<void>;
   fetchForgeCosts(): Promise<number[]>;
   fetchShardsConvertDenominator(): Promise<number>;
@@ -315,15 +324,18 @@ export default Vue.extend({
 
   computed: {
     ...(mapState([
-      'activeSpecialWeaponEventsIds',
-      'inactiveSpecialWeaponEventsIds',
-      'specialWeaponEvents',
-      'specialWeaponEventId',
-      'shardsSupply',
       'ownedWeaponIds',
       'skillBalance',
       'skillRewards'
     ]) as Accessors<StoreMappedState>),
+    ...mapState('specialWeaponsManager',
+      ([
+        'specialWeaponEvents',
+        'activeSpecialWeaponEventsIds',
+        'specialWeaponEventId',
+        'shardsSupply',
+        'inactiveSpecialWeaponEventsIds'
+      ])) as Accessors<StoreMappedSpecialWeaponsManagerState>,
     ...(mapGetters(['weaponsWithIds']) as Accessors<StoreMappedGetters>),
 
     eventDetails(): string {
@@ -473,9 +485,18 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['fetchSpecialWeaponEvents', 'fetchForgeCosts', 'convertShards', 'fetchShardsConvertDenominator',
-      'orderSpecialWeapon', 'forgeSpecialWeapon', 'fetchEventTotalOrderedCount', 'fetchShardsStakingRewards',
-      'claimShardsStakingRewards']) as StoreMappedActions,
+    ...mapActions('specialWeaponsManager',
+      [
+        'fetchSpecialWeaponEvents',
+        'fetchForgeCosts',
+        'convertShards',
+        'fetchShardsConvertDenominator',
+        'orderSpecialWeapon',
+        'forgeSpecialWeapon',
+        'fetchEventTotalOrderedCount',
+        'fetchShardsStakingRewards',
+        'claimShardsStakingRewards'
+      ]) as StoreMappedSpecialWeaponsManagerActions,
     ...mapMutations(['updateSpecialWeaponEventId']) as StoreMappedMutations,
 
     imgPath(img: string): string {

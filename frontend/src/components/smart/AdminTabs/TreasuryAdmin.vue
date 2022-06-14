@@ -16,14 +16,14 @@
       <b-form-input v-model="newPartnerProject.details" :placeholder="$t('admin.treasury.details')"/>
       <b-form-input v-model="newPartnerProject.website" :placeholder="$t('admin.treasury.websiteUrl')"/>
       <b-form-input v-model="newPartnerProject.note" :placeholder="$t('admin.treasury.noteOptional')"/>
-      <b-button @click="addNewPartnerProject()" :disabled="addNewPartnerProjectButtonDisabled" variant="primary"
+      <b-button @click="addNewPartnerProject()" :disabled="addNewPartnerProjectButtonDisabled" variant="info"
                 class="text-nowrap">
         {{ $t('admin.treasury.addNewPartnerProject') }}
       </b-button>
     </div>
     <h2 class="mt-3">{{ $t('admin.treasury.findActivePartnerProjects') }}</h2>
     <div class="d-flex align-items-center gap-3 flex-wrap">
-      <b-button @click="getActiveProjects()" :disabled="isLoading" variant="primary"
+      <b-button @click="getActiveProjects()" :disabled="isLoading" variant="info"
                 class="text-nowrap">
         {{ $t('admin.treasury.findActivePartnerProjects') }}
       </b-button>
@@ -63,7 +63,7 @@
       <b-form-input v-else v-model="selectedPartnerProject.propertyStringValue"
                     :placeholder="$t('admin.treasury.propertyValue')"/>
       <b-button @click="setPartnerProjectProperty()" :disabled="setPartnerProjectPropertyButtonDisabled"
-                variant="primary"
+                variant="info"
                 class="text-nowrap">
         {{ $t('admin.treasury.setPartnerProjectProperty') }}
       </b-button>
@@ -87,7 +87,7 @@ interface SelectedPartnerProject {
   propertyStringValue: string;
 }
 
-interface NewPartnerProject {
+export interface NewPartnerProject {
   name: string;
   tokenSymbol: string;
   tokenAddress: string;
@@ -102,7 +102,7 @@ interface NewPartnerProject {
   note: string;
 }
 
-interface StoreMappedActions {
+interface StoreMappedTreasuryActions {
   addPartnerProject(payload: { partnerProject: NewPartnerProject }): Promise<void>;
 
   getActivePartnerProjects(): Promise<NewPartnerProject[]>;
@@ -183,15 +183,16 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions([
-      'addPartnerProject',
-      'getActivePartnerProjects',
-      'setPartnerProjectLogo',
-      'setPartnerProjectDetails',
-      'setPartnerProjectWebsite',
-      'setPartnerProjectNote',
-      'setPartnerProjectIsActive',
-    ]) as StoreMappedActions,
+    ...mapActions('treasury',
+      [
+        'addPartnerProject',
+        'getActivePartnerProjects',
+        'setPartnerProjectLogo',
+        'setPartnerProjectDetails',
+        'setPartnerProjectWebsite',
+        'setPartnerProjectNote',
+        'setPartnerProjectIsActive',
+      ]) as StoreMappedTreasuryActions,
 
     async getActiveProjects() {
       try {

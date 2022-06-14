@@ -4,7 +4,7 @@
     <div class="d-flex align-items-center gap-3">
       <b-form-input v-model="newRaidXpReward" :placeholder="$t('admin.raid.raidXpReward')" number type="number"/>
       <b-button @click="setNewRaidXpReward()" :disabled="setNewRaidXpRewardButtonDisabled"
-                variant="primary" class="text-nowrap">
+                variant="info" class="text-nowrap">
         {{ $t('admin.raid.setRaidXpReward') }}
       </b-button>
     </div>
