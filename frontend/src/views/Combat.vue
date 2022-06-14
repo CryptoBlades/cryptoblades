@@ -5,15 +5,13 @@
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
       </div>
 
-      <b-modal id="fightResultsModal" hide-footer hide-header>
-        <CombatResults v-if="resultsAvailable" :fightResults="fightResults" :staminaUsed="staminaPerFight" class="mb-3" />
-        <div class="footer-close">
-            <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
-            <span class="tap" @click="$bvModal.hide('fightResultsModal')">
-              <img style="width: 40px; margin-left: 215px;" src="../assets/close-btn.png" alt="">
-              </span>
-        </div>
-      </b-modal>
+      <modal-container
+        :noBack="true"
+        :modalType="'combat-result'"
+        :componentProps="{
+          fightResults:fightResults,
+          staminaUsed:staminaPerFight
+        }"/>
 
       <div class="waitingForResult" v-if="waitingResults">
         <div class="col wa">
@@ -175,7 +173,6 @@
     </b-modal>
     <div class="blank-slate" v-if="ownWeapons.length === 0 || ownCharacters.length === 0">
       <div v-if="ownWeapons.length === 0">{{$t('combat.noWeapons')}}</div>
-
       <div v-if="ownCharacters.length === 0">{{$t('combat.noCharacters')}}</div>
     </div>
   </div>
@@ -186,10 +183,10 @@ import {getEnemyArt} from '../enemy-art';
 import {CharacterTrait, GetTotalMultiplierForTrait, WeaponElement} from '../interfaces';
 import Hint from '../components/Hint.vue';
 import Events from '../events';
-import CombatResults from '../components/CombatResults.vue';
 import {fromWeiEther, toBN} from '../utils/common';
 import WeaponInventory from '../components/WeaponInvetory.vue';
 import WeaponGrid from '../components/smart/WeaponGridNew.vue';
+import ModalContainer from '../components/modals/ModalContainer.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
 
@@ -292,7 +289,7 @@ export default {
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
       this.setIsInCombat(this.waitingResults);
-      if (this.resultsAvailable && error === null) this.$bvModal.show('fightResultsModal');
+      if (this.resultsAvailable && error === null) this.$bvModal.show('modal-info');
     },
   },
 
@@ -544,9 +541,9 @@ export default {
 
   components: {
     Hint,
-    CombatResults,
     WeaponInventory,
-    WeaponGrid
+    WeaponGrid,
+    ModalContainer
   },
 };
 </script>

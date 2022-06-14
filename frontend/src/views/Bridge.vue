@@ -63,11 +63,18 @@
           <i class="fas fa-spinner fa-spin"></i>
           {{$t('bridge.loading')}}
         </div>
-        <b-modal class="centered-modal" ref="character-warning-modal" @ok="transferToStorage()">
-          <template #modal-title class="text-capitalize">
-           <b-icon class="mr-2" icon="exclamation-circle" variant="danger"/>{{$t('bridge.warning')}}
-          </template>
+        <b-modal centered class="centered-modal" hide-footer hide-header ref="character-warning-modal" @ok="transferToStorage()">
+          <h3 class="confirmation-title">
+             <b-icon class="mr-2" icon="exclamation-circle" variant="danger"/>{{$t('bridge.warning')}}
+          </h3>
           <span>{{$t('bridge.unclaimedRemains')}}</span>
+          <div class="footer-btn mb-4">
+            <button class="close-btn"   @click="transferToStorage()">{{$t('blacksmith.confirm')}}</button>
+          </div>
+          <div class="footer-close" @click="$refs['character-warning-modal'].hide()">
+            <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+            <p class="close-icon"></p>
+          </div>
         </b-modal>
       </b-tab>
       <b-tab :title="$t('bridge.storage')" @click="showStorage(); selectedNftId = ''; targetChain = ''">
@@ -203,11 +210,18 @@
           <i class="fas fa-spinner fa-spin"></i>
           {{$t('bridge.loading')}}
         </div>
-        <b-modal class="centered-modal" ref="refund-warning-modal" @ok="cancelAll()">
-          <template #modal-title class="text-capitalize">
-           <b-icon icon="exclamation-circle" variant="danger"/>{{$t('bridge.warning')}}
-          </template>
+        <b-modal centered hide-footer hide-header class="centered-modal" ref="refund-warning-modal">
+          <h3 class="confirmation-title">
+            <b-icon icon="exclamation-circle" variant="danger"/>{{$t('bridge.warning')}}
+          </h3>
           <span>{{ $t('bridge.noRefundOfSpentSkill') }}</span>
+          <div class="footer-btn mb-4">
+            <button class="close-btn"   @click="cancelAll()">{{$t('blacksmith.confirm')}}</button>
+          </div>
+          <div class="footer-close" @click="$refs['refund-warning-modal'].hide()">
+            <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+            <p class="close-icon"></p>
+          </div>
         </b-modal>
       </b-tab>
       <!-- OLD BRIDGE: This tab is only useful for people who didn't withdraw their NFTs from the earlier bridge version -->

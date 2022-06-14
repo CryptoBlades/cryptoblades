@@ -574,6 +574,34 @@ button,
   cursor: pointer;
 }
 
+.footer-btn{
+  text-align: center;
+  padding-top: 2.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.footer-btn > .close-btn{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 0.8em;
+  padding-bottom: 0.8em;
+  font-family: Roboto;
+  background-color: #1168D0;
+  border-radius: 2px;
+  border: none;
+  color: rgb(255, 255, 255);
+  text-transform: capitalize;
+}
+
+.close-btn.cancel{
+  background-color: #e9be6edc;
+}
+
 .blank-slate {
   width: calc(100vw - 36px);
   height: calc(100vh - 120px);
@@ -741,17 +769,21 @@ button.close {
 }
 
 .character-modal {
-  background: #051126!important;
+  background: #05112600!important;
   border: none !important;
-  border: 1px solid #43506A!important;
-  padding:3rem;
+  border: 1px solid #43506a00!important;
+  padding:2rem;
 }
 .character-modal-mobile {
   padding:2rem;
 }
 
+#modal-container > .modal-dialog.modal-md {
+  max-width: 700px;
+}
+
 .character-modal header.modal-header{
-  background: #051126!important;
+  background: #05112600!important;
   border: none;
 }
 
@@ -760,6 +792,13 @@ button.close {
   text-align: center;
   font: normal normal bold 30px/38px Trajan;
   width: 100%;
+}
+
+.confirmation-title{
+  text-align: center;
+  font-family: Trajan;
+  text-transform: uppercase;
+  color: #EDCD90;
 }
 
 .character-modal div.modal-body {
@@ -791,9 +830,49 @@ button.close {
   height: 70px;
 }
 
+.tapAny{
+  font-family: Roboto;
+  color: #fffffe;
+  text-align: center;
+  font-size: 1em;
+  align-self: center;
+  font-weight: 500;
+  margin-bottom: 0px;
+  cursor: pointer;
+}
+
+.footer-close{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  margin-bottom: -7.5em;
+  cursor: pointer;
+}
+
+.close-icon{
+  margin-top: 1.3em;
+  content: url('assets/close-btn.png');
+  width: 2em;
+  height: auto;
+}
+
+.tapAny:hover{
+  color: #fffffed2;
+}
+
 .modal-body {
-  color: #9e8a57 !important;
-  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+  background: #051126!important;
+  border: none !important;
+  border: 1px solid #43506A!important;
+  padding:2rem;
 }
 
 .modal-footer {

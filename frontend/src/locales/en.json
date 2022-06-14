@@ -331,6 +331,8 @@
     "bonusPower": "Bonus power:"
   },
   "blacksmith": {
+    "sendYour": "Send your",
+    "toAnother": "to another account",
     "loading": "Loading...",
     "selectWeapon": "Select Weapon",
     "noWeapons": "You do not currently have any weapons <br> You can forge one by clicking the button below.",
@@ -451,9 +453,9 @@
     "lb": "Low Star Burn",
     "4b": "Four Star Burn",
     "5b": "Five Star Burn",
-    "confirm": "CONFIRM",
+    "confirm": "Confirm",
     "reforgeSucces": "REFORGE SUCCESSFUL",
-    "tapAnyWhere": "Tap Anywhere To Continue",
+    "tapAnyWhere": "Tap Anywhere To Close",
     "dwarvesForge": "The Dwarves Have Forged Your Weapons",
     "selectElement": "Select An Element",
     "enchant": "Enchant",
@@ -510,6 +512,7 @@
     "warning": "WARNING",
     "error": "Error:",
     "close": "Close",
+    "back": "Back",
     "errors": {
       "needToSelectChar": "You need to select a character to do battle.",
       "notEnoughDurability": "This weapon does not have enough durability.",

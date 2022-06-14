@@ -1,5 +1,6 @@
 <template>
-  <b-modal v-model="showModal" hide-footer size="lg" class="centered-text-modal" ref="special-forge-modal" :title="$t('blacksmith.specialForge')">
+  <b-modal v-model="showModal" hide-footer hide-header size="lg" class="centered-text-modal" ref="special-forge-modal">
+      <h3 class="confirmation-title mb-3">  {{$t('blacksmith.specialForge')}}</h3>
       <b-tabs justified>
         <b-tab :title="$t('blacksmith.forge')">
           <div class="d-flex justify-content-center mt-3" v-if="isLoading">
@@ -221,6 +222,10 @@
           </div>
         </b-tab>
       </b-tabs>
+      <div class="footer-close" @click="$refs['special-forge-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 </template>
 

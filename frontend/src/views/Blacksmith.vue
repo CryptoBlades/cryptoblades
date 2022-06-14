@@ -9,9 +9,8 @@
     <right-menu :activeTab="activeTab" :dusts="{lesser: lesser,greater: greater, powerful: powerful}"  :key="ctr" :showReforgeDust="showReforgeDust" />
 
     <!-- MODAL NEW UI -->
-    <b-modal class="" ref="confirm-reforge" hide-footer hide-header>
+    <b-modal size="md" class="centered-modal" centered ref="confirm-reforge" hide-footer hide-header>
       <div class="header-close">
-        <img src="../assets/separator.png" alt="">
         <h4>{{$t('blacksmith.dustConfirm')}}</h4>
       </div>
       <div class="forge-content">
@@ -54,21 +53,21 @@
             </b-row>
          </div>
       </div>
-      <div class="footer-close">
-          <div class="d-flex align-items-center info">
-            <b-icon icon="exclamation-circle" variant="danger" /> &nbsp; {{$t('blacksmith.cantBeUndone')}}
-          </div>
-          <img class="mb-2" src="../assets/separator.png" alt="">
-          <button class="ml-3 mt-4 forge-btns" @click="onReforgeWeaponWithDust()">
-            <span>{{$t('blacksmith.confirm')}}</span>
-          </button>
+      <div class="footer-btn mb-4">
+        <div class="d-flex align-items-center info text-center">
+          <b-icon icon="exclamation-circle" variant="danger" /> <span class="ml-2">{{$t('blacksmith.cantBeUndone')}}</span>
+        </div>
+        <button class="close-btn"  @click="onReforgeWeaponWithDust()">{{$t('blacksmith.confirm')}}</button>
+      </div>
+      <div class="footer-close" @click="$refs['confirm-reforge'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
       </div>
     </b-modal>
 
 
-    <b-modal ref="succesful-reforge" hide-footer hide-header @hide="clearDust">
+    <b-modal ref="succesful-reforge" class="centered-modal" centered hide-footer hide-header @hide="clearDust">
       <div class="forge-header" v-if="modalType == 'successReforge'">
-        <img src="../assets/header-line.png" alt="">
         <h3>{{$t('blacksmith.reforgeSucces')}}</h3>
       </div>
       <div class="forge-content">
@@ -117,10 +116,12 @@
             </b-row>
           </div>
       </div>
-      <div class="footer-close" v-if="modalType == 'successReforge'">
-        <img src="../assets/separator.png" alt="">
-        <span>{{$t('blacksmith.tapAnyWhere')}}</span>
-        <span class="close-icon" @click="closeModal('succesful-reforge')"></span>
+      <div class="footer-btn mb-4" v-if="modalType == 'successReforge'">
+        <button class="close-btn"   @click="closeModal('succesful-reforge')">{{$t('blacksmith.confirm')}}</button>
+      </div>
+      <div class="footer-close" @click="$refs['succesful-reforge'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
       </div>
     </b-modal>
 
@@ -223,7 +224,7 @@
                   <b-icon-question-circle class="centered-icon" scale="1.5"
                     v-on:click="onShowForgeDetails" v-tooltip.bottom="$t('blacksmith.clickForForgePercentages')"/>
 
-                  <b-modal hide-footer ref="forge-details-modal" :title="$t('blacksmith.forgePercentages')">
+                  <b-modal hide-footer class="centered-modal" centered aria-label="" ref="forge-details-modal" :title="$t('blacksmith.forgePercentages')">
                     <div>
                       {{$t('blacksmith.forgePercentage.5star')}} {{Number.parseFloat(forgeCost * (1/0.01)).toFixed(2)}} SKILL.
                     </div>
@@ -239,9 +240,13 @@
                     <div>
                       {{$t('blacksmith.forgePercentage.1star')}}
                     </div>
+                    <div class="footer-close" @click="$refs['forge-details-modal'].hide()">
+                      <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+                      <p class="close-icon"></p>
+                    </div>
                   </b-modal>
 
-                  <b-modal size="lg" hide-footer hide-header ref="new-forge-weapon">
+                  <b-modal size="lg" class="centered-modal" centered hide-footer hide-header ref="new-forge-weapon">
                     <div class="row new-weapons">
                       <img src="../assets/header-line.png" alt="">
                       <h3>{{$t('blacksmith.dwarvesForge')}}</h3>
@@ -249,14 +254,13 @@
                     <div class="weapon-list">
                       <weapon-grid :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true" :noPagination="true"/>
                     </div>
-                    <div class="footer-close">
-                      <img src="../assets/separator.png" alt="">
-                      <span>{{$t('blacksmith.tapAnyWhere')}}</span>
-                      <span class="close-icon" @click="closeModal('new-forge-weapon')"></span>
+                    <div class="footer-close" @click="$refs['new-forge-weapon'].hide()">
+                      <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+                      <p class="close-icon"></p>
                     </div>
                   </b-modal>
 
-                  <b-modal size="lg" hide-footer hide-header ref="forge-element-selector-modal">
+                  <b-modal class="centered-modal" centered size="lg" hide-footer hide-header ref="forge-element-selector-modal">
                     <div class="row justify-content-center">
                       <h4 class="select-el">{{$t('blacksmith.selectElement')}}</h4>
                     </div>
@@ -322,6 +326,10 @@
                       <b-icon-question-circle v-if="clickedForgeButton === 1"
                         class="ml-4 centered-icon" v-tooltip.bottom="$t('blacksmith.dynamicPricesDetails',
                           { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
+                    </div>
+                    <div class="footer-close" @click="$refs['forge-element-selector-modal'].hide()">
+                      <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+                      <p class="close-icon"></p>
                     </div>
                   </b-modal>
                 </div>
@@ -466,7 +474,7 @@
                   </button>
                   <div class="back-btn" @click="displayBlacksmith()">
                     <span class="menu-btn"></span>
-                    <span>{{$t('blacksmith.changeEquipment')}}</span>
+                    <span class="text-uppercase">{{$t('blacksmith.changeEquipment')}}</span>
                   </div>
                 </div>
               </div>
@@ -564,7 +572,7 @@
           </div>
         </div>
       </b-col>
-    <b-modal class="centered-modal text-center" ref="dustreforge-confirmation-modal"
+    <b-modal centered class="centered-modal text-center" ref="dustreforge-confirmation-modal"
              :title="$t('blacksmith.dustReforgeConfirmation')" @ok="onReforgeWeaponWithDust">
       <div class="row">
         <div>
@@ -596,7 +604,7 @@
       </div>
     </b-modal>
 
-    <b-modal class="centered-modal text-center" size="lg" ref="mass-dust-confirmation-modal" hide-footer hide-header>
+    <b-modal centered class="centered-modal text-center" size="lg" ref="mass-dust-confirmation-modal" hide-footer hide-header>
       <div class="dust-confirm">
         <h4>{{$t('blacksmith.createDustConfirm')}}</h4>
         <b-icon icon="exclamation-circle" variant="warning" />
@@ -616,9 +624,13 @@
             </span>
         </button>
       </div>
+      <div class="footer-close" @click="$refs['mass-dust-confirmation-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
-    <b-modal class="centered-text-modal" ref="reforge-bonuses-modal" :title="$t('blacksmith.reforgeBonuses')">
+    <b-modal centered class="centered-text-modal" ref="reforge-bonuses-modal" :title="$t('blacksmith.reforgeBonuses')">
       <div>
         {{ $t('blacksmith.reforgeBonus.5star')}}
       </div>
@@ -633,6 +645,10 @@
       </div>
       <div>
         {{ $t('blacksmith.reforgeBonus.1star')}}
+      </div>
+      <div class="footer-close" @click="$refs['reforge-bonuses-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
       </div>
     </b-modal>
     <SpecialWeaponForgeModal />
@@ -1420,7 +1436,7 @@ export default Vue.extend({
   justify-content: center;
 }
 
-.footer-close {
+.footer-close-forge {
   margin: auto;
   display: flex;
   flex-direction: column;
@@ -1476,7 +1492,9 @@ export default Vue.extend({
   font-family: Trajan;
   width: 30vw;
   margin: auto;
-  font-weight: 600;
+  font-weight: 500;
+  color: #EDCD90;
+  text-transform: uppercase;
   margin-top: 1.1em;
   margin-bottom: 1.5em;
 }
@@ -1488,13 +1506,13 @@ export default Vue.extend({
   width: 30px;
 }
 
-.footer-close > span{
+.footer-close-forge > span{
   font-family: Roboto;
   color: #fff;
   margin-top: 20px;
 }
 
-.footer-close > h3{
+.footer-close-forge > h3{
   font-family: Trajan;
   width: 30vw;
   margin: auto;
@@ -1631,6 +1649,7 @@ export default Vue.extend({
   font-size: 28px;
   margin-bottom: 30px;
   color: #e9c97a;
+  text-transform: uppercase;
 }
 
 .line{
@@ -1700,6 +1719,7 @@ export default Vue.extend({
   left: 20px;
 }
 
+
 .weapon-menu > div > div > h2{
   font-family: Trajan;
   font-weight: 500;
@@ -1712,6 +1732,9 @@ export default Vue.extend({
   width: 80%;
 }
 
+.none-mobile > button > span{
+  font-family: Oswald;
+}
 
 
 .weapon-menu > div > div > .details > span{
@@ -2294,6 +2317,10 @@ export default Vue.extend({
   width: 12em;
 }
 
+.footer-btn > div > span{
+  font-family: Roboto;
+}
+
 .weapon {
   min-height: 12em;
   max-height: 13em;
@@ -2485,7 +2512,7 @@ img.elements-modal:hover {
     font-family: Trajan;
     width: 100%;
     margin: auto;
-    font-weight: 600;
+    font-weight: 500;
     margin-top: 1.1em;
     text-align: center;
     margin-bottom: 1.5em;
@@ -2529,11 +2556,11 @@ img.elements-modal:hover {
     display: none;
   }
 
-  .footer-close{
+  .footer-close-forge{
     width: '';
   }
 
-  .footer-close > img, .new-weapons > img{
+  .footer-close-forge > img, .new-weapons > img{
     width: 90vw;
   }
 
