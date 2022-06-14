@@ -5,7 +5,7 @@
     @click="!isDisabled ? $emit('clickEvent') : ''"
     >
     <span :class="isDisabled ? 'disabled' : ''">
-      <span class="custom-title-font" :class="customTitleClass">{{title}}<br></span>
+      <span class="custom-title-font" :class="customTitleClass" v-html="title"></span>
       <span class="custom-subtitle-font" :class="customSubTitleClass">{{subTitle}}</span>
     </span>
   </button>
@@ -63,7 +63,6 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   height: 100%;
-  margin-right: 15px;
   align-items: center;
   vertical-align: middle;
   justify-content: center;
