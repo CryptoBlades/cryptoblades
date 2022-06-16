@@ -1,8 +1,8 @@
 
 <template>
-  <div class="background-image">
-    <div class="blind-background"></div>
-    <div v-if="!haveCharacters" class="blank-slate">
+  <div class="position-relative background-image">
+    <div class="blind-background position-absolute w-100 h-100 opacity-75"></div>
+    <div v-if="!haveCharacters" class="blank-slate position-relative content">
       <div class="initial-recruitment">
         <div class="tob-bg-img promotion-decoration">
           <img class="vertical-decoration bottom" src="../assets/border-element.png">
@@ -36,11 +36,12 @@
         :soulBalance="soulBalance"
         :ownCharacters="ownCharacters"
         @mintCharacter="onMintCharacter"
+        @onClaimGarrisonXp="onClaimGarrisonXp"
         @changeTab="onChangeTab"
       />
       <template v-if="activeTab === 'info' && havePlazaCharacters">
-        <div class="d-flex justify-content-end pr-5 pt-4 slippage-checkbox">
-          <b-checkbox v-if="ownCharacters.length === 4"  variant="primary"  v-model="mintSlippageApproved">
+        <div class="d-flex justify-content-end pr-5 pt-4 slippage-checkbox" v-if="ownCharacters.length === 4">
+          <b-checkbox variant="primary" v-model="mintSlippageApproved">
             <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
             <b-icon-question-circle class="ml-1 centered-icon" v-tooltip.bottom="$t('plaza.dynamicPricesDetails',
               { decreaseAmount: mintPriceDecreasePerHour, increaseAmount: mintCharacterPriceIncrease, minimumPrice: mintCharacterMinPrice})"/>
@@ -54,16 +55,6 @@
             <div>
               <div class="d-flex flex-column flex-md-row justify-content-space-between garrisson-content">
                 <h1>{{$t('characters')}} ({{ ownedGarrisonCharacterIds.length }})</h1>
-                <div class="d-flex justify-content-flex-end ml-md-auto">
-                  <b-button
-                    v-if="canClaimGarrisonXp"
-                    :disabled="isClaimingXp"
-                    variant="primary"
-                    class="ml-3 gtag-link-others"
-                    @click="onClaimGarrisonXp">
-                    {{isClaimingXp ? `${$t('plaza.claiming')}` : $t('plaza.claimXp')}}
-                  </b-button>
-                </div>
               </div>
               <character-list
                 :showNftOptions="true"
@@ -124,15 +115,27 @@
 
       </template>
     </div>
-    <b-modal class="centered-modal text-center" ref="burn-confirmation-modal" :title="$t('plaza.burnConfirmation')"
-      @ok="onBurnConfirm" :ok-disabled="burnCharacterIds.length === 0">
-      <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" />
+
+    <b-modal centered hide-header hide-footer class="centered-modal text-center"
+      id="burn-confirmation-modal" ref="burn-confirmation-modal"
+      :title="$t('plaza.burnConfirmation')">
+      <h3 class="confirmation-title">{{$t('plaza.burnConfirmation')}}</h3>
+      <div class="text-center burn-content mt-4">
+        <b-icon icon="exclamation-circle" variant="warning" />
         {{ $t('plaza.burnWarning', { characterAmount: burnCharacterIds.length })}}<br>
         {{ $t('plaza.cantBeUndone')}}
       </div>
-      <div class="text-center">
-        <b-icon icon="exclamation-circle" variant="danger" /> {{ $t('plaza.noRefunds')}}
+      <div class="text-center burn-content">
+        <b-icon icon="exclamation-circle" variant="warning" />
+        {{ $t('plaza.noRefunds')}}
+      </div>
+       <div class="footer-btn">
+        <button class="close-btn" :disabled="burnCharacterIds.length === 0" @click="onBurnConfirm">
+          {{isBurnInProgress ? 'Burning..' : $t('blacksmith.confirm')}}</button>
+      </div>
+      <div class="footer-close" @click="$refs['burn-confirmation-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
       </div>
     </b-modal>
     <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
@@ -453,6 +456,7 @@ export default Vue.extend({
         }
       }
       finally {
+        (this.$refs['burn-confirmation-modal'] as BModal).hide();
         this.isBurnInProgress = false;
       }
       this.soulBalance = +(await this.fetchSoulBalance());
@@ -512,6 +516,11 @@ export default Vue.extend({
   background-position: top right;
   min-height: calc(100vh - 120px);
   height: 100%;
+  z-index: 0;
+}
+.content {
+  z-index: 10;
+  position: relative;
 }
 
 .background-image > div:nth-child(1){
@@ -535,6 +544,10 @@ export default Vue.extend({
   align-items: center;
   justify-content: center;
   padding: 0 16px;
+}
+
+.modal-body {
+  border: 0px !important;
 }
 
 .switch {
@@ -572,6 +585,26 @@ export default Vue.extend({
 .switch_active:hover,
 .switch:hover {
   transform: scale(0.97);
+}
+
+.confirmation-title{
+  text-align: center;
+  font-family: Trajan;
+}
+
+.footer-btn{
+  flex-direction: row;
+  gap: 1em;
+}
+
+.footer-btn > button{
+  width: 100%;
+}
+
+.burn-content{
+  color: #fff;
+  font-family: Roboto;
+  font-size: 0.9em;
 }
 
 .spinning-circle{
@@ -712,7 +745,7 @@ export default Vue.extend({
     padding-top: 10px;
     padding-bottom: 10px;
     border-bottom: 1px solid #424A59;
-    background-color:#1d1d1d;
+    background-color:#000E29;
    }
  }
 
@@ -814,7 +847,7 @@ export default Vue.extend({
       padding-top: 10px;
       padding-bottom: 10px;
       border-bottom: 1px solid #424A59;
-      background-color:#1d1d1d;
+      background-color:#000E29;
     }
   }
 }

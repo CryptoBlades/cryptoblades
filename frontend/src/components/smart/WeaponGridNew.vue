@@ -22,16 +22,16 @@
       <div class="none-mobile d-flex flex-column align-items-end">
         <div class="px=2 pt-2 pb-2">
           <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
-            <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
+            <b-check variant="info" class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
             <strong>{{$t('weaponGrid.showFavorite')}}</strong>
           </div>
         </div>
         <div class="p-2 d-flex flex-row">
           <div class="pr-4" v-if="!showNftOptions">
-            <button class="btn-clear-filter" @click="$emit('selectAllWeapons')">{{selectWeaponsBtnLabel}}</button>
+            <button class="btn-clear-filter none-mobile" @click="$emit('selectAllWeapons')">{{selectWeaponsBtnLabel}}</button>
           </div>
           <div>
-            <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
+            <button class="btn-clear-filter none-mobile"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
           </div>
         </div>
       </div>
@@ -99,31 +99,41 @@
     </div>
 
 
-    <b-modal class="centered-modal" ref="weapon-rename-modal"
-      @ok="renameWeaponCall()">
-      <template #modal-title>
-        {{$t('weaponGrid.renameWeapon')}}
-      </template>
+    <b-modal centered class="centered-modal" ref="weapon-rename-modal"
+      hide-footer hide-header>
+      <h3 class="confirmation-title">{{$t('weaponGrid.renameWeapon')}}</h3>
       <b-form-input type="string"
         class="modal-input" v-model="weaponRename" :placeholder="$t('weaponGrid.renamePlaceholder')" />
       <span v-if="isRenameProfanish">
         {{$t('weaponGrid.isProfanish')}} <em>{{cleanRename}}</em>
       </span>
+      <div class="footer-btn mb-4">
+        <button class="close-btn"   @click="renameWeaponCall()">{{$t('blacksmith.confirm')}}</button>
+      </div>
+      <div class="footer-close" @click="$refs['weapon-rename-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
-    <b-modal class="centered-modal" ref="weapon-change-skin-modal"
-      @ok="changeWeaponSkinCall">
-      <template #modal-title>
-        {{$t('weaponGrid.changeWeaponSkill')}}
-      </template>
+    <b-modal centered class="centered-modal" ref="weapon-change-skin-modal"
+      hide-footer hide-header>
+      <h3 class="confirmation-title">{{$t('weaponGrid.changeWeaponSkill')}}</h3>
       <span >
         {{$t('weaponGrid.pickSkin')}}
       </span>
       <select class="form-control" v-model="targetSkin">
         <option v-for="skin in availableSkins" :value="skin" :key="skin">{{ skin }}</option>
       </select>
+      <div class="footer-btn mb-4">
+        <button class="close-btn"   @click="changeWeaponSkinCall()">{{$t('blacksmith.confirm')}}</button>
+      </div>
+      <div class="footer-close" @click="$refs['weapon-change-skin-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
-    <b-modal ref="open-filter" id="open-filter" hide-footer hide-header>
+    <b-modal centered ref="open-filter" id="open-filter" hide-footer hide-header>
        <div class="row d-flex align-items-center modal-filter" style="flex-grow:0.6" >
          <h4>Filter Weapon</h4>
           <div class="col-sm-6 col-md-6 col-lg-3 mb-3">
@@ -165,6 +175,10 @@
             <span>DONE</span>
           </button>
         </div>
+      </div>
+      <div class="footer-close" @click="$refs['open-filter'].hide()">
+        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
       </div>
     </b-modal>
   </div>
@@ -769,14 +783,14 @@ export default Vue.extend({
 .select-wrapper-items > select,
 .select-wrapper-element > select,
 .select-wrapper-star > select{
-  background-color: rgba(255, 255, 255, 0);
+  background-color: rgba(1, 13, 34, 0);
   color: #fff;
 }
 
 .select-wrapper-element > select option,
 .select-wrapper-items > select option,
 .select-wrapper-star > select option{
-  background-color: #171617;
+  background-color: #010D22;
   padding: 1px;
   color: #fff;
 }
