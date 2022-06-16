@@ -78,7 +78,7 @@ export default Vue.extend({
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style scoped>
 .container {
-  background: rgb(22, 22, 22); /* change to: background: #000E1D; */
+  background: #000E1D; /* change to: background: #000E1D; */
   padding: 45px 40px;
   display: flex;
   flex-direction: column;
