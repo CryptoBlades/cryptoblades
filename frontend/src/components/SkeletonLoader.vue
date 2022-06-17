@@ -211,7 +211,7 @@ export default Vue.extend({
 .stake-button{
   font: normal 16px/21px Roboto;
   text-align: center;
-  background: #9E8A57; /* change to: #1168D0; */
+  background: #1168D0;
   border-radius: 5px;
   border:none;
   color: #FFFFFF;
