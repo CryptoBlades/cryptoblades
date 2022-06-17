@@ -7,7 +7,7 @@
         {{option.name}} <span v-if="!option.noAmount">({{option.amount}} {{$t('nftOptionsDropdown.left')}})</span>
       </b-dropdown-item>
       <b-dropdown-item v-if="showTransfer" @click="resultMsg = ''; $refs['character-transfer-modal'].show()">
-        {{$t('nft.transferMenuItem')}}
+        {{$t('nftOptionsDropdown.transferMenuItem')}}
       </b-dropdown-item>
     </b-dropdown>
 
@@ -16,29 +16,29 @@
       hide-header hide-footer
       class="centered-modal"
       ref="character-transfer-modal"
-      :ok-title="$t('nft.transferOkButton')"
+      :ok-title="$t('nftOptionsDropdown.transferOkButton')"
       @ok="transfer"
       :ok-disabled="!isValidAddress || receiverAddress === ''  || isSending"
       :cancel-disabled="isSending"
       >
       <div class="p-4">
-        <h3 class="confirmation-title mb-5">{{$t('blacksmith.sendYour')}} {{nftType}} {{$t('blacksmith.toAnother')}} </h3>
-        <b-form-input class="transfer-input" placeholder="Receiver Address" v-model="receiverAddress"/>
+        <h3 class="confirmation-title mb-5">{{$t('nftOptionsDropdown.sendYour')}} {{nftType}} {{$t('nftOptionsDropdown.toAnother')}} </h3>
+        <b-form-input class="transfer-input" :placeholder="$t('nftOptionsDropdown.receiverAddress')" v-model="receiverAddress"/>
         <div class="transferResultContainer">
           <div class="loader" v-if="isSending">
             <i class="fas fa-spinner fa-spin"></i>
-              Loading...
+              {{$t('loading')}}
           </div>
-          <span class="resultMsg text-center"> {{(!isValidAddress && receiverAddress !== '') ? 'Invalid address' : ''}} </span>
+          <span class="resultMsg text-center"> {{(!isValidAddress && receiverAddress !== '') ? $t('nftOptionsDropdown.invalidAddress') : ''}} </span>
           <span class="resultMsg text-center"> {{resultMsg}} </span>
         </div>
         <div class="footer-btn">
           <button class="close-btn" @click="transfer">
-            {{isSending ? 'Sending..' : $t('plaza.transfer')}}</button>
+            {{isSending ? t('nftOptionsDropdown.sending') : $t('nftOptionsDropdown.transfer')}}</button>
         </div>
       </div>
       <div class="footer-close" @click="$refs['character-transfer-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -50,6 +50,7 @@
 import Vue from 'vue';
 import { PropType } from 'vue/types/options';
 import { mapActions } from 'vuex';
+import i18n from '@/i18n';
 
 interface StoreMappedActions {
   transferNFT(payload: {
@@ -117,8 +118,10 @@ export default Vue.extend({
         });
       }
       catch(e: any) {
-        if(e.code as number === 4001) this.resultMsg = 'You cancelled the transaction.';
-        else this.resultMsg = 'Error while transferring your ' + this.nftType + ' to ' + this.receiverAddress;
+        if(e.code as number === 4001) this.resultMsg = i18n.t('nftOptionsDropdown.cancelledTransaction').toString();
+        else this.resultMsg =
+         i18n.t('nftOptionsDropdown.errorTransfer').toString() + ' ' + this.nftType + ' ' +
+         i18n.t('nftOptionsDropdown.to').toString() + ' ' + this.receiverAddress;
       }
       this.isSending = false;
     }
