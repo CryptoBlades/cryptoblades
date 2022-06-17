@@ -250,7 +250,7 @@
       </div>
       </div>
       <div class="footer-close" @click="$refs['rewardsModal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -329,7 +329,7 @@
         </button>
       </div>
       <div class="footer-close" @click="$refs['equipments'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -363,14 +363,14 @@
       </div>
       </div>
       <div class="footer-close" @click="$refs['viewLoot'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
 
     <b-modal id="rewardsRaidPicker"  hide-footer hide-header ref="rewardsRaidPicker">
       <div class="raid-picker" v-if="isLoading">
-          <b-spinner v-if="spin" type="grow" :label="$t('raid.loading')"></b-spinner>
+          <b-spinner v-if="spin" type="grow" :label="$t('loading')"></b-spinner>
           <span>{{$t('raid.claimingRewards')}}</span>
       </div>
      <div class="rewards-header" v-if="!isLoading">
@@ -391,7 +391,7 @@
           <p>&#9888; {{$t('raid.allRewardRemove')}}</p>
       </div>
       <div class="footer-close" @click="$refs['rewardsRaidPicker'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -401,7 +401,7 @@
         <p> <img src="../assets/hint.png" alt="">  &nbsp;&nbsp; {{notifyError}}</p>
       </div>
       <div class="footer-close" @click="$refs['warningModal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>

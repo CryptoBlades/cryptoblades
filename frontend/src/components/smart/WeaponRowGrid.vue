@@ -70,7 +70,7 @@
           <button class="close-btn"   @click="renameWeaponCall()">{{$t('blacksmith.confirm')}}</button>
         </div>
         <div class="footer-close" @click="$refs['weapon-rename-modal'].hide()">
-          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
         </div>
       </b-modal>
@@ -88,7 +88,7 @@
           <button class="close-btn"   @click="changeWeaponSkinCall()">{{$t('blacksmith.confirm')}}</button>
         </div>
         <div class="footer-close" @click="$refs['weapon-change-skin-modal'].hide()">
-          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
         </div>
       </b-modal>

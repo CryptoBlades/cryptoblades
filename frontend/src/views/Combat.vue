@@ -137,7 +137,7 @@
                           + ~{{formattedSkill(targetExpectedPayouts[i] * fightMultiplier)}}
                         </div>
                     </div>
-                <p v-if="isLoadingTargets">{{$t('combat.loading')}}</p>
+                <p v-if="isLoadingTargets">{{$t('loading')}}</p>
                 </div>
               </div>
               </transition-group>
