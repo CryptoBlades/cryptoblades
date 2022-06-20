@@ -11,7 +11,7 @@
       </b-row>
     </div>
     <div class="content bg-dark" v-if="!canShowApp && !showMetamaskWarning">
-      <div class="outcome">
+      <div class="outcome mb-0 mt-0">
         <i class="fas fa-spinner fa-spin"></i>
       </div>
     </div>
@@ -537,7 +537,6 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   padding: 0px;
 }
 
-
 hr.hr-divider {
   border-top: 1px solid #9e8a57;
   margin-bottom: 0.5rem !important;
@@ -604,12 +603,11 @@ button,
 
 .blank-slate {
   width: calc(100vw - 36px);
-  height: calc(100vh - 120px);
+  height: 95vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
   font-size: 2rem;
   text-align: center;
 }
@@ -1090,7 +1088,7 @@ a.character-tab:focus {
 
 .outcome {
   /* margin: 20px auto; */
-  height: 80vh;
+  height: 90vh;
   display: flex;
   justify-content: center;
   align-items: center;
