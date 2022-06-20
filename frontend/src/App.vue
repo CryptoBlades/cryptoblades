@@ -612,6 +612,11 @@ button,
   text-align: center;
 }
 
+.blank-slate > div {
+  font-family: Roboto;
+  font-size: 1em;
+}
+
 .error {
   color: red;
   overflow: hidden;

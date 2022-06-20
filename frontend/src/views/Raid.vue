@@ -1,5 +1,11 @@
 <template>
-  <div class="main-font">
+  <div class="blank-slate" v-if="ownedCharacterIds.length <= 0">
+    <div v-if="ownedCharacterIds.length <= 0">
+      {{$t('quests.youNeedToHaveAtLeastOneCharacterRaid')}}<br>
+      {{ $t('combat.recruitAtPlaza') }}
+    </div>
+  </div>
+  <div  v-else class="main-font">
     <div style="display:inline-flex;">
        <div class="col-md-12 col-lg-12 col-sm-12 col-12">
         <div class="row">
@@ -798,6 +804,8 @@ export default Vue.extend({
   },
 
   async mounted() {
+
+    console.log('owned Character'+this.ownedCharacterIds.length);
     this.getTimeRemaining();
     const refreshRaidData = async () => {
       await (this as any).getRewardIndexes();
