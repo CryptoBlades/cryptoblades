@@ -134,7 +134,7 @@
           {{isBurnInProgress ? 'Burning..' : $t('blacksmith.confirm')}}</button>
       </div>
       <div class="footer-close" @click="$refs['burn-confirmation-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>

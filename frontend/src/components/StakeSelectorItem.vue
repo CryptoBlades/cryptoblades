@@ -497,7 +497,7 @@ export default Vue.extend({
     claimRewardButtonLabel(): TranslateResult {
       switch (this.rewardClaimState) {
       case RewardClaimState.LOADING:
-        return i18n.t('stake.loading');
+        return i18n.t('loading');
       case RewardClaimState.REWARD_LOCKED:
         return i18n.t('stake.sorryReward', {estimatedUnlockTimeLeftFormatted : this.estimatedUnlockTimeLeftFormatted});
       default:

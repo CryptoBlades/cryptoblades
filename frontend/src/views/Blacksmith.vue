@@ -61,7 +61,7 @@
         <button class="close-btn"  @click="onReforgeWeaponWithDust()">{{$t('blacksmith.confirm')}}</button>
       </div>
       <div class="footer-close" @click="$refs['confirm-reforge'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -121,7 +121,7 @@
         <button class="close-btn"   @click="closeModal('succesful-reforge')">{{$t('blacksmith.confirm')}}</button>
       </div>
       <div class="footer-close" @click="$refs['succesful-reforge'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -176,7 +176,7 @@
           {{$t('blacksmith.forgePercentage.1star')}}
         </div>
         <div class="footer-close" @click="$refs['forge-details-modal'].hide()">
-          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
         </div>
       </b-modal>
@@ -190,7 +190,7 @@
           <weapon-grid :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true" :noPagination="true"/>
         </div>
         <div class="footer-close" @click="$refs['new-forge-weapon'].hide()">
-          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
         </div>
       </b-modal>
@@ -263,7 +263,7 @@
               { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
         </div>
         <div class="footer-close" @click="$refs['forge-element-selector-modal'].hide()">
-          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
         </div>
       </b-modal>
@@ -551,12 +551,12 @@
               <p class="dust-cost">({{burnCost * burnWeaponIds.length }} SKILL)</p>
             </span>
             <span v-if="!disableForge && cooling" class="gtag-link-others" tagname="forge_weapon">
-               {{$t('blacksmith.loading')}}
+               {{$t('loading')}}
             </span>
         </button>
       </div>
       <div class="footer-close" @click="$refs['mass-dust-confirmation-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -580,7 +580,7 @@
         {{ $t('blacksmith.reforgeBonus.1star')}}
       </div>
       <div class="footer-close" @click="$refs['reforge-bonuses-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>

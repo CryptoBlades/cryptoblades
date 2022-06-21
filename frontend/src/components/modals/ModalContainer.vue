@@ -2,7 +2,7 @@
   <b-modal id="modal-info" ref="modal-info" class="md" hide-footer hide-header>
     <div class="to-back" v-if="!noBack">
       <span class="arrow-icon"></span>
-      <span>{{$t('blacksmith.tapAnyWhere')}}</span>
+      <span>{{$t('tapAnyWhere')}}</span>
     </div>
     <div class="modal-wrapper">
       <div class="header" v-if="headerContent">
@@ -28,7 +28,7 @@
       </div>
     </div>
     <div class="footer-close" @click="$refs['modal-info'].hide()">
-      <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+      <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
       <p class="close-icon"></p>
     </div>
   </b-modal>

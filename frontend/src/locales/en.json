@@ -69,7 +69,6 @@
     "burn": "BURN",
     "expNeeded": "Exp needed to level",
     "stamina": "Stamina",
-    "loading": "Loading...",
     "souls": "Soul Power",
     "soulTransferLabel": "Souls",
     "soul": "Soul",
@@ -150,10 +149,6 @@
     "signUp": "SIGN UP",
     "gotoPlaza": "Go to Plaza"
   },
-  "nft": {
-     "transferMenuItem": "Transfer",
-     "transferOkButton": "Transfer!"
-  },
   "nftIcon": {
     "weaponTooltip": "Weapons ({stars}*)",
     "junkTooltip": "Junk ({stars}*)",
@@ -169,9 +164,6 @@
     "id": "ID",
     "owned": "Owned:",
     "amount": "Amount"
-  },
-  "nftOptionsDropdown": {
-    "left": "left"
   },
   "EarningsCalculator": {
     "nextMilestone": "Next Milestone",
@@ -240,7 +232,6 @@
     "showCharacters": "Show Characters",
     "showShields" : "Show Shields",
     "moveNftToStorage": "Move NFT to Storage",
-    "loading": "Loading...",
     "warning": "Warning",
     "unclaimedRemains": "When transferring your character to another chain, any unclaimed XP remains on this one!",
     "storage": "Storage",
@@ -331,9 +322,6 @@
     "bonusPower": "Bonus power:"
   },
   "blacksmith": {
-    "sendYour": "Send your",
-    "toAnother": "to another account",
-    "loading": "Loading...",
     "selectWeapon": "Select Weapon",
     "noWeapons": "You do not currently have any weapons <br> You can forge one by clicking the button below.",
     "forgeSwordFor": "Forge sword for",
@@ -455,7 +443,6 @@
     "5b": "Five Star Burn",
     "confirm": "Confirm",
     "reforgeSucces": "REFORGE SUCCESSFUL",
-    "tapAnyWhere": "Tap Anywhere To Close",
     "dwarvesForge": "The Dwarves Have Forged Your Weapons",
     "selectElement": "Select An Element",
     "enchant": "Enchant",
@@ -530,7 +517,6 @@
     "xp": "XP",
     "victory": "Victory",
     "fight": "Fight!",
-    "loading": "Loading...",
     "noWeapons": "You do not currently have any weapons. You can forge one at the Blacksmith.",
     "noCharacters": "You do not currently have any characters. You can recruit one at the Plaza.",
     "winChances": {
@@ -599,7 +585,6 @@
     "raidRewards": "Raid rewards",
     "rewards": "Rewards",
     "claimingRewards": "Claiming rewards...",
-    "loading": "Loading...",
     "gotXP": "All participating characters got {xpReward} XP",
     "gotBonusXP": "Following character(s) performed exceptionally well and were rewarded with bonus XP:",
     "loot": "Raid Loot",
@@ -617,69 +602,6 @@
     }
   },
   "market": {
-    "browseNfts": "Browse NFTs",
-    "nftHint": "NFT stands for Non Fungible Token.<br>Weapons and Characters are NFTs of the ERC721 standard",
-    "browseChars": "Browse Characters",
-    "browseWeapons": "Browse Weapons",
-    "browseShields": "Browse Shields",
-    "price": "Price",
-    "loadingPrice": "Loading price...",
-    "sold": "sold",
-    "maxChars": "You already have max amount of characters (4).",
-    "loading": "Loading...",
-    "searchNfts": "Search NFTs",
-    "searchPlaceholder": "Seller Address, NFT ID",
-    "searchCharID": "Search Character ID",
-    "searchWeaponID": "Search Weapon ID",
-    "weaponsBySeller": "Weapons by Seller",
-    "charsBySeller": "Characters by Seller",
-    "searchShieldID": "Search Shield ID",
-    "shieldsBySeller": "Shields by Seller",
-    "searchMyWeapons": "Search My Weapons",
-    "weaponsPrivateTrades": "Weapons Private Trades",
-    "charsPrivateTrades": "Characters Private Trades",
-    "shieldsPrivateTrades": "Shields Private Trades",
-    "searchMyChars": "Search My Characters",
-    "searchMyShields": "Search My Shields",
-    "changePrice": "Change Price",
-    "changeTargetBuyer": "Change Target Buyer",
-    "cancelTooltip": "Cancelled sales cannot be re-listed for 24 hours!",
-    "cancelListing": "Cancel Listing",
-    "listNfts": "List NFTs",
-    "listingHint": "When you list an NFT for sale, it is transferred to the<br>market until someone buys it or you cancel the sale",
-    "showWeapons": "Show Weapons",
-    "showChars": "Show Characters",
-    "showShields": "Show Shields",
-    "listWeapon": "List Weapon",
-    "listChar": "List Character",
-    "listShield": "List Shield",
-    "listingTaxHint": "% tax (paid by the buyer) will be added to the final price.",
-    "sellType": "Sell {activeType}",
-    "changeTypePrice": "Change {activeType} price",
-    "sellPrice": "Sell Price (SKILL)",
-    "targetBuyerAddress": "Target Buyer Address (optional)",
-    "listingConfirmation": "Do you want to sell your {activeType} for ",
-    "buyerFee": "The buyer will pay an extra {activeListingMarketTax}% market fee for a total of",
-    "weaponsSold": "Weapons Sold",
-    "viewWeapons": "View weapons you have sold.",
-    "weaponTxHistory": "Weapon Transaction History",
-    "nothingThere": "It's seems like there's nothing here.",
-    "tips": "For tips on how to list NFTs, you may click this ",
-    "link": "link",
-    "charactersSold": "Characters Sold",
-    "charactersSoldTooltip": "View characters you have sold.",
-    "characterTxHistory": "Character Transaction History",
-    "shieldsSold": "Shields Sold",
-    "shieldsSoldTooltip": "View shields you have sold.",
-    "shieldsTxHistory": "Shield Transaction History",
-    "skillShop": "Skill Shop",
-    "skillShophint": "You can buy various goods in here",
-    "specials": "Specials",
-    "shop": "Shop",
-    "purchaseAndBurn": "Purchase and burn",
-    "characterBuyModal": "Character Buy Confirmation",
-    "characterBuyBurnModal": "Character Buy/Burn Confirmation",
-    "purchase": "Purchase",
     "nftList": {
       "characterRenameTag": "Rename Tag",
       "characterRenameTagDesc": "Renames one character.",
@@ -1279,7 +1201,6 @@
     "igo": "<br>+ IN GAME ONLY "
   },
   "leaderboard": {
-    "loading": "Loading..."
   },
   "portal": {
     "title": "Portal",
@@ -1332,7 +1253,6 @@
   },
   "pvp": {
     "lastDefeated": "You were last defeated by: ",
-    "tapAnywhere": "Tap anywhere to close",
     "kicked": "You were kicked from the arena!",
     "atLeastOneChar": "You need at least one character to enter PvP!",
     "arenaSignUp": "Arena Signup",
@@ -1490,6 +1410,21 @@
       "link": "Check it out!"
     }
   },
+  "nftOptionsDropdown": {
+    "title": "NFT Options",
+    "receiverAddress": "Receiver Address",
+    "transferMenuItem": "Transfer",
+    "transferOkButton": "Transfer!",
+    "left": "left",
+    "sending" : "Sending...",
+    "invalidAddress": "Invalid address",
+    "sendYour": "Send your",
+    "toAnother": "to another account",
+    "transfer": "Transfer",
+    "cancelledTransaction": "You cancelled the transaction.",
+    "errorTransfer" : "Error while transferring your",
+    "to" : "to"
+  },
   "on": "On",
   "off": "Off",
   "ok": "Ok",
@@ -1508,6 +1443,8 @@
   "stars": "Stars",
   "stats": "Stats",
   "bonusPower": "Bonus Power",
+  "loading" : "Loading ...",
+  "tapAnyWhere": "Tap Anywhere To Close",
   "traits": {
     "earth": "Earth",
     "fire": "Fire",
