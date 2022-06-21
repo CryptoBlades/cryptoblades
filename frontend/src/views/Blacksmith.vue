@@ -1035,7 +1035,6 @@ export default Vue.extend({
       this.greater = 0;
       this.powerful = 0;
       this.burnWeaponIds = [];
-
     },
     cancelReforge() {
       this.showReforge = false;
@@ -1150,6 +1149,9 @@ export default Vue.extend({
         this.burnWeaponId = null;
         (this.$refs['mass-dust-confirmation-modal'] as BModal).hide();
         this.cooling = false;
+        this.lesser = 0;
+        this.greater = 0;
+        this.powerful = 0;
       } catch (e) {
         console.error(e);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotBurn'));
