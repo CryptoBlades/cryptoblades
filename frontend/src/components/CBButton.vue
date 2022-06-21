@@ -4,14 +4,19 @@
     v-tooltip="toolTip"
     @click="!isDisabled ? $emit('clickEvent') : ''"
     >
-    <span :class="isDisabled ? 'disabled' : ''">
+    <span v-if="!isLoading">
       <span class="custom-title-font" :class="customTitleClass" v-html="title"></span>
       <span class="custom-subtitle-font" :class="customSubTitleClass">{{subTitle}}</span>
+    </span>
+    <span v-else :class="isDisabled ? 'disabled' : ''">
+      <loader :bgColor="'#ffffff5b'" :width="'50%'" />
+      <loader :bgColor="'#e9c97a'" :width="'9em'" />
     </span>
   </button>
 </template>
 <script lang="ts">
 import Vue from 'vue';
+import Loader from '../components/Loader.vue';
 export default Vue.extend({
   props:{
     title:{
@@ -43,6 +48,13 @@ export default Vue.extend({
       type:String,
       required: false
     },
+    isLoading:{
+      type: Boolean,
+      default: false
+    }
+  },
+  components:{
+    Loader
   }
 });
 </script>
@@ -52,7 +64,7 @@ export default Vue.extend({
 }
 .custom-title-font{
   font-family: Oswald;
-  color: #fff;
+  color: rgba(255, 255, 255);
 }
 .custom-subtitle-font{
   color: #e9c97a;

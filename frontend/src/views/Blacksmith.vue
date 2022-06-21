@@ -145,6 +145,7 @@
     <div class="blacksmith-content">
       <blacksmith-nav
         class="none-mobile"
+        :isLoading="isLoading"
         :disableForge="disableForge"
         :disableX10ForgeWithStaked="disableX10ForgeWithStaked"
         :disableUseStakedForForge="disableUseStakedForForge"
@@ -670,6 +671,7 @@ interface Data {
   mintWeaponMinPrice: string;
   cooling: boolean;
   currentFilteredWeapons: any[];
+  isLoading: boolean;
 }
 
 export default Vue.extend({
@@ -725,6 +727,7 @@ export default Vue.extend({
       mintWeaponMinPrice: '0',
       cooling: false,
       currentFilteredWeapons: [],
+      isLoading: true
     } as Data;
   },
 
@@ -1160,6 +1163,7 @@ export default Vue.extend({
       const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
       this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
       this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
+      this.isLoading = false;
     }
   },
 
