@@ -804,8 +804,6 @@ export default Vue.extend({
   },
 
   async mounted() {
-
-    console.log('owned Character'+this.ownedCharacterIds.length);
     this.getTimeRemaining();
     const refreshRaidData = async () => {
       await (this as any).getRewardIndexes();
