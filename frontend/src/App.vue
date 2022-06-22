@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <skale-banner v-if="currentChain == 'BNB'" :walletAddress="this.web3.eth.defaultAccount"/>
+    <skale-banner v-if="currentChain == 'SKALE'" :walletAddress="this.web3.eth.defaultAccount"/>
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content bg-dark">
       <b-row>

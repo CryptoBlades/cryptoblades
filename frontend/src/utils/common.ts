@@ -99,8 +99,7 @@ export const copyNftUrl = (id: number | string, type?: string): void => {
 
 export const requestSkale = async (userAddress: string) => {
   let res, resDescription;
-  // const headers = {Authorization: 'bearer ' + getConfigValue('SKALE_FAUCET_KEY'),'Content-Type': 'application/json'};
-  const headers = {Authorization: 'bearer ' + 'thisisafaucetkey','Content-Type': 'application/json'};
+  const headers = {Authorization: 'bearer ' + getConfigValue('SKALE_FAUCET_KEY'),'Content-Type': 'application/json'};
   await axios.post('https://api.cryptoblades.io/faucet', {address: userAddress, type: 'skale'}, {headers})
     .then(async(response) => {
       res = JSON.stringify(response.data);
@@ -124,7 +123,7 @@ export const requestSkale = async (userAddress: string) => {
       if (res === '{"sent":true}'){
         resDescription = i18n.t('skaleBanner.skaleSent');
       }
-      else if (res.includes('{"error":"Please try again in')){W
+      else if (res.includes('{"error":"Please try again in')){
         resDescription = i18n.t('skaleBanner.tryAgain');
       }
       else if (res.includes('is invalid, the capitalization checksum test failed, or it\'s an indirect IBAN address which can\'t be converted."}')){
