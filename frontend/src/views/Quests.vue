@@ -68,12 +68,15 @@
                    :externalAddress="weeklyReward.rewardExternalAddress"/>
     </b-modal>
   </div>
-  <div v-else-if="isLoading">
+  <div v-else-if="isLoading" class="blank-slate">
     <i class="fas fa-spinner fa-spin"/>
     {{ $t('quests.loading') }}
   </div>
-  <div v-else class="m-4 font-weight-bold">
-    {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}
+  <div v-else class="blank-slate">
+    <div v-if="ownedCharacterIds.length <= 0">
+      {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}.<br>
+      {{ $t('combat.recruitAtPlaza') }}
+    </div>
   </div>
 </template>
 

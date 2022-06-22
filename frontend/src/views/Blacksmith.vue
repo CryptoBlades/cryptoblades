@@ -2058,7 +2058,7 @@ export default Vue.extend({
 }
 
 .equipment-body{
-  height: 90vh;
+  height: auto;
   padding-left: 50px;
 }
 
