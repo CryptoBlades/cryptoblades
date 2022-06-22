@@ -243,6 +243,20 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true
     },
+    kavamainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.KAVA_MAINNET_PRIVATE_KEY,
+        process.env.KAVA_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.KAVA_MAINNET_RPC_URL || 'https://evm2.kava.io'
+        }
+      )),
+      network_id: 2222,
+      gas: 8000000,
+      gasPrice: 7000000000,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
     skaletestnet: {
       provider: () => new HDWalletProvider(hdWalletProviderOptions(
         process.env.SKALE_TESTNET_PRIVATE_KEY,

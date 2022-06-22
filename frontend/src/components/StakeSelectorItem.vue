@@ -1,5 +1,6 @@
 <template>
-  <div class="container">
+  <skeleton-loader v-if="isLoading"/>
+  <div v-else class="container">
     <h1 class="stake-type-title">{{ stakeTitle }}
       <b-icon-question-circle-fill v-if="deprecated"
         v-tooltip="$t('stake.StakeSelectorItem.deprecatedTooltip')" />
@@ -152,6 +153,8 @@ import BN from 'bignumber.js';
 import {mapActions, mapState} from 'vuex';
 import i18n from '@/i18n';
 import { TranslateResult } from 'vue-i18n';
+import Events from '../events';
+import SkeletonLoader from '../components/SkeletonLoader.vue';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from '@/stake-types';
 
 interface StoreMappedStakingActions {
@@ -230,6 +233,7 @@ type AllStakeTypes = StakeType | NftStakeType; // PropType<AllStakeTypes>
 export default Vue.extend({
   components: {
     Multiselect,
+    SkeletonLoader
   },
   props: {
     stakeTitle: {
@@ -251,6 +255,10 @@ export default Vue.extend({
     minimumStakeTime: {
       type: Number,
       required: true,
+    },
+    isLoading:{
+      type: Boolean,
+      default: true
     },
     estimatedYield: {
       type: BN,
@@ -489,7 +497,7 @@ export default Vue.extend({
     claimRewardButtonLabel(): TranslateResult {
       switch (this.rewardClaimState) {
       case RewardClaimState.LOADING:
-        return i18n.t('stake.loading');
+        return i18n.t('loading');
       case RewardClaimState.REWARD_LOCKED:
         return i18n.t('stake.sorryReward', {estimatedUnlockTimeLeftFormatted : this.estimatedUnlockTimeLeftFormatted});
       default:
@@ -516,6 +524,9 @@ export default Vue.extend({
 
     this.stakeRewardProgressInterval = setInterval(async () => {
       await this.fetchStakeDetails({ stakeType: this.stakeType });
+
+      // set the status of the data as loading is false
+      Events.$emit('setLoading', this.stakeType);
     }, 10 * 1000);
 
     this.secondsInterval = setInterval(() => {

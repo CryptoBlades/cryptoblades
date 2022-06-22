@@ -126,7 +126,7 @@
           <span v-else>Change</span>
       </button>
       <div class="footer-close" @click="$refs['character-change-trait-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -145,7 +145,7 @@
         </div>
         <button :disabled="isSending || receiverAddress === ''" @click="transfer">Transfer</button>
         <div class="footer-close" @click="$refs['character-transfer-modal'].hide()">
-          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
         </div>
     </b-modal>
@@ -197,7 +197,7 @@
         </div>
         <button :disabled="isSending || receiverAddress === ''" @click="onSoulTransferConfirm">Transfer</button>
         <div class="footer-close" @click="$refs['character-transfer-soul-modal'].hide()">
-          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
         </div>
     </b-modal>
@@ -224,7 +224,7 @@
         </div>
         <button :disabled="isSending || newName === ''" @click="renameCharacterCall">Change</button>
         <div class="footer-close" @click="$refs['character-change-name-modal'].hide()">
-          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
         </div>
     </b-modal>

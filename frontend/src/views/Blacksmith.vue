@@ -61,7 +61,7 @@
         <button class="close-btn"  @click="onReforgeWeaponWithDust()">{{$t('blacksmith.confirm')}}</button>
       </div>
       <div class="footer-close" @click="$refs['confirm-reforge'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -121,7 +121,7 @@
         <button class="close-btn"   @click="closeModal('succesful-reforge')">{{$t('blacksmith.confirm')}}</button>
       </div>
       <div class="footer-close" @click="$refs['succesful-reforge'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -145,6 +145,7 @@
     <div class="blacksmith-content">
       <blacksmith-nav
         class="none-mobile"
+        :isLoading="isLoading"
         :disableForge="disableForge"
         :disableX10ForgeWithStaked="disableX10ForgeWithStaked"
         :disableUseStakedForForge="disableUseStakedForForge"
@@ -175,7 +176,7 @@
           {{$t('blacksmith.forgePercentage.1star')}}
         </div>
         <div class="footer-close" @click="$refs['forge-details-modal'].hide()">
-          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
         </div>
       </b-modal>
@@ -189,7 +190,7 @@
           <weapon-grid :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true" :noPagination="true"/>
         </div>
         <div class="footer-close" @click="$refs['new-forge-weapon'].hide()">
-          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
         </div>
       </b-modal>
@@ -262,7 +263,7 @@
               { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
         </div>
         <div class="footer-close" @click="$refs['forge-element-selector-modal'].hide()">
-          <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
         </div>
       </b-modal>
@@ -550,12 +551,12 @@
               <p class="dust-cost">({{burnCost * burnWeaponIds.length }} SKILL)</p>
             </span>
             <span v-if="!disableForge && cooling" class="gtag-link-others" tagname="forge_weapon">
-               {{$t('blacksmith.loading')}}
+               {{$t('loading')}}
             </span>
         </button>
       </div>
       <div class="footer-close" @click="$refs['mass-dust-confirmation-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -579,7 +580,7 @@
         {{ $t('blacksmith.reforgeBonus.1star')}}
       </div>
       <div class="footer-close" @click="$refs['reforge-bonuses-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -670,6 +671,7 @@ interface Data {
   mintWeaponMinPrice: string;
   cooling: boolean;
   currentFilteredWeapons: any[];
+  isLoading: boolean;
 }
 
 export default Vue.extend({
@@ -725,6 +727,7 @@ export default Vue.extend({
       mintWeaponMinPrice: '0',
       cooling: false,
       currentFilteredWeapons: [],
+      isLoading: true
     } as Data;
   },
 
@@ -1032,7 +1035,6 @@ export default Vue.extend({
       this.greater = 0;
       this.powerful = 0;
       this.burnWeaponIds = [];
-
     },
     cancelReforge() {
       this.showReforge = false;
@@ -1147,6 +1149,9 @@ export default Vue.extend({
         this.burnWeaponId = null;
         (this.$refs['mass-dust-confirmation-modal'] as BModal).hide();
         this.cooling = false;
+        this.lesser = 0;
+        this.greater = 0;
+        this.powerful = 0;
       } catch (e) {
         console.error(e);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotBurn'));
@@ -1160,6 +1165,7 @@ export default Vue.extend({
       const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
       this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
       this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
+      this.isLoading = false;
     }
   },
 

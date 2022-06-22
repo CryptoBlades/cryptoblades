@@ -99,7 +99,7 @@
         </div>
       </div>
       <div class="footer-close" @click="$refs['filter-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -119,7 +119,7 @@
          <em>{{cleanRename}}</em>
       </span>
       <div class="footer-close" @click="$refs['character-rename-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -136,7 +136,7 @@
         <option v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
       </select>
       <div class="footer-close" @click="$refs['character-change-trait-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
@@ -151,7 +151,7 @@
         <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
       </select>
       <div class="footer-close" @click="$refs['character-change-skin-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>

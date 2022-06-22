@@ -61,7 +61,7 @@
 
         <div class="outcome" v-if="transferingToStorage">
           <i class="fas fa-spinner fa-spin"></i>
-          {{$t('bridge.loading')}}
+          {{$t('loading')}}
         </div>
         <b-modal centered class="centered-modal" hide-footer hide-header ref="character-warning-modal" @ok="transferToStorage()">
           <h3 class="confirmation-title">
@@ -72,7 +72,7 @@
             <button class="close-btn"   @click="transferToStorage()">{{$t('blacksmith.confirm')}}</button>
           </div>
           <div class="footer-close" @click="$refs['character-warning-modal'].hide()">
-            <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+            <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
             <p class="close-icon"></p>
           </div>
         </b-modal>
@@ -157,7 +157,7 @@
           <br>
           <div class="outcome" v-if="cancellingRequest">
             <i class="fas fa-spinner fa-spin"></i>
-            {{$t('bridge.loading')}}
+            {{$t('loading')}}
           </div>
         </div>
         <hr v-if="currentTransferNFTType === 'character' || 'weapon'" style="border:0.5px solid #9E8A57">
@@ -208,7 +208,7 @@
         </div>
         <div class="outcome" v-if="transferingFromStorage">
           <i class="fas fa-spinner fa-spin"></i>
-          {{$t('bridge.loading')}}
+          {{$t('loading')}}
         </div>
         <b-modal centered hide-footer hide-header class="centered-modal" ref="refund-warning-modal">
           <h3 class="confirmation-title">
@@ -219,7 +219,7 @@
             <button class="close-btn"   @click="cancelAll()">{{$t('blacksmith.confirm')}}</button>
           </div>
           <div class="footer-close" @click="$refs['refund-warning-modal'].hide()">
-            <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+            <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
             <p class="close-icon"></p>
           </div>
         </b-modal>
@@ -285,7 +285,7 @@
           </div>
           <div class="outcome" v-if="withdrawingFromBridge">
             <i class="fas fa-spinner fa-spin"></i>
-            {{$t('bridge.loading')}}
+            {{$t('loading')}}
           </div>
         </div>
       </b-tab>

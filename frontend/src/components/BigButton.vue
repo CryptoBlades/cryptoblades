@@ -6,9 +6,8 @@
 </template>
 
 <script lang="ts">
-
 export default {
-  props: ['mainText', 'subText', 'disabled'],
+  props: ['mainText', 'subText', 'disabled', 'isLoading'],
 };
 
 </script>
