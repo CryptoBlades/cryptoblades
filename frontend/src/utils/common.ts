@@ -9,6 +9,7 @@ import {networks as simpleQuestsNetworks} from '../../../build/contracts/SimpleQ
 import {QuestItemType} from '@/views/Quests.vue';
 import {abi as erc20Abi} from '../../../build/contracts/ERC20.json';
 import store from '@/store/store';
+import i18n from '@/i18n';
 
 BigNumber.config({ROUNDING_MODE: BigNumber.ROUND_DOWN});
 BigNumber.config({EXPONENTIAL_AT: 100});
@@ -94,6 +95,50 @@ export const copyNftUrl = (id: number | string, type?: string): void => {
   dummy.select();
   document.execCommand('copy');
   document.body.removeChild(dummy);
+};
+
+export const requestSkale = async (userAddress: string) => {
+  let res, resDescription;
+  // const headers = {Authorization: 'bearer ' + getConfigValue('SKALE_FAUCET_KEY'),'Content-Type': 'application/json'};
+  const headers = {Authorization: 'bearer ' + 'thisisafaucetkey','Content-Type': 'application/json'};
+  await axios.post('https://api.cryptoblades.io/faucet', {address: userAddress, type: 'skale'}, {headers})
+    .then(async(response) => {
+      res = JSON.stringify(response.data);
+      if (res === '{"sent":true}'){
+        resDescription = i18n.t('skaleBanner.skaleSent');
+      }
+      else if (res.includes('{"error":"Please try again in')){
+        resDescription = i18n.t('skaleBanner.tryAgain');
+      }
+      else if (res.includes('is invalid, the capitalization checksum test failed, or it\'s an indirect IBAN address which can\'t be converted."}')){
+        resDescription = i18n.t('skaleBanner.invalidAddress');
+      }
+      else if (res.includes('The faucet has dried up')){
+        resDescription = i18n.t('skaleBanner.outOfFuel');
+      }
+      else{
+        resDescription = i18n.t('skaleBanner.botMaintenance');
+      }
+    }).catch(async (error) => {
+      res = JSON.stringify(error.response.data);
+      if (res === '{"sent":true}'){
+        resDescription = i18n.t('skaleBanner.skaleSent');
+      }
+      else if (res.includes('{"error":"Please try again in')){W
+        resDescription = i18n.t('skaleBanner.tryAgain');
+      }
+      else if (res.includes('is invalid, the capitalization checksum test failed, or it\'s an indirect IBAN address which can\'t be converted."}')){
+        resDescription = i18n.t('skaleBanner.invalidAddress');
+      }
+      else if (res.includes('The faucet has dried up')){
+        resDescription = i18n.t('skaleBanner.outOfFuel');
+      }
+      else{
+        resDescription = i18n.t('skaleBanner.botMaintenance');
+      }
+    });
+
+  return resDescription;
 };
 
 export const addTokenToMetamask = async (address: string, symbol: string): Promise<void> => {

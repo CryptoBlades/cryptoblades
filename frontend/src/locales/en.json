@@ -1330,6 +1330,16 @@
       "highToLow": "Price: High -> Low"
     }
   },
+  "skaleBanner": {
+    "skaleSent": "SFUEL have been sent to your SKALE address",
+    "tryAgain": "You have already requested SFUEL. Please try again later.",
+    "invalidAddress": "You have entered an incorrect wallet address.",
+    "outOfFuel": "Please Call Developer - Skale Faucet bot is out of sfuel",
+    "botMaintenance": "Bot maintenance! Please Wait",
+    "requestSkale": "REQUEST SKALE",
+    "clickToRequest": "Click the button to Request for a SKALE",
+    "pleaseWait": "Processing please wait..."
+  },
   "pvp": {
     "lastDefeated": "You were last defeated by: ",
     "tapAnywhere": "Tap anywhere to close",

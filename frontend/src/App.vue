@@ -1,5 +1,6 @@
 <template>
   <div class="app">
+    <skale-banner v-if="currentChain == 'BNB'" :walletAddress="this.web3.eth.defaultAccount"/>
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content bg-dark">
       <b-row>
@@ -94,6 +95,7 @@ import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
+import SkaleBanner from './components/SkaleBanner.vue';
 import WeaponRowGrid from './components/smart/WeaponRowGrid.vue';
 import { apiUrl } from './utils/common';
 import i18n from './i18n';
@@ -174,6 +176,7 @@ export default Vue.extend({
     BigButton,
     SmallButton,
     WeaponRowGrid,
+    SkaleBanner
   },
 
   data() {
