@@ -12,7 +12,8 @@ module.exports = async function (deployer, network, accounts) {
     || network === 'avaxmainnet'
     || network === 'avaxmainnet-fork'
     || network === 'auroramainnet'
-    || network === 'skalemainnet') {
+    || network === 'skalemainnet'
+    || network === 'kavamainnet') {
     await upgradeProxy(PvpCore.address, PvpCore, { deployer });
     const pvpRankings = await PvpRankings.deployed();
     await pvpRankings.setSeasonDuration(86400);

@@ -11,7 +11,8 @@ module.exports = async function (deployer, network) {
     || network === 'avaxmainnet'
     || network === 'avaxmainnet-fork'
     || network === 'auroramainnet'
-    || network === 'skalemainnet') {
+    || network === 'skalemainnet'
+    || network === 'kavamainnet') {
     const game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
 
     // VAR_MINT_WEAPON_FEE_DECREASE_SPEED = 19

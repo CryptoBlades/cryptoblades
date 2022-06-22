@@ -14,7 +14,8 @@ module.exports = async function (deployer, network) {
     || network === 'avaxmainnet'
     || network === 'avaxmainnet-fork'
     || network === 'auroramainnet'
-    || network === 'skalemainnet') {
+    || network === 'skalemainnet'
+    || network === 'kavamainnet') {
     let nftMarket = await upgradeProxy(NFTMarket.address, NFTMarket, { deployer });
     let characters = await upgradeProxy(Characters.address, Characters, { deployer });
     let garrison = await upgradeProxy(Garrison.address, Garrison, { deployer });
