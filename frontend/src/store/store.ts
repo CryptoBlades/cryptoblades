@@ -59,6 +59,7 @@ type WaxBridgeDetailsPayload = Pick<
 IState, 'waxBridgeWithdrawableBnb' | 'waxBridgeRemainingWithdrawableBnbDuringPeriod' | 'waxBridgeTimeUntilLimitExpires'
 >;
 
+import wallet from './wallet';
 import bridge from './bridge';
 import pvp from './pvp';
 import quests from './quests';
@@ -72,6 +73,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store<IState>({
   modules:{
+    wallet,
     bridge,
     pvp,
     quests,
