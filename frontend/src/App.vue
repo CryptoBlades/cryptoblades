@@ -10,14 +10,17 @@
         <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
       </b-row>
     </div>
-    <div class="content bg-dark" v-if="!canShowApp && !showMetamaskWarning">
+    <div class="content bg-dark" v-if="!canShowApp && !showWalletModal">
       <div class="outcome mb-0 mt-0">
         <i class="fas fa-spinner fa-spin"></i>
       </div>
     </div>
-    <div class="fullscreen-warning" v-if="showMetamaskWarning">
+
+    <!--*****  NOT NEEDED ANYMORE ***** -->
+
+    <!-- <div class="fullscreen-warning" v-if="showMetamaskWarning">
       <div class="starter-panel">
-        <div class="tob-bg-img promotion-decoration">
+        <div class="tob-bg-img promdotion-decoration">
           <img class="vertical-decoration bottom" src="./assets/border-element.png">
         </div>
         <span class="starter-panel-heading">{{ $t('app.warning.title') }}</span>
@@ -28,19 +31,46 @@
           mainText="Wallet Connect" @click="walletConnectOnboarding()" />
         </div>
       </div>
-    </div>
+    </div> -->
+
+
+    <!-- ***** Do we need that check? ***** -->
+     <!--  || (!(ownCharacters.length === 0 && skillBalance === '0')) -->
     <div
       class="fullscreen-warning"
-      v-if="!hideWalletWarning && !showMetamaskWarning && (errorMessage || (ownCharacters.length === 0 && skillBalance === '0'))"
+      v-if="!hideWalletWarning"
     >
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || $t('app.warning.start') }}</span>
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
         <div>
-          <big-button class="button mm-button" :mainText="$t('app.warning.buttons.confMetamask')" @click="configureMetamask" />
-          <big-button :class="[isConnecting || isConnected ? 'disabled' : '']" class="button mm-button"
-          :mainText="$t('app.warning.buttons.startMetamask')" @click="connectMetamask" />
+
+
+          <!-- <big-button class="button mm-button" :mainText="$t('app.warning.buttons.confMetamask')" @click="configureMetamask" /> -->
+
+
+          <!-- <cb-button v-if="reforgeWeaponId !== null && ownWeapons.length > 0" class="custom-cb-btn custom-reforge-btn" tagname="weapon_special_forge"
+            :title="$t('blacksmith.reforgeWithDust')"
+            @clickEvent="$emit('displayDustReforge')"
+            :toolTip="$t('blacksmith.useDust')"
+          /> -->
+          <div class="wallet-connection-container"
+            v-for="(wallet, index) in SupportedWallets"
+            :key="index"
+          >
+
+            <b-button size="lg" class="m-2" variant="outline-primary"
+            @click="connectWallet(wallet); initializeStore()"
+            >
+            {{connectedWallet === wallet ?
+            $t('app.warning.buttons.connectedToWallet', {walletName: wallet}):
+            $t('app.warning.buttons.connectWallet', {walletName: wallet})}}
+            </b-button>
+          </div>
+            <b-button size="lg" class="m-2" variant="outline-primary" @click="startOnboarding" v-if="showWalletModal" >
+              Add Metamask
+            </b-button>
         </div>
         <div class="seperator"></div>
         <div class="instructions-list">
@@ -90,29 +120,24 @@ import _ from 'lodash';
 import Vue from 'vue';
 import Events from './events';
 import MetaMaskOnboarding from '@metamask/onboarding';
-import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
 import WeaponRowGrid from './components/smart/WeaponRowGrid.vue';
 import { apiUrl } from './utils/common';
 import i18n from './i18n';
-import { getConfigValue } from './contracts';
 import '@/mixins/general';
 import config from '../app-config.json';
 import { addChainToRouter } from '@/utils/common';
 import Web3 from 'web3';
-import WalletConnectProvider from '@walletconnect/web3-provider';
 import { Contracts, ICharacter } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
+import { SupportedWallets } from '@/store/wallet';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
 });
 
-interface RPCS {
-  [key: number]: string;
-}
 interface Data {
   errorMessage: string,
   hideWalletWarning: boolean,
@@ -125,10 +150,11 @@ interface Data {
   weaponId: null | number,
   toggleSideBar: boolean,
   currentPath: string,
-  showMetamaskWarning: boolean,
+  showWalletModal: boolean,
   pollCharacterStaminaIntervalId: ReturnType<typeof setInterval> | null,
   slowPollIntervalId: ReturnType<typeof setInterval> | null,
   doPollAccounts: boolean,
+  availableWallets: any[],
 }
 
 interface StoreMappedState {
@@ -171,7 +197,6 @@ export default Vue.extend({
   components: {
     NavBar,
     CharacterBar,
-    BigButton,
     SmallButton,
     WeaponRowGrid,
   },
@@ -189,15 +214,18 @@ export default Vue.extend({
       weaponId: null,
       toggleSideBar: false,
       currentPath: '',
-      showMetamaskWarning: false,
+      showWalletModal: false,
       pollCharacterStaminaIntervalId: null,
       slowPollIntervalId: null,
-      doPollAccounts: false
+      doPollAccounts: false,
+      availableWallets: [],
+      SupportedWallets
     } as Data;
   },
 
   computed: {
     ...(mapState(['skillBalance', 'defaultAccount', 'currentNetworkId', 'currentCharacterId', 'staking', 'web3']) as Accessors<StoreMappedState>),
+    ...(mapState('wallet', ['connectedWallet'])),
     ...(mapGetters(['contracts', 'ownCharacters', 'ownGarrisonCharacters', 'getExchangeUrl', 'getExchangeTransakUrl']) as Accessors<StoreMappedGetters>),
 
     canShowApp(): boolean {
@@ -208,8 +236,8 @@ export default Vue.extend({
       return localStorage.getItem('currentChain') || '';
     },
 
-    isWalletConnect(): boolean {
-      return localStorage.getItem('walletconnect') !== null;
+    lastConnectedWallet(): SupportedWallets {
+      return SupportedWallets[localStorage.getItem('lastConnectedWallet') as keyof typeof SupportedWallets];
     },
 
     isOptions(): boolean {
@@ -234,6 +262,10 @@ export default Vue.extend({
       'pollAccountsAndNetwork',
       'configureMetaMask',
     ]) as StoreMappedActions,
+    ...mapActions('wallet',[
+      'connectWallet',
+      // 'testConnection'
+    ]),
     ...mapMutations([
       'setWeb3',
       'updateCurrentChainSupportsPvP',
@@ -265,7 +297,7 @@ export default Vue.extend({
       //set chain in localStorage & MM from query param; check if supported
       else if (currentChain !== paramChain && supportedChains.includes(paramChain)){
         localStorage.setItem('currentChain', paramChain);
-        if(!this.isWalletConnect) await this.configureMetaMask();
+        if(this.lastConnectedWallet !== SupportedWallets.WALLETCONNECT) await this.configureMetaMask();
       }
       this.updateCurrentChainSupportsPvP();
       this.updateCurrentChainSupportsQuests();
@@ -298,25 +330,21 @@ export default Vue.extend({
       await this.configureMetaMask();
     },
 
-    async connectMetamask() {
-      const web3 = new Web3(Web3.givenProvider);
-      this.setWeb3(web3);
-      this.isConnecting = true;
-      this.errorMessage = i18n.t('app.warning.errorMessage.connecting').toString();
-      //test connection
-      web3.eth
-        .requestAccounts()
-        .then(() => {
-          this.errorMessage = i18n.t('app.warning.errorMessage.success').toString();
-          this.isConnecting = false;
-          this.isConnected = true;
-
-          this.initializeStore();
-        })
-        .catch(() => {
-          this.errorMessage = i18n.t('app.warning.errorMessage.error').toString();
-          this.isConnecting = false;
-        });
+    getAvailableWallets() {
+      // *** to do: simplify; use enums
+      //for some reason window.ethereum.providers is undefined if providers <2
+      console.log('providers');
+      console.log((window as any).ethereum.providers);
+      if((window as any).ethereum.providers){
+        const providers = (window as any).ethereum.providers;
+        if(providers.find((x: any) => x.isMetaMask)) this.availableWallets.push(SupportedWallets.METAMASK);
+        if(providers.find((x: any) => x.isCoinbaseWallet)) this.availableWallets.push(SupportedWallets.COINBASE);
+      }
+      else{
+        if(Web3.givenProvider.isMetaMask) this.availableWallets.push(SupportedWallets.METAMASK);
+        if(Web3.givenProvider.isCoinbaseWallet) this.availableWallets.push(SupportedWallets.COINBASE);
+      }
+      console.log(this.availableWallets);
     },
 
     toggleHideWalletWarning() {
@@ -332,7 +360,7 @@ export default Vue.extend({
 
       if (
         this.hideWalletWarning &&
-        !this.showMetamaskWarning &&
+        !this.showWalletModal &&
         (this.errorMessage || (this.ownCharacters.length === 0 && this.skillBalance === '0'))
       ) {
         (this as any).$dialog.notify.warning(i18n.t('app.warning.message.hideWalletWarning'),
@@ -394,24 +422,9 @@ export default Vue.extend({
       if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
       if (!localStorage.getItem('fightMultiplier')) localStorage.setItem('fightMultiplier', '1');
     },
-    async connectWalletConnect(){
-      const rpcs = {} as RPCS;
-      config.supportedChains.forEach((chain) => {
-        const chainId = getConfigValue('VUE_APP_NETWORK_ID', chain);
-        rpcs[chainId] = getConfigValue('rpcUrls',chain)[0];
-      });
-      const provider = new WalletConnectProvider({
-        rpc: rpcs,
-        chainId: JSON.parse(localStorage.getItem('walletconnect') || '').chainId,
-      });
-
-      //  Enable session (triggers QR Code modal)
-      await provider.enable();
-      this.setWeb3(new Web3(provider as any));
-    },
     walletConnectOnboarding(){
       (this as any).$router.push({ name: 'options' });
-      this.showMetamaskWarning = false;
+      this.showWalletModal = false;
       this.hideWalletWarning = true;
     }
   },
@@ -438,6 +451,7 @@ export default Vue.extend({
     Events.$on('toggle-sideBar', (bol: boolean) =>{
       this.toggleSideBar = bol;
     });
+    this.getAvailableWallets();
     this.showWarningDialog();
     if(this.hideWalletWarning) {
       this.configureMetamask();
@@ -447,17 +461,14 @@ export default Vue.extend({
     this.initializeSettings();
     this.checkChainAndParams();
     this.checkStorage();
-
-    if(!this.isWalletConnect){
-      await this.connectMetamask();
-    }
-    else{
-      this.showMetamaskWarning = false;
-      this.hideWalletWarning = true;
-      await this.connectWalletConnect();
-    }
+    console.log(SupportedWallets);
+    await this.connectWallet(this.lastConnectedWallet);
+    console.log('connected to wallet');
+    console.log(Web3.givenProvider);
     if(!this.web3.currentProvider){
-      this.showMetamaskWarning = true;
+      console.log(this.lastConnectedWallet);
+      this.showWalletModal = true;
+      console.log('!this.web3.currentProvider || !this.lastConnectedWallet');
     }
     try {
       await this.initializeStore();
@@ -1025,6 +1036,7 @@ a.character-tab:focus {
   margin: auto;
   text-align: center;
   overflow: auto auto;
+  background-color: #000E29;
 }
 
 .starter-panel-heading {
@@ -1118,5 +1130,14 @@ a.character-tab:focus {
   .vertical-decoration {
     width: 100%;
   }
+}
+.wallet-connection-container{
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.wallet-connection-container > button {
+  width: clamp(200px, 50%, 500px);
 }
 </style>
