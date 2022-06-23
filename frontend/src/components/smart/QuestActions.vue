@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isInitialized && (character || deletable || supply)" class="quest-actions-display gap-2 p-2">
+  <div v-if="isInitialized && (showActions || deletable)" class="quest-actions-display gap-2 p-2">
     <span v-if="showSupply && supply" class="text-center">
       {{ $t('quests.supplyLeft', {supply}) }}
     </span>
@@ -9,12 +9,15 @@
     <span v-else-if="afterDeadline" class="text-center">
       {{ $t('quests.questDeadlineOverCannotBeCompleted') }}
     </span>
-    <b-button v-if="character && character.quest.id === 0" :disabled="isLoading" variant="primary" @click="request">
-      {{ $t('quests.requestQuest') }}
+    <b-button v-if="character && character.quest.id === 0" :disabled="isLoading" variant="primary request-btn" @click="request">
+      <span> {{ $t('quests.requestQuest') }} </span>
     </b-button>
-    <b-button v-else-if="questCanBeCompleted && !afterDeadline && character" :disabled="isLoading" variant="primary"
+    <b-button v-if="character && character.quest.id === 0" :disabled="isLoading" variant="primary request-btn" @click="showPickableQuestModal=true;">
+      <span> Request Special Quest </span>
+    </b-button>
+    <b-button v-else-if="questCanBeCompleted && !afterDeadline && !deletable" :disabled="isLoading" variant="primary"
               class="flex-1"
-              @click="complete" :id="character.id" :key="character.id">
+              @click="complete">
       {{ $t('quests.complete') }}
     </b-button>
     <b-button v-if="deletable" variant="primary" class="flex-1" @click="deleteQuestTemplate()"
@@ -22,7 +25,7 @@
       {{ $t('quests.deleteQuest') }}
     </b-button>
     <b-button
-      v-if="character && quest.requirementType !== RequirementType.RAID && !questCanBeCompleted && !afterDeadline"
+      v-if="quest.requirementType !== RequirementType.RAID && !questCanBeCompleted && !afterDeadline && !deletable"
       :disabled="isLoading" variant="primary"
       class="flex-1" @click="submit">
       {{ $t('quests.submit') }}
@@ -36,7 +39,7 @@
           class="text-center">{{
         $t('quests.freeSkipResetsIn', {time: nextFreeSkipTime})
       }}</span>
-    <QuestSubmissionModal v-if="character" :showModal="showSubmissionModal" :character="character"
+    <QuestSubmissionModal v-if="character||quest" :quest="quest" :questTemplateType="questTemplateType" :showModal="showSubmissionModal" :character="character"
                           @close-submission-modal="onCloseSubmissionModal"/>
 
     <b-modal v-model="showQuestCompleteModal" ok-only class="centered-modal" :title="$t('quests.questComplete')"
@@ -49,17 +52,56 @@
                    :amount="quest.rewardAmount" :reputationAmount="quest.reputationAmount"
                    :externalAddress="quest.rewardExternalAddress"/>
     </b-modal>
+    <b-modal v-model="showPickableQuestModal" ok-only class="centered-modal" title="Pick your Quest">
+      <div v-if="isLoading">
+        <i class="fas fa-spinner fa-spin"/>
+        {{ $t('quests.loading') }}
+      </div>
+      <div>
+        <b-form inline>
+          <label class="mr-sm-2">Special Quest Tier</label>
+          <b-form-select class="mt-2 mb-2" v-model="pickableQuestTier">
+            <b-form-select-option :value="undefined" disabled>
+              {{ $t('quests.pleaseSelectQuestTier') }}
+            </b-form-select-option>
+            <b-form-select-option v-for="tier in tiers" :key="tier" :value="tier">
+              {{ $t(`quests.rarityType.${Rarity[tier]}`) }}
+            </b-form-select-option>
+          </b-form-select>
+        </b-form>
+          <div v-if="isLoading">
+            <i class="fas fa-spinner fa-spin"/>
+            {{ $t('quests.loading') }}
+          </div>
+          <h3 v-else-if="quests.length === 0">
+            {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
+          <div v-else class="d-flex flex-column gap-3">
+            <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row p-3 gap-5">
+              <QuestRequirements :quest="quest" :index="index"/>
+              <QuestRewards :quest="quest"/>
+              <div class="pickBtn-wrapper">
+              <b-button class="pickBtn" variant="primary" @click="pickQuest(index)">
+                <!-- {{ $t('quests.pickQuest') }} -->
+                Pick
+              </b-button>
+              </div>
+            </div>
+          </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
+import {Quest, Rarity, RequirementType, RewardType, QuestTemplateType} from '@/views/Quests.vue';
 import {Nft} from '../../interfaces/Nft';
 import Hint from '@/components/Hint.vue';
 import QuestSubmissionModal from '@/components/smart/QuestSubmissionModal.vue';
 import QuestReward from '@/components/smart/QuestReward.vue';
+import QuestRequirements from '@/components/smart/QuestRequirements.vue';
+import QuestRewards from '@/components/smart/QuestRewards.vue';
 import {mapActions} from 'vuex';
 import {NftIdType} from '@/components/smart/NftList.vue';
 import {getTimeRemaining} from '@/utils/common';
@@ -79,10 +121,19 @@ interface Data {
   isLimited: boolean;
   isInitialized: boolean;
   supply: number;
+  showPickableQuestModal: boolean;
+  pickableQuestTier?: Rarity;
+  quests: Quest[];
 }
 
 export default Vue.extend({
-  components: {Hint, QuestSubmissionModal, QuestReward},
+  components: {
+    Hint,
+    QuestSubmissionModal,
+    QuestReward,
+    QuestRequirements,
+    QuestRewards,
+  },
   props: {
     character: {
       type: Object as PropType<Nft>,
@@ -111,6 +162,14 @@ export default Vue.extend({
     questSupply: {
       type: Number,
     },
+    showActions: {
+      type: Boolean,
+      default: true,
+    },
+    questTemplateType: {
+      type: Number as PropType<QuestTemplateType>,
+      required: true,
+    },
   },
 
   data() {
@@ -132,6 +191,11 @@ export default Vue.extend({
       RequirementType,
       RewardType,
       Rarity,
+      QuestTemplateType,
+      showPickableQuestModal: false,
+      tiers: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
+      pickableQuestTier: undefined,
+      quests: [],
     } as Data;
   },
 
@@ -148,7 +212,11 @@ export default Vue.extend({
       return this.isLimited && !!this.deadlineTime;
     },
   },
-
+  watch: {
+    pickableQuestTier(): void {
+      this.fetchPickableQuests();
+    },
+  },
   methods: {
     ...mapActions([
       'skipQuest',
@@ -157,12 +225,22 @@ export default Vue.extend({
       'requestQuest',
       'getSkipQuestStaminaCost',
       'completeQuest',
+      'completeWalletQuest',
+      'requestPickableQuest',
       'nextFreeSkip',
       'getQuestDeadline',
       'getQuestSupply',
       'deleteQuest',
+      'getQuestTemplates',
     ]),
-
+    async fetchPickableQuests() {
+      try {
+        this.isLoading = true;
+        this.quests = await this.getQuestTemplates({tier: this.pickableQuestTier! + 30});
+      } finally {
+        this.isLoading = false;
+      }
+    },
     submit() {
       this.isLoading = true;
       this.showSubmissionModal = true;
@@ -195,9 +273,17 @@ export default Vue.extend({
     async complete() {
       try {
         this.isLoading = true;
-        const rewards = await this.completeQuest({characterID: this.character.id});
-        const rewardType = this.quest.rewardType;
-        await this.refreshSkipQuestData();
+        let rewards;
+        let rewardType: any;
+        if(this.questTemplateType === QuestTemplateType.QUEST || this.questTemplateType === QuestTemplateType.PROMO) {
+          rewards = await this.completeQuest({characterID: this.character.id});
+          rewardType = this.quest.rewardType;
+          await this.refreshSkipQuestData();
+        }
+        else if(this.questTemplateType === QuestTemplateType.WALLET){
+          rewards = await this.completeWalletQuest({questID: this.quest.id});
+          rewardType = this.quest.rewardType;
+        }
         if (!rewardType || rewardType === RewardType.EXPERIENCE || rewardType === RewardType.DUST || rewardType === RewardType.SOUL) {
           this.showQuestCompleteModal = true;
           return;
@@ -224,10 +310,20 @@ export default Vue.extend({
       }
     },
 
+    async pickQuest(index: number){
+      try {
+        this.isLoading = true;
+        await this.requestPickableQuest({characterID: this.character.id, pickableIndex: index});
+        this.$emit('refresh-quest-data');
+      } finally {
+        this.isLoading = false;
+        this.$forceUpdate();
+      }
+    },
     async deleteQuestTemplate() {
       try {
         this.isLoading = true;
-        await this.deleteQuest({tier: this.quest.tier, questID: this.quest.id});
+        await this.deleteQuest({tier: this.quest.tier!+this.questTemplateType, questID: this.quest.id});
         this.$emit('refresh-quest-data');
       } finally {
         this.isLoading = false;
@@ -323,5 +419,21 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: center;
   flex: 1;
+}
+.request-btn{
+  width: 30%;
+  align-self: flex-end;
+}
+.quest-row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  background: #141414;
+  border: 1px solid #60583E;
+  border-radius: 10px;
+  align-items: flex-end;
+}
+.pickBtn{
+  align-self: flex-end;
 }
 </style>

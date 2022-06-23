@@ -1,5 +1,6 @@
 <template>
-  <div v-if="character" class="quest-row gap-5"
+<div class="w-100">
+  <div v-if="questTemplateType === QuestTemplateType.QUEST && character" class="quest-row gap-5"
        :class="character.status !== undefined && (character.status !== NftStatus.AVAILABLE) ? 'busy-quest-row' : ''">
     <QuestCharacter :character="character" :quest="character.quest"
                     :reputationLevelRequirements="reputationLevelRequirements"/>
@@ -7,19 +8,25 @@
                        :progress="character.quest.progress" :index="characterId"/>
     <QuestRewards v-if="character.quest && character.quest.id !== 0" :quest="character.quest"/>
     <QuestActions :character="character" :quest="character.quest" :key="character.quest.id"
-                  @refresh-quest-data="onRefreshQuestData"/>
+                  @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
+  <div v-if="questTemplateType === QuestTemplateType.WALLET && quest" class="quest-row gap-5">
+    <QuestRequirements :quest="quest" :progress="quest.progress"/>
+    <QuestRewards v-if="quest && quest.id !== 0" :quest="quest"/>
+    <QuestActions :quest="quest" :key="quest.id"
+                  @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
+  </div>
+</div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import {Accessors, PropType} from 'vue/types/options';
-import {Rarity, RewardType} from '@/views/Quests.vue';
 import QuestCharacter from '@/components/smart/QuestCharacter.vue';
 import QuestRequirements from '@/components/smart/QuestRequirements.vue';
 import QuestRewards from '@/components/smart/QuestRewards.vue';
 import QuestActions from '@/components/smart/QuestActions.vue';
-import {Quest, ReputationLevelRequirements} from '../../views/Quests.vue';
+import {Quest, ReputationLevelRequirements, Rarity, RewardType, QuestTemplateType} from '@/views/Quests.vue';
 import {mapActions, mapGetters} from 'vuex';
 import {Nft, NftStatus} from '@/interfaces/Nft';
 
@@ -43,10 +50,15 @@ export default Vue.extend({
   props: {
     characterId: {
       type: Number as PropType<number | string>,
-      required: true,
+    },
+    quest: {
+      type: Object as PropType<Quest>,
     },
     reputationLevelRequirements: {
       type: Object as PropType<ReputationLevelRequirements>,
+    },
+    questTemplateType: {
+      type: Number as PropType<QuestTemplateType>,
     },
   },
 
@@ -57,6 +69,7 @@ export default Vue.extend({
       RewardType,
       Rarity,
       NftStatus,
+      QuestTemplateType
     } as Data;
   },
 
@@ -78,7 +91,9 @@ export default Vue.extend({
       if (!this.character) return;
       try {
         this.isLoading = true;
-        this.character.quest = await this.getCharacterQuestData({characterId: this.characterId});
+        if(this.questTemplateType === QuestTemplateType.QUEST){
+          this.character.quest = await this.getCharacterQuestData({characterId: this.characterId});
+        }
         this.$forceUpdate();
       } finally {
         this.isLoading = false;
@@ -88,8 +103,10 @@ export default Vue.extend({
 
 
   async mounted() {
-    this.character = await this.charactersWithIds([this.characterId]).filter(Boolean)[0];
-    this.character.status = +await this.getCharacterBusyStatus({characterId: this.characterId});
+    if(this.questTemplateType === QuestTemplateType.QUEST){
+      this.character = await this.charactersWithIds([this.characterId]).filter(Boolean)[0];
+      this.character.status = +await this.getCharacterBusyStatus({characterId: this.characterId});
+    }
     await this.refreshQuestData();
   },
 
@@ -105,6 +122,8 @@ export default Vue.extend({
   border: 1px solid #60583E;
   border-radius: 10px;
   align-items: center;
+  min-height: 150px;
+  padding: 0 20px;
 }
 
 .busy-quest-row {
