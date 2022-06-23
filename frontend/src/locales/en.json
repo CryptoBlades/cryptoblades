@@ -1356,7 +1356,8 @@
       "buttons": {
         "addMetamask": "Add MetaMask",
         "confMetamask": "Configure MetaMask",
-        "startMetamask": "Connect to MetaMask",
+        "connectWallet": "Connect {walletName}",
+        "connectedToWallet": "{walletName} connected",
         "network": "Switch to BNB Network",
         "hide": "Hide Warning"
       },
