@@ -1,4 +1,10 @@
 <template>
+  <div class="skill-balance-display-wrapper d-flex justify-center align-center">
+    <div class="h1 mb-0"
+    @click="openWalletModal()">
+      <b-icon-wallet class="walletIcon" ></b-icon-wallet>
+    </div>
+
   <div class="skill-balance-display d-flex flex-column flex-wrap p-2 custom-skill-balance-mobile" :style="isToggled ? 'padding-bottom: 10px !important': '' ">
     <div class="d-flex justify-content-end align-items-center pr-2 pb-1">
       <div size="sm" class="my-2 my-sm-0 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
@@ -131,6 +137,7 @@
       </div>
     </b-modal>
   </div>
+</div>
 </template>
 
 <script lang="ts">
@@ -148,6 +155,7 @@ import { getCleanName } from '@/rename-censor';
 import ElementTrait from '@/components/smart/ElementTrait.vue';
 import { SupportedProject } from '@/views/Treasury.vue';
 import PartneredProject from '../PartneredProject.vue';
+import Events from '../../events';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -367,6 +375,10 @@ export default Vue.extend({
     ...(mapActions(['fetchPartnerProjects',
       'getPartnerProjectMultiplier', 'claimPartnerToken']) as StoreMappedTreasuryActions),
     ...(mapMutations(['updatePayoutCurrencyId']) as StoreMappedMutations),
+    openWalletModal(){
+      localStorage.setItem('hideWalletWarning', 'false');
+      Events.$emit('setting:hideWalletWarning', { value:false });
+    },
     async onClaimTokens() {
       if(this.payoutCurrencyId !== '-1') {
         const currentMultiplier = await this.getPartnerProjectMultiplier(+this.payoutCurrencyId);
@@ -469,6 +481,8 @@ export default Vue.extend({
     border-bottom: 1px solid #707070;
     border-left: 0px;
     padding: 0px !important;
+    display:flex;
+    flex-direction: column;
   }
 
   .balance-container > div > span{
@@ -578,6 +592,9 @@ export default Vue.extend({
 .iframe{
   min-height: 850px;
   width: 100%;
+}
+.walletIcon{
+  color: #BFA765;
 }
 
 </style>
