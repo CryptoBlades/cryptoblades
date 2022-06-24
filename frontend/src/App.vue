@@ -126,7 +126,7 @@ import { addChainToRouter } from '@/utils/common';
 import Web3 from 'web3';
 import { Contracts, ICharacter } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
-import { SupportedWallets, SupportedWalletChecks } from '@/store/wallet';
+import { SupportedWallets } from '@/store/wallet';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -216,7 +216,6 @@ export default Vue.extend({
       doPollAccounts: false,
       availableWallets: [],
       SupportedWallets,
-      SupportedWalletChecks,
       showWalletWarningModal: false,
     } as Data;
   },
