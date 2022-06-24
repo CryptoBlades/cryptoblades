@@ -294,7 +294,7 @@ interface Data {
   isBridgeEnabled: boolean;
   showGraphics: boolean;
   hideRewards: boolean;
-  hideWalletWarning: boolean;
+  hideWalletModal: boolean;
   showSkillInUsd: boolean;
   isMenuOpen: boolean;
 }
@@ -317,7 +317,7 @@ export default Vue.extend({
   created() {
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
-    this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
+    this.hideWalletModal = localStorage.getItem('hideWalletModal') === 'true';
     this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
   },
 
@@ -327,7 +327,7 @@ export default Vue.extend({
       isMenuOpen: false,
       showGraphics: false,
       hideRewards: false,
-      hideWalletWarning: false,
+      hideWalletModal: false,
       showSkillInUsd: false,
       ClaimStage,
       raid,
@@ -427,12 +427,12 @@ export default Vue.extend({
       }
     },
 
-    toggleHideWalletWarning() {
-      this.hideWalletWarning = !this.hideWalletWarning;
-      if (this.hideWalletWarning) localStorage.setItem('hideWalletWarning', 'true');
-      else localStorage.setItem('hideWalletWarning', 'false');
+    togglehideWalletModal() {
+      this.hideWalletModal = !this.hideWalletModal;
+      if (this.hideWalletModal) localStorage.setItem('hideWalletModal', 'true');
+      else localStorage.setItem('hideWalletModal', 'false');
 
-      Events.$emit('setting:hideWalletWarning', {value: this.hideWalletWarning});
+      Events.$emit('setting:hideWalletModal', {value: this.hideWalletModal});
     },
 
     toggleShowSkillInUsd() {

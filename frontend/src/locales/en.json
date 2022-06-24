@@ -1351,15 +1351,14 @@
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
     "warning": {
-      "title": "Metamask Not Detected",
+      "title": "No Wallet Detected!",
       "start": "Get Started With CryptoBlades",
       "buttons": {
-        "addMetamask": "Add MetaMask",
-        "confMetamask": "Configure MetaMask",
+        "addWallet": "Add {walletName}",
+        "confMetamask": "Configure Wallet",
         "connectWallet": "Connect {walletName}",
         "connectedToWallet": "{walletName} connected",
-        "network": "Switch to BNB Network",
-        "hide": "Hide Warning"
+        "hide": "Hide"
       },
       "errorMessage": {
         "connecting": "Connecting to MetaMask...",
@@ -1403,7 +1402,7 @@
           "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
           "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
         },
-        "hideWalletWarning": "You have hidden the wallet warning and it would now be displayed. If you are trying to play, please disable the option and follow the instructions, otherwise close and ignore.",
+        "hideWalletModal": "You have hidden the wallet warning and it would now be displayed. If you are trying to play, please disable the option and follow the instructions, otherwise close and ignore.",
         "happyEarning": "Happy Earning!",
         "newCharacter": "New character",
         "inGarrison:": "appeared in Garrison"

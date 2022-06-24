@@ -755,7 +755,6 @@ export default new Vuex.Store<IState>({
     async pollAccountsAndNetwork({ state, dispatch, commit }) {
       let refreshUserDetails = false;
       const networkId = await state.web3.eth.net.getId();
-
       if(state.currentNetworkId !== networkId) {
         commit('setNetworkId', networkId);
         refreshUserDetails = true;
@@ -2603,85 +2602,6 @@ export default new Vuex.Store<IState>({
       await Promise.all([
         dispatch('fetchCharacterCosmetic', id)
       ]);
-    },
-
-    async configureMetaMask({ state, dispatch }) {
-      const currentNetwork = await state.web3.eth.net.getId();
-      if(currentNetwork === +getConfigValue('VUE_APP_NETWORK_ID')) return;
-      dispatch('configureChainNet', {
-        networkId: +getConfigValue('VUE_APP_NETWORK_ID'),
-        chainId: getConfigValue('chainId'),
-        chainName: getConfigValue('VUE_APP_EXPECTED_NETWORK_NAME'),
-        currencyName: getConfigValue('currencyName'),
-        currencySymbol: getConfigValue('currencySymbol'),
-        currencyDecimals: +getConfigValue('currencyDecimals'),
-        rpcUrls: getConfigValue('rpcUrls'),
-        blockExplorerUrls: getConfigValue('blockExplorerUrls'),
-        skillAddress: getConfigValue('VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS')
-      });
-    },
-    async configureChainNet(
-      { state, commit },
-      { networkId, chainId, chainName, currencyName, currencySymbol, currencyDecimals, rpcUrls, blockExplorerUrls, skillAddress }:
-      { networkId: number,
-        chainId: string,
-        chainName: string,
-        currencyName: string,
-        currencySymbol: string,
-        currencyDecimals: number,
-        rpcUrls: string[],
-        blockExplorerUrls: string[],
-        skillAddress: string,
-      })
-    {
-      commit('setNetworkId', networkId);
-      try {
-        await (state.web3.currentProvider as any).request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId }],
-        });
-      } catch (switchError) {
-        try {
-          await (state.web3.currentProvider as any).request({
-            method: 'wallet_addEthereumChain',
-            params: [
-              {
-                chainId,
-                chainName,
-                nativeCurrency: {
-                  name: currencyName,
-                  symbol: currencySymbol,
-                  decimals: currencyDecimals,
-                },
-                rpcUrls,
-                blockExplorerUrls,
-              },
-            ],
-          });
-        } catch (addError) {
-          console.error(addError);
-          return;
-        }
-      }
-
-      try {
-        await (state.web3.currentProvider as any).request({
-          method: 'wallet_watchAsset',
-          params: {
-            type: 'ERC20',
-            options: {
-              address: skillAddress,
-              symbol: 'SKILL',
-              decimals: 18,
-              image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
-            },
-          },
-        });
-      } catch (error) {
-        console.error(error);
-      }
-
-      window.location.reload();
     },
     async transferNFT({ state, dispatch },{nftId, receiverAddress, nftType}: {nftId: number, receiverAddress: string, nftType: string}) {
       const { Characters, Garrison, Junk, KeyLootbox, RaidTrinket, Shields, Weapons } = state.contracts();

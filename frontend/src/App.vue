@@ -10,51 +10,43 @@
         <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
       </b-row>
     </div>
-    <div class="content bg-dark" v-if="!canShowApp && !showWalletModal">
+    <div class="content bg-dark" v-if="!canShowApp">
       <div class="outcome mb-0 mt-0">
         <i class="fas fa-spinner fa-spin"></i>
       </div>
     </div>
 
-    <!--*****  NOT NEEDED ANYMORE ***** -->
-
-    <!-- <div class="fullscreen-warning" v-if="showMetamaskWarning">
+    <div class="fullscreen-warning" v-if="showWalletWarningModal">
       <div class="starter-panel">
         <div class="tob-bg-img promdotion-decoration">
           <img class="vertical-decoration bottom" src="./assets/border-element.png">
         </div>
         <span class="starter-panel-heading">{{ $t('app.warning.title') }}</span>
-        <div class="center">
-          <big-button class="button common-width-button"
-          :mainText="$t('app.warning.buttons.addMetamask')" @click="startOnboarding" v-if="showMetamaskWarning" />
-          <big-button class="button common-width-button"
-          mainText="Wallet Connect" @click="walletConnectOnboarding()" />
+          <div
+            class="wallet-connection-container"
+            v-for="(wallet, index) in SupportedWallets"
+            :key="index"
+          >
+            <b-button size="lg" class="m-2" variant="outline-primary"
+            @click="startOnboarding(wallet)"
+            >
+            {{ $t('app.warning.buttons.addWallet', {walletName: wallet})}}
+            </b-button>
         </div>
       </div>
-    </div> -->
-
-
-    <!-- ***** Do we need that check? ***** -->
-     <!--  || (!(ownCharacters.length === 0 && skillBalance === '0')) -->
+    </div>
     <div
       class="fullscreen-warning"
-      v-if="!hideWalletWarning"
+      v-if="!hideWalletModal && !showWalletWarningModal"
     >
+     <!-- ***** Do we need that check? ***** -->
+     <!--  || (!(ownCharacters.length === 0 && skillBalance === '0')) -->
       <div class="starter-panel">
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
         <span class="starter-panel-heading">{{ errorMessage || $t('app.warning.start') }}</span>
         <img class="mini-icon-starter" src="./assets/placeholder/sword-placeholder-6.png" alt="cross swords" srcset="" />
         <div>
 
-
-          <!-- <big-button class="button mm-button" :mainText="$t('app.warning.buttons.confMetamask')" @click="configureMetamask" /> -->
-
-
-          <!-- <cb-button v-if="reforgeWeaponId !== null && ownWeapons.length > 0" class="custom-cb-btn custom-reforge-btn" tagname="weapon_special_forge"
-            :title="$t('blacksmith.reforgeWithDust')"
-            @clickEvent="$emit('displayDustReforge')"
-            :toolTip="$t('blacksmith.useDust')"
-          /> -->
           <div class="wallet-connection-container"
             v-for="(wallet, index) in SupportedWallets"
             :key="index"
@@ -62,15 +54,14 @@
 
             <b-button size="lg" class="m-2" variant="outline-primary"
             @click="connectWallet(wallet); initializeStore()"
+            :disabled="!availableWallets.includes(wallet) && wallet !== SupportedWallets.WALLETCONNECT"
             >
             {{connectedWallet === wallet ?
             $t('app.warning.buttons.connectedToWallet', {walletName: wallet}):
             $t('app.warning.buttons.connectWallet', {walletName: wallet})}}
             </b-button>
           </div>
-            <b-button size="lg" class="m-2" variant="outline-primary" @click="startOnboarding" v-if="showWalletModal" >
-              Add Metamask
-            </b-button>
+
         </div>
         <div class="seperator"></div>
         <div class="instructions-list">
@@ -94,7 +85,11 @@
           </p>
         </div>
         <div class="seperator"></div>
-        <small-button class="button mm-button" @click="toggleHideWalletWarning" :text="$t('app.warning.buttons.hide')" />
+        <b-button size="lg" class="m-2" variant="outline-primary"
+        @click="togglehideWalletModal"
+        >
+        {{$t('app.warning.buttons.hide')}}
+        </b-button>
       </div>
       <div v-if="showAds && !isMobile()" class="ad-container">
       <script2 src="https://coinzillatag.com/lib/display.js"></script2>
@@ -120,7 +115,6 @@ import _ from 'lodash';
 import Vue from 'vue';
 import Events from './events';
 import MetaMaskOnboarding from '@metamask/onboarding';
-import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
 import WeaponRowGrid from './components/smart/WeaponRowGrid.vue';
@@ -140,7 +134,7 @@ Vue.directive('visible', (el, bind) => {
 
 interface Data {
   errorMessage: string,
-  hideWalletWarning: boolean,
+  hideWalletModal: boolean,
   showAds: boolean,
   isConnecting: boolean,
   isConnected: boolean,
@@ -150,11 +144,11 @@ interface Data {
   weaponId: null | number,
   toggleSideBar: boolean,
   currentPath: string,
-  showWalletModal: boolean,
   pollCharacterStaminaIntervalId: ReturnType<typeof setInterval> | null,
   slowPollIntervalId: ReturnType<typeof setInterval> | null,
   doPollAccounts: boolean,
   availableWallets: any[],
+  showWalletWarningModal: boolean,
 }
 
 interface StoreMappedState {
@@ -178,7 +172,11 @@ interface StoreMappedActions {
   initializeStore: () => void,
   fetchCharacterStamina: (characterId: number) => void,
   pollAccountsAndNetwork: () => void,
-  configureMetaMask: () => Promise<void>,
+}
+
+interface StoreMappedWalletActions {
+  connectWallet: (wallet: SupportedWallets) => void,
+  configureWallet: () => Promise<void>,
 }
 
 interface StoreMappedMutations {
@@ -197,14 +195,13 @@ export default Vue.extend({
   components: {
     NavBar,
     CharacterBar,
-    SmallButton,
     WeaponRowGrid,
   },
 
   data() {
     return {
       errorMessage: '',
-      hideWalletWarning: false,
+      hideWalletModal: false,
       showAds: false,
       isConnecting: false,
       isConnected: false,
@@ -214,12 +211,12 @@ export default Vue.extend({
       weaponId: null,
       toggleSideBar: false,
       currentPath: '',
-      showWalletModal: false,
       pollCharacterStaminaIntervalId: null,
       slowPollIntervalId: null,
       doPollAccounts: false,
       availableWallets: [],
-      SupportedWallets
+      SupportedWallets,
+      showWalletWarningModal: false,
     } as Data;
   },
 
@@ -236,8 +233,8 @@ export default Vue.extend({
       return localStorage.getItem('currentChain') || '';
     },
 
-    lastConnectedWallet(): SupportedWallets {
-      return SupportedWallets[localStorage.getItem('lastConnectedWallet') as keyof typeof SupportedWallets];
+    lastConnectedWallet(): string {
+      return localStorage.getItem('lastConnectedWallet') || '';
     },
 
     isOptions(): boolean {
@@ -260,12 +257,11 @@ export default Vue.extend({
       'initializeStore',
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
-      'configureMetaMask',
     ]) as StoreMappedActions,
     ...mapActions('wallet',[
       'connectWallet',
-      // 'testConnection'
-    ]),
+      'configureWallet',
+    ]) as StoreMappedWalletActions,
     ...mapMutations([
       'setWeb3',
       'updateCurrentChainSupportsPvP',
@@ -276,6 +272,8 @@ export default Vue.extend({
 
       const paramChain = (this as any).$router.currentRoute.query.chain;
       const supportedChains = window.location.href.startsWith('https://test') ? config.testSupportedChains : config.supportedChains;
+      console.log('paramChain', paramChain);
+      console.log('currentChain', currentChain);
 
       if(!paramChain){
         localStorage.setItem('currentChain', currentChain);
@@ -283,13 +281,13 @@ export default Vue.extend({
       }
 
       //add chain as query param if chain unchanged
-      if(currentChain === paramChain || !paramChain){
+      else if(currentChain === paramChain || !paramChain){
         localStorage.setItem('currentChain', currentChain);
         addChainToRouter(currentChain);
       }
 
       //if user has an unsupported chain set (e.g. BSC instead of BNB) in storage
-      if(!supportedChains.includes(currentChain)){
+      else if(!supportedChains.includes(currentChain)){
         localStorage.setItem('currentChain', 'BNB');
         addChainToRouter('BNB');
       }
@@ -297,7 +295,7 @@ export default Vue.extend({
       //set chain in localStorage & MM from query param; check if supported
       else if (currentChain !== paramChain && supportedChains.includes(paramChain)){
         localStorage.setItem('currentChain', paramChain);
-        if(this.lastConnectedWallet !== SupportedWallets.WALLETCONNECT) await this.configureMetaMask();
+        if(this.lastConnectedWallet !== SupportedWallets.WALLETCONNECT) await this.configureWallet();
       }
       this.updateCurrentChainSupportsPvP();
       this.updateCurrentChainSupportsQuests();
@@ -309,7 +307,7 @@ export default Vue.extend({
     },
 
     checkStorage() {
-      this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
+      this.hideWalletModal = localStorage.getItem('hideWalletModal') === 'true';
       if (process.env.NODE_ENV === 'development') this.showAds = false;
       else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
@@ -322,18 +320,27 @@ export default Vue.extend({
         .toFixed(4);
     },
 
-    async startOnboarding() {
-      const onboarding = new MetaMaskOnboarding();
-      onboarding.startOnboarding();
+    async startOnboarding(supportedWallet: SupportedWallets) {
+      if(supportedWallet === SupportedWallets.WALLETCONNECT) {
+        this.showWalletWarningModal = false;
+        this.hideWalletModal = true;
+        (this as any).$router.push({ name: 'options' });
+      }
+      else if(supportedWallet === SupportedWallets.METAMASK) {
+        new MetaMaskOnboarding().startOnboarding();
+      }
+      else if(supportedWallet === SupportedWallets.COINBASE) {
+        const url = 'https://www.coinbase.com/wallet/getting-started-extension';
+        window.open(url, '_blank')!.focus();
+      }
     },
-    async configureMetamask() {
-      await this.configureMetaMask();
+    async configureWallet() {
+      await this.configureWallet();
     },
 
     getAvailableWallets() {
       // *** to do: simplify; use enums
-      //for some reason window.ethereum.providers is undefined if providers <2
-      console.log('providers');
+      //window.ethereum.providers is undefined if providers < 2
       console.log((window as any).ethereum.providers);
       if((window as any).ethereum.providers){
         const providers = (window as any).ethereum.providers;
@@ -347,23 +354,22 @@ export default Vue.extend({
       console.log(this.availableWallets);
     },
 
-    toggleHideWalletWarning() {
-      this.hideWalletWarning = !this.hideWalletWarning;
-      if (this.hideWalletWarning) localStorage.setItem('hideWalletWarning', 'true');
-      else localStorage.setItem('hideWalletWarning', 'false');
+    togglehideWalletModal() {
+      this.hideWalletModal = !this.hideWalletModal;
+      if (this.hideWalletModal) localStorage.setItem('hideWalletModal', 'true');
+      else localStorage.setItem('hideWalletModal', 'false');
 
-      Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
+      Events.$emit('setting:hideWalletModal', { value: this.hideWalletModal });
     },
 
     async showWarningDialog() {
       await new Promise((resolve) => setTimeout(resolve, 7500));
 
       if (
-        this.hideWalletWarning &&
-        !this.showWalletModal &&
+        this.hideWalletModal &&
         (this.errorMessage || (this.ownCharacters.length === 0 && this.skillBalance === '0'))
       ) {
-        (this as any).$dialog.notify.warning(i18n.t('app.warning.message.hideWalletWarning'),
+        (this as any).$dialog.notify.warning(i18n.t('app.warning.message.hideWalletModal'),
           {
             timeout: 0,
           },
@@ -419,20 +425,15 @@ export default Vue.extend({
     initializeSettings(){
       if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
       if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
-      if (!localStorage.getItem('hideWalletWarning')) localStorage.setItem('hideWalletWarning', 'false');
+      if (!localStorage.getItem('hideWalletModal')) localStorage.setItem('hideWalletModal', 'false');
       if (!localStorage.getItem('fightMultiplier')) localStorage.setItem('fightMultiplier', '1');
     },
-    walletConnectOnboarding(){
-      (this as any).$router.push({ name: 'options' });
-      this.showWalletModal = false;
-      this.hideWalletWarning = true;
-    }
   },
 
   async mounted() {
     Events.$on('setting:hideRewards', () => this.checkStorage());
     Events.$on('setting:useGraphics', () => this.checkStorage());
-    Events.$on('setting:hideWalletWarning', () => this.checkStorage());
+    Events.$on('setting:hideWalletModal', () => this.checkStorage());
     // Events.$on('garrison:characterReceived', (e) => {
     //   this.$dialog.notify.warning(`${i18n.t('app.warning.message.newCharacter')} ID: ${e.id} ${i18n.t('app.warning.message.inGarrison')}!`,
     //     {
@@ -451,61 +452,66 @@ export default Vue.extend({
     Events.$on('toggle-sideBar', (bol: boolean) =>{
       this.toggleSideBar = bol;
     });
-    this.getAvailableWallets();
     this.showWarningDialog();
-    if(this.hideWalletWarning) {
-      this.configureMetamask();
+    if(this.hideWalletModal) {
+      this.configureWallet();
     }
   },
   async created() {
     this.initializeSettings();
-    this.checkChainAndParams();
     this.checkStorage();
     console.log(SupportedWallets);
-    await this.connectWallet(this.lastConnectedWallet);
-    console.log('connected to wallet');
-    console.log(Web3.givenProvider);
-    if(!this.web3.currentProvider){
-      console.log(this.lastConnectedWallet);
-      this.showWalletModal = true;
-      console.log('!this.web3.currentProvider || !this.lastConnectedWallet');
+
+    //check if any eth provider is available
+    console.log((window as any).ethereum);
+    if(!(window as any).ethereum){
+      this.showWalletWarningModal = true;
     }
-    try {
-      await this.initializeStore();
-    } catch (e: any) {
-      this.errorMessage = i18n.t('app.warning.errorMessage.welcome').toString();
-      if (e.code === 4001) {
-        this.errorMessage = i18n.t('app.warning.errorMessage.error').toString();
+    else{
+      this.getAvailableWallets();
+      await this.connectWallet(this.lastConnectedWallet);
+      this.checkChainAndParams();
+      if(!this.web3.currentProvider){
+        console.log(this.lastConnectedWallet);
+        console.log('!this.web3.currentProvider || !this.lastConnectedWallet');
       }
-
-      console.error(e);
-      throw e;
-    }
-
-    this.pollCharacterStaminaIntervalId = setInterval(async () => {
-      this.ownCharacters.forEach(async (c) => {
-        await this.updateCharacterStamina(c.id);
-      });
-      this.ownGarrisonCharacters.forEach(async (c) => {
-        await this.updateCharacterStamina(c.id);
-      });
-    }, 250000);
-
-    this.doPollAccounts = true;
-    const pollAccounts = async () => {
-      if (!this.doPollAccounts) return;
-
       try {
-        await this.pollAccountsAndNetwork();
-      } catch (e) {
+        await this.initializeStore();
+      } catch (e: any) {
+        this.errorMessage = i18n.t('app.warning.errorMessage.welcome').toString();
+        if (e.code === 4001) {
+          this.errorMessage = i18n.t('app.warning.errorMessage.error').toString();
+        }
+
         console.error(e);
+        throw e;
       }
-    };
 
-    pollAccounts();
+      this.pollCharacterStaminaIntervalId = setInterval(async () => {
+        this.ownCharacters.forEach(async (c) => {
+          await this.updateCharacterStamina(c.id);
+        });
+        this.ownGarrisonCharacters.forEach(async (c) => {
+          await this.updateCharacterStamina(c.id);
+        });
+      }, 250000);
 
-    this.checkNotifications();
-    this.initializeRecruitCost();
+      this.doPollAccounts = true;
+      const pollAccounts = async () => {
+        if (!this.doPollAccounts) return;
+
+        try {
+          await this.pollAccountsAndNetwork();
+        } catch (e) {
+          console.error(e);
+        }
+      };
+
+      pollAccounts();
+
+      this.checkNotifications();
+      this.initializeRecruitCost();
+    }
   },
 
   beforeDestroy() {

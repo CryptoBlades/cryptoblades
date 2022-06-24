@@ -48,21 +48,21 @@ const wallet = {
   },
   actions: {
     async connectWallet({state, commit, dispatch}: {commit: Commit, state: IWalletState, dispatch: Dispatch}, providerName: SupportedWallets) {
-      console.log('connectWallet', providerName);
-      //check multiple providers available
-      if(!(window as any).ethereum.providers){
-        console.log(Web3.givenProvider);
+      //check multiple providers available & exclude walletconnect
+      if(!(window as any).ethereum.providers && providerName !== SupportedWallets.WALLETCONNECT){
         const web3 = new Web3(Web3.givenProvider);
         commit('setWeb3', web3, { root: true });
       }
       else if(providerName === SupportedWallets.METAMASK){
         const web3 = new Web3((window as any).ethereum.providers.find((x: any) => x.isMetaMask));
         commit('setWeb3', web3, { root: true });
+        dispatch('configureWallet');
       }
 
       else if(providerName === SupportedWallets.COINBASE){
         const web3 = new Web3((window as any).ethereum.providers.find((x: any) => x.isCoinbaseWallet));
         commit('setWeb3', web3, { root: true });
+        dispatch('configureWallet');
       }
 
       else if (providerName === SupportedWallets.WALLETCONNECT){
@@ -93,14 +93,12 @@ const wallet = {
       state.connectionState = ConnectionState.CONNECTING;
 
       if(await dispatch('testConnection') || providerName === SupportedWallets.WALLETCONNECT){
-        console.log('connection successful');
         localStorage.setItem('lastConnectedWallet', providerName);
         commit('setConnectionState', ConnectionState.CONNECTED);
         commit('setConnectedWallet', providerName);
         return true;
       }
       else{
-        console.log('connection unsuccessful');
         commit('setConnectionState', ConnectionState.DISCONNECTED);
         return false;
       }
@@ -108,14 +106,93 @@ const wallet = {
     async testConnection({rootState}: {rootState: IState}){
       return rootState.web3.eth
         .requestAccounts()
-        .then((x) => {
-          console.log(x);
+        .then((res) => {
+          console.log(res);
           return true;
         })
-        .catch((x) => {
-          console.log(x);
+        .catch((err) => {
+          console.log(err);
           return false;
         });
+    },
+    async configureWallet({rootState, dispatch}: {rootState: IState, dispatch: Dispatch}) {
+      const currentNetwork = await rootState.web3.eth.net.getId();
+      if(currentNetwork === +getConfigValue('VUE_APP_NETWORK_ID')) return;
+      await dispatch('configureChainNet', {
+        networkId: +getConfigValue('VUE_APP_NETWORK_ID'),
+        chainId: getConfigValue('chainId'),
+        chainName: getConfigValue('VUE_APP_EXPECTED_NETWORK_NAME'),
+        currencyName: getConfigValue('currencyName'),
+        currencySymbol: getConfigValue('currencySymbol'),
+        currencyDecimals: +getConfigValue('currencyDecimals'),
+        rpcUrls: getConfigValue('rpcUrls'),
+        blockExplorerUrls: getConfigValue('blockExplorerUrls'),
+        skillAddress: getConfigValue('VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS')
+      });
+    },
+
+    async configureChainNet(
+      {rootState, commit}: {rootState: IState, commit: Commit},
+      { networkId, chainId, chainName, currencyName, currencySymbol, currencyDecimals, rpcUrls, blockExplorerUrls, skillAddress }:
+      { networkId: number,
+        chainId: string,
+        chainName: string,
+        currencyName: string,
+        currencySymbol: string,
+        currencyDecimals: number,
+        rpcUrls: string[],
+        blockExplorerUrls: string[],
+        skillAddress: string,
+      })
+    {
+      commit('setNetworkId', networkId, { root: true });
+      try {
+        await (rootState.web3.currentProvider as any).request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId }],
+        });
+      } catch (switchError) {
+        try {
+          await (rootState.web3.currentProvider as any).request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId,
+                chainName,
+                nativeCurrency: {
+                  name: currencyName,
+                  symbol: currencySymbol,
+                  decimals: currencyDecimals,
+                },
+                rpcUrls,
+                blockExplorerUrls,
+              },
+            ],
+          });
+        } catch (addError) {
+          console.error(addError);
+          return;
+        }
+      }
+
+      try {
+        await (rootState.web3.currentProvider as any).request({
+          method: 'wallet_watchAsset',
+          params: {
+            type: 'ERC20',
+            options: {
+              address: skillAddress,
+              symbol: 'SKILL',
+              decimals: 18,
+              image: 'https://app.cryptoblades.io/android-chrome-512x512.png',
+            },
+          },
+        });
+      } catch (error) {
+        console.error(error);
+      }
+
+      window.location.reload();
     },
   },
   // checkWalletConnection({state, commit, dispatch}: {commit: Commit, state: IWalletState, dispatch: Dispatch}){

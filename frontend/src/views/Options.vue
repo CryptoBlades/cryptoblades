@@ -28,8 +28,8 @@
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>{{$t("options.walletWarning")}}</h4>
-              <b-form-checkbox size="lg" :checked="hideWalletWarning" @change="toggleHideWalletWarning()" switch>
-                <b class="float-left">{{ hideWalletWarning ? $t("on") : $t("off")  }}</b>
+              <b-form-checkbox size="lg" :checked="hideWalletModal" @change="togglehideWalletModal()" switch>
+                <b class="float-left">{{ hideWalletModal ? $t("on") : $t("off")  }}</b>
               </b-form-checkbox>
             </b-list-group-item>
             <b-list-group-item class="d-flex justify-content-between align-items-center">
@@ -133,7 +133,7 @@ interface Data {
   showGraphics: boolean;
   hideRewards: boolean;
   hideAdvanced: boolean;
-  hideWalletWarning: boolean;
+  hideWalletModal: boolean;
   showSkillInUsd: boolean;
   showCosmetics: boolean;
   fightMultiplier: number;
@@ -167,7 +167,7 @@ export default Vue.extend({
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
     this.hideAdvanced = localStorage.getItem('hideAdvanced') === 'true';
-    this.hideWalletWarning = localStorage.getItem('hideWalletWarning') === 'true';
+    this.hideWalletModal = localStorage.getItem('hideWalletModal') === 'true';
     this.showSkillInUsd = localStorage.getItem('showSkillInUsd') === 'true';
     if(!localStorage.getItem('showCosmetics')) {
       localStorage.setItem('showCosmetics', 'true');
@@ -187,7 +187,7 @@ export default Vue.extend({
       showGraphics: false,
       hideRewards: false,
       hideAdvanced: false,
-      hideWalletWarning: false,
+      hideWalletModal: false,
       showSkillInUsd: false,
       showCosmetics: true,
       fightMultiplier: 1,
@@ -303,12 +303,12 @@ export default Vue.extend({
       }
     },
 
-    toggleHideWalletWarning() {
-      this.hideWalletWarning = !this.hideWalletWarning;
-      if (this.hideWalletWarning) localStorage.setItem('hideWalletWarning', 'true');
-      else localStorage.setItem('hideWalletWarning', 'false');
+    togglehideWalletModal() {
+      this.hideWalletModal = !this.hideWalletModal;
+      if (this.hideWalletModal) localStorage.setItem('hideWalletModal', 'true');
+      else localStorage.setItem('hideWalletModal', 'false');
 
-      Events.$emit('setting:hideWalletWarning', { value: this.hideWalletWarning });
+      Events.$emit('setting:hideWalletModal', { value: this.hideWalletModal });
     },
 
     toggleShowSkillInUsd() {

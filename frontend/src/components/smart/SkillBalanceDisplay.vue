@@ -376,8 +376,8 @@ export default Vue.extend({
       'getPartnerProjectMultiplier', 'claimPartnerToken']) as StoreMappedTreasuryActions),
     ...(mapMutations(['updatePayoutCurrencyId']) as StoreMappedMutations),
     openWalletModal(){
-      localStorage.setItem('hideWalletWarning', 'false');
-      Events.$emit('setting:hideWalletWarning', { value:false });
+      localStorage.setItem('hideWalletModal', 'false');
+      Events.$emit('setting:hideWalletModal', { value:false });
     },
     async onClaimTokens() {
       if(this.payoutCurrencyId !== '-1') {
