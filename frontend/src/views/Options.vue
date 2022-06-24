@@ -126,9 +126,13 @@ interface StoreMappedActions {
   claimTokenRewards(): Promise<void>;
   setUpContracts(): Promise<void>;
   initialize(): Promise<void>;
-  configureMetaMask(networkId: number): Promise<void>;
   fetchPartnerProjects(): Promise<void>;
 }
+
+interface StoreMappedWalletActions{
+  configureWallet(networkId: number): Promise<void>;
+}
+
 interface Data {
   showGraphics: boolean;
   hideRewards: boolean;
@@ -253,9 +257,11 @@ export default Vue.extend({
       'claimTokenRewards',
       'setUpContracts',
       'initialize',
-      'configureMetaMask',
       'fetchPartnerProjects',
     ]) as StoreMappedActions),
+    ...(mapActions('wallet',[
+      'configureWallet',
+    ]) as StoreMappedWalletActions),
     ...mapMutations([
       'setNetworkId',
       'updatePayoutCurrencyId',
@@ -339,7 +345,7 @@ export default Vue.extend({
       this.updateCurrentChainSupportsQuests();
       Events.$emit('setting:currentChain', { value: this.currentChain });
       addChainToRouter(this.currentChain);
-      if(!this.connectingWalletConnect) await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
+      if(!this.connectingWalletConnect) await this.configureWallet(+getConfigValue('VUE_APP_NETWORK_ID'));
     },
     async connectWallet() {
       if(this.isWalletConnect) {
