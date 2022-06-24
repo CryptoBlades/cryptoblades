@@ -233,8 +233,8 @@ export default Vue.extend({
       return localStorage.getItem('currentChain') || '';
     },
 
-    lastConnectedWallet(): string {
-      return localStorage.getItem('lastConnectedWallet') || '';
+    lastConnectedWallet(): SupportedWallets {
+      return localStorage.getItem('lastConnectedWallet') as SupportedWallets;
     },
 
     isOptions(): boolean {
