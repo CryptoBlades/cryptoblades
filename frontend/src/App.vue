@@ -126,7 +126,7 @@ import { addChainToRouter } from '@/utils/common';
 import Web3 from 'web3';
 import { Contracts, ICharacter } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
-import { SupportedWallets } from '@/store/wallet';
+import { SupportedWallets, SupportedWalletChecks } from '@/store/wallet';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -216,6 +216,7 @@ export default Vue.extend({
       doPollAccounts: false,
       availableWallets: [],
       SupportedWallets,
+      SupportedWalletChecks,
       showWalletWarningModal: false,
     } as Data;
   },
@@ -272,8 +273,6 @@ export default Vue.extend({
 
       const paramChain = (this as any).$router.currentRoute.query.chain;
       const supportedChains = window.location.href.startsWith('https://test') ? config.testSupportedChains : config.supportedChains;
-      console.log('paramChain', paramChain);
-      console.log('currentChain', currentChain);
 
       if(!paramChain){
         localStorage.setItem('currentChain', currentChain);
@@ -339,9 +338,7 @@ export default Vue.extend({
     },
 
     getAvailableWallets() {
-      // *** to do: simplify; use enums
       //window.ethereum.providers is undefined if providers < 2
-      console.log((window as any).ethereum.providers);
       if((window as any).ethereum.providers){
         const providers = (window as any).ethereum.providers;
         if(providers.find((x: any) => x.isMetaMask)) this.availableWallets.push(SupportedWallets.METAMASK);
@@ -351,7 +348,6 @@ export default Vue.extend({
         if(Web3.givenProvider.isMetaMask) this.availableWallets.push(SupportedWallets.METAMASK);
         if(Web3.givenProvider.isCoinbaseWallet) this.availableWallets.push(SupportedWallets.COINBASE);
       }
-      console.log(this.availableWallets);
     },
 
     togglehideWalletModal() {
@@ -434,13 +430,6 @@ export default Vue.extend({
     Events.$on('setting:hideRewards', () => this.checkStorage());
     Events.$on('setting:useGraphics', () => this.checkStorage());
     Events.$on('setting:hideWalletModal', () => this.checkStorage());
-    // Events.$on('garrison:characterReceived', (e) => {
-    //   this.$dialog.notify.warning(`${i18n.t('app.warning.message.newCharacter')} ID: ${e.id} ${i18n.t('app.warning.message.inGarrison')}!`,
-    //     {
-    //       timeout: 5000,
-    //     },
-    //   );
-    // });
     Events.$on('weapon-inventory', (bol: boolean) =>{
       this.showWeapon = bol;
     });
@@ -460,10 +449,8 @@ export default Vue.extend({
   async created() {
     this.initializeSettings();
     this.checkStorage();
-    console.log(SupportedWallets);
 
     //check if any eth provider is available
-    console.log((window as any).ethereum);
     if(!(window as any).ethereum){
       this.showWalletWarningModal = true;
     }
@@ -471,10 +458,6 @@ export default Vue.extend({
       this.getAvailableWallets();
       await this.connectWallet(this.lastConnectedWallet);
       this.checkChainAndParams();
-      if(!this.web3.currentProvider){
-        console.log(this.lastConnectedWallet);
-        console.log('!this.web3.currentProvider || !this.lastConnectedWallet');
-      }
       try {
         await this.initializeStore();
       } catch (e: any) {
