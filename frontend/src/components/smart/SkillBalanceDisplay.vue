@@ -595,6 +595,8 @@ export default Vue.extend({
 }
 .walletIcon{
   color: #BFA765;
+  vertical-align: middle;
+  font-size: 0.75em;
 }
 
 </style>
