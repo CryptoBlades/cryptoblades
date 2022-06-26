@@ -230,9 +230,11 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
         uint256 sourceTransferId
     ) public gameAdminRestricted
     {
+        require(botLog[sourceChain][sourceTransferId] == 0, "Already Processed");
         IERC20(_tokenAddress).transfer(receiver, _amount);
         transferIns[++_transferInsCount] = ERC20BridgeReceivedTokens(receiver, _tokenAddress, _amount, sourceChain, sourceTransferId);
         transferInOfPlayersHistory[receiver].add(_transferInsCount);
+        botLog[sourceChain][sourceTransferId] = _transferInsCount;
         emit BridgeIn(receiver, _tokenAddress, sourceChain, sourceTransferId, _amount);
     }
     
@@ -314,7 +316,7 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
         transferOut.status = status;
     }
 
-     function getTransferInFromLogV2(uint256 sourceChain, uint256 sourceTransferId) public view returns (uint256) {
+     function getTransferInFromLog(uint256 sourceChain, uint256 sourceTransferId) public view returns (uint256) {
         return botLog[sourceChain][sourceTransferId];
     }
 
