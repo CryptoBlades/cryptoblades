@@ -238,14 +238,6 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
         emit BridgeIn(receiver, _tokenAddress, sourceChain, sourceTransferId, _amount);
     }
     
-    function erc20BridgeIsEnabled() public view returns (bool) {
-        return erc20BridgeEnabled;
-    }
-
-    function setErc20BridgeIsEnabled(bool enabled) public restricted {
-        erc20BridgeEnabled = enabled;
-    }
-
     function getBridgeTransfers() public view returns (uint256) {
         return _transfersOutCount;
     }
