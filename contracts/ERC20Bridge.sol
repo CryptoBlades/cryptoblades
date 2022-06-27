@@ -353,4 +353,8 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
                 tokens[i] = token;
         }
     }
+
+    function recoverToken(address token, uint256 amount) public restricted {
+        IERC20(token).safeTransfer(msg.sender, amount);
+    }
 }
