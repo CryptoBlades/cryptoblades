@@ -5,7 +5,7 @@ import type {
   NFTMarket, WaxBridge, Blacksmith, Shields, Garrison, CharacterRenameTagConsumables,
   WeaponRenameTagConsumables, CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables,
   CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox, PvpArena,
-  WeaponCosmetics, CharacterCosmetics, NFTStorage, CBKLandSale, CBKLand, Treasury, Promos, BurningManager, SimpleQuests,
+  WeaponCosmetics, CharacterCosmetics, NFTStorage, ERC20Bridge, CBKLandSale, CBKLand, Treasury, Promos, BurningManager, SimpleQuests,
   PartnerVault, SpecialWeaponsManager, PvpCore, PvpRankings, TokensManager
 } from '../../../build/abi-interfaces';
 import { StakeType, NftStakeType } from './State';
@@ -58,6 +58,7 @@ export interface Contracts {
   WeaponCosmetics?: Contract<WeaponCosmetics>;
   CharacterCosmetics?: Contract<CharacterCosmetics>;
   NFTStorage?: Contract<NFTStorage>;
+  ERC20Bridge?: Contract<ERC20Bridge>;
   CBKLandSale?: Contract<CBKLandSale>;
   CBKLand?: Contract<CBKLand>;
 
