@@ -71,6 +71,12 @@ const token = {
 
       return ERC20Bridge.methods.getTokenBridgeVal(tokenAddress, 1).call(defaultCallOptions(rootState));
     },
+    async getTokenBridgeMaxAmount({rootState}: {rootState: IState}, tokenAddress: string) {
+      const { ERC20Bridge } = rootState.contracts();
+      if(!ERC20Bridge) return;
+
+      return ERC20Bridge.methods.getTokenBridgeVal(tokenAddress, 2).call(defaultCallOptions(rootState));
+    },
     async getBridgeTransferOfPlayer({rootState}: {rootState: IState}, playerAddress: string) {
       const { ERC20Bridge } = rootState.contracts();
       if(!ERC20Bridge) return;
