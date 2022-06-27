@@ -20,6 +20,7 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
 
     uint8 public constant BRIDGE_TOKEN_VAR_MIN_AMOUNT_INDEX = 0; // can't request bridge less than this value; value is in wei
     uint8 public constant BRIDGE_TOKEN_VAR_FEE_INDEX = 1;
+    uint8 public constant BRIDGE_TOKEN_VAR_MAX_AMOUNT_INDEX = 2; // can't request bridge greater than this value; value is in wei
 
     mapping(uint256 => uint256) private _bridgeVars;
     mapping(address => mapping(uint256 => uint256)) private _bridgeTokenVars;
@@ -37,6 +38,8 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
 
         uint256 chainId;
         uint8 status; // enumeration. 0 => nothing, 1 => transfer requested, 2 => processing, 3 => done
+
+        uint256 blockNumber;
     }
 
     struct ERC20BridgeReceivedTokens {
@@ -46,6 +49,8 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
 
         uint256 sourceChain;
         uint256 sourceTransferId;
+
+        uint256 blockNumber;
     }
 
 
@@ -210,12 +215,13 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
         canBridge()
     {
         require(_amount >= _bridgeTokenVars[_tokenAddress][BRIDGE_TOKEN_VAR_MIN_AMOUNT_INDEX], "NA1");
-        require(IERC20BridgeProxy(erc20ProxyContract[_tokenAddress]).canBridge(msg.sender, _amount, targetChain), "NA2");
+        require(_amount <= _bridgeTokenVars[_tokenAddress][BRIDGE_TOKEN_VAR_MAX_AMOUNT_INDEX], "NA2");
+        require(IERC20BridgeProxy(erc20ProxyContract[_tokenAddress]).canBridge(msg.sender, _amount, targetChain), "NA3");
 
         game.payContractTokenOnly(msg.sender, _bridgeTokenVars[_tokenAddress][BRIDGE_TOKEN_VAR_FEE_INDEX]);
         IERC20(_tokenAddress).transferFrom(msg.sender, address(this), _amount);
         
-        transferOuts[++_transfersOutCount] = ERC20BridgeOutRequests(msg.sender, _tokenAddress, _amount, targetChain, TRANSFER_OUT_STATUS_PENDING);
+        transferOuts[++_transfersOutCount] = ERC20BridgeOutRequests(msg.sender, _tokenAddress, _amount, targetChain, TRANSFER_OUT_STATUS_PENDING, block.number);
         transferOutOfPlayers[msg.sender] = _transfersOutCount;
         transferOutOfPlayersHistory[msg.sender].add(_transfersOutCount);
 
@@ -232,7 +238,7 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
     {
         require(botLog[sourceChain][sourceTransferId] == 0, "Already Processed");
         IERC20(_tokenAddress).transfer(receiver, _amount);
-        transferIns[++_transferInsCount] = ERC20BridgeReceivedTokens(receiver, _tokenAddress, _amount, sourceChain, sourceTransferId);
+        transferIns[++_transferInsCount] = ERC20BridgeReceivedTokens(receiver, _tokenAddress, _amount, sourceChain, sourceTransferId, block.number);
         transferInOfPlayersHistory[receiver].add(_transferInsCount);
         botLog[sourceChain][sourceTransferId] = _transferInsCount;
         emit BridgeIn(receiver, _tokenAddress, sourceChain, sourceTransferId, _amount);
@@ -280,22 +286,24 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
         }
     }
 
-    function getBridgeOutTransfer(uint256 bridgeTransferId) public view returns (address, address, uint256, uint256, uint8) {
+    function getBridgeOutTransfer(uint256 bridgeTransferId) public view returns (address, address, uint256, uint256, uint8, uint256) {
         ERC20BridgeOutRequests storage transferOut = transferOuts[bridgeTransferId];
         return (transferOut.owner,
                 transferOut.erc20Address,
                 transferOut.amount,
                 transferOut.chainId,
-                transferOut.status);
+                transferOut.status,
+                transferOut.blockNumber);
     }
 
-    function getBridgeInTransfer(uint256 bridgeTransferId) public view returns (address, address, uint256, uint256, uint256) {
+    function getBridgeInTransfer(uint256 bridgeTransferId) public view returns (address, address, uint256, uint256, uint256, uint256) {
         ERC20BridgeReceivedTokens storage transferIn = transferIns[bridgeTransferId];
         return (transferIn.owner,
                 transferIn.erc20Address,
                 transferIn.amount,
                 transferIn.sourceChain,
-                transferIn.sourceTransferId);
+                transferIn.sourceTransferId,
+                transferIn.blockNumber);
     }
 
     // Bot to update status of a transfer request (this chain => outside chain)
