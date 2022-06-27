@@ -50,6 +50,7 @@ import { abi as tokensManagerAbi, networks as tokensManagerNetworks } from '../.
 import { abi as weaponCosmeticsAbi, networks as weaponCosmeticsNetworks } from '../../build/contracts/WeaponCosmetics.json';
 import { abi as characterCosmeticsAbi, networks as characterCosmeticsNetworks } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
+import { abi as ERC20BridgeAbi, networks as ERC20BridgeNetworks } from '../../build/contracts/ERC20Bridge.json';
 import { abi as treasuryAbi, networks as treasuryNetworks } from '../../build/contracts/Treasury.json';
 import { abi as burningManagerAbi, networks as burningManagerNetworks } from '../../build/contracts/BurningManager.json';
 import { abi as kingStakingRewardsUpgradeableAbi,
@@ -304,6 +305,9 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const NFTStorageAddr = getConfigValue('VUE_APP_STORAGE_CONTRACT_ADDRESS') || (nftStorageNetworks as Networks)[networkId]!.address;
   const NFTStorage = new web3.eth.Contract(nftStorageAbi as Abi, NFTStorageAddr);
 
+  const ERC20BridgeAddr = (ERC20BridgeNetworks as Networks)[networkId]!.address;
+  const ERC20Bridge = new web3.eth.Contract(ERC20BridgeAbi as Abi, ERC20BridgeAddr);
+
   const cbkLandSaleAddr = (cbkLandSaleNetworks as Networks)[networkId]!.address;
   const CBKLandSale = new web3.eth.Contract(cbkLandSaleAbi as Abi, cbkLandSaleAddr);
 
@@ -401,7 +405,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
-    NFTStorage, CBKLandSale, CBKLand, Promos,
+    NFTStorage, ERC20Bridge, CBKLandSale, CBKLand, Promos,
     TokensManager,
     ...raidContracts,
     ...pvpContracts,
