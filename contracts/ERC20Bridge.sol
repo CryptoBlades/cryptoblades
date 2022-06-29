@@ -16,7 +16,7 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
    
-    bool erc20BridgeEnabled;
+    bool private _erc20BridgeEnabled;
 
     uint8 public constant BRIDGE_TOKEN_VAR_MIN_AMOUNT_INDEX = 0; // can't request bridge less than this value; value is in wei
     uint8 public constant BRIDGE_TOKEN_VAR_FEE_INDEX = 1;
@@ -56,31 +56,31 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
 
     uint256 private _transfersOutCount;
     mapping(uint256 => bool) private _bridgeEnabled; // Which chain can we go to from here?
-    mapping(uint256 => ERC20BridgeOutRequests) private transferOuts;
+    mapping(uint256 => ERC20BridgeOutRequests) private _transferOuts;
 
     uint256 private _transferInsCount;
-    mapping(uint256 => ERC20BridgeReceivedTokens) private transferIns;
+    mapping(uint256 => ERC20BridgeReceivedTokens) private _transferIns;
 
     // Player stuff
     // Player => bridgeTransferId
-    mapping(address => uint256) private transferOutOfPlayers;
-    mapping(address => EnumerableSet.UintSet) private transferOutOfPlayersHistory;
-    mapping(address => EnumerableSet.UintSet) private transferInOfPlayersHistory;
+    mapping(address => uint256) private _transferOutOfPlayers;
+    mapping(address => EnumerableSet.UintSet) private _transferOutOfPlayersHistory;
+    mapping(address => EnumerableSet.UintSet) private _transferInOfPlayersHistory;
 
     // address is IERC20
-    EnumerableSet.AddressSet private supportedTokenTypes;
+    EnumerableSet.AddressSet private _supportedTokenTypes;
     EnumerableSet.UintSet private _supportedChains;
 
     CryptoBlades public game;
 
     // Proxy contracts
-    mapping(address => address) private erc20ProxyContract;
+    mapping(address => address) private _erc20ProxyContract;
     // Source chain => transfer out id of source chain => transfer in id
-    mapping(uint256 => mapping(uint256 => uint256)) private botLog;
+    mapping(uint256 => mapping(uint256 => uint256)) private _botLog;
     // ERC20 => allowed networks to bridge into
-    mapping(address => EnumerableSet.UintSet) private erc20AllowedChains;
+    mapping(address => EnumerableSet.UintSet) private _erc20AllowedChains;
     // Target network => allowed ERC20s
-    mapping(uint256 => EnumerableSet.AddressSet) private targetChainAllowedERC20s;
+    mapping(uint256 => EnumerableSet.AddressSet) private _targetChainAllowedERC20s;
 
     event BridgeIn(address indexed receiver, address indexed erc20, uint256 indexed sourceChain, uint256 sourceId, uint256 amount);
     event BridgeOut(address indexed sender, address indexed erc20, uint256 indexed destinationChain, uint256 requestId, uint256 amount);
@@ -116,7 +116,7 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
 
      modifier canBridge() {
          require(
-            erc20BridgeEnabled == true,
+            _erc20BridgeEnabled == true,
             "bridge disabled"
         );
         _;
@@ -132,25 +132,25 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
 
     modifier noPendingBridge() {
          require(
-            transferOuts[transferOutOfPlayers[msg.sender]].status == TRANSFER_OUT_STATUS_NONE
-            || transferOuts[transferOutOfPlayers[msg.sender]].status == TRANSFER_OUT_STATUS_DONE,
+            _transferOuts[_transferOutOfPlayers[msg.sender]].status == TRANSFER_OUT_STATUS_NONE
+            || _transferOuts[_transferOutOfPlayers[msg.sender]].status == TRANSFER_OUT_STATUS_DONE,
             "Cannot request a bridge"
         );
         _;
     }
 
     modifier bridgeSupported(IERC20 _tokenAddress, uint256 targetChain) {
-        require(erc20AllowedChains[address(_tokenAddress)].contains(targetChain), "BNS1"); // We support bridging from this chain to that chain
-        require(IERC20BridgeProxy(erc20ProxyContract[address(_tokenAddress)]).isEnabled(), "BNS2");
+        require(_erc20AllowedChains[address(_tokenAddress)].contains(targetChain), "BNS1"); // We support bridging from this chain to that chain
+        require(IERC20BridgeProxy(_erc20ProxyContract[address(_tokenAddress)]).isEnabled(), "BNS2");
         _;
     }
     
     function isTokenSupported(IERC20 _tokenAddress) public view returns (bool) {
-        return supportedTokenTypes.contains(address(_tokenAddress));
+        return _supportedTokenTypes.contains(address(_tokenAddress));
     }
 
     function getSupportedTokenTypes() public view returns (IERC20[] memory) {
-        EnumerableSet.AddressSet storage set = supportedTokenTypes;
+        EnumerableSet.AddressSet storage set = _supportedTokenTypes;
         IERC20[] memory tokens = new IERC20[](set.length());
 
         for (uint256 i = 0; i < tokens.length; i++) {
@@ -160,19 +160,19 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
     }
 
     function allowToken(IERC20 _tokenAddress) public restricted {
-        supportedTokenTypes.add(address(_tokenAddress));
+        _supportedTokenTypes.add(address(_tokenAddress));
     }
 
     function disallowToken(IERC20 _tokenAddress) public restricted {
-        supportedTokenTypes.remove(address(_tokenAddress));
+        _supportedTokenTypes.remove(address(_tokenAddress));
     }
 
     function bridgeIsEnabled() public view returns (bool) {
-        return erc20BridgeEnabled;
+        return _erc20BridgeEnabled;
     }
 
     function setBridgeEnabled(bool enabled) public restricted {
-        erc20BridgeEnabled = enabled;
+        _erc20BridgeEnabled = enabled;
     }
 
     // bridge stuff
@@ -216,14 +216,14 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
     {
         require(_amount >= _bridgeTokenVars[_tokenAddress][BRIDGE_TOKEN_VAR_MIN_AMOUNT_INDEX], "NA1");
         require(_amount <= _bridgeTokenVars[_tokenAddress][BRIDGE_TOKEN_VAR_MAX_AMOUNT_INDEX], "NA2");
-        require(IERC20BridgeProxy(erc20ProxyContract[_tokenAddress]).canBridge(msg.sender, _amount, targetChain), "NA3");
+        require(IERC20BridgeProxy(_erc20ProxyContract[_tokenAddress]).canBridge(msg.sender, _amount, targetChain), "NA3");
 
         game.payContractTokenOnly(msg.sender, _bridgeTokenVars[_tokenAddress][BRIDGE_TOKEN_VAR_FEE_INDEX]);
         IERC20(_tokenAddress).transferFrom(msg.sender, address(this), _amount);
         
-        transferOuts[++_transfersOutCount] = ERC20BridgeOutRequests(msg.sender, _tokenAddress, _amount, targetChain, TRANSFER_OUT_STATUS_PENDING, block.number);
-        transferOutOfPlayers[msg.sender] = _transfersOutCount;
-        transferOutOfPlayersHistory[msg.sender].add(_transfersOutCount);
+        _transferOuts[++_transfersOutCount] = ERC20BridgeOutRequests(msg.sender, _tokenAddress, _amount, targetChain, TRANSFER_OUT_STATUS_PENDING, block.number);
+        _transferOutOfPlayers[msg.sender] = _transfersOutCount;
+        _transferOutOfPlayersHistory[msg.sender].add(_transfersOutCount);
 
         emit BridgeOut(msg.sender, _tokenAddress, targetChain, _transfersOutCount, _amount);
     }
@@ -236,11 +236,11 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
         uint256 sourceTransferId
     ) public gameAdminRestricted
     {
-        require(botLog[sourceChain][sourceTransferId] == 0, "Already Processed");
+        require(_botLog[sourceChain][sourceTransferId] == 0, "Already Processed");
         IERC20(_tokenAddress).transfer(receiver, _amount);
-        transferIns[++_transferInsCount] = ERC20BridgeReceivedTokens(receiver, _tokenAddress, _amount, sourceChain, sourceTransferId, block.number);
-        transferInOfPlayersHistory[receiver].add(_transferInsCount);
-        botLog[sourceChain][sourceTransferId] = _transferInsCount;
+        _transferIns[++_transferInsCount] = ERC20BridgeReceivedTokens(receiver, _tokenAddress, _amount, sourceChain, sourceTransferId, block.number);
+        _transferInOfPlayersHistory[receiver].add(_transferInsCount);
+        _botLog[sourceChain][sourceTransferId] = _transferInsCount;
         emit BridgeIn(receiver, _tokenAddress, sourceChain, sourceTransferId, _amount);
     }
     
@@ -265,29 +265,29 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
     }
 
     function getBridgeTransferOfPlayer(address player) public view returns (uint256) {
-        return transferOutOfPlayers[player];
+        return _transferOutOfPlayers[player];
     }
 
     function getBridgeOutTransferOfPlayerHistory(address player)  public view returns (uint256[] memory history) {
-        history = new uint256[](transferOutOfPlayersHistory[player].length());
+        history = new uint256[](_transferOutOfPlayersHistory[player].length());
 
-        for (uint256 i = 0; i < transferOutOfPlayersHistory[player].length(); i++) {
-            uint256 id = transferOutOfPlayersHistory[player].at(i);
+        for (uint256 i = 0; i < _transferOutOfPlayersHistory[player].length(); i++) {
+            uint256 id = _transferOutOfPlayersHistory[player].at(i);
                 history[i] = id;
         }
     }
 
     function getBridgeInTransferOfPlayerHistory(address player)  public view returns (uint256[] memory history) {
-        history = new uint256[](transferInOfPlayersHistory[player].length());
+        history = new uint256[](_transferInOfPlayersHistory[player].length());
 
-        for (uint256 i = 0; i < transferInOfPlayersHistory[player].length(); i++) {
-            uint256 id = transferInOfPlayersHistory[player].at(i);
+        for (uint256 i = 0; i < _transferInOfPlayersHistory[player].length(); i++) {
+            uint256 id = _transferInOfPlayersHistory[player].at(i);
                 history[i] = id;
         }
     }
 
     function getBridgeOutTransfer(uint256 bridgeTransferId) public view returns (address, address, uint256, uint256, uint8, uint256) {
-        ERC20BridgeOutRequests storage transferOut = transferOuts[bridgeTransferId];
+        ERC20BridgeOutRequests storage transferOut = _transferOuts[bridgeTransferId];
         return (transferOut.owner,
                 transferOut.erc20Address,
                 transferOut.amount,
@@ -297,7 +297,7 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
     }
 
     function getBridgeInTransfer(uint256 bridgeTransferId) public view returns (address, address, uint256, uint256, uint256, uint256) {
-        ERC20BridgeReceivedTokens storage transferIn = transferIns[bridgeTransferId];
+        ERC20BridgeReceivedTokens storage transferIn = _transferIns[bridgeTransferId];
         return (transferIn.owner,
                 transferIn.erc20Address,
                 transferIn.amount,
@@ -308,7 +308,7 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
 
     // Bot to update status of a transfer request (this chain => outside chain)
     function updateBridgeTransferStatus(uint256 bridgeTransferId, uint8 status, bool forced) public gameAdminRestricted {
-        ERC20BridgeOutRequests storage transferOut = transferOuts[bridgeTransferId];
+        ERC20BridgeOutRequests storage transferOut = _transferOuts[bridgeTransferId];
         require(forced ||
         (transferOut.status == TRANSFER_OUT_STATUS_PENDING && status == TRANSFER_OUT_STATUS_PROCESSING)
         || (transferOut.status == TRANSFER_OUT_STATUS_PROCESSING && status == TRANSFER_OUT_STATUS_DONE)
@@ -317,47 +317,47 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
     }
 
      function getTransferInFromLog(uint256 sourceChain, uint256 sourceTransferId) public view returns (uint256) {
-        return botLog[sourceChain][sourceTransferId];
+        return _botLog[sourceChain][sourceTransferId];
     }
 
     function setProxyContract(address token, address proxy, bool forced) external restricted {
-        require(forced || erc20ProxyContract[token] == address(0), "NA");
-        erc20ProxyContract[token] = proxy;
+        require(forced || _erc20ProxyContract[token] == address(0), "NA");
+        _erc20ProxyContract[token] = proxy;
     }
 
     function getProxyContract(address token) public view returns (address) {
-        return erc20ProxyContract[token];
+        return _erc20ProxyContract[token];
     }
 
     function setChainSupportedForERC20(address token, uint256[] calldata chainIds, bool support) external restricted {
         for (uint256 i = 0; i < chainIds.length; i++) {
             uint256 chainId = chainIds[i];
             if(support) {
-                require(!erc20AllowedChains[token].contains(chainId), "NA");
-                erc20AllowedChains[token].add(chainId);
-                targetChainAllowedERC20s[chainId].add(token);
+                require(!_erc20AllowedChains[token].contains(chainId), "NA");
+                _erc20AllowedChains[token].add(chainId);
+                _targetChainAllowedERC20s[chainId].add(token);
             } else {
-                require(erc20AllowedChains[token].contains(chainId), "NA2");
-                erc20AllowedChains[token].remove(chainId);
-                targetChainAllowedERC20s[chainId].remove(token);
+                require(_erc20AllowedChains[token].contains(chainId), "NA2");
+                _erc20AllowedChains[token].remove(chainId);
+                _targetChainAllowedERC20s[chainId].remove(token);
             }
         }
     }
 
     function getChainsSupportingERCs(address token) public view returns (uint256[] memory chains) {
-        chains = new uint256[](erc20AllowedChains[token].length());
+        chains = new uint256[](_erc20AllowedChains[token].length());
 
-        for (uint256 i = 0; i < erc20AllowedChains[token].length(); i++) {
-            uint256 id = erc20AllowedChains[token].at(i);
+        for (uint256 i = 0; i < _erc20AllowedChains[token].length(); i++) {
+            uint256 id = _erc20AllowedChains[token].at(i);
                 chains[i] = id;
         }
     }
 
     function getERCsSupportedByChain(uint256 chain) public view returns (address[] memory tokens) {
-        tokens = new address[](targetChainAllowedERC20s[chain].length());
+        tokens = new address[](_targetChainAllowedERC20s[chain].length());
 
-        for (uint256 i = 0; i < targetChainAllowedERC20s[chain].length(); i++) {
-            address token = targetChainAllowedERC20s[chain].at(i);
+        for (uint256 i = 0; i < _targetChainAllowedERC20s[chain].length(); i++) {
+            address token = _targetChainAllowedERC20s[chain].at(i);
                 tokens[i] = token;
         }
     }
