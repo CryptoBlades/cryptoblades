@@ -191,7 +191,9 @@
     },
     "couldNotForge": "Schmieden nicht möglich: Zu wenig Guthaben oder Transaktion wurde abgelehnt.",
     "couldNotReforge": "Umschmieden nicht möglich: Zu wenig Guthaben, Staub oder Transaktion wurde abgelehnt.",
-    "couldNotBurn": "Verbrennen nicht möglich: Zu wenig Guthaben oder Transaktion wurde abgelehnt."
+    "couldNotBurn": "Verbrennen nicht möglich: Zu wenig Guthaben oder Transaktion wurde abgelehnt.",
+    "disableDynamicMintingSalvage": "An dieser Kette kann jeweils eine Waffe geborgen werden",
+    "disableDynamicMintingForge": "An dieser Kette kann nur ein Schmiedevorgang gleichzeitig durchgeführt werden"
   },
   "dustBalanceDisplay": {
     "availableDust": "Dein Staub",

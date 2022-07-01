@@ -73,7 +73,8 @@
     "buyBNBTransak": "buy BNB with Transak",
     "recruitNew": "Recruit new character",
     "recruit": "Recruit",
-    "couldNotMint": "Could not mint character: insufficient funds or transaction denied."
+    "couldNotMint": "Could not mint character: insufficient funds or transaction denied.",
+    "disableDynamicMinting": "On this chain burning operation can be done on one champion at the time"
   },
   "characterList": {
     "level": "Level",
@@ -191,7 +192,9 @@
     },
     "couldNotForge": "Could not forge sword: Insuffucient funds or transaction was denied.",
     "couldNotReforge": "Could not reforge sword: Insufficient funds, Dust, or transaction was denied.",
-    "couldNotBurn": "Could not burn sword: Insufficient funds or transaction was denied."
+    "couldNotBurn": "Could not burn sword: Insufficient funds or transaction was denied.",
+    "disableDynamicMintingSalvage": "On this chain salvage operation can be done on one weapon at the time",
+    "disableDynamicMintingForge": "On this chain only single forge operation can be done at once"
   },
   "dustBalanceDisplay": {
     "availableDust": "Available Dust",
