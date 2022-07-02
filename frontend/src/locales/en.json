@@ -220,7 +220,8 @@
     "burning": "Burning...",
     "claiming": "Claiming...",
     "approveMintSlippage": "Enable 5% mint price slippage",
-    "dynamicPricesDetails": "Each character minted increases the price by {increaseAmount} SKILL. Mint price is being decreased every second at a rate of {decreaseAmount} SKILL per hour down to minimum price: {minimumPrice} SKILL. Allowing slippage will approve greater amount to be spent in case the price increases by the time your transactions is processed."
+    "dynamicPricesDetails": "Each character minted increases the price by {increaseAmount} SKILL. Mint price is being decreased every second at a rate of {decreaseAmount} SKILL per hour down to minimum price: {minimumPrice} SKILL. Allowing slippage will approve greater amount to be spent in case the price increases by the time your transactions is processed.",
+    "disableDynamicMinting": "On this chain burning operation can be done on one champion at the time"
   },
   "bridge": {
     "bridgeForYourNfts": "Bridge for your NFTs",
@@ -459,7 +460,9 @@
     "greaterDust": "Greater Dust",
     "lowerDust": "Lower Dust",
     "createDustConfirm": "Create Dust Confirmation",
-    "noDust": "No Dust Selected"
+    "noDust": "No Dust Selected",
+    "disableDynamicMintingSalvage": "On this chain salvage operation can be done on one weapon at the time",
+    "disableDynamicMintingForge": "On this chain only single forge operation can be done at once"
   },
   "dustBalanceDisplay": {
     "availableDust": "Available Dust",
