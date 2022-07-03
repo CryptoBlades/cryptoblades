@@ -58,11 +58,11 @@
                         </div>
                     </div>
                     <div class="w-limit" v-else>
-                        <div class="day">
+                        <div class="day" v-if="remainingTime.days > 0">
                           <p>{{ zeroPad(remainingTime.days, 2) }}</p>
                           <span>{{ remainingTime.days > 1 ? $t('raid.days') : $t('raid.day') }}</span>
                         </div>
-                        <div class="hour">
+                        <div class="hour" v-if="remainingTime.hours > 0">
                           <p>{{ zeroPad(remainingTime.hours, 2)}}</p>
                           <span>{{ remainingTime.hours > 1 ? $t('raid.hrs') : $t('raid.hr')}}</span>
                         </div>
