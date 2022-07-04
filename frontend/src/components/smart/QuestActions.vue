@@ -9,25 +9,25 @@
     <span v-else-if="afterDeadline" class="text-center">
       {{ $t('quests.questDeadlineOverCannotBeCompleted') }}
     </span>
-    <b-button v-if="character && character.quest.id === 0" :disabled="isLoading" variant="primary" @click="request">
+    <b-button v-if="character && character.quest.id === 0" :disabled="isLoading" class="custom-action-btn" variant="primary" @click="request">
       {{ $t('quests.requestQuest') }}
     </b-button>
     <b-button v-else-if="questCanBeCompleted && !afterDeadline && character" :disabled="isLoading" variant="primary"
-              class="flex-1"
+              class="flex-1 custom-action-btn"
               @click="complete" :id="character.id" :key="character.id">
       {{ $t('quests.complete') }}
     </b-button>
-    <b-button v-if="deletable" variant="primary" class="flex-1" @click="deleteQuestTemplate()"
+    <b-button v-if="deletable" variant="primary" class="flex-1 custom-action-btn" @click="deleteQuestTemplate()"
               :disabled="isLoading">
       {{ $t('quests.deleteQuest') }}
     </b-button>
     <b-button
       v-if="character && quest.requirementType !== RequirementType.RAID && !questCanBeCompleted && !afterDeadline"
       :disabled="isLoading" variant="primary"
-      class="flex-1" @click="submit">
+      class="flex-1 custom-action-btn" @click="submit">
       {{ $t('quests.submit') }}
     </b-button>
-    <b-button v-if="character && (!questCanBeCompleted || afterDeadline)" variant="primary" class="flex-1" @click="skip"
+    <b-button v-if="character && (!questCanBeCompleted || afterDeadline)" variant="primary" class="flex-1 custom-action-btn" @click="skip"
               :disabled="(!freeSkip && !hasStaminaToSkip) || isLoading">
       {{ freeSkip ? $t('quests.freeSkip') : $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
       <Hint v-if="!freeSkip && !hasStaminaToSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
@@ -323,5 +323,14 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: center;
   flex: 1;
+}
+.custom-action-btn{
+  font-family: Roboto;
+  background: transparent !important;
+  border: #EDCD90 1px solid !important;
+  color: #FFF !important
+}
+.custom-action-btn:hover{
+  border-color: #FFF !important;
 }
 </style>

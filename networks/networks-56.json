@@ -2987,6 +2987,12 @@
     "links": {},
     "address": "0x6fc3E5CE3Acf1eC9abDbc25cA2ad909E5EbAa3BA"
   },
+  "build/contracts/Launchpad.json": {
+    "events": {},
+    "links": {},
+    "address": "0x2E3CAb5BDa349F59dE08776FE174D0d3972a22cd",
+    "transactionHash": "0xf6ee649bccf40c88a9806a937055decaa4554f1836d073c90d0bdedfb38feceb"
+  },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
     "links": {},

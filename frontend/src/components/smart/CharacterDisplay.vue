@@ -14,7 +14,7 @@
                 <div class="element-frame">
                     <div>
                       <span
-                        :id="`${setIdForElement(filteredCharacter.trait, filteredCharacter.isSelected)}`"
+                        :id="`${setIdForElement(filteredCharacter.trait, filteredCharacter.id === currentCharacterId)}`"
                       />
                       <span v-if="toggled && getIfCharacterIsInRaid(filteredCharacter.id)" class="raid-indicator"></span>
                       <span v-if="toggled && filteredCharacter.pvpStatus === 'IN_ARENA'" class="pvp-indicator"></span>
@@ -29,7 +29,7 @@
                   </div>
                 </div>
                 <div class="character-details">
-                  <div class="name-list">
+                  <div class="name-list text-primary">
                     {{ getCleanCharacterName(filteredCharacter.id) }}
                   </div>
                   <div class="small-stamina-char"
@@ -62,7 +62,7 @@
                   </div>
                 </div>
                 <div class="character-details">
-                  <div class="name-list">
+                  <div class="name-list text-primary">
                     {{ sidebarItem.title }}
                   </div>
                   <div class="nav-line"></div>
@@ -510,7 +510,6 @@ li.character-highlight{
   margin: auto;
   font-size: 0.8vw;
   text-align: left;
-  color: #9e8a57;
 }
 
 .character-list-mobile {

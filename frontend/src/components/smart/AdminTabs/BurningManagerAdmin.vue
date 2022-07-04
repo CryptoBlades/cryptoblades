@@ -6,7 +6,7 @@
       <b-form-input v-model="giveawaySoulMint.soulAmount" :placeholder="$t('admin.burningManager.soulAmount')"
                     type="number"
                     number min="0"/>
-      <b-button @click="mintGiveawaySoul()" :disabled="mintGiveawaySoulDisabled()" variant="primary"
+      <b-button @click="mintGiveawaySoul()" :disabled="mintGiveawaySoulDisabled()" variant="info"
                 class="text-nowrap">
         {{ $t('admin.burningManager.mintSoul') }}
       </b-button>
@@ -17,7 +17,7 @@
     <div class="d-flex align-items-center gap-3">
       <b-form-input v-model="newSoulMultiplier" :placeholder="$t('admin.weapons.multiplier')" number type="number"/>
       <b-button @click="setNewSoulMultiplier()" :disabled="setNewSoulMultiplierButtonDisabled"
-                variant="primary" class="text-nowrap">
+                variant="info" class="text-nowrap">
         {{ $t('admin.burningManager.setSoulMultiplier') }}
       </b-button>
     </div>

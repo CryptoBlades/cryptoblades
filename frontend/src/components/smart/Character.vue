@@ -1,5 +1,5 @@
 <template>
-   <div class="row">
+   <div class="row ml-0 mr-0">
     <!-- Character Image -->
     <div class="col col-md-4">
       <div class="characterWrapper">
@@ -24,12 +24,12 @@
     <div class="col col-md-8">
       <!-- Character Name Heading -->
       <div class="mb-5 d-flex">
-        <h1 class="title mb-0">{{ getCharacterName(currentCharacterId) }}</h1>
+        <h1 class="title text-primary mb-0">{{ getCharacterName(currentCharacterId) }}</h1>
         <button class="edit-icon" @click="openChangeNameModal" ><img src="../../assets/edit-icon.svg" /></button>
         <span class="ml-auto align-self-end">#{{currentCharacterId}}</span>
       </div>
       <!-- Character chart info -->
-      <div class="row mb-5">
+      <div class="row mb-5 text-primary">
         <div class="col cell">
           <div class="table-bg"></div>
           <span class="main-font cell-title text-white">{{$t(`Character.level`)}}</span>
@@ -60,7 +60,7 @@
         <!-- EXP STAMINA -->
       <div>
         <div class="mb-4 main-font text">
-          <p class="mb-1">
+          <p class="mb-1 text-primary">
             <span class="text-white">
             {{$t(`Character.exp`)}}:{{" "}}
             </span>
@@ -77,7 +77,7 @@
           </b-progress>
         </div>
         <div>
-          <p class="mb-1">
+          <p class="mb-1 text-primary">
           <span class="text-white"> {{$t(`Character.stamina`)}}:{{" "}}</span>
           {{ getCharacterStamina(currentCharacterId) }}/200</p>
           <b-progress class="progress-custom">
@@ -103,13 +103,11 @@
     <b-modal @hide="removeErrors" class="centered-modal" ref="character-change-trait-modal"
       centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
       dialog-class="dialog-character" size="lg">
-      <template #modal-title>
-        {{$t('Character.changeTrait')}}
-      </template>
-      <span>
+      <h3 class="confirmation-title">  {{$t('Character.changeTrait')}}</h3>
+      <span class="trait-pick">
       {{$t('characterList.pickTrait')}}
       </span>
-      <div class="input">
+      <div class="input mt-2">
         <select class="form-control" v-model="targetTrait" :disabled="availableTraits.length === 0">
           <option class="text-body" v-if="availableTraits.length === 0" value="">{{ $t('Character.noTraits') }}</option>
           <option class="text-body" v-else value="" disabled selected hidden>Please select a trait</option>
@@ -127,18 +125,16 @@
           <span v-if="isSending"><i class="fas fa-spinner fa-spin"></i> Loading</span>
           <span v-else>Change</span>
       </button>
-      <button class="offset" @click="$refs['character-change-trait-modal'].hide()">
-          {{$t('characterModal.close')}}
-          <img src="../../assets/close-btn.png"/>
-      </button>
+      <div class="footer-close" @click="$refs['character-change-trait-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
     <!-- Character Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-modal"
       centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
       dialog-class="dialog-character" size="lg">
-      <template #modal-title>
-        {{$t('Character.transfer')}}
-      </template>
+        <h3 class="confirmation-title">{{$t('Character.transfer')}}</h3>
         <b-form-input class="input" placeholder="Enter address" v-model="receiverAddress"/>
         <div class="transferResultContainer">
           <div class="loader" v-if="isSending">
@@ -148,18 +144,16 @@
           <span class="resultMsg text-center"> {{resultMsg}} </span>
         </div>
         <button :disabled="isSending || receiverAddress === ''" @click="transfer">Transfer</button>
-        <button class="offset" @click="$refs['character-transfer-modal'].hide()">
-          {{$t('characterModal.close')}}
-          <img src="../../assets/close-btn.png"/>
-        </button>
+        <div class="footer-close" @click="$refs['character-transfer-modal'].hide()">
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+          <p class="close-icon"></p>
+        </div>
     </b-modal>
     <!-- Character Soul Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-soul-modal"
       centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
       dialog-class="dialog-character" size="lg">
-      <template #modal-title>
-        {{$t('Character.transferSoul')}}
-      </template>
+        <h3 class="confirmation-title">{{$t('Character.transferSoul')}}</h3>
         <div class="d-flex flex-column">
           <div class="row d-flex justify-content-between align-items-center mb-4">
             <div class="col col-md-3 d-flex justify-content-center align-items-center">
@@ -202,10 +196,10 @@
           </div>
         </div>
         <button :disabled="isSending || receiverAddress === ''" @click="onSoulTransferConfirm">Transfer</button>
-        <button class="offset" @click="$refs['character-transfer-soul-modal'].hide()">
-          {{$t('characterModal.close')}}
-          <img src="../../assets/close-btn.png"/>
-        </button>
+        <div class="footer-close" @click="$refs['character-transfer-soul-modal'].hide()">
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+          <p class="close-icon"></p>
+        </div>
     </b-modal>
     <!-- Character Change Name Modal -->
     <b-modal class="centered-modal" ref="character-change-name-modal"
@@ -229,10 +223,10 @@
           <span class="resultMsg text-center"> {{resultMsg}} </span>
         </div>
         <button :disabled="isSending || newName === ''" @click="renameCharacterCall">Change</button>
-        <button class="offset" @click="$refs['character-change-name-modal'].hide()">
-          {{$t('characterModal.close')}}
-          <img src="../../assets/close-btn.png"/>
-        </button>
+        <div class="footer-close" @click="$refs['character-change-name-modal'].hide()">
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+          <p class="close-icon"></p>
+        </div>
     </b-modal>
   </div>
 </template>
@@ -695,11 +689,14 @@ export default Vue.extend({
 .title {
   text-transform: uppercase;
   font-family: 'Trajan', serif;
-  font-weight: bold;
+  font-weight: 700;
   line-height: 38px;
   font-size: 30px;
 }
 
+.trait-pick{
+  font-family: Roboto;
+}
 
 .edit-icon {
   background: transparent;
@@ -723,6 +720,12 @@ export default Vue.extend({
 
 .progress-custom {
   height: 5px;
+}
+
+.confirmation-title{
+  color: #EDCD90;
+  text-transform: uppercase;
+  margin-bottom: 1em;
 }
 
 .bar {
