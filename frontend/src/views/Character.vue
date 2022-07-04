@@ -86,8 +86,9 @@
                         powerLimitExceeded ||
                         (burnOption === 1 && !targetCharacterId) ||
                         !canBurn() ||
+                        (burnCharacterIds.length > 1 && disableCharacterBurn) ||
                         isBurnInProgress ? 'opacity: 0.5' : ''"
-                      v-tooltip="$t('plaza.burnSelected')"
+                      v-tooltip=" (burnCharacterIds.length > 1 && disableCharacterBurn) ? $t('plaza.disableDynamicMinting') : $t('plaza.burnSelected')"
                       @click="showBurnConfirmation">
                         <span v-if="isBurnInProgress" class="gtag-link-others custom-recruit-text"> {{$t('plaza.burning')}}</span>
                         <span v-else class="gtag-link-others custom-recruit-text"> <p>{{$t('plaza.burn')}}</p>  {{burnCost }} SKILL</span>
@@ -160,6 +161,7 @@ import CharacterList from '@/components/smart/CharacterList.vue';
 import CharacterNav from '@/components/CharacterNav.vue';
 import Character from '@/components/smart/Character.vue';
 import Events from '@/events';
+import { getConfigValue } from '@/contracts';
 
 
 import { fromWeiEther, toBN } from '../utils/common';
@@ -197,6 +199,7 @@ interface Data {
   mintCharacterMinPrice: string;
   activeTab: string;
   soulBalance: number;
+  disableCharacterBurn: boolean;
   burnCost: number;
   burnPowerMultiplier: number;
   burnCharacterIds: string[];
@@ -226,6 +229,7 @@ export default Vue.extend({
       mintCharacterMinPrice: '0',
       showAds: false,
       soulBalance: 0,
+      disableCharacterBurn: (getConfigValue('featureSupport').disableDynamicMinting),
       burnCost: 0,
       burnPowerMultiplier: 1,
       burnCharacterIds: [],
@@ -376,7 +380,7 @@ export default Vue.extend({
     },
     showBurnConfirmation() {
       if(!(this.burnCharacterIds.length === 0 ||  this.powerLimitExceeded || (this.burnOption === 1 && !this.targetCharacterId)
-      || !this.canBurn() || this.isBurnInProgress)){
+      || !this.canBurn() || this.isBurnInProgress || (this.burnCharacterIds.length > 1 && this.disableCharacterBurn))){
         (this.$refs['burn-confirmation-modal'] as BModal).show();
       }
     },

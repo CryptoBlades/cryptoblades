@@ -284,6 +284,16 @@
       "address": "0x22821a2aBC0D6bfC3a6d412C035bFe9CfC44325f",
       "txHash": "0x06b7972884b9aa924366092e9c65d14e4b1900dd95f526ac7c1de9d5b377cf98",
       "kind": "transparent"
+    },
+    {
+      "address": "0x9677F72cf1518d16422579B10C809f4bEe8Aa8C4",
+      "txHash": "0x86def30258cf97982f2d392ab4959fb46536479139604e8afdb5f9ca6025afea",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x5373a055CcC1Bdb02A7CF5aAB321775F74dd7Ad0",
+      "txHash": "0x36b267a540f904195dc445637ab58278a7b680a65edbba13e4ecfd771aee2454",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -14780,6 +14790,455 @@
                 "type": "t_mapping(t_bytes32,t_uint256)"
               }
             ]
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "ed77954bc74608f78985f52771bf6dd0b3b787c8b8571ca7bcd6a65f08930e31": {
+      "address": "0xEEF6f994c7d7e92d9cD9c22077E624d20D5A8410",
+      "txHash": "0x8978fbda3c5244cf7ec58ed35d38f6cacd69901190dd18b739ef83643fc52ede",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)58095_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_erc20BridgeEnabled",
+            "type": "t_bool",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:19"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_bridgeVars",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:25"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_bridgeTokenVars",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:26"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_transfersOutCount",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:57"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_bridgeEnabled",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:58"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_transferOuts",
+            "type": "t_mapping(t_uint256,t_struct(ERC20BridgeOutRequests)9223_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:59"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_transferInsCount",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:61"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_transferIns",
+            "type": "t_mapping(t_uint256,t_struct(ERC20BridgeReceivedTokens)9236_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:62"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_transferOutOfPlayers",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:66"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_transferOutOfPlayersHistory",
+            "type": "t_mapping(t_address,t_struct(UintSet)64341_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:67"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_transferInOfPlayersHistory",
+            "type": "t_mapping(t_address,t_struct(UintSet)64341_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:68"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_supportedTokenTypes",
+            "type": "t_struct(AddressSet)64220_storage",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:71"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_supportedChains",
+            "type": "t_struct(UintSet)64341_storage",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:72"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "game",
+            "type": "t_contract(CryptoBlades)43306",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:74"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_erc20ProxyContract",
+            "type": "t_mapping(t_address,t_address)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:77"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_botLog",
+            "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:79"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_erc20AllowedChains",
+            "type": "t_mapping(t_address,t_struct(UintSet)64341_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:81"
+          },
+          {
+            "contract": "ERC20Bridge",
+            "label": "_targetChainAllowedERC20s",
+            "type": "t_mapping(t_uint256,t_struct(AddressSet)64220_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\ERC20Bridge.sol:83"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          },
+          "t_mapping(t_uint256,t_struct(ERC20BridgeOutRequests)9223_storage)": {
+            "label": "mapping(uint256 => struct ERC20Bridge.ERC20BridgeOutRequests)"
+          },
+          "t_struct(ERC20BridgeOutRequests)9223_storage": {
+            "label": "struct ERC20Bridge.ERC20BridgeOutRequests",
+            "members": [
+              {
+                "label": "owner",
+                "type": "t_address"
+              },
+              {
+                "label": "erc20Address",
+                "type": "t_address"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "chainId",
+                "type": "t_uint256"
+              },
+              {
+                "label": "status",
+                "type": "t_uint8"
+              },
+              {
+                "label": "blockNumber",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_mapping(t_uint256,t_struct(ERC20BridgeReceivedTokens)9236_storage)": {
+            "label": "mapping(uint256 => struct ERC20Bridge.ERC20BridgeReceivedTokens)"
+          },
+          "t_struct(ERC20BridgeReceivedTokens)9236_storage": {
+            "label": "struct ERC20Bridge.ERC20BridgeReceivedTokens",
+            "members": [
+              {
+                "label": "owner",
+                "type": "t_address"
+              },
+              {
+                "label": "erc20Address",
+                "type": "t_address"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "sourceChain",
+                "type": "t_uint256"
+              },
+              {
+                "label": "sourceTransferId",
+                "type": "t_uint256"
+              },
+              {
+                "label": "blockNumber",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_mapping(t_address,t_struct(UintSet)64341_storage)": {
+            "label": "mapping(address => struct EnumerableSet.UintSet)"
+          },
+          "t_struct(UintSet)64341_storage": {
+            "label": "struct EnumerableSet.UintSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)63955_storage"
+              }
+            ]
+          },
+          "t_struct(Set)63955_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_struct(AddressSet)64220_storage": {
+            "label": "struct EnumerableSet.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)63955_storage"
+              }
+            ]
+          },
+          "t_contract(CryptoBlades)43306": {
+            "label": "contract CryptoBlades"
+          },
+          "t_mapping(t_address,t_address)": {
+            "label": "mapping(address => address)"
+          },
+          "t_mapping(t_uint256,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(uint256 => mapping(uint256 => uint256))"
+          },
+          "t_mapping(t_uint256,t_struct(AddressSet)64220_storage)": {
+            "label": "mapping(uint256 => struct EnumerableSet.AddressSet)"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)58095_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_struct(RoleData)58095_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)61290_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)61290_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)61025_storage"
+              }
+            ]
+          },
+          "t_struct(Set)61025_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "1cd70dd93678f2a05d4b144c32c83e77d0ba7fcafb64e50f32cce4aa124c8769": {
+      "address": "0xecAA4636F6F3415FbAD3d3f5e6c20946A0F284Fa",
+      "txHash": "0xc5cda338dca0c29b62c5112fa1a31d405084bf691a9acfd3da90590dee080f19",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)58095_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "SkillERC20BridgeProxyContract",
+            "label": "promos",
+            "type": "t_contract(Promos)20899",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SkillERC20BridgeProxyContract.sol:13"
+          },
+          {
+            "contract": "SkillERC20BridgeProxyContract",
+            "label": "enabled",
+            "type": "t_bool",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SkillERC20BridgeProxyContract.sol:14"
+          }
+        ],
+        "types": {
+          "t_contract(Promos)20899": {
+            "label": "contract Promos"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)58095_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(RoleData)58095_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)61290_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)61290_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)61025_storage"
+              }
+            ]
+          },
+          "t_struct(Set)61025_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_uint256": {
+            "label": "uint256"
           },
           "t_array(t_uint256)49_storage": {
             "label": "uint256[49]"

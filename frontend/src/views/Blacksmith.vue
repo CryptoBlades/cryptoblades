@@ -147,6 +147,7 @@
         class="none-mobile"
         :isLoading="isLoading"
         :disableForge="disableForge"
+        :disableX10Forge="disableX10Forge"
         :disableX10ForgeWithStaked="disableX10ForgeWithStaked"
         :disableUseStakedForForge="disableUseStakedForForge"
         @onClickForge="onClickForge"
@@ -469,10 +470,11 @@
                 </div>
               </div>
             </div>
-            <div>
+            <div :disabled ="burnWeaponIds.length > 1 && disableX10Forge">
               <button class="forge-btns"
-              @click="showMassDustConfirmation"
-              >
+              v-tooltip="(burnWeaponIds.length > 1 && disableX10Forge) ? $t('blacksmith.disableDynamicMintingSalvage') : null"
+              :style="burnWeaponIds.length > 1 && disableX10Forge ? 'opacity: 0.5' : ''"
+              @click="showMassDustConfirmation">
                 <span>{{$t('blacksmith.salvage').toUpperCase()}}</span>
                 <span>({{(burnCost * burnWeaponIds.length).toFixed(4) }} SKILL)</span>
               </button>
@@ -610,6 +612,8 @@ import i18n from '@/i18n';
 import Events from '../events';
 import SpecialWeaponForgeModal from '@/components/smart/SpecialWeaponForgeModal.vue';
 import BlacksmithNav from '@/components/BlacksmithNav.vue';
+import { getConfigValue } from '@/contracts';
+
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards' >;
 
 type StoreMappedSpecialWeaponsManagerState = Pick<ISpecialWeaponsManagerState, 'specialWeaponEvents' | 'activeSpecialWeaponEventsIds' | 'specialWeaponEventId'>;
@@ -633,6 +637,7 @@ interface Data {
   dustReforgeCost: string,
   burnCost: string,
   disableForge: boolean;
+  disableX10Forge: boolean;
   newForged: number[];
   currentListofWeapons: string[];
   selectedElement: number | null,
@@ -689,6 +694,7 @@ export default Vue.extend({
       dustReforgeCost: '0',
       burnCost: '0',
       disableForge: false,
+      disableX10Forge: (getConfigValue('featureSupport').disableDynamicMinting),
       newForged: [],
       currentListofWeapons: [],
       selectedElement: null,
