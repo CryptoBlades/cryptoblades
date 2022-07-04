@@ -21,6 +21,7 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
     uint8 public constant BRIDGE_TOKEN_VAR_MIN_AMOUNT_INDEX = 0; // can't request bridge less than this value; value is in wei
     uint8 public constant BRIDGE_TOKEN_VAR_FEE_INDEX = 1;
     uint8 public constant BRIDGE_TOKEN_VAR_MAX_AMOUNT_INDEX = 2; // can't request bridge greater than this value; value is in wei
+    uint8 public constant BRIDGE_TOKEN_VAR_OPEN_TO_PUBLIC = 3; // token is public or whitelisted only
 
     mapping(uint256 => uint256) private _bridgeVars;
     mapping(address => mapping(uint256 => uint256)) private _bridgeTokenVars;
@@ -81,6 +82,9 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
     mapping(address => EnumerableSet.UintSet) private _erc20AllowedChains;
     // Target network => allowed ERC20s
     mapping(uint256 => EnumerableSet.AddressSet) private _targetChainAllowedERC20s;
+
+    // Whitelisted wallets
+    mapping(address => EnumerableSet.AddressSet) private _whitelistedWallets;
 
     event BridgeIn(address indexed receiver, address indexed erc20, uint256 indexed sourceChain, uint256 sourceId, uint256 amount);
     event BridgeOut(address indexed sender, address indexed erc20, uint256 indexed destinationChain, uint256 requestId, uint256 amount);
@@ -217,6 +221,8 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
         require(_amount >= _bridgeTokenVars[_tokenAddress][BRIDGE_TOKEN_VAR_MIN_AMOUNT_INDEX], "NA1");
         require(_amount <= _bridgeTokenVars[_tokenAddress][BRIDGE_TOKEN_VAR_MAX_AMOUNT_INDEX], "NA2");
         require(IERC20BridgeProxy(_erc20ProxyContract[_tokenAddress]).canBridge(msg.sender, _amount, targetChain), "NA3");
+        require(_bridgeTokenVars[_tokenAddress][BRIDGE_TOKEN_VAR_OPEN_TO_PUBLIC] == 1 
+                            || _whitelistedWallets[_tokenAddress].contains(msg.sender), "NA4");
 
         game.payContractTokenOnly(msg.sender, _bridgeTokenVars[_tokenAddress][BRIDGE_TOKEN_VAR_FEE_INDEX]);
         IERC20(_tokenAddress).transferFrom(msg.sender, address(this), _amount);
@@ -364,5 +370,28 @@ contract ERC20Bridge is Initializable, AccessControlUpgradeable
 
     function recoverToken(address token, uint256 amount) public restricted {
         IERC20(token).safeTransfer(msg.sender, amount);
+    }
+
+
+    function updateWhitelistedWallets(address token, address[] calldata wallets, bool enable) external gameAdminRestricted {
+        for (uint256 i = 0; i < wallets.length; i++) {
+            address wallet = wallets[i];
+            if(enable) {
+                require(!_whitelistedWallets[token].contains(wallet), "NA");
+                _whitelistedWallets[token].add(wallet);
+            } else {
+                require(_whitelistedWallets[token].contains(wallet), "NA2");
+                _whitelistedWallets[token].remove(wallet);
+            }
+        }
+    }
+
+    function getWhitelistedWallets(address token) public view returns (address[] memory wallets) {
+        wallets = new address[](_whitelistedWallets[token].length());
+
+        for (uint256 i = 0; i < _whitelistedWallets[token].length(); i++) {
+            address wallet = _whitelistedWallets[token].at(i);
+                wallets[i] = wallet;
+        }
     }
 }
