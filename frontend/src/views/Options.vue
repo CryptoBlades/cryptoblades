@@ -385,7 +385,6 @@ export default Vue.extend({
 .list-group {
   border: 2px solid #9e8a57;
   border-radius: 5px;
-  background: linear-gradient(120deg, rgba(20, 20, 20, 1) 0%, rgb(41, 43, 38) 100%);
   max-width: 900px;
   margin: 0 auto;
 }

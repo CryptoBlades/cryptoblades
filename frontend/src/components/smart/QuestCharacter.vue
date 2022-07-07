@@ -9,15 +9,15 @@
          :src="getCharacterArt(character)" alt="Character image"/>
     <div class="d-flex flex-column flex-1 mr-5">
       <span class="text-uppercase gold-text">{{ getCleanCharacterName(character.id) }}</span>
-      <span class="gray-text">{{ $t(`quests.tier`) }}: <span class="gold-text">{{
+      <span class="custom-font-white-text">{{ $t(`quests.tier`) }}: <span class="gold-text">{{
           $t(`quests.reputationTier.${ReputationTier[getReputationLevel(quest.reputation)]}`)
         }}  <b-icon-question-circle
           class="pointer"
           @click="showReputationInfoModal"/></span></span>
-      <span class="gray-text">{{ $t('quests.reputationPoints') }}: <span class="gold-text">{{
+      <span class="custom-font-white-text">{{ $t('quests.reputationPoints') }}: <span class="gold-text">{{
           quest.reputation.toLocaleString()
         }}</span></span>
-      <span v-if="getReputationBreakpoint(quest.reputation)" class="gray-text">{{ $t('quests.nextReputationTierOn') }}: <span
+      <span v-if="getReputationBreakpoint(quest.reputation)" class="custom-font-white-text">{{ $t('quests.nextReputationTierOn') }}: <span
         class="gold-text">{{ getReputationBreakpoint(quest.reputation).toLocaleString() }}</span></span>
       <div v-if="getReputationBreakpoint(quest.reputation)" class="quest-progress">
         <div class="quest-progress-bar" role="progressbar"
@@ -206,10 +206,12 @@ export default Vue.extend({
 
 .gold-text {
   color: #DABE75;
+  font-family: Roboto;
 }
 
-.gray-text {
-  color: #B4B0A7;
+.custom-font-white-text{
+  font-family: Roboto;
+  color: #FFFFFF;
 }
 
 .quest-progress {

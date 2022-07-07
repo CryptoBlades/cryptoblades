@@ -1,5 +1,5 @@
 <template>
-  <div class="character-list-container">
+  <div class="character-list-container pt-4">
     <div class="filters row mt-2 pl-2" v-if="showFilters && !isMobile()" @change="saveFilters()">
       <div>
         <div class="select-wrapper-no" :data-content="$t('characterList.level')">
@@ -98,6 +98,10 @@
           </button>
         </div>
       </div>
+      <div class="footer-close" @click="$refs['filter-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
     <b-modal class="centered-modal" ref="character-rename-modal"
@@ -114,6 +118,10 @@
         {{$t('characterList.renameCharacterProfanityWarning')}}
          <em>{{cleanRename}}</em>
       </span>
+      <div class="footer-close" @click="$refs['character-rename-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
     <b-modal class="centered-modal" ref="character-change-trait-modal"
@@ -127,19 +135,25 @@
       <select class="form-control" v-model="targetTrait">
         <option v-for="x in availableTraits" :value="x" :key="x">{{ x }}</option>
       </select>
+      <div class="footer-close" @click="$refs['character-change-trait-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
     <b-modal class="centered-modal" ref="character-change-skin-modal"
-      @ok="changeCharacterSkinCall">
-      <template #modal-title>
-        {{$t('characterList.changeCharacterSkin')}}
-      </template>
+      hide-header cancel-disabled@ok="changeCharacterSkinCall">
+      <h3 class="confirmation-title">   {{$t('characterList.changeCharacterSkin')}}</h3>
       <span >
         {{$t('characterList.pickSkin')}}
       </span>
       <select class="form-control" v-model="targetSkin">
         <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
       </select>
+      <div class="footer-close" @click="$refs['character-change-skin-modal'].hide()">
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
   </div>
 </template>
@@ -611,7 +625,7 @@ export default {
   border-top: 6px solid #666;
   position: absolute;
   left: 55px;
-  top: 27px;
+  top: 50px;
   font-family: Roboto;
   color: rgba(255, 255, 255, 0.541);
 }
@@ -623,7 +637,7 @@ export default {
   border-top: 6px solid #666;
   position: absolute;
   margin-left: 10px;
-  top: 27px;
+  top: 50px;
   font-family: Roboto;
   color: rgba(255, 255, 255, 0.541);
 }
@@ -730,26 +744,6 @@ export default {
 
 .above-wrapper-nft-display {
   top: 220px;
-}
-
-.clear-filters-button {
-  height: fit-content;
-  display: flex;
-  flex-direction: row;
-  align-self: flex-end;
-  margin:0 15px;
-  margin-bottom: 15px;
-  border-radius: 5px;
-  border:1px solid #EDCD90;
-  background-color: rgba(255, 255, 255, 0);
-  font-family: Roboto;
-  color: #fff;
-  padding: 5px 20px;
-}
-
-.clear-filters-button:hover{
-  background: rgba(0, 0, 0, 0) !important;
-  border: 1px solid #fff !important;
 }
 
 @media (max-width: 576px) {

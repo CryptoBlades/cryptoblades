@@ -1,5 +1,11 @@
 <template>
-  <div class="main-font">
+  <div class="blank-slate" v-if="ownedCharacterIds.length <= 0">
+    <div v-if="ownedCharacterIds.length <= 0">
+      {{$t('quests.youNeedToHaveAtLeastOneCharacterRaid')}}<br>
+      {{ $t('combat.recruitAtPlaza') }}
+    </div>
+  </div>
+  <div  v-else class="main-font">
     <div style="display:inline-flex;">
        <div class="col-md-12 col-lg-12 col-sm-12 col-12">
         <div class="row">
@@ -52,11 +58,11 @@
                         </div>
                     </div>
                     <div class="w-limit" v-else>
-                        <div class="day">
+                        <div class="day" v-if="remainingTime.days > 0">
                           <p>{{ zeroPad(remainingTime.days, 2) }}</p>
                           <span>{{ remainingTime.days > 1 ? $t('raid.days') : $t('raid.day') }}</span>
                         </div>
-                        <div class="hour">
+                        <div class="hour" v-if="remainingTime.hours > 0">
                           <p>{{ zeroPad(remainingTime.hours, 2)}}</p>
                           <span>{{ remainingTime.hours > 1 ? $t('raid.hrs') : $t('raid.hr')}}</span>
                         </div>
@@ -208,7 +214,7 @@
         </div>
       </div>
     </div>
-    <b-modal id="rewardsModal" hide-footer hide-header>
+    <b-modal id="rewardsModal" hide-footer hide-header ref="rewardsModal">
      <div>
       <div class="results-panel">
         <div class="float-center">
@@ -249,12 +255,13 @@
         </div>
       </div>
       </div>
-      <div class="rewards-footer">
-          <p>{{$t('raid.clickAnywhere')}}</p>
+      <div class="footer-close" @click="$refs['rewardsModal'].hide()">
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
       </div>
     </b-modal>
 
-    <b-modal id="equipments" hide-footer hide-header>
+    <b-modal id="equipments" hide-footer hide-header ref="equipments">
      <div class="d-flex align-items-center">
       <div class="results-panel">
         <div class="float-center">
@@ -327,9 +334,13 @@
           {{$t('raid.joinRaid')}}
         </button>
       </div>
+      <div class="footer-close" @click="$refs['equipments'].hide()">
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
-    <b-modal id="viewLoot" hide-footer hide-header>
+    <b-modal id="viewLoot" hide-footer hide-header ref="viewLoot">
      <div>
         <div class="tob-bg-img promotion-decoration">
           <img class="vertical-decoration bottom" src="../assets/header-ads.png">
@@ -357,16 +368,15 @@
         </div>
       </div>
       </div>
-      <div class="footer-close">
-          <img src="../assets/separator.png">
-          <p class="tap">{{$t('raid.clickAnywhere')}}</p>
-          <span @click="$bvModal.hide('rewardsModal')"><img src="../assets/close-btn.png" alt=""></span>
+      <div class="footer-close" @click="$refs['viewLoot'].hide()">
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
       </div>
     </b-modal>
 
-    <b-modal id="rewardsRaidPicker"  hide-footer hide-header>
+    <b-modal id="rewardsRaidPicker"  hide-footer hide-header ref="rewardsRaidPicker">
       <div class="raid-picker" v-if="isLoading">
-          <b-spinner v-if="spin" type="grow" :label="$t('raid.loading')"></b-spinner>
+          <b-spinner v-if="spin" type="grow" :label="$t('loading')"></b-spinner>
           <span>{{$t('raid.claimingRewards')}}</span>
       </div>
      <div class="rewards-header" v-if="!isLoading">
@@ -386,11 +396,19 @@
       <div class="rewards-footer" v-if="!isLoading">
           <p>&#9888; {{$t('raid.allRewardRemove')}}</p>
       </div>
+      <div class="footer-close" @click="$refs['rewardsRaidPicker'].hide()">
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
+      </div>
     </b-modal>
 
-    <b-modal id="warningModal" hide-footer hide-header>
+    <b-modal id="warningModal" ref="warningModal" hide-footer hide-header>
       <div class="warning-indicator">
         <p> <img src="../assets/hint.png" alt="">  &nbsp;&nbsp; {{notifyError}}</p>
+      </div>
+      <div class="footer-close" @click="$refs['warningModal'].hide()">
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+        <p class="close-icon"></p>
       </div>
     </b-modal>
  </div>
