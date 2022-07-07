@@ -157,7 +157,7 @@
             </router-link>
 
             <router-link class="menu-icon" :to="{ name: 'nft-display' }" exact>
-              <img src="../assets/navbar-icons/nft-display.svg" class="gold-icon" alt="NFT Display"/>
+              <img src="../assets/navbar-icons/nft-display.svg" class="gold-icon" alt="Nft Display"/>
               <span>{{ $t("viewLink.nftDisplay") }}</span>
             </router-link>
 

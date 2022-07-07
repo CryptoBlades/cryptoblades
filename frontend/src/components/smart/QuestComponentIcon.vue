@@ -123,8 +123,8 @@ export default Vue.extend({
 
 <style scoped>
 .reward-icon-container {
-  background: #000E29 0 0 no-repeat padding-box;
-  border: 1px solid #43506A;
+  background: #0B0B0B 0 0 no-repeat padding-box;
+  border: 1px solid #564B30;
   border-radius: 5px;
   width: 75px;
   height: 75px;

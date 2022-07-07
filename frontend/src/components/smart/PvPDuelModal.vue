@@ -64,7 +64,7 @@
     </div>
     <div class="closeWrapper">
       <p>
-        {{$t('tapAnywhere')}}
+        {{$t('pvp.tapAnywhere')}}
       </p>
       <button @click="close">
         <img src="../../assets/closeModal.svg" alt="Bottom separator">

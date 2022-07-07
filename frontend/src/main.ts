@@ -1,6 +1,7 @@
 import BootstrapVue from 'bootstrap-vue';
 import { BootstrapVueIcons } from 'bootstrap-vue';
 import BootstrapVueDialog from 'bootstrap-vue-dialog';
+import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 
 import Vue from 'vue';
@@ -12,7 +13,6 @@ import store from './store/store';
 import createRouter from './router';
 
 import App from './App.vue';
-import CBButton from '@/components/CBButton.vue';
 
 import {
   raid as featureFlagRaid,
@@ -35,7 +35,6 @@ Vue.use(VueRouter);
 Vue.use(VTooltip);
 Vue.use(BootstrapVue);
 Vue.use(BootstrapVueDialog);
-Vue.component('cb-button', CBButton);
 
 Vue.use(BootstrapVueIcons);
 

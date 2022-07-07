@@ -2139,11 +2139,6 @@
     "address": "0x39Bea96e13453Ed52A734B6ACEeD4c41F57B2271",
     "transactionHash": "0x21457977caf0e8cdfe16adb89b04dcad5d00071a8690df60f889567ef47b180c"
   },
-  "build/contracts/ERC20Bridge.json": {
-    "events": {},
-    "links": {},
-    "address": "0x5C41Fb66849aba563D1b6718772fb01ceb018c71"
-  },
   "build/contracts/Garrison.json": {
     "events": {
       "0xefe6a80b6beaa729816c7b03af9a2105b626fdada4a5209d81a95f8d1880b253": {
@@ -4811,11 +4806,6 @@
     "links": {},
     "address": "0xD6CDf4072EB6bcF10ef1b715aaA0fDF755B52327",
     "transactionHash": "0xce41988c4045d35fc4e3bb756fbc92743b84e35a27c7575d4c2426c2e13321da"
-  },
-  "build/contracts/SkillERC20BridgeProxyContract.json": {
-    "events": {},
-    "links": {},
-    "address": "0x9dDC408b7041Cf81d3a5B46a843bf50e03a1C8d7"
   },
   "build/contracts/SkillStakingRewards.json": {
     "events": {},

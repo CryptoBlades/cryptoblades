@@ -101,11 +101,10 @@ export default Vue.extend({
 .quest-row {
   display: flex;
   width: 100%;
-  background: rgba(0, 9, 26, 0.65);
-  border: 1px solid #404857;
+  background: #141414;
+  border: 1px solid #60583E;
   border-radius: 10px;
   align-items: center;
-  font-family: Roboto;
 }
 
 .busy-quest-row {

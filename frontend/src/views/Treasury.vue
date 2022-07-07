@@ -43,19 +43,16 @@ export interface SupportedProject {
   note: string;
 }
 
-interface StoreMappedTreasuryGetters {
+interface StoreMappedGetters {
   getPartnerProjects: SupportedProject[];
 }
 
 interface StoreMappedState {
+  payoutCurrencyId: string;
   currentNetworkId: number;
 }
 
-interface StoreMappedTreasuryState {
-  payoutCurrencyId: string;
-}
-
-interface StoreMappedTreasuryActions {
+interface StoreMappedActions {
   fetchPartnerProjects(): Promise<void>;
 }
 
@@ -73,15 +70,13 @@ export default Vue.extend({
   },
 
   computed: {
-    ...(mapGetters('treasury', ['getPartnerProjects']) as Accessors<StoreMappedTreasuryGetters>),
-    ...(mapState(['currentNetworkId']) as Accessors<StoreMappedState>),
-    ...(mapState('treasury',['payoutCurrencyId'])as Accessors<StoreMappedTreasuryState>),
-
+    ...(mapGetters(['getPartnerProjects']) as Accessors<StoreMappedGetters>),
+    ...(mapState(['payoutCurrencyId', 'currentNetworkId']) as Accessors<StoreMappedState>),
   },
 
   methods: {
-    ...(mapActions('treasury',['fetchPartnerProjects']) as StoreMappedTreasuryActions),
-    ...mapMutations('treasury', ['updatePayoutCurrencyId']),
+    ...(mapActions(['fetchPartnerProjects']) as StoreMappedActions),
+    ...mapMutations(['updatePayoutCurrencyId']),
 
     getLogoFile(projectName: string): string {
       return `${projectName.toLowerCase()}.png`;

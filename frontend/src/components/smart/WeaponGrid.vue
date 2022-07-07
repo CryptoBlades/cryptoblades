@@ -28,6 +28,7 @@
 
       <b-button
         v-if="!newWeapon"
+        variant="primary"
         class="clear-filters-button mb-3"
         @click="clearFilters"
       >
@@ -56,37 +57,29 @@
       </li>
     </ul>
 
-    <b-modal centered class="centered-modal" ref="weapon-rename-modal" hide-header hide-footer>
-      <h3 class="confirmation-title">{{$t('weaponGrid.renameWeapon')}}</h3>
-      <b-form-input type="string"
-        class="modal-input" v-model="weaponRename" :placeholder="$t('weaponGrid.renamePlaceholder')" />
+    <b-modal class="centered-modal" ref="weapon-rename-modal"
+                  @ok="renameWeaponCall()">
+                  <template #modal-title>
+                    {{$t('weaponGrid.renameWeapon')}}
+                  </template>
+                  <b-form-input type="string"
+                    class="modal-input" v-model="weaponRename" :placeholder="$t('weaponGrid.renamePlaceholder')" />
       <span v-if="isRenameProfanish">
         {{$t('weaponGrid.isProfanish')}} <em>{{cleanRename}}</em>
       </span>
-      <div class="footer-btn mb-4">
-        <button class="close-btn"   @click="renameWeaponCall()">{{$t('blacksmith.confirm')}}</button>
-      </div>
-      <div class="footer-close" @click="$refs['weapon-rename-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
-        <p class="close-icon"></p>
-      </div>
     </b-modal>
 
-    <b-modal centered class="centered-modal" ref="weapon-change-skin-modal" hide-footer hide-header>
-      <h3 class="confirmation-title">{{$t('weaponGrid.changeWeaponSkill')}}</h3>
+    <b-modal class="centered-modal" ref="weapon-change-skin-modal"
+      @ok="changeWeaponSkinCall">
+      <template #modal-title>
+        {{$t('weaponGrid.changeWeaponSkill')}}
+      </template>
       <span >
         {{$t('weaponGrid.pickSkin')}}
       </span>
       <select class="form-control" v-model="targetSkin">
         <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
       </select>
-      <div class="footer-btn mb-4">
-        <button class="close-btn"   @click="changeWeaponSkinCall()">{{$t('blacksmith.confirm')}}</button>
-      </div>
-      <div class="footer-close" @click="$refs['weapon-change-skin-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
-        <p class="close-icon"></p>
-      </div>
     </b-modal>
   </div>
 </template>

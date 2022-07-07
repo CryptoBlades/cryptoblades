@@ -97,7 +97,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions('treasury', ['getPartnerProjectMultiplier', 'getPartnerProjectClaimedAmount', 'getSkillToPartnerRatio', 'getPartnerProjectDistributionTime']),
+    ...mapActions(['getPartnerProjectMultiplier', 'getPartnerProjectClaimedAmount', 'getSkillToPartnerRatio', 'getPartnerProjectDistributionTime']),
 
     async update(): Promise<void> {
       const currentMultiplier = await this.getPartnerProjectMultiplier(this.partnerProject.id);

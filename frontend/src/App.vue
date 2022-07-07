@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <nav-bar :isToggled="toggleSideBar"/>
-    <div class="content bg-dark">
+    <div class="content dark-bg-text">
       <b-row>
         <character-bar :isToggled="toggleSideBar" v-if="currentCharacterId !== null"/>
         <b-col style="padding-left: 0;" :class="renderPageDisplay()">
@@ -10,8 +10,8 @@
         <WeaponRowGrid v-if="showWeapon" v-model.lazy="currentWeaponId" :checkForDurability="true"/>
       </b-row>
     </div>
-    <div class="content bg-dark" v-if="!canShowApp && !showMetamaskWarning">
-      <div class="outcome mb-0 mt-0">
+    <div class="content dark-bg-text" v-if="!canShowApp && !showMetamaskWarning">
+      <div class="outcome">
         <i class="fas fa-spinner fa-spin"></i>
       </div>
     </div>
@@ -438,6 +438,27 @@ export default Vue.extend({
     Events.$on('toggle-sideBar', (bol: boolean) =>{
       this.toggleSideBar = bol;
     });
+
+    document.body.addEventListener('click', (e: MouseEvent) => {
+      if(e !== null){
+        const tagname = (e.target as HTMLInputElement).getAttribute('tagname');
+        if (!tagname) return;
+
+        if ((e.target as HTMLInputElement).nodeName === 'BUTTON') {
+          (window as any).gtag('event', 'button_clicked', {
+            value: tagname,
+          });
+        }
+
+        if ((e.target as HTMLInputElement).className.includes('gtag-link-others')) {
+          (window as any).gtag('event', 'nav', {
+            event_category: 'navigation',
+            event_label: 'navbar',
+            value: tagname,
+          });
+        }
+      }
+    });
     this.showWarningDialog();
     if(this.hideWalletWarning) {
       this.configureMetamask();
@@ -506,7 +527,7 @@ export default Vue.extend({
 });
 </script>
 
-<style lang="scss">
+<style>
 
 @font-face {
     font-family: 'Trajan';
@@ -517,7 +538,6 @@ export default Vue.extend({
 
 @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
-@import '@/scss/app.scss';
 
 
 button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary > h1 {
@@ -537,12 +557,14 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   padding: 0px;
 }
 
+
 hr.hr-divider {
   border-top: 1px solid #9e8a57;
   margin-bottom: 0.5rem !important;
 }
 body {
   margin: 0;
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, #242720 100%);
 }
 
 .no-margin {
@@ -567,54 +589,29 @@ body {
   top: -10px;
 }
 
+.title-bg-text {
+  color: #9e8a57;
+}
+
+.dark-bg-text {
+  color: #9e8a57;
+}
 
 button,
 .pointer {
   cursor: pointer;
 }
 
-.footer-btn{
-  text-align: center;
-  padding-top: 2.5em;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-
-.footer-btn > .close-btn{
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-top: 0.8em;
-  padding-bottom: 0.8em;
-  font-family: Roboto;
-  background-color: #1168D0;
-  border-radius: 2px;
-  border: none;
-  color: rgb(255, 255, 255);
-  text-transform: capitalize;
-}
-
-.close-btn.cancel{
-  background-color: #e9be6edc;
-}
-
 .blank-slate {
   width: calc(100vw - 36px);
-  height: 95vh;
+  height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
   font-size: 2rem;
   text-align: center;
-}
-
-.blank-slate > div {
-  font-family: Roboto;
-  font-size: 1em;
 }
 
 .error {
@@ -727,41 +724,36 @@ button.close {
    font-size: clamp(24px, 2vw, 40px);
 }
 
-.clear-filters-button {
-  height: fit-content;
-  display: flex;
-  flex-direction: row;
-  align-self: flex-end;
-  margin:0 15px;
-  margin-bottom: 15px;
-  border-radius: 5px;
-  border:1px solid #EDCD90;
-  background-color: rgba(255, 255, 255, 0);
-  font-family: Roboto;
-  color: #fff;
-  padding: 5px 20px;
-}
-
-.clear-filters-button:hover{
-  background: rgba(0, 0, 0, 0) !important;
-  border: 1px solid #fff !important;
-}
-
 .btn {
+  border: 2px solid #6c5f38 !important;
   border-radius: 0.1em !important;
 }
+
 .common-width-button {
   margin: 0.8rem;
   width: 22%;
 }
+
 .btn.disabled,
 .btn:disabled {
   cursor: auto;
 }
+
+.btn:not(.disabled):not(:disabled):hover {
+  border: 2px solid #9e8a57 !important;
+  background: rgb(61, 61, 64);
+  background: linear-gradient(180deg, rgba(51, 51, 54, 1) 0%, rgba(44, 47, 50, 1) 5%, rgba(44, 58, 65, 1) 100%);
+}
+
 .btn-primary {
-  color: $primary !important;
+  color: #9e8a57 !important;
   background: rgb(31, 31, 34);
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+}
+
+
+.btn-outline-primary {
+  color: #9e8a57 !important;
 }
 
 .modal-header {
@@ -772,21 +764,17 @@ button.close {
 }
 
 .character-modal {
-  background: #05112600!important;
+  background: #051126!important;
   border: none !important;
-  border: 1px solid #43506a00!important;
-  padding:2rem;
+  border: 1px solid #43506A!important;
+  padding:3rem;
 }
 .character-modal-mobile {
   padding:2rem;
 }
 
-#modal-container > .modal-dialog.modal-md {
-  max-width: 700px;
-}
-
 .character-modal header.modal-header{
-  background: #05112600!important;
+  background: #051126!important;
   border: none;
 }
 
@@ -795,13 +783,6 @@ button.close {
   text-align: center;
   font: normal normal bold 30px/38px Trajan;
   width: 100%;
-}
-
-.confirmation-title{
-  text-align: center;
-  font-family: Trajan;
-  text-transform: uppercase;
-  color: #EDCD90;
 }
 
 .character-modal div.modal-body {
@@ -833,49 +814,9 @@ button.close {
   height: 70px;
 }
 
-.tapAny{
-  font-family: Roboto;
-  color: #fffffe;
-  text-align: center;
-  font-size: 1em;
-  align-self: center;
-  font-weight: 500;
-  margin-bottom: 0px;
-  cursor: pointer;
-}
-
-.footer-close{
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  align-items: center;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  margin-bottom: -7.5em;
-  cursor: pointer;
-}
-
-.close-icon{
-  margin-top: 1.3em;
-  content: url('assets/close-btn.png');
-  width: 2em;
-  height: auto;
-}
-
-.tapAny:hover{
-  color: #fffffed2;
-}
-
 .modal-body {
-  background: #051126!important;
-  border: none !important;
-  border: 1px solid #43506A!important;
-  padding:2rem;
+  color: #9e8a57 !important;
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
 }
 
 .modal-footer {
@@ -901,19 +842,19 @@ button.close {
   background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
   border-color: #9e8a576e;
 }
-.nav-tabs .nav-link{
-  border: 1px solid #404857!important;
-  background: transparent!important;
-  color: white!important;
-  text-transform: uppercase;
-  font-family: 'Oswald', sans-serif;
-  min-height:56px;
-  line-height: 38px;
-  border-radius: 0px;
+.nav-tabs {
+  border-bottom: 2px solid #9e8a57 !important;
 }
+
 .nav-tabs .nav-link.active {
-  border: 1px solid #404857!important;
-  background: #1168D0!important;
+  color: #9e8a57 !important;
+  border: 2px solid #9e8a57 !important;
+  background: linear-gradient(180deg, rgba(31, 31, 34, 1) 0%, rgba(24, 27, 30, 1) 5%, rgba(24, 38, 45, 1) 100%);
+}
+
+.nav-tabs .nav-link:hover,
+.nav-tabs .nav-link:focus {
+  border-color: #9e8a57 #9e8a57 #9e8a57 !important;
 }
 
 .outline {
@@ -998,6 +939,7 @@ a.character-tab:focus {
 .content {
   padding: 0 1em;
   height: auto;
+  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, rgba(36, 39, 32, 1) 100%);
   margin: auto;
 }
 
@@ -1005,6 +947,7 @@ a.character-tab:focus {
   position: fixed;
   top: 0;
   left: 0;
+  background: rgba(0, 0, 0, 0.425);
   height: 100vh;
   width: 100vw;
   display: flex;
@@ -1018,6 +961,7 @@ a.character-tab:focus {
 .starter-panel {
   width: 100%;
   max-width: 28em;
+  background: rgba(0, 0, 0, 1);
   box-shadow: 0 2px 4px #ffffff38;
   border: 1px solid #9e8a57;
   border-radius: 5px;
@@ -1082,6 +1026,10 @@ a.character-tab:focus {
 #blacksmith-bg{
   background: rgba(20, 20, 20, 1);
   background-image: url("./assets/blacksmith/blacksmith-bg.png");
+  background-image: url("./assets/blacksmith/blacksmith-bg.png"), linear-gradient(rgba(0, 68, 111, 0) 0%,
+  rgba(20, 20, 20, 0.4) 30%,rgba(20, 20, 20, 1) 100%); /* W3C */
+  /* background: radial-gradient(closest-side at 50% 50%, rgba(0, 68, 111, 0) 10%,
+  rgba(20, 20, 20, 0.4) 50%,rgba(20, 20, 20, 1) 100%), url('./assets/blacksmith/blacksmith-bg.png'); */
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -1093,7 +1041,7 @@ a.character-tab:focus {
 
 .outcome {
   /* margin: 20px auto; */
-  height: 90vh;
+  height: 80vh;
   display: flex;
   justify-content: center;
   align-items: center;

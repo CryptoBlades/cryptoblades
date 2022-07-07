@@ -109,14 +109,7 @@
               </div>
               <div>
                 <span class="raid-boss-value" v-if="raidData.raidStatus === '0' || raidData.raidStatus === ''">00:00</span>
-                <span class="raid-boss-value" v-else>
-                  <span class="raid-boss-value" v-if="this.remainingTime.hours > 0">
-                    {{this.remainingTime.hours}}:{{this.remainingTime.minutes}}:{{this.remainingTime.seconds}}
-                  </span>
-                  <span class="raid-boss-value" v-else>
-                    {{this.remainingTime.minutes}}:{{this.remainingTime.seconds}}
-                  </span>
-                </span>
+                <span class="raid-boss-value" v-else>{{this.remainingTime.minutes}}:{{this.remainingTime.seconds}}</span>
               </div>
             </div>
           </div>

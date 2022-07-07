@@ -191,9 +191,7 @@
     },
     "couldNotForge": "Schmieden nicht möglich: Zu wenig Guthaben oder Transaktion wurde abgelehnt.",
     "couldNotReforge": "Umschmieden nicht möglich: Zu wenig Guthaben, Staub oder Transaktion wurde abgelehnt.",
-    "couldNotBurn": "Verbrennen nicht möglich: Zu wenig Guthaben oder Transaktion wurde abgelehnt.",
-    "disableDynamicMintingSalvage": "In diesem Netzwerk kannst du deine Waffen nur einzeln einschmelzen!",
-    "disableDynamicMintingForge": "In diesem Netzwerk kannst du Waffen nur einzeln schmieden!"
+    "couldNotBurn": "Verbrennen nicht möglich: Zu wenig Guthaben oder Transaktion wurde abgelehnt."
   },
   "dustBalanceDisplay": {
     "availableDust": "Dein Staub",

@@ -132,9 +132,6 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-*{
-  font-family: Roboto !important;
-}
 .quest-requirement-display {
   display: flex;
   flex-direction: column;

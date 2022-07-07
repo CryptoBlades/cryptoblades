@@ -119,7 +119,7 @@
                         :min="0"/>
         </div>
       </div>
-      <b-button variant="info" @click="showConfirmationModal"
+      <b-button variant="primary" @click="showConfirmationModal"
                 :disabled="addNewQuestDisabled()">
         {{ promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest') }}
       </b-button>
@@ -181,7 +181,7 @@
           <b-form-input v-model="weeklyReward.reputationAmount" type="number" number :min="0"/>
         </div>
       </div>
-      <b-button variant="info" @click="addReward"
+      <b-button variant="primary" @click="addReward"
                 :disabled="addNewWeeklyRewardDisabled()">
         {{ $t('quests.addNewWeeklyReward') }}
       </b-button>
@@ -198,7 +198,7 @@
         <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 5}) }}</label>
         <b-form-input type="number" number :min="0" v-model="reputationLevelRequirements.level5"/>
       </div>
-      <b-button variant="info" @click="updateRequirements" :disabled="updateRequirementsDisabled()">
+      <b-button variant="primary" @click="updateRequirements" :disabled="updateRequirementsDisabled()">
         {{ $t('quests.updateRequirements') }}
       </b-button>
     </b-form>
@@ -208,7 +208,7 @@
         <label class="m-0 align-self-center">{{ $t('quests.staminaCost') }}</label>
         <b-form-input type="number" number :min="0" v-model="staminaCost"/>
       </div>
-      <b-button variant="info" @click="updateStaminaCost"
+      <b-button variant="primary" @click="updateStaminaCost"
                 :disabled="isLoading || showTemplateConfirmationModal || showPromoToggleConfirmationModal">
         {{ $t('quests.updateStaminaCost') }}
       </b-button>
@@ -223,7 +223,7 @@
           {{ $t('quests.loading') }}
         </span>
       </div>
-      <b-button variant="info" @click="showPromoToggleConfirmationModal = true"
+      <b-button variant="primary" @click="showPromoToggleConfirmationModal = true"
                 :disabled="isLoading || showTemplateConfirmationModal || showPromoToggleConfirmationModal">
         {{ $t('quests.togglePromoQuestsUsage') }}
       </b-button>
@@ -264,7 +264,7 @@
             <b-form-input type="number" @change="() => updateCommonChance(index)" number :min="0"
                           v-model="tierChance.legendary"/>
           </div>
-          <b-button variant="info" @click="() => updateTierChances(index, tierChance)" :disabled="isLoading">
+          <b-button variant="primary" @click="() => updateTierChances(index, tierChance)" :disabled="isLoading">
             {{ $t('quests.updateForLevel', {level: index + 1}) }}
           </b-button>
         </div>

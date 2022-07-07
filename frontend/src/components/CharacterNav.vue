@@ -44,19 +44,13 @@
           </div>
         </div>
         <div class="d-flex flex-column flex-md-row justify-contenct-center">
-          <div v-if="activeTab === 'garrison'"
-              class="mt-4 mt-md-0 ml-md-auto recruit-btn-custom text-uppercase custom-recruit-text-size mint-character"
-              @click="$emit('onClaimGarrisonXp')"
-              v-tooltip="$t('plaza.claimXp')">
-              <span class="gtag-link-others custom-recruit-text"> <span>{{$t('plaza.claimXp')}}</span></span>
-          </div>
           <div v-if="ownCharacters.length <= 4 && activeTab === 'info'"
               class="ml-3 mt-4 mt-md-0 ml-md-auto recruit-btn text-uppercase custom-recruit-text-size mint-character"
               @click="$emit('mintCharacter')"
               v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
               <span class="gtag-link-others custom-recruit-text"> <span>{{$t('plaza.recruit')}}</span> ({{ recruitCost }} NON-IGO SKILL)</span>
           </div>
-          <div v-if="ownCharacters.length <= 4 && activeTab === 'info'"
+          <div
               class="ml-3 mt-4 mt-md-0 ml-md-auto soul-border text-uppercase custom-recruit-text-size mint-character"
               @click="$emit('changeTab', 'burn')"
               v-tooltip="'Soul Balance'" tagname="recruit_character">
@@ -102,33 +96,12 @@ export default Vue.extend({
 
 </script>
 <style scoped lang="scss">
-.custom-padding-claim-garrison-xp{
-  padding: 10px 40px 10px 40px !important;
+custom-recruit-text-size{
+  font-size: 20px;
+  font-weight: bold;
 }
 .custom-recruit-text{
   color: #e9c97a;
-}
-.recruit-btn-custom{
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  margin-right: 15px;
-  align-items: center;
-  vertical-align: middle;
-  align-items: center;
-  justify-content: space-between;
-  background-image: url('../assets/recruit-btn.svg');
-  background-color: transparent;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  object-fit: fill;
-  padding: 5px 70px 5px 80px;
-  border: none;
-  font-family: Oswald;
-  color: #fff;
-  font-size: 20px;
-  margin: auto;
-  cursor: pointer;
 }
 
 .recruit-btn{
@@ -283,6 +256,7 @@ export default Vue.extend({
     justify-content: space-evenly;
     padding: 0px 0px 10px 0px;
     align-items: center;
+    background-color: rgba(20, 20, 20);
     border-bottom: 1px solid rgba(255, 255, 255, 0.418);
     z-index: 5;
   }
@@ -329,7 +303,6 @@ export default Vue.extend({
 
   .char-content div.menu-nav{
     height: 100% !important;
-    background-color: #000E29;
   }
 
   .mobile-menu > span.active{
@@ -347,7 +320,7 @@ export default Vue.extend({
     font-size: 0.8em;
   }
   .none-mobile{
-    display: none !important;
+    display: none;
   }
 
   .char-content{

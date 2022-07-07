@@ -80,13 +80,10 @@ export default Vue.extend({
   border-right: 1px solid rgba(255, 255, 255, 0.234);
 }
 
-.content > .row > .sideBorder{
-  max-width: 100px;
-  min-width: 100px;
-}
-
 .sideBorder{
   overflow: visible;
+  max-width: 100px;
+  min-width: 100px;
   border-right: 1px solid rgba(255, 255, 255, 0.234);
   transition: all 0.7s ease-in-out;
 }

@@ -22,10 +22,10 @@ module.exports = async function (deployer, network, accounts) {
 	else if (network === 'auroratestnet' || network === 'auroramainnet') {
 		await storage.setLocalChainPrefix('AURORA');
 	}
-	else if(network === 'kavatestnet' || network === 'kavamainnet') {
+	else if(network === 'kavatestnet') {
 		await storage.setLocalChainPrefix('KAVA');
 	}
-	else if(network === 'skaletestnet' || network === 'skalemainnet') {
+	else if(network === 'skaletestnet') {
 		await storage.setLocalChainPrefix('SKALE');
 	}
 	else {

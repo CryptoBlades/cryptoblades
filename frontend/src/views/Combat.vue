@@ -5,13 +5,15 @@
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
       </div>
 
-      <modal-container
-        :noBack="true"
-        :modalType="'combat-result'"
-        :componentProps="{
-          fightResults:fightResults,
-          staminaUsed:staminaPerFight
-        }"/>
+      <b-modal id="fightResultsModal" hide-footer hide-header>
+        <CombatResults v-if="resultsAvailable" :fightResults="fightResults" :staminaUsed="staminaPerFight" class="mb-3" />
+        <div class="footer-close">
+            <p class="tap"> {{$t('combat.tabAnywhere')}}</p>
+            <span class="tap" @click="$bvModal.hide('fightResultsModal')">
+              <img style="width: 40px; margin-left: 215px;" src="../assets/close-btn.png" alt="">
+              </span>
+        </div>
+      </b-modal>
 
       <div class="waitingForResult" v-if="waitingResults">
         <div class="col wa">
@@ -25,7 +27,7 @@
             <h5 class="m-2">{{$t('combat.adventure')}}</h5>
             <img src="../assets/hint.png" alt="" @click="hideBottomMenu(true)">
           </div>
-          <div class="col-lg-12 col-md-12 col-xl-12 col-sm-12 text-right combat-hint" :style="isToggled ? 'display:inline' : 'none'"
+          <div class="col-lg-12 col-md-12 col-xl-12 col-sm-12 text-right combant-hint" :style="isToggled ? 'display:inline' : 'none'"
            @click="hideBottomMenu(false)">
             <div class="combat-hints">
               <Hint class="mr-3" :text="$t('combat.elementHint')"/>
@@ -59,8 +61,8 @@
         <div class="col">
         <div class="mb-3" :style="'align-self: baseline; width: 20vw'">
           <span class="isMobile label-title">{{!selectedWeaponId ? $t('combat.selectStaminaStepOne') : $t('combat.selectStamina')}}</span>
-          <b-form-select
-          class="mt-3 custom-select" v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
+          <b-form-select style="background-color:#171617;color:#fff"
+          class="mt-3" v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
         </div>
           <div  v-if="currentCharacterStamina >= staminaPerFight" class="combat-enemy-container">
               <!-- selected weapon for combat details -->
@@ -137,7 +139,7 @@
                           + ~{{formattedSkill(targetExpectedPayouts[i] * fightMultiplier)}}
                         </div>
                     </div>
-                <p v-if="isLoadingTargets">{{$t('loading')}}</p>
+                <p v-if="isLoadingTargets">{{$t('combat.loading')}}</p>
                 </div>
               </div>
               </transition-group>
@@ -173,6 +175,7 @@
     </b-modal>
     <div class="blank-slate" v-if="ownWeapons.length === 0 || ownCharacters.length === 0">
       <div v-if="ownWeapons.length === 0">{{$t('combat.noWeapons')}}</div>
+
       <div v-if="ownCharacters.length === 0">{{$t('combat.noCharacters')}}</div>
     </div>
   </div>
@@ -183,10 +186,10 @@ import {getEnemyArt} from '../enemy-art';
 import {CharacterTrait, GetTotalMultiplierForTrait, WeaponElement} from '../interfaces';
 import Hint from '../components/Hint.vue';
 import Events from '../events';
+import CombatResults from '../components/CombatResults.vue';
 import {fromWeiEther, toBN} from '../utils/common';
 import WeaponInventory from '../components/WeaponInvetory.vue';
 import WeaponGrid from '../components/smart/WeaponGridNew.vue';
-import ModalContainer from '../components/modals/ModalContainer.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
 
@@ -289,7 +292,7 @@ export default {
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
       this.setIsInCombat(this.waitingResults);
-      if (this.resultsAvailable && error === null) this.$bvModal.show('modal-info');
+      if (this.resultsAvailable && error === null) this.$bvModal.show('fightResultsModal');
     },
   },
 
@@ -541,28 +544,24 @@ export default {
 
   components: {
     Hint,
+    CombatResults,
     WeaponInventory,
-    WeaponGrid,
-    ModalContainer
+    WeaponGrid
   },
 };
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
-.custom-select{
-  background-color:#010D22;
-  color:#fff
-}
 .body{
-  background: linear-gradient(0deg, rgba(0, 14, 41, 0.68), rgba(0, 14, 41, 0.68)), url('../assets/combat-bg.png');
+  background: linear-gradient(0deg, rgba(22, 22, 22, 0.95), rgba(22, 22, 22, 0.95)), url('../assets/combat-bg.png');
   background-size:cover;
   min-height: 100%;
 }
 h5{
-  font-family: 'Trajan', serif;
+  font-family: Trajan;
   font-size: 25px;
-  font-weight: 400;
+  font-weight: 600;
 }
 
 .label-title{
@@ -888,7 +887,6 @@ h1 {
 
 .adventure{
     text-align: left;
-    margin-top: 30px;
   }
 
 .btn-trigger{
@@ -1041,10 +1039,10 @@ h1 {
     height: 35px;
   }
 
-  .combat-hint{
+  .combant-hint{
     display: none;
     z-index: 99;
-    background-color:rgba(1, 13, 34,1);
+    background-color:rgba(20,20,20,1);
     transition: all 1s ease-in-out;
   }
 
@@ -1110,7 +1108,7 @@ h1 {
     font-size: 15px !important;
   }
 
-  .combat-hint{
+  .combant-hint{
     position: absolute;
   }
 

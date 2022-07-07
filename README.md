@@ -123,5 +123,3 @@ If you get any issues during deployment, run:
 - Download the app, install it on your device and run it.
 - Point it to the folder containing locale files. (frontend/src/locales)
 - Add translations, save with ctrl + s, you should be able to see changes immediately after rebuilding
-
-![Alt](https://repobeats.axiom.co/api/embed/7c81697202444d7c5da2bce53af27d4f15e04676.svg "Repobeats analytics image")

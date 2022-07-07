@@ -1,6 +1,6 @@
 <template>
   <div class="main-nav-div">
-    <b-navbar class="main-nav bg-dark border-bottom border-gray" toggleable="lg">
+    <b-navbar class="main-nav" toggleable="lg">
       <div class="nav-logo col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1">
         <router-link :to="{ name: 'dashboard' }" exact class="game-ui-logo">
           <img
@@ -252,6 +252,11 @@ a.router-link-active {
   justify-content: center;
   display: flex;
   align-items: center;
+}
+
+.navbar {
+  background: linear-gradient(45deg, #141414, #242720);
+  border-bottom: 2px solid #404857;
 }
 
 .main-nav > .view-links {

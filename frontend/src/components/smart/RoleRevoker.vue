@@ -2,7 +2,7 @@
   <div class="d-flex flex-column align-items-start gap-2 p-1">
     <h2 class="m-0">{{ $t('admin.revokeGivenRole', {role: roleName}) }}</h2>
     <b-form-input v-model="walletAddress" :placeholder="$t('admin.pasteInValidWalletAddress')"/>
-    <b-button variant="info" @click="onSubmit" :disabled="!isValidWeb3Address(walletAddress) || isLoading">
+    <b-button variant="primary" @click="onSubmit" :disabled="!isValidWeb3Address(walletAddress) || isLoading">
       {{ $t('admin.revokeRole') }}
     </b-button>
   </div>

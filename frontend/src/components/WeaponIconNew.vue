@@ -527,7 +527,7 @@ export default {
   border-radius: 5px;
   z-index: 540;
   padding: 5px 25px;
-  background: rgb(0, 14, 41);
+  background: rgb(26, 24, 24);
 }
 
 .glow-container > img{

@@ -44,7 +44,7 @@ module.exports = async function (deployer, network, accounts) {
     await raidTrinket.grantRole(raidTrinket_GA, bscDeployerAddress);
     await keyLootbox.grantRole(keyLootbox_GA, bscDeployerAddress);
   }
-  else if(network === 'skaletestnet') {
+  else if(network === 'skalemainnet' || network === 'skaletestnet') {
     networkName = 'skale';
     await weapons.grantRole(weapons_GA, skaleDeployerAddress);
     await characters.grantRole(characters_GA, skaleDeployerAddress);
@@ -69,11 +69,8 @@ module.exports = async function (deployer, network, accounts) {
     else if(network === 'auroramainnet' || network === 'auroratestnet') {
       networkName = 'aurora';
     }
-    else if(network === 'kavamainnet' || network === 'kavatestnet') {
+    else if(network === 'kavamainnet' || network === 'kavatestnet' || network === 'skaletestnet') {
       networkName = 'kava';
-    }
-    else if(network === 'skalemainnet') {
-      networkName = 'skale';
     }
 
     await weapons.grantRole(weapons_GA, altChainsDeployerAddress);

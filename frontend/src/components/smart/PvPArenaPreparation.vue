@@ -165,15 +165,23 @@
         </div>
         <div class="enterButtonsWrapper">
           <div class="enterArenaButtonWrapper">
-            <cb-button class="custom-enter-arena-btn" :title="`${$t('pvp.enterArena')} <br/>`" :subTitle="$t('pvp.untiered')"
-            @clickEvent="handleEnterArenaClick(true)"
-            :isDisabled="!this.checkBoxAgreed || !this.selectedWeaponId"
+            <pvp-button
+              class="pvpButton"
+              @click="handleEnterArenaClick(true)"
+              :buttonText="$t('pvp.enterArena')"
+              :buttonsubText="$t('pvp.untiered')"
+              :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
+              secondary
             />
           </div>
           <div class="enterArenaButtonWrapper">
-            <cb-button class="custom-enter-arena-btn" :title="`${$t('pvp.enterArena')} <br/>`" :subTitle="$t('pvp.tiered')"
-            @clickEvent="handleEnterArenaClick(false)"
-            :isDisabled="!this.checkBoxAgreed || !this.selectedWeaponId"
+            <pvp-button
+              class="pvpButton"
+              @click="handleEnterArenaClick(false)"
+              :buttonText="$t('pvp.enterArena')"
+              :buttonsubText="$t('pvp.tiered')"
+              :class="{ disabled: !this.checkBoxAgreed || !this.selectedWeaponId}"
+              secondary
             />
           </div>
         </div>
@@ -201,6 +209,7 @@ import { BPopover } from 'bootstrap-vue';
 import PvPWeapon from './PvPWeapon.vue';
 import PvPShield from './PvPShield.vue';
 import PvPCharacter from './PvPCharacter.vue';
+import PvPButton from './PvPButton.vue';
 import PvPSeparator from './PvPSeparator.vue';
 import checkIcon from '../../assets/checkImage.svg';
 import ellipseIcon from '../../assets/ellipseImage.svg';
@@ -228,6 +237,7 @@ export default {
   components: {
     'pvp-weapon': PvPWeapon,
     'pvp-shield': PvPShield,
+    'pvp-button': PvPButton,
     'pvp-separator': PvPSeparator,
     'pvp-character': PvPCharacter,
     'b-popover': BPopover,
@@ -506,9 +516,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.custom-enter-arena-btn{
-  margin-right: 0px !important;
-}
 .arenaPreparationWrapper {
   display: flex;
   flex-direction: column;
@@ -743,11 +750,11 @@ p, li, span {
   .enterButtonsWrapper {
     display: flex;
     margin-top: 2rem;
-    margin-left: 2rem;
 
       .enterArenaButtonWrapper {
+      flex: 1;
       &:first-of-type {
-        margin-right: 1rem;
+        margin-right: 2rem;
       }
 
       .pvpButton {
