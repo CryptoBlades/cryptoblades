@@ -30,13 +30,17 @@
           />
           <cb-button class="custom-cb-btn custom-forge-btn gtag-link-others" tagname="weapon_forge_single"
             :title="`${disableForge ? $t('blacksmith.coolingForge') : $t('blacksmith.forge')} x1 <br/>`"
+            :isLoading="isLoading"
             :subTitle="`(${forgeCost === '0' ? '0.0000' : forgeCost} SKILL)`" @clickEvent="$emit('onClickForge', 0)" :toolTip="$t('blacksmith.forgeNew')"
             :isDisabled="disableForge"
           />
           <cb-button class="custom-cb-btn custom-forge-btn gtag-link-others" tagname="weapon_forge_multiple"
             :title="`${disableForge ? $t('blacksmith.coolingForge') : $t('blacksmith.forge')} x10 <br/>`"
-            :subTitle="`(${forgeCost === '0' ? '0.0000' : forgeCost} SKILL)`" @clickEvent="$emit('onClickForge', 1)" :toolTip="$t('blacksmith.forge10New')"
-            :isDisabled="disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
+            :isLoading="isLoading"
+            :subTitle="`(${forgeCost === '0' ? '0.0000' : forgeCost} SKILL)`" @clickEvent="$emit('onClickForge', 1)"
+            :isDisabled="disableX10Forge || disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
+            :toolTip="(disableX10Forge) ? $t('blacksmith.disableDynamicMintingForge') : $t('blacksmith.forge10New')"
+            :style="disableX10Forge ? 'opacity: 0.5' : ''"
           />
           <!-- FOR STAKINGGGGGG -->
           <b-checkbox
@@ -65,7 +69,16 @@ export default Vue.extend({
       type: String,
       required: true,
     },
+    isLoading: {
+      type: Boolean,
+      default: true
+    },
     disableForge: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+    disableX10Forge: {
       type: Boolean,
       required: false,
       default: false

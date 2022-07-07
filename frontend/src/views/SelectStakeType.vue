@@ -4,6 +4,7 @@
     <ul class="stake-select-list">
       <li class="stake-select-item" v-for="e in entries" :key="e.stakeType">
         <stake-selector-item
+          :isLoading="e.isLoading"
           :stakeTitle="e.stakeTitle"
           :stakeTokenName="e.stakeTokenName"
           :rewardTokenName="e.rewardTokenName"
@@ -25,6 +26,7 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import BN from 'bignumber.js';
 import _ from 'lodash';
+import Events from '../events';
 BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
 BN.config({ EXPONENTIAL_AT: 100 });
 import StakeSelectorItem from '../components/StakeSelectorItem.vue';
@@ -32,22 +34,32 @@ import Vue from 'vue';
 import { humanReadableDetailsForStakeTypes, humanReadableDetailsForNftStakeTypes } from '../stake-types';
 import { isNftStakeType } from '@/interfaces';
 
+
 export default Vue.extend({
   components: {
-    StakeSelectorItem,
+    StakeSelectorItem
   },
-
+  data() {
+    return {
+      isLoading: false,
+    };
+  },
   computed: {
     ...mapState('staking', ['staking', 'stakeOverviews']),
     ...mapGetters('staking', ['availableStakeTypes', 'availableNftStakeTypes']),
 
     entries() {
       const entries = this.availableStakeTypes.map(stakeType => ({
-        stakeType, ...humanReadableDetailsForStakeTypes[stakeType]
+        stakeType, ...humanReadableDetailsForStakeTypes[stakeType],
+        // make the isLoading = true as a default value to set the loader as initial display
+        isLoading: true
       }));
       const nftEntires = this.availableNftStakeTypes.map(stakeType => ({
-        stakeType, ...humanReadableDetailsForNftStakeTypes[stakeType]
+        stakeType, ...humanReadableDetailsForNftStakeTypes[stakeType],
+        // make the isLoading = true as a default value to set the loader as initial display
+        isLoading: true
       }));
+
       return entries.concat(nftEntires);
     },
 
@@ -83,12 +95,24 @@ export default Vue.extend({
       if(isNftStakeType(stakeType)) {
         return estYield.dividedBy(BN(10).pow(18));
       }
+
       return estYield;
+    },
+
+    setIsLoading(stakeType){
+      this.entries.forEach((entry) =>{
+        if(stakeType === entry.stakeType){
+          entry.isLoading = false;
+        }
+      });
     }
   },
 
   async mounted() {
     await this.fetchStakeOverviewData();
+    Events.$on('setLoading', (stakeType) =>{
+      this.setIsLoading(stakeType);
+    });
   }
 });
 </script>

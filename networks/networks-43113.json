@@ -2486,6 +2486,12 @@
     "address": "0x418F2943FfB795145E1B34dEF46452ED28CB2262",
     "transactionHash": "0x11ad374407870c8a79c751dafab4e3ab3d34d34364c7df8da72fd32a91b9db64"
   },
+  "build/contracts/ERC20Bridge.json": {
+    "events": {},
+    "links": {},
+    "address": "0x4DFDbe58F08EBaE669Dd1F9032516448D260f4a5",
+    "transactionHash": "0xe0c48ebedc4d8394fa27ae5c6df2990d77484f5b30f9173b17e5f5065c5063eb"
+  },
   "build/contracts/ExperimentToken.json": {
     "events": {
       "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925": {
@@ -5053,6 +5059,12 @@
     "links": {},
     "address": "0x77e4100f80B8eF7B486986160255fa8AEB6E3864",
     "transactionHash": "0x363740a180f085158a760d862180d019201b34478edd9df799e2ef8f200f59a1"
+  },
+  "build/contracts/SkillERC20BridgeProxyContract.json": {
+    "events": {},
+    "links": {},
+    "address": "0xD385C3adD81BFB0824BF0333fe860D6d805265a9",
+    "transactionHash": "0x7a3118f5e7f7bf0a7bccaf839b79882ad1e0d66bbecb6ce7de1c340eb71720aa"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},

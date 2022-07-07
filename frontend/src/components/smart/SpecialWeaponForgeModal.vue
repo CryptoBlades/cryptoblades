@@ -4,7 +4,7 @@
       <b-tabs justified>
         <b-tab :title="$t('blacksmith.forge')">
           <div class="d-flex justify-content-center mt-3" v-if="isLoading">
-            <h4>{{$t('blacksmith.loading')}} <img class="spinner" src="../../assets/loadingSpinner.svg" /></h4>
+            <h4>{{$t('loading')}} <img class="spinner" src="../../assets/loadingSpinner.svg" /></h4>
           </div>
           <div v-else>
             <div class="d-flex mt-3 align-items-center">
@@ -122,7 +122,7 @@
         </b-tab>
         <b-tab :title="$t('blacksmith.shards')">
           <div class="d-flex justify-content-center mt-3" v-if="isLoading">
-            <h4>{{$t('blacksmith.loading')}} <img class="spinner" src="../../assets/loadingSpinner.svg" /></h4>
+            <h4>{{$t('loading')}} <img class="spinner" src="../../assets/loadingSpinner.svg" /></h4>
           </div>
           <div v-if="!isLoading">
             <div class="mt-2">
@@ -223,7 +223,7 @@
         </b-tab>
       </b-tabs>
       <div class="footer-close" @click="$refs['special-forge-modal'].hide()">
-        <p class="tapAny mt-4">{{$t('blacksmith.tapAnyWhere')}}</p>
+        <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
         <p class="close-icon"></p>
       </div>
     </b-modal>
