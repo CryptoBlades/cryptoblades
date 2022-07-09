@@ -345,6 +345,9 @@ export default {
           this.allSelected = false;
           return false;
         }
+        if(this.characterIds.length === this.toBurn.length){
+          this.allSelected = true;
+        }
 
         return true;
       });
@@ -356,6 +359,9 @@ export default {
         if(!idToBurn.includes(filteredCharacter.id)){
           this.allSelected = false;
           return false;
+        }
+        if(this.characterIds.length === this.toBurn.length){
+          this.allSelected = true;
         }
 
         return true;
