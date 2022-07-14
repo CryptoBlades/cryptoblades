@@ -613,6 +613,7 @@ import Events from '../events';
 import SpecialWeaponForgeModal from '@/components/smart/SpecialWeaponForgeModal.vue';
 import BlacksmithNav from '@/components/BlacksmithNav.vue';
 import { getConfigValue } from '@/contracts';
+import { filter } from 'vue/types/umd';
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards' >;
 
@@ -1151,6 +1152,7 @@ export default Vue.extend({
         await this.massBurnWeapons({
           burnWeaponIds: this.burnWeaponIds,
         });
+        this.hideWeapons = this.hideWeapons.filter(id => !this.burnWeaponIds.includes(id));
         this.burnWeaponIds = [];
         this.burnWeaponId = null;
         (this.$refs['mass-dust-confirmation-modal'] as BModal).hide();
@@ -1164,7 +1166,6 @@ export default Vue.extend({
         this.cooling = false;
       }
     },
-
     async updateMintWeaponFee() {
       if(!this.contracts.CryptoBlades) return;
       const forgeCost = await this.fetchMintWeaponFee();
