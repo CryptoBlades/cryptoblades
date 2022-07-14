@@ -613,7 +613,6 @@ import Events from '../events';
 import SpecialWeaponForgeModal from '@/components/smart/SpecialWeaponForgeModal.vue';
 import BlacksmithNav from '@/components/BlacksmithNav.vue';
 import { getConfigValue } from '@/contracts';
-import { filter } from 'vue/types/umd';
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards' >;
 
@@ -1053,10 +1052,6 @@ export default Vue.extend({
       this.lesserDust = '0';
       this.greaterDust = '0';
       this.powerfulDust = '0';
-    },
-    clearAllMassBurn(){
-      return this.burnWeaponIds = [],
-      this.hideWeapons = this.ownedWeaponIds;
     },
     getWeaponToUpgrade() {
       if(this.reforgeWeaponId){
