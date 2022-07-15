@@ -5,7 +5,7 @@ import hellborn4 from './assets/raid-bosses/CB_Hellborn Overlord.gif';
 import hellborn5 from './assets/raid-bosses/CB_Hellborn Shaman.gif';
 import hellborn6 from './assets/DragonFlyIdle_512.gif';
 
-import customMonster1 from './assets/custom/monster1.png';
+import customMonster1 from './assets/raid-bosses/custom/monster1.png';
 
 // import halloween1 from './assets/raid-bosses/halloween/CB_Hellborn M13.gif';
 // import halloween2 from './assets/raid-bosses/halloween/CB_Hellborn Ste1n.gif';
