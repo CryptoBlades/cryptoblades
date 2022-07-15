@@ -364,7 +364,7 @@ export default Vue.extend({
   methods: {
     ...(mapActions(['addMoreSkill', 'withdrawBnbFromWaxBridge',
       'claimXpRewards','fetchRemainingTokenClaimAmountPreTax', 'claimTokenRewards']) as StoreMappedActions),
-    ...(mapActions(['fetchPartnerProjects',
+    ...(mapActions('treasury', ['fetchPartnerProjects',
       'getPartnerProjectMultiplier', 'claimPartnerToken']) as StoreMappedTreasuryActions),
     ...(mapMutations(['updatePayoutCurrencyId']) as StoreMappedMutations),
     async onClaimTokens() {
