@@ -2,10 +2,11 @@
   <skeleton-loader v-if="isLoading"/>
   <div v-else class="container">
     <h1 class="stake-type-title">{{ stakeTitle }}
-      <b-icon-question-circle-fill v-if="deprecated"
+      <b-icon-question-circle-fill v-if="deprecated" class="quesition-mark"
         v-tooltip="$t('stake.StakeSelectorItem.deprecatedTooltip')" />
+      <b-icon-exclamation-circle-fill v-if="rewardsDepleted" class="exclamation-mark"
+        v-tooltip="$t('stake.StakeSelectorItem.rewardsDepletedTooltip')" />
     </h1>
-
     <div class="stake-stats">
       <div class="stake-stats-item">
         <div class="stake-stats-item-title">{{ $t('stake.StakeSelectorItem.earn') }}</div>
@@ -374,6 +375,10 @@ export default Vue.extend({
 
     estimatedUnlockTimeLeftFormatted(): string {
       return secondsToDDHHMMSS(this.stakeUnlockTimeLeftCurrentEstimate);
+    },
+
+    rewardsDepleted(): boolean {
+      return this.stakeRewardDistributionTimeLeftCurrentEstimate === 0 && !this.stakedBalance.isZero();
     },
 
     stakedBalance(): BN{
@@ -911,6 +916,15 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   height:100%;
+}
+
+.quesition-mark {
+  margin-right:5px;
+}
+
+.exclamation-mark {
+  background-color: red;
+  border-radius: 50%;
 }
 
 /* Mobile */
