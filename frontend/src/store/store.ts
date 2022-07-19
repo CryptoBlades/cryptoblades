@@ -2332,7 +2332,7 @@ export default new Vuex.Store<IState>({
 
       const VAR_HOURLY_INCOME = await CryptoBlades.methods.VAR_HOURLY_INCOME().call(defaultCallOptions(state));
 
-      return await CryptoBlades.methods.setVar(VAR_HOURLY_INCOME, hourlyIncome)
+      return await CryptoBlades.methods.setVar(VAR_HOURLY_INCOME, state.web3.utils.toBN(hourlyIncome * 10 ** 18).toString())
         .send({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
