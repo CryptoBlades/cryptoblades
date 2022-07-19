@@ -959,7 +959,9 @@
       "newValueInCents": "New value (in cents)",
       "setFightXpGainCurrentDefault32": "Set fight XP gain (current: {xpGain} xp, default: 32 xp)",
       "setFightXpGain": "Set fight XP gain",
-      "fightXpGain": "Fight XP gain"
+      "fightXpGain": "Fight XP gain",
+      "setHourlyIncome": "Set hourly income",
+      "hourlyIncome": "Hourly income"
     },
     "blacksmith": {
       "setFlatPriceOfItem": "Set flat price of item",
