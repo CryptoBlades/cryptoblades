@@ -69,6 +69,7 @@ module.exports = {
       confirmations: 10,
       timeoutBlocks: 200,
       gas: 10000000,//8000000,
+      gasPrice: 10000000000,
       skipDryRun: true
     },
     bscmainnet: {
@@ -165,7 +166,7 @@ module.exports = {
           providerOrUrl: process.env.POLYGON_MAINNET_RPC_URL || 'https://polygon-rpc.com/'
         }
       )),
-      gasPrice: 50000000000,
+      gasPrice: 100000000000,
       network_id: 137,
       confirmations: 10,
       timeoutBlocks: 200,
@@ -242,6 +243,20 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true
     },
+    kavamainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.KAVA_MAINNET_PRIVATE_KEY,
+        process.env.KAVA_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.KAVA_MAINNET_RPC_URL || 'https://evm2.kava.io'
+        }
+      )),
+      network_id: 2222,
+      gas: 8000000,
+      gasPrice: 7000000000,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
     skaletestnet: {
       provider: () => new HDWalletProvider(hdWalletProviderOptions(
         process.env.SKALE_TESTNET_PRIVATE_KEY,
@@ -251,6 +266,19 @@ module.exports = {
         }
       )),
       network_id: 2433657680876851,
+      gasPrice: 0,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    skalemainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.SKALE_MAINNET_PRIVATE_KEY,
+        process.env.SKALE_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.SKALE_MAINNET_RPC_URL || 'https://mainnet.skalenodes.com/v1/affectionate-immediate-pollux'
+        }
+      )),
+      network_id: 1026062157,
       gasPrice: 0,
       timeoutBlocks: 200,
       skipDryRun: true

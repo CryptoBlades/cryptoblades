@@ -83,7 +83,8 @@
     "recruit": "Zarekrutuj",
     "couldNotMint": "Nie udało się stworzyć postaci: niewystarczające fundusze lub transakcja odrzucona.",
     "garrison": "Garnizon",
-    "garrisonHint": "Twoje bezczynne postacie są w Garnizonie. Będąc w Garnizonie nie mogą walczyć."
+    "garrisonHint": "Twoje bezczynne postacie są w Garnizonie. Będąc w Garnizonie nie mogą walczyć.",
+    "disableDynamicMinting": "Na tym blockchain'nie dana operacja palenia może być wykonana na jednym bohaterze na raz"
   },
   "characterList": {
     "level": "Poziom",
@@ -204,7 +205,9 @@
     "couldNotReforge": "Could not reforge sword: Insufficient funds, Dust, or transaction was denied.",
     "couldNotBurn": "Could not burn sword: Insufficient funds or transaction was denied.",
     "lands": "Ziemie",
-    "landsAvailable": "Ziemie dostępne są w sklepie SKILL"
+    "landsAvailable": "Ziemie dostępne są w sklepie SKILL",
+    "disableDynamicMintingSalvage": "Na tym blockchain'nie dana operacja może być wykonana na jednej broni na raz",
+    "disableDynamicMintingForge": "Na tym blockchain'nie dana operacja tworzenia może być wykonana na jednej broni na raz"
   },
   "dustBalanceDisplay": {
     "availableDust": "Dostępny Puł",

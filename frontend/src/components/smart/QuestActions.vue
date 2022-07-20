@@ -20,17 +20,17 @@
               @click="complete()">
       {{ $t('quests.complete') }}
     </b-button>
-    <b-button v-if="deletable" variant="primary" class="flex-1" @click="deleteQuestTemplate()"
+    <b-button v-if="deletable" variant="primary" class="flex-1 custom-action-btn" @click="deleteQuestTemplate()"
               :disabled="isLoading">
       {{ $t('quests.deleteQuest') }}
     </b-button>
     <b-button
       v-if="quest.requirementType !== RequirementType.RAID && !questCanBeCompleted && !afterDeadline && !deletable"
       :disabled="isLoading" variant="primary"
-      class="flex-1" @click="submit">
+      class="flex-1 custom-action-btn" @click="submit">
       {{ $t('quests.submit') }}
     </b-button>
-    <b-button v-if="character && (!questCanBeCompleted || afterDeadline)" variant="primary" class="flex-1" @click="skip"
+    <b-button v-if="character && (!questCanBeCompleted || afterDeadline)" variant="primary" class="flex-1 custom-action-btn" @click="skip"
               :disabled="(!freeSkip && !hasStaminaToSkip) || isLoading">
       {{ freeSkip ? $t('quests.freeSkip') : $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
       <Hint v-if="!freeSkip && !hasStaminaToSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>

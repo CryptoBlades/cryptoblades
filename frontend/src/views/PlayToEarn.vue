@@ -1,7 +1,7 @@
 <template>
   <div class="body main-font" style="inline-flex">
-    <div class="blind-background"></div>
-    <div>
+    <div class="blind-background bg-dark"></div>
+    <div class="custom-padding">
       <div>
           <div class="col-lg-6 col-sm-12 adventure">
             <h5>{{$t('PlayToEarn.playToEarn')}}</h5>
@@ -16,7 +16,7 @@
                   <p>{{$t('PlayToEarn.adventureDesc')}}</p>
                   <div class="btn-join">{{$t('PlayToEarn.btnCombat')}}</div>
                 </div>
-                <card-frame v-if="!isMobile()"/>
+                <component v-bind:is="!isMobile() && !isToggled ? 'card-frame' : 'card-frame-toggled'"></component>
             </router-link>
 
             <router-link :to="{ name: 'raid' }" exact class="raid navs">
@@ -25,7 +25,7 @@
                   <p>{{$t('PlayToEarn.raidDesc')}}</p>
                   <div class="btn-join">{{$t('PlayToEarn.btnJoin')}}</div>
                 </div>
-                <card-frame v-if="!isMobile()"/>
+                <component v-bind:is="!isMobile() && !isToggled ? 'card-frame' : 'card-frame-toggled'"></component>
             </router-link>
 
             <router-link :to="{ name: 'pvp' }" exact class="arena navs">
@@ -34,7 +34,7 @@
                   <p>{{$t('PlayToEarn.arenaDesc')}}</p>
                   <div class="btn-join">{{$t('PlayToEarn.btnPvp')}}</div>
                 </div>
-                <card-frame v-if="!isMobile()"/>
+                <component v-bind:is="!isMobile() && !isToggled ? 'card-frame' : 'card-frame-toggled'"></component>
             </router-link>
           </div>
       </div>
@@ -46,6 +46,8 @@
 
 import Events from '../events';
 import CardFrame from '../components/CardFrame.vue';
+import CardFrameToggled from '../components/CardFrameToggled.vue';
+
 export default {
   data() {
     return {
@@ -56,22 +58,28 @@ export default {
     Events.$on('setWeaponId', (id) =>{
       this.selectedWeaponId = id;
     });
+    Events.$on('toggle-sideBar', (bol) =>{
+      this.isToggled = bol;
+    });
   },
   methods: {
   },
   components: {
-    CardFrame
+    'card-frame': CardFrame,
+    'card-frame-toggled' : CardFrameToggled
   },
 };
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
-
+.custom-padding{
+  padding: 60px !important;
+}
 h5{
-  font-family: Trajan;
+  font-family: 'Trajan', serif;
   font-size: 25px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .play-to-earn{
@@ -189,6 +197,7 @@ h5{
 
 .adventure{
     text-align: left;
+    color: #EDCD90;
   }
 
 

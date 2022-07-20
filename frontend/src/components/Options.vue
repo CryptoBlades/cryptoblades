@@ -38,7 +38,7 @@
 
             <router-link
               class="menu-icon"
-              :to="{ name: 'adventure' }"
+              :to="{ name: 'combat' }"
               exact
             >
               <img src="../assets/navbar-icons/combat-icon.png" alt="Adventure"/>
@@ -157,23 +157,8 @@
             </router-link>
 
             <router-link class="menu-icon" :to="{ name: 'nft-display' }" exact>
-              <img src="../assets/navbar-icons/nft-display.svg" class="gold-icon" alt="Nft Display"/>
+              <img src="../assets/navbar-icons/nft-display.svg" class="gold-icon" alt="NFT Display"/>
               <span>{{ $t("viewLink.nftDisplay") }}</span>
-            </router-link>
-
-            <router-link
-              v-if="merchandise"
-              class="menu-icon"
-              :to="{ name: 'merchandise' }"
-              exact
-              :class="supportsMerchandise ? '' : 'disabled-link'"
-            >
-              <img src="../assets/navbar-icons/shopping-bag.svg" class="gold-icon" alt="Merchandise"/>
-              <span>{{ $t("viewLink.merchandise") }} <hint
-                v-if="!supportsMerchandise"
-                class="hint"
-                :text="$t('viewLink.functionalityNotSupportedTooltip')"
-              /></span>
             </router-link>
 
             <router-link
@@ -294,7 +279,7 @@ import {fromWeiEther, toBN} from '../utils/common';
 import {nft_bridge as bridgeEnabled} from './../feature-flags';
 import {SupportedProject} from '@/views/Treasury.vue';
 import Hint from '@/components/Hint.vue';
-import {merchandise, portal, pvp, quests, raid} from '@/feature-flags';
+import { portal, pvp, quests, raid} from '@/feature-flags';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -349,7 +334,6 @@ export default Vue.extend({
       portal,
       pvp,
       quests,
-      merchandise,
     } as Data;
   },
 
@@ -362,15 +346,11 @@ export default Vue.extend({
     ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
     ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
     ...mapGetters([
-      'getCurrentChainSupportsMerchandise',
       'getCurrentChainSupportsPvP',
       'getCurrentChainSupportsQuests',
       'getHasAdminAccess',
       'getHasMinterAccess',
     ]),
-    supportsMerchandise(): boolean {
-      return this.getCurrentChainSupportsMerchandise;
-    },
     supportsPvP(): boolean {
       return this.getCurrentChainSupportsPvP;
     },

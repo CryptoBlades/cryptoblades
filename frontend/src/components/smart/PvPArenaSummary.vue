@@ -70,11 +70,12 @@
         </div>
       </div>
       <div class="characterImage">
-        <pvp-character :characterId="currentCharacterId" />
+        <pvp-character :characterTrait="characterInformation.element" />
       </div>
       <pvp-arena-information
         class="arenaInformation"
         :tierRewardsPool="tierRewardsPool"
+        :untieredRewardsPool="untieredRewardsPool"
         :tierTopRankers="isUntiered ? untieredTopRankers : tierTopRankers"
         :currentRankedSeason="currentRankedSeason"
         :secondsBeforeNextSeason="secondsBeforeNextSeason"
@@ -108,6 +109,9 @@ export default {
 
   props: {
     tierRewardsPool: {
+      default: null
+    },
+    untieredRewardsPool: {
       default: null
     },
     tierTopRankers: {
@@ -432,7 +436,6 @@ span, p, li, button, a {
   display: flex;
   width: 50%;
   padding: 3rem 0;
-  margin: 0 1rem;
   @media only screen and (min-width: 1440px) {
     width: 40%;
     margin: 0;

@@ -12,7 +12,7 @@
       </ul>
     </div>
     <div class="closeWrapper">
-      <p>{{$t('pvp.tapAnywhere')}}</p>
+      <p>{{$t('tapAnywhere')}}</p>
       <button @click="close">
         <img src="../../assets/closeModal.svg" alt="Bottom separator">
       </button>

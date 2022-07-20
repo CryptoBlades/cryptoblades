@@ -23,6 +23,7 @@ import Vue from 'vue';
 import CharacterDisplay from './smart/CharacterDisplay.vue';
 import '@/mixins/general';
 
+
 export default Vue.extend({
   props: ['isToggled', 'sidebarType'],
   components: {
@@ -62,6 +63,7 @@ export default Vue.extend({
   },
   async mounted() {
     this.checkStorage();
+    this.currentPath = (this as any).$route.path;
   },
   watch:{
     $route (to){
@@ -78,10 +80,13 @@ export default Vue.extend({
   border-right: 1px solid rgba(255, 255, 255, 0.234);
 }
 
-.sideBorder{
-  overflow: visible;
+.content > .row > .sideBorder{
   max-width: 100px;
   min-width: 100px;
+}
+
+.sideBorder{
+  overflow: visible;
   border-right: 1px solid rgba(255, 255, 255, 0.234);
   transition: all 0.7s ease-in-out;
 }

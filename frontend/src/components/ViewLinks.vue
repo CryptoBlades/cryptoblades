@@ -1,11 +1,11 @@
 <template>
   <b-navbar-nav>
-    <li class="character top-nav-links">
+    <li class="top-nav-links">
       <router-link :to="{ name: 'play-to-earn' }" exact class="nav-link">
         <div class="link-text play-to-earn-btn">{{ $t("PlayToEarn.playToEarn") }}</div>
       </router-link>
     </li>
-    <li class="character top-nav-links">
+    <li class="top-nav-links ml-4">
       <router-link :to="{ name: 'plaza' }" exact class="nav-link">
         <div class="icon"><img src="../assets/navbar-icons/plaza-icon.png" class="ui-link-icon" alt="Plaza"></div>
         <div class="link-text">{{ $t("viewLink.character") }}</div>
@@ -34,8 +34,9 @@
     <li class="top-nav-links">
       <a :href="BazaarLink()" class="nav-link" target="_blank">
         <div class="icon"><img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar"></div>
-        <div class="link-text">{{ $t("viewLink.bazaar") }}
-          <b-icon-box-arrow-up-right scale="0.7"/>
+        <div class="link-text d-flex  justify-content-center align-items-center">
+          {{ $t("viewLink.bazaar") }}
+          <b-icon-box-arrow-up-right scale="0.8"/>
         </div>
       </a>
     </li>
@@ -51,7 +52,7 @@
 </template>
 
 <script>
-import {merchandise, portal, pvp, quests, raid} from '@/feature-flags';
+import {portal, pvp, quests, raid} from '@/feature-flags';
 import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
 
@@ -65,22 +66,17 @@ export default Vue.extend({
       portal,
       pvp,
       quests,
-      merchandise,
     };
   },
 
   computed: {
     ...mapState(['defaultAccount']),
     ...mapGetters([
-      'getCurrentChainSupportsMerchandise',
       'getCurrentChainSupportsPvP',
       'getCurrentChainSupportsQuests',
       'getHasAdminAccess',
       'getHasMinterAccess',
     ]),
-    supportsMerchandise() {
-      return this.getCurrentChainSupportsMerchandise;
-    },
     supportsPvP() {
       return this.getCurrentChainSupportsPvP;
     },
@@ -127,8 +123,13 @@ a {
   font-weight: bolder;
   white-space: nowrap;
   font-family: 'Oswald', 'serif';
-  font-size: clamp(0.8rem, 1vw, 1rem);
+  font-size: clamp(.5rem, 1vw, 1rem);
   color: #ffffff;
+}
+
+.link-text > svg{
+  margin-top: -1px;
+  margin-left: 5px;
 }
 
 .play-to-earn-btn{
@@ -150,7 +151,7 @@ a {
   color: #fff;
   font-size: 17px;
   margin: auto;
-  margin-right: -10px;
+  margin-right: -40px;
 }
 .disabled-link > div {
   cursor: not-allowed;

@@ -50,6 +50,9 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
     mapping(address => uint256) private _rankingRewardsByPlayer;
     /// @dev top ranking characters by tier
     mapping(uint8 => uint256[]) private _topRankingCharactersByTier;
+    /// @dev owner's address by character ID
+    mapping(uint256 => address) private _ownerByCharacter;
+
 
     event SeasonRestarted(
         uint256 indexed newSeason,
@@ -126,7 +129,7 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
             ) {
                 uint256 excessPercentage;
                 
-                address topOnePlayer = characters.ownerOf(_topRankingCharactersByTier[i][0]);
+                address topOnePlayer = _ownerByCharacter[_topRankingCharactersByTier[i][0]];
 
                 // We accumulate excess percentage
                 for (
@@ -172,7 +175,50 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
             );
     }
 
-     function _processWinner(uint256 winnerID, uint8 tier) private {
+    // Note: Manual method in case of issues, remove when not needed.
+    function forceAssignRewards(
+        uint256 characterID,
+        uint8 position,
+        uint256 pool
+    ) external restricted {
+        uint256 percentage = prizePercentages[position];
+        uint256 amountToTransfer = (pool.mul(percentage)).div(100);
+        address playerToTransfer = _ownerByCharacter[characterID];
+
+        _rankingRewardsByPlayer[playerToTransfer] = _rankingRewardsByPlayer[
+            playerToTransfer
+        ].add(amountToTransfer);
+    }
+
+    // Note: Manual method in case of issues, remove when not needed.
+    function changeRankingRewards(
+        uint256 characterID,
+        uint256 amount
+    ) external restricted {
+        address playerToTransfer = _ownerByCharacter[characterID];
+
+        _rankingRewardsByPlayer[playerToTransfer] = amount;
+    }
+
+    // Note: Manual method in case of issues, remove when not needed.
+    function getRankingRewards(
+        uint256 characterID
+    ) external restricted view returns (uint256) {
+        address player = _ownerByCharacter[characterID];
+
+        return _rankingRewardsByPlayer[player];
+    }
+
+    // Note: Manual method in case of issues, remove when not needed.
+    function clearTierTopCharacters(uint8 tier) external restricted {
+        for (uint256 k = 0; k < _topRankingCharactersByTier[tier].length; k++) {
+            rankingPointsByCharacter[_topRankingCharactersByTier[tier][k]] = 0;
+        }
+        delete _topRankingCharactersByTier[tier];
+        rankingsPoolByTier[tier] = 0;
+    }
+
+    function _processWinner(uint256 winnerID, uint8 tier) private {
         uint256 rankingPoints = rankingPointsByCharacter[winnerID];
         uint256[] storage topRankingCharacters = _topRankingCharactersByTier[
             tier
@@ -287,7 +333,7 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
     ) private {
         uint256 percentage = prizePercentages[position];
         uint256 amountToTransfer = (pool.mul(percentage)).div(100);
-        address playerToTransfer = characters.ownerOf(characterID);
+        address playerToTransfer = _ownerByCharacter[characterID];
 
         _rankingRewardsByPlayer[playerToTransfer] = _rankingRewardsByPlayer[
             playerToTransfer
@@ -341,12 +387,20 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
             rankingPointsByCharacter[characterID] = 0;
             seasonByCharacter[characterID] = currentRankedSeason;
         }
+
+        if (_ownerByCharacter[characterID] != tx.origin) {
+            _ownerByCharacter[characterID] = tx.origin;
+        }
     }
 
     function handlePrepareDuel(uint256 characterID) external restricted {
         if (seasonByCharacter[characterID] != currentRankedSeason) {
             rankingPointsByCharacter[characterID] = 0;
             seasonByCharacter[characterID] = currentRankedSeason;
+        }
+
+        if (_ownerByCharacter[characterID] != tx.origin) {
+            _ownerByCharacter[characterID] = tx.origin;
         }
     }
 

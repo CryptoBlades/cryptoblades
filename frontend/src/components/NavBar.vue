@@ -1,8 +1,8 @@
 <template>
   <div class="main-nav-div">
-    <b-navbar class="main-nav" toggleable="sm">
+    <b-navbar class="main-nav bg-dark border-bottom border-gray" toggleable="lg">
       <div class="nav-logo col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1">
-        <router-link :to="{ name: 'plaza' }" exact class="game-ui-logo">
+        <router-link :to="{ name: 'dashboard' }" exact class="game-ui-logo">
           <img
             src="../assets/cb-logo.png"
             class="logo d-inline-block align-top"
@@ -10,14 +10,6 @@
           />
         </router-link>
       </div>
-
-      <b-navbar-toggle target="navbar-toggle-collapse" class="none-mobile">
-        <template #default="{ expanded }">
-          <b-icon v-if="expanded" icon="chevron-bar-up"></b-icon>
-          <b-icon v-else icon="chevron-bar-down"></b-icon>
-        </template>
-      </b-navbar-toggle>
-
       <b-collapse id="navbar-toggle-collapse" class="none-mobile" is-nav>
         <view-links class="view-links"></view-links>
       </b-collapse>
@@ -26,12 +18,9 @@
       <options class="d-none d-sm-flex none-mobile"/>
 
       <!-- Render only on mobile view -->
-      <div class="d-flex d-sm-none right-details">
-        <skill-balance-display class="skill-display-mobile"/>
-        <options class="options-display-mobile"/>
-      </div>
+        <options class="options-display-mobile d-sm-none"/>
     </b-navbar>
-    <claim-rewards-bar v-if="canShowRewardsBar"/>
+    <skill-balance-display class="skill-display-mobile d-sm-none"/>
   </div>
 </template>
 
@@ -41,7 +30,6 @@ import Vue from 'vue';
 import ViewLinks from './ViewLinks.vue';
 import Options from './Options.vue';
 import SkillBalanceDisplay from './smart/SkillBalanceDisplay.vue';
-import ClaimRewardsBar from './smart/ClaimRewardsBar.vue';
 
 import Events from '../events';
 import {mapGetters, mapMutations} from 'vuex';
@@ -50,7 +38,6 @@ export default Vue.extend({
   components: {
     ViewLinks,
     SkillBalanceDisplay,
-    ClaimRewardsBar,
     Options,
   },
 
@@ -102,9 +89,8 @@ a.router-link-active {
 }
 
 .view-links {
-  justify-content: space-between;
   align-items: center;
-  gap: 5rem;
+  gap: 3rem;
   padding: 0em 2em;
 }
 
@@ -148,7 +134,6 @@ a.router-link-active {
     flex: 5;
     display: flex;
     align-items: center;
-    height: 90px;
   }
 
   .skill-display-mobile > .balance-container {
@@ -216,7 +201,7 @@ a.router-link-active {
 
   /* hide when in mobile */
   .none-mobile {
-    display: none;
+    display: none !important;
   }
 
   .menu-icons {
@@ -269,19 +254,12 @@ a.router-link-active {
   align-items: center;
 }
 
-.navbar {
-  background: linear-gradient(45deg, #141414, #242720);
-  border-bottom: 2px solid #404857;
-}
-
 .main-nav > .view-links {
   flex: 2.3;
 }
 
 .nav-logo {
-  flex: 1;
   height: 100%;
-  justify-content: center;
   border-right: 2px solid #404857;
   display: flex;
 }
@@ -334,6 +312,16 @@ a.router-link-active {
   .main-nav {
     height: 12vh;
   }
+
+  .main-nav > div:nth-child(1){
+    flex-grow: 11;
+  }
+
+  .main-nav > div.options-display-mobile{
+    border-left: 1px solid #707070;
+    height: 100%;
+  }
+
   .nav-logo {
     border: 0;
     margin: 0;

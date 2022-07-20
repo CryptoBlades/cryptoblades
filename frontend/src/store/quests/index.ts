@@ -107,7 +107,7 @@ const quests = {
 
     async addQuestTemplate(
       { rootState }: {rootState: IState},
-      {questTemplate, tierOffset, supply, deadline}: {questTemplate: Quest, tierOffset: number, supply: number, deadline: number}){
+      {questTemplate, isPromo, supply, deadline}: {questTemplate: Quest, isPromo: boolean, supply: number, deadline: number}){
       const {SimpleQuests} = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;
 
@@ -145,7 +145,11 @@ const quests = {
         }
       }
 
-      const tier = questTemplate.tier! + tierOffset;
+      let tier = questTemplate.tier;
+      if (isPromo) {
+        tier! += 10;
+      }
+
       return await SimpleQuests.methods.addNewQuestTemplate(tier!,
         questTemplate.requirementType!, questTemplate.requirementRarity!, requirementAmount, questTemplate.requirementExternalAddress,
         questTemplate.rewardType!, questTemplate.rewardRarity!, rewardAmount, questTemplate.rewardExternalAddress,

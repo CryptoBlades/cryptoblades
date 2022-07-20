@@ -1,11 +1,8 @@
 <template>
   <div>
-    <div class="tob-bg-img promotion-decoration">
-      <img class="vertical-decoration bottom" src="../assets/header-ads.png">
-    </div>
   <div class="results-panel">
     <div class="float-center">
-      <h1 class="text-center outcome pt-4 pb-4">{{ formattedOutcome.toUpperCase() }}</h1>
+      <h1 class="text-center outcome result-title">{{ formattedOutcome.toUpperCase() }}</h1>
       <b-container>
         <b-row class="power-rolled">
           <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
@@ -38,10 +35,17 @@
         </b-row>
         <b-row>
           <b-col class="earned">
-            <h4>
-              {{formattedSkill}}  {{formattedUsd}}
+            <p class="h5 text-white">
+              <span v-html="$t('combatResults.earnedSkill', {
+                  noIGO: +igoDefaultReward ? formattedSkillNoIGO : formattedSkill,
+                  inUSD: formattedInUsd(calculateSkillPriceInUsd(+igoDefaultReward ? formattedSkillNoIGO : formattedSkill).toFixed(4))
+                })"> </span>
               <Hint :text="$t('combatResults.hint')" />
-            </h4>
+              <span v-if="+igoDefaultReward" v-html="$t('combatResults.earnedIGOSkill', {
+                  IGO: formattedSkillIGOReward,
+                  inUSD: formattedInUsd(calculateSkillPriceInUsd(formattedSkillIGOReward).toFixed(4))
+                })"></span>
+            </p>
             <h5>+ {{formattedXpGain}}</h5>
           </b-col>
         </b-row>
@@ -55,9 +59,6 @@
       </h6>
     </div>
   </div>
-    <div class="bot-bg-img promotion-decoration">
-      <img src="../assets/separator.png">
-    </div>
     <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
       <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
         <div class="coinzilla" data-zone="C-316621de2f7b8b25140"></div>
@@ -82,6 +83,8 @@ import {getConfigValue} from '@/contracts';
 import i18n from '@/i18n';
 import {TranslateResult} from 'vue-i18n';
 import '@/mixins/general';
+import Hint from '@/components/Hint.vue';
+import { mapActions } from 'vuex';
 
 interface CombatResult {
   isVictory: boolean;
@@ -93,20 +96,28 @@ interface CombatResult {
 }
 
 export default Vue.extend({
+  components: {
+    Hint
+  },
   props: {
     fightResults: {
       type: Object as PropType<CombatResult>,
       default() {
         return {} as CombatResult;
       },
-    }
+    },
+    staminaUsed: {
+      type: Number,
+      default: 0,
+    },
   },
 
   data() {
     return {
       skillPrice: 0,
       gasToken: '',
-      showAds: false
+      showAds: false,
+      igoDefaultReward: 0,
     };
   },
 
@@ -115,11 +126,17 @@ export default Vue.extend({
       if(this.fightResults.isVictory) return i18n.t('combatResults.won');
       else return i18n.t('combatResults.lost');
     },
-    formattedUsd(): string {
-      return `$${(this.calculateSkillPriceInUsd()).toFixed(2)}`;
-    },
     formattedSkill(): string {
-      return `(${toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6)} SKILL)`;
+      return toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6);
+    },
+    formattedSkillNoIGO(): string {
+      return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10) - this.igoDefaultReward).toString())).toFixed(6);
+    },
+    formattedSkillIGOReward(): string {
+      return toBN(fromWeiEther((this.igoDefaultReward * this.formattedStaminaUsed).toString())).toFixed(6);
+    },
+    formattedStaminaUsed(): number {
+      return this.staminaUsed / 40;
     },
     formattedSkillTooltip(): string {
       return fromWeiEther(this.fightResults.skillGain)+' SKILL';
@@ -129,22 +146,41 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions(['fetchIgoRewardsPerFight']),
     async fetchPrices(): Promise<void> {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
       this.skillPrice = response.data?.cryptoblades.usd;
     },
-    calculateSkillPriceInUsd(): number {
-      return fromWeiEther(this.fightResults.skillGain) as unknown as number * this.skillPrice as unknown as number;
+    formattedInUsd(value: string): string {
+      if(!value) return '';
+      return `($${value})`;
+    },
+    calculateSkillPriceInUsd(skill: number): number {
+      if(!skill) return 0;
+      return (skill as unknown as number * this.skillPrice as unknown as number);
+    },
+    calculatedSkillReward(): string {
+      return toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6);
+    },
+    calculateSkillRewardNoIGO(): string{
+      return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10) - this.igoDefaultReward).toString())).toFixed(6);
+    },
+    calculateSkillIGOReward(): string{
+      if(!this.igoDefaultReward) return '';
+      return toBN(fromWeiEther((this.igoDefaultReward * this.formattedStaminaUsed).toString())).toFixed(6);
     },
     checkStorage() {
       if (process.env.NODE_ENV === 'development') this.showAds = false;
       else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
   },
-
+  async beforeMount(){
+    this.igoDefaultReward = await this.fetchIgoRewardsPerFight();
+  },
   async mounted() {
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
     await this.fetchPrices();
+    this.igoDefaultReward = await this.fetchIgoRewardsPerFight();
     await new Promise(f => setTimeout(f, 1000));
     this.checkStorage();
   },
@@ -160,13 +196,18 @@ export default Vue.extend({
   margin: auto;
   text-align: center;
 }
+
+.result-title{
+  margin-bottom: 3em;
+  color: #EDCD90;
+}
+
 .outcome {
   font-family: Trajan;
   font-size: 2em;
-  font-weight: bold;
   padding: 0.1em;
   margin-top: 0.25em;
-  margin-bottom: 0;
+  margin-bottom: 1em;
 }
 .expander-divider {
   width: 100%;
@@ -271,14 +312,9 @@ export default Vue.extend({
 
 .top-bg-img > img, .bot-bg-img > img {
     width: 69% !important;
-    margin-bottom: -70px;
-
 }
 
 
-.tob-bg-img > img{
-  margin-top: -40px !important;
-}
 
 
 @media all and (max-width: 600px) {

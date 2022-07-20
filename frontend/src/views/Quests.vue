@@ -114,7 +114,8 @@
         </b-modal>
       </div>
       <div v-else class="m-4 font-weight-bold w-100">
-        {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}
+      {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}.<br>
+      {{ $t('combat.recruitAtPlaza') }}
       </div>
     </div>
   </div>
@@ -129,7 +130,6 @@ import QuestRow from '@/components/smart/QuestRow.vue';
 import QuestComponentIcon from '@/components/smart/QuestComponentIcon.vue';
 import QuestReward from '@/components/smart/QuestReward.vue';
 import QuestsList from '@/components/smart/QuestsList.vue';
-import Hint from '@/components/Hint.vue';
 import hourglass from '@/assets/hourglass.png';
 import {getTimeRemaining} from '@/utils/common';
 import {NftIdType} from '@/components/smart/NftList.vue';
@@ -205,7 +205,6 @@ export enum QuestItemType {
   EXPERIENCE,
   EXTERNAL,
   EXTERNAL_HOLD,
-  CHARACTER,
   REPUTATION = 99
 }
 
@@ -227,7 +226,6 @@ export enum QuestTemplateType {
   WALLET=30,
   PICKABLE=20
 }
-
 export interface ReputationLevelRequirements {
   level2: number;
   level3: number;
@@ -294,7 +292,7 @@ interface Data {
 }
 
 export default Vue.extend({
-  components: {QuestRow, QuestComponentIcon, QuestReward, QuestsList, Hint},
+  components: {QuestRow, QuestComponentIcon, QuestReward, QuestsList},
 
   props: {
     showCosmetics: {
@@ -466,11 +464,31 @@ export default Vue.extend({
   width: clamp(600px, 80%, 1200px);
   margin: 0 auto;
   padding: 50px 0;
+=======
+.custom-available-quest-button{
+  margin-top: 25px !important;
+}
+.custom-claim-weekly-reward-btn{
+  font-size: 11px !important;
+  margin-right: 0px !important;
+  margin-top: 8px !important;
+}
+.quests-container {
+  background-image: url('../../src/assets/questsBackground.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  min-height: 95vh;
+  min-width: 100%;
+  display: inline-flex;
+  padding: 3rem;
 }
 
 .quests-title {
-  font: normal normal bold 30px/38px Trajan;
-  color: #DABE75;
+  font-family: 'Trajan', serif;
+  font-size: 35px;
+  font-weight: 400;
+  color: #EDCD90;
 }
 .quests-title-2 {
   font: normal normal bold 20px/28px Trajan;
@@ -569,6 +587,12 @@ export default Vue.extend({
 }
 
 @media (max-width: 576px) {
+  .custom-claim-weekly-reward-btn{
+    margin-right: -25px !important;
+  }
+  .custom-available-quest-button{
+    margin-right: -20px !important;
+  }
   .quests-container {
     padding: 1rem;
     margin-bottom: 3rem;

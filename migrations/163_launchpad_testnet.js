@@ -35,7 +35,7 @@ module.exports = async function (deployer, network, accounts) {
       ],
       [1,2,3,4,5,6,7,8]
     );
-    await launchpad.setVars([2,3,4,5],[1800,1800,1,30]);
+    await launchpad.setVars([2,3,4,5,6,7],[1800,1800,1,30,1800,3600]);
     await launchpad.setSkillPrice('4000000000000000000');
   }
 };

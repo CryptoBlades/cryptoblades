@@ -118,12 +118,13 @@ export default Vue.extend({
 .quest-row {
   display: flex;
   width: 100%;
-  background: #141414;
-  border: 1px solid #60583E;
+  background: rgba(0, 9, 26, 0.65);
+  border: 1px solid #404857;
   border-radius: 10px;
   align-items: center;
   min-height: 150px;
   padding: 0 20px;
+  font-family: Roboto
 }
 
 .busy-quest-row {

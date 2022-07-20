@@ -62,6 +62,27 @@
       gtag('config', 'G-C5RLX74PEW');
       console.log("loaded Analytics");
 
+      document.body.addEventListener('click', (e) => {
+        if(e !== null){
+          const tagname = (e.target).getAttribute('tagname');
+          if (!tagname) return;
+
+          if ((e.target).nodeName === 'BUTTON') {
+            gtag('event', 'button_clicked', {
+              value: tagname,
+            });
+          }
+
+          if ((e.target).className.includes('gtag-link-others')) {
+            gtag('event', 'nav', {
+              event_category: 'navigation',
+              event_label: 'navbar',
+              value: tagname,
+            });
+          }
+        }
+      });
+
       window.localStorage.setItem('show-ads', 'true');
     },true);
   </script>
