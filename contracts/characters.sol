@@ -145,7 +145,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
     }
 
-    function get(uint256 id) public view /*noFreshLookup(id)*/ returns (uint16, uint8, uint8, uint64, uint16, uint16, uint16, uint16, uint16, uint16) {
+    function get(uint256 id) public view noFreshLookup(id) returns (uint16, uint8, uint8, uint64, uint16, uint16, uint16, uint16, uint16, uint16) {
         Character memory c = tokens[id];
         CharacterCosmetics memory cc = cosmetics[id];
         return (c.xp, c.level, c.trait, c.staminaTimestamp,

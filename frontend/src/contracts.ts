@@ -24,6 +24,7 @@ import { abi as shieldsAbi, networks as shieldsNetworks } from '../../build/cont
 import { abi as garrisonAbi, networks as garrisonNetworks } from '../../build/contracts/Garrison.json';
 import { abi as cbkLandSaleAbi, networks as cbkLandSaleNetworks } from '../../build/contracts/CBKLandSale.json';
 import { abi as promosAbi, networks as promosNetworks } from '../../build/contracts/Promos.json';
+import { abi as merchandiseAbi, networks as merchandiseNetworks } from '../../build/contracts/Merchandise.json';
 import { abi as cbkLandAbi, networks as cbkLandNetworks } from '../../build/contracts/CBKLand.json';
 import { abi as weaponRenameTagConsumablesAbi, networks as weaponRenameTagConsumablesNetworks } from '../../build/contracts/WeaponRenameTagConsumables.json';
 import { abi as characterRenameTagConsumablesAbi, networks as characterRenameTagConsumables } from '../../build/contracts/CharacterRenameTagConsumables.json';
@@ -401,7 +402,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
-    NFTStorage, CBKLandSale, CBKLand, Promos,
+    NFTStorage, CBKLandSale, CBKLand, Merchandise, Promos,
     TokensManager,
     ...raidContracts,
     ...pvpContracts,
