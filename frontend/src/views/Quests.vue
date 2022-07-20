@@ -147,7 +147,7 @@ export interface WeeklyReward {
 
 export interface Quest {
   progress: number;
-  type?: RequirementType;
+  type?: QuestTemplateType;
   reputation: number;
   id: number;
   tier?: Rarity;

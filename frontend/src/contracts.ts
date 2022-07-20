@@ -24,7 +24,6 @@ import { abi as shieldsAbi, networks as shieldsNetworks } from '../../build/cont
 import { abi as garrisonAbi, networks as garrisonNetworks } from '../../build/contracts/Garrison.json';
 import { abi as cbkLandSaleAbi, networks as cbkLandSaleNetworks } from '../../build/contracts/CBKLandSale.json';
 import { abi as promosAbi, networks as promosNetworks } from '../../build/contracts/Promos.json';
-import { abi as merchandiseAbi, networks as merchandiseNetworks } from '../../build/contracts/Merchandise.json';
 import { abi as cbkLandAbi, networks as cbkLandNetworks } from '../../build/contracts/CBKLand.json';
 import { abi as weaponRenameTagConsumablesAbi, networks as weaponRenameTagConsumablesNetworks } from '../../build/contracts/WeaponRenameTagConsumables.json';
 import { abi as characterRenameTagConsumablesAbi, networks as characterRenameTagConsumables } from '../../build/contracts/CharacterRenameTagConsumables.json';
@@ -107,7 +106,7 @@ export function getConfigValue(key: string, chain?: string): any {
   }
 
   if(process.env.NODE_ENV === 'development') return '';
-  const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
+  const env = window.location.href.startsWith('https://test') ? 'test' : ( window.location.href.includes('localhost') ? 'local' : 'production');
 
   if(chain) return (config as Config).environments[env].chains[chain][key];
 
@@ -121,7 +120,7 @@ export function getConfigValue(key: string, chain?: string): any {
   return (config as Config).environments[env].chains[currentChain][key];
 }
 
-let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
+let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '1337';
 
 export type Networks = Partial<Record<string, { address: string }>>;
 
@@ -204,7 +203,7 @@ function getNftStakingContractsInfoWithDefaults(): Partial<Record<NftStakeType, 
 }
 
 async function setUpStakingContracts(web3: Web3) {
-  networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
+  networkId = getConfigValue('VUE_APP_NETWORK_ID') || '1337';
   const stakingContractsInfo = getStakingContractsInfoWithDefaults();
   const nftStakingContractsInfo = getNftStakingContractsInfoWithDefaults();
 
@@ -308,9 +307,6 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const cbkLandSaleAddr = (cbkLandSaleNetworks as Networks)[networkId]!.address;
   const CBKLandSale = new web3.eth.Contract(cbkLandSaleAbi as Abi, cbkLandSaleAddr);
 
-  const merchandiseAddr = getConfigValue('VUE_APP_MERCHANDISE_CONTRACT_ADDRESS') || (merchandiseNetworks as Networks)[networkId]!.address;
-  const Merchandise = new web3.eth.Contract(merchandiseAbi as Abi, merchandiseAddr);
-
   const cbkLandAddr = (cbkLandNetworks as Networks)[networkId]!.address;
   const CBKLand = new web3.eth.Contract(cbkLandAbi as Abi, cbkLandAddr);
 
@@ -405,7 +401,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables, CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables,
     RaidTrinket, KeyLootbox, Junk,
     WeaponCosmetics, CharacterCosmetics,
-    NFTStorage, CBKLandSale, CBKLand, Merchandise, Promos,
+    NFTStorage, CBKLandSale, CBKLand, Promos,
     TokensManager,
     ...raidContracts,
     ...pvpContracts,

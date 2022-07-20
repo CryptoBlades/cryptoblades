@@ -1,6 +1,6 @@
 <template>
 <div class="w-100">
-  <div v-if="questTemplateType === QuestTemplateType.QUEST && character" class="quest-row gap-5"
+  <div v-if="questTemplateType === QuestTemplateType.QUEST || questTemplateType === QuestTemplateType.PICKABLE && character" class="quest-row gap-5"
        :class="character.status !== undefined && (character.status !== NftStatus.AVAILABLE) ? 'busy-quest-row' : ''">
     <QuestCharacter :character="character" :quest="character.quest"
                     :reputationLevelRequirements="reputationLevelRequirements"/>

@@ -17,7 +17,7 @@
     </b-button>
     <b-button v-else-if="questCanBeCompleted && !afterDeadline && !deletable" :disabled="isLoading" variant="primary"
               class="flex-1"
-              @click="complete">
+              @click="complete()">
       {{ $t('quests.complete') }}
     </b-button>
     <b-button v-if="deletable" variant="primary" class="flex-1" @click="deleteQuestTemplate()"
@@ -80,7 +80,7 @@
               <QuestRequirements :quest="quest" :index="index"/>
               <QuestRewards :quest="quest"/>
               <div class="pickBtn-wrapper">
-              <b-button class="pickBtn" variant="primary" @click="pickQuest(index)">
+              <b-button class="pickBtn" variant="primary" @click="pickQuest(quest.id)">
                 <!-- {{ $t('quests.pickQuest') }} -->
                 Pick
               </b-button>
@@ -236,7 +236,7 @@ export default Vue.extend({
     async fetchPickableQuests() {
       try {
         this.isLoading = true;
-        this.quests = await this.getQuestTemplates({tier: this.pickableQuestTier! + 30});
+        this.quests = await this.getQuestTemplates({tier: this.pickableQuestTier! + 20});
       } finally {
         this.isLoading = false;
       }
@@ -310,10 +310,10 @@ export default Vue.extend({
       }
     },
 
-    async pickQuest(index: number){
+    async pickQuest(questID: number){
       try {
         this.isLoading = true;
-        await this.requestPickableQuest({characterID: this.character.id, pickableIndex: index});
+        await this.requestPickableQuest({characterID: this.character.id, questID});
         this.$emit('refresh-quest-data');
       } finally {
         this.isLoading = false;
