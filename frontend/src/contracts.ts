@@ -106,7 +106,7 @@ export function getConfigValue(key: string, chain?: string): any {
   }
 
   if(process.env.NODE_ENV === 'development') return '';
-  const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
+  const env = window.location.href.startsWith('https://test') ? 'test' : ( window.location.href.includes('localhost') ? 'local' : 'production');
 
   if(chain) return (config as Config).environments[env].chains[chain][key];
 
@@ -120,7 +120,7 @@ export function getConfigValue(key: string, chain?: string): any {
   return (config as Config).environments[env].chains[currentChain][key];
 }
 
-let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
+let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '1337';
 
 export type Networks = Partial<Record<string, { address: string }>>;
 
@@ -203,7 +203,7 @@ function getNftStakingContractsInfoWithDefaults(): Partial<Record<NftStakeType, 
 }
 
 async function setUpStakingContracts(web3: Web3) {
-  networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
+  networkId = getConfigValue('VUE_APP_NETWORK_ID') || '1337';
   const stakingContractsInfo = getStakingContractsInfoWithDefaults();
   const nftStakingContractsInfo = getNftStakingContractsInfoWithDefaults();
 

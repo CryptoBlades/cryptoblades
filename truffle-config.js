@@ -53,7 +53,7 @@ module.exports = {
     //
     development: {
       host: process.env.ETH_DEV_RPC_HOST || '127.0.0.1',     // Localhost (default: none)
-      port: process.env.ETH_DEV_RPC_PORT || 7545,            // Standard Ethereum port (default: none)
+      port: process.env.ETH_DEV_RPC_PORT || 8545,            // Standard Ethereum port (default: none)
       network_id: process.env.ETH_DEV_RPC_NETWORK_ID || '*',       // Any network (default: none)
       gas: parseInt(process.env.ETH_DEV_RPC_GAS, 10) || 67219750 // required for deploy, otherwise it throws weird require-errors on constructor
     },
