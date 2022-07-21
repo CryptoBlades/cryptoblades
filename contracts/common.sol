@@ -21,14 +21,14 @@ library Common {
     }
 
     function getBonusRankingPoints(uint256 weakerPower, uint256 strongerPower) internal pure returns (uint256) {
-        // @TODO once tested transform to save gas: 
+        // @TODO once tested transform to save gas:
         // X < Y: (1 - ( (1.3*(x-y)/0.6*y) + (0.7*(y-x)/0.6*x) )) * 0.5
         // Note: Formula hard-copied in PvPArenaMatchMaking.vue due to contract size limitations in PvPArena.sol
         uint256 bonusRanking;
 
         uint256 strongerMinRoll = strongerPower.mul(90).div(100);
         uint256 strongerMaxRoll = strongerPower.mul(110).div(100);
- 
+
         uint256 weakerMinRoll = weakerPower.mul(90).div(100);
         uint256 weakerMaxRoll = weakerPower.mul(110).div(100);
 
@@ -36,7 +36,7 @@ library Common {
         uint256 weakerRollSpread = weakerMaxRoll.sub(weakerMinRoll);
 
         uint256 rollOverlap = weakerMaxRoll.sub(strongerMinRoll);
-       
+
         uint256 strongerRollChanceToOverlap = rollOverlap.mul(100).div(strongerRollSpread);
 
         uint256 weakerRollChanceToOverlap = rollOverlap.mul(100).div(weakerRollSpread);
@@ -66,7 +66,7 @@ library Common {
         uint24 bonusPower
     ) internal pure returns (uint24) {
         // we divide total power by 100 and add the base of 1000
-       return uint24 (weaponMultiplier.mulu(basePower).add(bonusPower).div(100).add(1000));  
+       return uint24 (weaponMultiplier.mulu(basePower).add(bonusPower).div(100).add(1000));
     }
     function getPowerAtLevel(uint8 level) internal pure returns (uint24) {
         // does not use fixed points since the numbers are simple
@@ -89,5 +89,25 @@ library Common {
         } else {
             adjustedAmount = amount.div(10**uint(18 - decimals));
         }
+    }
+
+    function numArraySplice(uint256[] memory arr, uint256 index) internal pure returns(uint256[] memory) {
+        if (index >= arr.length) return arr;
+
+        for (uint i = index; i< arr.length-1; i++){
+            arr[i] = arr[i+1];
+        }
+        delete arr[arr.length-1];
+        return arr;
+    }
+
+    function numArrayIncludes(uint256[] memory arr, uint256 value) internal pure returns(bool) {
+        bool includes = false;
+        for (uint i = 0; i < arr.length; i++){
+            if (arr[i] == value) {
+                includes = true;
+            }
+        }
+        return includes;
     }
 }
