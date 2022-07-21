@@ -21,11 +21,19 @@
       </b-button>
     </div>
     <h2 class="mt-2">{{ $t('admin.cryptoblades.setFightXpGainCurrentDefault32', {xpGain: currentFightXpGain}) }}</h2>
-    <div class="d-flex align-items-center gap-3">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
       <b-form-input v-model="newFightXpGain" :placeholder="$t('admin.cryptoblades.fightXpGain')" number type="number"/>
       <b-button @click="setNewFightXpGain()" :disabled="setNewFightXpGainButtonDisabled"
                 variant="info" class="text-nowrap">
         {{ $t('admin.cryptoblades.setFightXpGain') }}
+      </b-button>
+    </div>
+    <h2 class="mt-3">{{ $t('admin.cryptoblades.setHourlyIncome', {hourlyIncome: currentHourlyIncome}) }}</h2>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <b-form-input v-model="newHourlyIncome" :placeholder="$t('admin.cryptoblades.hourlyIncome')" number type="number"/>
+      <b-button @click="setNewHourlyIncome()" :disabled="setHourlyIncomeDisabled"
+                variant="info" class="text-nowrap">
+        {{ $t('admin.cryptoblades.setHourlyIncome') }}
       </b-button>
     </div>
   </div>
@@ -48,6 +56,8 @@ interface StoreMappedActions {
   getFightXpGain(): Promise<number>;
 
   setFightXpGain(payload: { xpGain: number }): Promise<void>;
+
+  setHourlyIncome(payload: { hourlyIncome: number }): Promise<void>;
 }
 
 interface Data {
@@ -58,6 +68,8 @@ interface Data {
   currentFightXpGain?: number;
   newFightXpGain?: number;
   isLoading: boolean;
+  currentHourlyIncome?: number;
+  newHourlyIncome?: number;
 }
 
 export default Vue.extend({
@@ -70,6 +82,8 @@ export default Vue.extend({
       currentFightXpGain: undefined,
       newFightXpGain: undefined,
       isLoading: false,
+      currentHourlyIncome: undefined,
+      newHourlyIncome: undefined
     } as Data;
   },
 
@@ -86,6 +100,10 @@ export default Vue.extend({
       return this.newFightXpGain === undefined
         || this.isLoading;
     },
+    setHourlyIncomeDisabled(): boolean {
+      return this.newHourlyIncome === undefined
+        || this.isLoading;
+    },
   },
 
   methods: {
@@ -96,6 +114,7 @@ export default Vue.extend({
       'getWeaponMintValue',
       'getFightXpGain',
       'setFightXpGain',
+      'setHourlyIncome',
     ]) as StoreMappedActions,
 
     async setNewCharacterMintValue() {
@@ -129,6 +148,18 @@ export default Vue.extend({
         await this.setFightXpGain({xpGain: this.newFightXpGain!});
         await this.loadCurrentValues();
         this.newFightXpGain = undefined;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async setNewHourlyIncome() {
+      if (this.setHourlyIncomeDisabled) return;
+      try {
+        this.isLoading = true;
+        await this.setHourlyIncome({hourlyIncome: this.newHourlyIncome!});
+        await this.loadCurrentValues();
+        this.newHourlyIncome = undefined;
       } finally {
         this.isLoading = false;
       }
