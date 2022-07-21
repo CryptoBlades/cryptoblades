@@ -148,19 +148,41 @@ contract EquipmentManager is Initializable, ReentrancyGuard, AccessControlUpgrad
     // PUBLIC FUNCTIONS
 
     function setEquipment(IERC721 nftAddress, uint256 characterId, uint256 nftId) external nonReentrant isCharacterOwner(characterId) isNftOwner(nftAddress, nftId) {
+        require(address(characters) != address(nftAddress), 'CEC'); // can't equip character
         uint256 nftSlot = nftSlots[nftAddress];
         uint256 nftCount = charEquipments[characterId][nftSlot].length;
         require(nftCount < maxSlots[nftSlot], 'MCR'); // max nft count reached
-        nftAddress.safeTransferFrom(msg.sender, address(this), nftId);
+        if (address(weapons) == address(nftAddress) || address(shields) == address(nftAddress)) {
+            if (address(weapons) == address(nftAddress)) {
+                require(weapons.getNftVar(nftId, weapons.NFTVAR_BUSY()) == 0, 'WIB'); // weapon is busy
+                weapons.setNftVar(nftId, weapons.NFTVAR_BUSY(), 3);
+            } else {
+                require(shields.getNftVar(nftId, shields.NFTVAR_BUSY()) == 0, 'SIB'); // shield is busy
+                shields.setNftVar(nftId, shields.NFTVAR_BUSY(), 3);
+            }
+        } else {
+            nftAddress.safeTransferFrom(msg.sender, address(this), nftId);
+        }
         charEquipments[characterId][nftSlot].push(nftId);
         charPower[characterId] = calculatePower(characterId);
         emit ItemEquipped(msg.sender, characterId, nftAddress, nftId);
     }
 
     function removeEquipment(IERC721 nftAddress, uint256 characterId, uint256 nftId) external nonReentrant isCharacterOwner(characterId)  {
+        require(address(characters) != address(nftAddress), 'CRC'); // can't remove character
         uint256 nftSlot = nftSlots[nftAddress];
         require(Common.numArrayIncludes(charEquipments[characterId][nftSlot], nftId), 'NNE'); // nft not equipped
-        nftAddress.safeTransferFrom(address(this), msg.sender, nftId);
+        if (address(weapons) == address(nftAddress) || address(shields) == address(nftAddress)) {
+            if (address(weapons) == address(nftAddress)) {
+                require(weapons.getNftVar(nftId, weapons.NFTVAR_BUSY()) != 0, 'WNB'); // weapon is not busy
+                weapons.setNftVar(nftId, weapons.NFTVAR_BUSY(), 0);
+            } else {
+                require(shields.getNftVar(nftId, shields.NFTVAR_BUSY()) != 0, 'SNB'); // shield is not busy
+                shields.setNftVar(nftId, shields.NFTVAR_BUSY(), 0);
+            }
+        } else {
+            nftAddress.safeTransferFrom(address(this), msg.sender, nftId);
+        }
         charEquipments[characterId][nftSlot] = Common.numArraySplice(charEquipments[characterId][nftSlot], nftId);
         charPower[characterId] = calculatePower(characterId);
         emit ItemUnequipped(msg.sender, characterId, nftAddress, nftId);
