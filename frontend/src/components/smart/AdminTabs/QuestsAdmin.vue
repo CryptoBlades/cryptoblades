@@ -317,6 +317,7 @@ import {
   DustRarity,
   Quest,
   QuestItemType,
+  QuestTemplateType,
   Rarity,
   ReputationLevelRequirements,
   RequirementType,
@@ -439,6 +440,7 @@ export default Vue.extend({
       RewardType,
       Rarity,
       DustRarity,
+      questTemplateType: QuestTemplateType
     } as Data;
   },
 
@@ -512,7 +514,6 @@ export default Vue.extend({
         this.isLoading = true;
         await this.addQuestTemplate({
           questTemplate: this.questTemplate,
-          tierOffset: this.questTemplateType,
           isPromo: this.promoQuestTemplates,
           supply: this.supply ? this.supply : 0,
           deadline: this.timestamp ? this.timestamp : 0,
