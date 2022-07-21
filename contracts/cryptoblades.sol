@@ -57,7 +57,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_MIN_CHARACTER_FEE = 24;
     uint256 public constant VAR_WEAPON_MINT_TIMESTAMP = 25;
     uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 26;
-    uint256 public constant VAR_FIGHT_FLAT_IGO_BONUS = 27; // TEMP, do not reuse 27 later though
+    // uint256 public constant VAR_FIGHT_FLAT_IGO_BONUS = 27; // TEMP, do not reuse 27 later though
 
 
     // Mapped user variable(userVars[]) keys, one value per wallet
@@ -354,9 +354,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             xp = 0;
         }
         //TEMP FOR EVENT
-        else {
+        /*else {
             _giveInGameOnlyFundsFromContractBalance(tx.origin, vars[VAR_FIGHT_FLAT_IGO_BONUS] * fightMultiplier);
-        }
+        }*/
         //^ TEMP
 
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
@@ -364,12 +364,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         vars[VAR_UNCLAIMED_SKILL] += tokens;
         vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
         xpRewards[char] += xp;
-        
+
 
         vars[VAR_HOURLY_FIGHTS] += fightMultiplier;
         vars[VAR_HOURLY_POWER_SUM] += playerFightPower * fightMultiplier;
 
-        emit FightOutcome(tx.origin, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, (tokens + vars[VAR_FIGHT_FLAT_IGO_BONUS] * fightMultiplier));
+        emit FightOutcome(tx.origin, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens /*(tokens + vars[VAR_FIGHT_FLAT_IGO_BONUS] * fightMultiplier)*/);
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
@@ -687,7 +687,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
     }
 
-    function payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) external restricted 
+    function payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) external restricted
         returns (
             uint256 _fromInGameOnlyFunds,
             uint256 _fromTokenRewards,
