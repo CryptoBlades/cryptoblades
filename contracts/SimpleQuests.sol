@@ -62,7 +62,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     uint256 internal constant NFTVAR_SIMPLEQUEST_PROGRESS = 101;
     uint256 internal constant NFTVAR_SIMPLEQUEST_TYPE = 102;
     uint256 internal constant NFTVAR_REPUTATION = 103;
-    uint256 internal constant NFTVAR_SIMPLEQUEST_TIER = 104;
 
     struct Quest {
         uint256 id;
@@ -244,14 +243,12 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     function setCharacterQuest(uint256 characterID, uint256 tier, uint256 questID) private returns (uint256) {
         decrementQuestSupply(tier, questID);
         characterQuest[characterID] = questID;
-        uint256[] memory fields = new uint256[](3);
+        uint256[] memory fields = new uint256[](2);
         fields[0] = NFTVAR_SIMPLEQUEST_PROGRESS;
         fields[1] = NFTVAR_SIMPLEQUEST_TYPE;
-        fields[2] = NFTVAR_SIMPLEQUEST_TIER;
-        uint256[] memory values = new uint256[](3);
+        uint256[] memory values = new uint256[](2);
         values[0] = 0;
         values[1] = uint256(quests[questID].requirementType);
-        values[2] = tier;
         characters.setNFTVars(characterID, fields, values);
         emit QuestAssigned(questID, characterID);
         return questID;
@@ -286,7 +283,11 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return _assignNextQuest(characterID, pickedQuestID);
     }
 
-    function completeQuest(uint256 characterID) public assertQuestsEnabled assertOwnsCharacter(characterID) assertOnQuest(characterID, true) returns (uint256[] memory questRewards) {
+    function completeQuest(uint256 characterID) public returns (uint256[] memory questRewards) {
+        return completeQuest(characterID, 0);
+    }
+
+    function completeQuest(uint256 characterID, uint256 pickedQuestID) public assertQuestsEnabled assertOwnsCharacter(characterID) assertOnQuest(characterID, true) returns (uint256[] memory questRewards) {
         uint256[] memory questData = getCharacterQuestData(characterID);
         require(questData[0] >= quests[characterQuest[characterID]].requirementAmount, "Not completed");
         uint256 questID = characterQuest[characterID];
@@ -297,10 +298,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         characters.setNftVar(characterID, NFTVAR_REPUTATION, currentReputation + quests[questID].reputationAmount);
         emit QuestComplete(questID, characterID);
         weeklyCompletions[msg.sender][now / 1 weeks] += 1;
-        if (questData[3] != pickableTier) {
-            _assignNextQuest(characterID, 0);
-        } else {
+        if (pickedQuestID == questTemplates[pickableTier][questIndexes[pickedQuestID]]) {
             setCharacterQuest(characterID, 0, 0); // empty character quest for pickable quests
+        } else {
+            _assignNextQuest(characterID, 0);
         }
     }
 
@@ -542,11 +543,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function getCharacterQuestData(uint256 characterID) public view returns (uint256[] memory) {
-        uint256[] memory questDataKeys = new uint256[](4);
+        uint256[] memory questDataKeys = new uint256[](3);
         questDataKeys[0] = NFTVAR_SIMPLEQUEST_PROGRESS;
         questDataKeys[1] = NFTVAR_SIMPLEQUEST_TYPE;
         questDataKeys[2] = NFTVAR_REPUTATION;
-        questDataKeys[3] = NFTVAR_SIMPLEQUEST_TIER;
         return characters.getNFTVars(characterID, questDataKeys);
     }
 
