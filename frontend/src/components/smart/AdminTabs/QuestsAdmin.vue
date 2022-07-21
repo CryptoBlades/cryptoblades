@@ -384,6 +384,7 @@ interface Data {
   usePromoQuests: boolean;
   supply?: number;
   timestamp?: number;
+  questTemplateType?: QuestTemplateType;
 }
 
 export default Vue.extend({
@@ -440,7 +441,7 @@ export default Vue.extend({
       RewardType,
       Rarity,
       DustRarity,
-      questTemplateType: QuestTemplateType
+      questTemplateType: QuestTemplateType.QUEST
     } as Data;
   },
 
