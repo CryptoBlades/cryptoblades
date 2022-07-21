@@ -464,7 +464,7 @@ export default Vue.extend({
   width: clamp(600px, 80%, 1200px);
   margin: 0 auto;
   padding: 50px 0;
-=======
+}
 .custom-available-quest-button{
   margin-top: 25px !important;
 }
