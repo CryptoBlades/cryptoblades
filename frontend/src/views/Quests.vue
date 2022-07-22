@@ -22,9 +22,9 @@
         </div>
         <div v-if="weeklyReward && weeklyReward.id && currentWeeklyCompletions !== undefined && weeklyReward.completionsGoal"
             class="d-flex flex-column gap-2">
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
             <div class="d-flex flex-column gap-2">
-              <div class="d-flex justify-content-between gap-4">
+              <div class="d-flex justify-content-between gap-4 flex-wrap">
                 <span class="text-uppercase weekly-progress">{{ $t('quests.weeklyProgress') }}</span>
                 <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon"
                                                                       alt="Hourglass"/> {{
@@ -41,7 +41,7 @@
                       class="quest-progress-value">{{ `${currentWeeklyCompletions} / ${weeklyReward.completionsGoal}` }}</span>
               </div>
             </div>
-            <div class="d-flex justify-content-center align-items-center gap-2 position-relative h-100">
+            <div class="d-flex justify-content-center align-items-center gap-2 mx-auto mt-3">
               <span v-if="weeklyClaimed" class="claimed-banner">{{ $t('quests.claimed') }}</span>
               <QuestComponentIcon :questItemType="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
                                   :amount="weeklyReward.rewardAmount"
@@ -471,15 +471,21 @@ export default Vue.extend({
     margin-bottom: 3rem;
   }
 
+  .weekly-progress{
+    margin: 0 auto;
+  }
+
   .weekly-progress-container {
     flex-direction: column;
     gap: 2rem;
   }
-.custom-available-quest-button{
-  font-size: 12px !important;
-}
-.custom-claim-weekly-reward-btn{
-  font-size: 12px !important;
-}
+  .custom-available-quest-button{
+    font-size: 12px !important;
+    margin: 25px 0 15px 0 !important;
+  }
+  .custom-claim-weekly-reward-btn{
+    font-size: 12px !important;
+    margin: 25px 0 15px 0 !important;
+  }
 }
 </style>
