@@ -1025,6 +1025,7 @@ a.character-tab:focus {
   margin: auto;
   text-align: center;
   overflow: auto auto;
+  background-color: #000E29;
 }
 
 .starter-panel-heading {
