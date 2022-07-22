@@ -896,6 +896,9 @@ export default Vue.extend({
         this.selectedElement = null;
         this.showModal = false;
         this.spin = false;
+        //refresh forge data
+        this.isLoading = true;
+        this.updateForgeData();
       }
     },
 
