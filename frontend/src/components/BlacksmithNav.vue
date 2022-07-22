@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex flex-column flex-md-row menu-nav justify-content-between">
-        <div class="d-flex flex-column flex-md-row">
+        <div class="d-flex flex-column flex-md-row mr-3">
           <div role="button" class="nav-char none-mobile" :class="['d-flex gap-3 align-items-center link',
             (activeTab === 'forge') ? 'active' : '']" @click="$emit('toggle', 'forge')">
             <div class="img-nav">
@@ -42,17 +42,18 @@
             :toolTip="(disableX10Forge) ? $t('blacksmith.disableDynamicMintingForge') : $t('blacksmith.forge10New')"
             :style="disableX10Forge ? 'opacity: 0.5' : ''"
           />
-          <!-- FOR STAKINGGGGGG -->
           <b-checkbox
-            class="mx-3 my-auto custom-staking-checkbox"
+            class="custom-staking-checkbox"
             :disabled="disableUseStakedForForge"
             @change="$emit('setStakedForForgeValue', $event)">
             <span v-if="disableUseStakedForForge"> <b>{{$t('blacksmith.notEnoughStakedSkill')}}<br></b></span>
             <span v-html="$t('blacksmith.spendStakedFunds')"></span>
           </b-checkbox>
-          <b-icon-question-circle class="centered-icon" scale="1.5"
-            v-on:click="$emit('onShowForgeDetails')" v-tooltip.bottom="$t('blacksmith.clickForForgePercentages')"/>
+          <div class="tooltip-container">
+            <b-icon-question-circle class="centered-icon" scale="1.5"
+              v-on:click="$emit('onShowForgeDetails')" v-tooltip.bottom="$t('blacksmith.clickForForgePercentages')"/>
           </div>
+      </div>
     </div>
 </template>
 
@@ -123,17 +124,19 @@ export default Vue.extend({
   margin-right: 15px !important;
 }
 .custom-staking-checkbox{
-  font-size: 8px !important;
-  margin-right: 15px !important;
+  font-size: 14px;
+  margin-right: 15px;
 }
+
 .custom-cb-btn{
   height: 120% !important;
   font-weight: normal !important;
   margin-top: -3px !important;
+  font-size: 14px !important;
 }
 .custom-forge-btn{
   margin-right: 15px !important;
-  font-size: 11px !important;
+  font-size: 14px !important;
 }
 .custom-padding-claim-garrison-xp{
   padding: 10px 40px 10px 40px !important;
@@ -265,6 +268,14 @@ export default Vue.extend({
   display: none;
 }
 
+.tooltip-container{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.custom-control-label > span {
+  white-space: nowrap;
+}
 
 @media (max-width: 600px) {
    .mobile-menu{
