@@ -6760,11 +6760,42 @@
         ],
         "name": "RoleRevoked",
         "type": "event"
+      },
+      "0x28a3ea4d199e72c2f5ac0a033b6a76c586656dd17ef9aeac769874b9a1104b54": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "partnerId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "claimedAmount",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "currentMultiplier",
+            "type": "uint256"
+          }
+        ],
+        "name": "TreasuryClaimed",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0x216AC39765D920D7f86162Daf9BE1f045f321A8D",
-    "transactionHash": "0x3690f0e8465be6f277a6826df61c6d5355fb6229d56cffc565044d801b5afc4d"
+    "transactionHash": "0x2bc45f5fcd1c3ed7020d310f90b5da87f19f2f62036af6835b862ac0f6f10ce6"
   },
   "build/contracts/WaxBridge.json": {
     "events": {
