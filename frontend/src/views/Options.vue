@@ -251,13 +251,18 @@ export default Vue.extend({
   },
 
   methods: {
+    ...(mapActions(
+      'treasury',
+      [
+        'fetchPartnerProjects',
+      ]
+    ) as StoreMappedActions),
     ...(mapActions([
       'claimTokenRewards',
       'setUpContracts',
       'initialize',
-      'configureMetaMask',
-      'fetchPartnerProjects',
-    ]) as StoreMappedActions),
+      'configureMetaMask']
+    ) as StoreMappedActions),
     ...mapMutations([
       'setNetworkId',
       'updatePayoutCurrencyId',
