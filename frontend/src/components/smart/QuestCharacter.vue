@@ -201,7 +201,6 @@ export default Vue.extend({
 
 .quest-character-portrait {
   width: 93px;
-  height: 133px;
 }
 
 .gold-text {
