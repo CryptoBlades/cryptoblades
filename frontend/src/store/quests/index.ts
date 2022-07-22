@@ -510,15 +510,20 @@ const quests = {
       return await SimpleQuests.methods.getWeeklyCompletions(rootState.defaultAccount).call(defaultCallOptions(rootState));
     },
 
-    async skipQuest({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, {characterID}: {characterID: number}) {
+    async skipQuest({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, {characterID, pickedQuestID}:
+    {characterID: number, pickedQuestID: number | undefined}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
 
-      await SimpleQuests.methods.skipQuest(characterID).send(defaultCallOptions(rootState));
+      if (pickedQuestID) {
+        await SimpleQuests.methods.skipQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
+      } else {
+        await SimpleQuests.methods.skipQuest(characterID).send(defaultCallOptions(rootState));
+      }
       await dispatch('fetchCharacterStamina', characterID);
     },
 
-    async completeQuest({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, {characterID}:
+    async completeQuest({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, {characterID, pickedQuestID}:
     {characterID: number, pickedQuestID: number | undefined}) {
       const {SimpleQuests} = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;
@@ -526,7 +531,12 @@ const quests = {
       if (!await SimpleQuests.methods.hasRandomQuestRewardSeedRequested(characterID).call(defaultCallOptions(rootState))) {
         await SimpleQuests.methods.generateRewardQuestSeed(characterID).send(defaultCallOptions(rootState));
       }
-      const result = await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(rootState));
+      let result;
+      if (pickedQuestID) {
+        result = await SimpleQuests.methods.completeQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
+      } else {
+        result = await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(rootState));
+      }
 
       const questRewards = result.events.QuestRewarded.returnValues.rewards;
       await Promise.all([

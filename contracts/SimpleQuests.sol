@@ -298,11 +298,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         characters.setNftVar(characterID, NFTVAR_REPUTATION, currentReputation + quests[questID].reputationAmount);
         emit QuestComplete(questID, characterID);
         weeklyCompletions[msg.sender][now / 1 weeks] += 1;
-        if (pickedQuestID == questTemplates[pickableTier][questIndexes[pickedQuestID]]) {
+        _assignNextQuest(characterID, pickedQuestID);
+        /*if (pickedQuestID == questTemplates[pickableTier][questIndexes[pickedQuestID]]) {
             setCharacterQuest(characterID, 0, 0); // empty character quest for pickable quests
-        } else {
-            _assignNextQuest(characterID, 0);
-        }
+        }*/
     }
 
     function completeWalletQuest(uint256 questID) public assertQuestsEnabled returns (uint256[] memory questRewards) {

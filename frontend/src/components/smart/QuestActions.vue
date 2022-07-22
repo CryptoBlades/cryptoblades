@@ -35,6 +35,10 @@
       {{ freeSkip ? $t('quests.freeSkip') : $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
       <Hint v-if="!freeSkip && !hasStaminaToSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
     </b-button>
+    <b-form-checkbox size="lg" :checked="pickable" @change="pickable=!pickable" switch v-if="(questCanBeCompleted && !afterDeadline && !deletable) ||
+      character && (!questCanBeCompleted || afterDeadline)" >
+      <b class="float-left">{{ pickable ? 'Pickable' : 'Random' }}</b>
+    </b-form-checkbox>
     <span v-if="nextFreeSkipTime && character && character.quest.id !== 0 && (!questCanBeCompleted || afterDeadline)"
           class="text-center">{{
         $t('quests.freeSkipResetsIn', {time: nextFreeSkipTime})
@@ -124,6 +128,7 @@ interface Data {
   showPickableQuestModal: boolean;
   pickableQuestTier?: Rarity;
   quests: Quest[];
+  pickedQuestId?: number;
 }
 
 export default Vue.extend({
@@ -144,6 +149,10 @@ export default Vue.extend({
     },
     questIndex: {
       type: Number,
+    },
+    pickable: {
+      type: Boolean,
+      default: false
     },
     refreshQuestTemplates: {
       type: Function,
@@ -196,6 +205,7 @@ export default Vue.extend({
       tiers: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
       pickableQuestTier: undefined,
       quests: [],
+      pickedQuestId: undefined,
     } as Data;
   },
 
@@ -260,8 +270,15 @@ export default Vue.extend({
 
     async skip() {
       try {
+        if (this.pickable) {
+          if (!this.pickedQuestId) {
+            return this.showPickableQuestModal = true;
+          }
+          await this.skipQuest({characterID: this.character.id, pickedQuestID: this.pickedQuestId});
+        } else {
+          await this.skipQuest({characterID: this.character.id});
+        }
         this.isLoading = true;
-        await this.skipQuest({characterID: this.character.id});
         await this.refreshSkipQuestData();
         this.$emit('refresh-quest-data');
       } finally {
@@ -276,7 +293,14 @@ export default Vue.extend({
         let rewards;
         let rewardType: any;
         if(this.questTemplateType === QuestTemplateType.QUEST || this.questTemplateType === QuestTemplateType.PROMO) {
-          rewards = await this.completeQuest({characterID: this.character.id});
+          if (this.pickable) {
+            if (!this.pickedQuestId) {
+              return this.showPickableQuestModal = true;
+            }
+            rewards = await this.completeQuest({characterID: this.character.id, pickedQuestID: this.pickedQuestId});
+          } else {
+            rewards = await this.completeQuest({characterID: this.character.id});
+          }
           rewardType = this.quest.rewardType;
           await this.refreshSkipQuestData();
         }
@@ -313,6 +337,10 @@ export default Vue.extend({
     async pickQuest(questID: number){
       try {
         this.isLoading = true;
+        if (!this.pickedQuestId) {
+          this.pickedQuestId = questID;
+          return this.showPickableQuestModal = false;
+        }
         await this.requestPickableQuest({characterID: this.character.id, questID});
         this.$emit('refresh-quest-data');
       } finally {
