@@ -669,7 +669,6 @@ interface Data {
   powerful: number;
   activeTab: string;
   ctr: number;
-  updateInterval: ReturnType<typeof setInterval> | null;
   mintSlippageApproved: boolean;
   mintPriceDecreasePerHour: string;
   mintWeaponPriceIncrease: string;
@@ -726,7 +725,6 @@ export default Vue.extend({
       powerful: 0,
       activeTab: 'forge',
       ctr: 0,
-      updateInterval: null as ReturnType<typeof setInterval> | null,
       mintSlippageApproved: false,
       mintPriceDecreasePerHour: '0',
       mintWeaponPriceIncrease: '0',
@@ -765,6 +763,9 @@ export default Vue.extend({
   },
 
   watch: {
+    defaultAccount() {
+      this.updateForgeData();
+    },
     activeTab(data){
       if(data === 'forge'){
         this.displayBlacksmith();
@@ -797,47 +798,8 @@ export default Vue.extend({
     },
   },
 
-  async created() {
-    await this.fetchSpecialWeaponEvents();
-    this.selectedSpecialWeaponEventId = +this.specialWeaponEventId;
-    if(!this.contracts.CryptoBlades || !this.contracts.BurningManager) return;
-    const stakedSkillBalanceThatCanBeSpentBN: BN = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18));
-
-    if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8))).isLessThan(0)) {
-      this.disableUseStakedForForge = true;
-    }
-    if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8).multipliedBy(10))).isLessThan(0)){
-      this.disableX10ForgeWithStaked = true;
-    }
-    const reforgeCost = await this.contracts.BurningManager.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
-    const skillReforgeCost = await this.contracts.BurningManager.methods.usdToSkill(reforgeCost).call({ from: this.defaultAccount });
-    this.reforgeCost = new BN(skillReforgeCost).div(new BN(10).pow(18)).toFixed(4);
-
-    const reforgeDustCost = await this.contracts.BurningManager.methods.reforgeWeaponWithDustFee().call({ from: this.defaultAccount });
-    const skillDustReforgeCost = await this.contracts.BurningManager.methods.usdToSkill(reforgeDustCost).call({ from: this.defaultAccount });
-    this.dustReforgeCost = new BN(skillDustReforgeCost).div(new BN(10).pow(18)).toFixed(4);
-
-    const burnCost = await this.contracts.BurningManager.methods.burnWeaponFee().call({ from: this.defaultAccount });
-    const skillBurnCost = await this.contracts.BurningManager.methods.usdToSkill(burnCost).call({ from: this.defaultAccount });
-    this.burnCost = new BN(skillBurnCost).div(new BN(10).pow(18)).toFixed(4);
-    if(window.location.href.split('&').find(x => x === 'showSpecialForge')) {
-      Events.$emit('show-special-forge-modal');
-    }
-    this.mintPriceDecreasePerHour = new BN(await this.fetchMintWeaponPriceDecreasePerSecond()).div(new BN(10).pow(18)).multipliedBy(60*60).toFixed(6);
-    this.mintWeaponPriceIncrease = new BN(await this.fetchWeaponMintIncreasePrice()).div(new BN(10).pow(18)).toFixed(6);
-    this.mintWeaponMinPrice = new BN(await this.fetchMintWeaponMinPrice()).div(new BN(10).pow(18)).toFixed(4);
-  },
-
-  destroyed() {
-    if(this.updateInterval) {
-      clearInterval(this.updateInterval);
-    }
-  },
-
   async mounted(){
     (this as any).$router.push({ path: 'blacksmith', query: { tab: 'weapon' }});
-    await this.updateMintWeaponFee();
-    this.updateInterval = setInterval(async () => { await this.updateMintWeaponFee(); }, 2000);
     Events.$on('forge-weapon', (id: number) =>{
       if(id === 0){
         this.onClickForge(id);
@@ -1161,13 +1123,41 @@ export default Vue.extend({
         this.cooling = false;
       }
     },
-    async updateMintWeaponFee() {
-      if(!this.contracts.CryptoBlades) return;
+    async updateForgeData(){
       const forgeCost = await this.fetchMintWeaponFee();
-      const skillForgeCost = await this.contracts.CryptoBlades.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
+      const skillForgeCost = await this.contracts.CryptoBlades!.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
       this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
       this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
       this.isLoading = false;
+
+      const stakedSkillBalanceThatCanBeSpentBN: BN = new BN(this.stakedSkillBalanceThatCanBeSpent).div(new BN(10).pow(18));
+
+      if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8))).isLessThan(0)) {
+        this.disableUseStakedForForge = true;
+      }
+      if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8).multipliedBy(10))).isLessThan(0)){
+        this.disableX10ForgeWithStaked = true;
+      }
+      const reforgeCost = await this.contracts.BurningManager!.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
+      const skillReforgeCost = await this.contracts.BurningManager!.methods.usdToSkill(reforgeCost).call({ from: this.defaultAccount });
+      this.reforgeCost = new BN(skillReforgeCost).div(new BN(10).pow(18)).toFixed(4);
+
+      const reforgeDustCost = await this.contracts.BurningManager!.methods.reforgeWeaponWithDustFee().call({ from: this.defaultAccount });
+      const skillDustReforgeCost = await this.contracts.BurningManager!.methods.usdToSkill(reforgeDustCost).call({ from: this.defaultAccount });
+      this.dustReforgeCost = new BN(skillDustReforgeCost).div(new BN(10).pow(18)).toFixed(4);
+
+      const burnCost = await this.contracts.BurningManager!.methods.burnWeaponFee().call({ from: this.defaultAccount });
+      const skillBurnCost = await this.contracts.BurningManager!.methods.usdToSkill(burnCost).call({ from: this.defaultAccount });
+      this.burnCost = new BN(skillBurnCost).div(new BN(10).pow(18)).toFixed(4);
+      if(window.location.href.split('&').find(x => x === 'showSpecialForge')) {
+        Events.$emit('show-special-forge-modal');
+      }
+      this.mintPriceDecreasePerHour = new BN(await this.fetchMintWeaponPriceDecreasePerSecond()).div(new BN(10).pow(18)).multipliedBy(60*60).toFixed(6);
+      this.mintWeaponPriceIncrease = new BN(await this.fetchWeaponMintIncreasePrice()).div(new BN(10).pow(18)).toFixed(6);
+      this.mintWeaponMinPrice = new BN(await this.fetchMintWeaponMinPrice()).div(new BN(10).pow(18)).toFixed(4);
+
+      await this.fetchSpecialWeaponEvents();
+      this.selectedSpecialWeaponEventId = +this.specialWeaponEventId;
     }
   },
 
