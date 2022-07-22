@@ -203,6 +203,8 @@ export default Vue.extend({
         'fr',
         'pl',
         'de',
+        'id',
+        'pt'
       ]
     } as Data;
   },
