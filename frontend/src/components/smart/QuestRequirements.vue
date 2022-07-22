@@ -153,9 +153,6 @@ export default Vue.extend({
   color: #B4B0A7;
 }
 
-.requirement-text-container > *{
-}
-
 .requirement-text {
   font-size: 18px;
   color: #DABE75;
