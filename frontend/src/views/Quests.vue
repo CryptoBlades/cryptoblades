@@ -475,5 +475,11 @@ export default Vue.extend({
     flex-direction: column;
     gap: 2rem;
   }
+.custom-available-quest-button{
+  font-size: 12px !important;
+}
+.custom-claim-weekly-reward-btn{
+  font-size: 12px !important;
+}
 }
 </style>
