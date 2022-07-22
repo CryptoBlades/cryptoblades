@@ -1053,10 +1053,6 @@ export default Vue.extend({
       this.greaterDust = '0';
       this.powerfulDust = '0';
     },
-    clearAllMassBurn(){
-      return this.burnWeaponIds = [],
-      this.hideWeapons = this.ownedWeaponIds;
-    },
     getWeaponToUpgrade() {
       if(this.reforgeWeaponId){
         return this.ownWeapons.find(x => x.id === this.reforgeWeaponId);
@@ -1151,6 +1147,7 @@ export default Vue.extend({
         await this.massBurnWeapons({
           burnWeaponIds: this.burnWeaponIds,
         });
+        this.hideWeapons = this.hideWeapons.filter(id => !this.burnWeaponIds.includes(id));
         this.burnWeaponIds = [];
         this.burnWeaponId = null;
         (this.$refs['mass-dust-confirmation-modal'] as BModal).hide();
@@ -1164,7 +1161,6 @@ export default Vue.extend({
         this.cooling = false;
       }
     },
-
     async updateMintWeaponFee() {
       if(!this.contracts.CryptoBlades) return;
       const forgeCost = await this.fetchMintWeaponFee();

@@ -2484,7 +2484,7 @@
     },
     "links": {},
     "address": "0xf055e7F7cbed74821A857D80Dd0E5b45576a41BD",
-    "transactionHash": "0xcd00c973af750355d7b17279afbf836258357d03b679f1815b835d7d3168573a"
+    "transactionHash": "0xbc77525be3d271f38627f4735986cb49e63595bc0daca318ab3676742c49efd7"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {
@@ -2640,7 +2640,7 @@
     },
     "links": {},
     "address": "0x3EB9A0cC8AD503d4EFf3244a9382C661d19C34e8",
-    "transactionHash": "0xa8ec927b298d95e35a8cba244eddc0dd09ee9721df61a13de2b8e65a42fcbf6f"
+    "transactionHash": "0xd08f93fdb11d232d5205083b34c6a3dbd833b55c160e68e35e7e0329405de29d"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -7151,11 +7151,42 @@
         ],
         "name": "RoleRevoked",
         "type": "event"
+      },
+      "0x28a3ea4d199e72c2f5ac0a033b6a76c586656dd17ef9aeac769874b9a1104b54": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "partnerId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "claimedAmount",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "currentMultiplier",
+            "type": "uint256"
+          }
+        ],
+        "name": "TreasuryClaimed",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xe9d1f63b622F504f0EF00a676Eb32742350cC276",
-    "transactionHash": "0xc3d30e3e0377cce477d58165577dabdf2f7fff235d68928455eb54f3739f49b3"
+    "transactionHash": "0x223738834419202782f06ccdc6498611157cdc75606d7bbc9828800c7fbae695"
   },
   "build/contracts/WaxBridge.json": {
     "events": {
