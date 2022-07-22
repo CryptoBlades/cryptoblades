@@ -752,7 +752,6 @@ export default Vue.extend({
       return this.currentFilteredWeapons.map(w => w.id);
     },
     totalSkillBalance(): BN {
-      console.log(toBN(fromWeiEther(this.skillRewards)).plus(toBN(fromWeiEther(this.inGameOnlyFunds))).plus(toBN(fromWeiEther(this.skillBalance))).toString());
       return toBN(fromWeiEther(this.skillRewards)).plus(toBN(fromWeiEther(this.inGameOnlyFunds))).plus(toBN(fromWeiEther(this.skillBalance)));
     },
 
@@ -1028,7 +1027,6 @@ export default Vue.extend({
       const currentFilteredForBuringIds = this.currentFilteredWeaponsIds.filter(id => this.burnWeaponIds.includes(id));
       if(currentFilteredForBuringIds.length > 0){
         currentFilteredForBuringIds.forEach(id => {
-          console.log(id);
           this.ctr += 1;
           const weaponDetails = this.ownWeapons.find(y => {
             if(y && +y.id === +id){
