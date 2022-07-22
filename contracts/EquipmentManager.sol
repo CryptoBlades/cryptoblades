@@ -133,11 +133,7 @@ contract EquipmentManager is Initializable, ReentrancyGuard, AccessControlUpgrad
                     weapons.getStat3(weaponId),
                     characters.getTrait(characterId)
                 );
-            power = Common.getPlayerPowerBase100(
-                    Common.getPowerAtLevel(characters.getLevel(characterId)),
-                    (weaponMult.add(bonusShieldStats)),
-                    weapons.getBonusPower(weaponId)
-                );
+            power = uint24(weaponMult.add(bonusShieldStats).mulu(Common.getPowerAtLevel(characters.getLevel(characterId))).add(weapons.getBonusPower(weaponId)));
         }
         return power;
     }
