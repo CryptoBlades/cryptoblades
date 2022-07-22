@@ -387,7 +387,6 @@ export default Vue.extend({
   margin-top: 25px !important;
 }
 .custom-claim-weekly-reward-btn{
-  font-size: 11px !important;
   margin-right: 0px !important;
   margin-top: 8px !important;
 }
