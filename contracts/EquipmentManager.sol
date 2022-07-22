@@ -6,7 +6,8 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./util.sol";
-import "./cryptoblades.sol";
+import "./characters.sol";
+import "./weapons.sol";
 import "./shields.sol";
 
 contract EquipmentManager is Initializable, ReentrancyGuard, AccessControlUpgradeable {
@@ -20,19 +21,18 @@ contract EquipmentManager is Initializable, ReentrancyGuard, AccessControlUpgrad
     Characters public characters;
     Weapons public weapons;
     Shields public shields;
-    CryptoBlades public game;
 
     EnumerableSet.AddressSet private allowedNFTs;
 
     mapping(IERC721 => uint256) nftSlots; // 0 = weapon, 1 = shield
     mapping(uint256 => mapping(uint256 => uint256[])) public charEquipments;
     mapping(uint256 => uint24) public charPower;
-    mapping(uint256 => uint256) public maxSlots;
+    mapping(IERC721 => uint256) public maxSlots;
 
     event ItemEquipped(address indexed owner, uint256 characterId, IERC721 nftAddress, uint256 nftId);
     event ItemUnequipped(address indexed owner, uint256 characterId, IERC721 nftAddress, uint256 nftId);
 
-    function initialize(Characters _characters, Weapons _weapons, Shields _shields, CryptoBlades _game)
+    function initialize(Characters _characters, Weapons _weapons, Shields _shields)
         public
         initializer
     {
@@ -43,7 +43,6 @@ contract EquipmentManager is Initializable, ReentrancyGuard, AccessControlUpgrad
         characters = _characters;
         weapons = _weapons;
         shields = _shields;
-        game = _game;
 
         _registerNftAddress(IERC721(address(weapons)));
         _registerNftAddress(IERC721(address(shields)));
@@ -73,7 +72,7 @@ contract EquipmentManager is Initializable, ReentrancyGuard, AccessControlUpgrad
     }
 
     function _isNftOwner(IERC721 nftAddress, uint256 nftId) private view {
-        require(IERC721(nftAddress).ownerOf(nftId) == msg.sender, 'Not nft owner');
+        require(nftAddress.ownerOf(nftId) == msg.sender, 'Not nft owner');
     }
 
     function _restricted() private view {
@@ -83,6 +82,7 @@ contract EquipmentManager is Initializable, ReentrancyGuard, AccessControlUpgrad
     function _registerNftAddress(IERC721 nftAddress) private {
         if (!allowedNFTs.contains(address(nftAddress))) {
             allowedNFTs.add(address(nftAddress));
+            nftSlots[nftAddress] = allowedNFTs.length();
         }
     }
 
@@ -102,11 +102,7 @@ contract EquipmentManager is Initializable, ReentrancyGuard, AccessControlUpgrad
 
     function characterEquipmentIds(IERC721 nftAddress, uint256 characterId) public view returns (uint256[] memory) {
         uint256 nftSlot = nftSlots[nftAddress];
-        uint256[] memory tokenIds;
-        for(uint i = 0; i < charEquipments[characterId][nftSlot].length; i++) {
-            tokenIds[i] = charEquipments[characterId][nftSlot][i];
-        }
-        return tokenIds;
+        return charEquipments[characterId][nftSlot];
     }
 
     function getAllowedNFTs() public view returns (IERC721[] memory) {
@@ -123,25 +119,26 @@ contract EquipmentManager is Initializable, ReentrancyGuard, AccessControlUpgrad
         uint256 weaponId;
         uint256 shieldId;
         int128 bonusShieldStats = 0;
+        uint24 power = 0;
         if (characterEquipmentIds(IERC721(address(weapons)), characterId).length > 0) {
             weaponId = characterEquipmentIds(IERC721(address(weapons)), characterId)[0];
+            if (characterEquipmentIds(IERC721(address(shields)), characterId).length > 0) {
+                shieldId = characterEquipmentIds(IERC721(address(shields)), characterId)[0];
+                bonusShieldStats = _getShieldStats(characterId, shieldId).sub(1).mul(20).div(100);
+            }
+            int128 weaponMult = weapons.getPowerMultiplierForTrait(
+                    weapons.getProperties(weaponId),
+                    weapons.getStat1(weaponId),
+                    weapons.getStat2(weaponId),
+                    weapons.getStat3(weaponId),
+                    characters.getTrait(characterId)
+                );
+            power = Common.getPlayerPowerBase100(
+                    Common.getPowerAtLevel(characters.getLevel(characterId)),
+                    (weaponMult.add(bonusShieldStats)),
+                    weapons.getBonusPower(weaponId)
+                );
         }
-        if (characterEquipmentIds(IERC721(address(shields)), characterId).length > 0) {
-            shieldId = characterEquipmentIds(IERC721(address(shields)), characterId)[0];
-            bonusShieldStats = _getShieldStats(characterId, shieldId).sub(1).mul(20).div(100);
-        }
-        int128 weaponMult = weapons.getPowerMultiplierForTrait(
-                weapons.getProperties(weaponId),
-                weapons.getStat1(weaponId),
-                weapons.getStat2(weaponId),
-                weapons.getStat3(weaponId),
-                characters.getTrait(characterId)
-            );
-        uint24 power = Common.getPlayerPowerBase100(
-                Common.getPowerAtLevel(characters.getLevel(characterId)),
-                (weaponMult.add(bonusShieldStats)),
-                weapons.getBonusPower(weaponId)
-            );
         return power;
     }
 
@@ -151,7 +148,7 @@ contract EquipmentManager is Initializable, ReentrancyGuard, AccessControlUpgrad
         require(address(characters) != address(nftAddress), 'CEC'); // can't equip character
         uint256 nftSlot = nftSlots[nftAddress];
         uint256 nftCount = charEquipments[characterId][nftSlot].length;
-        require(nftCount < maxSlots[nftSlot], 'MCR'); // max nft count reached
+        require(nftCount <= maxSlots[nftAddress], 'MCR'); // max nft count reached
         if (address(weapons) == address(nftAddress) || address(shields) == address(nftAddress)) {
             if (address(weapons) == address(nftAddress)) {
                 require(weapons.getNftVar(nftId, weapons.NFTVAR_BUSY()) == 0, 'WIB'); // weapon is busy
@@ -190,8 +187,7 @@ contract EquipmentManager is Initializable, ReentrancyGuard, AccessControlUpgrad
 
     function setSlotMaxCount(IERC721 nftAddress, uint256 value) external restricted {
         require(value > 0, 'VMZ'); // value must be more than zero
-        uint256 nftSlot = nftSlots[nftAddress];
-        maxSlots[nftSlot] = value;
+        maxSlots[nftAddress] = value;
     }
 
     function registerNFTAddress(IERC721 nftAddress) external restricted {

@@ -91,14 +91,28 @@ library Common {
         }
     }
 
-    function numArraySplice(uint256[] memory arr, uint256 index) internal pure returns(uint256[] memory) {
-        if (index >= arr.length) return arr;
-
-        for (uint i = index; i< arr.length-1; i++){
-            arr[i] = arr[i+1];
+    function indexOfValueInArray(uint256[] memory arr, uint256 value) internal pure returns(uint256) {
+        uint256 indexOfValue;
+        for (uint i = 0; i < arr.length; i++){
+            if (arr[i] == value) {
+                indexOfValue = i;
+            }
         }
-        delete arr[arr.length-1];
-        return arr;
+        return indexOfValue;
+    }
+
+    function numArraySplice(uint256[] memory arr, uint256 value) internal pure returns(uint256[] memory) {
+        if (!numArrayIncludes(arr, value)) return arr;
+        uint256 indexToDelete = indexOfValueInArray(arr, value);
+        uint[] memory arrayNew = new uint[](arr.length-1);
+        for (uint i = 0; i<arrayNew.length; i++){
+            if(i != indexToDelete && i<indexToDelete){
+                arrayNew[i] = arr[i];
+            } else {
+                arrayNew[i] = arr[i+1];
+            }
+        }
+        return arrayNew;
     }
 
     function numArrayIncludes(uint256[] memory arr, uint256 value) internal pure returns(bool) {
