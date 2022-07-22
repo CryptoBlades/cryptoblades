@@ -81,8 +81,8 @@ contract EquipmentManager is Initializable, ReentrancyGuard, AccessControlUpgrad
 
     function _registerNftAddress(IERC721 nftAddress) private {
         if (!allowedNFTs.contains(address(nftAddress))) {
-            allowedNFTs.add(address(nftAddress));
             nftSlots[nftAddress] = allowedNFTs.length();
+            allowedNFTs.add(address(nftAddress));
         }
     }
 
