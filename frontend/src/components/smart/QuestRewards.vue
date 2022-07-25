@@ -1,6 +1,6 @@
 <template>
   <div class="quest-reward-display gap-3">
-    <span class="reward-title">{{ $t('quests.reward') }}:</span>
+    <span class="reward-title">{{ $t('quests.reward') }}</span>
     <div class="d-flex align-items-center gap-2" :key="quest.id">
       <QuestComponentIcon :questItemType="quest.rewardType" :amount="quest.rewardAmount"
                           :rarity="quest.rewardRarity" :externalAddress="quest.rewardExternalAddress"/>
@@ -36,11 +36,17 @@ export default Vue.extend({
 .quest-reward-display {
   display: flex;
   flex-direction: column;
-  flex: 1;
 }
 
 .reward-title {
   font: normal normal normal 16px/18px Arial;
   color: #B4B0A7;
 }
+
+@media screen and (max-width: 576px) {
+  .quest-reward-display {
+    align-items: center;
+  }
+}
+
 </style>
