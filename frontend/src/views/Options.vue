@@ -265,10 +265,12 @@ export default Vue.extend({
     ) as StoreMappedActions),
     ...mapMutations([
       'setNetworkId',
-      'updatePayoutCurrencyId',
       'updateCurrentChainSupportsPvP',
       'updateCurrentChainSupportsQuests',
       'setWeb3',
+    ]),
+    ...mapMutations('treasury', [
+      'updatePayoutCurrencyId',
     ]),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
