@@ -1,10 +1,10 @@
 <template>
   <div class="quest-requirement-display gap-3">
     <span class="quest-title">{{ $t('quests.quest') }}</span>
-    <div class="d-flex align-items-center gap-3" :key="quest.id">
+    <div class="d-flex align-items-center gap-3 flex-wrap justify-content-center" :key="quest.id">
       <QuestComponentIcon :questItemType="quest.requirementType" :amount="quest.requirementAmount"
                           :rarity="quest.requirementRarity" :externalAddress="quest.requirementExternalAddress"/>
-      <div class="d-flex flex-column"><span class="requirement-text">{{
+      <div class="d-flex flex-column requirement-text-container"><span class="requirement-text">{{
           quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.submit')
         }} {{ quest.requirementAmount }}<span
           v-if="questItemTypeSupportsTimesValue(quest.requirementType) && !isCurrency">x</span> <span
@@ -156,10 +156,28 @@ export default Vue.extend({
 .requirement-text {
   font-size: 18px;
   color: #DABE75;
+  white-space: nowrap;
 }
 
 .quest-title {
   font: normal normal normal 16px/18px Arial;
   color: #B4B0A7;
 }
+
+@media screen and (max-width: 576px) {
+  .requirement-text {
+    white-space: normal;
+  }
+  .quest-requirement-display {
+    align-items: center;
+  }
+  .requirement-text-container{
+    align-items: center;
+  }
+  .rarity-label {
+    margin-top: 5px;
+    width: 100%;
+  }
+}
+
 </style>

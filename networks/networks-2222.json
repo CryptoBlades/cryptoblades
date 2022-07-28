@@ -2482,7 +2482,7 @@
     },
     "links": {},
     "address": "0x912252d3f7DaD807d122F7DBAd3D8245fc364C3d",
-    "transactionHash": "0x5c2684f3590abac27fcf0229fd7b61343970b698a35f8fceb587625bbceec25c"
+    "transactionHash": "0xeed348bc4b6aab023af2b5deebf33ee8f1b62798e427289ef1f29675ea020e91"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
@@ -5050,7 +5050,7 @@
     "events": {},
     "links": {},
     "address": "0x26B4DCb50e07323AC875c071b4F0a1E77b259d29",
-    "transactionHash": "0xbfdf72eadc902424a38f45acfc6c7cd1eb4778d18bd45c0fb884bf690f946492"
+    "transactionHash": "0x4a836fee60e880f495f1c6c46174b93adb5873e7c41702128e8bebcf5969a35f"
   },
   "build/contracts/WaxBridge.json": {
     "events": {

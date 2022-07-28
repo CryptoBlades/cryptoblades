@@ -3016,7 +3016,7 @@ export default new Vuex.Store<IState>({
           targetString,
           fightMultiplier
         )
-        .send({ from: state.defaultAccount, gas: '300000', value: +offsetCost });
+        .send({ from: state.defaultAccount, gasPrice: getGasPrice(), value: +offsetCost*fightMultiplier });
 
       await dispatch('fetchTargets', { characterId, weaponId });
 
