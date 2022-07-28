@@ -5,6 +5,8 @@ import hellborn4 from './assets/raid-bosses/CB_Hellborn Overlord.gif';
 import hellborn5 from './assets/raid-bosses/CB_Hellborn Shaman.gif';
 import hellborn6 from './assets/DragonFlyIdle_512.gif';
 
+import customMonster1 from './assets/raid-bosses/custom/monster1.png';
+
 // import halloween1 from './assets/raid-bosses/halloween/CB_Hellborn M13.gif';
 // import halloween2 from './assets/raid-bosses/halloween/CB_Hellborn Ste1n.gif';
 // import halloween3 from './assets/raid-bosses/halloween/CB_Hellborn Moneth.gif';
@@ -23,6 +25,7 @@ import hellborn6 from './assets/DragonFlyIdle_512.gif';
 
 const allImages = [
   hellborn1, hellborn2, hellborn3, hellborn4, hellborn5, hellborn6,
+  customMonster1
   // halloween1, halloween2, halloween3, halloween4, halloween5,
   // christmas1, christmas2, christmas3, christmas4, christmas5,
   // aprilFools3, aprilFools1, aprilFools2,

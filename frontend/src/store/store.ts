@@ -2326,6 +2326,16 @@ export default new Vuex.Store<IState>({
       });
     },
 
+    async setHourlyIncome({state}, {hourlyIncome}) {
+      const {CryptoBlades} = state.contracts();
+      if(!state.defaultAccount || !CryptoBlades) return;
+
+      const VAR_HOURLY_INCOME = await CryptoBlades.methods.VAR_HOURLY_INCOME().call(defaultCallOptions(state));
+
+      return await CryptoBlades.methods.setVar(VAR_HOURLY_INCOME, Web3.utils.toWei(hourlyIncome.toString(), 'ether').toString())
+        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
+    },
+
     async getRaidXpReward({state}) {
       const {Raid1} = state.contracts();
       if (!Raid1) return;
@@ -3006,7 +3016,7 @@ export default new Vuex.Store<IState>({
           targetString,
           fightMultiplier
         )
-        .send({ from: state.defaultAccount, gas: '300000', value: +offsetCost });
+        .send({ from: state.defaultAccount, gasPrice: getGasPrice(), value: +offsetCost*fightMultiplier });
 
       await dispatch('fetchTargets', { characterId, weaponId });
 

@@ -1025,6 +1025,7 @@ a.character-tab:focus {
   margin: auto;
   text-align: center;
   overflow: auto auto;
+  background-color: #000E29;
 }
 
 .starter-panel-heading {
@@ -1093,7 +1094,7 @@ a.character-tab:focus {
 
 .outcome {
   /* margin: 20px auto; */
-  height: 90vh;
+  height: 93vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1104,6 +1105,12 @@ a.character-tab:focus {
 @media all and (max-width: 600px) {
   .can-show-app{
     overflow-y: hidden ;
+  }
+}
+
+@media all and (max-width: 576px) {
+  .outcome {
+    height: 80vh;
   }
 }
 
