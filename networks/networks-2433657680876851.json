@@ -5070,7 +5070,7 @@
     },
     "links": {},
     "address": "0x4Ee8FBd60247a1b5A77e653935A13Ebfc9b00Ec4",
-    "transactionHash": "0x7200c0dec20dc008c2ede8c7f4f5d3617d0ec860646f715574aa68e64c68999a"
+    "transactionHash": "0x75c1ffdd4cba4509e98d0b3173169714a542fa01e93ae996c8a518b3c7dace8a"
   },
   "build/contracts/Treasury.json": {
     "events": {},
