@@ -298,7 +298,7 @@ export default {
     ...mapActions(['fetchTargets', 'doEncounterPayNative',
       'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
       'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight',
-      'getCurrentSkillPrice', 'getNativeTokenPriceInUsd', 'getCombatTokenChargePercent']),
+      'getCurrentSkillPrice', 'getNativeTokenPriceInUsd', 'getCombatTokenChargePercent', 'fetchCharacterStamina']),
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {

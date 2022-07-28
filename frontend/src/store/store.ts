@@ -2979,7 +2979,7 @@ export default new Vuex.Store<IState>({
 
     async fetchMintWeaponFee({state}) {
       const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades || !state.defaultAccount) return;
+      if(!CryptoBlades || !state.defaultAccount) return 0;
 
       return CryptoBlades.methods.getMintWeaponFee().call(defaultCallOptions(state));
     },
