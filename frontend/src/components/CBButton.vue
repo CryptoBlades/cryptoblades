@@ -65,11 +65,13 @@ export default Vue.extend({
 .custom-title-font{
   font-family: Oswald;
   color: rgba(255, 255, 255);
+  white-space: nowrap;
 }
 .custom-subtitle-font{
   color: #e9c97a;
   font-family: "Roboto", sans-serif;
   font-weight: normal;
+  white-space: nowrap;
 }
 .button-new {
   display: flex;

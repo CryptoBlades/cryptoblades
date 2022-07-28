@@ -203,6 +203,8 @@ export default Vue.extend({
         'fr',
         'pl',
         'de',
+        'id',
+        'pt'
       ]
     } as Data;
   },
@@ -249,19 +251,26 @@ export default Vue.extend({
   },
 
   methods: {
+    ...(mapActions(
+      'treasury',
+      [
+        'fetchPartnerProjects',
+      ]
+    ) as StoreMappedActions),
     ...(mapActions([
       'claimTokenRewards',
       'setUpContracts',
       'initialize',
-      'configureMetaMask',
-      'fetchPartnerProjects',
-    ]) as StoreMappedActions),
+      'configureMetaMask']
+    ) as StoreMappedActions),
     ...mapMutations([
       'setNetworkId',
-      'updatePayoutCurrencyId',
       'updateCurrentChainSupportsPvP',
       'updateCurrentChainSupportsQuests',
       'setWeb3',
+    ]),
+    ...mapMutations('treasury', [
+      'updatePayoutCurrencyId',
     ]),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
