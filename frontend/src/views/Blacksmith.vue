@@ -798,7 +798,7 @@ export default Vue.extend({
   },
 
   async mounted(){
-    (this as any).$router.push({ path: 'blacksmith', query: { tab: 'weapon' }});
+    (this as any).$router.push({ path: 'blacksmith', query: { tab: 'weapon' }}).catch(()=>{});
     Events.$on('forge-weapon', (id: number) =>{
       if(id === 0){
         this.onClickForge(id);
@@ -816,6 +816,8 @@ export default Vue.extend({
     Events.$on('create-dust', () =>{
       this.showMassDustConfirmation();
     });
+
+    this.updateForgeData();
   },
 
   methods: {
@@ -1125,6 +1127,7 @@ export default Vue.extend({
       }
     },
     async updateForgeData(){
+      if(!this.defaultAccount) return;
       const forgeCost = await this.fetchMintWeaponFee();
       const skillForgeCost = await this.contracts.CryptoBlades!.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
       this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
