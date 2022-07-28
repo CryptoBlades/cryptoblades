@@ -366,7 +366,7 @@ export default Vue.extend({
       'claimXpRewards','fetchRemainingTokenClaimAmountPreTax', 'claimTokenRewards']) as StoreMappedActions),
     ...(mapActions('treasury', ['fetchPartnerProjects',
       'getPartnerProjectMultiplier', 'claimPartnerToken']) as StoreMappedTreasuryActions),
-    ...(mapMutations(['updatePayoutCurrencyId']) as StoreMappedMutations),
+    ...(mapMutations('treasury', ['updatePayoutCurrencyId']) as StoreMappedMutations),
     async onClaimTokens() {
       if(this.payoutCurrencyId !== '-1') {
         const currentMultiplier = await this.getPartnerProjectMultiplier(+this.payoutCurrencyId);
