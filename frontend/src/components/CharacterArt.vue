@@ -18,8 +18,8 @@
 
     <div class="char-details">
       <h4>{{ getCleanCharacterName(character.id).toUpperCase() }}</h4>
-      <p>
-        {{$t(`quests.reputationTier.${ReputationTier[getReputationLevel(reputation)] || ''}`)}}
+      <p v-if="reputationLevelRequirements">
+        {{$t(`quests.reputationTier.${ReputationTier[getReputationLevel(reputation)]}`)}}
       </p>
       <div class="sep-line"></div>
       <div class="stats-info">

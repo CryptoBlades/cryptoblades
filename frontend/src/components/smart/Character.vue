@@ -42,10 +42,10 @@
           <span class="alt-text cell-value">{{ totalCharacterPower }}</span>
         </div>
         <div class="w-100 d-block d-md-none"></div>
-        <div class="col cell">
+        <div class="col cell" v-if="reputationLevelRequirements">
           <div class="table-bg"></div>
           <span class="main-font cell-title text-white">{{$t(`Character.reputation`)}}</span>
-          <span class="cell-value">{{$t(`quests.reputationTier.${ReputationTier[getReputationLevel(reputation)] || ''}`)}}</span>
+          <span class="cell-value">{{$t(`quests.reputationTier.${ReputationTier[getReputationLevel(reputation)]}`)}}</span>
         </div>
         <div class="w-100 d-block d-md-none"></div>
         <div class="col cell">
