@@ -247,8 +247,8 @@ import { isValidWeb3Address } from '@/utils/common';
 
 
 interface Skin {
-  id: string;
-  name: string;
+  id: number;
+  name?: string;
   amount: number;
 }
 
@@ -259,7 +259,6 @@ interface Data {
   soulBalance: number;
   powerAmount: number;
   haveRename: number;
-  characterCosmeticsNames: string[];
   targetTrait: string;
   haveChangeTraitFire: number;
   haveChangeTraitEarth: number;
@@ -314,19 +313,8 @@ export default Vue.extend({
       haveChangeTraitWater: 0,
       haveChangeTraitLightning: 0,
       quest: null,
-      characterCosmeticsNames: [
-        'Character Grayscale','Character Contrast',
-        'Character Sepia','Character Invert',
-        'Character Blur','Character Fire Glow',
-        'Character Earth Glow','Character Lightning Glow',
-        'Character Water Glow','Character Rainbow Glow',
-        'Character Dark Glow','Ghost Character',
-        'Character Police Lights','Character Neon Border',
-        'Character Diamond Border','Character Gold Border',
-        'Character Silver Border','Character Bronze Border',
-      ],
       haveCharacterCosmetics: [{
-        id: '0',
+        id: 0,
         name: 'Default',
         amount: 1
       }],
@@ -401,12 +389,11 @@ export default Vue.extend({
       if (+currentCosmetic > 0) {
         availableSkins.push({
           id: currentCosmetic,
-          name: this.characterCosmeticsNames[+currentCosmetic],
           amount: 1
         });
       }
 
-      for(let i = 0; i < 18; i++) {
+      for(let i = 0; i < 19; i++) {
         if(+this.haveCharacterCosmetics[i]?.amount > 0 && !availableSkins.find(item=> +item.id === i)) {
           availableSkins.push(this.haveCharacterCosmetics[i]);
         }
@@ -518,11 +505,10 @@ export default Vue.extend({
       this.haveChangeTraitLightning = await this.fetchTotalCharacterLightningTraitChanges();
     },
     async loadCosmeticsCount() {
-      for(let i = 1; i < 21; i++) {
+      for(let i = 1; i < 19; i++) {
         const amount = await this.fetchOwnedCharacterCosmetics({cosmetic: i.toString()});
         this.haveCharacterCosmetics.push({
-          id: i.toString(),
-          name: this.characterCosmeticsNames[i-1],
+          id: i,
           amount: +amount
         });
       }

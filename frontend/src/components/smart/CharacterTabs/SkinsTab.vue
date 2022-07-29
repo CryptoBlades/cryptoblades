@@ -4,24 +4,24 @@
         <div
           class="col col-md-3 image-width p-1 text-white text-center mb-3"
           role="button"
-          v-for="(cosmetic, index) in availableSkins" :key="index"
-          @click="handleSkin(cosmetic.id)"
+          v-for="skin in availableSkins" :key="skin.id"
+          @click="handleSkin(skin.id)"
         >
           <div
-          :class="['imgs px-3 pt-5 pb-3 text-center', characterCosmetics[currentCharacterId] == cosmetic ? 'active' : '' ]"
+          :class="['imgs px-3 pt-5 pb-3 text-center', characterCosmetics[currentCharacterId] === skin.id ? 'active' : '' ]"
           :style="{
-            border: characterCosmetics[currentCharacterId] === cosmetic.id ? '1px solid #1168D0!important' : '1px solid #404857'
+            border: characterCosmetics[currentCharacterId] === skin.id ? '1px solid #1168D0!important' : '1px solid #404857'
           }"
           >
-              <template v-if="characterCosmetics[currentCharacterId] === cosmetic.id">
+              <template v-if="characterCosmetics[currentCharacterId] === skin.id">
                 <span>{{$t(`Character.equippedLabel`)}}</span>
               </template>
-              <div v-bind:class="['character-cosmetic-applied-' + cosmetic.id, 'character-animation-applied-' + cosmetic.id]">
+              <div v-bind:class="['character-cosmetic-applied-' + skin.id, 'character-animation-applied-' + skin.id]">
                   <div class="animation" />
                   <img class="placeholder" :src="getCharacterArt(characters[currentCharacterId])" />
               </div>
           </div>
-          <h5 class="m-0 mt-2 cosmetic-font">{{cosmetic.name}}</h5>
+          <h5 class="m-0 mt-2 cosmetic-font">{{ skin.name || $t(`cosmetics.characterCosmetic.${CharacterCosmetic[skin.id]}`)}}</h5>
           <span class="main-font text-muted">{{$t(`Character.owned`)}}</span>
         </div>
       </div>
@@ -33,6 +33,7 @@ import Vue from 'vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
 
 import { getCharacterArt } from '@/character-arts-placeholder';
+import {CharacterCosmetic} from '@/enums/CharacterCosmetic';
 
 
 interface Data {
@@ -51,10 +52,11 @@ export default Vue.extend({
       default: ()=> []
     }
   },
-  data(): Data{
+  data(){
     return {
-      powerAmount: 0
-    };
+      powerAmount: 0,
+      CharacterCosmetic,
+    } as Data;
   },
   computed:{
     ...mapState(['characterCosmetics','currentCharacterId', 'characters']),

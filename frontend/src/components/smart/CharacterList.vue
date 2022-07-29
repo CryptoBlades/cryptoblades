@@ -148,7 +148,9 @@
         {{$t('characterList.pickSkin')}}
       </span>
       <select class="form-control" v-model="targetSkin">
-        <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+        <option v-for="skin in availableSkins" :value="skin.id" :key="skin.id">
+          {{ skin.name || $t(`cosmetics.characterCosmetic.${CharacterCosmetic[skin.id]}`) }}
+        </option>
       </select>
       <div class="footer-close" @click="$refs['character-change-skin-modal'].hide()">
         <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
@@ -159,13 +161,14 @@
 </template>
 
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
-import { getCharacterArt } from '../../character-arts-placeholder';
+import {mapActions, mapGetters, mapState} from 'vuex';
+import {getCharacterArt} from '@/character-arts-placeholder';
 import CharacterArt from '../CharacterArt.vue';
 import NftOptionsDropdown from '../NftOptionsDropdown.vue';
-import { getCleanName, isProfaneIsh } from '../../rename-censor';
+import {getCleanName, isProfaneIsh} from '@/rename-censor';
 import Events from '@/events';
 import i18n from '@/i18n';
+import {CharacterCosmetic} from '@/enums/CharacterCosmetic';
 
 const sorts = [
   { name: i18n.t('characterList.sorts.any'), dir: '' },
@@ -226,21 +229,11 @@ export default {
       options: [],
       haveCharacterCosmetic1: 0,
       haveCharacterCosmetic2: 0,
-      haveCharacterCosmetics: [0],
+      haveCharacterCosmetics: [],
       targetSkin: '',
       showCosmetics: true,
       allSelected: false,
-      characterCosmeticsNames: [
-        'Character Grayscale','Character Contrast',
-        'Character Sepia','Character Invert',
-        'Character Blur','Character Fire Glow',
-        'Character Earth Glow','Character Lightning Glow',
-        'Character Water Glow','Character Rainbow Glow',
-        'Character Dark Glow','Ghost Character',
-        'Character Police Lights','Character Neon Border',
-        'Character Diamond Border','Character Gold Border',
-        'Character Silver Border','Character Bronze Border',
-      ]
+      CharacterCosmetic,
     };
   },
 
@@ -321,11 +314,17 @@ export default {
     availableSkins() {
       const availableSkins = [];
 
-      availableSkins.push('No Skin');
+      availableSkins.push({
+        id: 0,
+        name: 'No skin',
+        amount: 1
+      });
 
-      for(let i = 0; i < 18; i++) {
+      for(let i = 0; i < 19; i++) {
         if(+this.haveCharacterCosmetics[i] > 0) {
-          availableSkins.push(this.characterCosmeticsNames[i]);
+          availableSkins.push({
+            id: i + 1,
+          });
         }
       }
 
@@ -531,13 +530,11 @@ export default {
     },
     async changeCharacterSkinCall() {
       if(!this.currentCharacterId) return;
-      // +1 as cosmetics have 1 (not 0) based ids
-      const selectedSkinId = this.characterCosmeticsNames.findIndex(x => x === this.targetSkin) + 1;
-      if(selectedSkinId === 0) {
+      if(+this.targetSkin === 0) {
         await this.removeCharacterCosmetic({ id: +this.currentCharacterId });
         await this.loadCosmeticsCount();
       } else {
-        await this.changeCharacterCosmetic({ id: +this.currentCharacterId, cosmetic: selectedSkinId });
+        await this.changeCharacterCosmetic({ id: +this.currentCharacterId, cosmetic: this.targetSkin });
         await this.loadCosmeticsCount();
       }
 
