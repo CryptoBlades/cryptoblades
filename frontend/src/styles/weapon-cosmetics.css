@@ -66,24 +66,36 @@
 
 .weapon-animation-applied-14{
   animation: nebula3 1000ms ease-in infinite;
+  margin: -6px -26px;
+  padding: 0;
 }
 
 .weapon-animation-applied-15{
   animation: nebula4 1000ms ease-in infinite;
+  margin: -6px -26px;
+  padding: 0;
 }
 
 .weapon-animation-applied-16{
-  border: 2.5px solid #b9f2ff;
+  border: 3.5px solid #b9f2ff;
+  margin: -6px -26px;
+  padding: 0;
 }
 
 .weapon-animation-applied-17{
-  border: 2.5px solid gold;
+  border: 3.5px solid gold;
+  margin: -6px -26px;
+  padding: 0;
 }
 
 .weapon-animation-applied-18{
-  border: 2.5px solid silver;
+  border: 3.5px solid silver;
+  margin: -6px -26px;
+  padding: 0;
 }
 
 .weapon-animation-applied-19{
-  border: 2.5px solid #CD7F32;
+  border: 3.5px solid #CD7F32;
+  margin: -6px -26px;
+  padding: 0;
 }
