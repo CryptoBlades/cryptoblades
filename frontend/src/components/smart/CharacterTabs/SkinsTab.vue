@@ -1,14 +1,14 @@
 <template>
     <b-tab :title="$t('Character.skins')" title-item-class="character-wrapper" title-link-class="character-tab" @click="$emit('loadCosmeticsCount')">
-      <div class="d-flex flex-wrap">
+      <div class="d-flex flex-wrap justify-content-center">
         <div
-          class="col col-md-3 image-width p-1 text-white text-center mb-3"
+          class="image-container p-1 text-white text-center mb-3"
           role="button"
           v-for="skin in availableSkins" :key="skin.id"
           @click="handleSkin(skin.id)"
         >
           <div
-          :class="['imgs px-3 pt-5 pb-3 text-center', characterCosmetics[currentCharacterId] === skin.id ? 'active' : '' ]"
+          :class="['imgs', characterCosmetics[currentCharacterId] === skin.id ? 'active' : '' ]"
           :style="{
             border: characterCosmetics[currentCharacterId] === skin.id ? '1px solid #1168D0!important' : '1px solid #404857'
           }"
@@ -87,15 +87,20 @@ export default Vue.extend({
   margin-top: 5px;
 }
 
-.image-width {
-  max-width: 250px;
+.image-container {
+  width: 250px;
+  // flex: 1;
 }
 
 .imgs{
   background-color: #000E1D;
   border-radius: 5px;
-  height: 245px;
+  height: 250px;
+  width: 100%;
   position: relative;
+  display:flex;
+  justify-content: center;
+  align-items: center;
   span{
     position: absolute;
     top: 10px;
@@ -111,11 +116,10 @@ export default Vue.extend({
     height: 100%;
     position: relative;
     img {
-      width: 100%;
-      height: 100%;
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       margin: 0;
       object-fit: contain;
     }
@@ -128,7 +132,6 @@ export default Vue.extend({
   line-height: 26px;
   text-transform: uppercase;
 }
-
 
 
 </style>
