@@ -430,14 +430,13 @@ export default {
           expectedPayoutWei.multipliedBy(tokenChargePercentage).div(100).multipliedBy(skillPriceUsd)
         ).div(nativeTokenPriceUsd).integerValue(BigNumber.ROUND_DOWN);
 
-        const results = await this.doEncounterPayNative({
+        this.fightResults = await this.doEncounterPayNative({
           characterId: this.currentCharacterId,
           weaponId: this.selectedWeaponId,
           targetString: targetIndex,
           fightMultiplier: this.fightMultiplier,
           offsetCost: offsetToPayInNativeToken
         });
-        this.fightResults = results;
 
         await this.fetchFightRewardSkill();
         await this.fetchFightRewardXp();

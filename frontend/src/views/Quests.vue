@@ -55,9 +55,11 @@
             :toolTip="!canClaimWeeklyReward ? $t('quests.cannotClaimWeeklyTooltip') : ''" :title="$t('quests.claimWeeklyReward')"></cb-button>
         </div>
       </div>
-      <div v-for="character in characters" :key="character.id" class="d-flex w-100">
-        <QuestRow :characterId="character.id" :reputationLevelRequirements="reputationLevelRequirements"
-                  @refresh-quest-data="onRefreshQuestData"/>
+      <div class="quest-row-wrapper">
+        <div v-for="character in characters" :key="character.id" class="d-flex w-100">
+          <QuestRow :characterId="character.id" :reputationLevelRequirements="reputationLevelRequirements"
+                    @refresh-quest-data="onRefreshQuestData"/>
+          </div>
       </div>
       <b-modal v-model="showWeeklyClaimedModal" ok-only class="centered-modal" :title="$t('quests.weeklyReward')">
         <div v-if="isLoading">
@@ -457,6 +459,16 @@ export default Vue.extend({
   transform: rotate(15deg);
   font-weight: bold;
   text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+}
+
+.quest-row-wrapper{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.quest-row-wrapper > div{
+  margin: 20px 0;
 }
 
 @media (max-width: 576px) {

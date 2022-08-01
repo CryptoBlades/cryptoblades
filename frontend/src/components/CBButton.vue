@@ -3,6 +3,7 @@
     class="button-new"
     v-tooltip="toolTip"
     @click="!isDisabled ? $emit('clickEvent') : ''"
+    :class="isDisabled ? 'disabled' : ''"
     >
     <span v-if="!isLoading">
       <span class="custom-title-font" :class="customTitleClass" v-html="title"></span>
