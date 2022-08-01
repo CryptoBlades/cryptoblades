@@ -619,7 +619,7 @@ export default Vue.extend({
       return fromWeiEther(wei);
     },
 
-    async joinRaidMethod(): Promise<void> {
+    async joinRaidMethod() {
       const canUserAfford = await this.canUserAfford({payingAmount: toBN(this.joinCost)});
       if(!canUserAfford) {
         (this as any).$bvModal.show('warningModal');
@@ -675,19 +675,19 @@ export default Vue.extend({
       await this.getParticipatingWeapons();
     },
 
-    async getParticipatingCharacters(): Promise<void> {
+    async getParticipatingCharacters() {
       // gets the list of this player's raid locked characters
       // TODO store these?
       this.participatingCharacters = await this.fetchRaidingCharacters();
     },
 
-    async getParticipatingWeapons(): Promise<void> {
+    async getParticipatingWeapons() {
       // gets the list of this player's raid locked weapons
       // TODO store these?
       this.participatingWeapons = await this.fetchRaidingWeapons();
     },
 
-    async isCharacterAlreadyRaiding(characterID: string): Promise<boolean> {
+    async isCharacterAlreadyRaiding(characterID: string){
       return await this.fetchIsCharacterRaiding({
         characterID
       });
@@ -699,18 +699,18 @@ export default Vue.extend({
       });
     },
 
-    async isRaidStarted(): Promise<boolean> {
+    async isRaidStarted() {
       return await this.fetchIsRaidStarted();
     },
 
-    async haveEnoughEnergy(characterID: string, weaponID: string): Promise<boolean>{
+    async haveEnoughEnergy(characterID: string, weaponID: string) {
       return await this.fetchHaveEnoughEnergy({
         characterID,
         weaponID
       });
     },
 
-    async getRewardIndexes(): Promise<void> {
+    async getRewardIndexes() {
       if(!this.raidIndex)
         return;
       let startIndex = +this.raidIndex-21; // one week worth
@@ -724,7 +724,7 @@ export default Vue.extend({
       });
     },
 
-    async promptRewardClaim(): void {
+    async promptRewardClaim() {
       // should offer a popup here to pick which index to claim
       // if only one index, then claim instantly
       if (this.rewardIndexes !== null && this.rewardIndexes.length > 0) {
@@ -743,7 +743,7 @@ export default Vue.extend({
       }
     },
 
-    async claimRewardIndex(rewardIndex: string): Promise<void> {
+    async claimRewardIndex(rewardIndex: string) {
       this.bonuxXpCharacterNames = [];
       this.bonuxXpAmounts = [];
       const result = await this.claimRaidRewards({
@@ -807,7 +807,7 @@ export default Vue.extend({
       return Array(+(zero > 0 && zero)).join('0') + num;
     },
 
-    processRaidData(): void {
+    processRaidData() {
       const raidData = this.getRaidState();
       this.raidIndex = raidData.index;
       this.bossName = this.getBossName();
