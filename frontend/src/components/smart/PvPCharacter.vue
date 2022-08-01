@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { getCharacterArtByTrait } from '../../character-arts-placeholder';
+import { getCharacterArtByTrait } from '@/character-arts-placeholder';
 export default {
   props: {
     characterTrait: {
@@ -32,7 +32,7 @@ export default {
   background-size: contain;
   background-position-y: bottom;
   background-repeat: no-repeat;
-  padding-bottom: 3rem;
+  padding-bottom: 1rem;
 }
 .characterImg {
   width: 100%;
