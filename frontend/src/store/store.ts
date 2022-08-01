@@ -2984,7 +2984,7 @@ export default new Vuex.Store<IState>({
           targetString,
           fightMultiplier
         )
-        .send({ from: state.defaultAccount, gasPrice: getGasPrice(), value: +offsetCost*fightMultiplier });
+        .send({ from: state.defaultAccount, gasPrice: getGasPrice(), value: (+offsetCost ? +offsetCost : 1)*fightMultiplier });
 
       let playerRoll = '';
       let enemyRoll = '';

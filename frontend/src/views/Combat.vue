@@ -422,7 +422,7 @@ export default {
         const targetPower = targetToFight.power;
         const expectedPayoutWei = new BigNumber(await this.fetchExpectedPayoutForMonsterPower({ power: targetPower, isCalculator: true }));
 
-        const nativeTokenPriceUsd = new BigNumber (await this.getNativeTokenPriceInUsd());
+        const nativeTokenPriceUsd = new BigNumber(await this.getNativeTokenPriceInUsd());
         const skillPriceUsd = new BigNumber(await this.getCurrentSkillPrice());
         const tokenChargePercentage = (await this.getCombatTokenChargePercent());
 

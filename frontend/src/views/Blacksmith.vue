@@ -128,7 +128,7 @@
 
     <Transition name="slide-fade">
       <div class="forging-modal" v-if="showModal" v-on:click.self="closeModal()">
-        <div class="forge-loading" v-if="spin && modalType == 'forge'">
+        <div class="forge-loading" v-if="spin && modalType === 'forge'">
           <div class="row new-weapons">
             <h3>{{$t('blacksmith.forging')}}</h3>
           </div>
