@@ -182,10 +182,10 @@
         </div>
       </b-modal>
 
-      <b-modal size="lg" class="centered-modal" centered hide-footer hide-header ref="new-forge-weapon">
+      <b-modal size="xl" class="centered-modal" centered hide-footer hide-header ref="new-forge-weapon">
         <div class="row new-weapons">
-          <img src="../assets/header-line.png" alt="">
-          <h3>{{$t('blacksmith.dwarvesForge')}}</h3>
+          <img src="../assets/header-line.png" alt="" class="max-width-100">
+          <h3 class="text-center">{{$t('blacksmith.dwarvesForge')}}</h3>
         </div>
         <div class="weapon-list">
           <weapon-grid :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true" :noPagination="true"/>
@@ -1384,6 +1384,10 @@ export default Vue.extend({
 .new-weapons {
   display: flex;
   justify-content: center;
+}
+
+.max-width-100 {
+  max-width: 100%;
 }
 
 .footer-close-forge {
