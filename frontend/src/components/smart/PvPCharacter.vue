@@ -32,7 +32,7 @@ export default {
   background-size: contain;
   background-position-y: bottom;
   background-repeat: no-repeat;
-  padding-bottom: 1rem;
+  padding-bottom: 10%;
 }
 .characterImg {
   width: 100%;
