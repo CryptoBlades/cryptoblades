@@ -182,15 +182,19 @@
                   <!-- :class="!isRaidStarted || !this.selectedWeaponId ? 'opacity-0': 'opacity-1' -->
                   <div class="col-lg-12 join-raid">
                     <button class="claim-btn"
-                      :disabled="noRewards()"
+                      :disabled="isLoading || isClaimingRewards || noRewards()"
                       @click="promptRewardClaim()">
                       <span v-tooltip="noRewards() ? $t('raid.noAvailableRewards') :
-                      $t('raid.rewardsFromPrevious')">{{$t('raid.claimRewards').toUpperCase()}}</span>
+                      $t('raid.rewardsFromPrevious')">
+                        {{isClaimingRewards ? $t('raid.claimingRewards').toUpperCase() : $t('raid.claimRewards').toUpperCase()}}
+                      </span>
                     </button>
                     <button v-if="!isMobile()" class="btn-raid"
                     @click="joinRaidMethod()"
-                    :disabled="raidStart()">
-                     <span v-tooltip="generateTooltip()">{{$t('raid.joinRaid')}}</span>
+                    :disabled="isLoading || isJoiningRaid || raidStart()">
+                     <span v-tooltip="generateTooltip()">
+                       {{isJoiningRaid ? $t('raid.joiningRaid').toUpperCase() : $t('raid.joinRaid')}}
+                     </span>
                     </button>
                      <button v-else class="btn-raid"  v-tooltip="$t('raid.joiningCostStamina', {formatStaminaHours})" @click="openEquipItems()">
                       {{$t('raid.signup')}}
@@ -386,7 +390,7 @@
      </div>
       <div class="raid-picker" v-if="!isLoading">
         <div class="raid-rewards">
-          <div v-for="id in rewardIndexes" :value="id" :key="id" @click="closeRewardPicker(id)">
+          <div v-for="id in rewardIndexes" :key="id" @click="closeRewardPicker(id)">
             <p class="m-0">{{$t('raid.raid')}} # {{id}}</p>
             <img src="../assets/chest.png" alt="Chest Icon">
             <button class="btn-rewards">{{$t('ClaimRewardsBar.claim')}}</button>
@@ -494,7 +498,9 @@ export default Vue.extend({
       traits:'',
       notifyError: '',
       isLoading: false,
-      raidStarted: false
+      raidStarted: false,
+      isClaimingRewards: false,
+      isJoiningRaid: false
     };
   },
 
@@ -569,11 +575,16 @@ export default Vue.extend({
       }
     },
 
-    closeRewardPicker(id: any){
-      this.isLoading = true;
-      this.rewardsRaidId = id;
-      this.claimRewardIndex(id);
-      this.isLoading = false;
+    async closeRewardPicker(id: any) {
+      try {
+        this.isLoading = true;
+        this.isClaimingRewards = true;
+        this.rewardsRaidId = id;
+        await this.claimRewardIndex(id);
+      } finally {
+        this.isLoading = false;
+        this.isClaimingRewards = false;
+      }
       (this as any).$bvModal.hide('rewardsRaidPicker');
     },
 
@@ -648,11 +659,16 @@ export default Vue.extend({
       }
 
       try {
+        this.isJoiningRaid = true;
+        this.isLoading = true;
         await this.joinRaid({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId});
         this.selectedWeaponId = '';
       } catch (e) {
         console.error(e);
         (this as any).$dialog.notify.error(i18n.t('raid.errors.whoops'));
+      } finally {
+        this.isJoiningRaid = false;
+        this.isLoading = false;
       }
 
       await this.getParticipatingCharacters();
@@ -708,14 +724,20 @@ export default Vue.extend({
       });
     },
 
-    promptRewardClaim(): void {
+    async promptRewardClaim(): void {
       // should offer a popup here to pick which index to claim
       // if only one index, then claim instantly
-      if(this.rewardIndexes !== null && this.rewardIndexes.length > 0) {
-        if(this.rewardIndexes.length === 1) {
-          this.claimRewardIndex(this.rewardIndexes[0]);
-        }
-        else {
+      if (this.rewardIndexes !== null && this.rewardIndexes.length > 0) {
+        if (this.rewardIndexes.length === 1) {
+          try {
+            this.isClaimingRewards = true;
+            this.isLoading = true;
+            await this.claimRewardIndex(this.rewardIndexes[0]);
+          } finally {
+            this.isClaimingRewards = false;
+            this.isLoading = false;
+          }
+        } else {
           (this as any).$bvModal.show('rewardsRaidPicker');
         }
       }
