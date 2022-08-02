@@ -330,7 +330,10 @@ export default Vue.extend({
   border: #EDCD90 1px solid !important;
   color: #FFF !important
 }
-.custom-action-btn:hover{
+.custom-action-btn:disabled {
+  border-color: #FFF !important;
+}
+.custom-action-btn:not([disabled]):hover{
   border-color: #FFF !important;
 }
 </style>

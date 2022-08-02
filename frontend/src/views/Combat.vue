@@ -422,7 +422,7 @@ export default {
         const targetPower = targetToFight.power;
         const expectedPayoutWei = new BigNumber(await this.fetchExpectedPayoutForMonsterPower({ power: targetPower, isCalculator: true }));
 
-        const nativeTokenPriceUsd = new BigNumber (await this.getNativeTokenPriceInUsd());
+        const nativeTokenPriceUsd = new BigNumber(await this.getNativeTokenPriceInUsd());
         const skillPriceUsd = new BigNumber(await this.getCurrentSkillPrice());
         const tokenChargePercentage = (await this.getCombatTokenChargePercent());
 
@@ -430,14 +430,13 @@ export default {
           expectedPayoutWei.multipliedBy(tokenChargePercentage).div(100).multipliedBy(skillPriceUsd)
         ).div(nativeTokenPriceUsd).integerValue(BigNumber.ROUND_DOWN);
 
-        const results = await this.doEncounterPayNative({
+        this.fightResults = await this.doEncounterPayNative({
           characterId: this.currentCharacterId,
           weaponId: this.selectedWeaponId,
           targetString: targetIndex,
           fightMultiplier: this.fightMultiplier,
           offsetCost: offsetToPayInNativeToken
         });
-        this.fightResults = results;
 
         await this.fetchFightRewardSkill();
         await this.fetchFightRewardXp();
