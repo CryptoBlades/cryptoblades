@@ -294,6 +294,11 @@
       "address": "0x864F131e094c0dac9ffF56770Af0340C4Acd2498",
       "txHash": "0xbaf453724024073ba6c72af9fe16e5b4231a56bf6971f16d22b6ebe6d39b333b",
       "kind": "transparent"
+    },
+    {
+      "address": "0xB8E65dd86e5BCEde186d0a11f1646B348EcB514B",
+      "txHash": "0x676425060189765d7b9d1caf9f6da9d6ab6da05726aa915b7ec7feceb6b48cc9",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -47380,6 +47385,567 @@
           },
           "t_array(t_uint256)50_storage": {
             "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "ff95fcd077cae0589722bba4e0c67cdf47297645722c8ce3261f54cf500b0f8a": {
+      "address": "0x8F7D7d06a8976C2312Ffe463Eb295cf318DBd2a5",
+      "txHash": "0x15ef237230e0cc88c1229ebb6d7949f80f0fb230cb1f66d15cdadc39dfc0dc0b",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)58250_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "characters",
+            "type": "t_contract(Characters)39512",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:66"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "weapons",
+            "type": "t_contract(Weapons)57803",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:67"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "skillToken",
+            "type": "t_contract(IERC20)63451",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:68"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "priceOracleSkillPerUsd",
+            "type": "t_contract(IPriceOracle)43537",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:69"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "randoms",
+            "type": "t_contract(IRandoms)43556",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:70"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "characterLimit",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:146"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "staminaCostFight",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:148"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "mintCharacterFee",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:151"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "refillStaminaFee",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:154"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "fightRewardBaseline",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:157"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "fightRewardGasOffset",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:158"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "mintWeaponFee",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:160"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "reforgeWeaponFee",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:161"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "nonce",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:163"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "lastBlockNumberCalled",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:165"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "fightXpGain",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:167"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "tokenRewards",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:169"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "xpRewards",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:170"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "oneFrac",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:172"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "fightTraitBonus",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:173"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "inGameOnlyFunds",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:175"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "totalInGameOnlyFunds",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:176"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "promos",
+            "type": "t_contract(Promos)21048",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:178"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "_rewardsClaimTaxTimerStart",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:180"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "stakeFromGameImpl",
+            "type": "t_contract(IStakeFromGame)43573",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:182"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "durabilityCostFight",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:184"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "burnWeaponFee",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:186"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "reforgeWeaponWithDustFee",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:187"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "blacksmith",
+            "type": "t_contract(Blacksmith)1662",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:189"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "mintPayments",
+            "type": "t_mapping(t_address,t_struct(MintPayment)40297_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:198"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "totalMintPaymentSkillRefundable",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:212"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "mintPaymentSkillDepositeds",
+            "type": "t_mapping(t_address,t_struct(MintPaymentSkillDeposited)40316_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:213"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "rewardsClaimTaxMax",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:215"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "rewardsClaimTaxDuration",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:216"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "vars",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:218"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "userVars",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:219"
+          },
+          {
+            "contract": "CryptoBlades",
+            "label": "specialWeaponsManager",
+            "type": "t_contract(SpecialWeaponsManager)35081",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\cryptoblades.sol:221"
+          }
+        ],
+        "types": {
+          "t_contract(Characters)39512": {
+            "label": "contract Characters"
+          },
+          "t_contract(Weapons)57803": {
+            "label": "contract Weapons"
+          },
+          "t_contract(IERC20)63451": {
+            "label": "contract IERC20"
+          },
+          "t_contract(IPriceOracle)43537": {
+            "label": "contract IPriceOracle"
+          },
+          "t_contract(IRandoms)43556": {
+            "label": "contract IRandoms"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_int128": {
+            "label": "int128"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_contract(Promos)21048": {
+            "label": "contract Promos"
+          },
+          "t_contract(IStakeFromGame)43573": {
+            "label": "contract IStakeFromGame"
+          },
+          "t_contract(Blacksmith)1662": {
+            "label": "contract Blacksmith"
+          },
+          "t_mapping(t_address,t_struct(MintPayment)40297_storage)": {
+            "label": "mapping(address => struct CryptoBlades.MintPayment)"
+          },
+          "t_struct(MintPayment)40297_storage": {
+            "label": "struct CryptoBlades.MintPayment",
+            "members": [
+              {
+                "label": "blockHash",
+                "type": "t_bytes32"
+              },
+              {
+                "label": "blockNumber",
+                "type": "t_uint256"
+              },
+              {
+                "label": "nftAddress",
+                "type": "t_address"
+              },
+              {
+                "label": "count",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_mapping(t_address,t_struct(MintPaymentSkillDeposited)40316_storage)": {
+            "label": "mapping(address => struct CryptoBlades.MintPaymentSkillDeposited)"
+          },
+          "t_struct(MintPaymentSkillDeposited)40316_storage": {
+            "label": "struct CryptoBlades.MintPaymentSkillDeposited",
+            "members": [
+              {
+                "label": "skillDepositedFromWallet",
+                "type": "t_uint256"
+              },
+              {
+                "label": "skillDepositedFromRewards",
+                "type": "t_uint256"
+              },
+              {
+                "label": "skillDepositedFromIgo",
+                "type": "t_uint256"
+              },
+              {
+                "label": "skillRefundableFromWallet",
+                "type": "t_uint256"
+              },
+              {
+                "label": "skillRefundableFromRewards",
+                "type": "t_uint256"
+              },
+              {
+                "label": "skillRefundableFromIgo",
+                "type": "t_uint256"
+              },
+              {
+                "label": "refundClaimableTimestamp",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))"
+          },
+          "t_contract(SpecialWeaponsManager)35081": {
+            "label": "contract SpecialWeaponsManager"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)58250_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_struct(RoleData)58250_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)61445_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)61445_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)61180_storage"
+              }
+            ]
+          },
+          "t_struct(Set)61180_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "a3e6ad2f75e47441472716842d5af96ab45e2f4bb492642e6dc49985bcb9668f": {
+      "address": "0x2038aE468d14c1A6eC37E8f14A3Ea3f4175d5f40",
+      "txHash": "0x61fa6d6c2c017c860ef0e63283be9a4876dec6079998dc1002bf52c70b632640",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)58250_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "TokensManager",
+            "label": "game",
+            "type": "t_contract(CryptoBlades)43461",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\TokensManager.sol:14"
+          },
+          {
+            "contract": "TokensManager",
+            "label": "combatTokenChargePercent",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\TokensManager.sol:16"
+          },
+          {
+            "contract": "TokensManager",
+            "label": "tokenPrice",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\TokensManager.sol:18"
+          },
+          {
+            "contract": "TokensManager",
+            "label": "skillTokenPrice",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\TokensManager.sol:19"
+          },
+          {
+            "contract": "TokensManager",
+            "label": "offsetSlippage",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\TokensManager.sol:20"
+          }
+        ],
+        "types": {
+          "t_contract(CryptoBlades)43461": {
+            "label": "contract CryptoBlades"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)58250_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(RoleData)58250_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)61445_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)61445_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)61180_storage"
+              }
+            ]
+          },
+          "t_struct(Set)61180_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
           }
         }
       }
