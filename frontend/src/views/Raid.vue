@@ -327,16 +327,16 @@
                        </div>
                      </div>
                   </div>
+                  <div class="d-flex justify-content-center w-100">
+                    <button class="btn-raid btn-modal"  v-tooltip="generateTooltip()" @click="joinRaidMethod()">
+                      {{$t('raid.joinRaid')}}
+                    </button>
+                  </div>
                 </div>
               </div>
           </b-container>
         </div>
       </div>
-      </div>
-      <div class="footer-close d-flex justify-content-center">
-        <button class="btn-raid btn-modal"  v-tooltip="generateTooltip()" @click="joinRaidMethod()">
-          {{$t('raid.joinRaid')}}
-        </button>
       </div>
       <div class="footer-close" @click="$refs['equipments'].hide()">
         <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
