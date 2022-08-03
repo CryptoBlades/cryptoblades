@@ -2984,19 +2984,17 @@ export default new Vuex.Store<IState>({
           targetString,
           fightMultiplier
         )
-        .send({ from: state.defaultAccount, gasPrice: getGasPrice(), value: (+offsetCost ? +offsetCost : 1)*fightMultiplier });
+        .send({ from: state.defaultAccount, gasPrice: getGasPrice(), gas: '300000', value: (+offsetCost ? +offsetCost : 1)*fightMultiplier });
 
       let playerRoll = '';
       let enemyRoll = '';
       let xpGain;
       let skillGain;
 
-      const currentBlock = await state.web3.eth.getBlockNumber();
-
       const fightOutcomeEvents = await CryptoBlades.getPastEvents('FightOutcome', {
-        filter: { owner: state.defaultAccount! },
-        toBlock: currentBlock,
-        fromBlock: currentBlock - 10 //safe window for potential lag after fight ends and before currentBlock gets fetched
+        filter: { owner: state.defaultAccount!, character: characterId },
+        toBlock: res.blockNumber,
+        fromBlock: res.blockNumber
       });
 
       if (fightOutcomeEvents.length) {
