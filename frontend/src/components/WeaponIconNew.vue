@@ -114,7 +114,11 @@ function transformModel(model, y) {
 export default {
   props: ['weapon', 'favorite', 'selected', 'hasNftOptions'],
   computed: {
-    ...mapState(['maxDurability', 'specialWeaponArts']),
+    ...mapState(['maxDurability']),
+    ...mapState('specialWeaponsManager',
+      ([
+        'specialWeaponArts',
+      ])),
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',
