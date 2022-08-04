@@ -202,7 +202,11 @@ export default {
   props: ['weapon', 'favorite', 'displayType'],
 
   computed: {
-    ...mapState(['maxDurability', 'specialWeaponArts']),
+    ...mapState(['maxDurability']),
+    ...mapState('specialWeaponsManager',
+      ([
+        'specialWeaponArts',
+      ])),
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',
