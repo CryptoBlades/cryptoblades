@@ -103,8 +103,11 @@ export default {
   computed: {
     ...mapState([
       'maxDurability',
-      'specialWeaponArts',
     ]),
+    ...mapState('specialWeaponsManager',
+      ([
+        'specialWeaponArts',
+      ])),
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',

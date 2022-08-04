@@ -168,7 +168,10 @@ export default {
 
   },
   computed: {
-    ...mapState(['specialWeaponArts']),
+    ...mapState('specialWeaponsManager',
+      ([
+        'specialWeaponArts',
+      ])),
     ...mapGetters(['getWeaponName', 'currentCharacter',]),
     tooltipHtml() {
       if(!this.nft) return '';
