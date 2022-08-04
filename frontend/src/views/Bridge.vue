@@ -352,6 +352,7 @@ interface StoreMappedActions {
   chainEnabled(payload: {
     chainId: number;
   }): Promise<boolean>;
+  fetchBridgeFee(): Promise<string>;
 }
 
 enum transferStates{
@@ -513,7 +514,7 @@ export default Vue.extend({
   },
   async mounted(){
     if (!this.contracts.NFTStorage) return;
-    this.bridgeFee = await this.contracts.NFTStorage.methods.getBridgeFee().call({ from: this.defaultAccount });
+    this.bridgeFee = await this.getBridgeFee();
     await this.showStorage();
     await this.getIncoming();
     this.refreshIntervall = window.setInterval(async () => await this.showStorage(), 5000);
@@ -539,6 +540,7 @@ export default Vue.extend({
       'getReceivedNFTs',
       'getReceivedNFT',
       'chainEnabled',
+      'fetchBridgeFee',
     ]) as StoreMappedActions),
     convertWeiToSkill(wei: string): string {
       return fromWeiEther(wei);
@@ -697,6 +699,9 @@ export default Vue.extend({
       await this.getStatus();
       this.loadedStorage = true;
     },
+    async getBridgeFee(){
+      return await this.fetchBridgeFee();
+    }
   },
   components: {
     WeaponGrid,

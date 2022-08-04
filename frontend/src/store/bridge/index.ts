@@ -185,6 +185,13 @@ const bridge = {
         transferInsMeta: nft[5],
       } as TransferedNft;
     },
+    async fetchBridgeFee({ rootState }: {rootState: IState, dispatch: Dispatch}) {
+      const { NFTStorage } = rootState.contracts();
+      if(!NFTStorage || !rootState.defaultAccount) return;
+      return await NFTStorage.methods.getBridgeFee().call({
+        from: rootState.defaultAccount,
+      });
+    },
   },
 };
 
