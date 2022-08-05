@@ -4,9 +4,7 @@
       <div class="d-flex justify-content-between w-100 weekly-progress-container">
         <div class="d-flex flex-column justify-content-between gap-2">
           <span class="quests-title">{{ $t('quests.quest') }}</span>
-          <b-button variant="primary" @click="showQuestsListModal = true">
-            {{ $t('quests.availableQuests') }}
-          </b-button>
+          <cb-button class="top-button" :title="$t('quests.availableQuests')" @clickEvent="showQuestsListModal = true"></cb-button>
           <b-modal v-model="showQuestsListModal" :title="$t('quests.availableQuests')" hide-footer
                   @hide="showQuestsListModal = false; tier = undefined" size="xl">
             <div class="d-flex justify-content-center align-items-center gap-3">
@@ -37,10 +35,10 @@
           </b-modal>
         </div>
         <div v-if="weeklyReward && weeklyReward.id && currentWeeklyCompletions !== undefined && weeklyReward.completionsGoal"
-            class="d-flex flex-column gap-2">
+            class="d-flex flex-column justify-content-between gap-2 align-items-end">
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <div class="d-flex flex-column gap-2">
-              <div class="d-flex justify-content-between gap-4 flex-wrap">
+            <div class="d-flex flex-column justify-content-between gap-2">
+              <div class="d-flex justify-content-between gap-4 flex-wrap ">
                 <span class="text-uppercase weekly-progress">{{ $t('quests.weeklyProgress') }}</span>
                 <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon"
                                                                       alt="Hourglass"/> {{
@@ -68,11 +66,9 @@
                                   :amount="weeklyReward.reputationAmount"/>
             </div>
           </div>
-          <b-button v-if="!weeklyClaimed" :disabled="isLoading || !canClaimWeeklyReward" variant="primary"
-                    @click="claimWeekly">
-            {{ $t('quests.claimWeeklyReward') }}
-            <Hint v-if="!canClaimWeeklyReward" class="hint" :text="$t('quests.cannotClaimWeeklyTooltip')"/>
-          </b-button>
+          <cb-button class="top-button" v-if="!weeklyClaimed"
+          :isDisabled="isLoading || !canClaimWeeklyReward" @clickEvent="claimWeekly"
+            :toolTip="!canClaimWeeklyReward ? $t('quests.cannotClaimWeeklyTooltip') : ''" :title="$t('quests.claimWeeklyReward')"></cb-button>
         </div>
       </div>
 
@@ -80,14 +76,15 @@
       <span class="quests-title-2">Wallet Quests</span>
       <div class="form-control-wrapper">
         <select class="form-control" v-model="walletQuestTier" >
-          <option v-for="x in rarities" :value="x" :key="x">{{ $t(`quests.rarityType.${Rarity[x]}`) }}</option>
+              <option :value="undefined">Select a Rarity</option>
+          <option v-for="x in rarities" :value="x" :key="x">{{$t(`quests.rarityType.${Rarity[x]}`)}}</option>
         </select>
       </div>
-
-      <div v-if="isLoading">
+      <div v-if="isLoadingWalletQuests">
         <i class="fas fa-spinner fa-spin"/>
         {{ $t('quests.loading') }}
       </div>
+
       <div v-else v-for="quest in walletQuests" :key="quest.id" class="d-flex w-100">
         <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET" :reputationLevelRequirements="reputationLevelRequirements"
                   @refresh-quest-data="onRefreshQuestData"/>
@@ -281,6 +278,7 @@ interface Data {
   showWeeklyClaimedModal: boolean;
   weeklyRewards: NftIdType[];
   isLoading: boolean;
+  isLoadingWalletQuests: boolean;
   nextWeekResetTime: string;
   nextWeekResetCheckInterval?: ReturnType<typeof setInterval>;
   currentWeeklyCompletions: number;
@@ -290,7 +288,7 @@ interface Data {
   usePromoQuests: boolean;
   questTemplateType: QuestTemplateType;
   walletQuests: Quest[];
-  walletQuestTier: Rarity;
+  walletQuestTier: Rarity | undefined;
 }
 
 export default Vue.extend({
@@ -312,6 +310,7 @@ export default Vue.extend({
       weeklyClaimed: true,
       showWeeklyClaimedModal: false,
       isLoading: false,
+      isLoadingWalletQuests: false,
       nextWeekResetTime: '',
       currentWeeklyCompletions: 0,
       showQuestsListModal: false,
@@ -324,7 +323,7 @@ export default Vue.extend({
       QuestTemplateType,
       questTemplateType: QuestTemplateType.QUEST,
       walletQuests:[],
-      walletQuestTier: Rarity.COMMON,
+      walletQuestTier: undefined,
     } as Data;
   },
 
@@ -395,8 +394,9 @@ export default Vue.extend({
 
     async refreshQuestData() {
       try {
+        console.log('refreshing quest data');
         this.isLoading = true;
-        this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
+        // this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
         this.usePromoQuests = await this.isUsingPromoQuests();
         this.currentWeeklyCompletions = +await this.getWeeklyCompletions();
         this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});
@@ -445,13 +445,20 @@ export default Vue.extend({
   },
 
   watch: {
+    async defaultAccount(){
+      await this.refreshQuestData();
+    },
     async ownedCharacterIds(characterIds) {
       await this.fetchCharacters(characterIds);
       await this.refreshQuestData();
     },
     async walletQuestTier() {
       this.walletQuests = [];
-      this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
+      if(this.walletQuestTier !== undefined){
+        this.isLoadingWalletQuests = true;
+        this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
+        this.isLoadingWalletQuests = false;
+      }
     },
   },
 });
@@ -467,12 +474,9 @@ export default Vue.extend({
   margin: 0 auto;
   padding: 50px 0;
 }
-.custom-available-quest-button{
-  margin-top: 25px !important;
-}
-.custom-claim-weekly-reward-btn{
-  margin-right: 0px !important;
-  margin-top: 8px !important;
+.top-button{
+  margin: 10px 0px !important;
+  height: 75px !important; /* :'( */
 }
 .quests-container-wrapper{
   background-image: url('../../src/assets/questsBackground.png');
@@ -503,11 +507,13 @@ export default Vue.extend({
 }
 .form-control-wrapper{
   position: relative;
+  width: 100%;
 }
 
 .form-control-wrapper > select{
   padding-right: 20px;
   text-align: right;
+  width: 15%;
 }
 
 .form-control-wrapper > select{
@@ -598,12 +604,6 @@ export default Vue.extend({
 }
 
 @media (max-width: 576px) {
-  .custom-claim-weekly-reward-btn{
-    margin-right: -25px !important;
-  }
-  .custom-available-quest-button{
-    margin-right: -20px !important;
-  }
   .quests-container {
     padding: 1rem;
     margin-bottom: 3rem;
@@ -616,14 +616,6 @@ export default Vue.extend({
   .weekly-progress-container {
     flex-direction: column;
     gap: 2rem;
-  }
-  .custom-available-quest-button{
-    font-size: 12px !important;
-    margin: 25px 0 15px 0 !important;
-  }
-  .custom-claim-weekly-reward-btn{
-    font-size: 12px !important;
-    margin: 25px 0 15px 0 !important;
   }
 }
 </style>

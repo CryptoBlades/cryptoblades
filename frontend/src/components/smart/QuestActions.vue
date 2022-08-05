@@ -487,23 +487,22 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   justify-content: center;
-  flex: 1;
+  align-items: center;
+  height: 100%;
 }
 .custom-action-btn{
   font-family: Roboto;
   background: transparent !important;
   border: #EDCD90 1px solid !important;
-  color: #FFF !important
+  color: #FFF !important;
+  width: 100%;
+  max-height: 50px;
 }
 .custom-action-btn:disabled {
   border-color: #FFF !important;
 }
 .custom-action-btn:not([disabled]):hover{
   border-color: #FFF !important;
-}
-.request-btn{
-  width: 30%;
-  align-self: flex-end;
 }
 .quest-row {
   display: flex;

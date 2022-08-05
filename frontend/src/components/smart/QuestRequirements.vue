@@ -1,7 +1,7 @@
 <template>
   <div class="quest-requirement-display gap-3">
     <span class="quest-title">{{ $t('quests.quest') }}</span>
-    <div class="d-flex align-items-center gap-3 flex-wrap justify-content-center" :key="quest.id">
+    <div class="d-flex align-items-center gap-3 flex-wrap" :key="quest.id">
       <QuestComponentIcon :questItemType="quest.requirementType" :amount="quest.requirementAmount"
                           :rarity="quest.requirementRarity" :externalAddress="quest.requirementExternalAddress"/>
       <div class="d-flex flex-column requirement-text-container"><span class="requirement-text">{{
@@ -139,7 +139,6 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   justify-content: center;
-  flex: 1;
 }
 
 .rarity-label {
