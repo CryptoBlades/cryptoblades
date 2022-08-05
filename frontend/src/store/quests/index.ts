@@ -107,7 +107,7 @@ const quests = {
 
     async addQuestTemplate(
       { rootState }: {rootState: IState},
-      {questTemplate, isPromo, supply, deadline}: {questTemplate: Quest, isPromo: boolean, supply: number, deadline: number}){
+      {questTemplate, tierOffset, supply, deadline}: {questTemplate: Quest, tierOffset: number, supply: number, deadline: number}){
       const {SimpleQuests} = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;
 
@@ -145,11 +145,7 @@ const quests = {
         }
       }
 
-      let tier = questTemplate.tier;
-      if (isPromo) {
-        tier! += 10;
-      }
-
+      const tier = questTemplate.tier! + tierOffset;
       return await SimpleQuests.methods.addNewQuestTemplate(tier!,
         questTemplate.requirementType!, questTemplate.requirementRarity!, requirementAmount, questTemplate.requirementExternalAddress,
         questTemplate.rewardType!, questTemplate.rewardRarity!, rewardAmount, questTemplate.rewardExternalAddress,
@@ -510,33 +506,27 @@ const quests = {
       return await SimpleQuests.methods.getWeeklyCompletions(rootState.defaultAccount).call(defaultCallOptions(rootState));
     },
 
-    async skipQuest({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, {characterID, pickedQuestID}:
-    {characterID: number, pickedQuestID: number | undefined}) {
+    async skipQuest(
+      { rootState, dispatch }: {rootState: IState, dispatch: Dispatch},
+      {characterID, pickedQuestID}: {characterID: number, pickedQuestID: number}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
-
-      if (pickedQuestID) {
-        await SimpleQuests.methods.skipQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
-      } else {
-        await SimpleQuests.methods.skipQuest(characterID).send(defaultCallOptions(rootState));
-      }
+      console.log('skipQuest', characterID, pickedQuestID);
+      await SimpleQuests.methods.skipQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
       await dispatch('fetchCharacterStamina', characterID);
     },
 
-    async completeQuest({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, {characterID, pickedQuestID}:
-    {characterID: number, pickedQuestID: number | undefined}) {
+    async completeQuest(
+      { rootState, dispatch }: {rootState: IState, dispatch: Dispatch},
+      {characterID, pickedQuestID}: {characterID: number, pickedQuestID: number}) {
       const {SimpleQuests} = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;
 
       if (!await SimpleQuests.methods.hasRandomQuestRewardSeedRequested(characterID).call(defaultCallOptions(rootState))) {
         await SimpleQuests.methods.generateRewardQuestSeed(characterID).send(defaultCallOptions(rootState));
       }
-      let result;
-      if (pickedQuestID) {
-        result = await SimpleQuests.methods.completeQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
-      } else {
-        result = await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(rootState));
-      }
+      console.log('completeQuest', pickedQuestID);
+      const result = await SimpleQuests.methods.completeQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
 
       const questRewards = result.events.QuestRewarded.returnValues.rewards;
       await Promise.all([
@@ -640,14 +630,14 @@ const quests = {
       return +await SimpleQuests.methods.walletQuestProgress(rootState.defaultAccount, questID).call(defaultCallOptions(rootState));
     },
     async submitWalletProgress(
-      { rootState }: {rootState: IState}, {questID, tokenIds}: {questID: number, indexInTier: number, tokenIds: string[]}) {
+      { rootState }: {rootState: IState}, {questID, tokenIds}: {questID: number, tokenIds: string[]}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
 
       return await SimpleQuests.methods.submitWalletProgress(questID, tokenIds).send(defaultCallOptions(rootState));
     },
     async submitWalletProgressAmount(
-      { rootState }: {rootState: IState}, {questID, amount}: {questID: number, indexInTier: number, amount: number}) {
+      { rootState }: {rootState: IState}, {questID, amount}: {questID: number, amount: number}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
 
@@ -662,7 +652,7 @@ const quests = {
     async requestPickableQuest({ rootState }: {rootState: IState}, {characterID, questID}: {characterID: number, questID: number}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
-
+      console.log(characterID, questID);
       return await SimpleQuests.methods.requestPickableQuest(characterID, questID).send(defaultCallOptions(rootState));
     }
   },

@@ -10,10 +10,7 @@
       {{ $t('quests.questDeadlineOverCannotBeCompleted') }}
     </span>
     <b-button v-if="character && character.quest.id === 0" :disabled="isLoading" variant="primary request-btn" @click="request">
-      <span> {{ $t('quests.requestQuest') }} </span>
-    </b-button>
-    <b-button v-if="character && character.quest.id === 0" :disabled="isLoading" variant="primary request-btn" @click="showPickableQuestModal=true;">
-      <span> Request Special Quest </span>
+      <span> {{ pickable ? $t('quests.chooseSpecialQuest')  : $t('quests.requestQuest') }} </span>
     </b-button>
     <b-button v-else-if="questCanBeCompleted && !afterDeadline && !deletable" :disabled="isLoading" variant="primary"
               class="flex-1"
@@ -25,24 +22,25 @@
       {{ $t('quests.deleteQuest') }}
     </b-button>
     <b-button
-      v-if="quest.requirementType !== RequirementType.RAID && !questCanBeCompleted && !afterDeadline && !deletable"
+      v-if="canSubmit"
       :disabled="isLoading" variant="primary"
       class="flex-1 custom-action-btn" @click="submit">
       {{ $t('quests.submit') }}
     </b-button>
-    <b-button v-if="character && (!questCanBeCompleted || afterDeadline)" variant="primary" class="flex-1 custom-action-btn" @click="skip"
-              :disabled="(!freeSkip && !hasStaminaToSkip) || isLoading">
+    <b-button v-if="character && isOnQuest && (!questCanBeCompleted || afterDeadline)" variant="primary" class="flex-1 custom-action-btn" @click="skip"
+              :disabled="!questCanBeSkipped || isLoading">
       {{ freeSkip ? $t('quests.freeSkip') : $t('quests.skip', {staminaCost: skipQuestStaminaCost}) }}
-      <Hint v-if="!freeSkip && !hasStaminaToSkip" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
+      <Hint v-if="!questCanBeSkipped" class="hint" :text="$t('quests.cannotSkipTooltip')"/>
     </b-button>
-    <b-form-checkbox size="lg" :checked="pickable" @change="pickable=!pickable" switch v-if="(questCanBeCompleted && !afterDeadline && !deletable) ||
-      character && (!questCanBeCompleted || afterDeadline)" >
-      <b class="float-left">{{ pickable ? 'Pickable' : 'Random' }}</b>
-    </b-form-checkbox>
     <span v-if="nextFreeSkipTime && character && character.quest.id !== 0 && (!questCanBeCompleted || afterDeadline)"
           class="text-center">{{
         $t('quests.freeSkipResetsIn', {time: nextFreeSkipTime})
-      }}</span>
+      }}
+    </span>
+    <b-form-checkbox size="lg" :checked="pickable" @change="pickable=!pickable" switch v-if="showPickableSwitch">
+      <b class="float-left">{{ pickable ? 'Special' : 'Random' }}</b>
+    </b-form-checkbox>
+    <!-- ADD TOOLTIP HERE -->
     <QuestSubmissionModal v-if="character||quest" :quest="quest" :questTemplateType="questTemplateType" :showModal="showSubmissionModal" :character="character"
                           @close-submission-modal="onCloseSubmissionModal"/>
 
@@ -84,9 +82,8 @@
               <QuestRequirements :quest="quest" :index="index"/>
               <QuestRewards :quest="quest"/>
               <div class="pickBtn-wrapper">
-              <b-button class="pickBtn" variant="primary" @click="pickQuest(quest.id)">
-                <!-- {{ $t('quests.pickQuest') }} -->
-                Pick
+              <b-button class="pickBtn" variant="primary" @click="handlePick(quest.id)">
+                {{pickButtonLabel}}
               </b-button>
               </div>
             </div>
@@ -109,6 +106,14 @@ import QuestRewards from '@/components/smart/QuestRewards.vue';
 import {mapActions} from 'vuex';
 import {NftIdType} from '@/components/smart/NftList.vue';
 import {getTimeRemaining} from '@/utils/common';
+import { TranslateResult } from 'vue-i18n';
+import i18n from '@/i18n';
+
+enum ActionAfterPick {
+  COMPLETE,
+  SKIP,
+  REQUEST
+}
 
 interface Data {
   hasStaminaToSkip: boolean;
@@ -206,20 +211,54 @@ export default Vue.extend({
       pickableQuestTier: undefined,
       quests: [],
       pickedQuestId: undefined,
+      ActionAfterPick,
     } as Data;
   },
 
   computed: {
-    questCanBeCompleted(): boolean {
-      return this.quest.progress >= this.quest.requirementAmount;
+    isOnQuest(): boolean{
+      return !!this.quest.id && !!this.quest.requirementAmount;
     },
-
+    questCanBeSkipped(): boolean {
+      return this.isOnQuest && (this.freeSkip || this.hasStaminaToSkip);
+    },
+    questCanBeCompleted(): boolean {
+      return this.isOnQuest && (this.quest.progress >= this.quest.requirementAmount && this.quest.requirementAmount !== 0);
+    },
+    canSubmit(): boolean {
+      return this.isOnQuest && this.quest.requirementType !== RequirementType.RAID && !this.afterDeadline && !this.deletable && !this.questCanBeCompleted;
+    },
     afterDeadline(): boolean {
       return this.isLimited && !this.deadlineTime;
     },
-
     hasIncomingDeadline(): boolean {
       return this.isLimited && !!this.deadlineTime;
+    },
+    showPickableSwitch(): boolean {
+      return (this.questCanBeCompleted || this.questCanBeSkipped || this.quest !== null) && this.questTemplateType !== QuestTemplateType.WALLET;
+    },
+    actionAfterPick(): ActionAfterPick {
+      if(this.questCanBeCompleted) {
+        return ActionAfterPick.COMPLETE;
+      } else if(this.questCanBeSkipped) {
+        return ActionAfterPick.SKIP;
+      } else {
+        return ActionAfterPick.REQUEST;
+      }
+    },
+    //TO DO: Maybe as tooltip? Review after merge ui
+    pickButtonLabel(): TranslateResult {
+      switch(this.actionAfterPick) {
+      case ActionAfterPick.COMPLETE:
+        return 'Set as next Quest and complete current Quest';
+      case ActionAfterPick.SKIP:
+        return 'Set as next Quest and skip current Quest';
+      case ActionAfterPick.REQUEST:
+        return 'Set as next Quest';
+        // return i18n.t('quests.requestQuest');
+      default:
+        return i18n.t('');
+      }
     },
   },
   watch: {
@@ -269,15 +308,9 @@ export default Vue.extend({
     },
 
     async skip() {
+      if(this.pickable) return this.showPickableQuestModal = true;
       try {
-        if (this.pickable) {
-          if (!this.pickedQuestId) {
-            return this.showPickableQuestModal = true;
-          }
-          await this.skipQuest({characterID: this.character.id, pickedQuestID: this.pickedQuestId});
-        } else {
-          await this.skipQuest({characterID: this.character.id});
-        }
+        await this.skipQuest({characterID: this.character.id, pickedQuestID: 0});
         this.isLoading = true;
         await this.refreshSkipQuestData();
         this.$emit('refresh-quest-data');
@@ -288,24 +321,20 @@ export default Vue.extend({
     },
 
     async complete() {
+      if (this.pickable) return this.showPickableQuestModal = true;
       try {
         this.isLoading = true;
         let rewards;
         let rewardType: any;
         if(this.questTemplateType === QuestTemplateType.QUEST || this.questTemplateType === QuestTemplateType.PROMO) {
-          if (this.pickable) {
-            if (!this.pickedQuestId) {
-              return this.showPickableQuestModal = true;
-            }
-            rewards = await this.completeQuest({characterID: this.character.id, pickedQuestID: this.pickedQuestId});
-          } else {
-            rewards = await this.completeQuest({characterID: this.character.id});
-          }
+          console.log('complete quest');
+          rewards = await this.completeQuest({characterID: this.character.id, pickedQuestID: 0});
           rewardType = this.quest.rewardType;
           await this.refreshSkipQuestData();
         }
         else if(this.questTemplateType === QuestTemplateType.WALLET){
           rewards = await this.completeWalletQuest({questID: this.quest.id});
+          console.log(rewards);
           rewardType = this.quest.rewardType;
         }
         if (!rewardType || rewardType === RewardType.EXPERIENCE || rewardType === RewardType.DUST || rewardType === RewardType.SOUL) {
@@ -324,24 +353,36 @@ export default Vue.extend({
     },
 
     async request() {
-      try {
-        this.isLoading = true;
-        await this.requestQuest({characterID: this.character.id});
-        this.$emit('refresh-quest-data');
-      } finally {
-        this.isLoading = false;
-        this.$forceUpdate();
+      if(this.pickable){
+        this.showPickableQuestModal = true;
+        return;
+      }
+      else{
+        try {
+          this.isLoading = true;
+          await this.requestQuest({characterID: this.character.id});
+          this.$emit('refresh-quest-data');
+        } finally {
+          this.isLoading = false;
+          this.$forceUpdate();
+        }
       }
     },
 
-    async pickQuest(questID: number){
+    async handlePick(questID: number) {
+      console.log(this.actionAfterPick);
       try {
         this.isLoading = true;
-        if (!this.pickedQuestId) {
-          this.pickedQuestId = questID;
-          return this.showPickableQuestModal = false;
+        console.log(this.actionAfterPick);
+        if(this.actionAfterPick === ActionAfterPick.COMPLETE){
+          await this.completeQuest({characterID: this.character.id, pickedQuestID: questID});
         }
-        await this.requestPickableQuest({characterID: this.character.id, questID});
+        else if(this.actionAfterPick === ActionAfterPick.SKIP){
+          await this.skipQuest({characterID: this.character.id, pickedQuestID: questID});
+        }
+        else if(this.actionAfterPick === ActionAfterPick.REQUEST){
+          await this.requestPickableQuest({characterID: this.character.id, questID});
+        }
         this.$emit('refresh-quest-data');
       } finally {
         this.isLoading = false;

@@ -73,9 +73,9 @@ interface StoreMappedActions {
 
   submitProgressAmount(payload: { characterID: string | number, amount: number }): Promise<void>;
 
-  submitWalletProgressAmount(payload: { questID: number, indexInTier: number | undefined, amount: number }): Promise<void>;
+  submitWalletProgressAmount(payload: { questID: number, amount: number }): Promise<void>;
 
-  submitWalletProgress(payload: { questID: number, indexInTier: number | undefined, tokenIds: (string | number)[] }): Promise<void>;
+  submitWalletProgress(payload: { questID: number, tokenIds: (string | number)[] }): Promise<void>;
 
   submitExternalProgressAmount(payload: { characterID: string | number, amount: number, currencyAddress: string }): Promise<void>;
 
@@ -202,6 +202,9 @@ export default Vue.extend({
       } else if (this.quest.requirementType === RequirementType.DUST) {
         if (this.quest.requirementRarity === Rarity.COMMON) {
           this.amountToBurn = remainingAmount > this.getLesserDust() ? this.getLesserDust() : remainingAmount;
+          console.log(this.getLesserDust());
+          console.log(remainingAmount);
+          console.log(this.amountToBurn);
         } else if (this.quest.requirementRarity === Rarity.UNCOMMON) {
           this.amountToBurn = remainingAmount > this.getGreaterDust() ? this.getGreaterDust() : remainingAmount;
         } else if (this.quest.requirementRarity === Rarity.RARE) {
@@ -268,7 +271,6 @@ export default Vue.extend({
           } else {
             await this.submitWalletProgress({
               questID: this.quest.id,
-              indexInTier: this.quest.tier,
               tokenIds: this.tokensToBurn,
             });
           }
@@ -309,7 +311,6 @@ export default Vue.extend({
           } else {
             await this.submitWalletProgressAmount({
               questID: this.quest.id,
-              indexInTier: this.quest.tier,
               amount: this.amountToBurn,
             });
           }

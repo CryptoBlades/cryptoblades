@@ -296,7 +296,7 @@
              :title="$t('quests.addNew')+` `+$t(`quests.questTemplateType.${QuestTemplateType[questTemplateType]}`)">
       <div class="d-flex flex-column align-items-center">
         <h4 class="text-center">
-          {{ promoQuestTemplates ? $t('quests.areYouSureAddPromoQuest') : $t('quests.areYouSureAddQuest') }}
+          {{ $t('quests.areYouSureAdd', {questType: $t(`quests.questTemplateType.${QuestTemplateType[questTemplateType]}`)})}}
         </h4>
         <div class="quest-row p-3">
           <QuestRequirements :quest="questTemplate"/>
@@ -628,8 +628,7 @@ export default Vue.extend({
         || (this.questTemplate.rewardType === RewardType.EXTERNAL
           && this.questTemplate.rewardExternalAddress
           && !isValidWeb3Address(this.questTemplate.rewardExternalAddress))
-        || this.showTemplateConfirmationModal || this.isLoading
-        || (this.questTemplateType === QuestTemplateType.WALLET && this.questTemplate.reputationAmount === 0);
+        || this.showTemplateConfirmationModal || this.isLoading;
     },
 
     addNewWeeklyRewardDisabled() {
