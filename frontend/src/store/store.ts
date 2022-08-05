@@ -2984,49 +2984,30 @@ export default new Vuex.Store<IState>({
           targetString,
           fightMultiplier
         )
-        .send({ from: state.defaultAccount, gasPrice: getGasPrice(), value: +offsetCost*fightMultiplier });
-
-      await dispatch('fetchTargets', { characterId, weaponId });
+        .send({ from: state.defaultAccount, gasPrice: getGasPrice(), gas: '300000', value: (+offsetCost ? +offsetCost : 1)*fightMultiplier });
 
       let playerRoll = '';
       let enemyRoll = '';
       let xpGain;
       let skillGain;
 
-      const currentBlock = await state.web3.eth.getBlockNumber();
-
-      await new Promise<void>((resolve, reject) => {
-        const subscription = state.web3.eth.subscribe('newBlockHeaders', async () => {
-          const fightOutcomeEvents = await CryptoBlades.getPastEvents('FightOutcome', {
-            filter: { owner: state.defaultAccount! },
-            toBlock: 'latest',
-            fromBlock: currentBlock
-          });
-
-          if (fightOutcomeEvents.length) {
-            playerRoll = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.playerRoll;
-            enemyRoll = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.enemyRoll;
-            xpGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.xpGain;
-            skillGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.skillGain;
-
-            subscription.unsubscribe((error, result) => {
-              if (!error) {
-                console.log(result);
-              } else {
-                console.log(error);
-                reject(error);
-              }
-            });
-
-            resolve();
-          }
-        });
+      const fightOutcomeEvents = await CryptoBlades.getPastEvents('FightOutcome', {
+        filter: { owner: state.defaultAccount!, character: characterId },
+        toBlock: res.blockNumber,
+        fromBlock: res.blockNumber
       });
+
+      if (fightOutcomeEvents.length) {
+        playerRoll = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.playerRoll;
+        enemyRoll = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.enemyRoll;
+        xpGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.xpGain;
+        skillGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.skillGain;
+      }
 
       const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
 
       const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
-
+      await dispatch('fetchTargets', { characterId, weaponId });
       await dispatch('fetchWeaponDurability', weaponId);
 
       return {

@@ -587,8 +587,14 @@ export default Vue.extend({
   text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
 }
 
-.form-group *{
-  white-space: nowrap;
+.quest-row-wrapper{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.quest-row-wrapper > div{
+  margin: 20px 0;
 }
 
 @media (max-width: 576px) {
