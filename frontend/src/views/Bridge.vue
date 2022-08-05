@@ -498,6 +498,12 @@ export default Vue.extend({
       return totalBalance.isGreaterThanOrEqualTo(cost);
     },
   },
+  watch: {
+    defaultAccount() {
+      this.getBridgeFee();
+      this.getIncoming();
+    },
+  },
   created(){
     this.supportedChains = window.location.href.startsWith('https://test') ? config.testSupportedChains : config.supportedChains;
 
@@ -513,10 +519,7 @@ export default Vue.extend({
     }
   },
   async mounted(){
-    if (!this.contracts.NFTStorage) return;
-    this.bridgeFee = await this.getBridgeFee();
     await this.showStorage();
-    await this.getIncoming();
     this.refreshIntervall = window.setInterval(async () => await this.showStorage(), 5000);
   },
   beforeDestroy(){
@@ -700,7 +703,7 @@ export default Vue.extend({
       this.loadedStorage = true;
     },
     async getBridgeFee(){
-      return await this.fetchBridgeFee();
+      this.bridgeFee = await this.fetchBridgeFee();
     }
   },
   components: {
