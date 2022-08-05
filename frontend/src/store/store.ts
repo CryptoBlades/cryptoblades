@@ -1660,6 +1660,24 @@ export default new Vuex.Store<IState>({
       ]);
     },
 
+    async fetchReforgeWeaponFee({ state }) {
+      const { BurningManager } = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+      return await BurningManager.methods.reforgeWeaponFee().call({ from: state.defaultAccount });
+    },
+
+    async fetchReforgeWeaponWithDustFee({ state }) {
+      const { BurningManager } = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+      return await BurningManager.methods.reforgeWeaponWithDustFee().call({ from: state.defaultAccount });
+    },
+
+    async fetchBurnWeaponFee({ state }) {
+      const { BurningManager } = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+      return await BurningManager.methods.burnWeaponFee().call({ from: state.defaultAccount });
+    },
+
     async fetchTargets({ state, commit }, { characterId, weaponId }) {
       if(isUndefined(characterId) || isUndefined(weaponId)) {
         commit('updateTargets', { characterId, weaponId, targets: [] });
