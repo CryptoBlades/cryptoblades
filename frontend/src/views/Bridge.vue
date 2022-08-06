@@ -519,8 +519,10 @@ export default Vue.extend({
     }
   },
   async mounted(){
-    await this.getBridgeFee();
-    await this.getIncoming();
+    if(this.defaultAccount && this.contracts){
+      this.getBridgeFee();
+      this.getIncoming();
+    }
     await this.showStorage();
     this.refreshIntervall = window.setInterval(async () => await this.showStorage(), 5000);
   },
