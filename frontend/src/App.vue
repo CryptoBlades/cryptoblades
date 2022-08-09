@@ -150,11 +150,14 @@ interface StoreMappedGetters {
 
 interface StoreMappedActions {
   initializeStore: () => void,
-  fetchCharacterStamina: (characterId: number) => void,
   pollAccountsAndNetwork: () => void,
   configureMetaMask: () => Promise<void>,
   fetchMintCharacterFee: () => Promise<string>,
   fetchUsdSkillValue: (payload: string | number) => Promise<string | number>,
+}
+
+interface StoreMappedCombatActions {
+  fetchCharacterStamina: (characterId: number) => void,
 }
 
 interface StoreMappedMutations {
@@ -232,12 +235,15 @@ export default Vue.extend({
   methods: {
     ...mapActions([
       'initializeStore',
-      'fetchCharacterStamina',
       'pollAccountsAndNetwork',
       'configureMetaMask',
       'fetchMintCharacterFee',
       'fetchUsdSkillValue',
     ]) as StoreMappedActions,
+    ...mapActions('combat',
+      [
+        'fetchCharacterStamina'
+      ]) as StoreMappedCombatActions,
     ...mapMutations([
       'setWeb3',
       'updateCurrentChainSupportsPvP',

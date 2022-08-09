@@ -60,7 +60,7 @@ export default Vue.extend({
   },
   computed:{
     ...mapState(['characterCosmetics','currentCharacterId', 'characters']),
-    ...mapGetters(['getCharacterPower']),
+    ...mapGetters('combat', ['getCharacterPower']),
   },
   methods: {
     ...mapActions(['removeCharacterCosmetic', 'changeCharacterCosmetic']) as StoreMappedActions,

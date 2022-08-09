@@ -138,9 +138,9 @@ export default {
       'getCharacterUnclaimedXp',
       'timeUntilCharacterHasMaxStamina',
       'charactersWithIds',
-      'garrisonCharactersWithIds',
-      'getCharacterPower'
+      'garrisonCharactersWithIds'
     ]),
+    ...mapGetters('combat', ['getCharacterPower']),
 
     reputation() {
       return this.quest?.reputation ?? 0;

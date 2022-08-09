@@ -390,9 +390,9 @@ export default Vue.extend({
       'currentCharacterStamina',
       'getCharacterName',
       'getExchangeUrl',
-      'getCharacterPower',
       'getCharacterIsInArena'
     ]),
+    ...mapGetters('combat', ['getCharacterPower']),
 
     character(): any {
       if (!this.currentCharacter) {

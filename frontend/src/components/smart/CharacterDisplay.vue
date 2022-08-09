@@ -129,9 +129,9 @@ export default Vue.extend({
       'getIsCharacterViewExpanded',
       'fightGasOffset',
       'getCharacterIsInArena',
-      'fightBaseline',
-      'getCharacterPower'
+      'fightBaseline'
     ]),
+    ...mapGetters('combat', ['getCharacterPower']),
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },

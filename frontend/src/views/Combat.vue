@@ -178,7 +178,8 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
 import {getEnemyArt} from '../enemy-art';
 import {CharacterTrait, GetTotalMultiplierForTrait, WeaponElement} from '../interfaces';
 import Hint from '../components/Hint.vue';
@@ -191,7 +192,22 @@ import ModalContainer from '../components/modals/ModalContainer.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
 
-export default {
+interface StoreMappedCombatActions {
+  fetchCharacterStamina: (characterId: number) => void,
+  fetchTargets: () => void,
+  doEncounterPayNative: () => void,
+  fetchFightRewardSkill: () => void,
+  fetchFightRewardXp: () => void,
+  fetchExpectedPayoutForMonsterPower: () => void,
+  fetchHourlyAllowance: () => void,
+  fetchHourlyPowerAverage: () => void,
+  fetchHourlyPayPerFight: () => void,
+  getCurrentSkillPrice: () => void,
+  getNativeTokenPriceInUsd: () => void,
+  getCombatTokenChargePercent: () => void,
+}
+
+export default Vue.extend({
   data() {
     return {
       selectedWeaponId: null,
@@ -253,9 +269,9 @@ export default {
       'currentCharacterStamina',
       'getWeaponDurability',
       'fightGasOffset',
-      'fightBaseline',
-      'getCharacterPower'
+      'fightBaseline'
     ]),
+    ...mapGetters('combat', ['getCharacterPower']),
 
     targets() {
       return this.getTargetsByCharacterIdAndWeaponId(this.currentCharacterId, this.selectedWeaponId);
@@ -295,10 +311,22 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounterPayNative',
-      'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
-      'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight',
-      'getCurrentSkillPrice', 'getNativeTokenPriceInUsd', 'getCombatTokenChargePercent', 'fetchCharacterStamina']),
+    ...mapActions('combat',
+      [
+        'fetchTargets',
+        'doEncounterPayNative',
+        'fetchFightRewardSkill',
+        'fetchFightRewardXp',
+        //'getXPRewardsIfWin',
+        'fetchExpectedPayoutForMonsterPower',
+        'fetchHourlyAllowance',
+        'fetchHourlyPowerAverage',
+        'fetchHourlyPayPerFight',
+        'getCurrentSkillPrice',
+        'getNativeTokenPriceInUsd',
+        'getCombatTokenChargePercent',
+        'fetchCharacterStamina'
+      ]) as StoreMappedCombatActions,
     ...mapMutations(['setIsInCombat']),
     getEnemyArt,
     weaponHasDurability(id) {
@@ -556,7 +584,7 @@ export default {
     WeaponGrid,
     ModalContainer
   },
-};
+});
 </script>
 
 <style scoped>

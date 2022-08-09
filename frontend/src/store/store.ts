@@ -1,12 +1,12 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
-import _, {isUndefined} from 'lodash';
+import _ from 'lodash';
 import {bnMinimum, currentChainSupportsPvP, currentChainSupportsQuests, gasUsedToBnb, toBN} from '@/utils/common';
 
 import {getConfigValue, setUpContracts} from '@/contracts';
 
-import {characterFromContract, junkFromContract, shieldFromContract, targetFromContract, trinketFromContract, weaponFromContract} from '@/contract-models';
+import {characterFromContract, junkFromContract, shieldFromContract, trinketFromContract, weaponFromContract} from '@/contract-models';
 
 import {CharacterPower, Contract, isStakeType, IState, IWeb3EventSubscription, StakeType} from '@/interfaces';
 import {getCharacterNameFromSeed} from '@/character-name';
@@ -29,6 +29,7 @@ import staking from './staking';
 import land from './land';
 import treasury from './treasury';
 import specialWeaponsManager from './specialWeaponsManager';
+import combat from './combat';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -64,7 +65,8 @@ export default new Vuex.Store<IState>({
     staking,
     land,
     treasury,
-    specialWeaponsManager
+    specialWeaponsManager,
+    combat,
   },
   state: {
     web3: new Web3(),
@@ -167,11 +169,11 @@ export default new Vuex.Store<IState>({
       };
     },
 
-    getCharacterPower(state: IState) {
-      return (characterId: number) => {
-        return state.characterPowers[characterId];
-      };
-    },
+    // getCharacterPower(state: IState) {
+    //   return (characterId: number) => {
+    //     return state.characterPowers[characterId];
+    //   };
+    // },
 
     getCharacterIsInArena(state: IState) {
       return (characterId: number) => {
@@ -197,11 +199,11 @@ export default new Vuex.Store<IState>({
       };
     },
 
-    getWeaponDurability(state: IState) {
-      return (weaponId: number) => {
-        return state.weaponDurabilities[weaponId];
-      };
-    },
+    // getWeaponDurability(state: IState) {
+    //   return (weaponId: number) => {
+    //     return state.weaponDurabilities[weaponId];
+    //   };
+    // },
     getWeaponRename(state: IState) {
       return (weaponId: number) => {
         return state.weaponRenames[weaponId];
@@ -550,9 +552,9 @@ export default new Vuex.Store<IState>({
       state.currentCharacterId = characterId;
     },
 
-    setIsInCombat(state: IState, isInCombat: boolean) {
-      state.isInCombat = isInCombat;
-    },
+    // setIsInCombat(state: IState, isInCombat: boolean) {
+    //   state.isInCombat = isInCombat;
+    // },
 
     setIsCharacterViewExpanded(state: IState, isExpanded: boolean) {
       state.isCharacterViewExpanded = isExpanded;
@@ -797,8 +799,8 @@ export default new Vuex.Store<IState>({
             await Promise.all([
               dispatch('fetchCharacter', { characterId }),
               dispatch('fetchSkillBalance'),
-              dispatch('fetchFightRewardSkill'),
-              dispatch('fetchFightRewardXp'),
+              dispatch('combat/fetchFightRewardSkill'),
+              dispatch('combat/fetchFightRewardXp'),
               dispatch('fetchDustBalance')
             ]);
           })
@@ -821,8 +823,8 @@ export default new Vuex.Store<IState>({
             await Promise.all([
               dispatch('fetchCharacter', { characterId, inGarrison: true }),
               dispatch('fetchSkillBalance'),
-              dispatch('fetchFightRewardSkill'),
-              dispatch('fetchFightRewardXp'),
+              dispatch('combat/fetchFightRewardSkill'),
+              dispatch('combat/fetchFightRewardXp'),
               dispatch('fetchGarrisonCharactersXp'),
               dispatch('fetchDustBalance')
             ]);
@@ -1002,8 +1004,8 @@ export default new Vuex.Store<IState>({
         dispatch('fetchTrinkets', ownedTrinketIds),
         dispatch('fetchJunks', ownedJunkIds),
         dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchFightRewardXp'),
+        dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardXp'),
         dispatch('fetchGarrisonCharactersXp'),
         dispatch('fetchFightGasOffset'),
         dispatch('fetchFightBaseline'),
@@ -1335,20 +1337,20 @@ export default new Vuex.Store<IState>({
       ownedCharacterIds.push(...ownedGarrisonCharacterIds);
 
       for (const charId of ownedCharacterIds) {
-        dispatch('fetchCharacterStamina', charId);
+        dispatch('combat/fetchCharacterStamina', charId);
       }
     },
 
-    async fetchCharacterStamina({ state, commit }, characterId: number) {
-      const staminaString = await state.contracts().Characters!.methods
-        .getStaminaPoints('' + characterId)
-        .call(defaultCallOptions(state));
+    // async fetchCharacterStamina({ state, commit }, characterId: number) {
+    //   const staminaString = await state.contracts().Characters!.methods
+    //     .getStaminaPoints('' + characterId)
+    //     .call(defaultCallOptions(state));
 
-      const stamina = parseInt(staminaString, 10);
-      if (state.characterStaminas[characterId] !== stamina) {
-        commit('updateCharacterStamina', { characterId, stamina });
-      }
-    },
+    //   const stamina = parseInt(staminaString, 10);
+    //   if (state.characterStaminas[characterId] !== stamina) {
+    //     commit('updateCharacterStamina', { characterId, stamina });
+    //   }
+    // },
     async getAccountCharacters({state}) {
       if(!state.defaultAccount) return;
       const numberOfCharacters = parseInt(await state.contracts().Characters!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
@@ -1426,8 +1428,8 @@ export default new Vuex.Store<IState>({
       await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
 
       await Promise.all([
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchFightRewardXp'),
+        dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardXp'),
         dispatch('setupCharacterStaminas')
       ]);
     },
@@ -1461,7 +1463,7 @@ export default new Vuex.Store<IState>({
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardSkill'),
         dispatch('updateWeaponIds'),
         dispatch('setupWeaponDurabilities'),
         dispatch('specialWeaponsManager/fetchShardsSupply')
@@ -1497,7 +1499,7 @@ export default new Vuex.Store<IState>({
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardSkill'),
         dispatch('updateWeaponIds'),
         dispatch('setupWeaponDurabilities'),
         dispatch('specialWeaponsManager/fetchShardsSupply')
@@ -1551,8 +1553,8 @@ export default new Vuex.Store<IState>({
       await Promise.all([
         dispatch('fetchSkillBalance'),
         dispatch('updateWeaponIds'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchFightRewardXp')
+        dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardXp')
       ]);
     },
 
@@ -1608,8 +1610,8 @@ export default new Vuex.Store<IState>({
       await Promise.all([
         dispatch('fetchSkillBalance'),
         dispatch('updateWeaponIds'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchFightRewardXp'),
+        dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardXp'),
         dispatch('fetchDustBalance')
       ]);
     },
@@ -1654,8 +1656,8 @@ export default new Vuex.Store<IState>({
       await Promise.all([
         dispatch('fetchSkillBalance'),
         dispatch('updateWeaponIds'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchFightRewardXp'),
+        dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardXp'),
         dispatch('fetchDustBalance')
       ]);
     },
@@ -1678,18 +1680,18 @@ export default new Vuex.Store<IState>({
       return await BurningManager.methods.burnWeaponFee().call({ from: state.defaultAccount });
     },
 
-    async fetchTargets({ state, commit }, { characterId, weaponId }) {
-      if(isUndefined(characterId) || isUndefined(weaponId)) {
-        commit('updateTargets', { characterId, weaponId, targets: [] });
-        return;
-      }
+    // async fetchTargets({ state, commit }, { characterId, weaponId }) {
+    //   if(isUndefined(characterId) || isUndefined(weaponId)) {
+    //     commit('updateTargets', { characterId, weaponId, targets: [] });
+    //     return;
+    //   }
 
-      const targets = await state.contracts().CryptoBlades!.methods
-        .getTargets(characterId, weaponId)
-        .call(defaultCallOptions(state));
+    //   const targets = await state.contracts().CryptoBlades!.methods
+    //     .getTargets(characterId, weaponId)
+    //     .call(defaultCallOptions(state));
 
-      commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
-    },
+    //   commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
+    // },
 
     async doEncounter({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier }) {
       const res = await state.contracts().CryptoBlades!.methods
@@ -1731,30 +1733,30 @@ export default new Vuex.Store<IState>({
       };
     },
 
-    async fetchExpectedPayoutForMonsterPower({ state }, { power, isCalculator = false }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-      if(isCalculator) {
-        return await CryptoBlades.methods.getTokenGainForFight(power, false).call(defaultCallOptions(state));
-      }
-      return await CryptoBlades.methods.getTokenGainForFight(power, true).call(defaultCallOptions(state));
-    },
+    // async fetchExpectedPayoutForMonsterPower({ state }, { power, isCalculator = false }) {
+    //   const { CryptoBlades } = state.contracts();
+    //   if(!CryptoBlades) return;
+    //   if(isCalculator) {
+    //     return await CryptoBlades.methods.getTokenGainForFight(power, false).call(defaultCallOptions(state));
+    //   }
+    //   return await CryptoBlades.methods.getTokenGainForFight(power, true).call(defaultCallOptions(state));
+    // },
 
-    async fetchHourlyPowerAverage({ state }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-      return await CryptoBlades.methods.vars(4).call(defaultCallOptions(state));
-    },
-    async fetchHourlyPayPerFight({ state }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-      return await CryptoBlades.methods.vars(5).call(defaultCallOptions(state));
-    },
-    async fetchHourlyAllowance({ state }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-      return await CryptoBlades.methods.vars(18).call(defaultCallOptions(state));
-    },
+    // async fetchHourlyPowerAverage({ state }) {
+    //   const { CryptoBlades } = state.contracts();
+    //   if(!CryptoBlades) return;
+    //   return await CryptoBlades.methods.vars(4).call(defaultCallOptions(state));
+    // },
+    // async fetchHourlyPayPerFight({ state }) {
+    //   const { CryptoBlades } = state.contracts();
+    //   if(!CryptoBlades) return;
+    //   return await CryptoBlades.methods.vars(5).call(defaultCallOptions(state));
+    // },
+    // async fetchHourlyAllowance({ state }) {
+    //   const { CryptoBlades } = state.contracts();
+    //   if(!CryptoBlades) return;
+    //   return await CryptoBlades.methods.vars(18).call(defaultCallOptions(state));
+    // },
 
     async fetchRemainingTokenClaimAmountPreTax({ state }) {
       if(!_.isFunction(state.contracts)) return;
@@ -1975,38 +1977,38 @@ export default new Vuex.Store<IState>({
       return fightBaseline;
     },
 
-    async fetchFightRewardSkill({ state, commit }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
+    // async fetchFightRewardSkill({ state, commit }) {
+    //   const { CryptoBlades } = state.contracts();
+    //   if(!CryptoBlades) return;
 
-      const [skillRewards] = await Promise.all([
-        (async () => {
-          const skillRewards = await CryptoBlades.methods
-            .getTokenRewards()
-            .call(defaultCallOptions(state));
+    //   const [skillRewards] = await Promise.all([
+    //     (async () => {
+    //       const skillRewards = await CryptoBlades.methods
+    //         .getTokenRewards()
+    //         .call(defaultCallOptions(state));
 
-          commit('updateSkillRewards', { skillRewards });
+    //       commit('updateSkillRewards', { skillRewards });
 
-          return skillRewards;
-        })()
-      ]);
+    //       return skillRewards;
+    //     })()
+    //   ]);
 
-      return skillRewards;
-    },
+    //   return skillRewards;
+    // },
 
-    async fetchFightRewardXp({ state, commit }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
+    // async fetchFightRewardXp({ state, commit }) {
+    //   const { CryptoBlades } = state.contracts();
+    //   if(!CryptoBlades) return;
 
-      const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds.map(x => x.toString())).call(defaultCallOptions(state));
+    //   const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds.map(x => x.toString())).call(defaultCallOptions(state));
 
-      const xpCharaIdPairs = state.ownedCharacterIds.map((charaId, i) => {
-        return [charaId, xps[i]];
-      });
+    //   const xpCharaIdPairs = state.ownedCharacterIds.map((charaId, i) => {
+    //     return [charaId, xps[i]];
+    //   });
 
-      commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
-      return xpCharaIdPairs;
-    },
+    //   commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
+    //   return xpCharaIdPairs;
+    // },
 
     async fetchGarrisonCharactersXp({ state, commit }) {
       const { CryptoBlades } = state.contracts();
@@ -2246,7 +2248,7 @@ export default new Vuex.Store<IState>({
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill')
+        dispatch('combat/fetchFightRewardSkill')
       ]);
     },
 
@@ -2261,7 +2263,7 @@ export default new Vuex.Store<IState>({
 
       await Promise.all([
         dispatch('fetchCharacters', state.ownedCharacterIds),
-        dispatch('fetchFightRewardXp')
+        dispatch('combat/fetchFightRewardXp')
       ]);
     },
 
@@ -2803,12 +2805,12 @@ export default new Vuex.Store<IState>({
       return;
     },
 
-    async getCharacterPower({ state }, characterId) {
-      const { Characters } = state.contracts();
-      if (!Characters || !state.defaultAccount) return;
+    // async getCharacterPower({ state }, characterId) {
+    //   const { Characters } = state.contracts();
+    //   if (!Characters || !state.defaultAccount) return;
 
-      return await Characters.methods.getPower(characterId).call({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
+    //   return await Characters.methods.getPower(characterId).call({from: state.defaultAccount, gasPrice: getGasPrice()});
+    // },
 
     async burnCharactersIntoCharacter({ state, dispatch }, {burnIds, targetId}) {
       const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
@@ -2977,74 +2979,74 @@ export default new Vuex.Store<IState>({
       return CryptoBlades.methods.getMintCharacterFee().call(defaultCallOptions(state));
     },
 
-    async getCurrentSkillPrice({ state }) {
-      const { TokensManager } = state.contracts();
-      if (!TokensManager || !state.defaultAccount) return;
+    // async getCurrentSkillPrice({ state }) {
+    //   const { TokensManager } = state.contracts();
+    //   if (!TokensManager || !state.defaultAccount) return;
 
-      return await TokensManager.methods.skillTokenPrice().call(defaultCallOptions(state));
-    },
+    //   return await TokensManager.methods.skillTokenPrice().call(defaultCallOptions(state));
+    // },
 
-    async getNativeTokenPriceInUsd({ state }) {
-      const { TokensManager } = state.contracts();
-      if (!TokensManager || !state.defaultAccount) return;
+    // async getNativeTokenPriceInUsd({ state }) {
+    //   const { TokensManager } = state.contracts();
+    //   if (!TokensManager || !state.defaultAccount) return;
 
-      return await TokensManager.methods.tokenPrice().call(defaultCallOptions(state));
-    },
+    //   return await TokensManager.methods.tokenPrice().call(defaultCallOptions(state));
+    // },
 
-    async doEncounterPayNative({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier, offsetCost }) {
-      const { TokensManager, CryptoBlades } = state.contracts();
-      if (!TokensManager || !CryptoBlades || !state.defaultAccount) return;
+    // async doEncounterPayNative({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier, offsetCost }) {
+    //   const { TokensManager, CryptoBlades } = state.contracts();
+    //   if (!TokensManager || !CryptoBlades || !state.defaultAccount) return;
 
-      const res = await TokensManager.methods
-        .fight(
-          characterId,
-          weaponId,
-          targetString,
-          fightMultiplier
-        )
-        .send({ from: state.defaultAccount, gasPrice: getGasPrice(), gas: '300000', value: (+offsetCost ? +offsetCost : 1)*fightMultiplier });
+    //   const res = await TokensManager.methods
+    //     .fight(
+    //       characterId,
+    //       weaponId,
+    //       targetString,
+    //       fightMultiplier
+    //     )
+    //     .send({ from: state.defaultAccount, gasPrice: getGasPrice(), gas: '300000', value: (+offsetCost ? +offsetCost : 1)*fightMultiplier });
 
-      let playerRoll = '';
-      let enemyRoll = '';
-      let xpGain;
-      let skillGain;
+    //   let playerRoll = '';
+    //   let enemyRoll = '';
+    //   let xpGain;
+    //   let skillGain;
 
-      const fightOutcomeEvents = await CryptoBlades.getPastEvents('FightOutcome', {
-        filter: { owner: state.defaultAccount!, character: characterId },
-        toBlock: res.blockNumber,
-        fromBlock: res.blockNumber
-      });
+    //   const fightOutcomeEvents = await CryptoBlades.getPastEvents('FightOutcome', {
+    //     filter: { owner: state.defaultAccount!, character: characterId },
+    //     toBlock: res.blockNumber,
+    //     fromBlock: res.blockNumber
+    //   });
 
-      if (fightOutcomeEvents.length) {
-        playerRoll = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.playerRoll;
-        enemyRoll = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.enemyRoll;
-        xpGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.xpGain;
-        skillGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.skillGain;
-      }
+    //   if (fightOutcomeEvents.length) {
+    //     playerRoll = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.playerRoll;
+    //     enemyRoll = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.enemyRoll;
+    //     xpGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.xpGain;
+    //     skillGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.skillGain;
+    //   }
 
-      const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
+    //   const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
 
-      const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
-      await dispatch('fetchTargets', { characterId, weaponId });
-      await dispatch('fetchWeaponDurability', weaponId);
+    //   const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
+    //   await dispatch('fetchTargets', { characterId, weaponId });
+    //   await dispatch('fetchWeaponDurability', weaponId);
 
-      return {
-        isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
-        playerRoll,
-        enemyRoll,
-        xpGain,
-        skillGain,
-        bnbGasUsed
-      };
-    },
+    //   return {
+    //     isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
+    //     playerRoll,
+    //     enemyRoll,
+    //     xpGain,
+    //     skillGain,
+    //     bnbGasUsed
+    //   };
+    // },
 
-    async getCombatTokenChargePercent({ state }) {
-      const { TokensManager } = state.contracts();
-      if(!TokensManager || !state.defaultAccount) return;
+    // async getCombatTokenChargePercent({ state }) {
+    //   const { TokensManager } = state.contracts();
+    //   if(!TokensManager || !state.defaultAccount) return;
 
-      return await TokensManager.methods
-        .combatTokenChargePercent()
-        .call(defaultCallOptions(state));
-    },
+    //   return await TokensManager.methods
+    //     .combatTokenChargePercent()
+    //     .call(defaultCallOptions(state));
+    // },
   }
 });

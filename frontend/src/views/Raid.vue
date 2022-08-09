@@ -506,7 +506,8 @@ export default Vue.extend({
 
   computed: {
     ...mapState(['characters', 'currentCharacterId', 'ownedCharacterIds']),
-    ...mapGetters(['ownWeapons', 'currentCharacter', 'getCharacterName', 'getCharacterPower']),
+    ...mapGetters(['ownWeapons', 'currentCharacter', 'getCharacterName']),
+    ...mapGetters('combat', ['getCharacterPower']),
 
     currentMultiplier(): string {
       if(!this.selectedWeaponId) return '0';

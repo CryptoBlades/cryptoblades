@@ -112,6 +112,7 @@ import { getCleanName, isProfaneIsh } from '../../rename-censor';
 import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 import i18n from '@/i18n';
 import {WeaponCosmetic} from '@/enums/WeaponCosmetic';
+import { ICombatState } from '@/store/combat';
 
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
 interface Skin {
@@ -121,6 +122,9 @@ interface Skin {
 }
 interface StoreMappedGetters {
   weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
+}
+interface StoreMappedCombatGetters {
+  getWeaponDurability(state: ICombatState): number;
 }
 interface StoreMappedActions {
   fetchWeapons(weaponIds: string[]): Promise<void>;
@@ -254,7 +258,8 @@ export default Vue.extend({
   },
   computed: {
     ...(mapState(['ownedWeaponIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['weaponsWithIds','getWeaponDurability',]) as Accessors<StoreMappedGetters>),
+    ...(mapGetters(['weaponsWithIds']) as Accessors<StoreMappedGetters>),
+    ...(mapGetters('combat', ['getWeaponDurability']) as Accessors<StoreMappedCombatGetters>),
     weaponIdsToDisplay(): string[] {
       if (this.showGivenWeaponIds) {
         return this.weaponIds;
