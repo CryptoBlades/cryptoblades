@@ -315,8 +315,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         restricted returns (uint256, uint256) {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
-        FightData memory data;
-        {
+
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
             _getFightDataAndDrainStaminaUnpacked(fighter, char, fightMultiplier);
         
@@ -333,12 +332,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             now / 1 hours
         );
     
-        data = FightData(
+        FightData memory data = FightData(
             Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
             uint24(charTrait | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
             uint24(target & 0xFFFFFF)
         );
-        }
 
         return performFight(
             fighter,
