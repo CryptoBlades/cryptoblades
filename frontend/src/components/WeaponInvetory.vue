@@ -1,5 +1,6 @@
 <template>
-  <div class="weapon-icon"
+  <div v-if="weapon"
+    class="weapon-icon"
     :id="'weapon-details'"
     :key="weapon.id"
     v-bind:class="[(getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '')]"
@@ -201,7 +202,11 @@ export default {
   props: ['weapon', 'favorite', 'displayType'],
 
   computed: {
-    ...mapState(['maxDurability', 'specialWeaponArts']),
+    ...mapState(['maxDurability']),
+    ...mapState('specialWeaponsManager',
+      ([
+        'specialWeaponArts',
+      ])),
     ...mapGetters([
       'currentCharacter',
       'getWeaponDurability',

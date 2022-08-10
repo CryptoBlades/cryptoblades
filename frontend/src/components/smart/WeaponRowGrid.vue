@@ -82,7 +82,9 @@
           {{$t('weaponGrid.pickSkin')}}
         </span>
         <select class="form-control" v-model="targetSkin">
-          <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+          <option v-for="skin in availableSkins" :value="skin.id" :key="skin.id">
+            {{ skin.name || $t(`cosmetics.weaponCosmetic.${WeaponCosmetic[skin.id]}`) }}
+          </option>
         </select>
         <div class="footer-btn mb-4">
           <button class="close-btn"   @click="changeWeaponSkinCall()">{{$t('blacksmith.confirm')}}</button>
@@ -109,8 +111,14 @@ import { BModal } from 'bootstrap-vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
 import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 import i18n from '@/i18n';
+import {WeaponCosmetic} from '@/enums/WeaponCosmetic';
 
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
+interface Skin {
+  id: number;
+  name?: string;
+  amount: number;
+}
 interface StoreMappedGetters {
   weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
 }
@@ -134,7 +142,6 @@ interface Data {
   haveWeaponCosmetics: number[];
   targetSkin: string;
   currentWeaponId: number | string | null;
-  weaponCosmeticsNames: string[];
   hoveredWeapon: string [];
 }
 const sorts = [
@@ -236,27 +243,7 @@ export default Vue.extend({
       targetSkin: '',
       currentWeaponId: null,
       hoveredWeapon: [],
-      weaponCosmeticsNames: [
-        i18n.t('market.nftList.weaponGrayscale'),
-        i18n.t('market.nftList.weaponContrast'),
-        i18n.t('market.nftList.weaponSepia'),
-        i18n.t('market.nftList.weaponInvert'),
-        i18n.t('market.nftList.weaponBlur'),
-        i18n.t('market.nftList.weaponFireglow'),
-        i18n.t('market.nftList.weaponEarthglow'),
-        i18n.t('market.nftList.weaponLightningglow'),
-        i18n.t('market.nftList.weaponWaterglow'),
-        i18n.t('market.nftList.weaponRainbowglow'),
-        i18n.t('market.nftList.weaponDarkglow'),
-        i18n.t('market.nftList.weaponGhost'),
-        i18n.t('market.nftList.weaponPolicelights'),
-        i18n.t('market.nftList.weaponNeonborder'),
-        i18n.t('market.nftList.weaponRotatingNeonborder'),
-        i18n.t('market.nftList.weaponDiamondborder'),
-        i18n.t('market.nftList.weaponGoldborder'),
-        i18n.t('market.nftList.weaponSilverborder'),
-        i18n.t('market.nftList.weaponBronzeborder')
-      ]
+      WeaponCosmetic
     } as Data;
   },
   components: {
@@ -321,12 +308,21 @@ export default Vue.extend({
     cleanRename(): string {
       return getCleanName(this.weaponRename);
     },
-    availableSkins(): string[] {
+    availableSkins(): Skin[] {
       const availableSkins = [];
-      availableSkins.push('No Skin');
+
+      availableSkins.push({
+        id: 0,
+        name: 'No skin',
+        amount: 1
+      });
+
       for(let i = 0; i < 19; i++) {
         if(+this.haveWeaponCosmetics[i] > 0) {
-          availableSkins.push(this.weaponCosmeticsNames[i]);
+          availableSkins.push({
+            id: i + 1,
+            amount: +this.haveWeaponCosmetics[i]
+          });
         }
       }
       return availableSkins;
@@ -419,14 +415,12 @@ export default Vue.extend({
     },
     async changeWeaponSkinCall() {
       if(!this.currentWeaponId) return;
-      // +1 because cosmetics are 1 (not 0) based
-      const selectedSkinId = this.weaponCosmeticsNames.findIndex(x => x === this.targetSkin) + 1;
-      if(selectedSkinId === 0) {
+      if(+this.targetSkin === 0) {
         await this.removeWeaponCosmetic({ id: +this.currentWeaponId });
         await this.loadCosmeticsCount();
       } else {
-        await this.changeWeaponCosmetic({ id: +this.currentWeaponId, cosmetic: selectedSkinId });
-        this.haveWeaponCosmetics[selectedSkinId - 1] = await this.fetchOwnedWeaponCosmetics({cosmetic: selectedSkinId});
+        await this.changeWeaponCosmetic({ id: +this.currentWeaponId, cosmetic: +this.targetSkin });
+        this.haveWeaponCosmetics[+this.targetSkin] = await this.fetchOwnedWeaponCosmetics({cosmetic: +this.targetSkin});
         await this.loadCosmeticsCount();
       }
       this.updateOptions();

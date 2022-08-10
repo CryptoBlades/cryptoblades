@@ -63,7 +63,10 @@ export default {
     }
   },
   computed: {
-    ...mapState(['specialWeaponArts']),
+    ...mapState('specialWeaponsManager',
+      ([
+        'specialWeaponArts',
+      ])),
     getElementImageUrl() {
       if (this.weapon.element === 'Fire') {
         return fire;

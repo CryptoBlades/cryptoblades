@@ -229,7 +229,7 @@ export default Vue.extend({
       return this.characters[this.currentCharacterId];
     },
     haveCharacters() {
-      return this.ownedGarrisonCharacterIds.length > 0 || this.ownCharacters?.length > 0;
+      return this.ownedGarrisonCharacterIds?.length > 0 || this.ownCharacters?.length > 0;
     },
     characterLvl(): number {
       return this.characters[this.currentCharacterId]?.level + 1 ?? 1;

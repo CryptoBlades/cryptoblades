@@ -97,7 +97,7 @@
 
             <a
               class="menu-icon"
-              href="https://bazaar.market"
+              :href="BazaarLink()"
               target="_blank"
             >
               <img src="../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
@@ -387,6 +387,11 @@ export default Vue.extend({
 
   methods: {
     ...(mapActions(['claimTokenRewards']) as StoreMappedActions),
+
+    BazaarLink() {
+      return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
+    },
+
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
       if (this.showGraphics) localStorage.setItem('useGraphics', 'true');

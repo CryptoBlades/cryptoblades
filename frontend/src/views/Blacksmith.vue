@@ -128,7 +128,7 @@
 
     <Transition name="slide-fade">
       <div class="forging-modal" v-if="showModal" v-on:click.self="closeModal()">
-        <div class="forge-loading" v-if="spin && modalType == 'forge'">
+        <div class="forge-loading" v-if="spin && modalType === 'forge'">
           <div class="row new-weapons">
             <h3>{{$t('blacksmith.forging')}}</h3>
           </div>
@@ -182,10 +182,10 @@
         </div>
       </b-modal>
 
-      <b-modal size="lg" class="centered-modal" centered hide-footer hide-header ref="new-forge-weapon">
+      <b-modal size="xl" class="centered-modal" centered hide-footer hide-header ref="new-forge-weapon">
         <div class="row new-weapons">
-          <img src="../assets/header-line.png" alt="">
-          <h3>{{$t('blacksmith.dwarvesForge')}}</h3>
+          <img src="../assets/header-line.png" alt="" class="max-width-100">
+          <h3 class="text-center">{{$t('blacksmith.dwarvesForge')}}</h3>
         </div>
         <div class="weapon-list">
           <weapon-grid :showGivenWeaponIds="true" :weaponIds="newForged" :newWeapon="true" :noPagination="true"/>
@@ -798,7 +798,7 @@ export default Vue.extend({
   },
 
   async mounted(){
-    (this as any).$router.push({ path: 'blacksmith', query: { tab: 'weapon' }});
+    (this as any).$router.push({ path: 'blacksmith', query: { tab: 'weapon' }}).catch(()=>{});
     Events.$on('forge-weapon', (id: number) =>{
       if(id === 0){
         this.onClickForge(id);
@@ -816,6 +816,8 @@ export default Vue.extend({
     Events.$on('create-dust', () =>{
       this.showMassDustConfirmation();
     });
+
+    this.updateForgeData();
   },
 
   methods: {
@@ -823,7 +825,8 @@ export default Vue.extend({
       'burnWeapon', 'massBurnWeapons',
       'reforgeWeaponWithDust', 'massBurnWeapons',
       'fetchMintWeaponPriceDecreasePerSecond', 'fetchWeaponMintIncreasePrice',
-      'fetchMintWeaponMinPrice', 'fetchMintWeaponFee']),
+      'fetchMintWeaponMinPrice', 'fetchMintWeaponFee', 'fetchUsdSkillValue',
+      'fetchReforgeWeaponFee', 'fetchReforgeWeaponWithDustFee', 'fetchBurnWeaponFee']),
     ...mapActions('specialWeaponsManager', ['fetchSpecialWeaponEvents']),
     ...mapMutations(['updateSpecialWeaponEventId']),
     setStakedForForgeValue(value: boolean){
@@ -1125,8 +1128,9 @@ export default Vue.extend({
       }
     },
     async updateForgeData(){
+      if(!this.defaultAccount) return;
       const forgeCost = await this.fetchMintWeaponFee();
-      const skillForgeCost = await this.contracts.CryptoBlades!.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
+      const skillForgeCost = await this.fetchUsdSkillValue(forgeCost);
       this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
       this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
       this.isLoading = false;
@@ -1139,16 +1143,16 @@ export default Vue.extend({
       if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8).multipliedBy(10))).isLessThan(0)){
         this.disableX10ForgeWithStaked = true;
       }
-      const reforgeCost = await this.contracts.BurningManager!.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
-      const skillReforgeCost = await this.contracts.BurningManager!.methods.usdToSkill(reforgeCost).call({ from: this.defaultAccount });
+      const reforgeCost = await this.fetchReforgeWeaponFee();
+      const skillReforgeCost = await this.fetchUsdSkillValue(reforgeCost);
       this.reforgeCost = new BN(skillReforgeCost).div(new BN(10).pow(18)).toFixed(4);
 
-      const reforgeDustCost = await this.contracts.BurningManager!.methods.reforgeWeaponWithDustFee().call({ from: this.defaultAccount });
-      const skillDustReforgeCost = await this.contracts.BurningManager!.methods.usdToSkill(reforgeDustCost).call({ from: this.defaultAccount });
+      const reforgeDustCost = await this.fetchReforgeWeaponWithDustFee();
+      const skillDustReforgeCost = await this.fetchUsdSkillValue(reforgeDustCost);
       this.dustReforgeCost = new BN(skillDustReforgeCost).div(new BN(10).pow(18)).toFixed(4);
 
-      const burnCost = await this.contracts.BurningManager!.methods.burnWeaponFee().call({ from: this.defaultAccount });
-      const skillBurnCost = await this.contracts.BurningManager!.methods.usdToSkill(burnCost).call({ from: this.defaultAccount });
+      const burnCost = await this.fetchBurnWeaponFee();
+      const skillBurnCost = await this.fetchUsdSkillValue(burnCost);
       this.burnCost = new BN(skillBurnCost).div(new BN(10).pow(18)).toFixed(4);
       if(window.location.href.split('&').find(x => x === 'showSpecialForge')) {
         Events.$emit('show-special-forge-modal');
@@ -1381,6 +1385,10 @@ export default Vue.extend({
 .new-weapons {
   display: flex;
   justify-content: center;
+}
+
+.max-width-100 {
+  max-width: 100%;
 }
 
 .footer-close-forge {

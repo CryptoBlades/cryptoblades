@@ -106,6 +106,7 @@ export default Vue.extend({
   border-radius: 10px;
   align-items: center;
   font-family: Roboto;
+  height: clamp(200px, 20vh, 250px);
 }
 
 .busy-quest-row {
@@ -116,6 +117,7 @@ export default Vue.extend({
 @media (max-width: 576px) {
   .quest-row {
     flex-direction: column;
+    height: auto;
   }
 }
 </style>

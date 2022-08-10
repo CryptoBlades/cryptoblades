@@ -2317,7 +2317,7 @@
     },
     "links": {},
     "address": "0x98145a2fEBac238280bbdEDc2757dC162318b16e",
-    "transactionHash": "0x442757ff5a669f50ee2d9a170233d7484471df9d40c1623c08bf29ffa45ea092"
+    "transactionHash": "0x0d9b01dc0c12b8833f4f19d17e85a9a73e2be837202727163a41f80c3d9e40f6"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
@@ -3695,7 +3695,7 @@
     },
     "links": {},
     "address": "0xA3637832a813d0bA6B528133dfa06Ab46Db2722a",
-    "transactionHash": "0x35d7d4fbc7b3ce6e99b116a684b4717f1ea6841006147f8e2e57cc2e5e97d5ed"
+    "transactionHash": "0xee6abdfa569ce2d6640eede2bc58d3e76856f8e2d89358d29185405256eee98c"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -3796,7 +3796,7 @@
     },
     "links": {},
     "address": "0xA9B55940748Dd003e3da10DDa9C5706AEF8fB4CD",
-    "transactionHash": "0x2377ad02276766db7afe9781a39f1d681ddbe55b3acbda0ea8886d6b3ce7db44"
+    "transactionHash": "0x712f4c801107e7b5bc8e82700bddc2669d0e1929629a922234cbb664a12506a5"
   },
   "build/contracts/Raid1.json": {
     "events": {},
@@ -4766,6 +4766,88 @@
     "links": {},
     "address": "0x5a61ae603Af252dBa80c1005502Fe5A7C590FD4D",
     "transactionHash": "0x5fd9f9c05d01c71e986c1fe16fac9c7ffcb3ffa6d55cb1ee82728727840900d5"
+  },
+  "build/contracts/TokensManager.json": {
+    "events": {
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0x9259036aAa3dE32FD74D05058eaE139ccda1A48b",
+    "transactionHash": "0x99034c66471f9e272deab506761c8f757ea405cae49251bc91c491071e887de5"
   },
   "build/contracts/Treasury.json": {
     "events": {},
