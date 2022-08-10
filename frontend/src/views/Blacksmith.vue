@@ -825,7 +825,8 @@ export default Vue.extend({
       'burnWeapon', 'massBurnWeapons',
       'reforgeWeaponWithDust', 'massBurnWeapons',
       'fetchMintWeaponPriceDecreasePerSecond', 'fetchWeaponMintIncreasePrice',
-      'fetchMintWeaponMinPrice', 'fetchMintWeaponFee']),
+      'fetchMintWeaponMinPrice', 'fetchMintWeaponFee', 'fetchUsdSkillValue',
+      'fetchReforgeWeaponFee', 'fetchReforgeWeaponWithDustFee', 'fetchBurnWeaponFee']),
     ...mapActions('specialWeaponsManager', ['fetchSpecialWeaponEvents']),
     ...mapMutations(['updateSpecialWeaponEventId']),
     setStakedForForgeValue(value: boolean){
@@ -1129,7 +1130,7 @@ export default Vue.extend({
     async updateForgeData(){
       if(!this.defaultAccount) return;
       const forgeCost = await this.fetchMintWeaponFee();
-      const skillForgeCost = await this.contracts.CryptoBlades!.methods.usdToSkill(forgeCost).call({ from: this.defaultAccount });
+      const skillForgeCost = await this.fetchUsdSkillValue(forgeCost);
       this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);
       this.forgeCostBN = new BN(skillForgeCost).div(new BN(10).pow(18));
       this.isLoading = false;
@@ -1142,16 +1143,16 @@ export default Vue.extend({
       if((stakedSkillBalanceThatCanBeSpentBN.minus(this.forgeCostBN.multipliedBy(0.8).multipliedBy(10))).isLessThan(0)){
         this.disableX10ForgeWithStaked = true;
       }
-      const reforgeCost = await this.contracts.BurningManager!.methods.reforgeWeaponFee().call({ from: this.defaultAccount });
-      const skillReforgeCost = await this.contracts.BurningManager!.methods.usdToSkill(reforgeCost).call({ from: this.defaultAccount });
+      const reforgeCost = await this.fetchReforgeWeaponFee();
+      const skillReforgeCost = await this.fetchUsdSkillValue(reforgeCost);
       this.reforgeCost = new BN(skillReforgeCost).div(new BN(10).pow(18)).toFixed(4);
 
-      const reforgeDustCost = await this.contracts.BurningManager!.methods.reforgeWeaponWithDustFee().call({ from: this.defaultAccount });
-      const skillDustReforgeCost = await this.contracts.BurningManager!.methods.usdToSkill(reforgeDustCost).call({ from: this.defaultAccount });
+      const reforgeDustCost = await this.fetchReforgeWeaponWithDustFee();
+      const skillDustReforgeCost = await this.fetchUsdSkillValue(reforgeDustCost);
       this.dustReforgeCost = new BN(skillDustReforgeCost).div(new BN(10).pow(18)).toFixed(4);
 
-      const burnCost = await this.contracts.BurningManager!.methods.burnWeaponFee().call({ from: this.defaultAccount });
-      const skillBurnCost = await this.contracts.BurningManager!.methods.usdToSkill(burnCost).call({ from: this.defaultAccount });
+      const burnCost = await this.fetchBurnWeaponFee();
+      const skillBurnCost = await this.fetchUsdSkillValue(burnCost);
       this.burnCost = new BN(skillBurnCost).div(new BN(10).pow(18)).toFixed(4);
       if(window.location.href.split('&').find(x => x === 'showSpecialForge')) {
         Events.$emit('show-special-forge-modal');

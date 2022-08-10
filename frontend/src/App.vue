@@ -153,6 +153,8 @@ interface StoreMappedActions {
   fetchCharacterStamina: (characterId: number) => void,
   pollAccountsAndNetwork: () => void,
   configureMetaMask: () => Promise<void>,
+  fetchMintCharacterFee: () => Promise<string>,
+  fetchUsdSkillValue: (payload: string | number) => Promise<string | number>,
 }
 
 interface StoreMappedMutations {
@@ -233,6 +235,8 @@ export default Vue.extend({
       'fetchCharacterStamina',
       'pollAccountsAndNetwork',
       'configureMetaMask',
+      'fetchMintCharacterFee',
+      'fetchUsdSkillValue',
     ]) as StoreMappedActions,
     ...mapMutations([
       'setWeb3',
@@ -283,8 +287,8 @@ export default Vue.extend({
     },
     async initializeRecruitCost() {
       if(!this.contracts.CryptoBlades) return;
-      const recruitCost = await this.contracts.CryptoBlades.methods.getMintCharacterFee().call({ from: this.defaultAccount });
-      const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call({ from: this.defaultAccount });
+      const recruitCost = await this.fetchMintCharacterFee();
+      const skillRecruitCost = await this.fetchUsdSkillValue(recruitCost);
       this.recruitCost = new BN(skillRecruitCost)
         .div(new BN(10).pow(18))
         .toFixed(4);
