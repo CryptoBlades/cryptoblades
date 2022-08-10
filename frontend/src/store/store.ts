@@ -1691,46 +1691,6 @@ export default new Vuex.Store<IState>({
       commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
     },
 
-    async doEncounter({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier }) {
-      const res = await state.contracts().CryptoBlades!.methods
-        .fight(
-          characterId,
-          weaponId,
-          targetString,
-          fightMultiplier
-        )
-        .send({ from: state.defaultAccount, gas: '300000', gasPrice: getGasPrice() });
-
-      await dispatch('fetchTargets', { characterId, weaponId });
-
-
-      const {
-        /*owner,
-        character,
-        weapon,
-        target,*/
-        playerRoll,
-        enemyRoll,
-        xpGain,
-        skillGain
-      } = res.events.FightOutcome.returnValues;
-
-      const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
-
-      const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
-
-      await dispatch('fetchWeaponDurability', weaponId);
-
-      return {
-        isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
-        playerRoll,
-        enemyRoll,
-        xpGain,
-        skillGain,
-        bnbGasUsed
-      };
-    },
-
     async fetchExpectedPayoutForMonsterPower({ state }, { power, isCalculator = false }) {
       const { CryptoBlades } = state.contracts();
       if(!CryptoBlades) return;
