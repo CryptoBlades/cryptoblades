@@ -43,7 +43,7 @@ contract TokensManager is Initializable, AccessControlUpgradeable {
     }
 
     function fight(uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external payable {
-        (uint256 tokens, uint256 expectedTokens) = game.fight(char, wep, target, fightMultiplier);
+        (uint256 tokens, uint256 expectedTokens) = game.fight(msg.sender, char, wep, target, fightMultiplier);
 
         uint256 offset = ABDKMath64x64.mulu(getSkillToNativeRatio(), expectedTokens.mul(combatTokenChargePercent).div(100));
 
