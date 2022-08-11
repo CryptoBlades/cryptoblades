@@ -154,59 +154,59 @@ const combat = {
         bnbGasUsed
       };
     },
-  },
 
-  async getCombatTokenChargePercent({ state }: {state: IState}) {
-    const { TokensManager } = state.contracts();
-    if(!TokensManager || !state.defaultAccount) return;
+    async getCombatTokenChargePercent({ state }: {state: IState}) {
+      const { TokensManager } = state.contracts();
+      if(!TokensManager || !state.defaultAccount) return;
 
-    return await TokensManager.methods
-      .combatTokenChargePercent()
-      .call(defaultCallOptions(state));
-  },
+      return await TokensManager.methods
+        .combatTokenChargePercent()
+        .call(defaultCallOptions(state));
+    },
 
-  async fetchFightRewardSkill({ state, commit }: {state: IState, commit: Commit}) {
-    const { CryptoBlades } = state.contracts();
-    if(!CryptoBlades) return;
+    async fetchFightRewardSkill({ state, commit }: {state: IState, commit: Commit}) {
+      const { CryptoBlades } = state.contracts();
+      if(!CryptoBlades) return;
 
-    const [skillRewards] = await Promise.all([
-      (async () => {
-        const skillRewards = await CryptoBlades.methods
-          .getTokenRewards()
-          .call(defaultCallOptions(state));
+      const [skillRewards] = await Promise.all([
+        (async () => {
+          const skillRewards = await CryptoBlades.methods
+            .getTokenRewards()
+            .call(defaultCallOptions(state));
 
-        commit('updateSkillRewards', { skillRewards });
+          commit('updateSkillRewards', { skillRewards });
 
-        return skillRewards;
-      })()
-    ]);
+          return skillRewards;
+        })()
+      ]);
 
-    return skillRewards;
-  },
+      return skillRewards;
+    },
 
-  async fetchFightRewardXp({ rootState, state, commit }: {rootState: IState, state: ICombatState, commit: Commit}) {
-    const { CryptoBlades } = rootState.contracts();
-    if(!CryptoBlades) return;
+    async fetchFightRewardXp({ rootState, state, commit }: {rootState: IState, state: ICombatState, commit: Commit}) {
+      const { CryptoBlades } = rootState.contracts();
+      if(!CryptoBlades) return;
 
-    const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds.map(x => x.toString())).call(defaultCallOptions(rootState));
+      const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds.map(x => x.toString())).call(defaultCallOptions(rootState));
 
-    const xpCharaIdPairs = state.ownedCharacterIds.map((charaId, i) => {
-      return [charaId, xps[i]];
-    });
+      const xpCharaIdPairs = state.ownedCharacterIds.map((charaId, i) => {
+        return [charaId, xps[i]];
+      });
 
-    commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
-    return xpCharaIdPairs;
-  },
+      commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
+      return xpCharaIdPairs;
+    },
 
-  async fetchCharacterStamina({ rootState, state, commit }: {rootState: IState, state: ICombatState, commit: Commit}, characterId: number) {
-    const staminaString = await rootState.contracts().Characters!.methods
-      .getStaminaPoints('' + characterId)
-      .call(defaultCallOptions(rootState));
+    async fetchCharacterStamina({ rootState, state, commit }: {rootState: IState, state: ICombatState, commit: Commit}, characterId: number) {
+      const staminaString = await rootState.contracts().Characters!.methods
+        .getStaminaPoints('' + characterId)
+        .call(defaultCallOptions(rootState));
 
-    const stamina = parseInt(staminaString, 10);
-    if (state.characterStaminas[characterId] !== stamina) {
-      commit('updateCharacterStamina', { characterId, stamina });
-    }
+      const stamina = parseInt(staminaString, 10);
+      if (state.characterStaminas[characterId] !== stamina) {
+        commit('updateCharacterStamina', { characterId, stamina });
+      }
+    },
   },
 };
 

@@ -181,7 +181,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {getEnemyArt} from '../enemy-art';
-import {CharacterTrait, GetTotalMultiplierForTrait, WeaponElement} from '../interfaces';
+import {CharacterTrait, GetTotalMultiplierForTrait, ITarget, WeaponElement} from '../interfaces';
 import Hint from '../components/Hint.vue';
 import Events from '../events';
 import {fromWeiEther, toBN} from '../utils/common';
@@ -191,24 +191,122 @@ import WeaponGrid from '../components/smart/WeaponGridNew.vue';
 import ModalContainer from '../components/modals/ModalContainer.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
+import i18n from '../i18n';
+import VueI18n from 'vue-i18n';
 
 interface StoreMappedCombatActions {
-  fetchCharacterStamina: (characterId: number) => void,
-  fetchTargets: () => void,
-  doEncounterPayNative: () => void,
-  fetchFightRewardSkill: () => void,
-  fetchFightRewardXp: () => void,
-  fetchExpectedPayoutForMonsterPower: () => void,
-  fetchHourlyAllowance: () => void,
-  fetchHourlyPowerAverage: () => void,
-  fetchHourlyPayPerFight: () => void,
-  getCurrentSkillPrice: () => void,
-  getNativeTokenPriceInUsd: () => void,
-  getCombatTokenChargePercent: () => void,
+  fetchCharacterStamina(characterId: number): Promise<void>;
+  fetchTargets(characterId: number, weaponId: number): Promise<void>;
+  doEncounterPayNative(
+    characterId: number,
+    weaponId: number,
+    targetString: number,
+    fightMultiplier: number,
+    offsetCost: number
+  ): Promise<{
+    isVictory: boolean,
+    playerRoll: string,
+    enemyRoll: string,
+    xpGain: any,
+    skillGain: any,
+    bnbGasUsed: string,
+  }>;
+  fetchFightRewardSkill(): Promise<string>;
+  fetchFightRewardXp(): Promise<string[][]>;
+  fetchExpectedPayoutForMonsterPower(
+    power: string | number,
+    isCalculator: boolean): Promise<string>;
+  fetchHourlyAllowance(): Promise<string>;
+  fetchHourlyPowerAverage(): Promise<string>;
+  fetchHourlyPayPerFight(): Promise<string>;
+  getCurrentSkillPrice(): Promise<string>;
+  getNativeTokenPriceInUsd(): Promise<string>;
+  getCombatTokenChargePercent(): Promise<string>;
 }
 
-export default Vue.extend({
-  data() {
+interface ICombatData {
+  selectedWeaponId: any;
+  error: any;
+  waitingResults: boolean;
+  resultsAvailable: boolean;
+  fightResults: any;
+  intervalSeconds: any;
+  intervalMinutes: any;
+  timeSeconds: any;
+  timeMinutes: any;
+  fightXpGain: number;
+  selectedWeapon: any;
+  fightMultiplier: number;
+  staminaPerFight: number;
+  targetExpectedPayouts: number[];
+  targetToFight: any;
+  targetToFightIndex: any;
+  minutesToNextAllowance: any;
+  secondsToNextAllowance: any;
+  lastAllowanceSkill: any;
+  nextAllowanceCounter: any;
+  powerAvg: any;
+  expectedSkill: any;
+  activeCard: any;
+  isToggled: boolean;
+  gridStyling: string;
+  index: number;
+  counterInterval: any;
+}
+
+interface ICombatMethod {
+  getEnemyArt(enemyId: number): string,
+  weaponHasDurability(id: number): boolean,
+  charHasStamina(): boolean,
+  getCharacterTrait(trait: CharacterTrait): string,
+  getWinChance(enemyPower: number, enemyElement: number): VueI18n.TranslateResult,
+  getElementAdvantage(playerElement: number, enemyElement: number): 1 | 0 | -1,
+  enter(el: any, done: any): void,
+  beforeEnter(el: any): void,
+  hideBottomMenu(bol: any): void,
+  getExpectedPayout(): Promise<void>,
+  getHourlyAllowance(): Promise<void>,
+  onClickEncounter(targetToFight: ITarget, targetIndex: number): Promise<void>,
+  fightTarget(targetToFight: ITarget, targetIndex: number): Promise<void>,
+  formattedSkill(skill: any): string,
+  getPotentialXp(targetToFight: ITarget): number,
+  setFightMultiplier(): void,
+  setStaminaSelectorValues(): {
+    value: null,
+    text:  VueI18n.TranslateResult,
+    disabled: boolean
+  }[] |
+  {
+    value: number,
+    text:  VueI18n.TranslateResult,
+    disabled: boolean
+  }[],
+  getExpectedPayouts(): Promise<void>,
+  updateStaminaPerFight(): void,
+  changeEquipedWeapon(): void,
+  addCommas(nStr: string): string,
+  changeColorChange(stat: string): string,
+  getTargetsByCharacterIdAndWeaponId(currentCharacterId: number, selectedWeaponId: number): ITarget,
+  // targets(): any[],
+  // isLoadingTargets(): boolean,
+  // selections(): any[],
+  // updateResults(): any[],
+}
+interface ICombatComputed {
+  //targets(): any[],
+  //isLoadingTargets(): boolean,
+  //selections(): any[],
+  //updateResults(): any[],
+  setIsInCombat(getIsInCombat: boolean): void,
+  //getTargetsByCharacterIdAndWeaponId(currentCharacterId: number, selectedWeaponId: number): ITarget,
+}
+interface ICombatProps {
+  currentCharacterId: number,
+  currentWeaponId: number,
+}
+
+export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatProps>({
+  data(): ICombatData {
     return {
       selectedWeaponId: null,
       error: null,
@@ -235,9 +333,16 @@ export default Vue.extend({
       activeCard: null,
       isToggled: false,
       gridStyling:'justify-content:flex-start; gap:2.5vw',
-      index: 1
+      index: 1,
+      counterInterval: null
     };
   },
+  // props: {
+  //   [
+  //     'currentCharacterId',
+  //     'currentWeaponId'
+  //   ],
+  // },
   async mounted(){
     this.selectedWeaponId = this.currentWeaponId;
     Events.$on('chooseweapon', (id) =>{
@@ -267,11 +372,10 @@ export default Vue.extend({
       'ownWeapons',
       'currentCharacter',
       'currentCharacterStamina',
-      'getWeaponDurability',
       'fightGasOffset',
       'fightBaseline'
     ]),
-    ...mapGetters('combat', ['getCharacterPower']),
+    ...mapGetters('combat', ['getCharacterPower', 'getWeaponDurability']),
 
     targets() {
       return this.getTargetsByCharacterIdAndWeaponId(this.currentCharacterId, this.selectedWeaponId);
@@ -311,13 +415,13 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions('combat',
+    ...mapActions(['getXPRewardsIfWin']),
+    ...(mapActions('combat',
       [
         'fetchTargets',
         'doEncounterPayNative',
         'fetchFightRewardSkill',
         'fetchFightRewardXp',
-        //'getXPRewardsIfWin',
         'fetchExpectedPayoutForMonsterPower',
         'fetchHourlyAllowance',
         'fetchHourlyPowerAverage',
@@ -326,19 +430,19 @@ export default Vue.extend({
         'getNativeTokenPriceInUsd',
         'getCombatTokenChargePercent',
         'fetchCharacterStamina'
-      ]) as StoreMappedCombatActions,
-    ...mapMutations(['setIsInCombat']),
+      ]) as StoreMappedCombatActions),
+    ...mapMutations('combat', ['setIsInCombat']),
     getEnemyArt,
-    weaponHasDurability(id) {
+    weaponHasDurability(id: number) {
       return this.getWeaponDurability(id) >= this.fightMultiplier;
     },
     charHasStamina(){
       return this.currentCharacterStamina >= this.staminaPerFight;
     },
-    getCharacterTrait(trait) {
+    getCharacterTrait(trait: CharacterTrait) {
       return CharacterTrait[trait];
     },
-    getWinChance(enemyPower, enemyElement) {
+    getWinChance(enemyPower: number, enemyElement: number) {
       const characterPower = this.getCharacterPower(this.currentCharacter.id);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
       const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === this.selectedWeaponId);
@@ -355,8 +459,8 @@ export default Vue.extend({
       const enemyRange = enemyMax - enemyMin;
       let rollingTotal = 0;
       // shortcut: if it is impossible for one side to win, just say so
-      if (playerMin > enemyMax) return this.$t('combat.winChances.veryLikely');
-      if (playerMax < enemyMin) this.$t('combat.winChances.unlikely');
+      if (playerMin > enemyMax) return i18n.t('combat.winChances.veryLikely');
+      if (playerMax < enemyMin) i18n.t('combat.winChances.unlikely');
 
       // case 1: player power is higher than enemy power
       if (playerMin >= enemyMin) {
@@ -377,12 +481,12 @@ export default Vue.extend({
         //since this is chance the enemy wins, we negate it
         rollingTotal = 1 - rollingTotal;
       }
-      if (rollingTotal <= 0.3) return this.$t('combat.winChances.unlikely');
-      if (rollingTotal <= 0.5) return this.$t('combat.winChances.possible');
-      if (rollingTotal <= 0.7) return this.$t('combat.winChances.likely');
-      return this.$t('combat.winChances.veryLikely');
+      if (rollingTotal <= 0.3) return i18n.t('combat.winChances.unlikely');
+      if (rollingTotal <= 0.5) return i18n.t('combat.winChances.possible');
+      if (rollingTotal <= 0.7) return i18n.t('combat.winChances.likely');
+      return i18n.t('combat.winChances.veryLikely');
     },
-    getElementAdvantage(playerElement, enemyElement) {
+    getElementAdvantage(playerElement: number, enemyElement: number) {
       if ((playerElement + 1) % 4 === enemyElement) return 1;
       if ((enemyElement + 1) % 4 === playerElement) return -1;
       return 0;
@@ -500,11 +604,11 @@ export default Vue.extend({
 
     setStaminaSelectorValues() {
       if(this.currentCharacterStamina < 40) {
-        return [{ value: this.fightMultiplier, text: this.$t('combat.moreStamina'), disabled: true}];
+        return [{ value: this.fightMultiplier, text: i18n.t('combat.moreStamina'), disabled: true}];
       }
 
       const choices = [
-        {value: null, text: this.$t('combat.pleaseSelect'), disabled: true},
+        {value: null, text: i18n.t('combat.pleaseSelect'), disabled: true},
       ];
 
       const addChoices = [];
