@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import {gasUsedToBnb} from '@/utils/common';
-import {IState} from '@/interfaces';
+import {IState, IWeapon} from '@/interfaces';
 import {isUndefined} from 'lodash';
 import {targetFromContract} from '@/contract-models';
 import {Dispatch, Commit} from 'vuex';
@@ -12,6 +12,8 @@ export interface ICombatState {
   isInCombat: boolean;
   ownedCharacterIds: number[];
   characterStaminas: Record<number, number>;
+  ownedWeaponIds: number[];
+  weapons: IWeapon[];
 }
 
 const defaultCallOptions = (state:  IState) => ({ from: state.defaultAccount });
@@ -24,6 +26,8 @@ const combat = {
     isInCombat: false,
     ownedCharacterIds: [],
     characterStaminas: {},
+    ownedWeaponIds: [],
+    weapons: [],
   } as ICombatState,
   getters: {
     getCharacterPower(state: ICombatState) {
@@ -36,7 +40,16 @@ const combat = {
         return state.weaponDurabilities[weaponId];
       };
     },
-
+    ownWeapons(state: ICombatState) {
+      return this.weaponsWithIds(state);
+    },
+    weaponsWithIds(state: ICombatState) {
+      return (weaponIds: (string | number)[]) => {
+        const weapons = weaponIds.map(id => state.weapons[+id]);
+        if (weapons.some((w) => w === null)) return [];
+        return weapons;
+      };
+    },
   },
   mutations: {
     setIsInCombat(state: ICombatState, isInCombat: boolean) {

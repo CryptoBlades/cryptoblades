@@ -301,17 +301,17 @@ export default new Vuex.Store<IState>({
       return state.hasMinterAccess;
     },
 
-    ownWeapons(state, getters) {
-      return getters.weaponsWithIds(state.ownedWeaponIds);
-    },
+    // ownWeapons(state, getters) {
+    //   return getters.weaponsWithIds(state.ownedWeaponIds);
+    // },
 
-    weaponsWithIds(state) {
-      return (weaponIds: (string | number)[]) => {
-        const weapons = weaponIds.map(id => state.weapons[+id]);
-        if (weapons.some((w) => w === null)) return [];
-        return weapons;
-      };
-    },
+    // weaponsWithIds(state) {
+    //   return (weaponIds: (string | number)[]) => {
+    //     const weapons = weaponIds.map(id => state.weapons[+id]);
+    //     if (weapons.some((w) => w === null)) return [];
+    //     return weapons;
+    //   };
+    // },
 
     shieldsWithIds(state) {
       return (shieldIds: (string | number)[]) => {

@@ -193,12 +193,6 @@ import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
 import i18n from '../i18n';
 import VueI18n from 'vue-i18n';
-import { Accessors } from 'vue/types/options';
-
-interface StoreMappedState {
-  currentCharacterId: number,
-  currentWeaponId: number,
-}
 
 interface StoreMappedCombatActions {
   fetchCharacterStamina(characterId: number): Promise<void>;
@@ -300,6 +294,8 @@ interface ICombatComputed {
   isLoadingTargets: boolean,
   selections: any[],
   updateResults: any[],
+  currentWeaponId: number;
+  currentCharacterId: number;
 }
 interface ICombatProps {
   currentCharacterId: number,
@@ -307,10 +303,6 @@ interface ICombatProps {
 }
 
 export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatProps>({
-  props: {
-    currentCharacterId: Number,
-    currentWeaponId: Number,
-  },
   data(): ICombatData {
     return {
       selectedWeaponId: null,
@@ -344,7 +336,7 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
   },
   async mounted(): Promise<void> {
     this.selectedWeaponId = this.currentWeaponId;
-    Events.$on('chooseweapon', (id: number) =>{
+    Events.$on('chooseweapon', (id: number) => {
       this.selectedWeaponId = id;
       this.index++;
     });
@@ -364,7 +356,7 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
     clearInterval(this.counterInterval);
   },
   computed: {
-    ...(mapState(['currentCharacterId','currentWeaponId']) as Accessors<StoreMappedState>),
+    ...mapState(['currentCharacterId', 'currentWeaponId']),
     ...mapGetters([
       'getTargetsByCharacterIdAndWeaponId',
       'ownCharacters',
@@ -382,7 +374,7 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
 
     isLoadingTargets(): boolean {
       const targetsLength = this.targets as never[];
-      return targetsLength.length === 0 && this.currentCharacterId && this.selectedWeaponId;
+      return targetsLength.length === 0 && !!this.currentCharacterId && !!this.selectedWeaponId;
     },
 
     selections(): any[] {
