@@ -193,6 +193,12 @@ import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
 import i18n from '../i18n';
 import VueI18n from 'vue-i18n';
+import { Accessors } from 'vue/types/options';
+
+interface StoreMappedState {
+  currentCharacterId: number,
+  currentWeaponId: number,
+}
 
 interface StoreMappedCombatActions {
   fetchCharacterStamina(characterId: number): Promise<void>;
@@ -225,8 +231,8 @@ interface StoreMappedCombatActions {
 }
 
 interface ICombatData {
-  selectedWeaponId: any;
-  error: any;
+  selectedWeaponId: number | null;
+  error: string | null;
   waitingResults: boolean;
   resultsAvailable: boolean;
   fightResults: any;
@@ -286,19 +292,14 @@ interface ICombatMethod {
   changeEquipedWeapon(): void,
   addCommas(nStr: string): string,
   changeColorChange(stat: string): string,
-  getTargetsByCharacterIdAndWeaponId(currentCharacterId: number, selectedWeaponId: number): ITarget,
-  // targets(): any[],
-  // isLoadingTargets(): boolean,
-  // selections(): any[],
-  // updateResults(): any[],
+  getTargetsByCharacterIdAndWeaponId(currentCharacterId: number, selectedWeaponId: number): never[] | ITarget,
+  setIsInCombat(getIsInCombat: boolean): void,
 }
 interface ICombatComputed {
-  //targets(): any[],
-  //isLoadingTargets(): boolean,
-  //selections(): any[],
-  //updateResults(): any[],
-  setIsInCombat(getIsInCombat: boolean): void,
-  //getTargetsByCharacterIdAndWeaponId(currentCharacterId: number, selectedWeaponId: number): ITarget,
+  targets: never[] | ITarget,
+  isLoadingTargets: boolean,
+  selections: any[],
+  updateResults: any[],
 }
 interface ICombatProps {
   currentCharacterId: number,
@@ -306,6 +307,10 @@ interface ICombatProps {
 }
 
 export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatProps>({
+  props: {
+    currentCharacterId: Number,
+    currentWeaponId: Number,
+  },
   data(): ICombatData {
     return {
       selectedWeaponId: null,
@@ -334,18 +339,12 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
       isToggled: false,
       gridStyling:'justify-content:flex-start; gap:2.5vw',
       index: 1,
-      counterInterval: null
+      counterInterval: null,
     };
   },
-  // props: {
-  //   [
-  //     'currentCharacterId',
-  //     'currentWeaponId'
-  //   ],
-  // },
-  async mounted(){
+  async mounted(): Promise<void> {
     this.selectedWeaponId = this.currentWeaponId;
-    Events.$on('chooseweapon', (id) =>{
+    Events.$on('chooseweapon', (id: number) =>{
       this.selectedWeaponId = id;
       this.index++;
     });
@@ -365,7 +364,7 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
     clearInterval(this.counterInterval);
   },
   computed: {
-    ...mapState(['currentCharacterId','currentWeaponId']),
+    ...(mapState(['currentCharacterId','currentWeaponId']) as Accessors<StoreMappedState>),
     ...mapGetters([
       'getTargetsByCharacterIdAndWeaponId',
       'ownCharacters',
@@ -377,19 +376,20 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
     ]),
     ...mapGetters('combat', ['getCharacterPower', 'getWeaponDurability']),
 
-    targets() {
-      return this.getTargetsByCharacterIdAndWeaponId(this.currentCharacterId, this.selectedWeaponId);
+    targets(): never[] | ITarget {
+      return this.getTargetsByCharacterIdAndWeaponId(this.currentCharacterId, this.selectedWeaponId as number);
     },
 
-    isLoadingTargets() {
-      return this.targets.length === 0 && this.currentCharacterId && this.selectedWeaponId;
+    isLoadingTargets(): boolean {
+      const targetsLength = this.targets as never[];
+      return targetsLength.length === 0 && this.currentCharacterId && this.selectedWeaponId;
     },
 
-    selections() {
+    selections(): any[] {
       return [this.currentCharacterId, this.selectedWeaponId];
     },
 
-    updateResults() {
+    updateResults(): any[] {
       return [this.fightResults, this.error];
     },
   },
