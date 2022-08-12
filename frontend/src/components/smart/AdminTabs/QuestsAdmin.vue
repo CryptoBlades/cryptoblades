@@ -23,7 +23,9 @@
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectQuestTier') }}
             </b-form-select-option>
-            <b-form-select-option v-for="rarity in rarities" :key="rarity" :value="rarity">
+            <!-- TODO: This will come back when we add additional tiers to Wallet Quests -->
+            <b-form-select-option v-for="rarity in rarities" :key="rarity" :value="rarity"
+                                  :disabled="questTemplateType === QuestTemplateType.WALLET && rarity !== Rarity.COMMON">
               {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
