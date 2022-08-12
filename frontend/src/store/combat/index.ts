@@ -5,15 +5,17 @@ import {isUndefined} from 'lodash';
 import {targetFromContract} from '@/contract-models';
 import {Dispatch, Commit} from 'vuex';
 import { getGasPrice } from '../store';
+import BigNumber from 'bignumber.js';
 
 export interface ICombatState {
-  characterPowers: Record<number, number>;
-  weaponDurabilities: Record<number, number>;
+  //characterPowers: Record<number, number>;
+  //weaponDurabilities: Record<number, number>;
   isInCombat: boolean;
   ownedCharacterIds: number[];
   characterStaminas: Record<number, number>;
   ownedWeaponIds: number[];
   weapons: IWeapon[];
+  targetsByCharacterIdAndWeaponId: Record<number, Record<number, ITarget>>;
 }
 
 const defaultCallOptions = (state:  IState) => ({ from: state.defaultAccount });
@@ -21,35 +23,34 @@ const defaultCallOptions = (state:  IState) => ({ from: state.defaultAccount });
 const combat = {
   namespaced: true,
   state: {
-    characterPowers: {},
-    weaponDurabilities: {},
+    //characterPowers: {},
+    //weaponDurabilities: {},
     isInCombat: false,
     ownedCharacterIds: [],
     characterStaminas: {},
     ownedWeaponIds: [],
     weapons: [],
+    targetsByCharacterIdAndWeaponId: {},
   } as ICombatState,
   getters: {
-    getCharacterPower(state: ICombatState) {
-      return (characterId: number) => {
-        return state.characterPowers[characterId];
+    // getCharacterPower(state: ICombatState) {
+    //   return (characterId: number) => {
+    //     return state.characterPowers[characterId];
+    //   };
+    // },
+    getTargetsByCharacterIdAndWeaponId(state: ICombatState) {
+      return (characterId: number, weaponId: number) => {
+        const targetsByWeaponId = state.targetsByCharacterIdAndWeaponId[characterId];
+        if (!targetsByWeaponId) return [];
+
+        return targetsByWeaponId[weaponId] ?? [];
       };
     },
-    getWeaponDurability(state: ICombatState) {
-      return (weaponId: number) => {
-        return state.weaponDurabilities[weaponId];
-      };
-    },
-    ownWeapons(state: ICombatState) {
-      return this.weaponsWithIds(state);
-    },
-    weaponsWithIds(state: ICombatState) {
-      return (weaponIds: (string | number)[]) => {
-        const weapons = weaponIds.map(id => state.weapons[+id]);
-        if (weapons.some((w) => w === null)) return [];
-        return weapons;
-      };
-    },
+    // getWeaponDurability(state: ICombatState) {
+    //   return (weaponId: number) => {
+    //     return state.weaponDurabilities[weaponId];
+    //   };
+    // },
   },
   mutations: {
     setIsInCombat(state: ICombatState, isInCombat: boolean) {
@@ -75,7 +76,9 @@ const combat = {
       return await CryptoBlades.methods.vars(18).call(defaultCallOptions(state));
     },
 
-    async fetchTargets({state, commit}: {state: IState, commit: Commit}, { characterId, weaponId }: {characterId: number, weaponId: number}) {
+    async fetchTargets(
+      {state, commit}: {state: IState, commit: Commit},
+      { characterId, weaponId }: {characterId: number, weaponId: number}) {
       if(isUndefined(characterId) || isUndefined(weaponId)) {
         commit('updateTargets', { characterId, weaponId, targets: [] });
         return;
@@ -121,7 +124,7 @@ const combat = {
     async doEncounterPayNative(
       { state, dispatch }: {state: IState, dispatch: Dispatch},
       { characterId, weaponId, targetString, fightMultiplier, offsetCost }:
-      { characterId: number, weaponId: number, targetString: number, fightMultiplier: number, offsetCost: number }) {
+      { characterId: number, weaponId: number, targetString: number, fightMultiplier: number, offsetCost: BigNumber }) {
       const { TokensManager, CryptoBlades } = state.contracts();
       if (!TokensManager || !CryptoBlades || !state.defaultAccount) return;
 

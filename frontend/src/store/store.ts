@@ -145,15 +145,6 @@ export default new Vuex.Store<IState>({
       return _.isFunction(state.contracts) ? state.contracts() : null!;
     },
 
-    getTargetsByCharacterIdAndWeaponId(state: IState) {
-      return (characterId: number, weaponId: number) => {
-        const targetsByWeaponId = state.targetsByCharacterIdAndWeaponId[characterId];
-        if (!targetsByWeaponId) return [];
-
-        return targetsByWeaponId[weaponId] ?? [];
-      };
-    },
-
     getCharacterName(state: IState) {
       return (characterId: number) => {
         if(state.characterRenames[characterId] !== undefined){
@@ -169,11 +160,11 @@ export default new Vuex.Store<IState>({
       };
     },
 
-    // getCharacterPower(state: IState) {
-    //   return (characterId: number) => {
-    //     return state.characterPowers[characterId];
-    //   };
-    // },
+    getCharacterPower(state: IState) {
+      return (characterId: number) => {
+        return state.characterPowers[characterId];
+      };
+    },
 
     getCharacterIsInArena(state: IState) {
       return (characterId: number) => {
@@ -199,11 +190,11 @@ export default new Vuex.Store<IState>({
       };
     },
 
-    // getWeaponDurability(state: IState) {
-    //   return (weaponId: number) => {
-    //     return state.weaponDurabilities[weaponId];
-    //   };
-    // },
+    getWeaponDurability(state: IState) {
+      return (weaponId: number) => {
+        return state.weaponDurabilities[weaponId];
+      };
+    },
     getWeaponRename(state: IState) {
       return (weaponId: number) => {
         return state.weaponRenames[weaponId];
@@ -301,17 +292,17 @@ export default new Vuex.Store<IState>({
       return state.hasMinterAccess;
     },
 
-    // ownWeapons(state, getters) {
-    //   return getters.weaponsWithIds(state.ownedWeaponIds);
-    // },
+    ownWeapons(state, getters) {
+      return getters.weaponsWithIds(state.ownedWeaponIds);
+    },
 
-    // weaponsWithIds(state) {
-    //   return (weaponIds: (string | number)[]) => {
-    //     const weapons = weaponIds.map(id => state.weapons[+id]);
-    //     if (weapons.some((w) => w === null)) return [];
-    //     return weapons;
-    //   };
-    // },
+    weaponsWithIds(state) {
+      return (weaponIds: (string | number)[]) => {
+        const weapons = weaponIds.map(id => state.weapons[+id]);
+        if (weapons.some((w) => w === null)) return [];
+        return weapons;
+      };
+    },
 
     shieldsWithIds(state) {
       return (shieldIds: (string | number)[]) => {

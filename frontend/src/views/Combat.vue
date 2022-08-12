@@ -181,7 +181,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {getEnemyArt} from '../enemy-art';
-import {CharacterTrait, GetTotalMultiplierForTrait, ITarget, WeaponElement} from '../interfaces';
+import {CharacterTrait, GetTotalMultiplierForTrait, ITarget, IWeapon, WeaponElement} from '../interfaces';
 import Hint from '../components/Hint.vue';
 import Events from '../events';
 import {fromWeiEther, toBN} from '../utils/common';
@@ -192,18 +192,24 @@ import ModalContainer from '../components/modals/ModalContainer.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
 import i18n from '../i18n';
-import VueI18n from 'vue-i18n';
 
 interface StoreMappedCombatActions {
   fetchCharacterStamina(characterId: number): Promise<void>;
-  fetchTargets(characterId: number, weaponId: number): Promise<void>;
+  fetchTargets(
+    { characterId, weaponId }:
+    { characterId: number, weaponId: number }): Promise<void>;
   doEncounterPayNative(
-    characterId: number,
-    weaponId: number,
-    targetString: number,
-    fightMultiplier: number,
-    offsetCost: number
-  ): Promise<{
+    { characterId,
+      weaponId,
+      targetString,
+      fightMultiplier,
+      offsetCost }:
+    { characterId: number,
+      weaponId: number,
+      targetString: number,
+      fightMultiplier: number,
+      offsetCost: BigNumber
+    }): Promise<{
     isVictory: boolean,
     playerRoll: string,
     enemyRoll: string,
@@ -214,8 +220,8 @@ interface StoreMappedCombatActions {
   fetchFightRewardSkill(): Promise<string>;
   fetchFightRewardXp(): Promise<string[][]>;
   fetchExpectedPayoutForMonsterPower(
-    power: string | number,
-    isCalculator: boolean): Promise<string>;
+    { power, isCalculator }:
+    { power: stringOrNumber, isCalculator: boolean }): Promise<string>;
   fetchHourlyAllowance(): Promise<string>;
   fetchHourlyPowerAverage(): Promise<string>;
   fetchHourlyPayPerFight(): Promise<string>;
@@ -224,9 +230,13 @@ interface StoreMappedCombatActions {
   getCombatTokenChargePercent(): Promise<string>;
 }
 
+type stringOrNull = string | null;
+type numberOrNull = number | null;
+type stringOrNumber = string | number;
+
 interface ICombatData {
-  selectedWeaponId: number | null;
-  error: string | null;
+  selectedWeaponId: numberOrNull;
+  error: stringOrNull;
   waitingResults: boolean;
   resultsAvailable: boolean;
   fightResults: any;
@@ -238,15 +248,15 @@ interface ICombatData {
   selectedWeapon: any;
   fightMultiplier: number;
   staminaPerFight: number;
-  targetExpectedPayouts: number[];
+  targetExpectedPayouts: string[];
   targetToFight: any;
   targetToFightIndex: any;
   minutesToNextAllowance: any;
   secondsToNextAllowance: any;
-  lastAllowanceSkill: any;
+  lastAllowanceSkill: stringOrNull;
   nextAllowanceCounter: any;
-  powerAvg: any;
-  expectedSkill: any;
+  powerAvg: stringOrNull;
+  expectedSkill: stringOrNull;
   activeCard: any;
   isToggled: boolean;
   gridStyling: string;
@@ -254,56 +264,56 @@ interface ICombatData {
   counterInterval: any;
 }
 
-interface ICombatMethod {
-  getEnemyArt(enemyId: number): string,
-  weaponHasDurability(id: number): boolean,
-  charHasStamina(): boolean,
-  getCharacterTrait(trait: CharacterTrait): string,
-  getWinChance(enemyPower: number, enemyElement: number): VueI18n.TranslateResult,
-  getElementAdvantage(playerElement: number, enemyElement: number): 1 | 0 | -1,
-  enter(el: any, done: any): void,
-  beforeEnter(el: any): void,
-  hideBottomMenu(bol: any): void,
-  getExpectedPayout(): Promise<void>,
-  getHourlyAllowance(): Promise<void>,
-  onClickEncounter(targetToFight: ITarget, targetIndex: number): Promise<void>,
-  fightTarget(targetToFight: ITarget, targetIndex: number): Promise<void>,
-  formattedSkill(skill: any): string,
-  getPotentialXp(targetToFight: ITarget): number,
-  setFightMultiplier(): void,
-  setStaminaSelectorValues(): {
-    value: null,
-    text:  VueI18n.TranslateResult,
-    disabled: boolean
-  }[] |
-  {
-    value: number,
-    text:  VueI18n.TranslateResult,
-    disabled: boolean
-  }[],
-  getExpectedPayouts(): Promise<void>,
-  updateStaminaPerFight(): void,
-  changeEquipedWeapon(): void,
-  addCommas(nStr: string): string,
-  changeColorChange(stat: string): string,
-  getTargetsByCharacterIdAndWeaponId(currentCharacterId: number, selectedWeaponId: number): never[] | ITarget,
-  setIsInCombat(getIsInCombat: boolean): void,
-}
-interface ICombatComputed {
-  targets: never[] | ITarget,
-  isLoadingTargets: boolean,
-  selections: any[],
-  updateResults: any[],
-  currentWeaponId: number;
-  currentCharacterId: number;
-}
-interface ICombatProps {
-  currentCharacterId: number,
-  currentWeaponId: number,
-}
+// interface ICombatMethod {
+//   getEnemyArt(enemyId: number): string,
+//   weaponHasDurability(id: number): boolean,
+//   charHasStamina(): boolean,
+//   getCharacterTrait(trait: CharacterTrait): string,
+//   getWinChance(enemyPower: number, enemyElement: number): VueI18n.TranslateResult,
+//   getElementAdvantage(playerElement: number, enemyElement: number): 1 | 0 | -1,
+//   enter(el: any, done: any): void,
+//   beforeEnter(el: any): void,
+//   hideBottomMenu(bol: any): void,
+//   getExpectedPayout(): Promise<void>,
+//   getHourlyAllowance(): Promise<void>,
+//   onClickEncounter(targetToFight: ITarget, targetIndex: number): Promise<void>,
+//   fightTarget(targetToFight: ITarget, targetIndex: number): Promise<void>,
+//   formattedSkill(skill: any): string,
+//   getPotentialXp(targetToFight: ITarget): number,
+//   setFightMultiplier(): void,
+//   setStaminaSelectorValues(): {
+//     value: null,
+//     text:  VueI18n.TranslateResult,
+//     disabled: boolean
+//   }[] |
+//   {
+//     value: number,
+//     text:  VueI18n.TranslateResult,
+//     disabled: boolean
+//   }[],
+//   getExpectedPayouts(): Promise<void>,
+//   updateStaminaPerFight(): void,
+//   changeEquipedWeapon(): void,
+//   addCommas(nStr: string): string,
+//   changeColorChange(stat: string): string,
+//   getTargetsByCharacterIdAndWeaponId(currentCharacterId: number, selectedWeaponId: number): never[] | ITarget,
+//   setIsInCombat(getIsInCombat: boolean): void,
+// }
+// interface ICombatComputed {
+//   targets: never[] | ITarget,
+//   isLoadingTargets: boolean,
+//   selections: any[],
+//   updateResults: any[],
+//   currentWeaponId: number;
+//   currentCharacterId: number;
+// }
+// interface ICombatProps {
+//   currentCharacterId: number,
+//   currentWeaponId: number,
+// }
 
-export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatProps>({
-  data(): ICombatData {
+export default Vue.extend({
+  data() {
     return {
       selectedWeaponId: null,
       error: null,
@@ -332,9 +342,9 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
       gridStyling:'justify-content:flex-start; gap:2.5vw',
       index: 1,
       counterInterval: null,
-    };
+    } as ICombatData;
   },
-  async mounted(): Promise<void> {
+  async mounted() {
     this.selectedWeaponId = this.currentWeaponId;
     Events.$on('chooseweapon', (id: number) => {
       this.selectedWeaponId = id;
@@ -358,23 +368,24 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
   computed: {
     ...mapState(['currentCharacterId', 'currentWeaponId']),
     ...mapGetters([
-      'getTargetsByCharacterIdAndWeaponId',
       'ownCharacters',
       'ownWeapons',
       'currentCharacter',
       'currentCharacterStamina',
       'fightGasOffset',
-      'fightBaseline'
+      'fightBaseline',
+      'getCharacterPower',
+      'getWeaponDurability',
     ]),
-    ...mapGetters('combat', ['getCharacterPower', 'getWeaponDurability']),
+    ...mapGetters('combat', ['getTargetsByCharacterIdAndWeaponId']),
 
-    targets(): never[] | ITarget {
+    targets(): any[] | ITarget {
       return this.getTargetsByCharacterIdAndWeaponId(this.currentCharacterId, this.selectedWeaponId as number);
     },
 
     isLoadingTargets(): boolean {
-      const targetsLength = this.targets as never[];
-      return targetsLength.length === 0 && !!this.currentCharacterId && !!this.selectedWeaponId;
+      const targets = this.targets as any[];
+      return targets.length === 0 && !!this.currentCharacterId && !!this.selectedWeaponId;
     },
 
     selections(): any[] {
@@ -388,7 +399,7 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
 
   watch: {
     async selections([characterId, weaponId]) {
-      if (!this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === weaponId)) {
+      if (!this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === weaponId)) {
         this.selectedWeaponId = null;
       }
       await this.fetchTargets({ characterId, weaponId });
@@ -402,7 +413,7 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
       this.setIsInCombat(this.waitingResults);
-      if (this.resultsAvailable && error === null) this.$bvModal.show('modal-info');
+      if (this.resultsAvailable && error === null) (this as any).$bvModal.show('modal-info');
     },
   },
 
@@ -437,7 +448,7 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
     getWinChance(enemyPower: number, enemyElement: number) {
       const characterPower = this.getCharacterPower(this.currentCharacter.id);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === this.selectedWeaponId);
+      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === this.selectedWeaponId);
       this.selectedWeapon = selectedWeapon;
       const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
@@ -485,7 +496,7 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
     },
 
     // for enemy card animaton
-    enter(el, done) {
+    enter(el: any, done: any) {
       gasp.to(el, {
         opacity: 1,
         y: 0,
@@ -494,13 +505,13 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
         delay: el.dataset.index * 0.1
       });
     },
-    beforeEnter(el){
+    beforeEnter(el: any){
       el.style.opacity = 0;
       el.style.transform = 'translateY(100px)';
     },
     // -------------------
 
-    hideBottomMenu(bol){
+    hideBottomMenu(bol: boolean){
       this.isToggled = bol;
     },
 
@@ -512,20 +523,20 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
       const fetchHourlyAllowance = await this.fetchHourlyAllowance();
       this.lastAllowanceSkill = this.formattedSkill(fetchHourlyAllowance);
     },
-    async onClickEncounter(targetToFight, targetIndex) {
+    async onClickEncounter(targetToFight: ITarget, targetIndex: number) {
       // this.$bvModal.show('waitingForResult');
       if(this.targetExpectedPayouts[targetIndex] === '0'){
         this.targetToFight = targetToFight;
         this.targetToFightIndex = targetIndex;
         await this.getHourlyAllowance();
-        this.$refs['no-skill-warning-modal'].show();
+        (this.$refs['no-skill-warning-modal'] as any).show();
       }
       else{
         this.fightTarget(targetToFight, targetIndex);
       }
     },
 
-    async fightTarget(targetToFight, targetIndex){
+    async fightTarget(targetToFight: ITarget, targetIndex: number){
       if (this.selectedWeaponId === null || this.currentCharacterId === null) {
         return;
       }
@@ -534,7 +545,8 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
       // Force a quick refresh of targets
       await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
-      if (this.targets[targetIndex].original !== targetToFight.original) {
+      const targets = this.targets as any[];
+      if (targets[targetIndex].original !== targetToFight.original) {
         this.waitingResults = false;
         return;
       }
@@ -568,21 +580,21 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
         await this.fetchCharacterStamina(this.currentCharacterId);
 
         this.error = null;
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
         this.error = e.message;
       }
     },
 
-    formattedSkill(skill) {
-      const skillBalance = fromWeiEther(skill, 'ether');
+    formattedSkill(skill: stringOrNumber) {
+      const skillBalance = fromWeiEther(skill.toString());
       return `${toBN(skillBalance).toFixed(6)} SKILL`;
     },
 
-    getPotentialXp(targetToFight) {
+    getPotentialXp(targetToFight: ITarget) {
       const characterPower = this.getCharacterPower(this.currentCharacter.id);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === this.selectedWeaponId);
+      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === this.selectedWeaponId);
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
       const totalPower = characterPower * weaponMultiplier + selectedWeapon.bonusPower;
       //Formula taken from getXpGainForFight funtion of cryptoblades.sol
@@ -596,33 +608,33 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
 
     setStaminaSelectorValues() {
       if(this.currentCharacterStamina < 40) {
-        return [{ value: this.fightMultiplier, text: i18n.t('combat.moreStamina'), disabled: true}];
+        return [{ value: this.fightMultiplier, text: i18n.t('combat.moreStamina').toString(), disabled: true}];
       }
 
-      const choices = [
-        {value: null, text: i18n.t('combat.pleaseSelect'), disabled: true},
+      const choices: {value: numberOrNull, text: string, disabled?: boolean }[] = [
+        {value: null, text: i18n.t('combat.pleaseSelect').toString(), disabled: true},
       ];
 
       const addChoices = [];
 
       if(this.currentCharacterStamina >= 200) {
-        addChoices.push({ value: 5, text: 200 });
+        addChoices.push({ value: 5, text: '200' });
       }
 
       if(this.currentCharacterStamina >= 160) {
-        addChoices.push({ value: 4, text: 160 });
+        addChoices.push({ value: 4, text: '160' });
       }
 
       if(this.currentCharacterStamina >= 120) {
-        addChoices.push({ value: 3, text: 120 });
+        addChoices.push({ value: 3, text: '120' });
       }
 
       if(this.currentCharacterStamina >= 80) {
-        addChoices.push({ value: 2, text: 80 });
+        addChoices.push({ value: 2, text: '80' });
       }
 
       if(this.currentCharacterStamina >= 40) {
-        addChoices.push({ value: 1, text: 40 });
+        addChoices.push({ value: 1, text: '40' });
       }
 
       choices.push(...addChoices.reverse());
@@ -633,8 +645,9 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
     async getExpectedPayouts() {
       if(!this.targets) return;
       const expectedPayouts = new Array(4);
-      for(let i = 0; i < this.targets.length; i++) {
-        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: this.targets[i].power });
+      const targets = this.targets as ITarget[];
+      for(let i = 0; i < targets.length; i++) {
+        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: targets[i].power, isCalculator: false });
         expectedPayouts[i] = expectedPayout;
       }
       this.targetExpectedPayouts = expectedPayouts;
@@ -648,7 +661,7 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
       Events.$emit('weapon-inventory', true);
     },
 
-    addCommas(nStr) {
+    addCommas(nStr: string) {
       nStr += '';
       const x = nStr.split('.');
       let x1 = x[0];
@@ -659,7 +672,7 @@ export default Vue.extend<ICombatData, ICombatMethod, ICombatComputed, ICombatPr
       }
       return x1 + x2;
     },
-    changeColorChange(stat){
+    changeColorChange(stat: string){
       let bgColor;
       if(stat.toUpperCase() === 'UNLIKELY'){
         bgColor =  'background-color: #B10000 !important';
