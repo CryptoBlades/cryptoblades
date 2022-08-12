@@ -13,7 +13,7 @@
       <span> {{ pickable ? $t('quests.chooseSpecialQuest')  : $t('quests.requestQuest') }} </span>
     </b-button>
     <b-button v-else-if="questCanBeCompleted && !afterDeadline && !deletable" :disabled="isLoading" variant="primary"
-              class="flex-1"
+              class="flex-1 complete-btn"
               @click="complete()">
       {{ $t('quests.complete') }}
     </b-button>
@@ -503,6 +503,13 @@ export default Vue.extend({
 }
 .custom-action-btn:not([disabled]):hover{
   border-color: #FFF !important;
+}
+.complete-btn{
+  font-family: Roboto;
+  border: #EDCD90 1px solid !important;
+  color: #FFF !important;
+  width: 100%;
+  max-height: 50px;
 }
 .quest-row {
   display: flex;
