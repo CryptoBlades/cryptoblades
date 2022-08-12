@@ -299,9 +299,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         emit QuestComplete(questID, characterID);
         weeklyCompletions[msg.sender][now / 1 weeks] += 1;
         _assignNextQuest(characterID, pickedQuestID);
-        /*if (pickedQuestID == questTemplates[pickableTier][questIndexes[pickedQuestID]]) {
-            setCharacterQuest(characterID, 0, 0); // empty character quest for pickable quests
-        }*/
     }
 
     function completeWalletQuest(uint256 questID) public assertQuestsEnabled returns (uint256[] memory questRewards) {

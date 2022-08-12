@@ -8,6 +8,8 @@ const Weapons = artifacts.require("Weapons");
 const Junk = artifacts.require("Junk");
 
 module.exports = async function (deployer, network, accounts) {
+  const simpleQuests = await upgradeProxy(SimpleQuests.address, SimpleQuests, {deployer});
+  const partnerVault = await upgradeProxy(PartnerVault.address, PartnerVault, {deployer});
   if (network === "development"
   || network === "development-fork"
   || network === 'bsctestnet'
@@ -20,8 +22,6 @@ module.exports = async function (deployer, network, accounts) {
   || network === 'auroratestnet'
   || network === 'kavatestnet'
   || network === 'skaletestnet') {
-    const simpleQuests = await upgradeProxy(SimpleQuests.address, SimpleQuests, {deployer});
-    const partnerVault = await upgradeProxy(PartnerVault.address, PartnerVault, {deployer});
     const pickableTier = 20;
     const walletTier = 30;
 
@@ -34,6 +34,7 @@ module.exports = async function (deployer, network, accounts) {
     simpleQuests.addNewQuestTemplate(walletTier,7,0,10,nullAddress,7,0,11,nullAddress,0,0,0); // soul
     simpleQuests.addNewQuestTemplate(walletTier,10,0,1,Weapons.address,2,0,1,nullAddress,0,0,0); // external (weapon example)
     simpleQuests.addNewQuestTemplate(walletTier,11,0,1,Junk.address,12,0,1,nullAddress,0,0,0); // hold (junk example)
+    simpleQuests.addNewQuestTemplate(walletTier,10,0,1000,SkillToken.address,12,0,1,nullAddress,0,0,0); // skill (ext erc20 test)
 
     // Test pickable quests
     simpleQuests.addNewQuestTemplate(pickableTier,1,0,1,nullAddress,1,0,2,nullAddress,0,0,0); // weapon
