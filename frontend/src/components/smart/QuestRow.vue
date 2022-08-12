@@ -116,8 +116,7 @@ export default Vue.extend({
 
 <style scoped>
 .quest-row,
-.quest-row-wallet
-{
+.quest-row-wallet {
   display: flex;
   width: 100%;
   background: rgba(0, 9, 26, 0.65);
@@ -156,9 +155,11 @@ export default Vue.extend({
 }
 
 @media (max-width: 576px) {
-  .quest-row {
+  .quest-row,
+  .quest-row-wallet {
     flex-direction: column;
     height: auto;
+    gap: 1rem;
   }
 }
 

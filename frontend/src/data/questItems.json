@@ -6,6 +6,12 @@
       "image": "SKILL.png",
       "website": "https://www.cryptoblades.io/"
     },
+    "0x10cb66ce2969d8c8193707A9dCD559D2243B8b37": {
+      "name": "Crypto Legions Bloodstone (BLST)",
+      "description": "Bloodstone is the ecosystem token of Crypto Legions, a unique Play-to-Earn game on BNB Chain.",
+      "image": "BLST.png",
+      "website": "https://cryptolegions.app/"
+    },
     "0xB63F5847d0E9F1107B590D063F0D584d485C8d23": {
       "name": "Cakemonster NFT",
       "description": "Cake Monster is a ultra-deflationary, automated dividend yield, and meme token. It offers a multitude of unique DeFi features aimed at building a flexible and multifaceted reward system for all participants without compromising the sustainability or security of the protocol ecosystem.",

@@ -55,7 +55,7 @@
                       class="quest-progress-value">{{ `${currentWeeklyCompletions} / ${weeklyReward.completionsGoal}` }}</span>
               </div>
             </div>
-            <div class="d-flex justify-content-center align-items-center gap-2 position-relative h-100">
+            <div class="d-flex justify-content-center align-items-center gap-2 position-relative">
 
             <!-- incoming: <div class="d-flex justify-content-center align-items-center gap-2 mx-auto mt-3"> -->
               <span v-if="weeklyClaimed" class="claimed-banner">{{ $t('quests.claimed') }}</span>
@@ -397,7 +397,6 @@ export default Vue.extend({
       try {
         console.log('refreshing quest data');
         this.isLoading = true;
-        this.walletQuests = [];
         if(this.walletQuestTier !== undefined){
           this.isLoadingWalletQuests = true;
           this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
@@ -613,6 +612,7 @@ export default Vue.extend({
   .quests-container {
     padding: 1rem;
     margin-bottom: 3rem;
+    width: 100%;
   }
 
   .weekly-progress{
