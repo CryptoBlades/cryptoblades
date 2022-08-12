@@ -2377,7 +2377,7 @@
     },
     "links": {},
     "address": "0x3F715995647fe44Db45411bb9e81b7A1aD5A8387",
-    "transactionHash": "0x390b7fdcb41788a7ddba97bf88d9a96a90fef1b07e1970884ffd7df731c66f87"
+    "transactionHash": "0xd7085421f0b9421ff12c6702a8b3cdbc8b7c35a0ac708995fdfdb66eda22b36a"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
@@ -3803,7 +3803,7 @@
     },
     "links": {},
     "address": "0x236777456dD5159Da6c38A0E24f46e30C6f9e326",
-    "transactionHash": "0x85c4d688660f554b4caa2540e5d21afd86fbc65865698c1e1bc954c7bd1b1e4c|{\"gasBurned\":13871384505816,\"tx\":\"6HDANEEM1FGwCh8HHxtjyL5Ys3qAXRA9RmaP3cojQtgC\"}"
+    "transactionHash": "0x7396c108dba58c823c0f45f69769a8a1fcb8756612534b482ac0dbc0ff96f4ef"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -3904,7 +3904,7 @@
     },
     "links": {},
     "address": "0xb23F1C1841567b95F1C6E8fd6189539790BBB9F4",
-    "transactionHash": "0x49db8efb48eaa48add7d92fe2886506f5b90f67a275b3c0215657174699fde88|{\"gasBurned\":10795150977454,\"tx\":\"G5XP9k36Aqz5ws3KMLpm7SoFZDCK38Gvme2qZkkbc4um\"}"
+    "transactionHash": "0x18395d120f5940bbac8fc25a563cd7f10d38e75edacbd218e450bea6c0072aba"
   },
   "build/contracts/Raid1.json": {
     "events": {},
@@ -4954,7 +4954,8 @@
       }
     },
     "links": {},
-    "address": "0xe1bAf442A842aa68D30b09513841B917AB2cAD28"
+    "address": "0xe1bAf442A842aa68D30b09513841B917AB2cAD28",
+    "transactionHash": "0x7f5065a93f5bee67aff0894597ee1bbadb1d681c076f416927e9f303823493df"
   },
   "build/contracts/Treasury.json": {
     "events": {},

@@ -3876,7 +3876,7 @@
     },
     "links": {},
     "address": "0x9D38BF3ca5E9B9B725348DDBB82866D2e7093c86",
-    "transactionHash": "0xf7fa5f40f1437f12948d991a134ee55c17cc544f527ac7311dd576b876a1a898"
+    "transactionHash": "0x24b90bec4c0c88cffc68ee21dcd9c7406effd9bc65f7698de1acbd8d757bed75"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
