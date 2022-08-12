@@ -242,7 +242,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
             pvprankings.changeRankingPoints(characterID, 0);
         }
 
-        pvprankings.handleEnterArena(characterID, tier);
+        pvprankings.handleEnterArena(msg.sender, characterID, tier);
 
         isCharacterInArena[characterID] = true;
         characters.setNftVar(characterID, 1, 1);
@@ -389,9 +389,9 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
         uint256 defenderID = getOpponent(attackerID);
 
-        pvprankings.handlePrepareDuel(attackerID);
+        pvprankings.handlePrepareDuel(msg.sender, attackerID);
 
-        pvprankings.handlePrepareDuel(defenderID);
+        pvprankings.handlePrepareDuel(msg.sender, defenderID);
 
         isDefending[defenderID] = true;
 

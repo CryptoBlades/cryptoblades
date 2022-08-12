@@ -1660,6 +1660,24 @@ export default new Vuex.Store<IState>({
       ]);
     },
 
+    async fetchReforgeWeaponFee({ state }) {
+      const { BurningManager } = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+      return await BurningManager.methods.reforgeWeaponFee().call({ from: state.defaultAccount });
+    },
+
+    async fetchReforgeWeaponWithDustFee({ state }) {
+      const { BurningManager } = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+      return await BurningManager.methods.reforgeWeaponWithDustFee().call({ from: state.defaultAccount });
+    },
+
+    async fetchBurnWeaponFee({ state }) {
+      const { BurningManager } = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+      return await BurningManager.methods.burnWeaponFee().call({ from: state.defaultAccount });
+    },
+
     async fetchTargets({ state, commit }, { characterId, weaponId }) {
       if(isUndefined(characterId) || isUndefined(weaponId)) {
         commit('updateTargets', { characterId, weaponId, targets: [] });
@@ -1671,46 +1689,6 @@ export default new Vuex.Store<IState>({
         .call(defaultCallOptions(state));
 
       commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
-    },
-
-    async doEncounter({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier }) {
-      const res = await state.contracts().CryptoBlades!.methods
-        .fight(
-          characterId,
-          weaponId,
-          targetString,
-          fightMultiplier
-        )
-        .send({ from: state.defaultAccount, gas: '300000', gasPrice: getGasPrice() });
-
-      await dispatch('fetchTargets', { characterId, weaponId });
-
-
-      const {
-        /*owner,
-        character,
-        weapon,
-        target,*/
-        playerRoll,
-        enemyRoll,
-        xpGain,
-        skillGain
-      } = res.events.FightOutcome.returnValues;
-
-      const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
-
-      const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
-
-      await dispatch('fetchWeaponDurability', weaponId);
-
-      return {
-        isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
-        playerRoll,
-        enemyRoll,
-        xpGain,
-        skillGain,
-        bnbGasUsed
-      };
     },
 
     async fetchExpectedPayoutForMonsterPower({ state }, { power, isCalculator = false }) {

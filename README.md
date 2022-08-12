@@ -73,6 +73,8 @@ To run tests locally simply run
 ## Config
 
 - All network config is in app-config.json
+- `cd frontend` - navigate to frontend folder
+- `npm run setup-app-config` -Initial setup of app-config.json file
 - If you want to add a new network: add it's configuration in app-config.json and add update currentTokenPrice getter in EarningsCalculator.
 
 ## Alternative development flow with Hardhat
