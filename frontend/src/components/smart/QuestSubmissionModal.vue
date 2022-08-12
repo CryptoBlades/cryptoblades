@@ -60,7 +60,7 @@ import Vue from 'vue';
 import WeaponGrid from '@/components/smart/WeaponGrid.vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import NftList, {NftIdType} from '@/components/smart/NftList.vue';
-import {Quest, Rarity, RequirementType, RewardType, QuestTemplateType} from '@/views/Quests.vue';
+import {Quest, QuestTemplateType, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 import NftIcon from '@/components/NftIcon.vue';
 import {PropType} from 'vue/types/options';
@@ -77,7 +77,11 @@ interface StoreMappedActions {
 
   submitWalletProgress(payload: { questID: number, tokenIds: (string | number)[] }): Promise<void>;
 
+  submitWalletExternalProgress(payload: { questID: number, tokenIds: (string | number)[], tokenAddress: string }): Promise<void>;
+
   submitExternalProgressAmount(payload: { characterID: string | number, amount: number, currencyAddress: string }): Promise<void>;
+
+  submitWalletExternalProgressAmount(payload: { questID: number, amount: number, currencyAddress: string }): Promise<void>;
 
   isExternalCurrency(payload: { currencyAddress: string }): Promise<boolean>;
 
@@ -178,7 +182,9 @@ export default Vue.extend({
       'submitWalletProgressAmount',
       'submitWalletProgress',
       'submitExternalProgress',
+      'submitWalletExternalProgress',
       'submitExternalProgressAmount',
+      'submitWalletExternalProgressAmount',
       'fetchSoulBalance',
       'isExternalCurrency',
     ]) as StoreMappedActions,
@@ -210,6 +216,8 @@ export default Vue.extend({
         } else if (this.quest.requirementRarity === Rarity.RARE) {
           this.amountToBurn = remainingAmount > this.getPowerfulDust() ? this.getPowerfulDust() : remainingAmount;
         }
+      } else if (this.quest.requirementType === RequirementType.EXTERNAL) {
+        this.amountToBurn = remainingAmount;
       }
     },
 
@@ -259,12 +267,11 @@ export default Vue.extend({
             });
           }
         }
-        /*TODO*/
         else if(this.questTemplateType === QuestTemplateType.WALLET){
           if (this.externalsToBurn && this.quest?.requirementExternalAddress &&
              (this.quest.requirementType === RequirementType.EXTERNAL || this.quest.requirementType === RequirementType.EXTERNAL_HOLD)) {
-            await this.submitExternalProgress({
-              characterID: this.characterId,
+            await this.submitWalletExternalProgress({
+              questID: this.quest.id,
               tokenIds: this.externalsToBurn.split(',').map(id => +id),
               tokenAddress: this.quest.requirementExternalAddress,
             });
@@ -303,8 +310,8 @@ export default Vue.extend({
         else if(this.questTemplateType === QuestTemplateType.WALLET){
           if (this.quest.requirementExternalAddress
             && (this.quest.requirementType === RequirementType.EXTERNAL || this.quest.requirementType === RequirementType.EXTERNAL_HOLD)) {
-            await this.submitExternalProgressAmount({
-              characterID: this.characterId,
+            await this.submitWalletExternalProgressAmount({
+              questID: this.quest.id,
               amount: this.amountToBurn,
               currencyAddress: this.quest.requirementExternalAddress,
             });

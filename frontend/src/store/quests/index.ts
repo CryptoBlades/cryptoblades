@@ -593,12 +593,12 @@ const quests = {
         .call(defaultCallOptions(rootState));
 
       if(tokenIds.length === 1 && !isApprovedForAll) {
-        await tokenContract.methods.approve(SimpleQuests.options.address, tokenIds[0]).send({
+        await tokenContract.methods.approve(PartnerVault.options.address, tokenIds[0]).send({
           from: rootState.defaultAccount,
           gasPrice: getGasPrice()
         });
       } else if (!isApprovedForAll) {
-        await tokenContract.methods.setApprovalForAll(SimpleQuests.options.address, true).send({
+        await tokenContract.methods.setApprovalForAll(PartnerVault.options.address, true).send({
           from: rootState.defaultAccount,
           gasPrice: getGasPrice()
         });
@@ -609,7 +609,7 @@ const quests = {
 
     async submitExternalProgressAmount(
       { rootState }: {rootState: IState},
-      {characterID, amount, currencyAddress}: {characterID: number, amount: number, currencyAddress: string},) {
+      {characterID, amount, currencyAddress}: {characterID: number, amount: number, currencyAddress: string}) {
       const {SimpleQuests, PartnerVault} = rootState.contracts();
       if (!SimpleQuests || !PartnerVault || !rootState.defaultAccount) return;
 
@@ -636,12 +636,54 @@ const quests = {
 
       return await SimpleQuests.methods.submitWalletProgress(questID, tokenIds).send(defaultCallOptions(rootState));
     },
+
+    async submitWalletExternalProgress(
+      { rootState }: {rootState: IState}, {questID, tokenIds, tokenAddress}: {questID: number, tokenIds: string[], tokenAddress: string}) {
+      const {SimpleQuests, PartnerVault} = rootState.contracts();
+      if (!SimpleQuests || !PartnerVault || !rootState.defaultAccount) return;
+
+      const tokenContract = new rootState.web3.eth.Contract(erc721Abi as any[], tokenAddress) as Contract<IERC721>;
+
+      const isApprovedForAll = await tokenContract.methods.isApprovedForAll(rootState.defaultAccount, SimpleQuests.options.address)
+        .call(defaultCallOptions(rootState));
+
+      if(tokenIds.length === 1 && !isApprovedForAll) {
+        await tokenContract.methods.approve(PartnerVault.options.address, tokenIds[0]).send({
+          from: rootState.defaultAccount,
+          gasPrice: getGasPrice()
+        });
+      } else if (!isApprovedForAll) {
+        await tokenContract.methods.setApprovalForAll(PartnerVault.options.address, true).send({
+          from: rootState.defaultAccount,
+          gasPrice: getGasPrice()
+        });
+      }
+
+      return await SimpleQuests.methods.submitWalletProgress(questID, tokenIds).send(defaultCallOptions(rootState));
+    },
+
     async submitWalletProgressAmount(
       { rootState }: {rootState: IState}, {questID, amount}: {questID: number, amount: number}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
 
       return await SimpleQuests.methods.submitWalletProgressAmount(questID, amount).send(defaultCallOptions(rootState));
+    },
+
+    async submitWalletExternalProgressAmount(
+      { rootState }: {rootState: IState}, {questID, amount, currencyAddress}: {questID: number, amount: number, currencyAddress: string}) {
+      const {SimpleQuests, PartnerVault} = rootState.contracts();
+      if (!SimpleQuests || !PartnerVault || !rootState.defaultAccount) return;
+
+      const currencyContract = new rootState.web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
+      const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(rootState));
+      const amountTimesDecimals = rootState.web3.utils.toBN(amount * 10 ** currencyDecimals);
+      await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
+        from: rootState.defaultAccount,
+        gasPrice: getGasPrice()
+      });
+
+      return await SimpleQuests.methods.submitWalletProgressAmount(questID, amountTimesDecimals.toString()).send(defaultCallOptions(rootState));
     },
     async completeWalletQuest({ rootState }: {rootState: IState}, {questID}: {questID: number}) {
       const { SimpleQuests } = rootState.contracts();

@@ -396,7 +396,12 @@ export default Vue.extend({
       try {
         console.log('refreshing quest data');
         this.isLoading = true;
-        // this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
+        this.walletQuests = [];
+        if(this.walletQuestTier !== undefined){
+          this.isLoadingWalletQuests = true;
+          this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
+          this.isLoadingWalletQuests = false;
+        }
         this.usePromoQuests = await this.isUsingPromoQuests();
         this.currentWeeklyCompletions = +await this.getWeeklyCompletions();
         this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});
