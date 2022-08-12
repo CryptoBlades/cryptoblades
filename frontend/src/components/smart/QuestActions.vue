@@ -54,7 +54,7 @@
                    :amount="quest.rewardAmount" :reputationAmount="quest.reputationAmount"
                    :externalAddress="quest.rewardExternalAddress"/>
     </b-modal>
-    <b-modal v-model="showPickableQuestModal" ok-only class="centered-modal" title="Pick your Quest">
+    <b-modal v-model="showPickableQuestModal" ok-only class="centered-modal" size="xl" title="Pick your Quest">
       <div v-if="isLoading">
         <i class="fas fa-spinner fa-spin"/>
         {{ $t('quests.loading') }}
@@ -82,7 +82,7 @@
               <QuestRequirements :quest="quest" :index="index"/>
               <QuestRewards :quest="quest"/>
               <div class="pickBtn-wrapper">
-              <b-button class="pickBtn" variant="primary" @click="handlePick(quest.id)">
+              <b-button class="flex-1 custom-action-btn" variant="primary" @click="handlePick(quest.id)">
                 {{pickButtonLabel}}
               </b-button>
               </div>
@@ -513,14 +513,23 @@ export default Vue.extend({
 }
 .quest-row {
   display: flex;
-  justify-content: center;
   width: 100%;
-  background: #141414;
-  border: 1px solid #60583E;
+  background: rgba(0, 9, 26, 0.65);
+  border: 1px solid #404857;
   border-radius: 10px;
-  align-items: flex-end;
+  align-items: center;
+  font-family: Roboto;
+  height: clamp(200px, 20vh, 250px);
+  justify-content: space-between;
+  margin: 10px 0;
+  padding: 10px 30px;
 }
-.pickBtn{
-  align-self: flex-end;
+
+@media (max-width: 576px) {
+  .quest-row {
+    flex-direction: column;
+    height: auto;
+    gap: 1rem;
+  }
 }
 </style>
