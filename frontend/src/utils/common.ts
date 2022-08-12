@@ -121,14 +121,14 @@ export const isValidWeb3Address = (walletAddress: string) => {
 };
 
 export const currentChainSupportsPvP = () => {
-  const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '1337';
+  const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
   const contractAddress = process.env.VUE_APP_PVP_CONTRACT_ADDRESS ||
     getConfigValue('VUE_APP_PVP_CONTRACT_ADDRESS') || (pvpNetworks as Networks)[networkId]?.address;
   return !!contractAddress;
 };
 
 export const currentChainSupportsQuests = () => {
-  const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '1337';
+  const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
   const contractAddress = process.env.VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS ||
     getConfigValue('VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS') || (simpleQuestsNetworks as Networks)[networkId]?.address;
   return !!contractAddress;

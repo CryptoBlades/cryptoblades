@@ -120,7 +120,7 @@ export function getConfigValue(key: string, chain?: string): any {
   return (config as Config).environments[env].chains[currentChain][key];
 }
 
-let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '1337';
+let networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
 
 export type Networks = Partial<Record<string, { address: string }>>;
 
@@ -203,7 +203,7 @@ function getNftStakingContractsInfoWithDefaults(): Partial<Record<NftStakeType, 
 }
 
 async function setUpStakingContracts(web3: Web3) {
-  networkId = getConfigValue('VUE_APP_NETWORK_ID') || '1337';
+  networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
   const stakingContractsInfo = getStakingContractsInfoWithDefaults();
   const nftStakingContractsInfo = getNftStakingContractsInfoWithDefaults();
 
