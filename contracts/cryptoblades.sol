@@ -378,7 +378,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         vars[VAR_UNCLAIMED_SKILL] += tokens;
         vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
         xpRewards[char] += xp;
-        
+
 
         vars[VAR_HOURLY_FIGHTS] += fightMultiplier;
         vars[VAR_HOURLY_POWER_SUM] += data.playerFightPower * fightMultiplier;
@@ -701,7 +701,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
     }
 
-    function payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) external restricted 
+    function payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) external restricted
         returns (
             uint256 _fromInGameOnlyFunds,
             uint256 _fromTokenRewards,
