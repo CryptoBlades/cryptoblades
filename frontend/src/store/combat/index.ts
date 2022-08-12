@@ -1,20 +1,15 @@
 import _ from 'lodash';
 import {gasUsedToBnb} from '@/utils/common';
-import {IState, IWeapon} from '@/interfaces';
+import {IState, ITarget} from '@/interfaces';
 import {isUndefined} from 'lodash';
 import {targetFromContract} from '@/contract-models';
 import {Dispatch, Commit} from 'vuex';
 import { getGasPrice } from '../store';
 import BigNumber from 'bignumber.js';
+import Vue from 'vue';
 
 export interface ICombatState {
-  //characterPowers: Record<number, number>;
-  //weaponDurabilities: Record<number, number>;
   isInCombat: boolean;
-  ownedCharacterIds: number[];
-  characterStaminas: Record<number, number>;
-  ownedWeaponIds: number[];
-  weapons: IWeapon[];
   targetsByCharacterIdAndWeaponId: Record<number, Record<number, ITarget>>;
 }
 
@@ -23,21 +18,10 @@ const defaultCallOptions = (state:  IState) => ({ from: state.defaultAccount });
 const combat = {
   namespaced: true,
   state: {
-    //characterPowers: {},
-    //weaponDurabilities: {},
     isInCombat: false,
-    ownedCharacterIds: [],
-    characterStaminas: {},
-    ownedWeaponIds: [],
-    weapons: [],
     targetsByCharacterIdAndWeaponId: {},
   } as ICombatState,
   getters: {
-    // getCharacterPower(state: ICombatState) {
-    //   return (characterId: number) => {
-    //     return state.characterPowers[characterId];
-    //   };
-    // },
     getTargetsByCharacterIdAndWeaponId(state: ICombatState) {
       return (characterId: number, weaponId: number) => {
         const targetsByWeaponId = state.targetsByCharacterIdAndWeaponId[characterId];
@@ -46,15 +30,20 @@ const combat = {
         return targetsByWeaponId[weaponId] ?? [];
       };
     },
-    // getWeaponDurability(state: ICombatState) {
-    //   return (weaponId: number) => {
-    //     return state.weaponDurabilities[weaponId];
-    //   };
-    // },
+    getIsInCombat(state: ICombatState) {
+      return state.isInCombat;
+    },
   },
   mutations: {
     setIsInCombat(state: ICombatState, isInCombat: boolean) {
       state.isInCombat = isInCombat;
+    },
+    updateTargets(state: ICombatState, { characterId, weaponId, targets }: {characterId: number, weaponId: number, targets: ITarget[]}) {
+      if (!state.targetsByCharacterIdAndWeaponId[characterId]) {
+        Vue.set(state.targetsByCharacterIdAndWeaponId, characterId, {});
+      }
+
+      Vue.set(state.targetsByCharacterIdAndWeaponId[characterId], weaponId, targets);
     },
   },
   actions: {
@@ -199,13 +188,13 @@ const combat = {
       return skillRewards;
     },
 
-    async fetchFightRewardXp({ rootState, state, commit }: {rootState: IState, state: ICombatState, commit: Commit}) {
+    async fetchFightRewardXp({ rootState, commit }: {rootState: IState, commit: Commit}) {
       const { CryptoBlades } = rootState.contracts();
       if(!CryptoBlades) return;
 
-      const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds.map(x => x.toString())).call(defaultCallOptions(rootState));
+      const xps = await CryptoBlades.methods.getXpRewards(rootState.ownedCharacterIds.map(x => x.toString())).call(defaultCallOptions(rootState));
 
-      const xpCharaIdPairs = state.ownedCharacterIds.map((charaId, i) => {
+      const xpCharaIdPairs = rootState.ownedCharacterIds.map((charaId, i) => {
         return [charaId, xps[i]];
       });
 
@@ -213,13 +202,13 @@ const combat = {
       return xpCharaIdPairs;
     },
 
-    async fetchCharacterStamina({ rootState, state, commit }: {rootState: IState, state: ICombatState, commit: Commit}, characterId: number) {
+    async fetchCharacterStamina({ rootState, commit }: {rootState: IState, commit: Commit}, characterId: number) {
       const staminaString = await rootState.contracts().Characters!.methods
         .getStaminaPoints('' + characterId)
         .call(defaultCallOptions(rootState));
 
       const stamina = parseInt(staminaString, 10);
-      if (state.characterStaminas[characterId] !== stamina) {
+      if (rootState.characterStaminas[characterId] !== stamina) {
         commit('updateCharacterStamina', { characterId, stamina });
       }
     },

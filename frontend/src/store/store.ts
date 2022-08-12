@@ -117,11 +117,8 @@ export default new Vuex.Store<IState>({
     weaponDurabilities: {},
     weaponRenames: {},
     maxDurability: 0,
-    isInCombat: false,
     weaponCosmetics: {},
     isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
-
-    targetsByCharacterIdAndWeaponId: {},
 
     shields: {},
     trinkets: {},
@@ -434,10 +431,6 @@ export default new Vuex.Store<IState>({
       return state.fightBaseline;
     },
 
-    getIsInCombat(state: IState): boolean {
-      return state.isInCombat;
-    },
-
     getIsCharacterViewExpanded(state: IState): boolean {
       return state.isCharacterViewExpanded;
     },
@@ -668,14 +661,6 @@ export default new Vuex.Store<IState>({
     updateCharacterCosmetic(state: IState, { characterId, characterCosmetic }) {
       Vue.set(state.characterCosmetics, characterId, characterCosmetic);
     },
-    updateTargets(state: IState, { characterId, weaponId, targets }) {
-      if (!state.targetsByCharacterIdAndWeaponId[characterId]) {
-        Vue.set(state.targetsByCharacterIdAndWeaponId, characterId, {});
-      }
-
-      Vue.set(state.targetsByCharacterIdAndWeaponId[characterId], weaponId, targets);
-    },
-
     updateWaxBridgeDetails(state, payload: WaxBridgeDetailsPayload) {
       state.waxBridgeWithdrawableBnb = payload.waxBridgeWithdrawableBnb;
       state.waxBridgeRemainingWithdrawableBnbDuringPeriod = payload.waxBridgeRemainingWithdrawableBnbDuringPeriod;

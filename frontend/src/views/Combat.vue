@@ -181,7 +181,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {getEnemyArt} from '../enemy-art';
-import {CharacterTrait, GetTotalMultiplierForTrait, ITarget, IWeapon, WeaponElement} from '../interfaces';
+import {CharacterTrait, GetTotalMultiplierForTrait, ICharacter, ITarget, IWeapon, WeaponElement} from '../interfaces';
 import Hint from '../components/Hint.vue';
 import Events from '../events';
 import {fromWeiEther, toBN} from '../utils/common';
@@ -192,6 +192,7 @@ import ModalContainer from '../components/modals/ModalContainer.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
 import i18n from '../i18n';
+import { Accessors } from 'vue/types/options';
 
 interface StoreMappedCombatActions {
   fetchCharacterStamina(characterId: number): Promise<void>;
@@ -230,6 +231,30 @@ interface StoreMappedCombatActions {
   getCombatTokenChargePercent(): Promise<string>;
 }
 
+interface StoreMappedState {
+  currentCharacterId: number,
+  currentWeaponId: number,
+}
+
+interface StoreMappedGetters {
+  ownCharacters: ICharacter[],
+  ownWeapons: IWeapon[],
+  currentCharacter: ICharacter,
+  currentCharacterStamina: number,
+  fightGasOffset: string,
+  fightBaseline: string,
+  getCharacterPower(characterId: number): number,
+  getWeaponDurability(weaponId: number): number,
+}
+
+interface StoreMappedCombatMutations {
+  setIsInCombat(isInCombat: boolean): boolean,
+}
+
+interface StoreMappedCombatGetters {
+  getTargetsByCharacterIdAndWeaponId(currentCharacterId: number, selectedWeaponId: number): ITarget | any[],
+}
+
 type stringOrNull = string | null;
 type numberOrNull = number | null;
 type stringOrNumber = string | number;
@@ -263,54 +288,6 @@ interface ICombatData {
   index: number;
   counterInterval: any;
 }
-
-// interface ICombatMethod {
-//   getEnemyArt(enemyId: number): string,
-//   weaponHasDurability(id: number): boolean,
-//   charHasStamina(): boolean,
-//   getCharacterTrait(trait: CharacterTrait): string,
-//   getWinChance(enemyPower: number, enemyElement: number): VueI18n.TranslateResult,
-//   getElementAdvantage(playerElement: number, enemyElement: number): 1 | 0 | -1,
-//   enter(el: any, done: any): void,
-//   beforeEnter(el: any): void,
-//   hideBottomMenu(bol: any): void,
-//   getExpectedPayout(): Promise<void>,
-//   getHourlyAllowance(): Promise<void>,
-//   onClickEncounter(targetToFight: ITarget, targetIndex: number): Promise<void>,
-//   fightTarget(targetToFight: ITarget, targetIndex: number): Promise<void>,
-//   formattedSkill(skill: any): string,
-//   getPotentialXp(targetToFight: ITarget): number,
-//   setFightMultiplier(): void,
-//   setStaminaSelectorValues(): {
-//     value: null,
-//     text:  VueI18n.TranslateResult,
-//     disabled: boolean
-//   }[] |
-//   {
-//     value: number,
-//     text:  VueI18n.TranslateResult,
-//     disabled: boolean
-//   }[],
-//   getExpectedPayouts(): Promise<void>,
-//   updateStaminaPerFight(): void,
-//   changeEquipedWeapon(): void,
-//   addCommas(nStr: string): string,
-//   changeColorChange(stat: string): string,
-//   getTargetsByCharacterIdAndWeaponId(currentCharacterId: number, selectedWeaponId: number): never[] | ITarget,
-//   setIsInCombat(getIsInCombat: boolean): void,
-// }
-// interface ICombatComputed {
-//   targets: never[] | ITarget,
-//   isLoadingTargets: boolean,
-//   selections: any[],
-//   updateResults: any[],
-//   currentWeaponId: number;
-//   currentCharacterId: number;
-// }
-// interface ICombatProps {
-//   currentCharacterId: number,
-//   currentWeaponId: number,
-// }
 
 export default Vue.extend({
   data() {
@@ -366,8 +343,8 @@ export default Vue.extend({
     clearInterval(this.counterInterval);
   },
   computed: {
-    ...mapState(['currentCharacterId', 'currentWeaponId']),
-    ...mapGetters([
+    ...(mapState(['currentCharacterId', 'currentWeaponId']) as Accessors<StoreMappedState>),
+    ...(mapGetters([
       'ownCharacters',
       'ownWeapons',
       'currentCharacter',
@@ -376,8 +353,8 @@ export default Vue.extend({
       'fightBaseline',
       'getCharacterPower',
       'getWeaponDurability',
-    ]),
-    ...mapGetters('combat', ['getTargetsByCharacterIdAndWeaponId']),
+    ]) as Accessors<StoreMappedGetters>),
+    ...(mapGetters('combat', ['getTargetsByCharacterIdAndWeaponId']) as Accessors<StoreMappedCombatGetters>),
 
     targets(): any[] | ITarget {
       return this.getTargetsByCharacterIdAndWeaponId(this.currentCharacterId, this.selectedWeaponId as number);
@@ -418,7 +395,6 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['getXPRewardsIfWin']),
     ...(mapActions('combat',
       [
         'fetchTargets',
@@ -434,7 +410,7 @@ export default Vue.extend({
         'getCombatTokenChargePercent',
         'fetchCharacterStamina'
       ]) as StoreMappedCombatActions),
-    ...mapMutations('combat', ['setIsInCombat']),
+    ...(mapMutations('combat', ['setIsInCombat']) as StoreMappedCombatMutations),
     getEnemyArt,
     weaponHasDurability(id: number) {
       return this.getWeaponDurability(id) >= this.fightMultiplier;
@@ -448,9 +424,10 @@ export default Vue.extend({
     getWinChance(enemyPower: number, enemyElement: number) {
       const characterPower = this.getCharacterPower(this.currentCharacter.id);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === this.selectedWeaponId);
+      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === this.selectedWeaponId) as IWeapon;
       this.selectedWeapon = selectedWeapon;
-      const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);
+      const element: WeaponElement = WeaponElement[selectedWeapon.element as keyof typeof WeaponElement];
+      const weaponElement = parseInt(WeaponElement[element], 10);
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
       const totalPower = characterPower * weaponMultiplier + selectedWeapon.bonusPower;
       const totalMultiplier = 1 + 0.075 * (weaponElement === playerElement ? 1 : 0) + 0.075 * this.getElementAdvantage(playerElement, enemyElement);
@@ -594,7 +571,7 @@ export default Vue.extend({
     getPotentialXp(targetToFight: ITarget) {
       const characterPower = this.getCharacterPower(this.currentCharacter.id);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === this.selectedWeaponId);
+      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === this.selectedWeaponId) as IWeapon;
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
       const totalPower = characterPower * weaponMultiplier + selectedWeapon.bonusPower;
       //Formula taken from getXpGainForFight funtion of cryptoblades.sol
