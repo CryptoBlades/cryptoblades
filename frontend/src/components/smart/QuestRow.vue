@@ -163,8 +163,4 @@ export default Vue.extend({
   }
 }
 
-*:hover {
-   outline:1px blue solid;
- }
-
 </style>
