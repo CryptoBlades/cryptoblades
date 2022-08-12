@@ -891,7 +891,7 @@ export default Vue.extend({
         this.newForged = this.ownedWeaponIds.splice(this.ownedWeaponIds.length - amount, this.ownedWeaponIds.length);
         (this.$refs['new-forge-weapon'] as BModal).show();
       } catch (e) {
-        console.log('Error while forging:', e);
+        console.error('Error while forging:', e);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
       } finally {
         this.disableForge = false;

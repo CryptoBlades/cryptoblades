@@ -1456,6 +1456,10 @@ export default new Vuex.Store<IState>({
           { feeMultiplier: num * 4 * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
         );
 
+        if (!await CryptoBlades.methods.hasSeed().call(defaultCallOptions(state))) {
+          await CryptoBlades.methods.generateSeed().send(defaultCallOptions(state));
+        }
+
         await CryptoBlades.methods.mintWeaponN(num, chosenElement, eventId).send({ from: state.defaultAccount, gas: '5000000', gasPrice: getGasPrice(), });
       }
 
@@ -1491,6 +1495,10 @@ export default new Vuex.Store<IState>({
           cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
           { feeMultiplier: chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
         );
+
+        if (!await CryptoBlades.methods.hasSeed().call(defaultCallOptions(state))) {
+          await CryptoBlades.methods.generateSeed().send(defaultCallOptions(state));
+        }
 
         await CryptoBlades.methods.mintWeapon(chosenElement, eventId).send({ from: state.defaultAccount, gasPrice: getGasPrice(), });
       }

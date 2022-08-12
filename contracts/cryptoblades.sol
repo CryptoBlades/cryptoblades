@@ -16,6 +16,7 @@ import "./util.sol";
 import "./common.sol";
 import "./Blacksmith.sol";
 import "./SpecialWeaponsManager.sol";
+import "./SafeRandoms.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -30,6 +31,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
+    bytes32 public constant WEAPON_SEED = keccak256("WEAPON_SEED");
 
     int128 public constant PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT =
         14757395258967641292; // 0.8 in fixed-point 64x64 format
@@ -225,6 +227,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     mapping(address => mapping(uint256 => uint256)) public userVars;
 
     SpecialWeaponsManager public specialWeaponsManager;
+    SafeRandoms public safeRandoms;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -318,7 +321,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
             _getFightDataAndDrainStaminaUnpacked(fighter, char, fightMultiplier);
-        
+
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
@@ -331,7 +334,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             target,
             now / 1 hours
         );
-    
+
         FightData memory data = FightData(
             Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
             uint24(charTrait | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
@@ -378,7 +381,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         vars[VAR_UNCLAIMED_SKILL] += tokens;
         vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
         xpRewards[char] += xp;
-        
+
 
         vars[VAR_HOURLY_FIGHTS] += fightMultiplier;
         vars[VAR_HOURLY_POWER_SUM] += data.playerFightPower * fightMultiplier;
@@ -560,22 +563,39 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _mintWeaponLogic(chosenElement, eventId);
     }
 
+    function setSafeRandoms(SafeRandoms _safeRandoms) public restricted {
+        safeRandoms = _safeRandoms;
+    }
+
+    function hasSeed() public view returns (bool) {
+        return safeRandoms.hasSingleSeedRequest(tx.origin, getSeed());
+    }
+
+    function generateSeed() public {
+        safeRandoms.requestSingleSeed(tx.origin, getSeed());
+    }
+
+    function getSeed() internal pure returns (uint256 seed) {
+        seed = uint(keccak256(abi.encodePacked(WEAPON_SEED, uint(1))));
+    }
+
     function _mintWeaponNLogic(uint32 num, uint8 chosenElement, uint256 eventId) internal {
         require(num > 0 && num <= 10);
+        uint256 seed = safeRandoms.popSingleSeed(msg.sender, getSeed(), true, true);
         if(eventId > 0) {
             specialWeaponsManager.addShards(msg.sender, eventId, num);
         }
         _updateWeaponMintFee(num);
-        weapons.mintN(msg.sender, num, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
+        weapons.mintN(msg.sender, num, seed, chosenElement);
     }
 
     function _mintWeaponLogic(uint8 chosenElement, uint256 eventId) internal {
-        //uint256 seed = randoms.getRandomSeed(msg.sender);
+        uint256 seed = safeRandoms.popSingleSeed(msg.sender, getSeed(), true, true);
         if(eventId > 0) {
             specialWeaponsManager.addShards(msg.sender, eventId, 1);
         }
         _updateWeaponMintFee(1);
-        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
+        weapons.mint(msg.sender, seed, chosenElement);
     }
 
     function _updateWeaponMintFee(uint256 num) internal {
@@ -701,7 +721,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
     }
 
-    function payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) external restricted 
+    function payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) external restricted
         returns (
             uint256 _fromInGameOnlyFunds,
             uint256 _fromTokenRewards,

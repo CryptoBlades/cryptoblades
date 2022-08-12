@@ -18,6 +18,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     /* ========== CONSTANTS ========== */
 
     bytes32 public constant GAME = keccak256("GAME");
+    bytes32 public constant SHIELD_SEED = keccak256("SHIELD_SEED");
 
     uint256 public constant ITEM_WEAPON_RENAME = 1;
     uint256 public constant ITEM_CHARACTER_RENAME = 2;
@@ -62,6 +63,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     mapping(uint256 => address) currencies;
 
     mapping(uint256 => address) public links;
+    SafeRandoms public safeRandoms;
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -129,17 +131,32 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         IERC20(tokenAddress).safeTransfer(msg.sender, amount);
     }
 
+    function setSafeRandoms(SafeRandoms _safeRandoms) public isAdmin {
+        safeRandoms = _safeRandoms;
+    }
+
+    function hasSeed() public view returns (bool) {
+        return safeRandoms.hasSingleSeedRequest(tx.origin, getSeed());
+    }
+
+    function generateSeed() public {
+        safeRandoms.requestSingleSeed(tx.origin, getSeed());
+    }
+
+    function getSeed() internal pure returns (uint256 seed) {
+        seed = uint(keccak256(abi.encodePacked(SHIELD_SEED, uint(1))));
+    }
+
     function purchaseShield() public {
         require(itemFlatPrices[ITEM_SHIELD] > 0);
-
+        uint256 seed = safeRandoms.popSingleSeed(msg.sender, getSeed(), true, true);
         uint256 shieldType = numberParameters[VAR_PURCHASE_SHIELD_TYPE];
         if(shieldType != 0) {
             require(numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] > 0);
             numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] -= 1;
         }
         payCurrency(msg.sender, itemFlatPrices[ITEM_SHIELD], CURRENCY_SKILL);
-        shields.mint(msg.sender, shieldType,
-            uint256(keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1)))));
+        shields.mint(msg.sender, shieldType, seed);
     }
 
     /* ========== MODIFIERS ========== */
@@ -153,7 +170,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
          _isAdmin();
         _;
     }
-    
+
     function _isAdmin() internal view {
          require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
     }
