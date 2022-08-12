@@ -74,12 +74,13 @@
 
       <!-- Wallet Quests -->
       <span class="quests-title-2">Wallet Quests</span>
-      <div class="form-control-wrapper">
-        <select class="form-control" v-model="walletQuestTier" >
-              <option :value="undefined">Select a Rarity</option>
-          <option v-for="x in rarities" :value="x" :key="x">{{$t(`quests.rarityType.${Rarity[x]}`)}}</option>
-        </select>
-      </div>
+      <!-- TODO: This will come back when we add additional tiers to Wallet Quests -->
+<!--      <div class="form-control-wrapper">-->
+<!--        <select class="form-control" v-model="walletQuestTier" >-->
+<!--              <option :value="undefined">Select a Rarity</option>-->
+<!--          <option v-for="x in rarities" :value="x" :key="x">{{$t(`quests.rarityType.${Rarity[x]}`)}}</option>-->
+<!--        </select>-->
+<!--      </div>-->
       <div v-if="isLoadingWalletQuests">
         <i class="fas fa-spinner fa-spin"/>
         {{ $t('quests.loading') }}
@@ -323,7 +324,7 @@ export default Vue.extend({
       QuestTemplateType,
       questTemplateType: QuestTemplateType.QUEST,
       walletQuests:[],
-      walletQuestTier: undefined,
+      walletQuestTier: 0,
     } as Data;
   },
 
