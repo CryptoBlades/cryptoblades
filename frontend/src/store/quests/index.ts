@@ -58,6 +58,9 @@ const quests = {
           rewardExternalAddress: string;
           reputationAmount: string;
         };
+        if(tier >= 30 && tier < 40){
+          quest.progress = await dispatch('getWalletQuestProgress', {questID: +quest.id});
+        }
         const emptyAccount = '0x0000000000000000000000000000000000000000';
         if(quest.requirementExternalAddress !== emptyAccount
           && ((quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL)
@@ -81,9 +84,6 @@ const quests = {
           } catch {
             // Contract does not support decimals
           }
-        }
-        if(tier >= 30 && tier < 40){
-          quest.progress = await dispatch('getWalletQuestProgress', {questID: +quest.id});
         }
         const questTemplate = {
           progress: +quest.progress,
