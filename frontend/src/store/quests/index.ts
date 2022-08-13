@@ -127,7 +127,7 @@ const quests = {
         const contract = new rootState.web3.eth.Contract(erc20Abi as any[], questTemplate.requirementExternalAddress);
         try {
           const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(rootState));
-          requirementAmount = rootState.web3.utils.toBN(requirementAmount * 10 ** currencyDecimals).toString();
+          requirementAmount = new BigNumber(requirementAmount).multipliedBy(new BigNumber(10 ** currencyDecimals)).toString();
         } catch {
           // Contract does not support decimals
         }
@@ -139,7 +139,7 @@ const quests = {
         const contract = new rootState.web3.eth.Contract(erc20Abi as any[], questTemplate.rewardExternalAddress);
         try {
           const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(rootState));
-          rewardAmount = +rootState.web3.utils.toBN(rewardAmount * 10 ** currencyDecimals).toString();
+          rewardAmount = +new BigNumber(rewardAmount).multipliedBy(new BigNumber(10 ** currencyDecimals));
         } catch {
           // Contract does not support decimals
         }
@@ -615,7 +615,7 @@ const quests = {
 
       const currencyContract = new rootState.web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
       const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(rootState));
-      const amountTimesDecimals = rootState.web3.utils.toBN(amount * 10 ** currencyDecimals);
+      const amountTimesDecimals = new BigNumber(amount).multipliedBy(new BigNumber(10 ** currencyDecimals));
       await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
         from: rootState.defaultAccount,
         gasPrice: getGasPrice()
@@ -677,7 +677,7 @@ const quests = {
 
       const currencyContract = new rootState.web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
       const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(rootState));
-      const amountTimesDecimals = rootState.web3.utils.toBN(amount * 10 ** currencyDecimals);
+      const amountTimesDecimals = new BigNumber(amount).multipliedBy(new BigNumber(10 ** currencyDecimals));
       await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
         from: rootState.defaultAccount,
         gasPrice: getGasPrice()
