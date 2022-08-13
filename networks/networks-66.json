@@ -3288,7 +3288,7 @@
     },
     "links": {},
     "address": "0xb1b74eC1B0655A777b6268a63a30bE5Ad5C179cD",
-    "transactionHash": "0x0635a5ec315d34d7cf3bee2c21218346f9e2795154e403aab92d0290ff0fb8bb"
+    "transactionHash": "0xe89a1ee6802897333810cf84cf20627d3f56b8d551dbdb02b9bdb9d6f4a0a04c"
   },
   "build/contracts/Promos.json": {
     "events": {

@@ -3396,7 +3396,7 @@
     },
     "links": {},
     "address": "0xeE119eB272995Db5a6075333Df535667F61287Db",
-    "transactionHash": "0xc7329b37ac0edaea69b30ae0faf2055dac18a92008d8704aa4305202806e5d3c"
+    "transactionHash": "0x33b1b3fe3ec86dbaa092bd7cc5cf9d78bee266f87e1de303c51b396e4df339f0"
   },
   "build/contracts/Promos.json": {
     "events": {
