@@ -73,7 +73,7 @@
       </div>
 
       <!-- Wallet Quests -->
-      <span class="quests-title-2">Wallet Quests</span>
+      <span v-if="walletQuests.length" class="quests-title-2">Wallet Quests</span>
       <!-- TODO: This will come back when we add additional tiers to Wallet Quests -->
 <!--      <div class="form-control-wrapper">-->
 <!--        <select class="form-control" v-model="walletQuestTier" >-->
