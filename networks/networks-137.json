@@ -4546,7 +4546,8 @@
       }
     },
     "links": {},
-    "address": "0x9369ddE99E574A598ba067c0Ff394D96142167B1"
+    "address": "0x9369ddE99E574A598ba067c0Ff394D96142167B1",
+    "transactionHash": "0xf25628442fae030b6278f2d56251718a92561c6a2ab43db417662fdfd530f8e5"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -6392,11 +6393,74 @@
         ],
         "name": "WeeklyRewardSet",
         "type": "event"
+      },
+      "0x645b576ea1b70b2a340735005c6d0c3302b40b8079e0cc149f1db4d606be382d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "questID",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          }
+        ],
+        "name": "WalletQuestComplete",
+        "type": "event"
+      },
+      "0x3a75beb9093482f20af9201d383d16205421572864f41cae38bb6ba6328efe75": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "questID",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          }
+        ],
+        "name": "WalletQuestProgressed",
+        "type": "event"
+      },
+      "0x52790295db8a9172d05ce63d6a89c332757ae1a1760f64d9543133b0efcc623f": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "questID",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256[]",
+            "name": "rewards",
+            "type": "uint256[]"
+          }
+        ],
+        "name": "WalletQuestRewarded",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xc97011880a37139BD5eEEAE7A2cf683a82D615e0",
-    "transactionHash": "0xd1eefc319b6f22b2079951225ae549defdc647869710c71e46435406cac6d034"
+    "transactionHash": "0xe8c803ad5649d425c75e48bba21144947ba7ca4612df330328e19a6ffe0f17cb"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},
