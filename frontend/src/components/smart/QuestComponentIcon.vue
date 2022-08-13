@@ -74,7 +74,11 @@ export default Vue.extend({
         this.tooltip = i18n.t(`quests.dustRarityType.${DustRarity[this.rarity]}`)
           + ' ' + i18n.t(`quests.questItemType.${QuestItemType[this.questItemType]}`);
       } else if (this.questItemType === QuestItemType.EXTERNAL || this.questItemType === QuestItemType.EXTERNAL_HOLD) {
-        this.tooltip = (questItemsInfo as QuestItemsInfo).questItems[this.externalAddress].name;
+        this.tooltip = `
+        - ${(questItemsInfo as QuestItemsInfo).questItems[this.externalAddress]?.name} -
+        ${(questItemsInfo as QuestItemsInfo).questItems[this.externalAddress]?.website}
+        ${(questItemsInfo as QuestItemsInfo).questItems[this.externalAddress]?.description}
+        `;
       } else {
         this.tooltip = i18n.t(`quests.questItemType.${QuestItemType[this.questItemType]}`).toString();
       }
@@ -110,7 +114,9 @@ export default Vue.extend({
       this.icon = raid;
     } else if (this.questItemType === QuestItemType.EXTERNAL || this.questItemType === QuestItemType.EXTERNAL_HOLD) {
       const fileName = (questItemsInfo as QuestItemsInfo).questItems[this.externalAddress]?.image;
-      this.icon = this.imgPath(fileName);
+      if (fileName) {
+        this.icon = this.imgPath(fileName);
+      }
     }
     if (questItemTypeSupportsStars(this.questItemType)) {
       this.stars = Array(this.rarity + 1).fill('★').join('');
