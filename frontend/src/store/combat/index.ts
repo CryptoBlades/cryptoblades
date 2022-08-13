@@ -7,10 +7,13 @@ import {Dispatch, Commit} from 'vuex';
 import { getGasPrice } from '../store';
 import BigNumber from 'bignumber.js';
 import Vue from 'vue';
+import { getFeeInSkillFromUsd } from '@/contract-call-utils';
 
 export interface ICombatState {
   isInCombat: boolean;
   targetsByCharacterIdAndWeaponId: Record<number, Record<number, ITarget>>;
+  fightBaseline: string;
+  fightGasOffset: string;
 }
 
 const defaultCallOptions = (state:  IState) => ({ from: state.defaultAccount });
@@ -20,6 +23,8 @@ const combat = {
   state: {
     isInCombat: false,
     targetsByCharacterIdAndWeaponId: {},
+    fightBaseline: '0',
+    fightGasOffset: '0',
   } as ICombatState,
   getters: {
     getTargetsByCharacterIdAndWeaponId(state: ICombatState) {
@@ -33,6 +38,13 @@ const combat = {
     getIsInCombat(state: ICombatState) {
       return state.isInCombat;
     },
+    fightGasOffset(state: ICombatState) {
+      return state.fightGasOffset;
+    },
+
+    fightBaseline(state: ICombatState) {
+      return state.fightBaseline;
+    },
   },
   mutations: {
     setIsInCombat(state: ICombatState, isInCombat: boolean) {
@@ -45,8 +57,23 @@ const combat = {
 
       Vue.set(state.targetsByCharacterIdAndWeaponId[characterId], weaponId, targets);
     },
+    updateFightBaseline(state: ICombatState, { fightBaseline }: { fightBaseline: string }) {
+      state.fightBaseline = fightBaseline;
+    },
+    updateFightGasOffset(state: ICombatState, { fightGasOffset }: { fightGasOffset: string }) {
+      state.fightGasOffset = fightGasOffset;
+    },
   },
   actions: {
+    async fetchIgoRewardsPerFight({state}: {state: IState}) {
+      const { CryptoBlades } = state.contracts();
+      if(!CryptoBlades || !state.defaultAccount) return;
+
+      return await CryptoBlades.methods
+        .vars(27)
+        .call(defaultCallOptions(state));
+    },
+
     async fetchHourlyPowerAverage({state}: {state: IState}) {
       const { CryptoBlades } = state.contracts();
       if(!CryptoBlades) return;
@@ -108,6 +135,48 @@ const combat = {
       if (!TokensManager || !state.defaultAccount) return;
 
       return await TokensManager.methods.skillTokenPrice().call(defaultCallOptions(state));
+    },
+
+    async doEncounter(
+      { state, dispatch }: {state: IState, dispatch: Dispatch},
+      { characterId, weaponId, targetString, fightMultiplier }:
+      { characterId: number, weaponId: number, targetString: number, fightMultiplier: number }) {
+      const res = await state.contracts().CryptoBlades!.methods
+        .fight(
+          characterId,
+          weaponId,
+          targetString,
+          fightMultiplier
+        )
+        .send({ from: state.defaultAccount, gas: '300000', gasPrice: getGasPrice() });
+
+      await dispatch('fetchTargets', { characterId, weaponId });
+
+      const {
+        /*owner,
+        character,
+        weapon,
+        target,*/
+        playerRoll,
+        enemyRoll,
+        xpGain,
+        skillGain
+      } = res.events.FightOutcome.returnValues;
+
+      const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
+
+      const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
+
+      await dispatch('fetchWeaponDurability', weaponId);
+
+      return {
+        isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
+        playerRoll,
+        enemyRoll,
+        xpGain,
+        skillGain,
+        bnbGasUsed
+      };
     },
 
     async doEncounterPayNative(
@@ -211,6 +280,50 @@ const combat = {
       if (rootState.characterStaminas[characterId] !== stamina) {
         commit('updateCharacterStamina', { characterId, stamina });
       }
+    },
+
+    async fetchFightGasOffset({ rootState, commit }: {rootState: IState, commit: Commit}) {
+      const { CryptoBlades } = rootState.contracts();
+      if(!CryptoBlades) return;
+      const fightGasOffset = await getFeeInSkillFromUsd(
+        CryptoBlades,
+        defaultCallOptions(rootState),
+        cryptoBladesMethods => cryptoBladesMethods.fightRewardGasOffset()
+      );
+
+      commit('updateFightGasOffset', { fightGasOffset });
+      return fightGasOffset;
+    },
+
+    async fetchFightBaseline({ rootState, commit }: {rootState: IState, commit: Commit}) {
+      const { CryptoBlades } = rootState.contracts();
+      if(!CryptoBlades) return;
+
+      const fightBaseline = await getFeeInSkillFromUsd(
+        CryptoBlades,
+        defaultCallOptions(rootState),
+        cryptoBladesMethods => cryptoBladesMethods.fightRewardBaseline()
+      );
+
+      commit('updateFightBaseline', { fightBaseline });
+      return fightBaseline;
+    },
+
+    async getFightXpGain({rootState}: {rootState: IState}) {
+      const {CryptoBlades} = rootState.contracts();
+      if (!CryptoBlades) return;
+
+      return +await CryptoBlades.methods.fightXpGain().call(defaultCallOptions(rootState));
+    },
+
+    async setFightXpGain({rootState}: {rootState: IState}, {xpGain}: {xpGain: number}) {
+      const {CryptoBlades} = rootState.contracts();
+      if (!CryptoBlades) return;
+
+      await CryptoBlades.methods.setFightXpGain(xpGain).send({
+        from: rootState.defaultAccount,
+        gasPrice: getGasPrice(),
+      });
     },
   },
 };

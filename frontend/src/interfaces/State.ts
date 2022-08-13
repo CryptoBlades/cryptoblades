@@ -75,9 +75,6 @@ export interface IState {
   currentNetworkId: number | null;
   skillPriceInUsd: number;
 
-  fightGasOffset: string;
-  fightBaseline: string;
-
   skillBalance: string;
   skillRewards: string;
   maxRewardsClaimTax: string;
