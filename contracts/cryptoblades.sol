@@ -23,6 +23,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using SafeMath for uint64;
     using SafeERC20 for IERC20;
 
+    struct FightData {
+        uint24 playerFightPower;
+        uint24 traitsCWE;
+        uint24 targetPower;
+    }
+
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
     int128 public constant PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT =
@@ -295,19 +301,28 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         timestamp = uint64((playerData >> 32) & 0xFFFFFFFFFFFFFFFF);
     }
 
-    function fight(uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external
+    function _getFightDataAndDrainStaminaUnpacked(address fighter, uint256 char, uint8 fightMultiplier) private returns(uint8, uint24, uint64) {
+        return unpackFightData(characters.getFightDataAndDrainStamina(fighter,
+            char, staminaCostFight * fightMultiplier, false, 0));
+    }
+
+    function _getFightDataAndDrainDurability(address fighter, uint256 wep, uint8 charTrait, uint8 fightMultiplier) private returns(int128, int128, uint24, uint8) {
+        return weapons.getFightDataAndDrainDurability(fighter, wep, charTrait,
+            durabilityCostFight * fightMultiplier, false, 0);
+    }
+
+    function fight(address fighter, uint256 char, uint256 wep, uint32 target, uint8 fightMultiplier) external
         restricted returns (uint256, uint256) {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
-        (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
-            unpackFightData(characters.getFightDataAndDrainStamina(tx.origin,
-                char, staminaCostFight * fightMultiplier, false, 0));
 
+        (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
+            _getFightDataAndDrainStaminaUnpacked(fighter, char, fightMultiplier);
+        
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = weapons.getFightDataAndDrainDurability(tx.origin, wep, charTrait,
-                durabilityCostFight * fightMultiplier, false, 0);
+            uint8 weaponTrait) = _getFightDataAndDrainDurability(fighter, wep, charTrait, fightMultiplier);
 
         // dirty variable reuse to avoid stack limits
         target = grabTarget(
@@ -316,36 +331,41 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             target,
             now / 1 hours
         );
-        return performFight(
-            char,
-            wep,
+    
+        FightData memory data = FightData(
             Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
             uint24(charTrait | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
-            uint24(target & 0xFFFFFF),
+            uint24(target & 0xFFFFFF)
+        );
+
+        return performFight(
+            fighter,
+            char,
+            wep,
+            data,
             fightMultiplier
         );
     }
 
     function performFight(
+        address fighter,
         uint256 char,
         uint256 wep,
-        uint24 playerFightPower,
-        uint24 traitsCWE, // could fit into uint8 since each trait is only stored on 2 bits (TODO)
-        uint24 targetPower,
+        FightData memory data,
         uint8 fightMultiplier
     ) private returns (uint256 tokens, uint256 expectedTokens) {
-        uint256 seed = uint256(keccak256(abi.encodePacked(now, tx.origin)));
-        uint24 playerRoll = getPlayerPowerRoll(playerFightPower,traitsCWE,seed);
-        uint24 monsterRoll = getMonsterPowerRoll(targetPower, RandomUtil.combineSeeds(seed,1));
+        uint256 seed = uint256(keccak256(abi.encodePacked(now, fighter)));
+        uint24 playerRoll = getPlayerPowerRoll(data.playerFightPower,data.traitsCWE,seed);
+        uint24 monsterRoll = getMonsterPowerRoll(data.targetPower, RandomUtil.combineSeeds(seed,1));
 
         updateHourlyPayouts(); // maybe only check in trackIncome? (or do via bot)
 
-        uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
-        tokens = getTokenGainForFight(targetPower, true) * fightMultiplier;
+        uint16 xp = getXpGainForFight(data.playerFightPower, data.targetPower) * fightMultiplier;
+        tokens = getTokenGainForFight(data.targetPower, true) * fightMultiplier;
         expectedTokens = tokens;
 
-        if(tokenRewards[tx.origin] == 0 && tokens > 0) {
-            _rewardsClaimTaxTimerStart[tx.origin] = block.timestamp;
+        if(tokenRewards[fighter] == 0 && tokens > 0) {
+            _rewardsClaimTaxTimerStart[fighter] = block.timestamp;
         }
 
         if (playerRoll < monsterRoll) {
@@ -354,16 +374,16 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
 
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
-        tokenRewards[tx.origin] += tokens;
+        tokenRewards[fighter] += tokens;
         vars[VAR_UNCLAIMED_SKILL] += tokens;
         vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
         xpRewards[char] += xp;
-        
+
 
         vars[VAR_HOURLY_FIGHTS] += fightMultiplier;
-        vars[VAR_HOURLY_POWER_SUM] += playerFightPower * fightMultiplier;
+        vars[VAR_HOURLY_POWER_SUM] += data.playerFightPower * fightMultiplier;
 
-        emit FightOutcome(tx.origin, char, wep, (targetPower | ((uint32(traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
+        emit FightOutcome(fighter, char, wep, (data.targetPower | ((uint32(data.traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
@@ -681,7 +701,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
     }
 
-    function payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) external restricted 
+    function payContractConvertedSupportingStaked(address playerAddress, uint256 convertedAmount) external restricted
         returns (
             uint256 _fromInGameOnlyFunds,
             uint256 _fromTokenRewards,

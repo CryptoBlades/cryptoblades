@@ -6,11 +6,13 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradea
 import "@openzeppelin/contracts/introspection/ERC165Checker.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "./util.sol";
 
 contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721ReceiverUpgradeable {
     using ABDKMath64x64 for int128;
     using SafeMath for uint256;
+    using EnumerableSet for EnumerableSet.UintSet;
 
     bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
 
@@ -18,6 +20,7 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
 
     mapping(address => uint256[]) public nfts;
     mapping(address => uint256) public currencies;
+    mapping(address => EnumerableSet.UintSet) private shownNfts; // ID confirmed held by a user (private due to limitation)
 
     function initialize() public initializer {
         __AccessControl_init_unchained();
@@ -49,6 +52,14 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
         for (uint i = 0; i < tokenIds.length; i++) {
             tokenAddress.safeTransferFrom(tx.origin, address(this), tokenIds[i]);
             nfts[address(tokenAddress)].push(tokenIds[i]);
+        }
+    }
+
+    function showHeldNfts(IERC721 tokenAddress, uint256[] calldata tokenIds, address holder) external restricted isValidERC721(tokenAddress) {
+        for (uint i = 0; i < tokenIds.length; i++) {
+            require(tokenAddress.ownerOf(tokenIds[i]) == holder, "Not holder");
+            require(shownNfts[address(tokenAddress)].contains(tokenIds[i]) == false, "NFT already shown");
+            shownNfts[address(tokenAddress)].add(tokenIds[i]);
         }
     }
 
@@ -86,5 +97,12 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
 
     function getNftsInVault(address tokenAddress) public view returns (uint256[] memory) {
         return nfts[tokenAddress];
+    }
+
+    function haveNftsBeenShown(address tokenAddress, uint256[] memory tokenIds) public view returns (bool[] memory result) {
+        result = new bool[](tokenIds.length);
+        for(uint i = 0; i < tokenIds.length; i++) {
+            result[i] = shownNfts[tokenAddress].contains(tokenIds[i]);
+        }
     }
 }
