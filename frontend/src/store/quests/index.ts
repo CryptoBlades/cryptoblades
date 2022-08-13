@@ -133,13 +133,13 @@ const quests = {
         }
       }
 
-      let rewardAmount: number = questTemplate.rewardAmount;
+      let rewardAmount: string | number = questTemplate.rewardAmount;
 
       if(questTemplate.rewardType === RewardType.EXTERNAL){
         const contract = new rootState.web3.eth.Contract(erc20Abi as any[], questTemplate.rewardExternalAddress);
         try {
           const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(rootState));
-          rewardAmount = +new BigNumber(rewardAmount).multipliedBy(new BigNumber(10 ** currencyDecimals));
+          rewardAmount = new BigNumber(rewardAmount).multipliedBy(new BigNumber(10 ** currencyDecimals)).toString();
         } catch {
           // Contract does not support decimals
         }
