@@ -55,6 +55,12 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
         }
     }
 
+    function recordNfts(IERC721 tokenAddress, uint256 startId, uint256 endId) external restricted isValidERC721(tokenAddress) {
+        for (uint i = startId; i <= endId; i++) {
+            nfts[address(tokenAddress)].push(i);
+        }
+    }
+
     function showHeldNfts(IERC721 tokenAddress, uint256[] calldata tokenIds, address holder) external restricted isValidERC721(tokenAddress) {
         for (uint i = 0; i < tokenIds.length; i++) {
             require(tokenAddress.ownerOf(tokenIds[i]) == holder, "Not holder");
