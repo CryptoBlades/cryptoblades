@@ -72,7 +72,7 @@ export default Vue.extend({
     requirementName(): string {
       if (this.quest.requirementType === RequirementType.EXTERNAL || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
         if (this.quest?.requirementExternalAddress === undefined) return '';
-        return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].name;
+        return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress]?.name;
       } else if (this.quest.requirementType === RequirementType.DUST) {
         if(this.quest.requirementRarity === undefined) return '';
         return i18n.t(`quests.dustRarityType.${DustRarity[this.quest.requirementRarity]}`).toString() + ' ' +
@@ -84,11 +84,11 @@ export default Vue.extend({
     },
     externalTooltip(): string {
       if (!this.quest?.requirementExternalAddress) return '';
-      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].description;
+      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress]?.description;
     },
     externalWebsite(): string {
       if (!this.quest?.requirementExternalAddress) return '';
-      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].website;
+      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress]?.website;
     },
   },
 
