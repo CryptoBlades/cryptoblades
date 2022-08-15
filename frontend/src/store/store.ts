@@ -2032,7 +2032,7 @@ export default new Vuex.Store<IState>({
 
       const currencyContract = new state.web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
       const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
-      const amountTimesDecimals = state.web3.utils.toBN(amount * 10 ** currencyDecimals);
+      const amountTimesDecimals = new BigNumber(amount).multipliedBy(new BigNumber(10 ** currencyDecimals));
 
       await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
         from: state.defaultAccount,

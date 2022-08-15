@@ -1,7 +1,7 @@
 <template>
   <div class="quest-requirement-display gap-3">
     <span class="quest-title">{{ $t('quests.quest') }}</span>
-    <div class="d-flex align-items-center gap-3 flex-wrap justify-content-center" :key="quest.id">
+    <div class="d-flex align-items-center gap-3 flex-wrap" :key="quest.id">
       <QuestComponentIcon :questItemType="quest.requirementType" :amount="quest.requirementAmount"
                           :rarity="quest.requirementRarity" :externalAddress="quest.requirementExternalAddress"/>
       <div class="d-flex flex-column requirement-text-container"><span class="requirement-text">{{
@@ -72,7 +72,7 @@ export default Vue.extend({
     requirementName(): string {
       if (this.quest.requirementType === RequirementType.EXTERNAL || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
         if (this.quest?.requirementExternalAddress === undefined) return '';
-        return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].name;
+        return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress]?.name;
       } else if (this.quest.requirementType === RequirementType.DUST) {
         if(this.quest.requirementRarity === undefined) return '';
         return i18n.t(`quests.dustRarityType.${DustRarity[this.quest.requirementRarity]}`).toString() + ' ' +
@@ -84,11 +84,11 @@ export default Vue.extend({
     },
     externalTooltip(): string {
       if (!this.quest?.requirementExternalAddress) return '';
-      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].description;
+      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress]?.description;
     },
     externalWebsite(): string {
       if (!this.quest?.requirementExternalAddress) return '';
-      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].website;
+      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress]?.website;
     },
   },
 
@@ -139,7 +139,6 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   justify-content: center;
-  flex: 1;
 }
 
 .rarity-label {

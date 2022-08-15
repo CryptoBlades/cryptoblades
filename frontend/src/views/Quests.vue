@@ -1,13 +1,27 @@
 <template>
-  <div class="quests-container-wrapper">
-    <div v-if="characters.length !== 0" class="d-flex flex-wrap quests-container gap-4">
+  <div class="quest-wrapper">
+    <div class="d-flex flex-wrap quests-container gap-4">
       <div class="d-flex justify-content-between w-100 weekly-progress-container">
         <div class="d-flex flex-column justify-content-between gap-2">
-          <h5 class="quests-title">{{ $t('quests.quest') }}</h5>
-          <cb-button class="custom-available-quest-button" :title="$t('quests.availableQuests')" @clickEvent="showQuestsListModal = true"></cb-button>
+          <span class="quests-title">{{ $t('quests.quest') }}</span>
+          <cb-button class="top-button" :title="$t('quests.availableQuests')" @clickEvent="showQuestsListModal = true"></cb-button>
           <b-modal v-model="showQuestsListModal" :title="$t('quests.availableQuests')" hide-footer
                   @hide="showQuestsListModal = false; tier = undefined" size="xl">
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex justify-content-center align-items-center gap-3">
+              <b-form-group class="m-3">
+                <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.QUEST">
+                  {{ $t('quests.questsTitle') }}
+                </b-form-radio>
+                <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.PROMO">
+                  {{ $t('quests.questTemplateType.PROMO') }}
+                </b-form-radio>
+                <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.WALLET">
+                  {{ $t('quests.questTemplateType.WALLET') }}
+                </b-form-radio>
+                <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.PICKABLE">
+                  {{ $t('quests.questTemplateType.PICKABLE') }}
+                </b-form-radio>
+              </b-form-group>
               <b-form-select class="mt-2 mb-2" v-model="tier">
                 <b-form-select-option :value="undefined" disabled>
                   {{ $t('quests.pleaseSelectQuestTier') }}
@@ -17,14 +31,14 @@
                 </b-form-select-option>
               </b-form-select>
             </div>
-            <QuestsList v-if="tier !== undefined" :tier="usePromoQuests ? tier + 10 : tier"/>
+            <QuestsList v-if="tier !== undefined" :tier="tier + tierOffset"/>
           </b-modal>
         </div>
         <div v-if="weeklyReward && weeklyReward.id && currentWeeklyCompletions !== undefined && weeklyReward.completionsGoal"
-            class="d-flex flex-column gap-2">
+            class="d-flex flex-column justify-content-between gap-2 align-items-end">
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <div class="d-flex flex-column gap-2">
-              <div class="d-flex justify-content-between gap-4 flex-wrap">
+            <div class="d-flex flex-column justify-content-between gap-2">
+              <div class="d-flex justify-content-between gap-4 flex-wrap ">
                 <span class="text-uppercase weekly-progress">{{ $t('quests.weeklyProgress') }}</span>
                 <span v-if="nextWeekResetTime" class="next-reset"><img :src="hourglass" class="hourglass-icon"
                                                                       alt="Hourglass"/> {{
@@ -41,7 +55,9 @@
                       class="quest-progress-value">{{ `${currentWeeklyCompletions} / ${weeklyReward.completionsGoal}` }}</span>
               </div>
             </div>
-            <div class="d-flex justify-content-center align-items-center gap-2 mx-auto mt-3">
+            <div class="d-flex justify-content-center align-items-center gap-2 position-relative">
+
+            <!-- incoming: <div class="d-flex justify-content-center align-items-center gap-2 mx-auto mt-3"> -->
               <span v-if="weeklyClaimed" class="claimed-banner">{{ $t('quests.claimed') }}</span>
               <QuestComponentIcon :questItemType="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
                                   :amount="weeklyReward.rewardAmount"
@@ -50,35 +66,56 @@
                                   :amount="weeklyReward.reputationAmount"/>
             </div>
           </div>
-          <cb-button class="custom-claim-weekly-reward-btn" v-if="!weeklyClaimed"
+          <cb-button class="top-button" v-if="!weeklyClaimed"
           :isDisabled="isLoading || !canClaimWeeklyReward" @clickEvent="claimWeekly"
             :toolTip="!canClaimWeeklyReward ? $t('quests.cannotClaimWeeklyTooltip') : ''" :title="$t('quests.claimWeeklyReward')"></cb-button>
         </div>
       </div>
-      <div class="quest-row-wrapper">
-        <div v-for="character in characters" :key="character.id" class="d-flex w-100">
-          <QuestRow :characterId="character.id" :reputationLevelRequirements="reputationLevelRequirements"
-                    @refresh-quest-data="onRefreshQuestData"/>
-          </div>
+
+      <!-- Wallet Quests -->
+      <span v-if="walletQuests.length" class="quests-title-2">Wallet Quests</span>
+      <!-- TODO: This will come back when we add additional tiers to Wallet Quests -->
+<!--      <div class="form-control-wrapper">-->
+<!--        <select class="form-control" v-model="walletQuestTier" >-->
+<!--              <option :value="undefined">Select a Rarity</option>-->
+<!--          <option v-for="x in rarities" :value="x" :key="x">{{$t(`quests.rarityType.${Rarity[x]}`)}}</option>-->
+<!--        </select>-->
+<!--      </div>-->
+      <div v-if="isLoadingWalletQuests">
+        <i class="fas fa-spinner fa-spin"/>
+        {{ $t('quests.loading') }}
       </div>
-      <b-modal v-model="showWeeklyClaimedModal" ok-only class="centered-modal" :title="$t('quests.weeklyReward')">
+
+      <div v-else v-for="quest in walletQuests" :key="quest.id" class="d-flex w-100">
+        <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET" :reputationLevelRequirements="reputationLevelRequirements"
+                  @refresh-quest-data="onRefreshQuestData"/>
+      </div>
+
+        <!-- Character Quests -->
+        <span class="quests-title-2">Character Quests</span>
         <div v-if="isLoading">
           <i class="fas fa-spinner fa-spin"/>
           {{ $t('quests.loading') }}
         </div>
-        <QuestReward v-else :type="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity" :rewards="weeklyRewards"
-                    :amount="weeklyReward.rewardAmount" :reputationAmount="weeklyReward.reputationAmount"
-                    :externalAddress="weeklyReward.rewardExternalAddress"/>
-      </b-modal>
-    </div>
-    <div v-else-if="isLoading" class="blank-slate">
-      <i class="fas fa-spinner fa-spin"/>
-      {{ $t('quests.loading') }}
-    </div>
-    <div v-else class="blank-slate">
-      <div v-if="ownedCharacterIds.length <= 0">
-        {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}.<br>
-        {{ $t('combat.recruitAtPlaza') }}
+        <div v-if="characters.length !== 0 && !isLoading" class="d-flex flex-column w-100">
+        <div v-for="character in characters" :key="character.id" class="w-100 my-3">
+          <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id" :reputationLevelRequirements="reputationLevelRequirements"
+                    @refresh-quest-data="onRefreshQuestData"/>
+        </div>
+        <br>
+        <b-modal v-model="showWeeklyClaimedModal" ok-only class="centered-modal" :title="$t('quests.weeklyReward')">
+          <div v-if="isLoading">
+            <i class="fas fa-spinner fa-spin"/>
+            {{ $t('quests.loading') }}
+          </div>
+          <QuestReward v-else :type="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity" :rewards="weeklyRewards"
+                      :amount="weeklyReward.rewardAmount" :reputationAmount="weeklyReward.reputationAmount"
+                      :externalAddress="weeklyReward.rewardExternalAddress"/>
+        </b-modal>
+      </div>
+      <div v-else class="m-4 font-weight-bold w-100">
+      {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}.<br>
+      {{ $t('combat.recruitAtPlaza') }}
       </div>
     </div>
   </div>
@@ -110,7 +147,7 @@ export interface WeeklyReward {
 
 export interface Quest {
   progress: number;
-  type?: RequirementType;
+  type?: QuestTemplateType;
   reputation: number;
   id: number;
   tier?: Rarity;
@@ -150,6 +187,7 @@ export enum RewardType {
   SHIELD,
   EXPERIENCE = 9,
   SOUL = 7,
+  CHARACTER = 12,
   EXTERNAL = 10,
 }
 
@@ -182,6 +220,12 @@ export enum ReputationTier {
   PEASANT, TRADESMAN, NOBLE, KNIGHT, KING
 }
 
+export enum QuestTemplateType {
+  QUEST=0,
+  PROMO=10,
+  WALLET=30,
+  PICKABLE=20
+}
 export interface ReputationLevelRequirements {
   level2: number;
   level3: number;
@@ -219,6 +263,8 @@ interface StoreMappedActions {
   claimWeeklyReward(): Promise<number[]>;
 
   isUsingPromoQuests(): Promise<boolean>;
+
+  getQuestTemplates(payload: { tier: number }): Promise<Quest[]>;
 }
 
 interface StoreMappedGetters {
@@ -233,6 +279,7 @@ interface Data {
   showWeeklyClaimedModal: boolean;
   weeklyRewards: NftIdType[];
   isLoading: boolean;
+  isLoadingWalletQuests: boolean;
   nextWeekResetTime: string;
   nextWeekResetCheckInterval?: ReturnType<typeof setInterval>;
   currentWeeklyCompletions: number;
@@ -240,6 +287,9 @@ interface Data {
   rarities: Rarity[];
   tier?: Rarity;
   usePromoQuests: boolean;
+  questTemplateType: QuestTemplateType;
+  walletQuests: Quest[];
+  walletQuestTier: Rarity | undefined;
 }
 
 export default Vue.extend({
@@ -261,6 +311,7 @@ export default Vue.extend({
       weeklyClaimed: true,
       showWeeklyClaimedModal: false,
       isLoading: false,
+      isLoadingWalletQuests: false,
       nextWeekResetTime: '',
       currentWeeklyCompletions: 0,
       showQuestsListModal: false,
@@ -270,6 +321,10 @@ export default Vue.extend({
       hourglass,
       QuestItemType,
       Rarity,
+      QuestTemplateType,
+      questTemplateType: QuestTemplateType.QUEST,
+      walletQuests:[],
+      walletQuestTier: 0,
     } as Data;
   },
 
@@ -284,6 +339,19 @@ export default Vue.extend({
     weeklyGoalReached(): boolean {
       return this.currentWeeklyCompletions >= this.weeklyReward?.completionsGoal!;
     },
+
+    tierOffset(): number {
+      switch(this.questTemplateType){
+      default:
+        return 0;
+      case QuestTemplateType.PROMO:
+        return 10;
+      case QuestTemplateType.PICKABLE:
+        return 20;
+      case QuestTemplateType.WALLET:
+        return 30;
+      }
+    }
   },
 
   methods: {
@@ -297,6 +365,7 @@ export default Vue.extend({
       'hasClaimedWeeklyReward',
       'claimWeeklyReward',
       'isUsingPromoQuests',
+      'getQuestTemplates'
     ]) as StoreMappedActions,
 
     async claimWeekly() {
@@ -326,7 +395,13 @@ export default Vue.extend({
 
     async refreshQuestData() {
       try {
+        console.log('refreshing quest data');
         this.isLoading = true;
+        if(this.walletQuestTier !== undefined){
+          this.isLoadingWalletQuests = true;
+          this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
+          this.isLoadingWalletQuests = false;
+        }
         this.usePromoQuests = await this.isUsingPromoQuests();
         this.currentWeeklyCompletions = +await this.getWeeklyCompletions();
         this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});
@@ -375,22 +450,38 @@ export default Vue.extend({
   },
 
   watch: {
+    async defaultAccount(){
+      await this.refreshQuestData();
+    },
     async ownedCharacterIds(characterIds) {
       await this.fetchCharacters(characterIds);
       await this.refreshQuestData();
-    }
+    },
+    async walletQuestTier() {
+      this.walletQuests = [];
+      if(this.walletQuestTier !== undefined){
+        this.isLoadingWalletQuests = true;
+        this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
+        this.isLoadingWalletQuests = false;
+      }
+    },
   },
 });
 </script>
 
 <style scoped lang="scss">
 @import '../styles/character-cosmetics.css';
-.custom-available-quest-button{
-  margin-top: 25px !important;
+.quest-wrapper{
+  background: transparent url("../../src/assets/questsBackground.png") 0 0 no-repeat padding-box;
 }
-.custom-claim-weekly-reward-btn{
-  margin-right: 0px !important;
-  margin-top: 8px !important;
+.quests-container {
+  width: clamp(600px, 80%, 1200px);
+  margin: 0 auto;
+  padding: 50px 0;
+}
+.top-button{
+  margin: 10px 0px !important;
+  height: 75px !important; /* :'( */
 }
 .quests-container-wrapper{
   background-image: url('../../src/assets/questsBackground.png');
@@ -412,6 +503,52 @@ export default Vue.extend({
   font-size: 35px;
   font-weight: 400;
   color: #EDCD90;
+}
+.quests-title-2 {
+  font: normal normal bold 20px/28px Trajan;
+  color: #DABE75;
+  width: 100%;
+  margin-top: 25px;
+}
+.form-control-wrapper{
+  position: relative;
+  width: 100%;
+}
+
+.form-control-wrapper > select{
+  padding-right: 20px;
+  text-align: right;
+  width: 15%;
+}
+
+.form-control-wrapper > select{
+  background-color: rgba(255, 255, 255, 0);
+  color: #fff;
+}
+
+.form-control-wrapper > select option{
+  background-color: #171617;
+  padding: 1px;
+  color: #fff;
+  text-align: left;
+}
+
+.form-control-wrapper > select option:hover{
+  box-shadow: 0 0 10px 100px #000 inset;
+  padding: 1px;
+  color: #fff;
+}
+
+.form-control-wrapper:after {
+  content: attr(data-content);
+  width: 0;
+  height: 0;
+  border-top: 6px solid #666;
+  position: absolute;
+  left: 8px;
+  top: 2px;
+  font-family: Roboto;
+  color: rgba(255, 255, 255, 0.541);
 }
 
 .next-reset {
@@ -472,15 +609,10 @@ export default Vue.extend({
 }
 
 @media (max-width: 576px) {
-  .custom-claim-weekly-reward-btn{
-    margin-right: -25px !important;
-  }
-  .custom-available-quest-button{
-    margin-right: -20px !important;
-  }
   .quests-container {
     padding: 1rem;
     margin-bottom: 3rem;
+    width: 100%;
   }
 
   .weekly-progress{
@@ -490,14 +622,6 @@ export default Vue.extend({
   .weekly-progress-container {
     flex-direction: column;
     gap: 2rem;
-  }
-  .custom-available-quest-button{
-    font-size: 12px !important;
-    margin: 25px 0 15px 0 !important;
-  }
-  .custom-claim-weekly-reward-btn{
-    font-size: 12px !important;
-    margin: 25px 0 15px 0 !important;
   }
 }
 </style>

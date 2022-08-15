@@ -21,6 +21,7 @@ module.exports = async function (deployer, network, accounts) {
 
     // token setup for local dev
     await token.transferFrom(token.address, accounts[0], web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
+    await token.transferFrom(token.address, accounts[1], web3.utils.toWei('1', 'kether')); // 1000 skill, test token value is $5 usd
     await expToken.transferFrom(expToken.address, accounts[0], web3.utils.toWei('599', 'ether'));
     await expToken2.transferFrom(expToken2.address, accounts[0], web3.utils.toWei('699', 'ether'));
   }

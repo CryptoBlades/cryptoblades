@@ -1,12 +1,18 @@
 <template>
   <div class="p-1">
-    <h2>{{ promoQuestTemplates ? $t('quests.createNewPromoQuest') : $t('quests.createNewQuest') }}</h2>
+    <h2>{{ $t('quests.createNewQuest')}} {{$t(`quests.questTemplateType.${QuestTemplateType[questTemplateType]}`)}}</h2>
     <b-form-group class="m-3">
-      <b-form-radio v-model="promoQuestTemplates" @change="refreshQuestTemplates" :value="false">
+      <b-form-radio v-model="questTemplateType" @change="refreshQuestTemplates" :value="QuestTemplateType.QUEST">
         {{ $t('quests.questsTitle') }}
       </b-form-radio>
-      <b-form-radio v-model="promoQuestTemplates" @change="refreshQuestTemplates" :value="true">
-        {{ $t('quests.promoQuests') }}
+      <b-form-radio v-model="questTemplateType" @change="refreshQuestTemplates" :value="QuestTemplateType.PROMO">
+        {{ $t('quests.questTemplateType.PROMO') }}
+      </b-form-radio>
+      <b-form-radio v-model="questTemplateType" @change="refreshQuestTemplates" :value="QuestTemplateType.WALLET">
+        {{ $t('quests.questTemplateType.WALLET') }}
+      </b-form-radio>
+      <b-form-radio v-model="questTemplateType" @change="refreshQuestTemplates" :value="QuestTemplateType.PICKABLE">
+        {{ $t('quests.questTemplateType.PICKABLE') }}
       </b-form-radio>
     </b-form-group>
     <b-form class="d-flex flex-column gap-3">
@@ -17,7 +23,9 @@
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectQuestTier') }}
             </b-form-select-option>
-            <b-form-select-option v-for="rarity in rarities" :key="rarity" :value="rarity">
+            <!-- TODO: This will come back when we add additional tiers to Wallet Quests -->
+            <b-form-select-option v-for="rarity in rarities" :key="rarity" :value="rarity"
+                                  :disabled="questTemplateType === QuestTemplateType.WALLET && rarity !== Rarity.COMMON">
               {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
             </b-form-select-option>
           </b-form-select>
@@ -28,8 +36,14 @@
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectRequirementType') }}
             </b-form-select-option>
-            <b-form-select-option v-for="requirementType in requirementTypes" :key="requirementType"
-                                  :value="requirementType">
+            <b-form-select-option
+              v-for="requirementType in requirementTypes"
+              :key="requirementType"
+              :value="requirementType"
+              :disabled="
+              (requirementType === RequirementType.STAMINA || requirementType === RequirementType.RAID)
+              && questTemplateType === QuestTemplateType.WALLET"
+              >
               {{ $t(`quests.requirementType.${RequirementType[requirementType]}`) }}
             </b-form-select-option>
           </b-form-select>
@@ -71,8 +85,9 @@
             <b-form-select-option :value="undefined" disabled>
               {{ $t('quests.pleaseSelectRewardType') }}
             </b-form-select-option>
-            <b-form-select-option v-for="rewardType in rewardTypes" :key="rewardType" :value="rewardType">
-              {{ $t(`quests.rewardType.${RewardType[rewardType]}`) }}
+            <b-form-select-option v-for="rewardType in rewardTypes" :key="rewardType" :value="rewardType"
+            :disabled="questTemplateType === QuestTemplateType.WALLET && rewardType === RewardType.EXPERIENCE"
+            >              {{ $t(`quests.rewardType.${RewardType[rewardType]}`) }}
             </b-form-select-option>
           </b-form-select>
           <b-form-input v-model="questTemplate.rewardExternalAddress"
@@ -91,7 +106,8 @@
           <b-form-select
             v-else-if="questTemplate.rewardType !== RewardType.EXPERIENCE
             && questTemplate.rewardType !== RewardType.SOUL
-            && questTemplate.rewardType !== RewardType.EXTERNAL"
+            && questTemplate.rewardType !== RewardType.EXTERNAL
+            && questTemplate.rewardType !== RewardType.CHARACTER"
             class="mt-2 mb-2"
             v-model="questTemplate.rewardRarity"
             :disabled="questTemplate.rewardType === undefined">
@@ -106,7 +122,11 @@
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.reputation') }}</label>
         <div class="d-flex align-items-center gap-3">
-          <b-form-input v-model="questTemplate.reputationAmount" type="number" number :min="0"/>
+          <b-form-input
+            :disabled="questTemplateType === QuestTemplateType.WALLET"
+            v-model="questTemplate.reputationAmount"
+            type="number" number :min="0"
+          />
         </div>
         <label class="m-0 align-self-center">{{ $t('quests.limitedOptional') }}</label>
         <div class="d-flex align-items-center gap-3 mt-2">
@@ -119,12 +139,12 @@
                         :min="0"/>
         </div>
       </div>
-      <b-button variant="info" @click="showConfirmationModal"
+      <b-button variant="primary" @click="showConfirmationModal"
                 :disabled="addNewQuestDisabled()">
-        {{ promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest') }}
+        {{$t('quests.addNew')}} {{$t(`quests.questTemplateType.${QuestTemplateType[questTemplateType]}`)}}
       </b-button>
     </b-form>
-    <QuestTemplatesDisplay :promoQuestTemplates="promoQuestTemplates"/>
+    <QuestTemplatesDisplay/>
     <h2 class="mt-2">{{ $t('quests.setWeeklyRewardCurrent', {weekNumber: currentWeekNumber}) }}</h2>
     <b-form class="d-flex flex-column gap-3">
       <div class="grid-container gap-3">
@@ -181,7 +201,7 @@
           <b-form-input v-model="weeklyReward.reputationAmount" type="number" number :min="0"/>
         </div>
       </div>
-      <b-button variant="info" @click="addReward"
+      <b-button variant="primary" @click="addReward"
                 :disabled="addNewWeeklyRewardDisabled()">
         {{ $t('quests.addNewWeeklyReward') }}
       </b-button>
@@ -198,7 +218,7 @@
         <label class="m-0 align-self-center">{{ $t('quests.reputationLevel', {level: 5}) }}</label>
         <b-form-input type="number" number :min="0" v-model="reputationLevelRequirements.level5"/>
       </div>
-      <b-button variant="info" @click="updateRequirements" :disabled="updateRequirementsDisabled()">
+      <b-button variant="primary" @click="updateRequirements" :disabled="updateRequirementsDisabled()">
         {{ $t('quests.updateRequirements') }}
       </b-button>
     </b-form>
@@ -208,7 +228,7 @@
         <label class="m-0 align-self-center">{{ $t('quests.staminaCost') }}</label>
         <b-form-input type="number" number :min="0" v-model="staminaCost"/>
       </div>
-      <b-button variant="info" @click="updateStaminaCost"
+      <b-button variant="primary" @click="updateStaminaCost"
                 :disabled="isLoading || showTemplateConfirmationModal || showPromoToggleConfirmationModal">
         {{ $t('quests.updateStaminaCost') }}
       </b-button>
@@ -223,7 +243,7 @@
           {{ $t('quests.loading') }}
         </span>
       </div>
-      <b-button variant="info" @click="showPromoToggleConfirmationModal = true"
+      <b-button variant="primary" @click="showPromoToggleConfirmationModal = true"
                 :disabled="isLoading || showTemplateConfirmationModal || showPromoToggleConfirmationModal">
         {{ $t('quests.togglePromoQuestsUsage') }}
       </b-button>
@@ -264,7 +284,7 @@
             <b-form-input type="number" @change="() => updateCommonChance(index)" number :min="0"
                           v-model="tierChance.legendary"/>
           </div>
-          <b-button variant="info" @click="() => updateTierChances(index, tierChance)" :disabled="isLoading">
+          <b-button variant="primary" @click="() => updateTierChances(index, tierChance)" :disabled="isLoading">
             {{ $t('quests.updateForLevel', {level: index + 1}) }}
           </b-button>
         </div>
@@ -275,16 +295,16 @@
       </h3>
     </b-form>
     <b-modal v-model="showTemplateConfirmationModal" @ok.prevent="onSubmit" :ok-disabled="isLoading" size="xl"
-             :title="promoQuestTemplates ? $t('quests.addNewPromoQuest') : $t('quests.addNewQuest')">
+             :title="$t('quests.addNew')+` `+$t(`quests.questTemplateType.${QuestTemplateType[questTemplateType]}`)">
       <div class="d-flex flex-column align-items-center">
         <h4 class="text-center">
-          {{ promoQuestTemplates ? $t('quests.areYouSureAddPromoQuest') : $t('quests.areYouSureAddQuest') }}
+          {{ $t('quests.areYouSureAdd', {questType: $t(`quests.questTemplateType.${QuestTemplateType[questTemplateType]}`)})}}
         </h4>
         <div class="quest-row p-3">
           <QuestRequirements :quest="questTemplate"/>
           <QuestRewards :quest="questTemplate"/>
-          <QuestActions :quest="questTemplate" :key="questTemplate.id" showSupply :deadline="timestamp"
-                        :questSupply="supply"/>
+          <QuestActions :quest="questTemplate" :questTemplateType="questTemplateType" :key="questTemplate.id" showSupply :deadline="timestamp"
+                        :questSupply="supply" :showActions="false"/>
         </div>
       </div>
     </b-modal>
@@ -310,7 +330,8 @@ import {
   ReputationLevelRequirements,
   RequirementType,
   RewardType,
-  TierChances
+  TierChances,
+  QuestTemplateType
 } from '../../../views/Quests.vue';
 import QuestTemplatesDisplay from '../QuestTemplatesDisplay.vue';
 import QuestRequirements from '../QuestRequirements.vue';
@@ -319,7 +340,7 @@ import QuestActions from '../QuestActions.vue';
 import {isValidWeb3Address} from '@/utils/common';
 
 interface StoreMappedActions {
-  addQuestTemplate(payload: { questTemplate: Quest, isPromo: boolean, supply: number, deadline: number }): Promise<void>;
+  addQuestTemplate(payload: { questTemplate: Quest, tierOffset: number, supply: number, deadline: number }): Promise<void>;
 
   addPromoQuestTemplate(payload: { questTemplate: Quest }): Promise<void>;
 
@@ -360,7 +381,7 @@ interface Data {
   requirementTypes: RequirementType[];
   rewardTypes: RewardType[];
   weeklyRewardTypes: RewardType[];
-  promoQuestTemplates: boolean;
+  questTemplateType: QuestTemplateType;
   rewardID?: number;
   week?: number;
   isLoading: boolean;
@@ -409,12 +430,14 @@ export default Vue.extend({
       rewardTypes: [RewardType.WEAPON, RewardType.JUNK,
         RewardType.DUST, RewardType.TRINKET,
         RewardType.SHIELD, RewardType.EXPERIENCE,
-        RewardType.SOUL, RewardType.EXTERNAL],
+        RewardType.SOUL, RewardType.EXTERNAL,
+        RewardType.CHARACTER],
       weeklyRewardTypes: [RewardType.WEAPON, RewardType.JUNK,
         RewardType.DUST, RewardType.TRINKET,
         RewardType.SHIELD, RewardType.SOUL,
-        RewardType.EXTERNAL],
-      promoQuestTemplates: false,
+        RewardType.EXTERNAL, RewardType.CHARACTER],
+      questTemplateType: QuestTemplateType.WALLET,
+      QuestTemplateType,
       isLoading: false,
       showTemplateConfirmationModal: false,
       showPromoToggleConfirmationModal: false,
@@ -436,6 +459,26 @@ export default Vue.extend({
       const weekInSeconds = 604800;
       return Math.floor(Date.now() / 1000 / weekInSeconds % 53) + 1;
     },
+    tierOffset(): number {
+      switch(this.questTemplateType){
+      default:
+        return 0;
+      case QuestTemplateType.PROMO:
+        return 10;
+      case QuestTemplateType.PICKABLE:
+        return 20;
+      case QuestTemplateType.WALLET:
+        return 30;
+      }
+    }
+  },
+
+  watch: {
+    questTemplateType(questType: QuestTemplateType){
+      if(questType === QuestTemplateType.WALLET){
+        this.questTemplate.reputationAmount = 0;
+      }
+    }
   },
 
   methods: {
@@ -501,7 +544,7 @@ export default Vue.extend({
         this.isLoading = true;
         await this.addQuestTemplate({
           questTemplate: this.questTemplate,
-          isPromo: this.promoQuestTemplates,
+          tierOffset: this.questTemplateType,
           supply: this.supply ? this.supply : 0,
           deadline: this.timestamp ? this.timestamp : 0,
         });
@@ -574,7 +617,8 @@ export default Vue.extend({
         || (this.questTemplate.rewardRarity === undefined
           && this.questTemplate.rewardType !== RewardType.EXPERIENCE
           && this.questTemplate.rewardType !== RewardType.SOUL
-          && this.questTemplate.rewardType !== RewardType.EXTERNAL)
+          && this.questTemplate.rewardType !== RewardType.EXTERNAL
+          && this.questTemplate.rewardType !== RewardType.CHARACTER)
         || !this.questTemplate.rewardAmount
         || this.questTemplate.reputationAmount === undefined
         || (this.timestamp && !this.supply)
@@ -670,5 +714,9 @@ export default Vue.extend({
   border: 1px solid #60583E;
   border-radius: 10px;
   align-items: center;
+}
+
+.custom-select{
+  color:#000;
 }
 </style>

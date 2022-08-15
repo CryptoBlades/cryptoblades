@@ -2,7 +2,7 @@ import {
   IState,
   Contract,
 } from '@/interfaces';
-import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances, WeeklyReward} from '@/views/Quests.vue';
+import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances, WeeklyReward, QuestTemplateType} from '@/views/Quests.vue';
 import BigNumber from 'bignumber.js';
 // import Web3 from 'web3';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';
@@ -33,7 +33,7 @@ const quests = {
       return await SimpleQuests.methods.questSupplies(questID).call(defaultCallOptions(rootState));
     },
 
-    async getQuestTemplates({rootState}: {rootState: IState}, {tier}: {tier: number}) {
+    async getQuestTemplates({rootState, dispatch}: {rootState: IState, dispatch: Dispatch}, {tier}: {tier: number}) {
       const {SimpleQuests} = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;
 
@@ -58,6 +58,9 @@ const quests = {
           rewardExternalAddress: string;
           reputationAmount: string;
         };
+        if(tier >= 30 && tier < 40){
+          quest.progress = await dispatch('getWalletQuestProgress', {questID: +quest.id});
+        }
         const emptyAccount = '0x0000000000000000000000000000000000000000';
         if(quest.requirementExternalAddress !== emptyAccount
           && ((quest.requirementType && +quest.requirementType as RequirementType === RequirementType.EXTERNAL)
@@ -104,7 +107,7 @@ const quests = {
 
     async addQuestTemplate(
       { rootState }: {rootState: IState},
-      {questTemplate, isPromo, supply, deadline}: {questTemplate: Quest, isPromo: boolean, supply: number, deadline: number}){
+      {questTemplate, tierOffset, supply, deadline}: {questTemplate: Quest, tierOffset: number, supply: number, deadline: number}){
       const {SimpleQuests} = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;
 
@@ -124,29 +127,25 @@ const quests = {
         const contract = new rootState.web3.eth.Contract(erc20Abi as any[], questTemplate.requirementExternalAddress);
         try {
           const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(rootState));
-          requirementAmount = rootState.web3.utils.toBN(requirementAmount * 10 ** currencyDecimals).toString();
+          requirementAmount = new BigNumber(requirementAmount).multipliedBy(new BigNumber(10 ** currencyDecimals)).toString();
         } catch {
           // Contract does not support decimals
         }
       }
 
-      let rewardAmount: number | string = questTemplate.rewardAmount;
+      let rewardAmount: string | number = questTemplate.rewardAmount;
 
       if(questTemplate.rewardType === RewardType.EXTERNAL){
         const contract = new rootState.web3.eth.Contract(erc20Abi as any[], questTemplate.rewardExternalAddress);
         try {
           const currencyDecimals = await contract.methods.decimals().call(defaultCallOptions(rootState));
-          rewardAmount = rootState.web3.utils.toBN(rewardAmount * 10 ** currencyDecimals).toString();
+          rewardAmount = new BigNumber(rewardAmount).multipliedBy(new BigNumber(10 ** currencyDecimals)).toString();
         } catch {
           // Contract does not support decimals
         }
       }
 
-      let tier = questTemplate.tier;
-      if (isPromo) {
-        tier! += 10;
-      }
-
+      const tier = questTemplate.tier! + tierOffset;
       return await SimpleQuests.methods.addNewQuestTemplate(tier!,
         questTemplate.requirementType!, questTemplate.requirementRarity!, requirementAmount, questTemplate.requirementExternalAddress,
         questTemplate.rewardType!, questTemplate.rewardRarity!, rewardAmount, questTemplate.rewardExternalAddress,
@@ -164,10 +163,10 @@ const quests = {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
 
-      const questId = await SimpleQuests.methods.characterQuest(characterId).call(defaultCallOptions(rootState));
+      const questID = await SimpleQuests.methods.characterQuest(characterId).call(defaultCallOptions(rootState));
 
 
-      const quest = await SimpleQuests.methods.quests(questId).call(defaultCallOptions(rootState)) as unknown as {
+      const quest = await SimpleQuests.methods.quests(questID).call(defaultCallOptions(rootState)) as unknown as {
         progress: string | number;
         id: string;
         tier: string;
@@ -211,7 +210,7 @@ const quests = {
 
       return {
         progress: +quest.progress,
-        type: +charQuestDataRaw[1] as RequirementType,
+        type: +charQuestDataRaw[3] as QuestTemplateType,
         reputation: +charQuestDataRaw[2],
         id: +quest.id,
         tier: +quest.tier as Rarity,
@@ -507,22 +506,27 @@ const quests = {
       return await SimpleQuests.methods.getWeeklyCompletions(rootState.defaultAccount).call(defaultCallOptions(rootState));
     },
 
-    async skipQuest({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, {characterID}: {characterID: number}) {
+    async skipQuest(
+      { rootState, dispatch }: {rootState: IState, dispatch: Dispatch},
+      {characterID, pickedQuestID}: {characterID: number, pickedQuestID: number}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
-
-      await SimpleQuests.methods.skipQuest(characterID).send(defaultCallOptions(rootState));
+      console.log('skipQuest', characterID, pickedQuestID);
+      await SimpleQuests.methods.skipQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
       await dispatch('fetchCharacterStamina', characterID);
     },
 
-    async completeQuest({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, {characterID}: {characterID: number}) {
+    async completeQuest(
+      { rootState, dispatch }: {rootState: IState, dispatch: Dispatch},
+      {characterID, pickedQuestID}: {characterID: number, pickedQuestID: number}) {
       const {SimpleQuests} = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;
 
       if (!await SimpleQuests.methods.hasRandomQuestRewardSeedRequested(characterID).call(defaultCallOptions(rootState))) {
         await SimpleQuests.methods.generateRewardQuestSeed(characterID).send(defaultCallOptions(rootState));
       }
-      const result = await SimpleQuests.methods.completeQuest(characterID).send(defaultCallOptions(rootState));
+      console.log('completeQuest', pickedQuestID);
+      const result = await SimpleQuests.methods.completeQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
 
       const questRewards = result.events.QuestRewarded.returnValues.rewards;
       await Promise.all([
@@ -589,12 +593,12 @@ const quests = {
         .call(defaultCallOptions(rootState));
 
       if(tokenIds.length === 1 && !isApprovedForAll) {
-        await tokenContract.methods.approve(SimpleQuests.options.address, tokenIds[0]).send({
+        await tokenContract.methods.approve(PartnerVault.options.address, tokenIds[0]).send({
           from: rootState.defaultAccount,
           gasPrice: getGasPrice()
         });
       } else if (!isApprovedForAll) {
-        await tokenContract.methods.setApprovalForAll(SimpleQuests.options.address, true).send({
+        await tokenContract.methods.setApprovalForAll(PartnerVault.options.address, true).send({
           from: rootState.defaultAccount,
           gasPrice: getGasPrice()
         });
@@ -605,13 +609,13 @@ const quests = {
 
     async submitExternalProgressAmount(
       { rootState }: {rootState: IState},
-      {characterID, amount, currencyAddress}: {characterID: number, amount: number, currencyAddress: string},) {
+      {characterID, amount, currencyAddress}: {characterID: number, amount: number, currencyAddress: string}) {
       const {SimpleQuests, PartnerVault} = rootState.contracts();
       if (!SimpleQuests || !PartnerVault || !rootState.defaultAccount) return;
 
       const currencyContract = new rootState.web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
       const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(rootState));
-      const amountTimesDecimals = rootState.web3.utils.toBN(amount * 10 ** currencyDecimals);
+      const amountTimesDecimals = new BigNumber(amount).multipliedBy(new BigNumber(10 ** currencyDecimals));
       await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
         from: rootState.defaultAccount,
         gasPrice: getGasPrice()
@@ -619,6 +623,80 @@ const quests = {
 
       return await SimpleQuests.methods.submitProgressAmount(characterID, amountTimesDecimals.toString()).send(defaultCallOptions(rootState));
     },
+    async getWalletQuestProgress({ rootState }: {rootState: IState}, {questID}: {questID: number}) {
+      const { SimpleQuests } = rootState.contracts();
+      if (!SimpleQuests || !rootState.defaultAccount) return;
+
+      return +await SimpleQuests.methods.walletQuestProgress(rootState.defaultAccount, questID).call(defaultCallOptions(rootState));
+    },
+    async submitWalletProgress(
+      { rootState }: {rootState: IState}, {questID, tokenIds}: {questID: number, tokenIds: string[]}) {
+      const { SimpleQuests } = rootState.contracts();
+      if(!SimpleQuests || !rootState.defaultAccount) return;
+
+      return await SimpleQuests.methods.submitWalletProgress(questID, tokenIds).send(defaultCallOptions(rootState));
+    },
+
+    async submitWalletExternalProgress(
+      { rootState }: {rootState: IState}, {questID, tokenIds, tokenAddress}: {questID: number, tokenIds: string[], tokenAddress: string}) {
+      const {SimpleQuests, PartnerVault} = rootState.contracts();
+      if (!SimpleQuests || !PartnerVault || !rootState.defaultAccount) return;
+
+      const tokenContract = new rootState.web3.eth.Contract(erc721Abi as any[], tokenAddress) as Contract<IERC721>;
+
+      const isApprovedForAll = await tokenContract.methods.isApprovedForAll(rootState.defaultAccount, SimpleQuests.options.address)
+        .call(defaultCallOptions(rootState));
+
+      if(tokenIds.length === 1 && !isApprovedForAll) {
+        await tokenContract.methods.approve(PartnerVault.options.address, tokenIds[0]).send({
+          from: rootState.defaultAccount,
+          gasPrice: getGasPrice()
+        });
+      } else if (!isApprovedForAll) {
+        await tokenContract.methods.setApprovalForAll(PartnerVault.options.address, true).send({
+          from: rootState.defaultAccount,
+          gasPrice: getGasPrice()
+        });
+      }
+
+      return await SimpleQuests.methods.submitWalletProgress(questID, tokenIds).send(defaultCallOptions(rootState));
+    },
+
+    async submitWalletProgressAmount(
+      { rootState }: {rootState: IState}, {questID, amount}: {questID: number, amount: number}) {
+      const { SimpleQuests } = rootState.contracts();
+      if(!SimpleQuests || !rootState.defaultAccount) return;
+
+      return await SimpleQuests.methods.submitWalletProgressAmount(questID, amount).send(defaultCallOptions(rootState));
+    },
+
+    async submitWalletExternalProgressAmount(
+      { rootState }: {rootState: IState}, {questID, amount, currencyAddress}: {questID: number, amount: number, currencyAddress: string}) {
+      const {SimpleQuests, PartnerVault} = rootState.contracts();
+      if (!SimpleQuests || !PartnerVault || !rootState.defaultAccount) return;
+
+      const currencyContract = new rootState.web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
+      const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(rootState));
+      const amountTimesDecimals = new BigNumber(amount).multipliedBy(new BigNumber(10 ** currencyDecimals));
+      await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
+        from: rootState.defaultAccount,
+        gasPrice: getGasPrice()
+      });
+
+      return await SimpleQuests.methods.submitWalletProgressAmount(questID, amountTimesDecimals.toString()).send(defaultCallOptions(rootState));
+    },
+    async completeWalletQuest({ rootState }: {rootState: IState}, {questID}: {questID: number}) {
+      const { SimpleQuests } = rootState.contracts();
+      if(!SimpleQuests || !rootState.defaultAccount) return;
+
+      return await SimpleQuests.methods.completeWalletQuest(questID).send(defaultCallOptions(rootState));
+    },
+    async requestPickableQuest({ rootState }: {rootState: IState}, {characterID, questID}: {characterID: number, questID: number}) {
+      const { SimpleQuests } = rootState.contracts();
+      if(!SimpleQuests || !rootState.defaultAccount) return;
+      console.log(characterID, questID);
+      return await SimpleQuests.methods.requestPickableQuest(characterID, questID).send(defaultCallOptions(rootState));
+    }
   },
 };
 
