@@ -16,7 +16,7 @@ export interface ICombatState {
   fightGasOffset: string;
 }
 
-const defaultCallOptions = (state:  IState) => ({ from: state.defaultAccount });
+const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
 
 const combat = {
   namespaced: true,
@@ -65,76 +65,75 @@ const combat = {
     },
   },
   actions: {
-    async fetchIgoRewardsPerFight({state}: {state: IState}) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades || !state.defaultAccount) return;
+    async fetchIgoRewardsPerFight({ rootState }: {rootState: IState}) {
+      const { CryptoBlades } = rootState.contracts();
+      if(!CryptoBlades || !rootState.defaultAccount) return;
 
       return await CryptoBlades.methods
         .vars(27)
-        .call(defaultCallOptions(state));
+        .call(defaultCallOptions(rootState));
     },
 
-    async fetchHourlyPowerAverage({state}: {state: IState}) {
-      const { CryptoBlades } = state.contracts();
+    async fetchHourlyPowerAverage({ rootState }: {rootState: IState}) {
+      const { CryptoBlades } = rootState.contracts();
       if(!CryptoBlades) return;
-      return await CryptoBlades.methods.vars(4).call(defaultCallOptions(state));
+      return await CryptoBlades.methods.vars(4).call(defaultCallOptions(rootState));
     },
 
-    async fetchHourlyPayPerFight({state}: {state: IState}) {
-      const { CryptoBlades } = state.contracts();
+    async fetchHourlyPayPerFight({ rootState }: {rootState: IState}) {
+      const { CryptoBlades } = rootState.contracts();
       if(!CryptoBlades) return;
-      return await CryptoBlades.methods.vars(5).call(defaultCallOptions(state));
+      return await CryptoBlades.methods.vars(5).call(defaultCallOptions(rootState));
     },
 
-    async fetchHourlyAllowance({state}: {state: IState}) {
-      const { CryptoBlades } = state.contracts();
+    async fetchHourlyAllowance({ rootState }: {rootState: IState}) {
+      const { CryptoBlades } = rootState.contracts();
       if(!CryptoBlades) return;
-      return await CryptoBlades.methods.vars(18).call(defaultCallOptions(state));
+      return await CryptoBlades.methods.vars(18).call(defaultCallOptions(rootState));
     },
 
-    async fetchTargets(
-      {state, commit}: {state: IState, commit: Commit},
-      { characterId, weaponId }: {characterId: number, weaponId: number}) {
+    async fetchTargets({rootState, commit}: {rootState: IState, commit: Commit}, { characterId, weaponId }: {characterId: number, weaponId: number}) {
       if(isUndefined(characterId) || isUndefined(weaponId)) {
         commit('updateTargets', { characterId, weaponId, targets: [] });
         return;
       }
 
-      const targets = await state.contracts().CryptoBlades!.methods
+      const targets = await rootState.contracts().CryptoBlades!.methods
         .getTargets(characterId, weaponId)
-        .call(defaultCallOptions(state));
+        .call(defaultCallOptions(rootState));
 
       commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
     },
 
-    async getCharacterPower({ state }: {state: IState}, characterId: number) {
-      const { Characters } = state.contracts();
-      if (!Characters || !state.defaultAccount) return;
+    async getCharacterPower({rootState}: {rootState: IState}, characterId: number) {
+      const { Characters } = rootState.contracts();
+      if (!Characters || !rootState.defaultAccount) return;
 
-      return await Characters.methods.getPower(characterId).call({from: state.defaultAccount, gasPrice: getGasPrice()});
+      return await Characters.methods.getPower(characterId).call({from: rootState.defaultAccount, gasPrice: getGasPrice()});
     },
 
-    async fetchExpectedPayoutForMonsterPower({ state }: {state: IState}, { power, isCalculator = false }: {power: string | number, isCalculator: boolean}) {
-      const { CryptoBlades } = state.contracts();
+    async fetchExpectedPayoutForMonsterPower(
+      { rootState }: {rootState: IState}, { power, isCalculator = false }: {power: string | number, isCalculator: boolean}) {
+      const { CryptoBlades } = rootState.contracts();
       if(!CryptoBlades) return;
       if(isCalculator) {
-        return await CryptoBlades.methods.getTokenGainForFight(power, false).call(defaultCallOptions(state));
+        return await CryptoBlades.methods.getTokenGainForFight(power, false).call(defaultCallOptions(rootState));
       }
-      return await CryptoBlades.methods.getTokenGainForFight(power, true).call(defaultCallOptions(state));
+      return await CryptoBlades.methods.getTokenGainForFight(power, true).call(defaultCallOptions(rootState));
     },
 
-    async getNativeTokenPriceInUsd({ state }: {state: IState}) {
-      const { TokensManager } = state.contracts();
-      if (!TokensManager || !state.defaultAccount) return;
+    async getNativeTokenPriceInUsd({ rootState }: {rootState: IState}) {
+      const { TokensManager } = rootState.contracts();
+      if (!TokensManager || !rootState.defaultAccount) return;
 
-      return await TokensManager.methods.tokenPrice().call(defaultCallOptions(state));
+      return await TokensManager.methods.tokenPrice().call(defaultCallOptions(rootState));
     },
 
-    async getCurrentSkillPrice({ state }: {state: IState}) {
-      const { TokensManager } = state.contracts();
-      if (!TokensManager || !state.defaultAccount) return;
+    async getCurrentSkillPrice({ rootState }: {rootState: IState}) {
+      const { TokensManager } = rootState.contracts();
+      if (!TokensManager || !rootState.defaultAccount) return;
 
-      return await TokensManager.methods.skillTokenPrice().call(defaultCallOptions(state));
+      return await TokensManager.methods.skillTokenPrice().call(defaultCallOptions(rootState));
     },
 
     // async doEncounter(
@@ -180,11 +179,11 @@ const combat = {
     // },
 
     async doEncounterPayNative(
-      { state, dispatch }: {state: IState, dispatch: Dispatch},
+      { rootState, dispatch }: {rootState: IState, dispatch: Dispatch},
       { characterId, weaponId, targetString, fightMultiplier, offsetCost }:
       { characterId: number, weaponId: number, targetString: number, fightMultiplier: number, offsetCost: BigNumber }) {
-      const { TokensManager, CryptoBlades } = state.contracts();
-      if (!TokensManager || !CryptoBlades || !state.defaultAccount) return;
+      const { TokensManager, CryptoBlades } = rootState.contracts();
+      if (!TokensManager || !CryptoBlades || !rootState.defaultAccount) return;
 
       const res = await TokensManager.methods
         .fight(
@@ -193,7 +192,7 @@ const combat = {
           targetString,
           fightMultiplier
         )
-        .send({ from: state.defaultAccount, gasPrice: getGasPrice(), gas: '300000', value: (+offsetCost ? +offsetCost : 1)*fightMultiplier });
+        .send({ from: rootState.defaultAccount, gasPrice: getGasPrice(), gas: '300000', value: (+offsetCost ? +offsetCost : 1)*fightMultiplier });
 
       let playerRoll = '';
       let enemyRoll = '';
@@ -201,7 +200,7 @@ const combat = {
       let skillGain;
 
       const fightOutcomeEvents = await CryptoBlades.getPastEvents('FightOutcome', {
-        filter: { owner: state.defaultAccount!, character: characterId },
+        filter: { owner: rootState.defaultAccount!, character: characterId },
         toBlock: res.blockNumber,
         fromBlock: res.blockNumber
       });
@@ -213,7 +212,7 @@ const combat = {
         skillGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.skillGain;
       }
 
-      const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
+      const {gasPrice} = await rootState.web3.eth.getTransaction(res.transactionHash);
 
       const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
       await dispatch('combat/fetchTargets', { characterId, weaponId });
@@ -229,24 +228,24 @@ const combat = {
       };
     },
 
-    async getCombatTokenChargePercent({ state }: {state: IState}) {
-      const { TokensManager } = state.contracts();
-      if(!TokensManager || !state.defaultAccount) return;
+    async getCombatTokenChargePercent({ rootState }: {rootState: IState}) {
+      const { TokensManager } = rootState.contracts();
+      if(!TokensManager || !rootState.defaultAccount) return;
 
       return await TokensManager.methods
         .combatTokenChargePercent()
-        .call(defaultCallOptions(state));
+        .call(defaultCallOptions(rootState));
     },
 
-    async fetchFightRewardSkill({ state, commit }: {state: IState, commit: Commit}) {
-      const { CryptoBlades } = state.contracts();
+    async fetchFightRewardSkill({ rootState, commit }: {rootState: IState, commit: Commit}) {
+      const { CryptoBlades } = rootState.contracts();
       if(!CryptoBlades) return;
 
       const [skillRewards] = await Promise.all([
         (async () => {
           const skillRewards = await CryptoBlades.methods
             .getTokenRewards()
-            .call(defaultCallOptions(state));
+            .call(defaultCallOptions(rootState));
 
           commit('updateSkillRewards', { skillRewards }, { root: true });
 
