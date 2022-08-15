@@ -96,7 +96,7 @@ const combat = {
       {state, commit}: {state: IState, commit: Commit},
       { characterId, weaponId }: {characterId: number, weaponId: number}) {
       if(isUndefined(characterId) || isUndefined(weaponId)) {
-        commit('updateTargets', { characterId, weaponId, targets: [] });
+        commit('combat/updateTargets', { characterId, weaponId, targets: [] });
         return;
       }
 
@@ -104,7 +104,7 @@ const combat = {
         .getTargets(characterId, weaponId)
         .call(defaultCallOptions(state));
 
-      commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
+      commit('combat/updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
     },
 
     async getCharacterPower({ state }: {state: IState}, characterId: number) {
@@ -150,7 +150,7 @@ const combat = {
         )
         .send({ from: state.defaultAccount, gas: '300000', gasPrice: getGasPrice() });
 
-      await dispatch('fetchTargets', { characterId, weaponId });
+      await dispatch('combat/fetchTargets', { characterId, weaponId });
 
       const {
         /*owner,
@@ -216,7 +216,7 @@ const combat = {
       const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
 
       const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
-      await dispatch('fetchTargets', { characterId, weaponId });
+      await dispatch('combat/fetchTargets', { characterId, weaponId });
       await dispatch('fetchWeaponDurability', weaponId);
 
       return {
@@ -291,7 +291,7 @@ const combat = {
         cryptoBladesMethods => cryptoBladesMethods.fightRewardGasOffset()
       );
 
-      commit('updateFightGasOffset', { fightGasOffset });
+      commit('combat/updateFightGasOffset', { fightGasOffset });
       return fightGasOffset;
     },
 
@@ -305,7 +305,7 @@ const combat = {
         cryptoBladesMethods => cryptoBladesMethods.fightRewardBaseline()
       );
 
-      commit('updateFightBaseline', { fightBaseline });
+      commit('combat/updateFightBaseline', { fightBaseline });
       return fightBaseline;
     },
 

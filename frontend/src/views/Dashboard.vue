@@ -222,10 +222,24 @@ export default Vue.extend({
   },
 
   computed: {
-    ...mapState(['characters', 'currentCharacterId', 'maxStamina', 'ownedCharacterIds', 'web3', 'ownedGarrisonCharacterIds',]),
-    ...mapGetters(['getCharacterName', 'getRaidState', 'ownCharacters', 'getCharacterRank',
-      'getCharacterElement', 'ownGarrisonCharacters', 'getCharacterStamina']),
-    ...mapGetters('combat', ['getCharacterPower']),
+    ...mapState([
+      'characters',
+      'currentCharacterId',
+      'maxStamina',
+      'ownedCharacterIds',
+      'web3',
+      'ownedGarrisonCharacterIds',
+    ]),
+    ...mapGetters([
+      'getCharacterName',
+      'getRaidState',
+      'ownCharacters',
+      'getCharacterRank',
+      'getCharacterElement',
+      'ownGarrisonCharacters',
+      'getCharacterStamina',
+      'getCharacterPower',
+    ]),
     selectedCharacter(): Nft{
       return this.characters[this.currentCharacterId];
     },

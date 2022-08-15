@@ -157,7 +157,7 @@ interface StoreMappedActions {
 }
 
 interface StoreMappedCombatActions {
-  fetchCharacterStamina: (characterId: number) => void,
+  fetchCharacterStamina: (characterId: number) => Promise<void>,
 }
 
 interface StoreMappedMutations {

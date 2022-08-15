@@ -69,7 +69,7 @@ export default Vue.extend({
   },
   computed:{
     ...mapState(['characters','currentCharacterId']),
-    ...mapGetters('combat', ['getCharacterPower']),
+    ...mapGetters(['getCharacterPower']),
     remainingPowerLimit(): number {
       return( 4 * CharacterPower(this.characters[this.currentCharacterId]?.level ?? 0) - this.getCharacterPower(this.currentCharacterId.toString()) ?? 0);
     },

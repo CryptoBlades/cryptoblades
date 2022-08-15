@@ -147,6 +147,7 @@ import { getConfigValue } from '@/contracts';
 import { CharacterPower, CharacterTrait, GetTotalMultiplierForTrait, IWeapon, WeaponTrait } from '@/interfaces';
 import axios from 'axios';
 import Vue from 'vue';
+import { Accessors } from 'vue/types/options';
 import { mapActions, mapGetters } from 'vuex';
 import { toBN, fromWeiEther } from '../../utils/common';
 
@@ -158,6 +159,17 @@ interface PriceJson {
   'matic-network': CoinPrice;
 }
 
+interface StoreMappedCombatGetters {
+  fightGasOffset: string;
+  fightBaseline: string;
+}
+
+interface StoreMappedCombatActions {
+  fetchExpectedPayoutForMonsterPower(
+    { power, isCalculator }:
+    { power: string | number, isCalculator: boolean }): Promise<string>;
+}
+
 interface CoinPrice {
   usd: number;
 }
@@ -167,9 +179,11 @@ export default Vue.extend({
     ...mapGetters([
       'currentCharacter',
       'currentWeapon',
+    ]),
+    ...(mapGetters('combat', [
       'fightGasOffset',
       'fightBaseline'
-    ]),
+    ]) as Accessors<StoreMappedCombatGetters>),
 
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
@@ -216,7 +230,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['fetchExpectedPayoutForMonsterPower']),
+    ...(mapActions(['combat', 'fetchExpectedPayoutForMonsterPower']) as StoreMappedCombatActions),
     async onShowEarningsCalculator() {
       if(this.currentCharacter !== null) {
         this.characterElementValue = CharacterTrait[this.currentCharacter.trait];
@@ -332,7 +346,7 @@ export default Vue.extend({
     },
 
     async getAverageRewardForPower(power: number) {
-      const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: Math.round(power), isCalculator: true });
+      const expectedPayout = parseInt(await this.fetchExpectedPayoutForMonsterPower({ power: Math.round(power), isCalculator: true }), 10);
       return this.formattedSkill(expectedPayout);
     },
 
@@ -346,7 +360,9 @@ export default Vue.extend({
     },
 
     getAverageRewardAtLevel(level: number): number {
-      return this.formattedSkill(this.fightGasOffset) + (this.formattedSkill(this.fightBaseline) * (Math.sqrt(CharacterPower(level - 1)/1000)));
+      return this.formattedSkill(parseInt(this.fightGasOffset, 10))
+      + (this.formattedSkill(parseInt(this.fightBaseline, 10))
+      * (Math.sqrt(CharacterPower(level - 1)/1000)));
     },
 
     getRewardDiffBonus(level: number, targetLevel: number): string {

@@ -241,8 +241,6 @@ interface StoreMappedGetters {
   ownWeapons: IWeapon[],
   currentCharacter: ICharacter,
   currentCharacterStamina: number,
-  fightGasOffset: string,
-  fightBaseline: string,
   getCharacterPower(characterId: number): number,
   getWeaponDurability(weaponId: number): number,
 }
@@ -253,6 +251,8 @@ interface StoreMappedCombatMutations {
 
 interface StoreMappedCombatGetters {
   getTargetsByCharacterIdAndWeaponId(currentCharacterId: number, selectedWeaponId: number): ITarget | any[],
+  fightGasOffset: string,
+  fightBaseline: string,
 }
 
 type stringOrNull = string | null;
@@ -349,12 +349,14 @@ export default Vue.extend({
       'ownWeapons',
       'currentCharacter',
       'currentCharacterStamina',
-      'fightGasOffset',
-      'fightBaseline',
       'getCharacterPower',
       'getWeaponDurability',
     ]) as Accessors<StoreMappedGetters>),
-    ...(mapGetters('combat', ['getTargetsByCharacterIdAndWeaponId']) as Accessors<StoreMappedCombatGetters>),
+    ...(mapGetters('combat', [
+      'getTargetsByCharacterIdAndWeaponId',
+      'fightGasOffset',
+      'fightBaseline',
+    ]) as Accessors<StoreMappedCombatGetters>),
 
     targets(): any[] | ITarget {
       return this.getTargetsByCharacterIdAndWeaponId(this.currentCharacterId, this.selectedWeaponId as number);

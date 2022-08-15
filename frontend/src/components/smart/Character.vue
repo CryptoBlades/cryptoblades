@@ -334,8 +334,11 @@ export default Vue.extend({
       'characterStaminas',
       'ownedGarrisonCharacterIds',
     ]),
-    ...mapGetters(['getCharacterName', 'getCharacterStamina']),
-    ...mapGetters('combat', ['getCharacterPower']),
+    ...mapGetters([
+      'getCharacterName',
+      'getCharacterStamina',
+      'getCharacterPower',
+    ]),
     availableTraits(): string[] {
       const availableTraits = [];
       if(this.haveChangeTraitFire > 0) {

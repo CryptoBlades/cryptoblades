@@ -266,9 +266,9 @@ export default Vue.extend({
       'contracts',
       'ownCharacters',
       'getExchangeUrl',
-      'getCharacterIsInArena'
+      'getCharacterIsInArena',
+      'getCharacterPower',
     ]),
-    ...mapGetters('combat', ['getCharacterPower']),
     selectedCharacter(): Nft{
       return this.characters[this.currentCharacterId];
     },

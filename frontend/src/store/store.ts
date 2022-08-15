@@ -953,8 +953,8 @@ export default new Vuex.Store<IState>({
         dispatch('combat/fetchFightRewardSkill'),
         dispatch('combat/fetchFightRewardXp'),
         dispatch('fetchGarrisonCharactersXp'),
-        dispatch('fetchFightGasOffset'),
-        dispatch('fetchFightBaseline'),
+        dispatch('combat/fetchFightGasOffset'),
+        dispatch('combat/fetchFightBaseline'),
       ]);
     },
 
