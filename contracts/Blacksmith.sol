@@ -144,7 +144,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     }
 
     function getSeed() internal pure returns (uint256 seed) {
-        seed = uint(keccak256(abi.encodePacked(SHIELD_SEED, uint(1))));
+        seed = RandomUtil.combineSeeds(uint(SHIELD_SEED), uint(1));
     }
 
     function purchaseShield() public {

@@ -567,21 +567,21 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         safeRandoms = _safeRandoms;
     }
 
-    function hasSeed() public view returns (bool) {
-        return safeRandoms.hasSingleSeedRequest(tx.origin, getSeed());
+    function hasSeed(uint quantity) public view returns (bool) {
+        return safeRandoms.hasSingleSeedRequest(tx.origin, getSeed(quantity));
     }
 
-    function generateSeed() public {
-        safeRandoms.requestSingleSeed(tx.origin, getSeed());
+    function generateSeed(uint quantity) public {
+        safeRandoms.requestSingleSeed(tx.origin, getSeed(quantity));
     }
 
-    function getSeed() internal pure returns (uint256 seed) {
-        seed = uint(keccak256(abi.encodePacked(WEAPON_SEED, uint(1))));
+    function getSeed(uint quantity) internal pure returns (uint256 seed) {
+        seed = RandomUtil.combineSeeds(uint(WEAPON_SEED), quantity);
     }
 
     function _mintWeaponNLogic(uint32 num, uint8 chosenElement, uint256 eventId) internal {
         require(num > 0 && num <= 10);
-        uint256 seed = safeRandoms.popSingleSeed(msg.sender, getSeed(), true, true);
+        uint256 seed = safeRandoms.popSingleSeed(msg.sender, getSeed(num), true, true);
         if(eventId > 0) {
             specialWeaponsManager.addShards(msg.sender, eventId, num);
         }
@@ -590,7 +590,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _mintWeaponLogic(uint8 chosenElement, uint256 eventId) internal {
-        uint256 seed = safeRandoms.popSingleSeed(msg.sender, getSeed(), true, true);
+        uint256 seed = safeRandoms.popSingleSeed(msg.sender, getSeed(1), true, true);
         if(eventId > 0) {
             specialWeaponsManager.addShards(msg.sender, eventId, 1);
         }
