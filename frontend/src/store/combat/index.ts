@@ -96,7 +96,7 @@ const combat = {
       {state, commit}: {state: IState, commit: Commit},
       { characterId, weaponId }: {characterId: number, weaponId: number}) {
       if(isUndefined(characterId) || isUndefined(weaponId)) {
-        commit('combat/updateTargets', { characterId, weaponId, targets: [] });
+        commit('updateTargets', { characterId, weaponId, targets: [] });
         return;
       }
 
@@ -104,7 +104,7 @@ const combat = {
         .getTargets(characterId, weaponId)
         .call(defaultCallOptions(state));
 
-      commit('combat/updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
+      commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
     },
 
     async getCharacterPower({ state }: {state: IState}, characterId: number) {
@@ -137,47 +137,47 @@ const combat = {
       return await TokensManager.methods.skillTokenPrice().call(defaultCallOptions(state));
     },
 
-    async doEncounter(
-      { state, dispatch }: {state: IState, dispatch: Dispatch},
-      { characterId, weaponId, targetString, fightMultiplier }:
-      { characterId: number, weaponId: number, targetString: number, fightMultiplier: number }) {
-      const res = await state.contracts().CryptoBlades!.methods
-        .fight(
-          characterId,
-          weaponId,
-          targetString,
-          fightMultiplier
-        )
-        .send({ from: state.defaultAccount, gas: '300000', gasPrice: getGasPrice() });
+    // async doEncounter(
+    //   { state, dispatch }: {state: IState, dispatch: Dispatch},
+    //   { characterId, weaponId, targetString, fightMultiplier }:
+    //   { characterId: number, weaponId: number, targetString: number, fightMultiplier: number }) {
+    //   const res = await state.contracts().CryptoBlades!.methods
+    //     .fight(
+    //       characterId,
+    //       weaponId,
+    //       targetString,
+    //       fightMultiplier
+    //     )
+    //     .send({ from: state.defaultAccount, gas: '300000', gasPrice: getGasPrice() });
 
-      await dispatch('combat/fetchTargets', { characterId, weaponId });
+    //   await dispatch('combat/fetchTargets', { characterId, weaponId });
 
-      const {
-        /*owner,
-        character,
-        weapon,
-        target,*/
-        playerRoll,
-        enemyRoll,
-        xpGain,
-        skillGain
-      } = res.events.FightOutcome.returnValues;
+    //   const {
+    //     /*owner,
+    //     character,
+    //     weapon,
+    //     target,*/
+    //     playerRoll,
+    //     enemyRoll,
+    //     xpGain,
+    //     skillGain
+    //   } = res.events.FightOutcome.returnValues;
 
-      const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
+    //   const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
 
-      const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
+    //   const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
 
-      await dispatch('fetchWeaponDurability', weaponId);
+    //   await dispatch('fetchWeaponDurability', weaponId);
 
-      return {
-        isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
-        playerRoll,
-        enemyRoll,
-        xpGain,
-        skillGain,
-        bnbGasUsed
-      };
-    },
+    //   return {
+    //     isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
+    //     playerRoll,
+    //     enemyRoll,
+    //     xpGain,
+    //     skillGain,
+    //     bnbGasUsed
+    //   };
+    // },
 
     async doEncounterPayNative(
       { state, dispatch }: {state: IState, dispatch: Dispatch},
@@ -248,7 +248,7 @@ const combat = {
             .getTokenRewards()
             .call(defaultCallOptions(state));
 
-          commit('updateSkillRewards', { skillRewards });
+          commit('updateSkillRewards', { skillRewards }, { root: true });
 
           return skillRewards;
         })()
@@ -267,7 +267,7 @@ const combat = {
         return [charaId, xps[i]];
       });
 
-      commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
+      commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) }, { root: true });
       return xpCharaIdPairs;
     },
 
@@ -278,7 +278,7 @@ const combat = {
 
       const stamina = parseInt(staminaString, 10);
       if (rootState.characterStaminas[characterId] !== stamina) {
-        commit('updateCharacterStamina', { characterId, stamina });
+        commit('updateCharacterStamina', { characterId, stamina }, { root: true });
       }
     },
 
@@ -291,7 +291,7 @@ const combat = {
         cryptoBladesMethods => cryptoBladesMethods.fightRewardGasOffset()
       );
 
-      commit('combat/updateFightGasOffset', { fightGasOffset });
+      commit('updateFightGasOffset', { fightGasOffset });
       return fightGasOffset;
     },
 
@@ -305,7 +305,7 @@ const combat = {
         cryptoBladesMethods => cryptoBladesMethods.fightRewardBaseline()
       );
 
-      commit('combat/updateFightBaseline', { fightBaseline });
+      commit('updateFightBaseline', { fightBaseline });
       return fightBaseline;
     },
 
