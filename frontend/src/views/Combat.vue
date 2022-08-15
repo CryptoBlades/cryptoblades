@@ -126,7 +126,7 @@
 
                         <!-- power -->
                         <div class="encounter-power pt-2">
-                           {{$t('combat.power').toUpperCase()}} : {{ addCommas(e.power) }}
+                           {{$t('combat.power').toUpperCase()}} : {{ e.power.toLocaleString() }}
                         </div>
 
                         <div class="xp-gain">
@@ -475,17 +475,17 @@ export default Vue.extend({
     },
 
     // for enemy card animaton
-    enter(el: any, done: any) {
+    enter(el: HTMLElement, done: any) {
       gasp.to(el, {
         opacity: 1,
         y: 0,
         duration: 0.5,
         onComplete: done,
-        delay: el.dataset.index * 0.1
+        delay: el.dataset.index as any * 0.1
       });
     },
-    beforeEnter(el: any){
-      el.style.opacity = 0;
+    beforeEnter(el: HTMLElement){
+      el.style.opacity = '0';
       el.style.transform = 'translateY(100px)';
     },
     // -------------------
@@ -640,17 +640,6 @@ export default Vue.extend({
       Events.$emit('weapon-inventory', true);
     },
 
-    addCommas(nStr: string) {
-      nStr += '';
-      const x = nStr.split('.');
-      let x1 = x[0];
-      const x2 = x.length > 1 ? '.' + x[1] : '';
-      const rgx = /(\d+)(\d{3})/;
-      while (rgx.test(x1)) {
-        x1 = x1.replace(rgx, '$1' + ',' + '$2');
-      }
-      return x1 + x2;
-    },
     changeColorChange(stat: string){
       let bgColor;
       if(stat.toUpperCase() === 'UNLIKELY'){
