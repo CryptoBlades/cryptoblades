@@ -96,8 +96,8 @@ export default {
       'timeUntilWeaponHasMaxDurability',
       'getWeaponName',
       'getWeaponCosmetic',
+      'getWeaponDurability',
     ]),
-    ...mapGetters('combat', ['getWeaponDurability']),
   },
 };
 </script>

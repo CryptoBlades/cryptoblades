@@ -211,8 +211,6 @@ interface Skin {
 }
 interface StoreMappedGetters {
   weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
-}
-interface StoreMappedCombatGetters {
   getWeaponDurability(state: ICombatState): number;
 }
 interface StoreMappedActions {
@@ -385,8 +383,7 @@ export default Vue.extend({
   },
   computed: {
     ...(mapState(['ownedWeaponIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['weaponsWithIds']) as Accessors<StoreMappedGetters>),
-    ...(mapGetters('combat', ['getWeaponDurability']) as Accessors<StoreMappedCombatGetters>),
+    ...(mapGetters(['weaponsWithIds', 'getWeaponDurability']) as Accessors<StoreMappedGetters>),
     weaponIdsToDisplay(): string[] {
       if (this.showGivenWeaponIds) {
         return this.weaponIds;
