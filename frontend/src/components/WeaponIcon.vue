@@ -110,10 +110,10 @@ export default {
       ])),
     ...mapGetters([
       'currentCharacter',
-      'getWeaponDurability',
       'timeUntilWeaponHasMaxDurability',
       'getWeaponName',
-      'getWeaponCosmetic'
+      'getWeaponCosmetic',
+      'getWeaponDurability',
     ]),
     tooltipHtml() {
       if(!this.weapon) return '';

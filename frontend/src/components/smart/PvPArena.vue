@@ -92,7 +92,6 @@ import { characterFromContract as formatCharacter } from '../../contract-models'
 import { duelResultFromContract as formatDuelResult } from '../../contract-models';
 import { characterKickedEventFromContract as formatCharacterKickedEvent } from '../../contract-models';
 
-
 export default {
   components: {
     'pvp-arena-preparation': PvPArenaPreparation,
@@ -183,7 +182,6 @@ export default {
       'getSeasonStartedAt',
       'getSeasonDuration',
       'getCharacterLevel',
-      'getCharacterPower',
       'getCharacterFullPower',
       'getRankingPointsByCharacter',
       'getRankingsPoolByTier',
@@ -201,6 +199,7 @@ export default {
       'getRename',
       'withdrawFromOldArena'
     ]),
+    ...mapActions('combat', ['getCharacterPower']),
 
     async getWeaponInformation(weaponId) {
       return formatWeapon(`${weaponId}`, await this.getWeapon(weaponId));

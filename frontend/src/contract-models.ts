@@ -155,7 +155,7 @@ export function weaponFromContract(id: string | number, data: string[]): IWeapon
 
   return {
     id: +id, properties,
-    element: traitNumberToName(traitNum),
+    element: traitNumberToName(traitNum) as keyof typeof WeaponElement,
     stat1: statNumberToName(stat1Type), stat1Value, stat1Type,
     stat2: statNumberToName(stat2Type), stat2Value, stat2Type,
     stat3: statNumberToName(stat3Type), stat3Value, stat3Type,

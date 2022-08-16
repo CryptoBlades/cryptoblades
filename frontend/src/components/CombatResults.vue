@@ -95,6 +95,10 @@ interface CombatResult {
   bnbGasUsed: string;
 }
 
+interface StoreMappedCombatActions {
+  fetchIgoRewardsPerFight(): Promise<string>;
+}
+
 export default Vue.extend({
   components: {
     Hint
@@ -146,7 +150,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions(['fetchIgoRewardsPerFight']),
+    ...(mapActions('combat', ['fetchIgoRewardsPerFight']) as StoreMappedCombatActions),
     async fetchPrices(): Promise<void> {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
       this.skillPrice = response.data?.cryptoblades.usd;
@@ -175,12 +179,12 @@ export default Vue.extend({
     },
   },
   async beforeMount(){
-    this.igoDefaultReward = await this.fetchIgoRewardsPerFight();
+    this.igoDefaultReward = parseInt(await this.fetchIgoRewardsPerFight(), 10);
   },
   async mounted() {
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
     await this.fetchPrices();
-    this.igoDefaultReward = await this.fetchIgoRewardsPerFight();
+    this.igoDefaultReward = parseInt(await this.fetchIgoRewardsPerFight(), 10);
     await new Promise(f => setTimeout(f, 1000));
     this.checkStorage();
   },

@@ -126,7 +126,7 @@
 
                         <!-- power -->
                         <div class="encounter-power pt-2">
-                           {{$t('combat.power').toUpperCase()}} : {{ addCommas(e.power) }}
+                           {{$t('combat.power').toUpperCase()}} : {{ e.power.toLocaleString() }}
                         </div>
 
                         <div class="xp-gain">
@@ -178,9 +178,10 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
 import {getEnemyArt} from '../enemy-art';
-import {CharacterTrait, GetTotalMultiplierForTrait, WeaponElement} from '../interfaces';
+import {CharacterTrait, GetTotalMultiplierForTrait, ICharacter, ITarget, IWeapon, WeaponElement} from '../interfaces';
 import Hint from '../components/Hint.vue';
 import Events from '../events';
 import {fromWeiEther, toBN} from '../utils/common';
@@ -190,8 +191,105 @@ import WeaponGrid from '../components/smart/WeaponGridNew.vue';
 import ModalContainer from '../components/modals/ModalContainer.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
+import i18n from '../i18n';
+import { Accessors } from 'vue/types/options';
 
-export default {
+interface StoreMappedCombatActions {
+  fetchCharacterStamina(characterId: number): Promise<void>;
+  fetchTargets(
+    { characterId, weaponId }:
+    { characterId: number, weaponId: number }): Promise<void>;
+  doEncounterPayNative(
+    { characterId,
+      weaponId,
+      targetString,
+      fightMultiplier,
+      offsetCost }:
+    { characterId: number,
+      weaponId: number,
+      targetString: number,
+      fightMultiplier: number,
+      offsetCost: BigNumber
+    }): Promise<{
+    isVictory: boolean,
+    playerRoll: string,
+    enemyRoll: string,
+    xpGain: any,
+    skillGain: any,
+    bnbGasUsed: string,
+  }>;
+  fetchFightRewardSkill(): Promise<string>;
+  fetchFightRewardXp(): Promise<string[][]>;
+  fetchExpectedPayoutForMonsterPower(
+    { power, isCalculator }:
+    { power: stringOrNumber, isCalculator: boolean }): Promise<string>;
+  fetchHourlyAllowance(): Promise<string>;
+  fetchHourlyPowerAverage(): Promise<string>;
+  fetchHourlyPayPerFight(): Promise<string>;
+  getCurrentSkillPrice(): Promise<string>;
+  getNativeTokenPriceInUsd(): Promise<string>;
+  getCombatTokenChargePercent(): Promise<string>;
+}
+
+interface StoreMappedState {
+  currentCharacterId: number,
+  currentWeaponId: number,
+}
+
+interface StoreMappedGetters {
+  ownCharacters: ICharacter[],
+  ownWeapons: IWeapon[],
+  currentCharacter: ICharacter,
+  currentCharacterStamina: number,
+  getCharacterPower(characterId: number): number,
+  getWeaponDurability(weaponId: number): number,
+}
+
+interface StoreMappedCombatMutations {
+  setIsInCombat(isInCombat: boolean): boolean,
+}
+
+interface StoreMappedCombatGetters {
+  getTargetsByCharacterIdAndWeaponId(currentCharacterId: number, selectedWeaponId: number): ITarget | any[],
+  fightGasOffset: string,
+  fightBaseline: string,
+}
+
+type stringOrNull = string | null;
+type numberOrNull = number | null;
+type stringOrNumber = string | number;
+
+interface ICombatData {
+  selectedWeaponId: numberOrNull;
+  error: stringOrNull;
+  waitingResults: boolean;
+  resultsAvailable: boolean;
+  fightResults: any;
+  intervalSeconds: any;
+  intervalMinutes: any;
+  timeSeconds: any;
+  timeMinutes: any;
+  fightXpGain: number;
+  selectedWeapon: any;
+  fightMultiplier: number;
+  staminaPerFight: number;
+  targetExpectedPayouts: string[];
+  targetToFight: any;
+  targetToFightIndex: any;
+  minutesToNextAllowance: any;
+  secondsToNextAllowance: any;
+  lastAllowanceSkill: stringOrNull;
+  nextAllowanceCounter: any;
+  powerAvg: stringOrNull;
+  expectedSkill: stringOrNull;
+  activeCard: any;
+  isToggled: boolean;
+  gridStyling: string;
+  index: number;
+  counterInterval: any;
+}
+
+export default Vue.extend({
   data() {
     return {
       selectedWeaponId: null,
@@ -219,12 +317,13 @@ export default {
       activeCard: null,
       isToggled: false,
       gridStyling:'justify-content:flex-start; gap:2.5vw',
-      index: 1
-    };
+      index: 1,
+      counterInterval: null,
+    } as ICombatData;
   },
-  async mounted(){
+  async mounted() {
     this.selectedWeaponId = this.currentWeaponId;
-    Events.$on('chooseweapon', (id) =>{
+    Events.$on('chooseweapon', (id: number) => {
       this.selectedWeaponId = id;
       this.index++;
     });
@@ -244,39 +343,42 @@ export default {
     clearInterval(this.counterInterval);
   },
   computed: {
-    ...mapState(['currentCharacterId','currentWeaponId']),
-    ...mapGetters([
-      'getTargetsByCharacterIdAndWeaponId',
+    ...(mapState(['currentCharacterId', 'currentWeaponId']) as Accessors<StoreMappedState>),
+    ...(mapGetters([
       'ownCharacters',
       'ownWeapons',
       'currentCharacter',
       'currentCharacterStamina',
+      'getCharacterPower',
       'getWeaponDurability',
+    ]) as Accessors<StoreMappedGetters>),
+    ...(mapGetters('combat', [
+      'getTargetsByCharacterIdAndWeaponId',
       'fightGasOffset',
       'fightBaseline',
-      'getCharacterPower'
-    ]),
+    ]) as Accessors<StoreMappedCombatGetters>),
 
-    targets() {
-      return this.getTargetsByCharacterIdAndWeaponId(this.currentCharacterId, this.selectedWeaponId);
+    targets(): any[] | ITarget {
+      return this.getTargetsByCharacterIdAndWeaponId(this.currentCharacterId, this.selectedWeaponId as number);
     },
 
-    isLoadingTargets() {
-      return this.targets.length === 0 && this.currentCharacterId && this.selectedWeaponId;
+    isLoadingTargets(): boolean {
+      const targets = this.targets as any[];
+      return targets.length === 0 && !!this.currentCharacterId && !!this.selectedWeaponId;
     },
 
-    selections() {
+    selections(): any[] {
       return [this.currentCharacterId, this.selectedWeaponId];
     },
 
-    updateResults() {
+    updateResults(): any[] {
       return [this.fightResults, this.error];
     },
   },
 
   watch: {
     async selections([characterId, weaponId]) {
-      if (!this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === weaponId)) {
+      if (!this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === weaponId)) {
         this.selectedWeaponId = null;
       }
       await this.fetchTargets({ characterId, weaponId });
@@ -290,32 +392,44 @@ export default {
       this.resultsAvailable = fightResults !== null;
       this.waitingResults = fightResults === null && error === null;
       this.setIsInCombat(this.waitingResults);
-      if (this.resultsAvailable && error === null) this.$bvModal.show('modal-info');
+      if (this.resultsAvailable && error === null) (this as any).$bvModal.show('modal-info');
     },
   },
 
   methods: {
-    ...mapActions(['fetchTargets', 'doEncounterPayNative',
-      'fetchFightRewardSkill', 'fetchFightRewardXp', 'getXPRewardsIfWin', 'fetchExpectedPayoutForMonsterPower',
-      'fetchHourlyAllowance', 'fetchHourlyPowerAverage', 'fetchHourlyPayPerFight',
-      'getCurrentSkillPrice', 'getNativeTokenPriceInUsd', 'getCombatTokenChargePercent', 'fetchCharacterStamina']),
-    ...mapMutations(['setIsInCombat']),
+    ...(mapActions('combat',
+      [
+        'fetchTargets',
+        'doEncounterPayNative',
+        'fetchFightRewardSkill',
+        'fetchFightRewardXp',
+        'fetchExpectedPayoutForMonsterPower',
+        'fetchHourlyAllowance',
+        'fetchHourlyPowerAverage',
+        'fetchHourlyPayPerFight',
+        'getCurrentSkillPrice',
+        'getNativeTokenPriceInUsd',
+        'getCombatTokenChargePercent',
+        'fetchCharacterStamina'
+      ]) as StoreMappedCombatActions),
+    ...(mapMutations('combat', ['setIsInCombat']) as StoreMappedCombatMutations),
     getEnemyArt,
-    weaponHasDurability(id) {
+    weaponHasDurability(id: number) {
       return this.getWeaponDurability(id) >= this.fightMultiplier;
     },
     charHasStamina(){
       return this.currentCharacterStamina >= this.staminaPerFight;
     },
-    getCharacterTrait(trait) {
+    getCharacterTrait(trait: CharacterTrait) {
       return CharacterTrait[trait];
     },
-    getWinChance(enemyPower, enemyElement) {
+    getWinChance(enemyPower: number, enemyElement: number) {
       const characterPower = this.getCharacterPower(this.currentCharacter.id);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === this.selectedWeaponId);
+      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === this.selectedWeaponId) as IWeapon;
       this.selectedWeapon = selectedWeapon;
-      const weaponElement = parseInt(WeaponElement[selectedWeapon.element], 10);
+      const element: WeaponElement = WeaponElement[selectedWeapon.element as keyof typeof WeaponElement];
+      const weaponElement = parseInt(WeaponElement[element], 10);
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
       const totalPower = characterPower * weaponMultiplier + selectedWeapon.bonusPower;
       const totalMultiplier = 1 + 0.075 * (weaponElement === playerElement ? 1 : 0) + 0.075 * this.getElementAdvantage(playerElement, enemyElement);
@@ -327,8 +441,8 @@ export default {
       const enemyRange = enemyMax - enemyMin;
       let rollingTotal = 0;
       // shortcut: if it is impossible for one side to win, just say so
-      if (playerMin > enemyMax) return this.$t('combat.winChances.veryLikely');
-      if (playerMax < enemyMin) this.$t('combat.winChances.unlikely');
+      if (playerMin > enemyMax) return i18n.t('combat.winChances.veryLikely');
+      if (playerMax < enemyMin) i18n.t('combat.winChances.unlikely');
 
       // case 1: player power is higher than enemy power
       if (playerMin >= enemyMin) {
@@ -349,34 +463,34 @@ export default {
         //since this is chance the enemy wins, we negate it
         rollingTotal = 1 - rollingTotal;
       }
-      if (rollingTotal <= 0.3) return this.$t('combat.winChances.unlikely');
-      if (rollingTotal <= 0.5) return this.$t('combat.winChances.possible');
-      if (rollingTotal <= 0.7) return this.$t('combat.winChances.likely');
-      return this.$t('combat.winChances.veryLikely');
+      if (rollingTotal <= 0.3) return i18n.t('combat.winChances.unlikely');
+      if (rollingTotal <= 0.5) return i18n.t('combat.winChances.possible');
+      if (rollingTotal <= 0.7) return i18n.t('combat.winChances.likely');
+      return i18n.t('combat.winChances.veryLikely');
     },
-    getElementAdvantage(playerElement, enemyElement) {
+    getElementAdvantage(playerElement: number, enemyElement: number) {
       if ((playerElement + 1) % 4 === enemyElement) return 1;
       if ((enemyElement + 1) % 4 === playerElement) return -1;
       return 0;
     },
 
     // for enemy card animaton
-    enter(el, done) {
+    enter(el: HTMLElement, done: any) {
       gasp.to(el, {
         opacity: 1,
         y: 0,
         duration: 0.5,
         onComplete: done,
-        delay: el.dataset.index * 0.1
+        delay: el.dataset.index as any * 0.1
       });
     },
-    beforeEnter(el){
-      el.style.opacity = 0;
+    beforeEnter(el: HTMLElement){
+      el.style.opacity = '0';
       el.style.transform = 'translateY(100px)';
     },
     // -------------------
 
-    hideBottomMenu(bol){
+    hideBottomMenu(bol: boolean){
       this.isToggled = bol;
     },
 
@@ -388,20 +502,20 @@ export default {
       const fetchHourlyAllowance = await this.fetchHourlyAllowance();
       this.lastAllowanceSkill = this.formattedSkill(fetchHourlyAllowance);
     },
-    async onClickEncounter(targetToFight, targetIndex) {
+    async onClickEncounter(targetToFight: ITarget, targetIndex: number) {
       // this.$bvModal.show('waitingForResult');
       if(this.targetExpectedPayouts[targetIndex] === '0'){
         this.targetToFight = targetToFight;
         this.targetToFightIndex = targetIndex;
         await this.getHourlyAllowance();
-        this.$refs['no-skill-warning-modal'].show();
+        (this.$refs['no-skill-warning-modal'] as any).show();
       }
       else{
         this.fightTarget(targetToFight, targetIndex);
       }
     },
 
-    async fightTarget(targetToFight, targetIndex){
+    async fightTarget(targetToFight: ITarget, targetIndex: number){
       if (this.selectedWeaponId === null || this.currentCharacterId === null) {
         return;
       }
@@ -410,7 +524,8 @@ export default {
       // Force a quick refresh of targets
       await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
-      if (this.targets[targetIndex].original !== targetToFight.original) {
+      const targets = this.targets as any[];
+      if (targets[targetIndex].original !== targetToFight.original) {
         this.waitingResults = false;
         return;
       }
@@ -444,21 +559,21 @@ export default {
         await this.fetchCharacterStamina(this.currentCharacterId);
 
         this.error = null;
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
         this.error = e.message;
       }
     },
 
-    formattedSkill(skill) {
-      const skillBalance = fromWeiEther(skill, 'ether');
+    formattedSkill(skill: stringOrNumber) {
+      const skillBalance = fromWeiEther(skill.toString());
       return `${toBN(skillBalance).toFixed(6)} SKILL`;
     },
 
-    getPotentialXp(targetToFight) {
+    getPotentialXp(targetToFight: ITarget) {
       const characterPower = this.getCharacterPower(this.currentCharacter.id);
       const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon) => weapon.id === this.selectedWeaponId);
+      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === this.selectedWeaponId) as IWeapon;
       const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
       const totalPower = characterPower * weaponMultiplier + selectedWeapon.bonusPower;
       //Formula taken from getXpGainForFight funtion of cryptoblades.sol
@@ -472,33 +587,33 @@ export default {
 
     setStaminaSelectorValues() {
       if(this.currentCharacterStamina < 40) {
-        return [{ value: this.fightMultiplier, text: this.$t('combat.moreStamina'), disabled: true}];
+        return [{ value: this.fightMultiplier, text: i18n.t('combat.moreStamina').toString(), disabled: true}];
       }
 
-      const choices = [
-        {value: null, text: this.$t('combat.pleaseSelect'), disabled: true},
+      const choices: {value: numberOrNull, text: string, disabled?: boolean }[] = [
+        {value: null, text: i18n.t('combat.pleaseSelect').toString(), disabled: true},
       ];
 
       const addChoices = [];
 
       if(this.currentCharacterStamina >= 200) {
-        addChoices.push({ value: 5, text: 200 });
+        addChoices.push({ value: 5, text: '200' });
       }
 
       if(this.currentCharacterStamina >= 160) {
-        addChoices.push({ value: 4, text: 160 });
+        addChoices.push({ value: 4, text: '160' });
       }
 
       if(this.currentCharacterStamina >= 120) {
-        addChoices.push({ value: 3, text: 120 });
+        addChoices.push({ value: 3, text: '120' });
       }
 
       if(this.currentCharacterStamina >= 80) {
-        addChoices.push({ value: 2, text: 80 });
+        addChoices.push({ value: 2, text: '80' });
       }
 
       if(this.currentCharacterStamina >= 40) {
-        addChoices.push({ value: 1, text: 40 });
+        addChoices.push({ value: 1, text: '40' });
       }
 
       choices.push(...addChoices.reverse());
@@ -509,8 +624,9 @@ export default {
     async getExpectedPayouts() {
       if(!this.targets) return;
       const expectedPayouts = new Array(4);
-      for(let i = 0; i < this.targets.length; i++) {
-        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: this.targets[i].power });
+      const targets = this.targets as ITarget[];
+      for(let i = 0; i < targets.length; i++) {
+        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: targets[i].power, isCalculator: false });
         expectedPayouts[i] = expectedPayout;
       }
       this.targetExpectedPayouts = expectedPayouts;
@@ -524,18 +640,7 @@ export default {
       Events.$emit('weapon-inventory', true);
     },
 
-    addCommas(nStr) {
-      nStr += '';
-      const x = nStr.split('.');
-      let x1 = x[0];
-      const x2 = x.length > 1 ? '.' + x[1] : '';
-      const rgx = /(\d+)(\d{3})/;
-      while (rgx.test(x1)) {
-        x1 = x1.replace(rgx, '$1' + ',' + '$2');
-      }
-      return x1 + x2;
-    },
-    changeColorChange(stat){
+    changeColorChange(stat: string){
       let bgColor;
       if(stat.toUpperCase() === 'UNLIKELY'){
         bgColor =  'background-color: #B10000 !important';
@@ -556,7 +661,7 @@ export default {
     WeaponGrid,
     ModalContainer
   },
-};
+});
 </script>
 
 <style scoped>

@@ -105,6 +105,7 @@ import {BModal} from 'bootstrap-vue';
 import {getCleanName, isProfaneIsh} from '../../rename-censor';
 import i18n from '@/i18n';
 import {WeaponCosmetic} from '@/enums/WeaponCosmetic';
+import { ICombatState } from '@/store/combat';
 
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
 interface Skin {
@@ -114,6 +115,7 @@ interface Skin {
 }
 interface StoreMappedGetters {
   weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
+  getWeaponDurability(state: ICombatState): number;
 }
 interface StoreMappedActions {
   fetchWeapons(weaponIds: string[]): Promise<void>;
@@ -246,7 +248,7 @@ export default Vue.extend({
   },
   computed: {
     ...(mapState(['ownedWeaponIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['weaponsWithIds','getWeaponDurability',]) as Accessors<StoreMappedGetters>),
+    ...(mapGetters(['weaponsWithIds', 'getWeaponDurability']) as Accessors<StoreMappedGetters>),
     weaponIdsToDisplay(): string[] {
       if (this.showGivenWeaponIds) {
         return this.weaponIds;

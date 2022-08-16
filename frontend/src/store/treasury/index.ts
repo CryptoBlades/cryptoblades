@@ -212,7 +212,7 @@ const treasury = {
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardSkill'),
         dispatch('fetchPartnerProject', id)
       ]);
     },
