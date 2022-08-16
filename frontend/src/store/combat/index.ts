@@ -136,48 +136,6 @@ const combat = {
       return await TokensManager.methods.skillTokenPrice().call(defaultCallOptions(rootState));
     },
 
-    // async doEncounter(
-    //   { state, dispatch }: {state: IState, dispatch: Dispatch},
-    //   { characterId, weaponId, targetString, fightMultiplier }:
-    //   { characterId: number, weaponId: number, targetString: number, fightMultiplier: number }) {
-    //   const res = await state.contracts().CryptoBlades!.methods
-    //     .fight(
-    //       characterId,
-    //       weaponId,
-    //       targetString,
-    //       fightMultiplier
-    //     )
-    //     .send({ from: state.defaultAccount, gas: '300000', gasPrice: getGasPrice() });
-
-    //   await dispatch('combat/fetchTargets', { characterId, weaponId });
-
-    //   const {
-    //     /*owner,
-    //     character,
-    //     weapon,
-    //     target,*/
-    //     playerRoll,
-    //     enemyRoll,
-    //     xpGain,
-    //     skillGain
-    //   } = res.events.FightOutcome.returnValues;
-
-    //   const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
-
-    //   const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
-
-    //   await dispatch('fetchWeaponDurability', weaponId);
-
-    //   return {
-    //     isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
-    //     playerRoll,
-    //     enemyRoll,
-    //     xpGain,
-    //     skillGain,
-    //     bnbGasUsed
-    //   };
-    // },
-
     async doEncounterPayNative(
       { rootState, dispatch }: {rootState: IState, dispatch: Dispatch},
       { characterId, weaponId, targetString, fightMultiplier, offsetCost }:
