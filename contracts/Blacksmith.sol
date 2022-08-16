@@ -35,6 +35,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     uint256 public constant LINK_SKILL_ORACLE_2 = 1; // technically second skill oracle (it's separate)
     uint256 public constant LINK_KING_ORACLE = 2;
+    uint256 public constant LINK_SAFE_RANDOMS = 3;
 
     uint256 public constant CURRENCY_SKILL = 0;
     //uint256 public constant CURRENCY_KING = 1; // not referenced atm
@@ -63,7 +64,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     mapping(uint256 => address) currencies;
 
     mapping(uint256 => address) public links;
-    SafeRandoms public safeRandoms;
 
     /* ========== INITIALIZERS AND MIGRATORS ========== */
 
@@ -131,16 +131,12 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         IERC20(tokenAddress).safeTransfer(msg.sender, amount);
     }
 
-    function setSafeRandoms(SafeRandoms _safeRandoms) public isAdmin {
-        safeRandoms = _safeRandoms;
-    }
-
     function hasSeed() public view returns (bool) {
-        return safeRandoms.hasSingleSeedRequest(tx.origin, getSeed());
+        return SafeRandoms(links[LINK_SAFE_RANDOMS]).hasSingleSeedRequest(tx.origin, getSeed());
     }
 
     function generateSeed() public {
-        safeRandoms.requestSingleSeed(tx.origin, getSeed());
+        SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(tx.origin, getSeed());
     }
 
     function getSeed() internal pure returns (uint256 seed) {
@@ -149,7 +145,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function purchaseShield() public {
         require(itemFlatPrices[ITEM_SHIELD] > 0);
-        uint256 seed = safeRandoms.popSingleSeed(msg.sender, getSeed(), true, true);
+        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(), true, true);
         uint256 shieldType = numberParameters[VAR_PURCHASE_SHIELD_TYPE];
         if(shieldType != 0) {
             require(numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] > 0);
@@ -191,10 +187,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function getCurrency(uint256 currency) public view returns (address) {
         return currencies[currency];
-    }
-
-    function getLink(uint256 linkId) public view returns (address) {
-        return links[linkId];
     }
 
     function vars(uint256 varField) public view returns (uint256) {

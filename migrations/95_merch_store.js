@@ -9,7 +9,7 @@ module.exports = async function (deployer, network, accounts) {
     const game = await CryptoBlades.deployed();
     const blacksmith = await Blacksmith.deployed();
     const LINK_SKILL_ORACLE_2 = await blacksmith.LINK_SKILL_ORACLE_2();
-    const skillOracle2 = await blacksmith.getLink(LINK_SKILL_ORACLE_2);
+    const skillOracle2 = await blacksmith.links(LINK_SKILL_ORACLE_2);
     const merch = await deployProxy(Merchandise, [game.address, skillOracle2], { deployer });
     const GAME_ADMIN = await game.GAME_ADMIN();
     await game.grantRole(GAME_ADMIN, merch.address);

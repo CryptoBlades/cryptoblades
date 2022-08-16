@@ -66,6 +66,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_WEAPON_MINT_TIMESTAMP = 25;
     uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 26;
 
+    uint256 public constant LINK_SAFE_RANDOMS = 1;
+
 
     // Mapped user variable(userVars[]) keys, one value per wallet
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
@@ -227,7 +229,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     mapping(address => mapping(uint256 => uint256)) public userVars;
 
     SpecialWeaponsManager public specialWeaponsManager;
-    SafeRandoms public safeRandoms;
+    mapping(uint256 => address) public links;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -563,16 +565,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _mintWeaponLogic(chosenElement, eventId);
     }
 
-    function setSafeRandoms(SafeRandoms _safeRandoms) public restricted {
-        safeRandoms = _safeRandoms;
-    }
-
     function hasSeed(uint quantity) public view returns (bool) {
-        return safeRandoms.hasSingleSeedRequest(tx.origin, getSeed(quantity));
+        return SafeRandoms(links[LINK_SAFE_RANDOMS]).hasSingleSeedRequest(tx.origin, getSeed(quantity));
     }
 
     function generateSeed(uint quantity) public {
-        safeRandoms.requestSingleSeed(tx.origin, getSeed(quantity));
+        SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(tx.origin, getSeed(quantity));
     }
 
     function getSeed(uint quantity) internal pure returns (uint256 seed) {
@@ -581,7 +579,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function _mintWeaponNLogic(uint32 num, uint8 chosenElement, uint256 eventId) internal {
         require(num > 0 && num <= 10);
-        uint256 seed = safeRandoms.popSingleSeed(msg.sender, getSeed(num), true, true);
+        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(num), true, true);
         if(eventId > 0) {
             specialWeaponsManager.addShards(msg.sender, eventId, num);
         }
@@ -590,7 +588,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _mintWeaponLogic(uint8 chosenElement, uint256 eventId) internal {
-        uint256 seed = safeRandoms.popSingleSeed(msg.sender, getSeed(1), true, true);
+        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(1), true, true);
         if(eventId > 0) {
             specialWeaponsManager.addShards(msg.sender, eventId, 1);
         }
@@ -896,6 +894,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         for(uint i = 0; i < varFields.length; i++) {
             vars[varFields[i]] = values[i];
         }
+    }
+
+    function setLink(uint256 linkId, address linkAddress) external restricted {
+        links[linkId] = linkAddress;
     }
 
     function giveInGameOnlyFunds(address to, uint256 skillAmount) external restricted {
