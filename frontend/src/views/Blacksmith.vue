@@ -822,8 +822,7 @@ export default Vue.extend({
 
   methods: {
     ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN',
-      'burnWeapon', 'massBurnWeapons',
-      'reforgeWeaponWithDust', 'massBurnWeapons',
+      'burnWeapon', 'massBurnWeapons', 'reforgeWeaponWithDust',
       'fetchMintWeaponPriceDecreasePerSecond', 'fetchWeaponMintIncreasePrice',
       'fetchMintWeaponMinPrice', 'fetchMintWeaponFee', 'fetchUsdSkillValue',
       'fetchReforgeWeaponFee', 'fetchReforgeWeaponWithDustFee', 'fetchBurnWeaponFee']),
