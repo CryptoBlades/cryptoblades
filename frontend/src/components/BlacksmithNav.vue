@@ -104,7 +104,7 @@ export default Vue.extend({
       required: true,
     },
     reforgeWeaponId: {
-      type: String,
+      type: Number,
       required: false,
       default: null
     },
