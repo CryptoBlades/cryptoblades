@@ -58,6 +58,11 @@ export const apiUrl = (url: string) => `${process.env.VUE_APP_API_URL || 'https:
 
 export const getCurrentGasPrices = async () => {
   const response = await axios.get('https://www.gasnow.org/api/v3/gas/price');
+  console.log('currentGasPrice: ', {
+    low: response.data.data.slow / 1e9,
+    medium: response.data.data.standard / 1e9,
+    high: response.data.data.fast / 1e9
+  });
   return {
     low: response.data.data.slow / 1e9,
     medium: response.data.data.standard / 1e9,
@@ -100,6 +105,7 @@ export const addTokenToMetamask = async (address: string, symbol: string): Promi
   try {
     const contract = new (window as any).ethereum.Contract(erc20Abi as any[], address);
     const decimals = await contract.methods.decimals().call();
+    console.log('in addTokenToMetamask: ', symbol, decimals);
     await (window as any).ethereum?.request({
       method: 'wallet_watchAsset',
       params: {

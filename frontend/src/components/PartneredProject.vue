@@ -117,6 +117,7 @@ export default Vue.extend({
     },
 
     async addTokenToMetamask() {
+      console.log('addTokenToMetamask');
       await addTokenToMetamask(this.partnerProject.tokenAddress, this.partnerProject.tokenSymbol);
     },
 

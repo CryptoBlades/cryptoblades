@@ -1583,6 +1583,12 @@ export default new Vuex.Store<IState>({
           { feeMultiplier: burnWeaponIds.length }
         );
 
+        const fee = new BigNumber((await BurningManager.methods.burnWeaponFee().call({ from: state.defaultAccount })));
+        const BurningManagerAddress = BurningManager.options.address;
+        const skillBurnCost = await CryptoBlades.methods.usdToSkill(fee.toString()).call(defaultCallOptions(state));
+        const skillBurnCostTotal = new BigNumber(skillBurnCost).multipliedBy(burnWeaponIds.length);
+        await SkillToken.methods.approve(BurningManagerAddress, skillBurnCostTotal.toString()).send(defaultCallOptions(state));
+
         await BurningManager.methods
           .burnWeapons(
             burnWeaponIds
@@ -2400,6 +2406,7 @@ export default new Vuex.Store<IState>({
     async configureMetaMask({ state, dispatch }) {
       const currentNetwork = await state.web3.eth.net.getId();
       if(currentNetwork === +getConfigValue('VUE_APP_NETWORK_ID')) return;
+      console.log('configureMetaMask: ', +getConfigValue('currencyDecimal'));
       dispatch('configureChainNet', {
         networkId: +getConfigValue('VUE_APP_NETWORK_ID'),
         chainId: getConfigValue('chainId'),

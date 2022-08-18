@@ -309,6 +309,7 @@ export default Vue.extend({
     },
 
     async connectMetamask() {
+      console.log('connetMetamask');
       const web3 = new Web3(Web3.givenProvider);
       this.setWeb3(web3);
       this.isConnecting = true;
