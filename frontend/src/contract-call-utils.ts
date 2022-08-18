@@ -54,9 +54,11 @@ export async function approveFeeWalletOnly<T extends Contract<unknown>>(
     .call(callOptsWithFrom);
 
   if (feeInSkill.lte(allowance)) {
+    console.log('here, ', allowance);
     return null;
   }
 
+  console.log('there ', feeInSkill.toString(), allowance);
   return await skillToken.methods
     .approve(feeContract.options.address, feeInSkill.toString())
     .send(approveOptsWithFrom);
@@ -94,6 +96,7 @@ export async function approveFeeFixed<T extends Contract<unknown>>(
         .getSkillNeededFromUserWallet(from, feeInSkill.toString(), allowInGameOnlyFunds)
         .call(callOptsWithFrom)
         .then((n: BigNumber.Value) => new BigNumber(n));
+      console.log('feeInSkill check in approveFeeFixed', feeInSkill);
     }
     catch(err) {
       const paidByRewardPool = feeInSkill.lte(skillRewardsAvailable);
@@ -103,8 +106,7 @@ export async function approveFeeFixed<T extends Contract<unknown>>(
       }
     }
   }
-
-  return await approveFeeWalletOnly(
+  const val = await approveFeeWalletOnly(
     feeContract,
     skillToken,
     from,
@@ -112,6 +114,9 @@ export async function approveFeeFixed<T extends Contract<unknown>>(
     approveOpts,
     feeInSkill
   );
+  console.log(val, ': ', feeInSkill.toString());
+
+  return val;
 }
 
 export async function approveFeeDynamic<T extends Contract<unknown>>(
@@ -139,8 +144,7 @@ export async function approveFeeDynamic<T extends Contract<unknown>>(
         fn
       )
   );
-
-  return await approveFeeFixed(
+  const val = await approveFeeFixed(
     cryptoBladesContract,
     feeContract,
     skillToken,
@@ -151,6 +155,20 @@ export async function approveFeeDynamic<T extends Contract<unknown>>(
     feeInSkill,
     { feeMultiplier, allowInGameOnlyFunds, allowSkillRewards }
   );
+
+  console.log(val);
+  return val;
+  // await approveFeeFixed(
+  //   cryptoBladesContract,
+  //   feeContract,
+  //   skillToken,
+  //   from,
+  //   skillRewardsAvailable,
+  //   callOpts,
+  //   approveOpts,
+  //   feeInSkill,
+  //   { feeMultiplier, allowInGameOnlyFunds, allowSkillRewards }
+  // );
 }
 
 export async function approveFeeWalletOrRewards<T extends Contract<unknown>>(

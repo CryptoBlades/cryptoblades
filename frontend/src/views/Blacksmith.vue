@@ -871,6 +871,7 @@ export default Vue.extend({
       this.spin = true;
       try {
         if(amount === 1){
+          console.log('amount === 1', this.mintSlippageApproved);
           await this.mintWeapon({
             useStakedSkillOnly: this.useStakedForForge,
             chosenElement: this.selectedElement || 100,
@@ -879,6 +880,7 @@ export default Vue.extend({
           });
         }
         else{
+          console.log('amount !== 1');
           await await this.mintWeaponN({
             num: amount,
             useStakedSkillOnly: this.useStakedForForge,

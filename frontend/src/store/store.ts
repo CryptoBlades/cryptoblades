@@ -46,6 +46,7 @@ type NftStakingRewardsAlias = Contract<INftStakingRewards> | null;
 export function getGasPrice() {
   const gasPrice: string = getConfigValue('gasPrice');
   if(gasPrice) {
+    console.log(Web3.utils.toWei(gasPrice, 'gwei'));
     return Web3.utils.toWei(gasPrice, 'gwei');
   } else return '';
 }
@@ -450,6 +451,7 @@ export default new Vuex.Store<IState>({
     },
 
     setSkillPriceInUsd(state, payload) {
+      console.log(payload);
       state.skillPriceInUsd = payload;
     },
 
@@ -462,6 +464,7 @@ export default new Vuex.Store<IState>({
     },
 
     updateSkillBalance(state: IState, { skillBalance }) {
+      console.log(skillBalance);
       state.skillBalance = skillBalance;
     },
 
@@ -488,6 +491,7 @@ export default new Vuex.Store<IState>({
     },
 
     updateInGameOnlyFunds(state, { inGameOnlyFunds }: Pick<IState, 'inGameOnlyFunds'>) {
+      console.log(inGameOnlyFunds);
       state.inGameOnlyFunds = inGameOnlyFunds;
     },
 
@@ -1429,7 +1433,7 @@ export default new Vuex.Store<IState>({
           cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
           { feeMultiplier: chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
         );
-
+        console.log('approvalFee gas price: ', getGasPrice());
         await CryptoBlades.methods.mintWeapon(chosenElement, eventId).send({ from: state.defaultAccount, gasPrice: getGasPrice(), });
       }
 
@@ -1785,6 +1789,11 @@ export default new Vuex.Store<IState>({
       const { NFTMarket } = state.contracts();
       if(!NFTMarket) return;
 
+      console.log(await NFTMarket.methods
+        .getFinalPrice(
+          nftContractAddr,
+          tokenId
+        ).call(defaultCallOptions(state)));
       // returns the listing's price in skill wei
       return await NFTMarket.methods
         .getFinalPrice(
