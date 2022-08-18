@@ -37,7 +37,7 @@
           <cb-button class="custom-cb-btn custom-forge-btn gtag-link-others" tagname="weapon_forge_multiple"
             :title="`${disableForge ? $t('blacksmith.coolingForge') : $t('blacksmith.forge')} x10 <br/>`"
             :isLoading="isLoading"
-            :subTitle="`(${forgeCost === '0' ? '0.0000' : forgeCost} SKILL)`" @clickEvent="$emit('onClickForge', 1)"
+            :subTitle="`(${forgeCost === '0' ? '0.0000' : (forgeCost*10).toFixed(4)} SKILL)`" @clickEvent="$emit('onClickForge', 1)"
             :isDisabled="disableX10Forge || disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
             :toolTip="(disableX10Forge) ? $t('blacksmith.disableDynamicMintingForge') : $t('blacksmith.forge10New')"
             :style="disableX10Forge ? 'opacity: 0.5' : ''"
