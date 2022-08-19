@@ -131,27 +131,27 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         IERC20(tokenAddress).safeTransfer(msg.sender, amount);
     }
 
+    function getSeed() internal pure returns (uint256 seed) {
+        seed = RandomUtil.combineSeeds(uint(SHIELD_SEED), uint(1));
+    }
+
     function hasSeed() public view returns (bool) {
         return SafeRandoms(links[LINK_SAFE_RANDOMS]).hasSingleSeedRequest(tx.origin, getSeed());
     }
 
     function generateSeed() public {
+        require(itemFlatPrices[ITEM_SHIELD] > 0);
+        payCurrency(msg.sender, itemFlatPrices[ITEM_SHIELD], CURRENCY_SKILL);
         SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(tx.origin, getSeed());
     }
 
-    function getSeed() internal pure returns (uint256 seed) {
-        seed = RandomUtil.combineSeeds(uint(SHIELD_SEED), uint(1));
-    }
-
     function purchaseShield() public {
-        require(itemFlatPrices[ITEM_SHIELD] > 0);
-        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(), true, true);
         uint256 shieldType = numberParameters[VAR_PURCHASE_SHIELD_TYPE];
         if(shieldType != 0) {
             require(numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] > 0);
             numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] -= 1;
         }
-        payCurrency(msg.sender, itemFlatPrices[ITEM_SHIELD], CURRENCY_SKILL);
+        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(), true, false);
         shields.mint(msg.sender, shieldType, seed);
     }
 

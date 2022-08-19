@@ -821,7 +821,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN',
+    ...mapActions(['reforgeWeapon', 'mintWeapons',
       'burnWeapon', 'massBurnWeapons',
       'reforgeWeaponWithDust', 'massBurnWeapons',
       'fetchMintWeaponPriceDecreasePerSecond', 'fetchWeaponMintIncreasePrice',
@@ -871,23 +871,13 @@ export default Vue.extend({
       this.showModal = true;
       this.spin = true;
       try {
-        if(amount === 1){
-          await this.mintWeapon({
-            useStakedSkillOnly: this.useStakedForForge,
-            chosenElement: this.selectedElement || 100,
-            eventId: this.selectedSpecialWeaponEventId,
-            mintSlippageApproved: this.mintSlippageApproved
-          });
-        }
-        else{
-          await await this.mintWeaponN({
-            num: amount,
-            useStakedSkillOnly: this.useStakedForForge,
-            chosenElement: this.selectedElement,
-            eventId: this.selectedSpecialWeaponEventId,
-            mintSlippageApproved: this.mintSlippageApproved
-          });
-        }
+        await this.mintWeapons({
+          quantity: amount,
+          useStakedSkillOnly: this.useStakedForForge,
+          chosenElement: this.selectedElement,
+          eventId: this.selectedSpecialWeaponEventId,
+          mintSlippageApproved: this.mintSlippageApproved
+        });
         this.newForged = this.ownedWeaponIds.splice(this.ownedWeaponIds.length - amount, this.ownedWeaponIds.length);
         (this.$refs['new-forge-weapon'] as BModal).show();
       } catch (e) {

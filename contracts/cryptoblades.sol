@@ -68,7 +68,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     uint256 public constant LINK_SAFE_RANDOMS = 1;
 
-
     // Mapped user variable(userVars[]) keys, one value per wallet
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
     uint256 public constant USERVAR_CLAIM_TIMESTAMP = 10002;
@@ -522,27 +521,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _updateCharacterMintFee();
     }
 
-    function mintWeaponN(uint32 num, uint8 chosenElement, uint256 eventId)
-        external
-        onlyNonContract
-        oncePerBlock(msg.sender)
-    {
+    function generateSeed(uint32 num, uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(getMintWeaponFee() * num * chosenElementFee));
-        _mintWeaponNLogic(num, chosenElement, eventId);
+        int128 mintWeaponFee =
+            getMintWeaponFee()
+                .mul(ABDKMath64x64.fromUInt(num))
+                .mul(ABDKMath64x64.fromUInt(chosenElementFee));
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee));
+        _updateWeaponMintFee(num);
+        SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(tx.origin, getSeed(num, chosenElement));
     }
 
-    function mintWeapon(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
-        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(getMintWeaponFee() * chosenElementFee));
-        _mintWeaponLogic(chosenElement, eventId);
-    }
-
-    function mintWeaponNUsingStakedSkill(uint32 num, uint8 chosenElement, uint256 eventId)
-        external
-        onlyNonContract
-        oncePerBlock(msg.sender)
-    {
+    function generateSeedUsingStakedSkill(uint32 num, uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
             getMintWeaponFee()
@@ -550,50 +540,29 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 .mul(ABDKMath64x64.fromUInt(num))
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
         _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
-
-        _mintWeaponNLogic(num, chosenElement, eventId);
+        _updateWeaponMintFee(num);
+        SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(tx.origin, getSeed(num, chosenElement));
     }
 
-    function mintWeaponUsingStakedSkill(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
-        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        int128 discountedMintWeaponFee =
-            getMintWeaponFee()
-                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
-                .mul(ABDKMath64x64.fromUInt(chosenElementFee));
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
-
-        _mintWeaponLogic(chosenElement, eventId);
-    }
-
-    function hasSeed(uint quantity) public view returns (bool) {
-        return SafeRandoms(links[LINK_SAFE_RANDOMS]).hasSingleSeedRequest(tx.origin, getSeed(quantity));
-    }
-
-    function generateSeed(uint quantity) public {
-        SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(tx.origin, getSeed(quantity));
-    }
-
-    function getSeed(uint quantity) internal pure returns (uint256 seed) {
-        seed = RandomUtil.combineSeeds(uint(WEAPON_SEED), quantity);
-    }
-
-    function _mintWeaponNLogic(uint32 num, uint8 chosenElement, uint256 eventId) internal {
+    function mintWeapon(uint32 num, uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
         require(num > 0 && num <= 10);
-        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(num), true, true);
         if(eventId > 0) {
             specialWeaponsManager.addShards(msg.sender, eventId, num);
         }
-        _updateWeaponMintFee(num);
+        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(num, chosenElement), true, false);
         weapons.mintN(msg.sender, num, seed, chosenElement);
     }
 
-    function _mintWeaponLogic(uint8 chosenElement, uint256 eventId) internal {
-        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(1), true, true);
-        if(eventId > 0) {
-            specialWeaponsManager.addShards(msg.sender, eventId, 1);
-        }
-        _updateWeaponMintFee(1);
-        weapons.mint(msg.sender, seed, chosenElement);
+    function hasSeed(uint quantity, uint element) public view returns (bool) {
+        return SafeRandoms(links[LINK_SAFE_RANDOMS]).hasSingleSeedRequest(tx.origin, getSeed(quantity, element));
+    }
+
+    function getSeed(uint quantity, uint element) internal pure returns (uint256 seed) {
+        uint[] memory seeds = new uint[](3);
+        seeds[0] = uint(WEAPON_SEED);
+        seeds[1] = quantity;
+        seeds[2] = element;
+        seed = RandomUtil.combineSeeds(seeds);
     }
 
     function _updateWeaponMintFee(uint256 num) internal {
