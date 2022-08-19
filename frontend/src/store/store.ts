@@ -1438,11 +1438,12 @@ export default new Vuex.Store<IState>({
       if (!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
       const chosenElementFee = chosenElement === 100 ? 1 : 2;
       const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
+      const WEAPON_SEED = await CryptoBlades.methods.WEAPON_SEED().call(defaultCallOptions(state));
 
-      if (!await CryptoBlades.methods.hasSeed(quantity, chosenElement).call(defaultCallOptions(state))) {
+      if (!await CryptoBlades.methods.hasSeed(WEAPON_SEED, quantity, chosenElement).call(defaultCallOptions(state))) {
         if (useStakedSkillOnly) {
           await CryptoBlades.methods
-            .generateSeedUsingStakedSkill(quantity, chosenElement)
+            .generateWeaponSeedUsingStakedSkill(quantity, chosenElement)
             .send({from: state.defaultAccount, gasPrice: getGasPrice(),});
         } else {
           await approveFee(
@@ -1455,7 +1456,7 @@ export default new Vuex.Store<IState>({
             cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
             {feeMultiplier: quantity * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true}
           );
-          await CryptoBlades.methods.generateSeed(quantity, chosenElement).send(defaultCallOptions(state));
+          await CryptoBlades.methods.generateWeaponSeed(quantity, chosenElement).send(defaultCallOptions(state));
         }
       }
 
