@@ -1412,6 +1412,13 @@
           "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
           "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
         },
+        "SKALE":{
+          "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and SFUEL for gas.",
+          "inst1": "1. Get you SFUEL for free by joining the <a target=_blank href=https://discord.gg/cryptoblades> CryptoBlades Discord Server </a>",
+          "inst2": "2. Go to #bot-commands and enter the command '/sfuelfaucet' followed by your address",
+          "inst3": "3. You can transfer your SKILL from BNB to SKALE with our <a target=_blank href=https://drawbridge.cryptoblades.io/> Drawbridge </a>",
+          "inst4": "4. That's it! If you have any questions, check our <a target=_blank href=https://cryptoblades.gitbook.io/wiki/> Wiki </a>"
+        },
         "hideWalletWarning": "You have hidden the wallet warning and it would now be displayed. If you are trying to play, please disable the option and follow the instructions, otherwise close and ignore.",
         "happyEarning": "Happy Earning!",
         "newCharacter": "New character",
