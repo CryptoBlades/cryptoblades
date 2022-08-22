@@ -371,16 +371,16 @@ export default Vue.extend({
   transform: scale(2);
 }
 
-/deep/ .weapon-grid {
+::v-deep .weapon-grid {
   justify-items: center;
   padding: 30px 0;
   margin: 10px 0;
 }
-/deep/ .character-list {
+::v-deep .character-list {
   padding: 40px 0;
   margin: 10px 0;
 }
-/deep/ .nft-list {
+::v-deep .nft-list {
   padding: 40px 0;
   margin: 10px 0;
 }

@@ -391,7 +391,7 @@ export default Vue.extend({
   width: 40%;
 }
 
-/deep/ .modal-footer-margin {
+::v-deep .modal-footer-margin {
   margin-bottom: 3rem;
 }
 

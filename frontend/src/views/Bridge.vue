@@ -300,7 +300,7 @@ import {Accessors} from 'vue/types/options';
 import {Contract, Contracts, IState} from '@/interfaces';
 import {NftIdType} from '@/components/smart/NftList.vue';
 import {Characters, Shields, Weapons} from '../../../build/abi-interfaces';
-import WeaponGrid from '../components/smart/WeaponGrid.vue';
+import WeaponGrid from '../components/smart/WeaponGridNew.vue';
 import CharacterList from '../components/smart/CharacterList.vue';
 import NftList from '../components/smart/NftList.vue';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
@@ -740,10 +740,10 @@ export default Vue.extend({
   text-align: center;
   font-size: 1em;
 }
-/deep/ .character-list{
+::v-deep .character-list{
   justify-content: center;
 }
-/deep/ .weapon-grid{
+::v-deep .weapon-grid{
   grid-template-columns: repeat(auto-fit,12em);
 	box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
 	transform: scale(1);
