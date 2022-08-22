@@ -592,7 +592,7 @@
 
 <script lang='ts'>
 import BN from 'bignumber.js';
-import WeaponGrid from '../components/smart/WeaponGridNew.vue';
+import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import RightMenu from '../components/RightMenu.vue';
 import BigButton from '../components/BigButton.vue';
 import { getWeaponArt } from '../weapon-arts-placeholder';
@@ -600,7 +600,7 @@ import { getWeaponRarity } from '../weapon-element';
 import { getCleanName } from '../rename-censor';
 import Vue from 'vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
-import WeaponIcon from '../components/WeaponIconNew.vue';
+import WeaponIcon from '../components/WeaponIcon.vue';
 import { BModal } from 'bootstrap-vue';
 import NftList from '@/components/smart/NftList.vue';
 import { Contracts, IState } from '@/interfaces';

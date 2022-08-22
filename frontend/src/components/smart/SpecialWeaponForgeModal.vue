@@ -240,7 +240,7 @@ import { secondsToDDHHMMSS } from '@/utils/date-time';
 import eventShard from '../../assets/special-weapons/eventShard.png';
 import generalShard from '../../assets/special-weapons/generalShard.png';
 import forgingGif from '../../assets/special-weapons/forging.gif';
-import WeaponIcon from '../WeaponIconNew.vue';
+import WeaponIcon from '../WeaponIcon.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
 
 type StoreMappedState = Pick<IState,'ownedWeaponIds' |'skillBalance' | 'skillRewards'>;
