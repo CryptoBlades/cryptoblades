@@ -99,7 +99,7 @@ import Events from '../../events';
 import {Accessors, PropType} from 'vue/types/options';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import {IState, IWeapon} from '../../interfaces';
-import WeaponIcon from '../WeaponIcon.vue';
+import WeaponIcon from '../WeaponIconNew.vue';
 import NftOptionsDropdown, {NftOption} from '../NftOptionsDropdown.vue';
 import {BModal} from 'bootstrap-vue';
 import {getCleanName, isProfaneIsh} from '../../rename-censor';
