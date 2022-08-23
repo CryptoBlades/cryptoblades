@@ -1189,6 +1189,7 @@ export default Vue.extend({
 }
 #weapon-bg{
   background-image: url('../assets/blacksmith/blacksmith-bg.png');
+  background-size: clamp(100%, 100%, 100%) auto;
 }
 
 .weapon-header{
@@ -1642,7 +1643,7 @@ export default Vue.extend({
 
 .blacksmith-page{
   background-image: url('../assets/blacksmith/cb-reforge-bg.jpg');
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
   background-repeat: no-repeat;
   background-position: top right;
   min-height: calc(100vh - 120px);

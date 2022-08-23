@@ -515,7 +515,7 @@ export default Vue.extend({
 
 .background-image {
   background-image: url('../assets/artwork-fantasy-art-ruins.png') ;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
   background-repeat: no-repeat;
   background-position: top right;
   min-height: calc(100vh - 120px);

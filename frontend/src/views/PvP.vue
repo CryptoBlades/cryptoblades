@@ -84,6 +84,7 @@ export default {
 .pvpWrapper {
   min-height: 100vh;
   background-image: url('../assets/pvpBackgroundImage.png');
+  background-size: clamp(100%, 100%, 100%) auto;
   padding: 1rem 4rem 4rem 4rem;
 
   .noCharacter {

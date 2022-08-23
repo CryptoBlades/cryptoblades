@@ -1099,7 +1099,7 @@ a.character-tab:focus {
   background: rgba(20, 20, 20, 1);
   background-image: url("./assets/blacksmith/blacksmith-bg.png");
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
 }
 
 .can-show-app{

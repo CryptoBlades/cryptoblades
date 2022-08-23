@@ -1629,7 +1629,7 @@ hr.divider {
 .drop-chance .raid-loot{
   background-image: url('../assets/chest.png');
   background-position: center;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
   height: 150px;
   width: 155px;
   margin-right: -100px;

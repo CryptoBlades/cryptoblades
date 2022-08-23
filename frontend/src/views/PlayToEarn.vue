@@ -104,7 +104,7 @@ h5{
 .main-font{
   background-image: url('../assets/combat-bg.png');
   background-position: 0 0;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
   height: 90vh;
 }
 

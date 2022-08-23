@@ -672,7 +672,7 @@ export default Vue.extend({
 }
 .body{
   background: linear-gradient(0deg, rgba(0, 14, 41, 0.68), rgba(0, 14, 41, 0.68)), url('../assets/combat-bg.png');
-  background-size:cover;
+  background-size: clamp(100%, 100%, 100%) auto;
   min-height: 100%;
 }
 h5{
@@ -695,7 +695,7 @@ h5{
   cursor: pointer;
   background-position: center;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
   background-image: url('../assets/enemy-bg-transparent.png');
   background-color: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, #242720 100%);
   border: 1px solid #a28d54;
