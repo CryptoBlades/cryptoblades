@@ -537,6 +537,8 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
 
 .app{
   width: auto;
+  display: flex;
+  flex-flow: column;
 }
 
 
@@ -1007,8 +1009,7 @@ a.character-tab:focus {
 
 .content {
   padding: 0 1em;
-  height: auto;
-  margin: auto;
+  flex: 1;
 }
 
 .fullscreen-warning {
