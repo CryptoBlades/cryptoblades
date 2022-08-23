@@ -99,20 +99,6 @@ a.router-link-active {
   padding-bottom: 0;
 }
 
-.dropdown-menu {
-  background: rgb(20, 20, 20);
-  background: linear-gradient(
-    45deg,
-    rgba(20, 20, 20, 1) 0%,
-    rgba(36, 39, 32, 1) 100%
-  );
-  border: none;
-}
-
-.dropdown-menu li a:hover {
-  background: transparent;
-}
-
 @media (max-width: 1024px) {
   .navbar-expand-sm {
     text-align: center;
