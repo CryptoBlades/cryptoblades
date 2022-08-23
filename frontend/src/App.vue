@@ -539,8 +539,12 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   width: auto;
   display: flex;
   flex-flow: column;
+  height: 100%;
 }
 
+.app .content.bg-dark{
+  flex: 1;
+}
 
 .set-normal{
   margin-left: auto;
@@ -553,8 +557,9 @@ hr.hr-divider {
   border-top: 1px solid #9e8a57;
   margin-bottom: 0.5rem !important;
 }
-body {
+html, body {
   margin: 0;
+  height: 100%;
 }
 
 .no-margin {
@@ -1002,14 +1007,13 @@ a.character-tab:focus {
   background: #404857;
 }
 </style>
-<style scoped>
+<style lang="scss" scoped>
 .app {
   margin: 0;
 }
 
 .content {
   padding: 0 1em;
-  flex: 1;
 }
 
 .fullscreen-warning {
