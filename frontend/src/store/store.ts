@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _ from 'lodash';
-import {bnMinimum, currentChainSupportsPvP, currentChainSupportsQuests, toBN} from '@/utils/common';
+import {bnMinimum, currentChainSupportsDrawbridge, currentChainSupportsPvP, currentChainSupportsQuests, toBN} from '@/utils/common';
 
 import {getConfigValue, setUpContracts} from '@/contracts';
 
@@ -97,6 +97,7 @@ export default new Vuex.Store<IState>({
     ownedDust: [],
     currentChainSupportsPvP: false,
     currentChainSupportsQuests: false,
+    currentChainSupportsDrawbridge: false,
     hasAdminAccess: false,
     hasMinterAccess: false,
 
@@ -276,6 +277,10 @@ export default new Vuex.Store<IState>({
 
     getCurrentChainSupportsQuests(state) {
       return state.currentChainSupportsQuests;
+    },
+
+    getCurrentChainSupportsDrawbridge(state) {
+      return state.currentChainSupportsDrawbridge;
     },
 
     getHasAdminAccess(state) {
@@ -552,6 +557,10 @@ export default new Vuex.Store<IState>({
 
     updateCurrentChainSupportsQuests(state: IState) {
       state.currentChainSupportsQuests = currentChainSupportsQuests();
+    },
+
+    updateCurrentChainSupportsDrawbridge(state: IState) {
+      state.currentChainSupportsDrawbridge = currentChainSupportsDrawbridge();
     },
 
     updateHasAdminAccess(state: IState, hasAdminAccess: boolean) {

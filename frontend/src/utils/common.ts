@@ -134,6 +134,12 @@ export const currentChainSupportsQuests = () => {
   return !!contractAddress;
 };
 
+export const currentChainSupportsDrawbridge = () => {
+  const currentChain = localStorage.getItem('currentChain') ?? '';
+  console.log('CurrentChain', currentChain);
+  return currentChain === 'SKALE' || currentChain === 'BSC';
+};
+
 export const getTimeRemaining = (end: string) => {
   const total = new Date(+end * 1000).getTime() - new Date().getTime();
   let seconds: string | number = Math.floor((total / 1000) % 60);

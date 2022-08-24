@@ -7,6 +7,7 @@
     "raid": "Raid",
     "pvp": "PvP",
     "bazaar": "Markt",
+    "drawbridge": "Zugbrücke",
     "stake": "Stake"
   },
   "ClaimRewardsBar": {
