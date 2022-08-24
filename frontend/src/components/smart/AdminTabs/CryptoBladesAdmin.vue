@@ -53,11 +53,12 @@ interface StoreMappedActions {
 
   getWeaponMintValue(): Promise<number>;
 
-  getFightXpGain(): Promise<number>;
-
-  setFightXpGain(payload: { xpGain: number }): Promise<void>;
-
   setHourlyIncome(payload: { hourlyIncome: number }): Promise<void>;
+}
+
+interface StoreMappedCombatActions {
+  getFightXpGain(): Promise<number>;
+  setFightXpGain(payload: { xpGain: number }): Promise<void>;
 }
 
 interface Data {
@@ -112,10 +113,13 @@ export default Vue.extend({
       'setWeaponMintValue',
       'getCharacterMintValue',
       'getWeaponMintValue',
-      'getFightXpGain',
-      'setFightXpGain',
       'setHourlyIncome',
     ]) as StoreMappedActions,
+    ...(mapActions('combat',
+      [
+        'getFightXpGain',
+        'setFightXpGain',
+      ]) as StoreMappedCombatActions),
 
     async setNewCharacterMintValue() {
       if (this.setCharacterMintValueButtonDisabled) return;

@@ -80,7 +80,6 @@
           <div class="weapon-icon-wrapper">
             <weapon-icon class="weapon-icon" :hasNftOptions="showNftOptions" :weapon="weapon" :favorite="isFavorite(weapon.id)" :id="'weapon-'+weapon.id"
             :selected="showNftOptions ? highlight === weapon.id : setBorderSelected(weapon.id)"/>
-            <weapon-popover :weapon="weapon" :placement="'right'"/>
           </div>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
             <slot name="above" :weapon="weapon"></slot>
@@ -194,7 +193,6 @@ import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '../../interfaces';
 import WeaponIcon from '../WeaponIconNew.vue';
-import WeaponPopover from '../WeaponPopover.vue';
 import { NftOption } from '../NftOptionsDropdown.vue';
 import { BModal } from 'bootstrap-vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
@@ -202,6 +200,7 @@ import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 import i18n from '@/i18n';
 import { copyNftUrl } from '@/utils/common';
 import {WeaponCosmetic} from '@/enums/WeaponCosmetic';
+import { ICombatState } from '@/store/combat';
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
 interface Skin {
   id: number;
@@ -210,6 +209,7 @@ interface Skin {
 }
 interface StoreMappedGetters {
   weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
+  getWeaponDurability(state: ICombatState): number;
 }
 interface StoreMappedActions {
   fetchWeapons(weaponIds: string[]): Promise<void>;
@@ -377,11 +377,10 @@ export default Vue.extend({
   components: {
     WeaponIcon,
     NftOptionsDropdown,
-    WeaponPopover
   },
   computed: {
     ...(mapState(['ownedWeaponIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['weaponsWithIds','getWeaponDurability',]) as Accessors<StoreMappedGetters>),
+    ...(mapGetters(['weaponsWithIds', 'getWeaponDurability']) as Accessors<StoreMappedGetters>),
     weaponIdsToDisplay(): string[] {
       if (this.showGivenWeaponIds) {
         return this.weaponIds;

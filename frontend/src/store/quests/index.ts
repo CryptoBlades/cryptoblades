@@ -513,7 +513,7 @@ const quests = {
       if(!SimpleQuests || !rootState.defaultAccount) return;
       console.log('skipQuest', characterID, pickedQuestID);
       await SimpleQuests.methods.skipQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
-      await dispatch('fetchCharacterStamina', characterID);
+      await dispatch('combat/fetchCharacterStamina', characterID);
     },
 
     async completeQuest(
@@ -537,7 +537,7 @@ const quests = {
         dispatch('updateJunkIds'),
         dispatch('updateKeyLootboxIds'),
         dispatch('fetchDustBalance'),
-        dispatch('fetchCharacterStamina', characterID),
+        dispatch('combat/fetchCharacterStamina', characterID),
         dispatch('fetchSoulBalance', characterID),
       ]);
       return questRewards;
@@ -575,7 +575,7 @@ const quests = {
 
       await SimpleQuests.methods.submitProgressAmount(characterID, amount).send(defaultCallOptions(rootState));
       await Promise.all([
-        dispatch('fetchCharacterStamina', characterID),
+        dispatch('combat/fetchCharacterStamina', characterID),
         dispatch('fetchSoulBalance', characterID),
         dispatch('fetchDustBalance'),
       ]);

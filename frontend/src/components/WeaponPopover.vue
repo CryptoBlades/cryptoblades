@@ -93,10 +93,10 @@ export default {
         'specialWeaponArts',
       ])),
     ...mapGetters([
-      'getWeaponDurability',
       'timeUntilWeaponHasMaxDurability',
       'getWeaponName',
       'getWeaponCosmetic',
+      'getWeaponDurability',
     ]),
   },
 };
