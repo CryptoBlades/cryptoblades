@@ -111,7 +111,7 @@
               :class="supportsDrawbridge ? '' : 'disabled-link'"
             >
             <!-- TODO: need drawbridge-icon -->
-              <img src="../assets/navbar-icons/bazaar-icon.png" alt="Drawbridge"/>
+              <img src="../assets/navbar-icons/bridge-icon.png" alt="Drawbridge"/>
               <span>{{ $t("viewLink.drawbridge") }} <hint
                 v-if="!supportsDrawbridge"
                 class="hint"
