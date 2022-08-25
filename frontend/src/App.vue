@@ -619,7 +619,7 @@ button,
 }
 
 .blank-slate {
-  width: calc(100vw - 36px);
+  width: 100vw;//calc(100vw - 36px);
   height: 95vh;
   display: flex;
   flex-direction: column;
