@@ -132,20 +132,26 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     }
 
     function getSeed(uint seedId, uint shieldType) internal pure returns (uint256 seed) {
-        seed = RandomUtil.combineSeeds(seedId, shieldType);
+        uint[] memory seeds = new uint[](3);
+        seeds[0] = seedId;
+        seeds[1] = uint(1);
+        seeds[2] = shieldType;
+        seed = RandomUtil.combineSeeds(seeds);
     }
 
     function hasSeed(uint seedId, uint shieldType) public view returns (bool) {
         return SafeRandoms(links[LINK_SAFE_RANDOMS]).hasSingleSeedRequest(tx.origin, getSeed(seedId, shieldType));
     }
 
-    function generateShieldSeed(uint shieldType) public {
+    function generateShieldSeed() public {
         require(itemFlatPrices[ITEM_SHIELD] > 0);
+        uint256 shieldType = numberParameters[VAR_PURCHASE_SHIELD_TYPE];
         payCurrency(msg.sender, itemFlatPrices[ITEM_SHIELD], CURRENCY_SKILL);
         SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(tx.origin, getSeed(uint(SHIELD_SEED), shieldType));
     }
 
-    function claimShield(uint shieldType) public {
+    function claimShield() public {
+        uint256 shieldType = numberParameters[VAR_PURCHASE_SHIELD_TYPE];
         if(shieldType != 0) {
             require(numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] > 0);
             numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] -= 1;
