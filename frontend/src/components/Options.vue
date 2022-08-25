@@ -411,6 +411,9 @@ export default Vue.extend({
     },
 
     DrawbridgeLink() {
+      if (!this.supportsDrawbridge) {
+        return;
+      }
       return process.env.VUE_APP_DRAWBRIDGE_URL || 'https://drawbridge.cryptoblades.io/';
     },
 

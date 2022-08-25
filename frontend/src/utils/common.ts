@@ -136,7 +136,6 @@ export const currentChainSupportsQuests = () => {
 
 export const currentChainSupportsDrawbridge = () => {
   const currentChain = localStorage.getItem('currentChain') ?? '';
-  console.log('CurrentChain', currentChain);
   return currentChain === 'SKALE' || currentChain === 'BSC';
 };
 
