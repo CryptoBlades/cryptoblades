@@ -1,7 +1,7 @@
 <template>
   <div class="main-nav-div">
     <b-navbar class="main-nav bg-dark border-bottom border-gray" toggleable="lg">
-      <div class="nav-logo col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1">
+      <div class="nav-logo col-xl-2 col-lg-3 col-md-4 col-sm-4 cols-1">
         <router-link :to="{ name: 'dashboard' }" exact class="game-ui-logo">
           <img
             src="../assets/cb-logo.png"
@@ -10,8 +10,8 @@
           />
         </router-link>
       </div>
-      <b-collapse id="navbar-toggle-collapse" class="none-mobile" is-nav>
-        <view-links class="view-links"></view-links>
+      <b-collapse id="navbar-toggle-collapse" class="d-sm-none none-mobile" is-nav>
+        <view-links class="view-links d-none d-xl-flex"></view-links>
       </b-collapse>
 
       <skill-balance-display class="ml-auto d-none d-sm-flex none-mobile"/>

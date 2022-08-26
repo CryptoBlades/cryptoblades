@@ -546,6 +546,13 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   flex: 1;
 }
 
+@media all and (max-width: 767.98px) {
+  div.content.bg-dark .row{
+    margin-left: -10px;
+    margin-right: -10px;
+  }
+}
+
 .set-normal{
   margin-left: auto;
   margin-right: auto;
@@ -619,7 +626,7 @@ button,
 }
 
 .blank-slate {
-  width: 100vw;//calc(100vw - 36px);
+  width: calc(100vw - 36px);
   height: 95vh;
   display: flex;
   flex-direction: column;
