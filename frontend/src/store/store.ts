@@ -1373,14 +1373,14 @@ export default new Vuex.Store<IState>({
 
     async hasWeaponsToClaim({ state }) {
       const {CryptoBlades} = state.contracts();
-      if (!CryptoBlades) return;
+      if (!CryptoBlades || !state.defaultAccount) return;
 
       return !!+await CryptoBlades.methods.claimWeaponData(state.defaultAccount).call(defaultCallOptions(state));
     },
 
     async quantityOfWeaponsToClaim({ state }) {
       const {CryptoBlades} = state.contracts();
-      if (!CryptoBlades) return;
+      if (!CryptoBlades || !state.defaultAccount) return;
 
       const claimWeaponData = +await CryptoBlades.methods.claimWeaponData(state.defaultAccount).call(defaultCallOptions(state));
       return Number(BigInt(claimWeaponData) >> BigInt(32));
