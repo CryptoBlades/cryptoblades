@@ -567,6 +567,7 @@ hr.hr-divider {
 html, body {
   margin: 0;
   height: 100%;
+  background-color: #000E29 !important;
 }
 
 .no-margin {
