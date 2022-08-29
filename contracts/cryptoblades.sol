@@ -558,6 +558,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function mintWeapon() external onlyNonContract oncePerBlock(msg.sender) {
         uint8 chosenElement = uint8((claimWeaponData[msg.sender]) & 0xFF);
         uint32 quantity = uint32((claimWeaponData[msg.sender] >> 32) & 0xFFFFFFFF);
+        require(quantity > 0);
         claimWeaponData[msg.sender] = 0;
         uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement), true, false);
         weapons.mintN(msg.sender, quantity, seed, chosenElement);

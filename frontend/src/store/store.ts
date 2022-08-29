@@ -1390,7 +1390,7 @@ export default new Vuex.Store<IState>({
       const {CryptoBlades} = state.contracts();
       if (!CryptoBlades || !state.defaultAccount) return;
 
-      await CryptoBlades.methods.mintWeapon().send({from: state.defaultAccount, gasPrice: getGasPrice(),});
+      await CryptoBlades.methods.mintWeapon().send({from: state.defaultAccount, gasPrice: getGasPrice()});
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
