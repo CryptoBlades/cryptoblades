@@ -229,6 +229,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     SpecialWeaponsManager public specialWeaponsManager;
     mapping(uint256 => address) public links;
+    mapping(address => uint256) public claimWeaponData;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -521,7 +522,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _updateCharacterMintFee();
     }
 
-    function generateWeaponSeed(uint32 quantity, uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
+    function generateWeaponSeed(uint32 quantity, uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
         require(quantity > 0 && quantity <= 10);
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 mintWeaponFee =
@@ -530,10 +531,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
         _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee));
         _updateWeaponMintFee(quantity);
+        if (eventId > 0) {
+            specialWeaponsManager.addShards(msg.sender, eventId, quantity);
+        }
         SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement));
+        claimWeaponData[msg.sender] = uint256(uint256(chosenElement) | (uint256(quantity) << 32));
     }
 
-    function generateWeaponSeedUsingStakedSkill(uint32 quantity, uint8 chosenElement) external onlyNonContract oncePerBlock(msg.sender) {
+    function generateWeaponSeedUsingStakedSkill(uint32 quantity, uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
         require(quantity > 0 && quantity <= 10);
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
@@ -543,20 +548,19 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
         _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
         _updateWeaponMintFee(quantity);
-        SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement));
-    }
-
-    function mintWeapon(uint32 quantity, uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
-        require(quantity > 0 && quantity <= 10);
-        if(eventId > 0) {
+        if (eventId > 0) {
             specialWeaponsManager.addShards(msg.sender, eventId, quantity);
         }
-        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement), true, false);
-        weapons.mintN(msg.sender, quantity, seed, chosenElement);
+        SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement));
+        claimWeaponData[msg.sender] = uint256(uint256(chosenElement) | (uint256(quantity) << 32));
     }
 
-    function hasSeed(uint seedId, uint quantity, uint element) public view returns (bool) {
-        return SafeRandoms(links[LINK_SAFE_RANDOMS]).hasSingleSeedRequest(msg.sender, getSeed(seedId, quantity, element));
+    function mintWeapon() external onlyNonContract oncePerBlock(msg.sender) {
+        uint8 chosenElement = uint8((claimWeaponData[msg.sender]) & 0xFF);
+        uint32 quantity = uint32((claimWeaponData[msg.sender] >> 32) & 0xFFFFFFFF);
+        claimWeaponData[msg.sender] = 0;
+        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement), true, false);
+        weapons.mintN(msg.sender, quantity, seed, chosenElement);
     }
 
     function getSeed(uint seedId, uint quantity, uint element) internal pure returns (uint256 seed) {
