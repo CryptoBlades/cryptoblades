@@ -18,7 +18,7 @@
             <span  class="main-font text-muted fs-5">{{$t('blacksmith.salvage')}}</span>
           </div>
         </div>
-        <div class="d-flex flex-column flex-md-row justify-contenct-center" v-if="activeTab === 'forge'" >
+        <div class="d-flex flex-column flex-md-row justify-content-center" v-if="activeTab === 'forge'" >
           <cb-button v-if="reforgeWeaponId !== null && ownWeapons.length > 0" class="custom-cb-btn custom-reforge-btn" tagname="weapon_special_forge"
             :title="$t('blacksmith.reforgeWithDust')"
             @clickEvent="$emit('displayDustReforge')"
