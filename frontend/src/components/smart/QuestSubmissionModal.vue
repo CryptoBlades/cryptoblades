@@ -14,9 +14,13 @@
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
                    showGivenWeaponIds @chooseweapon="addBurnToken"
                    :starsOptions="getRequiredStarsAndHigher" :canFavorite="false"
-                   :chosenStarsOption="getRequiredStars"/>
+                   :chosenStarsOption="getRequiredStars"
+                   :selectable="'multiple'"
+                   />
       <weapon-grid :weaponIds="tokensToBurn" showGivenWeaponIds @chooseweapon="removeBurnToken"
-                   :canFavorite="false" :chosenStarsOption="''"/>
+                   :canFavorite="false" :chosenStarsOption="''"
+                   :selectable="'multiple'"
+                   />
     </div>
     <div v-else-if="quest.requirementType === RequirementType.DUST
       || quest.requirementType === RequirementType.STAMINA

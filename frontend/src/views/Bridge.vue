@@ -44,10 +44,11 @@
 
         <div class="sell-grid" v-if="nftType === 'weapon'">
           <weapon-grid
-          v-model="selectedNftId"
-          :showReforgedWeaponsDefVal="false"
-          :showFavoriteWeaponsDefVal="false"
-          :canFavorite="false"
+            v-model="selectedNftId"
+            :showReforgedWeaponsDefVal="false"
+            :showFavoriteWeaponsDefVal="false"
+            :canFavorite="false"
+            :selectable="'single'"
           />
         </div>
 
@@ -131,6 +132,7 @@
             :showFavoriteWeaponsDefVal="false"
             :canFavorite="false"
             :newWeapon="true"
+            :selectable="'single'"
             />
           </div>
           <div v-if="currentTransferNFTType === 'character'">
@@ -175,15 +177,16 @@
         </div>
         <div v-if="nftType === 'weapon' && storedNftsIds.length !== 0">
           <weapon-grid
-          v-model="selectedNftId"
-          :showReforgedWeaponsDefVal="true"
-          :showFavoriteWeaponsDefVal="true"
-          :showReforgedToggle="true"
-          :showFavoriteToggle="true"
-          :canFavorite="false"
-          :weaponIds="storedNftsIds"
-          :showGivenWeaponIds="true"
-            />
+            v-model="selectedNftId"
+            :showReforgedWeaponsDefVal="true"
+            :showFavoriteWeaponsDefVal="true"
+            :showReforgedToggle="true"
+            :showFavoriteToggle="true"
+            :canFavorite="false"
+            :weaponIds="storedNftsIds"
+            :showGivenWeaponIds="true"
+            :selectable="'single'"
+          />
         </div>
         <div v-else-if="nftType === 'weapon'">
           <h3 class="text-center p-4">{{$t('bridge.noWeaponsStored')}}</h3>
