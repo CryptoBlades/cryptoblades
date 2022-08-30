@@ -28,10 +28,10 @@
         </div>
         <div class="p-2 d-flex flex-row">
           <div class="pr-4" v-if="!showNftOptions">
-            <button class="btn-clear-filter none-mobile" @click="$emit('selectAllWeapons')">{{selectWeaponsBtnLabel}}</button>
+            <button class="btn-action none-mobile" @click="$emit('selectAllWeapons')">{{selectWeaponsBtnLabel}}</button>
           </div>
           <div>
-            <button class="btn-clear-filter none-mobile"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
+            <button class="btn-action none-mobile"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
           </div>
         </div>
       </div>
@@ -863,7 +863,7 @@ export default Vue.extend({
   color: rgba(255, 255, 255, 0.541);
 }
 
-.btn-clear-filter{
+.btn-action{
   padding: 0.4em 2em;
   border-radius: 5px;
   background-color: rgba(255, 255, 255, 0);
