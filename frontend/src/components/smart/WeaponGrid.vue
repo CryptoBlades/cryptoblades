@@ -79,7 +79,7 @@
           <nft-options-dropdown v-if="showNftOptions" :nftType="'weapon'" :nftId="weapon.id" :options="options" :showTransfer="!isMarket" class="nft-options"/>
           <div class="weapon-icon-wrapper">
             <weapon-icon class="weapon-icon" :hasNftOptions="showNftOptions" :weapon="weapon" :favorite="isFavorite(weapon.id)" :id="'weapon-'+weapon.id"
-            :selected="showNftOptions ? highlight === weapon.id : setBorderSelected(weapon.id)"/>
+            :selected="onSelect(weapon.id)"/>
           </div>
           <div class="above-wrapper" v-if="$slots.above || $scopedSlots.above">
             <slot name="above" :weapon="weapon"></slot>
@@ -242,6 +242,9 @@ interface Data {
   selectWeaponsBtnLabel: string;
   mobileSelectAllBool: boolean;
 }
+
+type Selectable = 'none' | 'single' | 'multiple';
+
 const sorts = [
   { name: i18n.t('weaponGrid.sorts.any'), dir: '' },
   { name: i18n.t('weaponGrid.sorts.lowToHigh'), dir: 1 },
@@ -344,6 +347,10 @@ export default Vue.extend({
     },
     chosenStarsOption: {
       type: [String, Number],
+    },
+    selectable: {
+      type: String as PropType<Selectable>,
+      default: 'none',
     },
   },
   data() {
@@ -513,7 +520,7 @@ export default Vue.extend({
     isFavorite(weaponId: number): boolean {
       return this.favorites[weaponId];
     },
-    setBorderSelected(weaponId: number){
+    setBorderSelected(weaponId: number): boolean{
       let bols = false;
       if(this.ignore){
         this.ignore.forEach((x: any) => {
@@ -664,6 +671,19 @@ export default Vue.extend({
     beforeEnter(el: any){
       el.style.opacity = 0;
       el.style.transform = 'translateY(100px)';
+    },
+    onSelect(id: number): boolean {
+      switch (this.selectable) {
+      default: {
+        return false;
+      }
+      case 'single': {
+        return (this.highlight === id);
+      }
+      case 'multiple': {
+        return this.setBorderSelected(id);
+      }
+      }
     }
   },
   async mounted() {
