@@ -532,6 +532,11 @@ export default Vue.extend({
   color: gray;
 }
 
+.disabled-link > *{
+  opacity: 0.4;
+  filter: grayscale(100%);
+}
+
 .x-button {
   float: right;
   color: white;
