@@ -723,9 +723,6 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-::v-deep .select-wrapper-element:after{
-  top: 363px !important;
-}
 ::v-deep .select-wrapper-no:after{
   top: 363px !important;
   left: 40px !important;

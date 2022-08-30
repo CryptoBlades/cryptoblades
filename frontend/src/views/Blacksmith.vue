@@ -440,9 +440,18 @@
       <div style="margin-right: 0" class="row mt-2" v-if="showReforge && showReforgeDust === false">
         <div class="col-md-9 col-xl-9 col-lg-7">
           <div class="weapon-content pr-0 pl-0">
-            <weapon-grid :selectable="'multiple'" v-model="burnWeaponId" :ignore="burnWeaponIds" :noTitle="false" titleType="burn-weapon"
-                    :showGivenWeaponIds="true" :weaponIds="hideWeapons" @chooseweapon="addBurnWeapon" @selectAllWeapons="selectAllForBurn"
-                    @currentFilteredWeapons="passFilteredItems"/>
+            <weapon-grid
+              :selectable="'multiple'"
+              v-model="burnWeaponId"
+              :ignore="burnWeaponIds"
+              :noTitle="false"
+              titleType="burn-weapon"
+              :showGivenWeaponIds="true"
+              :weaponIds="hideWeapons"
+              @chooseweapon="addBurnWeapon"
+              @selectAllWeapons="selectAllForBurn"
+              @currentFilteredWeapons="passFilteredItems"
+            />
           </div>
         </div>
         <div class="col-md-3 col-xl-3 col-lg-5 dust-area none-mobile">
