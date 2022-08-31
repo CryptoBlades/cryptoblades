@@ -1375,14 +1375,18 @@ export default new Vuex.Store<IState>({
       const {CryptoBlades} = state.contracts();
       if (!CryptoBlades || !state.defaultAccount) return;
 
-      return !!+await CryptoBlades.methods.claimWeaponData(state.defaultAccount).call(defaultCallOptions(state));
+      const USERVAR_CLAIM_WEAPON_DATA = await CryptoBlades.methods.USERVAR_CLAIM_WEAPON_DATA().call(defaultCallOptions(state));
+
+      return !!+await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
     },
 
     async quantityOfWeaponsToClaim({ state }) {
       const {CryptoBlades} = state.contracts();
       if (!CryptoBlades || !state.defaultAccount) return;
 
-      const claimWeaponData = +await CryptoBlades.methods.claimWeaponData(state.defaultAccount).call(defaultCallOptions(state));
+      const USERVAR_CLAIM_WEAPON_DATA = await CryptoBlades.methods.USERVAR_CLAIM_WEAPON_DATA().call(defaultCallOptions(state));
+
+      const claimWeaponData = +await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
       return Number(BigInt(claimWeaponData) >> BigInt(32));
     },
 
@@ -1408,7 +1412,9 @@ export default new Vuex.Store<IState>({
       const chosenElementFee = chosenElement === 100 ? 1 : 2;
       const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
-      const hasWeaponsToClaim = !!+await CryptoBlades.methods.claimWeaponData(state.defaultAccount).call(defaultCallOptions(state));
+      const USERVAR_CLAIM_WEAPON_DATA = await CryptoBlades.methods.USERVAR_CLAIM_WEAPON_DATA().call(defaultCallOptions(state));
+
+      const hasWeaponsToClaim = !!+await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
 
       console.log('hasWeaponsToClaim', hasWeaponsToClaim);
       console.log('eventId', eventId);

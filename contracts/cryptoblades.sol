@@ -71,6 +71,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     // Mapped user variable(userVars[]) keys, one value per wallet
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
     uint256 public constant USERVAR_CLAIM_TIMESTAMP = 10002;
+    uint256 public constant USERVAR_CLAIM_WEAPON_DATA = 10003;
 
     Characters public characters;
     Weapons public weapons;
@@ -229,7 +230,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     SpecialWeaponsManager public specialWeaponsManager;
     mapping(uint256 => address) public links;
-    mapping(address => uint256) public claimWeaponData;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -535,7 +535,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             specialWeaponsManager.addShards(msg.sender, eventId, quantity);
         }
         SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement));
-        claimWeaponData[msg.sender] = uint256(uint256(chosenElement) | (uint256(quantity) << 32));
+        userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] = uint256(uint256(chosenElement) | (uint256(quantity) << 32));
     }
 
     function generateWeaponSeedUsingStakedSkill(uint32 quantity, uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
@@ -552,14 +552,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             specialWeaponsManager.addShards(msg.sender, eventId, quantity);
         }
         SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement));
-        claimWeaponData[msg.sender] = uint256(uint256(chosenElement) | (uint256(quantity) << 32));
+        userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] = uint256(uint256(chosenElement) | (uint256(quantity) << 32));
     }
 
     function mintWeapon() external onlyNonContract oncePerBlock(msg.sender) {
-        uint8 chosenElement = uint8((claimWeaponData[msg.sender]) & 0xFF);
-        uint32 quantity = uint32((claimWeaponData[msg.sender] >> 32) & 0xFFFFFFFF);
+        uint8 chosenElement = uint8((userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA]) & 0xFF);
+        uint32 quantity = uint32((userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] >> 32) & 0xFFFFFFFF);
         require(quantity > 0);
-        claimWeaponData[msg.sender] = 0;
+        userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] = 0;
         uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement), true, false);
         weapons.mintN(msg.sender, quantity, seed, chosenElement);
     }
