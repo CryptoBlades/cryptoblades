@@ -304,7 +304,7 @@
           <QuestRequirements :quest="questTemplate"/>
           <QuestRewards :quest="questTemplate"/>
           <QuestActions :quest="questTemplate" :questTemplateType="questTemplateType" :key="questTemplate.id" showSupply :deadline="timestamp"
-                        :questSupply="supply" :showActions="false"/>
+                        :questSupply="supply"/>
         </div>
       </div>
     </b-modal>
