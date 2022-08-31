@@ -54,6 +54,12 @@
       "image": "BUSD.png",
       "website": "https://binance.com"
     },
+    "0x31471E0791fCdbE82fbF4C44943255e923F1b794": {
+      "name": "Plant Vs Undead (PVU)",
+      "description": "PVU is a currency used in Plant vs Undead game.",
+      "image": "PVU.png",
+      "website": "https://plantvsundead.com/"
+    },
     "0xB63F5847d0E9F1107B590D063F0D584d485C8d23": {
       "name": "Cakemonster NFT",
       "description": "Cake Monster is a ultra-deflationary, automated dividend yield, and meme token. It offers a multitude of unique DeFi features aimed at building a flexible and multifaceted reward system for all participants without compromising the sustainability or security of the protocol ecosystem.",

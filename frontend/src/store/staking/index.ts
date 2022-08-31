@@ -365,7 +365,7 @@ const staking = {
       await Promise.all([
         dispatch('fetchSkillBalance'),
         dispatch('fetchStakeDetails', { stakeType }),
-        dispatch('fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardSkill'),
       ]);
     },
 

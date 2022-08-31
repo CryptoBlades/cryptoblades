@@ -105,6 +105,13 @@ interface RaidMappedActions {
 
 interface StoreMappedGetters {
   charactersWithIds(ids: (string | number)[]): Nft[];
+  getCharacterPower(characterId: number): Promise<string>;
+}
+
+interface StoreMappedCombatGetters {
+  getIsInCombat: boolean;
+  fightGasOffset: string;
+  fightBaseline: string;
 }
 
 interface StoreMappedActions {
@@ -125,13 +132,15 @@ export default Vue.extend({
       'charactersWithIds',
       'ownCharacters',
       'timeUntilCharacterHasMaxStamina',
-      'getIsInCombat',
       'getIsCharacterViewExpanded',
-      'fightGasOffset',
       'getCharacterIsInArena',
-      'fightBaseline',
       'getCharacterPower'
     ]),
+    ...(mapGetters('combat', [
+      'getIsInCombat',
+      'fightGasOffset',
+      'fightBaseline',
+    ]) as Accessors<StoreMappedCombatGetters>),
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },
