@@ -150,17 +150,21 @@ interface StoreMappedGetters {
 
 interface StoreMappedActions {
   initializeStore: () => void,
-  fetchCharacterStamina: (characterId: number) => void,
   pollAccountsAndNetwork: () => void,
   configureMetaMask: () => Promise<void>,
   fetchMintCharacterFee: () => Promise<string>,
   fetchUsdSkillValue: (payload: string | number) => Promise<string | number>,
 }
 
+interface StoreMappedCombatActions {
+  fetchCharacterStamina: (characterId: number) => Promise<void>,
+}
+
 interface StoreMappedMutations {
   setWeb3: (web3: Web3) => void,
   updateCurrentChainSupportsPvP: () => void,
   updateCurrentChainSupportsQuests: () => void,
+  updateCurrentChainSupportsDrawbridge: () => void,
 }
 
 interface Notification {
@@ -232,16 +236,20 @@ export default Vue.extend({
   methods: {
     ...mapActions([
       'initializeStore',
-      'fetchCharacterStamina',
       'pollAccountsAndNetwork',
       'configureMetaMask',
       'fetchMintCharacterFee',
       'fetchUsdSkillValue',
     ]) as StoreMappedActions,
+    ...mapActions('combat',
+      [
+        'fetchCharacterStamina'
+      ]) as StoreMappedCombatActions,
     ...mapMutations([
       'setWeb3',
       'updateCurrentChainSupportsPvP',
-      'updateCurrentChainSupportsQuests'
+      'updateCurrentChainSupportsQuests',
+      'updateCurrentChainSupportsDrawbridge',
     ])as StoreMappedMutations,
     async checkChainAndParams(){
       const currentChain = localStorage.getItem('currentChain') || 'BNB';
@@ -273,6 +281,7 @@ export default Vue.extend({
       }
       this.updateCurrentChainSupportsPvP();
       this.updateCurrentChainSupportsQuests();
+      this.updateCurrentChainSupportsDrawbridge();
     },
     async updateCharacterStamina(id: number) {
       if (id !== null) {

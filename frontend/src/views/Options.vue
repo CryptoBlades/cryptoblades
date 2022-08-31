@@ -267,6 +267,7 @@ export default Vue.extend({
       'setNetworkId',
       'updateCurrentChainSupportsPvP',
       'updateCurrentChainSupportsQuests',
+      'updateCurrentChainSupportsDrawbridge',
       'setWeb3',
     ]),
     ...mapMutations('treasury', [
@@ -346,6 +347,7 @@ export default Vue.extend({
       localStorage.setItem('currentChain', this.currentChain);
       this.updateCurrentChainSupportsPvP();
       this.updateCurrentChainSupportsQuests();
+      this.updateCurrentChainSupportsDrawbridge();
       Events.$emit('setting:currentChain', { value: this.currentChain });
       addChainToRouter(this.currentChain);
       if(!this.connectingWalletConnect) await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));

@@ -7,13 +7,13 @@
     <QuestRequirements v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
                        :progress="character.quest.progress" :index="characterId"/>
     <QuestRewards v-if="character.quest && character.quest.id !== 0" :quest="character.quest"/>
-    <QuestActions :character="character" :quest="character.quest" :key="character.quest.id"
+    <QuestActions :character="character" :quest="character.quest" :key="character.quest.id" showSupply
                   @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
   <div v-if="questTemplateType === QuestTemplateType.WALLET && quest" class="quest-row-wallet">
     <QuestRequirements :quest="quest" :progress="quest.progress"/>
     <QuestRewards v-if="quest && quest.id !== 0" :quest="quest"/>
-    <QuestActions :quest="quest" :key="quest.id"
+    <QuestActions :quest="quest" :key="quest.id" showSupply
                   @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
 </div>

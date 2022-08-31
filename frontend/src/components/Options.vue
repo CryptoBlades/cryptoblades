@@ -104,6 +104,20 @@
               <span>{{ $t("viewLink.bazaar") }}</span>
             </a>
 
+            <a
+              class="menu-icon"
+              :href="DrawbridgeLink()"
+              target="_blank"
+              :class="supportsDrawbridge ? '' : 'disabled-link'"
+            >
+              <img src="../assets/navbar-icons/drawbridge-icon.png" alt="Drawbridge"/>
+              <span>{{ $t("viewLink.drawbridge") }} <hint
+                v-if="!supportsDrawbridge"
+                class="hint"
+                :text="$t('viewLink.DrawbridgeNotSupportedTooltip')"
+              /></span>
+            </a>
+
             <router-link
               class="menu-icon"
               :to="{ name: 'select-stake-type' }"
@@ -348,6 +362,7 @@ export default Vue.extend({
     ...mapGetters([
       'getCurrentChainSupportsPvP',
       'getCurrentChainSupportsQuests',
+      'getCurrentChainSupportsDrawbridge',
       'getHasAdminAccess',
       'getHasMinterAccess',
     ]),
@@ -357,6 +372,9 @@ export default Vue.extend({
     },
     supportsQuests(): boolean {
       return this.getCurrentChainSupportsQuests;
+    },
+    supportsDrawbridge(): boolean {
+      return this.getCurrentChainSupportsDrawbridge;
     },
     hasAdminAccess(): boolean {
       return this.getHasAdminAccess || this.getHasMinterAccess;
@@ -390,6 +408,13 @@ export default Vue.extend({
 
     BazaarLink() {
       return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
+    },
+
+    DrawbridgeLink() {
+      if (!this.supportsDrawbridge) {
+        return;
+      }
+      return process.env.VUE_APP_DRAWBRIDGE_URL || 'https://drawbridge.cryptoblades.io/';
     },
 
     toggleGraphics() {
@@ -505,6 +530,11 @@ export default Vue.extend({
 .disabled-link {
   cursor: not-allowed;
   color: gray;
+}
+
+.disabled-link > *{
+  opacity: 0.4;
+  filter: grayscale(100%);
 }
 
 .x-button {

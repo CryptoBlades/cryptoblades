@@ -1,6 +1,5 @@
 import { ICharacter } from './Character';
 import { IWeapon } from './Weapon';
-import { ITarget } from './Target';
 import { Contracts } from './Contracts';
 import { Nft } from './Nft';
 import { IShield } from './Shield';
@@ -76,9 +75,6 @@ export interface IState {
   currentNetworkId: number | null;
   skillPriceInUsd: number;
 
-  fightGasOffset: string;
-  fightBaseline: string;
-
   skillBalance: string;
   skillRewards: string;
   maxRewardsClaimTax: string;
@@ -97,6 +93,7 @@ export interface IState {
   ownedDust: string[];
   currentChainSupportsPvP: boolean;
   currentChainSupportsQuests: boolean;
+  currentChainSupportsDrawbridge: boolean;
   hasAdminAccess: boolean;
   hasMinterAccess: boolean;
 
@@ -115,7 +112,6 @@ export interface IState {
   weaponRenames: Record<number, string>;
   weaponCosmetics: Record<number, string>;
   maxDurability: number;
-  targetsByCharacterIdAndWeaponId: Record<number, Record<number, ITarget>>;
 
   currentNftType: string | null;
   currentNftId: number | null;
@@ -124,7 +120,6 @@ export interface IState {
   waxBridgeRemainingWithdrawableBnbDuringPeriod: string;
   waxBridgeTimeUntilLimitExpires: number;
 
-  isInCombat: boolean;
   isCharacterViewExpanded: boolean;
 
   shields: Record<number, IShield>;

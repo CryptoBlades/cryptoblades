@@ -381,7 +381,16 @@ interface Data {
 
 export default Vue.extend({
   computed: {
-    ...mapState(['characters', 'ownedGarrisonCharacterIds', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance', 'skillRewards', 'xpRewards']),
+    ...mapState([
+      'characters',
+      'ownedGarrisonCharacterIds',
+      'maxStamina',
+      'currentCharacterId',
+      'defaultAccount',
+      'skillBalance',
+      'skillRewards',
+      'xpRewards'
+    ]),
     ...mapGetters([
       'contracts',
       'ownCharacters',
@@ -390,8 +399,8 @@ export default Vue.extend({
       'currentCharacterStamina',
       'getCharacterName',
       'getExchangeUrl',
+      'getCharacterIsInArena',
       'getCharacterPower',
-      'getCharacterIsInArena'
     ]),
 
     character(): any {

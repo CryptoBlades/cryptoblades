@@ -44,10 +44,11 @@
 
         <div class="sell-grid" v-if="nftType === 'weapon'">
           <weapon-grid
-          v-model="selectedNftId"
-          :showReforgedWeaponsDefVal="false"
-          :showFavoriteWeaponsDefVal="false"
-          :canFavorite="false"
+            v-model="selectedNftId"
+            :showReforgedWeaponsDefVal="false"
+            :showFavoriteWeaponsDefVal="false"
+            :canFavorite="false"
+            :selectable="'single'"
           />
         </div>
 
@@ -131,6 +132,7 @@
             :showFavoriteWeaponsDefVal="false"
             :canFavorite="false"
             :newWeapon="true"
+            :selectable="'single'"
             />
           </div>
           <div v-if="currentTransferNFTType === 'character'">
@@ -175,15 +177,16 @@
         </div>
         <div v-if="nftType === 'weapon' && storedNftsIds.length !== 0">
           <weapon-grid
-          v-model="selectedNftId"
-          :showReforgedWeaponsDefVal="true"
-          :showFavoriteWeaponsDefVal="true"
-          :showReforgedToggle="true"
-          :showFavoriteToggle="true"
-          :canFavorite="false"
-          :weaponIds="storedNftsIds"
-          :showGivenWeaponIds="true"
-            />
+            v-model="selectedNftId"
+            :showReforgedWeaponsDefVal="true"
+            :showFavoriteWeaponsDefVal="true"
+            :showReforgedToggle="true"
+            :showFavoriteToggle="true"
+            :canFavorite="false"
+            :weaponIds="storedNftsIds"
+            :showGivenWeaponIds="true"
+            :selectable="'single'"
+          />
         </div>
         <div v-else-if="nftType === 'weapon'">
           <h3 class="text-center p-4">{{$t('bridge.noWeaponsStored')}}</h3>
@@ -519,6 +522,10 @@ export default Vue.extend({
     }
   },
   async mounted(){
+    if(this.defaultAccount && this.contracts){
+      this.getBridgeFee();
+      this.getIncoming();
+    }
     await this.showStorage();
     this.refreshIntervall = window.setInterval(async () => await this.showStorage(), 5000);
   },
@@ -716,9 +723,6 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-::v-deep .select-wrapper-element:after{
-  top: 363px !important;
-}
 ::v-deep .select-wrapper-no:after{
   top: 363px !important;
   left: 40px !important;
@@ -736,10 +740,10 @@ export default Vue.extend({
   text-align: center;
   font-size: 1em;
 }
-/deep/ .character-list{
+::v-deep .character-list{
   justify-content: center;
 }
-/deep/ .weapon-grid{
+::v-deep .weapon-grid{
   grid-template-columns: repeat(auto-fit,12em);
 	box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
 	transform: scale(1);
