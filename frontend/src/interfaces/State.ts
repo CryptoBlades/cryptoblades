@@ -93,6 +93,7 @@ export interface IState {
   ownedDust: string[];
   currentChainSupportsPvP: boolean;
   currentChainSupportsQuests: boolean;
+  currentChainSupportsDrawbridge: boolean;
   hasAdminAccess: boolean;
   hasMinterAccess: boolean;
 

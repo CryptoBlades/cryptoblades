@@ -7,6 +7,7 @@
     "adventure": "Adventure",
     "raid": "Raid",
     "bazaar": "Bazaar",
+    "drawbridge": "Drawbridge",
     "arena" : "Arena",
     "stake": "Stake",
     "pvp": "PvP",
@@ -18,7 +19,8 @@
     "nftbridge": "NFT Bridge",
     "wiki": "Wiki",
     "nftDisplay": "NFT Display",
-    "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
+    "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality.",
+    "DrawbridgeNotSupportedTooltip": "Drawbridge is only available for SKALE and BSC chains."
   },
   "sideBar": {
     "fightingArena": "Fighting in the arena",

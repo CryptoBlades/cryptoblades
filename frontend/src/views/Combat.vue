@@ -187,7 +187,7 @@ import Events from '../events';
 import {fromWeiEther, toBN} from '../utils/common';
 import BigNumber from 'bignumber.js';
 import WeaponInventory from '../components/WeaponInvetory.vue';
-import WeaponGrid from '../components/smart/WeaponGridNew.vue';
+import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import ModalContainer from '../components/modals/ModalContainer.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
