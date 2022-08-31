@@ -348,7 +348,7 @@ export default Vue.extend({
 .dashboard-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: auto;
   z-index: 1;
   overflow:hidden;
 }

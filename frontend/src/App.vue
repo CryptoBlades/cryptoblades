@@ -561,6 +561,7 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   margin-right: auto;
   transition: 1s width;
   padding: 0px;
+  width: auto;
 }
 
 hr.hr-divider {
@@ -571,6 +572,7 @@ html, body {
   margin: 0;
   height: 100%;
   background-color: #000E29 !important;
+  //overflow: clip;
 }
 
 .no-margin {
@@ -630,7 +632,6 @@ button,
 }
 
 .blank-slate {
-  width: calc(100vw - 36px);
   height: 95vh;
   display: flex;
   flex-direction: column;

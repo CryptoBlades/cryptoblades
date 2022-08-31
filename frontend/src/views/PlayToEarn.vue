@@ -105,6 +105,7 @@ h5{
   background-image: url('../assets/combat-bg.png');
   background-position: 0 0;
   background-size: clamp(100%, 100%, 100%) auto;
+  background-repeat: no-repeat;
   height: 90vh;
 }
 
