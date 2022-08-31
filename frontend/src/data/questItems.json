@@ -14,7 +14,7 @@
     },
     "0xc6f252c2CdD4087e30608A35c022ce490B58179b": {
       "name": "CryptoBlades Character",
-      "description": "CryptoBlades Characters (CBC) are the titular heroes & utility NFTs of the longest standing sustainable play-to-earn game, CryptoBlades. These NFTs, along with the swords they wield, are the core component of earning in CB.",
+      "description": "CryptoBlades Characters on 61 lvl with maxed out soul power. CryptoBlades Characters (CBC) are the titular heroes & utility NFTs of the longest standing sustainable play-to-earn game, CryptoBlades. These NFTs, along with the swords they wield, are the core component of earning in CB.",
       "image": "character.png",
       "website": "https://www.cryptoblades.io/"
     },
@@ -53,6 +53,12 @@
       "description": "BUSD is a 1:1 USD-backed stablecoin.",
       "image": "BUSD.png",
       "website": "https://binance.com"
+    },
+    "0x31471E0791fCdbE82fbF4C44943255e923F1b794": {
+      "name": "Plant Vs Undead (PVU)",
+      "description": "PVU is a currency used in Plant vs Undead game.",
+      "image": "PVU.png",
+      "website": "https://plantvsundead.com/"
     },
     "0xB63F5847d0E9F1107B590D063F0D584d485C8d23": {
       "name": "Cakemonster NFT",

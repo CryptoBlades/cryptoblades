@@ -73,7 +73,7 @@
       </div>
 
       <!-- Wallet Quests -->
-      <span v-if="walletQuests.length" class="quests-title-2">Wallet Quests</span>
+      <span v-if="walletQuests && walletQuests.length" class="quests-title-2">Wallet Quests</span>
       <!-- TODO: This will come back when we add additional tiers to Wallet Quests -->
 <!--      <div class="form-control-wrapper">-->
 <!--        <select class="form-control" v-model="walletQuestTier" >-->
@@ -395,23 +395,37 @@ export default Vue.extend({
 
     async refreshQuestData() {
       try {
-        console.log('refreshing quest data');
         this.isLoading = true;
-        if(this.walletQuestTier !== undefined){
+        if (this.walletQuestTier !== undefined) {
           this.isLoadingWalletQuests = true;
-          this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
+          this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier + 30});
           this.isLoadingWalletQuests = false;
         }
-        this.usePromoQuests = await this.isUsingPromoQuests();
-        this.currentWeeklyCompletions = +await this.getWeeklyCompletions();
-        this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});
-        this.weeklyClaimed = await this.hasClaimedWeeklyReward();
-        await this.getNextWeekResetTime();
-        this.reputationLevelRequirements = await this.getReputationLevelRequirements();
-        this.characters = await Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {
-          character.quest = await this.getCharacterQuestData({characterId: character.id});
-          return character;
-        }));
+        const [
+          usePromoQuests,
+          currentWeeklyCompletions,
+          weeklyReward,
+          weeklyClaimed,
+          reputationLevelRequirements,
+          characters,
+        ] = await Promise.all([
+          this.isUsingPromoQuests(),
+          this.getWeeklyCompletions(),
+          this.getWeeklyReward({timestamp: Date.now()}),
+          this.hasClaimedWeeklyReward(),
+          this.getReputationLevelRequirements(),
+          Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {
+            character.quest = await this.getCharacterQuestData({characterId: character.id});
+            return character;
+          })),
+          this.getNextWeekResetTime(),
+        ]);
+        this.usePromoQuests = usePromoQuests;
+        this.currentWeeklyCompletions = +currentWeeklyCompletions;
+        this.weeklyReward = weeklyReward;
+        this.weeklyClaimed = weeklyClaimed;
+        this.reputationLevelRequirements = reputationLevelRequirements;
+        this.characters = characters;
       } finally {
         this.isLoading = false;
       }
@@ -481,7 +495,7 @@ export default Vue.extend({
   padding: 50px 0;
 }
 .top-button{
-  margin: 10px 0px !important;
+  margin: 10px 0 !important;
   height: 75px !important; /* :'( */
 }
 .quests-container-wrapper{

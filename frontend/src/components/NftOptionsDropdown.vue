@@ -130,11 +130,27 @@ export default Vue.extend({
 </script>
 
 <style>
+.dropdown-menu {
+  background: rgb(0,14,41);
+  background: linear-gradient(
+    45deg,
+    rgb(0,14,41) 0%,
+    rgb(1, 20, 57) 100%
+  );
+  border: 1px solid rgba(245, 245, 245, 0.116);
+}
+
+.dropdown-menu li a:hover {
+  background: transparent;
+}
+
 .options-dropdown .btn {
   background: transparent;
-  border: 0 !important;
   border-radius: 16px !important;
   z-index: 1;
+}
+.btn{
+  border: 0 !important;
 }
 
 .dropdown-item.disabled {

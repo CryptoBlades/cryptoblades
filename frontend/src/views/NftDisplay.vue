@@ -1,108 +1,96 @@
 <template>
-  <div>
-    <div class="row row-cols-2 nft-display">
-      <div class="col-12 col-md-4 search-section">
-        <div class="row search-row-section">
-          <div class="col">
-            <h1>Search for NFT</h1>
-          </div>
-          <div class="col">
-            <div class="row search-input-section">
-              <input
-                class="form-control search search-input-id"
-                type="text"
-                v-model="nftId"
-                placeholder="NFT ID"
-                @keyup.enter="searchForNft"
-              />
-              <select class="form-control search-input-type" v-model="nftType">
-                <option v-for="x in allNftTypes" :value="x" :key="x">
-                  {{ capitalizeText(x) || "Weapon" }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="col">
-            <big-button
-              class="encounter-button btn-styled search-button"
-              :mainText="`Search`"
-              @click="searchForNft"
-            />
-          </div>
+  <div class="nft-display">
+    <div class="search-section">
+      <h1 class="text-center">Search for NFTs</h1>
+        <div class="search-input-section">
+          <input
+            class="form-control search search-input-id"
+            type="text"
+            v-model="nftId"
+            placeholder="NFT ID"
+            @keyup.enter="searchForNft"
+          />
+          <select class="form-control search-input-type" v-model="nftType">
+            <option v-for="x in allNftTypes" :value="x" :key="x">
+              {{ capitalizeText(x) || "Weapon" }}
+            </option>
+          </select>
         </div>
+        <cb-button
+          class="search-button"
+          tagname="weapon_special_forge"
+          :title="`Search`"
+          @clickEvent="searchForNft"
+        />
       </div>
 
-      <div class="col-12 col-md-8 search-result-section">
-        <div class="row result-row-section">
-          <weapon-grid
-            v-if="this.weapon"
-            class="weapon-grid"
-            :weaponIds="[this.weapon.id]"
-            :showGivenWeaponIds="true"
-            :showReforgedToggle="false"
-            :showReforgedWeaponsDefVal="false"
-            :showFavoriteToggle="false"
-            :showFavoriteWeaponsDefVal="false"
-            :canFavorite="false"
-            :newWeapon="true"
-          >
-          </weapon-grid>
+    <div class="search-result-section">
+      <div class="result-row-section">
+        <weapon-grid
+          v-if="this.weapon"
+          class="weapon-grid"
+          :weaponIds="[this.weapon.id]"
+          :showGivenWeaponIds="true"
+          :showReforgedToggle="false"
+          :showReforgedWeaponsDefVal="false"
+          :showFavoriteToggle="false"
+          :showFavoriteWeaponsDefVal="false"
+          :canFavorite="false"
+          :newWeapon="true"
+          :noPagination="true"
+        >
+        </weapon-grid>
 
-          <character-list
-            v-else-if="character"
-            class="character-list"
-            :characterIds="[this.character.id]"
-            :showGivenCharacterIds="true"
-            :nftDisplay="true"
-          >
-          </character-list>
+        <character-list
+          v-else-if="character"
+          class="character-list"
+          :characterIds="[this.character.id]"
+          :showGivenCharacterIds="true"
+          :nftDisplay="true"
+        >
+        </character-list>
 
-          <nft-list
-            v-else-if="shield"
-            class="nft-list"
-            :nftIdTypes="[{ id: shield.id, type: shield.type }]"
-            :showGivenNftIdTypes="true"
-            :isReward="true"
-          >
-          </nft-list>
+        <nft-list
+          v-else-if="shield"
+          class="nft-list"
+          :nftIdTypes="[{ id: shield.id, type: shield.type }]"
+          :showGivenNftIdTypes="true"
+          :isReward="true"
+        >
+        </nft-list>
 
-          <h3 v-else class="info-text">
-            NFT search result will be displayed here
-          </h3>
+        <h3 v-else class="info-text">
+          Search result will be displayed here
+        </h3>
 
-          <div class="btn-section">
-          <div
-            v-if="nftPrice && nftPrice !== '0' && (shield||weapon||character)"
-            class="purchase-section"
-          >
-              <span
-                v-tooltip.top="{
-                  content: maxPrecisionSkill(nftPrice),
-                  trigger: isMobile() ? 'click' : 'hover',
-                }"
-                @mouseover="hover = !isMobile() || true"
-                @mouseleave="hover = !isMobile()"
-              >
-                <strong>Price</strong>:
-                <CurrencyConverter :skill="nftPriceInSkill()" />
-              </span>
-              <a :href="marketLink" target="_blank" rel="noopener noreferrer">
-                <big-button
-                class="encounter-button btn-styled purchase-button"
-                variant="primary"
-                :mainText="`Buy on Bazaar!`"
-                >
-              </big-button>
-            </a>
-            <big-button
-              v-if="ownerAddress"
-              class="encounter-button btn-styled copy-url-button"
-              :mainText="`Copy URL`"
-              @click="copyNftUrl"
-            />
-          </div>
-          </div>
+        <div class="btn-section">
+        <div
+          v-if="nftPrice && nftPrice !== '0' && (shield||weapon||character)"
+          class="purchase-section"
+        >
+            <span
+              v-tooltip.top="{
+                content: maxPrecisionSkill(nftPrice),
+                trigger: isMobile() ? 'click' : 'hover',
+              }"
+              @mouseover="hover = !isMobile() || true"
+              @mouseleave="hover = !isMobile()"
+            >
+              <strong>Price</strong>:
+              <CurrencyConverter :skill="nftPriceInSkill()" />
+            </span>
+            <a :href="marketLink" target="_blank" rel="noopener noreferrer">
+              <cb-button
+                class="purchase-button"
+                :title="`Buy on Bazaar!`"
+              />
+          </a>
+          <cb-button
+            class="copy-url-button"
+            :title="`Copy URL`"
+            @clickEvent="copyNftUrl"
+          />
+        </div>
         </div>
       </div>
     </div>
@@ -114,7 +102,6 @@ import { mapActions, mapGetters } from 'vuex';
 import { isNftType, Nft, allNftTypes } from '../interfaces/Nft';
 import { Accessors } from 'vue/types/options';
 import { Contract, Contracts } from '@/interfaces';
-import BigButton from '../components/BigButton.vue';
 import { NftIdType } from '@/components/smart/NftList.vue';
 import { Characters, Shields, Weapons } from '../../../build/abi-interfaces';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
@@ -335,7 +322,6 @@ export default Vue.extend({
   },
 
   components: {
-    BigButton,
     WeaponGrid,
     CharacterList,
     NftList,
@@ -364,28 +350,36 @@ export default Vue.extend({
   font-size: 32px;
 }
 .character-list {
-  transform: scale(1.5);
+  transform: scale(1.25);
 }
 .nft-list,
 .weapon-grid {
-  transform: scale(2);
+  transform: scale(1.25);
 }
 
-/deep/ .weapon-grid {
+::v-deep .character-list-container {
+  border: none;
+}
+
+::v-deep .weapon-grid {
   justify-items: center;
   padding: 30px 0;
   margin: 10px 0;
 }
-/deep/ .character-list {
+::v-deep .character-list {
   padding: 40px 0;
   margin: 10px 0;
 }
-/deep/ .nft-list {
+::v-deep .nft-list {
   padding: 40px 0;
   margin: 10px 0;
 }
-.search-button {
-  width: 22em;
+.search-button,
+.purchase-button,
+.copy-url-button {
+  width: 220px;
+  margin: 0 auto !important;
+  margin-top: 20px !important;
 }
 .purchase-section * {
   width: 100%;
@@ -401,10 +395,6 @@ export default Vue.extend({
   margin-top: 30px;
 }
 
-.copy-url-button{
-  margin-top: 10px;
-}
-
 .btn-section{
   margin-top:20px;
   display: flex;
@@ -412,7 +402,7 @@ export default Vue.extend({
 }
 
 .nft-display {
-  height: auto;
+  padding-bottom: 100px;
 }
 
 .search-result-section {
@@ -420,11 +410,19 @@ export default Vue.extend({
 }
 
 .search-section {
-  border-right: 1px solid #9e8a57;
+  display:flex;
+  flex-direction: column;
+}
+.search-section > h1 {
+  font-family: "Trajan", serif;
+  font-size: 35px;
+  font-weight: 400;
+  color: #EDCD90;
+  margin-bottom: 20px;
 }
 
-.result-row-section,
-.search-row-section {
+.result-row-section{
+  display: flex;
   flex-direction: column;
   align-content: center;
 }
@@ -439,7 +437,12 @@ export default Vue.extend({
 
 .search-input-section {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.search-input-section > * {
+  margin: 10px;
 }
 
 .m-top-negative-5 {
