@@ -543,6 +543,7 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   display: flex;
   flex-flow: column;
   height: 100%;
+  overflow: auto;
 }
 
 .app .content.bg-dark{
@@ -572,7 +573,7 @@ html, body {
   margin: 0;
   height: 100%;
   background-color: #000E29 !important;
-  //overflow: clip;
+  overflow: hidden;
 }
 
 .no-margin {

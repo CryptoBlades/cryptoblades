@@ -1662,7 +1662,7 @@ export default Vue.extend({
   background-size: clamp(100%, 100%, 100%) auto;
   background-repeat: no-repeat;
   background-position: top right;
-  min-height: calc(100vh - 120px);
+  //min-height: calc(100vh - 120px);
   height: 100%;
   z-index: 0;
 }
@@ -2894,8 +2894,10 @@ img.elements-modal:hover {
 }
 }
 .blacksmith-content{
+   overflow: auto;
+   position: relative;
+
    div.menu-nav{
-    height: 60px;
     padding-left: 50px;
     padding-right: 50px;
     padding-top: 10px;
