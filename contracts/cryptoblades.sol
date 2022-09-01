@@ -524,6 +524,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function generateWeaponSeed(uint32 quantity, uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
         require(quantity > 0 && quantity <= 10);
+        require(userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] == 0);
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 mintWeaponFee =
             getMintWeaponFee()
@@ -540,6 +541,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function generateWeaponSeedUsingStakedSkill(uint32 quantity, uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
         require(quantity > 0 && quantity <= 10);
+        require(userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] == 0);
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
             getMintWeaponFee()
