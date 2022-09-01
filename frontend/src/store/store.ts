@@ -16,6 +16,7 @@ import {burningManager as featureFlagBurningManager} from '@/feature-flags';
 import {ERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from '@/stake-types';
 import {Nft} from '@/interfaces/Nft';
+import {Element} from '@/enums/Element';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';
@@ -1379,32 +1380,30 @@ export default new Vuex.Store<IState>({
       ]);
     },
 
-    async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
-    { num: any, useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
-      const { CryptoBlades, SkillToken, Weapons } = state.contracts();
-      if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
-      const chosenElementFee = chosenElement === 100 ? 1 : 2;
-      const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
+    async hasWeaponsToClaim({ state }) {
+      const {CryptoBlades} = state.contracts();
+      if (!CryptoBlades || !state.defaultAccount) return;
 
-      if(useStakedSkillOnly) {
-        await CryptoBlades.methods
-          .mintWeaponNUsingStakedSkill(num, chosenElement, eventId)
-          .send({ from: state.defaultAccount, gas: '5000000', gasPrice: getGasPrice(), });
-      }
-      else {
-        await approveFee(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
-          { feeMultiplier: num * 4 * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
-        );
+      const USERVAR_CLAIM_WEAPON_DATA = await CryptoBlades.methods.USERVAR_CLAIM_WEAPON_DATA().call(defaultCallOptions(state));
 
-        await CryptoBlades.methods.mintWeaponN(num, chosenElement, eventId).send({ from: state.defaultAccount, gas: '5000000', gasPrice: getGasPrice(), });
-      }
+      return !!+await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
+    },
+
+    async quantityOfWeaponsToClaim({ state }) {
+      const {CryptoBlades} = state.contracts();
+      if (!CryptoBlades || !state.defaultAccount) return;
+
+      const USERVAR_CLAIM_WEAPON_DATA = await CryptoBlades.methods.USERVAR_CLAIM_WEAPON_DATA().call(defaultCallOptions(state));
+
+      const claimWeaponData = +await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
+      return Number(BigInt(claimWeaponData) >> BigInt(32));
+    },
+
+    async claimWeapons({ state, dispatch }) {
+      const {CryptoBlades} = state.contracts();
+      if (!CryptoBlades || !state.defaultAccount) return;
+
+      await CryptoBlades.methods.mintWeapon().send({from: state.defaultAccount, gasPrice: getGasPrice()});
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
@@ -1415,32 +1414,41 @@ export default new Vuex.Store<IState>({
       ]);
     },
 
-    async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
-    { useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
-      const { CryptoBlades, SkillToken, Weapons } = state.contracts();
-      if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
+    async mintWeapons({state, dispatch}, {quantity = 1, useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved}:
+    { quantity: any, useStakedSkillOnly?: boolean, chosenElement: Element, eventId: any, mintSlippageApproved: boolean }) {
+      const {CryptoBlades, SkillToken} = state.contracts();
+      if (!CryptoBlades || !SkillToken || !state.defaultAccount) return;
       const chosenElementFee = chosenElement === 100 ? 1 : 2;
       const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
-      if(useStakedSkillOnly) {
-        await CryptoBlades.methods
-          .mintWeaponUsingStakedSkill(chosenElement, eventId)
-          .send({ from: state.defaultAccount, gasPrice: getGasPrice(), });
-      }
-      else {
-        await approveFee(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
-          { feeMultiplier: chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
-        );
+      const USERVAR_CLAIM_WEAPON_DATA = await CryptoBlades.methods.USERVAR_CLAIM_WEAPON_DATA().call(defaultCallOptions(state));
 
-        await CryptoBlades.methods.mintWeapon(chosenElement, eventId).send({ from: state.defaultAccount, gasPrice: getGasPrice(), });
+      const hasWeaponsToClaim = !!+await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
+
+      console.log('hasWeaponsToClaim', hasWeaponsToClaim);
+      console.log('eventId', eventId);
+
+      if (!hasWeaponsToClaim) {
+        if (useStakedSkillOnly) {
+          await CryptoBlades.methods
+            .generateWeaponSeedUsingStakedSkill(quantity, chosenElement, eventId)
+            .send({from: state.defaultAccount, gasPrice: getGasPrice(),});
+        } else {
+          await approveFee(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            state.skillRewards,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
+            {feeMultiplier: quantity * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true}
+          );
+          await CryptoBlades.methods.generateWeaponSeed(quantity, chosenElement, eventId).send(defaultCallOptions(state));
+        }
       }
+
+      await CryptoBlades.methods.mintWeapon().send({from: state.defaultAccount, gasPrice: getGasPrice(),});
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
