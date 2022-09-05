@@ -8,7 +8,8 @@
           </p>
           <span class="text-light title-text">{{$t("EarningsCalculator.earningsCalculator")}}</span>
 
-          <b-modal hide-footer ref="earnings-calc-modal" size="xl" :title="$t('EarningsCalculator.earningsCalculator')">
+          <b-modal hide-footer hide-header ref="earnings-calc-modal" size="xl">
+            <h4 class="modal-title">{{$t("EarningsCalculator.earningsCalculator")}}</h4>
             <div class="calculator">
               <div class="calculator-character">
                 <span class="calculator-subheader">{{$t('character')}}</span>
@@ -22,6 +23,11 @@
                   <input class="stat-slider" type="range" min="1" max="255" v-model="levelSliderValue" />
                   <b-form-input class="stat-input" type="number" v-model="levelSliderValue" :min="1" :max="255" />
                 </div>
+                <span>{{$t('Character.souls')}}</span>
+                <div class="slider-input-div">
+                  <input class="stat-slider" type="range" :min="0" :max="maxSoulSliderValue" v-model="soulSliderValue" />
+                  <b-form-input class="stat-input" type="number" v-model="soulSliderValue" :min="0" :max="maxSoulSliderValue" />
+                </div>
                 <span>{{$t('stamina')}}</span>
                 <select class="form-control wep-trait-form" v-model="staminaSelectValue">
                   <option v-for="x in [40,80,120,160,200]" :value="x" :key="x">{{ x }}</option>
@@ -34,18 +40,23 @@
                     <span class="calculator-subheader">{{$t('EarningsCalculator.currentPrices')}} (USD)</span>
                     <div class="prices-div">
                       <div class="token-price-div">
-                        {{gasToken}}: ${{currentTokenPrice}}
+                        {{gasToken}}:
+                        <span v-if="!isLoading">${{currentTokenPrice}}</span>
+                        <span v-else><i class="fas fa-spinner fa-spin ml-2"></i></span>
                       </div>
                       <div class="token-price-div">
-                      SKILL: ${{skillPrice }}
+                        SKILL:
+                        <span v-if="!isLoading">${{skillPrice}}</span>
+                        <span v-else><i class="fas fa-spinner fa-spin ml-2"></i></span>
                       </div>
                     </div>
                   </div>
                   <div class="coin-price-inputs">
-                    <span class="calculator-subheader">Current Best Multiplier</span>
+                    <span class="calculator-subheader">{{$t('EarningsCalculator.currentBestMultiplier')}}</span>
                     <div class="prices-div">
                       <div class="token-price-div">
-                        x{{currentMultiplier}}
+                        <span v-if="!isLoading">x{{currentMultiplier}}</span>
+                        <span v-else><i class="fas fa-spinner fa-spin ml-2"></i></span>
                       </div>
                     </div>
                   </div>
@@ -73,7 +84,6 @@
                     </b-row>
                   </div>
                 </div>
-                <span class="calculator-subheader ml-5 mr-5">The values are based on an hourly allowance that can run out.</span>
                 <div class="button-div">
                   <b-button class="btn btn-primary" @click="onReset">
                       Reset
@@ -83,7 +93,7 @@
                       Calculate
                   </b-button>
                   <b-icon-question-circle class="centered-icon" scale="1.5"
-                    v-tooltip.bottom="`Earnings are based on skill income from last hour, shown earnings are valid as long as the supply lasts.`"/>
+                    v-tooltip.bottom="$t('EarningsCalculator.earningsHint')"/>
                 </div>
               </div>
 
@@ -134,6 +144,10 @@
                     :min="getMinRoll(starsValue)" :max="getMaxRoll(starsValue)" />
                 </div>
               </div>
+            </div>
+            <div class="footer-close" @click="$refs['earnings-calc-modal'].hide()">
+              <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+              <p class="close-icon"></p>
             </div>
           </b-modal>
         </div>
@@ -186,6 +200,7 @@ export default Vue.extend({
     ...mapGetters([
       'currentCharacter',
       'currentWeapon',
+      'getCharacterPower'
     ]),
     ...(mapGetters('combat', [
       'fightGasOffset',
@@ -216,13 +231,18 @@ export default Vue.extend({
         return this.bnbPrice;
       }
     },
+
+    maxSoulSliderValue(): number {
+      return CharacterPower(this.levelSliderValue - 1) * 3;
+    }
   },
 
   data() {
     return {
       characterElementValue: '',
       levelSliderValue: 1,
-      staminaSelectValue: 40,
+      soulSliderValue: 0,
+      staminaSelectValue: 200,
       starsValue: 1,
       wepElementValue: '',
       wepFirstStatElementValue: '',
@@ -243,7 +263,8 @@ export default Vue.extend({
       calculationResults: [] as number[][],
       gasToken: '',
       fightFeePercentage: 0,
-      currentMultiplier: 1
+      currentMultiplier: 1,
+      isLoading: false
     };
   },
 
@@ -251,9 +272,10 @@ export default Vue.extend({
     ...(mapActions('combat', ['fetchExpectedPayoutForMonsterPower', 'getCombatTokenChargePercent',]) as StoreMappedCombatActions),
     ...(mapActions('treasury', ['getCurrentBestMultiplier']) as StoreMappedTreasuryActions),
     async onShowEarningsCalculator() {
-      if(this.currentCharacter !== null) {
+      if(this.currentCharacter !== null && this.currentCharacter !== undefined) {
         this.characterElementValue = CharacterTrait[this.currentCharacter.trait];
         this.levelSliderValue = this.currentCharacter.level + 1;
+        this.soulSliderValue = this.getCharacterPower(this.currentCharacter.id) - CharacterPower(this.currentCharacter.level);
       }
 
       if(this.currentWeapon !== null) {
@@ -268,16 +290,20 @@ export default Vue.extend({
         this.wepBonusPowerSliderValue = this.currentWeapon.bonusPower;
       }
 
-      await this.fetchPrices();
-      this.fightFeePercentage = +await this.getCombatTokenChargePercent();
-      this.currentMultiplier = +(await this.getCurrentBestMultiplier()/1e18).toFixed(4);
       (this.$refs['earnings-calc-modal'] as any).show();
+      this.isLoading = true;
+      try {
+        await this.fetchPricesAndFees();
+      }
+      finally {
+        this.isLoading = false;
+      }
     },
 
     onReset() {
       this.characterElementValue = '';
       this.levelSliderValue =  1;
-      this.staminaSelectValue = 40;
+      this.staminaSelectValue = 200;
       this.starsValue =  1;
       this.wepElementValue =  '';
       this.wepFirstStatElementValue =  '';
@@ -308,6 +334,12 @@ export default Vue.extend({
       }
     },
 
+    async fetchPricesAndFees() {
+      await this.fetchPrices();
+      this.fightFeePercentage = +await this.getCombatTokenChargePercent();
+      this.currentMultiplier = +(+(await this.getCurrentBestMultiplier()/1e18).toFixed(4));
+    },
+
     async fetchPrices() {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin,huobi-token,oec-token,matic-network,avalanche-2,ethereum&vs_currencies=usd');
       const data = response.data as PriceJson;
@@ -321,6 +353,7 @@ export default Vue.extend({
     },
 
     canCalculate(): boolean {
+      if(this.isLoading) return false;
       if(!this.characterElementValue || !this.wepElementValue) return false;
       if(this.starsValue < 4 && !this.wepFirstStatElementValue) return false;
       if(this.starsValue === 4 && (!this.wepFirstStatElementValue || !this.wepSecondStatElementValue)) return false;
@@ -336,13 +369,13 @@ export default Vue.extend({
       const characterTrait = CharacterTrait[this.characterElementValue as keyof typeof CharacterTrait];
       const weaponMultiplier = GetTotalMultiplierForTrait(weapon, characterTrait);
 
-      const totalPower = this.getTotalPower(CharacterPower(this.levelSliderValue - 1), weaponMultiplier, this.wepBonusPowerSliderValue);
+      const totalPower = this.getTotalPower(CharacterPower(this.levelSliderValue - 1) + +this.soulSliderValue, weaponMultiplier, this.wepBonusPowerSliderValue);
       const averageDailyReward = await this.getAverageRewardForPower(totalPower) * 7.2;
-      const averageDailyCostInFees = averageDailyReward * this.fightFeePercentage / 100;
-      const averageFightProfit = (averageDailyReward - averageDailyCostInFees) * this.skillPrice * this.currentMultiplier / 7.2;
+      const averageDailyCostInNativeTokenFees = this.gasToken === 'SFUEL' ? 0 : averageDailyReward * this.skillPrice * this.fightFeePercentage / 100;
+      const averageFightProfit = averageDailyReward * this.skillPrice * this.currentMultiplier / 7.2;
       for(let i = 1; i < 8; i++) {
         const averageDailyProfitForCharacter = averageFightProfit * i -
-          ((this.getNumberOfFights(this.staminaSelectValue) * fightFee));
+          ((this.getNumberOfFights(this.staminaSelectValue) * fightFee)) - averageDailyCostInNativeTokenFees;
         const averageDailyProfitForAllCharacter = 4 * averageDailyProfitForCharacter;
         const averageMonthlyProfitForAllCharacter = 30 * averageDailyProfitForAllCharacter;
         this.calculationResults.push([averageDailyProfitForCharacter, averageDailyProfitForAllCharacter, averageMonthlyProfitForAllCharacter]);
@@ -510,7 +543,7 @@ export default Vue.extend({
 }
 
 .form-control.stat-input {
-  width: 45px;
+  width: 60px;
   height: 20px;
   padding: 0;
 }
@@ -659,6 +692,15 @@ export default Vue.extend({
 
 .title-text {
   font-size: 0.85vw;
+}
+
+.modal-title {
+  font-family: Trajan;
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: #e9c97a;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 @media (max-width: 576px) {

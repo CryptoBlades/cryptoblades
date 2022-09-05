@@ -292,6 +292,7 @@ import Vue from 'vue';
 import {fromWeiEther, toBN} from '../utils/common';
 import {nft_bridge as bridgeEnabled} from './../feature-flags';
 import {SupportedProject} from '@/views/Treasury.vue';
+import Hint from '@/components/Hint.vue';
 import { portal, pvp, quests, raid} from '@/feature-flags';
 
 interface StoreMappedState {
@@ -326,6 +327,7 @@ enum ClaimStage {
 }
 
 export default Vue.extend({
+  components: {Hint},
   created() {
     this.showGraphics = localStorage.getItem('useGraphics') === 'true';
     this.hideRewards = localStorage.getItem('hideRewards') === 'true';
@@ -559,7 +561,6 @@ export default Vue.extend({
 .menu-icon {
   min-height: 7rem;
   min-width: 7rem;
-  max-width: 7rem;
   background: #1a253b 0% 0% no-repeat padding-box;
   border: 1px solid #344362;
   border-radius: 5px;

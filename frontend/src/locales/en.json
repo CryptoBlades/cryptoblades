@@ -172,10 +172,12 @@
     "earningsCalculator": "Earnings Calculator",
     "milestoneBonus": "Earn {0} more per battle at",
     "currentPrices": "Current prices",
+    "currentBestMultiplier": "Current Best Multiplier",
     "earnings": "Earnings",
     "winsPerDay": "Wins # per day",
     "dailyProfit": "Daily profit",
-    "monthlyProfit": "Monthly profit"
+    "monthlyProfit": "Monthly profit",
+    "earningsHint": "Earnings are based on the best available multiplier in Treasury, which varies based on players claiming."
   },
   "plaza": {
     "welcome": "Start earning today!",
