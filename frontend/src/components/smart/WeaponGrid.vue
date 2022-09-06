@@ -19,11 +19,15 @@
           </div>
       </div>
       <span class="filter-icon ml-4" @click="showFilter"></span>
-      <div class="none-mobile d-flex flex-column align-items-end">
-        <div class="px=2 pt-2 pb-2">
-          <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
+      <div class="none-mobile d-flex flex-column align-items-start">
+        <div class="d-flex flex-column p-2">
+          <div v-if="showFavoriteToggle" class="show-reforged none-mobile">
             <b-check variant="info" class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
             <strong>{{$t('weaponGrid.showFavorite')}}</strong>
+          </div>
+          <div v-if="showReforgedToggle" class="show-reforged none-mobile">
+            <b-check variant="info" class="show-reforged-checkbox" v-model="showReforgedWeapons" />
+            <strong>{{$t('weaponGrid.showReforged')}}</strong>
           </div>
         </div>
         <div class="p-2 d-flex flex-row">

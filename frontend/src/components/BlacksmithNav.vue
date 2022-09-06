@@ -28,19 +28,27 @@
             @clickEvent="$emit('onClickSpecialForge')"
             :toolTip="$t('blacksmith.specialForgeTooltip')"
           />
-          <cb-button class="custom-cb-btn custom-forge-btn gtag-link-others" tagname="weapon_forge_single"
+          <cb-button v-if="!canClaim" class="custom-cb-btn custom-forge-btn gtag-link-others" tagname="weapon_forge_single"
             :title="`${disableForge ? $t('blacksmith.coolingForge') : $t('blacksmith.forge')} x1 <br/>`"
             :isLoading="isLoading"
-            :subTitle="`(${forgeCost === '0' ? '0.0000' : forgeCost} SKILL)`" @clickEvent="$emit('onClickForge', 0)" :toolTip="$t('blacksmith.forgeNew')"
             :isDisabled="disableForge"
+            :subTitle="`(${forgeCost === '0' ? '0.0000' : forgeCost} SKILL)`" @clickEvent="$emit('onClickForge', 0)"
+            :toolTip="$t('blacksmith.forgeNew')"
           />
-          <cb-button class="custom-cb-btn custom-forge-btn gtag-link-others" tagname="weapon_forge_multiple"
+          <cb-button v-if="!canClaim" class="custom-cb-btn custom-forge-btn gtag-link-others" tagname="weapon_forge_multiple"
             :title="`${disableForge ? $t('blacksmith.coolingForge') : $t('blacksmith.forge')} x10 <br/>`"
             :isLoading="isLoading"
-            :subTitle="`(${forgeCost === '0' ? '0.0000' : forgeCost} SKILL)`" @clickEvent="$emit('onClickForge', 1)"
+            :subTitle="`(${forgeCost === '0' ? '0.0000' : (forgeCost*10).toFixed(4)} SKILL)`" @clickEvent="$emit('onClickForge', 1)"
             :isDisabled="disableX10Forge || disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
             :toolTip="(disableX10Forge) ? $t('blacksmith.disableDynamicMintingForge') : $t('blacksmith.forge10New')"
             :style="disableX10Forge ? 'opacity: 0.5' : ''"
+          />
+          <cb-button v-if="canClaim" class="custom-cb-btn custom-special-forge-btn" tagname="weapon_claim"
+            :title="`${disableForge ? $t('blacksmith.coolingForge') : $t('blacksmith.claimForged')} <br/>`"
+            :isLoading="isLoading"
+            @clickEvent="$emit('onClickClaim')"
+            :isDisabled="disableForge"
+            :toolTip="$t('blacksmith.claimWeaponsPaidFor')"
           />
           <b-checkbox
             class="custom-staking-checkbox"
@@ -95,6 +103,11 @@ export default Vue.extend({
       default: false
     },
     disableUseStakedForForge: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+    canClaim: {
       type: Boolean,
       required: false,
       default: false
