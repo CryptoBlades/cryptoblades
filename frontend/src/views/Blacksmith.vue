@@ -2916,7 +2916,7 @@ img.elements-modal:hover {
 }
 }
 .blacksmith-content{
-   overflow: auto;
+   overflow: clip;
    position: relative;
 
    div.menu-nav{
@@ -2926,6 +2926,7 @@ img.elements-modal:hover {
     padding-bottom: 10px;
     border-bottom: 1px solid #424A59;
     background-color:#000E1D;
+    flex-wrap: wrap;
    }
  }
 
