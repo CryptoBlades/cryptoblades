@@ -539,7 +539,7 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
 }
 
 .app{
-  width: auto;
+  width: 100%;
   display: flex;
   flex-flow: column;
   height: 100%;
@@ -572,6 +572,7 @@ hr.hr-divider {
 html, body {
   margin: 0;
   height: 100%;
+  width: 100%;
   background-color: #000E29 !important;
   overflow: hidden;
 }
@@ -633,7 +634,7 @@ button,
 }
 
 .blank-slate {
-  height: 95vh;
+  height: clamp(50vh, 50vh, 95vh);
   display: flex;
   flex-direction: column;
   justify-content: center;

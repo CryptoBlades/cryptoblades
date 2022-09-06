@@ -489,11 +489,6 @@ export default Vue.extend({
   background: transparent url("../../src/assets/questsBackground.png") 0 0 no-repeat padding-box;
   background-size: clamp(100%, 100%, 100%) auto;
 }
-.quests-container {
-  width: clamp(600px, 80%, 1200px);
-  margin: 0 auto;
-  padding: 50px 0;
-}
 .top-button{
   margin: 10px 0 !important;
   height: 75px !important; /* :'( */
@@ -511,6 +506,7 @@ export default Vue.extend({
 .quests-container{
   width: clamp(200px, 75vw, 1200px);
   margin: 0 auto;
+  padding: 50px 0;
 }
 
 .quests-title {
