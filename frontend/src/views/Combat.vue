@@ -673,6 +673,7 @@ export default Vue.extend({
 .body{
   background: linear-gradient(0deg, rgba(0, 14, 41, 0.68), rgba(0, 14, 41, 0.68)), url('../assets/combat-bg.png');
   background-size: clamp(100%, 100%, 100%) auto;
+  background-repeat: no-repeat;
   min-height: 100%;
 }
 h5{
@@ -1040,7 +1041,7 @@ h1 {
 }
 
 .select-weapons > div{
-  width: 80vw;
+  width: 100%;
 }
 
 .select-weapons > div > ul{
