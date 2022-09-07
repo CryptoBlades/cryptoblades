@@ -1037,11 +1037,18 @@ export default Vue.extend({
     width: 30px;
   }
 }
-/* Needed to adjust weapon list */
-@media all and (max-width: 767.98px) {
+
+@media all and (max-width: 570px) {
   .remove-flex-wrap-mobile{
     flex-wrap: nowrap !important;
   }
+}
+
+/* Needed to adjust weapon list */
+@media all and (max-width: 767.98px) {
+  /* .remove-flex-wrap-mobile{
+    flex-wrap: nowrap !important;
+  } */
   .weapon-grid {
     padding-left: 2em;
     justify-content: center;
