@@ -525,6 +525,7 @@ export default Vue.extend({
 .content {
   z-index: 10;
   position: relative;
+  height: inherit;
 }
 
 .background-image > div:nth-child(1){
