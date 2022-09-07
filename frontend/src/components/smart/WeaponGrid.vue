@@ -39,8 +39,8 @@
           </div>
         </div>
       </div>
-      <div v-if="titleType=='combat'" class="none-mobile filter-combat">
-        <div>
+      <div v-if="titleType=='combat'" class="none-mobile filter-combat flex-wrap">
+        <div class="flex-wrap">
           <div class="select-wrapper-star" :data-content="$t('nftList.star')">
             <select class="form-control" v-model="starFilter" >
             <option v-for="starOption in starsOptions" :value="starOption" :key="starOption">{{ starOption || $t('nftList.sorts.any') }}</option>
@@ -1046,9 +1046,6 @@ export default Vue.extend({
 
 /* Needed to adjust weapon list */
 @media all and (max-width: 767.98px) {
-  /* .remove-flex-wrap-mobile{
-    flex-wrap: nowrap !important;
-  } */
   .weapon-grid {
     padding-left: 2em;
     justify-content: center;
