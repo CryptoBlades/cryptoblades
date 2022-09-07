@@ -848,7 +848,11 @@ export default Vue.extend({
   }
 }
 
-@media all and (max-width: 600px) {
+.raid-boss-button-and-drops > a > .pve-button{
+  width: max-content;
+}
+
+@media all and (max-width: 742px) { /* tried778 start600 next742*/
   .upper-body-container,
   .lower-body-container {
     display: flex;
@@ -981,4 +985,7 @@ export default Vue.extend({
     justify-content: center;
   }
 }
+/* .joinRaid{
+    width: max-content;
+  } */
 </style>
