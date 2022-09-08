@@ -574,6 +574,14 @@ p, li, span {
   margin: 0 auto;
   justify-content: space-between;
 }
+@media  all and (max-width: 1057px) {
+  .mainWrapper{
+    flex-direction: column;
+  }
+  .arenaSignup .bottomList ul li{
+    white-space: inherit !important;
+  }
+}
 .title {
   margin-bottom: 0.75rem;
   color: #cec198;
