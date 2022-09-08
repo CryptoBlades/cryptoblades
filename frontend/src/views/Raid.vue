@@ -199,7 +199,7 @@
                      <button v-else class="btn-raid"  v-tooltip="$t('raid.joiningCostStamina', {formatStaminaHours})" @click="openEquipItems()">
                       {{$t('raid.signup')}}
                     </button>
-                    <div>
+                    <div class="d-inline-block">
                       <p>{{$t('raid.joiningCost')}}</p>
                       <span>{{ staminaCost }} {{$t('raid.stamina')}}</span>|
                       <span>{{ durabilityCost }} {{$t('raid.durability')}}</span> |
@@ -2122,6 +2122,10 @@ hr.divider {
     padding-left: 0px;
   }
 
+  .join-raid > div{
+    position: absolute;
+    margin-top: -35px;
+  }
 
   .float-center .container .power-rolled {
     padding: 0px !important;
