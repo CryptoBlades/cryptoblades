@@ -2122,10 +2122,10 @@ hr.divider {
     padding-left: 0px;
   }
 
-  .join-raid > div{
+  /* .join-raid > div{
     position: absolute;
     margin-top: -35px;
-  }
+  } */
 
   .float-center .container .power-rolled {
     padding: 0px !important;
@@ -2178,6 +2178,13 @@ hr.divider {
 }
 
 @media only screen and (max-width: 992px) and (min-width: 601px){
+  .join-raid > div{
+    position: absolute;
+    margin-bottom: -125px;
+    padding-bottom: 25px;
+    padding-top: 25px;
+  }
+
   .nav-raid{
     margin-top: 20px;
   }
@@ -2207,6 +2214,15 @@ hr.divider {
   .powers > div > p {
       color: #fff;
       font-size: 2.8vw !important;
+  }
+}
+
+@media only screen and (max-width: 1200px) and (min-width: 993px) {
+  .join-raid > div{
+    position: absolute;
+    margin-bottom: -125px;
+    padding-bottom: 25px;
+    padding-top: 25px;
   }
 }
 

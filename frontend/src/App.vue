@@ -563,6 +563,7 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   transition: 1s width;
   padding: 0px;
   width: auto;
+  overflow-x: clip;
 }
 
 hr.hr-divider {
