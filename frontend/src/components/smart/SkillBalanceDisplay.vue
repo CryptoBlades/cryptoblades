@@ -12,7 +12,8 @@
           <span>{{formattedBalance}}</span>
           <span>{{getCurrencySymbol}}</span>
       </div>
-      <div size="sm" class="my-2 my-sm-0 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
+
+      <div size="sm" class="my-2 my-sm-0 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="onBuySkill">
         <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
           <div class="buy-skill-modal">
             <h4 class="text-center mt-1 mb-4"> {{ $t('skillBalanceDisplay.buyWithCrypto') }} </h4>
@@ -388,6 +389,10 @@ export default Vue.extend({
     ...(mapActions('treasury', ['fetchPartnerProjects',
       'getPartnerProjectMultiplier', 'claimPartnerToken']) as StoreMappedTreasuryActions),
     ...(mapMutations('treasury', ['updatePayoutCurrencyId']) as StoreMappedMutations),
+    onBuySkill() {
+      if(localStorage.getItem('currentChain') === 'SKALE') window.open(process.env.VUE_APP_DRAWBRIDGE_URL || 'https://drawbridge.cryptoblades.io/');
+      else this.showModal();
+    },
     async onClaimTokens() {
       if(this.payoutCurrencyId !== '-1') {
         const currentMultiplier = await this.getPartnerProjectMultiplier(+this.payoutCurrencyId);
