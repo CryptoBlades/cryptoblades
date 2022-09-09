@@ -573,14 +573,7 @@ p, li, span {
   width: 100%;
   margin: 0 auto;
   justify-content: space-between;
-}
-@media  all and (max-width: 1057px) {
-  .mainWrapper{
-    flex-direction: column;
-  }
-  .arenaSignup .bottomList ul li{
-    white-space: inherit !important;
-  }
+  flex-wrap: wrap;
 }
 .title {
   margin-bottom: 0.75rem;
@@ -703,7 +696,10 @@ p, li, span {
         color: #b4b0a7;
         font-size: 0.875rem;
         line-height: 1.25rem;
-        white-space: nowrap;
+        white-space: wrap;
+        @media  all and (max-width: 1057px) {
+          white-space: inherit;
+        }
       }
       .bulletpoint {
         height: 0.5rem;
@@ -752,6 +748,7 @@ p, li, span {
     display: flex;
     margin-top: 2rem;
     margin-left: 2rem;
+    flex-wrap: wrap;
 
       .enterArenaButtonWrapper {
       &:first-of-type {
@@ -767,6 +764,7 @@ p, li, span {
 .characterImage {
   display: flex;
   width: 40%;
+  min-width: 200px;
   padding: 3rem 0;
   @media only screen and (min-width: 1440px) {
     width: 30%;

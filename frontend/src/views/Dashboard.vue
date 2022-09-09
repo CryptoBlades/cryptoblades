@@ -985,7 +985,4 @@ export default Vue.extend({
     justify-content: center;
   }
 }
-/* .joinRaid{
-    width: max-content;
-  } */
 </style>

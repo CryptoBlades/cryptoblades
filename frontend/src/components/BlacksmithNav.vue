@@ -8,7 +8,6 @@
             </div>
             <span class="main-font text-muted fs-5">{{$t('blacksmith.forge')}}</span>
           </div>
-          <!-- <div class="w-100 d-block d-md-none none-mobile"></div> -->
           <div class="separator d-none d-sm-block mx-3 none-mobile"></div>
           <div role="button" class="none-mobile" :class="['d-flex gap-3 align-items-center link mt-sm-0',
             (activeTab === 'salvage') ? 'active' : '']" @click="$emit('toggle', 'salvage')">
@@ -19,7 +18,7 @@
           </div>
         </div>
         <div class="d-flex flex-column flex-sm-row justify-content-center flex-wrap" v-if="activeTab === 'forge'" >
-          <div class="d-flex flex-column flex-sm-row justify-content-center flex-nowrap">
+          <div class="forge-buttons d-flex flex-column flex-sm-row justify-content-center flex-nowrap">
             <cb-button v-if="reforgeWeaponId !== null && ownWeapons.length > 0" class="custom-cb-btn custom-reforge-btn" tagname="weapon_special_forge"
               :title="$t('blacksmith.reforgeWithDust')"
               @clickEvent="$emit('displayDustReforge')"
@@ -134,16 +133,21 @@ export default Vue.extend({
 *{
   z-index: 1;
 }
+
+.blacksmith-nav{
+  justify-content: space-between;
+}
+
 @media (max-width: 1185px) {
   .blacksmith-nav{
     justify-content: center !important;
   }
-}
-@media (min-width: 1186px) {
-  .blacksmith-nav{
-    justify-content: space-between !important;
+
+  .forge-buttons{
+    margin: 5px 0px 5px 0px;
   }
 }
+
 .custom-reforge-btn{
   margin-right: -5px !important;
 }

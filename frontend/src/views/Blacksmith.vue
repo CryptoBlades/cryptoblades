@@ -1681,10 +1681,9 @@ export default Vue.extend({
 
 .blacksmith-page{
   background-image: url('../assets/blacksmith/cb-reforge-bg.jpg');
-  background-size: clamp(100%, 100%, 100%) auto;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: top right;
-  //min-height: calc(100vh - 120px);
   height: 100%;
   z-index: 0;
 }

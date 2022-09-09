@@ -2122,11 +2122,6 @@ hr.divider {
     padding-left: 0px;
   }
 
-  /* .join-raid > div{
-    position: absolute;
-    margin-top: -35px;
-  } */
-
   .float-center .container .power-rolled {
     padding: 0px !important;
     width: 50% !important;
