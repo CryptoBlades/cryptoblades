@@ -100,6 +100,26 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         emit LandMintedWithReseller(minter, tokenID, tier, chunkId, reseller);
     }
 
+    // To be used by the NFT bridge. This is fine as the logic will still be maintend by CBKLandSale deployed to BSC.
+    // We are just mirroring on other chains
+    // ChunkId set on global T1s or reseller T1s will include BE server which has access to BSC CBKLandSale
+    function mintOrUpdate(uint256 tokenID, address minter, uint256 tier, uint256 chunkId, uint256 x, uint256 y, address reseller) public restricted returns (uint256) {
+        
+        if(tokenID == 0) {
+            tokenID = landMinted++;
+            _mint(minter, tokenID);
+            landData[tokenID][LT] = tier;
+            landAddressData[tokenID][LAR] = reseller;
+        }
+        
+        // Unlike vars above, these may change at some point (or multiple)        
+        landData[tokenID][LX] = x;
+        landData[tokenID][LY] = y;
+        landData[tokenID][LC] = chunkId;
+
+        return tokenID;
+    }
+
     function massMint(address minter, uint256 tier, uint256 chunkId, address reseller, uint256 quantity) public restricted {
         for(uint256 i = 0; i < quantity; i++) {
             mint(minter, tier, chunkId, reseller);
