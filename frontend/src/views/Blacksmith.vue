@@ -150,12 +150,14 @@
         :disableX10Forge="disableX10Forge"
         :disableX10ForgeWithStaked="disableX10ForgeWithStaked"
         :disableUseStakedForForge="disableUseStakedForForge"
+        :canClaim="canClaim"
         @onClickForge="onClickForge"
         @onClickSpecialForge="onClickSpecialForge"
         @setStakedForForgeValue="setStakedForForgeValue"
         @toggle="activeTab = $event"
         @onShowForgeDetails="onShowForgeDetails"
         @displayDustReforge="displayDustReforge()"
+        @onClickClaim="onClickClaimWeapons"
         :activeTab="activeTab"
         :ownWeapons="ownWeapons"
         :reforgeWeaponId="reforgeWeaponId"
@@ -201,15 +203,15 @@
           <h4 class="select-el">{{$t('blacksmith.selectElement')}}</h4>
         </div>
         <div class="row justify-content-center select-elements-container" ref="forgeWeapon">
-          <div id="random-border" v-on:click="setChosenElement($event, 100)"> </div>
+          <div id="random-border" v-on:click="setChosenElement($event, Element.RANDOM)"> </div>
           <div class="line-sep"></div>
-          <div id="fire-border" v-on:click="setChosenElement($event, 0)"> </div>
+          <div id="fire-border" v-on:click="setChosenElement($event, Element.FIRE)"> </div>
           <div class="line-sep"></div>
-          <div id="earth-border" v-on:click="setChosenElement($event, 1)"> </div>
+          <div id="earth-border" v-on:click="setChosenElement($event, Element.EARTH)"> </div>
           <div class="line-sep"></div>
-          <div id="lightning-border" v-on:click="setChosenElement($event, 2)"> </div>
+          <div id="lightning-border" v-on:click="setChosenElement($event, Element.LIGHTNING)"> </div>
           <div class="line-sep"></div>
-          <div id="water-border" v-on:click="setChosenElement($event, 3)"> </div>
+          <div id="water-border" v-on:click="setChosenElement($event, Element.WATER)"> </div>
         </div>
         <div v-if="activeSpecialWeaponEventsIds.length > 0"
           class="row justify-content-center select-elements-container align-items-baseline mt-4">
@@ -611,9 +613,9 @@ import BN from 'bignumber.js';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import RightMenu from '../components/RightMenu.vue';
 import BigButton from '../components/BigButton.vue';
-import { getWeaponArt } from '../weapon-arts-placeholder';
-import { getWeaponRarity } from '../weapon-element';
-import { getCleanName } from '../rename-censor';
+import { getWeaponArt } from '@/weapon-arts-placeholder';
+import { getWeaponRarity } from '@/weapon-element';
+import { getCleanName } from '@/rename-censor';
 import Vue from 'vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import WeaponIcon from '../components/WeaponIcon.vue';
@@ -629,6 +631,7 @@ import Events from '../events';
 import SpecialWeaponForgeModal from '@/components/smart/SpecialWeaponForgeModal.vue';
 import BlacksmithNav from '@/components/BlacksmithNav.vue';
 import { getConfigValue } from '@/contracts';
+import {Element} from '@/enums/Element';
 
 type StoreMappedState = Pick<IState, 'defaultAccount' | 'ownedWeaponIds' | 'skillBalance' | 'inGameOnlyFunds' | 'skillRewards' >;
 
@@ -692,6 +695,7 @@ interface Data {
   cooling: boolean;
   currentFilteredWeapons: any[];
   isLoading: boolean;
+  canClaim: boolean;
 }
 
 export default Vue.extend({
@@ -747,7 +751,9 @@ export default Vue.extend({
       mintWeaponMinPrice: '0',
       cooling: false,
       currentFilteredWeapons: [],
-      isLoading: true
+      isLoading: true,
+      canClaim: false,
+      Element
     } as Data;
   },
 
@@ -837,7 +843,8 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions(['mintWeapon', 'reforgeWeapon', 'mintWeaponN',
+    ...mapActions(['reforgeWeapon', 'mintWeapons', 'hasWeaponsToClaim', 'claimWeapons',
+      'quantityOfWeaponsToClaim',
       'burnWeapon', 'massBurnWeapons',
       'reforgeWeaponWithDust', 'massBurnWeapons',
       'fetchMintWeaponPriceDecreasePerSecond', 'fetchWeaponMintIncreasePrice',
@@ -887,27 +894,17 @@ export default Vue.extend({
       this.showModal = true;
       this.spin = true;
       try {
-        if(amount === 1){
-          await this.mintWeapon({
-            useStakedSkillOnly: this.useStakedForForge,
-            chosenElement: this.selectedElement || 100,
-            eventId: this.selectedSpecialWeaponEventId,
-            mintSlippageApproved: this.mintSlippageApproved
-          });
-        }
-        else{
-          await await this.mintWeaponN({
-            num: amount,
-            useStakedSkillOnly: this.useStakedForForge,
-            chosenElement: this.selectedElement,
-            eventId: this.selectedSpecialWeaponEventId,
-            mintSlippageApproved: this.mintSlippageApproved
-          });
-        }
+        await this.mintWeapons({
+          quantity: amount,
+          useStakedSkillOnly: this.useStakedForForge,
+          chosenElement: this.selectedElement,
+          eventId: this.selectedSpecialWeaponEventId,
+          mintSlippageApproved: this.mintSlippageApproved
+        });
         this.newForged = this.ownedWeaponIds.splice(this.ownedWeaponIds.length - amount, this.ownedWeaponIds.length);
         (this.$refs['new-forge-weapon'] as BModal).show();
       } catch (e) {
-        console.log('Error while forging:', e);
+        console.error('Error while forging:', e);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
       } finally {
         this.disableForge = false;
@@ -968,7 +965,31 @@ export default Vue.extend({
       (this.$refs['forge-element-selector-modal']as BModal).show();
     },
 
-    setChosenElement(elementObject: any, selectedNumber: number) {
+    async onClickClaimWeapons() {
+      try {
+        this.disableForge = true;
+        this.modalType = 'forge';
+        this.showModal = true;
+        this.spin = true;
+        const quantity = await this.quantityOfWeaponsToClaim();
+        await this.claimWeapons();
+        this.newForged = this.ownedWeaponIds.splice(this.ownedWeaponIds.length - quantity, this.ownedWeaponIds.length);
+        (this.$refs['new-forge-weapon'] as BModal).show();
+      } catch (e) {
+        console.error('Error while claiming:', e);
+        (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
+      } finally {
+        this.disableForge = false;
+        this.selectedElement = null;
+        this.showModal = false;
+        this.spin = false;
+        //refresh forge data
+        this.isLoading = true;
+        this.updateForgeData();
+      }
+    },
+
+    setChosenElement(elementObject: any, selectedNumber: Element) {
       if(selectedNumber === this.selectedElement) this.selectedElement = null;
       else this.selectedElement = selectedNumber;
 
@@ -1145,6 +1166,7 @@ export default Vue.extend({
     },
     async updateForgeData(){
       if(!this.defaultAccount) return;
+      this.canClaim = await this.hasWeaponsToClaim();
       const forgeCost = await this.fetchMintWeaponFee();
       const skillForgeCost = await this.fetchUsdSkillValue(forgeCost);
       this.forgeCost = new BN(skillForgeCost).div(new BN(10).pow(18)).toFixed(4);

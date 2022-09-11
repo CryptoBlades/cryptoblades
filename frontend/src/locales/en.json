@@ -336,6 +336,8 @@
     "forgeNew": "Forge a new weapon",
     "forge10New": "Forge 10 new weapons",
     "forge": "Forge",
+    "claimForged": "Claim forged",
+    "claimWeaponsPaidFor": "Claim weapons paid for",
     "reforge": "Reforge",
     "coolingForge": "Cooling forge ...",
     "notEnoughStakedSkill": "Not enough staked SKILL!",
