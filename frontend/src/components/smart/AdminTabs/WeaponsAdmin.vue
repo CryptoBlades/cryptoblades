@@ -60,7 +60,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import {isValidWeb3Address} from '../../../utils/common';
+import {isValidWeb3Address} from '@/utils/common';
+import {Element} from '@/enums/Element';
 
 interface StoreMappedActions {
   incrementDustSupplies(payload: { playerAddress: string, amountLB: number, amount4B: number, amount5B: number }): Promise<void>;
@@ -76,14 +77,6 @@ interface StoreMappedActions {
 
 enum Rarity {
   COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
-}
-
-enum Element {
-  RANDOM = 100,
-  FIRE = 0,
-  WATER = 1,
-  EARTH = 2,
-  LIGHTNING = 3,
 }
 
 interface GiveawayWeaponMint {

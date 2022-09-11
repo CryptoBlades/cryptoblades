@@ -16,6 +16,7 @@ import "./util.sol";
 import "./common.sol";
 import "./Blacksmith.sol";
 import "./SpecialWeaponsManager.sol";
+import "./SafeRandoms.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -30,6 +31,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
+    bytes32 public constant WEAPON_SEED = keccak256("WEAPON_SEED");
 
     int128 public constant PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT =
         14757395258967641292; // 0.8 in fixed-point 64x64 format
@@ -64,10 +66,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_WEAPON_MINT_TIMESTAMP = 25;
     uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 26;
 
+    uint256 public constant LINK_SAFE_RANDOMS = 1;
 
     // Mapped user variable(userVars[]) keys, one value per wallet
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
     uint256 public constant USERVAR_CLAIM_TIMESTAMP = 10002;
+    uint256 public constant USERVAR_CLAIM_WEAPON_DATA = 10003;
 
     Characters public characters;
     Weapons public weapons;
@@ -225,6 +229,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     mapping(address => mapping(uint256 => uint256)) public userVars;
 
     SpecialWeaponsManager public specialWeaponsManager;
+    mapping(uint256 => address) public links;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -318,7 +323,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
             _getFightDataAndDrainStaminaUnpacked(fighter, char, fightMultiplier);
-        
+
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
@@ -331,7 +336,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             target,
             now / 1 hours
         );
-    
+
         FightData memory data = FightData(
             Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
             uint24(charTrait | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
@@ -517,65 +522,56 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _updateCharacterMintFee();
     }
 
-    function mintWeaponN(uint32 num, uint8 chosenElement, uint256 eventId)
-        external
-        onlyNonContract
-        oncePerBlock(msg.sender)
-    {
+    function generateWeaponSeed(uint32 quantity, uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
+        require(quantity > 0 && quantity <= 10);
+        require(userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] == 0);
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(getMintWeaponFee() * num * chosenElementFee));
-        _mintWeaponNLogic(num, chosenElement, eventId);
+        int128 mintWeaponFee =
+            getMintWeaponFee()
+                .mul(ABDKMath64x64.fromUInt(quantity))
+                .mul(ABDKMath64x64.fromUInt(chosenElementFee));
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee));
+        _updateWeaponMintFee(quantity);
+        if (eventId > 0) {
+            specialWeaponsManager.addShards(msg.sender, eventId, quantity);
+        }
+        SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement));
+        userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] = uint256(uint256(chosenElement) | (uint256(quantity) << 32));
     }
 
-    function mintWeapon(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
-        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(getMintWeaponFee() * chosenElementFee));
-        _mintWeaponLogic(chosenElement, eventId);
-    }
-
-    function mintWeaponNUsingStakedSkill(uint32 num, uint8 chosenElement, uint256 eventId)
-        external
-        onlyNonContract
-        oncePerBlock(msg.sender)
-    {
+    function generateWeaponSeedUsingStakedSkill(uint32 quantity, uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
+        require(quantity > 0 && quantity <= 10);
+        require(userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] == 0);
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
             getMintWeaponFee()
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
-                .mul(ABDKMath64x64.fromUInt(num))
+                .mul(ABDKMath64x64.fromUInt(quantity))
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
         _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
-
-        _mintWeaponNLogic(num, chosenElement, eventId);
-    }
-
-    function mintWeaponUsingStakedSkill(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
-        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        int128 discountedMintWeaponFee =
-            getMintWeaponFee()
-                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
-                .mul(ABDKMath64x64.fromUInt(chosenElementFee));
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
-
-        _mintWeaponLogic(chosenElement, eventId);
-    }
-
-    function _mintWeaponNLogic(uint32 num, uint8 chosenElement, uint256 eventId) internal {
-        require(num > 0 && num <= 10);
-        if(eventId > 0) {
-            specialWeaponsManager.addShards(msg.sender, eventId, num);
+        _updateWeaponMintFee(quantity);
+        if (eventId > 0) {
+            specialWeaponsManager.addShards(msg.sender, eventId, quantity);
         }
-        _updateWeaponMintFee(num);
-        weapons.mintN(msg.sender, num, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
+        SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement));
+        userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] = uint256(uint256(chosenElement) | (uint256(quantity) << 32));
     }
 
-    function _mintWeaponLogic(uint8 chosenElement, uint256 eventId) internal {
-        //uint256 seed = randoms.getRandomSeed(msg.sender);
-        if(eventId > 0) {
-            specialWeaponsManager.addShards(msg.sender, eventId, 1);
-        }
-        _updateWeaponMintFee(1);
-        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
+    function mintWeapon() external onlyNonContract oncePerBlock(msg.sender) {
+        uint8 chosenElement = uint8((userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA]) & 0xFF);
+        uint32 quantity = uint32((userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] >> 32) & 0xFFFFFFFF);
+        require(quantity > 0);
+        userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] = 0;
+        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement), true, false);
+        weapons.mintN(msg.sender, quantity, seed, chosenElement);
+    }
+
+    function getSeed(uint seedId, uint quantity, uint element) internal pure returns (uint256 seed) {
+        uint[] memory seeds = new uint[](3);
+        seeds[0] = seedId;
+        seeds[1] = quantity;
+        seeds[2] = element;
+        seed = RandomUtil.combineSeeds(seeds);
     }
 
     function _updateWeaponMintFee(uint256 num) internal {
@@ -876,6 +872,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         for(uint i = 0; i < varFields.length; i++) {
             vars[varFields[i]] = values[i];
         }
+    }
+
+    function setLink(uint256 linkId, address linkAddress) external restricted {
+        links[linkId] = linkAddress;
     }
 
     function giveInGameOnlyFunds(address to, uint256 skillAmount) external restricted {
