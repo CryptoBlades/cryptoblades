@@ -205,7 +205,7 @@
     },
     "links": {},
     "address": "0x81D04c184865f32218880d94add228D38aEe7148",
-    "transactionHash": "0x022b719e61c61b139d909c0d941ae1e36066933e6a7c94729c16e6f58ea1251c"
+    "transactionHash": "0xdfc3294d2d48a860e6fe1c60dedb2635813933279a36d465d062465a3dd1d8d7"
   },
   "build/contracts/BurningManager.json": {
     "events": {
@@ -4737,7 +4737,7 @@
     },
     "links": {},
     "address": "0xc3DD291386330f25AbC26Df1a1fF69f003f8D4A3",
-    "transactionHash": "0xb85a60a5fd2b3652df8f44a28567273a30053dc2d69338b36e54e6b9d4ba6a4e"
+    "transactionHash": "0xb276f55627cc6f1138c12a082b11b7c05f91950cd23632ccf006a7261f1ec685"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -6650,7 +6650,7 @@
     },
     "links": {},
     "address": "0x7907c3345a645A494d5fF4924CDc89e5d892c800",
-    "transactionHash": "0xf61bca60d88246c30ff471c2efef201181fe322c6efa24f20ee3e5fb26d5626d"
+    "transactionHash": "0xb71e3b8faa4f8005e2ab5318de51221e09e234f0f6c42ae93126b65f47409084"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},

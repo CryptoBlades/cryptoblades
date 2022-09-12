@@ -80,6 +80,7 @@ export default new Vuex.Store<IState>({
     skillPriceInUsd: 0,
 
     skillBalance: '0',
+    balance: '0',
     skillRewards: '0',
     maxRewardsClaimTax: '0',
     rewardsClaimTax: '0',
@@ -216,6 +217,12 @@ export default new Vuex.Store<IState>({
     },
     getExchangeUrl() {
       return getConfigValue('exchangeUrl');
+    },
+    getBalanceUrl() {
+      return getConfigValue('balanceUrl');
+    },
+    getCurrencySymbol() {
+      return getConfigValue('currencySymbol');
     },
     getExchangeTransakUrl() {
       const currencyNetwork = getConfigValue('currencyNetwork') || 'BNB';
@@ -469,6 +476,10 @@ export default new Vuex.Store<IState>({
 
     updateSkillBalance(state: IState, { skillBalance }) {
       state.skillBalance = skillBalance;
+    },
+
+    updateBalance(state: IState, { balance }) {
+      state.balance = balance;
     },
 
     updateDustBalance(state: IState, { dustBalance }) {
@@ -1040,8 +1051,17 @@ export default new Vuex.Store<IState>({
           }
         })(),
         dispatch('fetchInGameOnlyFunds'),
+        dispatch('fetchBalance'),
         dispatch('staking/fetchStakeDetails', { stakeType: stakeTypeThatCanHaveUnclaimedRewardsStakedTo })
       ]);
+    },
+
+    async fetchBalance({ state, commit }) {
+      const { defaultAccount } = state;
+      if(!defaultAccount) return;
+
+      const balance = await state.web3.eth.getBalance(defaultAccount);
+      commit('updateBalance', { balance });
     },
 
     async fetchDustBalance({ state, commit }) {
