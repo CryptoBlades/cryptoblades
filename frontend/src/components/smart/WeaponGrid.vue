@@ -53,11 +53,6 @@
               :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
             </select>
           </div>
-          <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
-            <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
-            <span>{{$t('weaponGrid.showFavorite')}}</span>
-          </div>
-          <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
         </div>
         <div class="d-flex align-items-center select-wrapper-items">
           <span>{{$t('nftList.show')}}</span>
@@ -795,6 +790,12 @@ export default Vue.extend({
 
 .select-wrapper-star > select{
   text-align: right;
+}
+
+@media (max-width: 1037px) {
+  .select-wrapper-items {
+    margin-top: 10px;
+  }
 }
 
 .select-wrapper-items > select,
