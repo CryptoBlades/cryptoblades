@@ -174,7 +174,7 @@
     },
     "links": {},
     "address": "0xcAFAAF5064bCA5cB596A73428006A71C57Ed480a",
-    "transactionHash": "0xeeae92985b332ccbf09d91c85e9ff427275bfe5d09e286e2b4d96a87f34f213e"
+    "transactionHash": "0x423a421b75f2e5d7d1ac60cd941ede887ef902373c72b71345f6afcd855cdde9"
   },
   "build/contracts/BurningManager.json": {
     "events": {
@@ -2317,7 +2317,7 @@
     },
     "links": {},
     "address": "0x98145a2fEBac238280bbdEDc2757dC162318b16e",
-    "transactionHash": "0x0d9b01dc0c12b8833f4f19d17e85a9a73e2be837202727163a41f80c3d9e40f6"
+    "transactionHash": "0xcfa5ba76a17225722827346b632720e0610025621b29591aea9431142d00a55e"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
