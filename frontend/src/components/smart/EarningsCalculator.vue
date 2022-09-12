@@ -233,7 +233,7 @@ export default Vue.extend({
     },
 
     maxSoulSliderValue(): number {
-      return CharacterPower(this.levelSliderValue - 1) * 3;
+      return CharacterPower(this.levelSliderValue - 1) * this.powerMultiplierLimit;
     }
   },
 
@@ -264,13 +264,15 @@ export default Vue.extend({
       gasToken: '',
       fightFeePercentage: 0,
       currentMultiplier: 1,
-      isLoading: false
+      isLoading: false,
+      powerMultiplierLimit: 3 // hardcoded soul power limit in the contract
     };
   },
 
   methods: {
     ...(mapActions('combat', ['fetchExpectedPayoutForMonsterPower', 'getCombatTokenChargePercent',]) as StoreMappedCombatActions),
     ...(mapActions('treasury', ['getCurrentBestMultiplier']) as StoreMappedTreasuryActions),
+
     async onShowEarningsCalculator() {
       if(this.currentCharacter !== null && this.currentCharacter !== undefined) {
         this.characterElementValue = CharacterTrait[this.currentCharacter.trait];
