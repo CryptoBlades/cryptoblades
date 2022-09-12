@@ -65,7 +65,7 @@
           <div  v-if="currentCharacterStamina >= staminaPerFight" class="combat-enemy-container">
               <!-- selected weapon for combat details -->
               <div class="weapon-selection mb-4">
-                <div class="header-row d-flex justify-content-between">
+                <div class="header-row justify-content-between">
                   <div class="selectedWeaponDetails">
                     <div class="select-weapons" v-if="!selectedWeaponId || !weaponHasDurability(selectedWeaponId)">
                       <span class="isMobile label-title">{{$t('combat.selectAWeapon')}}</span>
