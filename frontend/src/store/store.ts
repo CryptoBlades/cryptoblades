@@ -16,7 +16,8 @@ import {burningManager as featureFlagBurningManager} from '@/feature-flags';
 import {ERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from '@/stake-types';
 import {Nft} from '@/interfaces/Nft';
-import {getNFTCall} from '@/utils/multicall';
+//import {getNFTCall} from '@/utils/multicall';
+import { Interface } from '@ethersproject/abi';
 import {Element} from '@/enums/Element';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
@@ -2769,6 +2770,18 @@ export default new Vuex.Store<IState>({
       if(!CryptoBlades || !state.defaultAccount) return;
 
       return CryptoBlades.methods.getMintCharacterFee().call(defaultCallOptions(state));
+    },
+
+    async multicall({state}, {abi, calls}) {
+      const { MultiCall } = state.contracts();
+      const itf = new Interface(abi);
+      const data = calls.map((call: any) => [
+        call.address.toLowerCase(),
+        itf.encodeFunctionData(call.name, call.params),
+      ]);
+      const { returnData } = await MultiCall.methods.aggregate(data).call(defaultCallOptions(state));
+      const res = returnData.map((call, i) => itf.decodeFunctionResult(calls[i].name, call));
+      return res;
     },
   }
 });
