@@ -73,6 +73,9 @@
               </div>
           </b-col>
         </div>
+        <div class="d-flex justify-content-center" v-if="currentPath != '/blacksmith'">
+          <EarningsCalculator />
+        </div>
         <div class="btn-trigger" @click="hideSideBar(!toggled)">
           <img :class="!toggled ? 'rotateLeft' : 'rotateRight'" src="../../assets/left-arrow.png" alt="">
         </div>
@@ -105,15 +108,23 @@ interface RaidMappedActions {
 
 interface StoreMappedGetters {
   charactersWithIds(ids: (string | number)[]): Nft[];
+  getCharacterPower(characterId: number): Promise<string>;
+}
+
+interface StoreMappedCombatGetters {
+  getIsInCombat: boolean;
+  fightGasOffset: string;
+  fightBaseline: string;
 }
 
 interface StoreMappedActions {
   getCharacterBusyStatus(payload: { characterId: string | number }): Promise<number>;
 }
 import i18n from '@/i18n';
+import EarningsCalculator from './EarningsCalculator.vue';
 
 export default Vue.extend({
-  props:['toggled','currentPath'],
+  props: ['toggled', 'currentPath'],
   computed: {
     ...mapGetters(['charactersWithIds']) as Accessors<StoreMappedGetters>,
     ...mapState(['maxStamina', 'currentCharacterId', 'ownedCharacterIds']),
@@ -125,30 +136,31 @@ export default Vue.extend({
       'charactersWithIds',
       'ownCharacters',
       'timeUntilCharacterHasMaxStamina',
-      'getIsInCombat',
       'getIsCharacterViewExpanded',
-      'fightGasOffset',
       'getCharacterIsInArena',
-      'fightBaseline',
       'getCharacterPower'
     ]),
+    ...(mapGetters('combat', [
+      'getIsInCombat',
+      'fightGasOffset',
+      'fightBaseline',
+    ]) as Accessors<StoreMappedCombatGetters>),
     isLoadingCharacter(): boolean {
       return !this.currentCharacter;
     },
     filteredCharactersForList(): any {
-      const items: any  = this.ownCharacters;
-      for(const x of items){
+      const items: any = this.ownCharacters;
+      for (const x of items) {
         x.isSelected = false;
         this.setCharacterOnRaid(x.id);
       }
       return items;
     },
   },
-
   data() {
     return {
       traits: CharacterTrait,
-      isPlaza : false,
+      isPlaza: false,
       sideBarBlacksmith: [
         {
           id: 0,
@@ -168,7 +180,7 @@ export default Vue.extend({
         },
         {
           id: 2,
-          title:  i18n.t('blacksmith.dustStorage'),
+          title: i18n.t('blacksmith.dustStorage'),
           desc: i18n.t('blacksmith.dustStorageDesc'),
           iconName: 'icon-dust',
           status: '',
@@ -198,133 +210,131 @@ export default Vue.extend({
     getCharacterArt,
     CharacterPower,
     RequiredXp,
-
-    async isCharacterAlreadyRaiding(characterID: string)  {
-      return await this.fetchIsCharacterRaiding({characterID});
+    async isCharacterAlreadyRaiding(characterID: string) {
+      return await this.fetchIsCharacterRaiding({ characterID });
     },
-
     setListClassForSelChar(id: string, currentCharId: string): any {
-      if (id === currentCharId){
+      if (id === currentCharId) {
         this.setSelectedCharacter(id);
         return 'character-highlight';
       }
-
-      else return 'character';
+      else
+        return 'character';
     },
-    getNftStatus(activeCharacter: any){
+    getNftStatus(activeCharacter: any) {
       this.composeCharacterData(activeCharacter.id).then(data => {
         if (data.status !== undefined && data.status in NftStatus) {
-          for(const character of this.filteredCharactersForList){
-            if(character.id === activeCharacter.id){
+          for (const character of this.filteredCharactersForList) {
+            if (character.id === activeCharacter.id) {
               character.pvpStatus = NftStatus[data.status];
             }
           }
-        } else {
-          for(const character of this.filteredCharactersForList){
-            if(character.id === activeCharacter.id){
+        }
+        else {
+          for (const character of this.filteredCharactersForList) {
+            if (character.id === activeCharacter.id) {
               character.pvpStatus = 'BUSY';
             }
           }
         }
       });
     },
-
-
-    async composeCharacterData(id: any){
+    async composeCharacterData(id: any) {
       let characterStatus;
       // eslint-disable-next-line prefer-const
       characterStatus = await this.charactersWithIds([id]).filter(Boolean)[0];
-      characterStatus.status = + await this.getCharacterBusyStatus({characterId: id});
+      characterStatus.status = +await this.getCharacterBusyStatus({ characterId: id });
       return characterStatus;
     },
-
-    async setCharacterOnRaid(id: any){
+    async setCharacterOnRaid(id: any) {
       const charId = id;
-      if(await this.isCharacterAlreadyRaiding(id)){
+      if (await this.isCharacterAlreadyRaiding(id)) {
         this.charOnRaid.push(charId);
       }
     },
-
-    getIfCharacterIsInRaid(id: any){
+    getIfCharacterIsInRaid(id: any) {
       let toReturnWarning;
       this.charOnRaid.forEach((characterOnRaid: any) => {
-        if(id === characterOnRaid){
+        if (id === characterOnRaid) {
           toReturnWarning = true;
         }
       });
-
       return toReturnWarning;
     },
-
-    setActiveTab(tab: any){
-      (this as any).$router.push({ path: 'blacksmith', query: { tab: tab.route }});
-      this.sideBarBlacksmith.forEach((sidebarTab: { id: any; status: string; }) => {
-        if(sidebarTab.id === tab.id) sidebarTab.status = 'active';
-        else sidebarTab.status = '';
+    setActiveTab(tab: any) {
+      (this as any).$router.push({ path: 'blacksmith', query: { tab: tab.route } });
+      this.sideBarBlacksmith.forEach((sidebarTab: {
+        id: any;
+        status: string;
+      }) => {
+        if (sidebarTab.id === tab.id)
+          sidebarTab.status = 'active';
+        else
+          sidebarTab.status = '';
       });
     },
-
     toolTipHtml(time: string): string {
       return i18n.t('blacksmith.regenerate') + time;
     },
-
-    setSelectedCharacter(id: any){
-      for(const a of this.filteredCharactersForList){
-        if(a.id === id){
+    setSelectedCharacter(id: any) {
+      for (const a of this.filteredCharactersForList) {
+        if (a.id === id) {
           a.isSelected = true;
-        }else{
+        }
+        else {
           a.isSelected = false;
         }
       }
     },
-
-
     //toggle the sidebar
-    hideSideBar(bol: any){
+    hideSideBar(bol: any) {
       Events.$emit('toggle-sideBar', bol);
     },
-
     formattedSkill(skill: number): number {
       const skillBalance = fromWeiEther(skill.toString());
       return toBN(skillBalance).toNumber();
     },
-
     getCleanCharacterName(id: string): string {
       return getCleanName(this.getCharacterName(id));
     },
-
-    setIdForElement(traits: any, isSelected: boolean){
-      if(traits === '0'){
-        if(isSelected){
+    setIdForElement(traits: any, isSelected: boolean) {
+      if (traits === '0') {
+        if (isSelected) {
           return 'fire-element';
-        }else{
+        }
+        else {
           return 'w-fire-element';
         }
       }
-      else if(traits === '1'){
-        if(isSelected){
+      else if (traits === '1') {
+        if (isSelected) {
           return 'earth-element';
-        }else{
+        }
+        else {
           return 'w-earth-element';
         }
       }
-      else if(traits=== '2'){
-        if(isSelected){
+      else if (traits === '2') {
+        if (isSelected) {
           return 'lightning-element';
-        }else{
+        }
+        else {
           return 'w-lightning-element';
         }
       }
-      else if(traits === '3'){
-        if(isSelected){
+      else if (traits === '3') {
+        if (isSelected) {
           return 'water-element';
-        }else{
+        }
+        else {
           return 'w-water-element';
         }
       }
-      else return '';
+      else
+        return '';
     },
   },
+  components: { EarningsCalculator }
 });
 </script>
 

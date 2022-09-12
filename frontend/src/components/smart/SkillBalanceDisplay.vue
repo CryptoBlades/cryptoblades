@@ -1,7 +1,19 @@
 <template>
   <div class="skill-balance-display d-flex flex-column flex-wrap p-2 custom-skill-balance-mobile" :style="isToggled ? 'padding-bottom: 10px !important': '' ">
     <div class="d-flex justify-content-end align-items-center pr-2 pb-1">
-      <div size="sm" class="my-2 my-sm-0 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="showModal">
+      <div v-if="getBalanceUrl"
+        size="sm" class="my-2 my-sm-0 skill-tooltip" variant="primary"
+        v-tooltip="$t('skillBalanceDisplay.buyBalanceTooltip')"
+        @click="onClickBalance"
+      >
+        <img src="../../assets/add-skill-icon.svg" class="add-button gtag-link-others mr-1" :style="isMobile() ? 'width: 20px':''"  tagname="buy_balance">
+      </div>
+      <div class="balance-container mt-1 pr-2">
+          <span>{{formattedBalance}}</span>
+          <span>{{getCurrencySymbol}}</span>
+      </div>
+
+      <div size="sm" class="my-2 my-sm-0 skill-tooltip" variant="primary" v-tooltip="$t('skillBalanceDisplay.buySkillTooltip')" @click="onBuySkill">
         <b-modal size="xl" class="centered-modal " ref="transak-buy" :title="$t('skillBalanceDisplay.buySkillTitle')" ok-only>
           <div class="buy-skill-modal">
             <h4 class="text-center mt-1 mb-4"> {{ $t('skillBalanceDisplay.buyWithCrypto') }} </h4>
@@ -157,6 +169,7 @@ interface StoreMappedState {
   waxBridgeTimeUntilLimitExpires: number;
   ownedCharacterIds: string[];
   xpRewards: Record<string, string>;
+  balance: string;
 }
 
 interface StoreMappedTreasuryState {
@@ -170,6 +183,8 @@ interface StoreMappedGetters {
   ownCharacters: ICharacter[];
   getExchangeTransakUrl: string;
   getExchangeUrl: string;
+  getBalanceUrl: string;
+  getCurrencySymbol: string;
   availableBNB: string;
   currentCharacter: ICharacter | null;
   getCharacterName(id: number): string;
@@ -224,12 +239,14 @@ export default Vue.extend({
   },
   computed: {
     ...(mapState(['skillRewards', 'skillBalance', 'inGameOnlyFunds', 'waxBridgeWithdrawableBnb',
-      'waxBridgeTimeUntilLimitExpires', 'ownedCharacterIds', 'xpRewards']) as Accessors<StoreMappedState>),
+      'waxBridgeTimeUntilLimitExpires', 'ownedCharacterIds', 'xpRewards', 'balance']) as Accessors<StoreMappedState>),
     ...(mapState('treasury',
       ['payoutCurrencyId','partnerProjectMultipliers', 'partnerProjectRatios','defaultSlippage'])as Accessors<StoreMappedTreasuryState>),
     ...(mapGetters({
       availableBNB: 'waxBridgeAmountOfBnbThatCanBeWithdrawnDuringPeriod',
       getExchangeUrl: 'getExchangeUrl',
+      getBalanceUrl: 'getBalanceUrl',
+      getCurrencySymbol: 'getCurrencySymbol',
       getExchangeTransakUrl: 'getExchangeTransakUrl',
       ownCharacters: 'ownCharacters',
       getCharacterName: 'getCharacterName',
@@ -301,6 +318,11 @@ export default Vue.extend({
       return `${toBN(skillBalance).toFixed(4)} SKILL`;
     },
 
+    formattedBalance(): string {
+      const balance = fromWeiEther(this.balance);
+      return `${toBN(balance).toFixed(4)} `;
+    },
+
     hasBnbAvailableToWithdraw(): boolean {
       return toBN(this.waxBridgeWithdrawableBnb).gt(0);
     },
@@ -367,6 +389,10 @@ export default Vue.extend({
     ...(mapActions('treasury', ['fetchPartnerProjects',
       'getPartnerProjectMultiplier', 'claimPartnerToken']) as StoreMappedTreasuryActions),
     ...(mapMutations('treasury', ['updatePayoutCurrencyId']) as StoreMappedMutations),
+    onBuySkill() {
+      if(localStorage.getItem('currentChain') === 'SKALE') window.open(process.env.VUE_APP_DRAWBRIDGE_URL || 'https://drawbridge.cryptoblades.io/');
+      else this.showModal();
+    },
     async onClaimTokens() {
       if(this.payoutCurrencyId !== '-1') {
         const currentMultiplier = await this.getPartnerProjectMultiplier(+this.payoutCurrencyId);
@@ -442,7 +468,10 @@ export default Vue.extend({
     },
     showModal() {
       (this.$refs['transak-buy'] as BModal).show();
-    }
+    },
+    onClickBalance(){
+      window.open(this.getBalanceUrl, '_blank');
+    },
   },
 
   components: {

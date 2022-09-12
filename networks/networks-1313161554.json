@@ -98,7 +98,7 @@
     "events": {},
     "links": {},
     "address": "0x737DE423f5DC41552a8e165eE51D5d070988f29D",
-    "transactionHash": "0x84dfbc9dc2ae531d74d12a3ec605d3264f51fc0eeaa20b162de28edadcb2b0b8|{\"gasBurned\":12536113167764,\"tx\":\"ETm28UyAs2gBdUhMmEbA1HWGHUjLT755S7MrpqjUBLdf\"}"
+    "transactionHash": "0x143e0a3d50dc9ab87a6d6379f3f76f7c6b785821e74f9d5df995deaed6bf3090"
   },
   "build/contracts/BurningManager.json": {
     "events": {
@@ -2377,7 +2377,7 @@
     },
     "links": {},
     "address": "0x3F715995647fe44Db45411bb9e81b7A1aD5A8387",
-    "transactionHash": "0xd7085421f0b9421ff12c6702a8b3cdbc8b7c35a0ac708995fdfdb66eda22b36a"
+    "transactionHash": "0x3ca7be1a7893949d260dc6fe17f9a6213bca48699ea6ef3d633081242a2c559c"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
@@ -3396,7 +3396,7 @@
     },
     "links": {},
     "address": "0xeE119eB272995Db5a6075333Df535667F61287Db",
-    "transactionHash": "0x430fb5a3a4d1fd12b3e9cd2c96dd662b465129cc5256e1795dd4871ac5fb0583|{\"gasBurned\":11142324857458,\"tx\":\"BBj32nErUVK28r8iLsdp6HMU8w9y4Pakw3JrXputaisR\"}"
+    "transactionHash": "0x33b1b3fe3ec86dbaa092bd7cc5cf9d78bee266f87e1de303c51b396e4df339f0"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -4767,7 +4767,7 @@
     },
     "links": {},
     "address": "0x89995f8C61d7366119773Ac791e9B427e1B63a4A",
-    "transactionHash": "0xb42f9f91850da4ecf4d6941f388f796cd2ee21dc18b744b0e3721bdee44da13a|{\"gasBurned\":16123644284542,\"tx\":\"DcWpVrmE6p3gMTnvFLhsuNZuKgrEV2qTuEXriedQn8St\"}"
+    "transactionHash": "0x9acbad59335cfe0904b4f096933634b19a1190f4473b0699e61575f567a14736"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},

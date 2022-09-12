@@ -196,8 +196,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return assignNewQuest(characterID);
     }
 
-    function requestPickableQuest(uint256 characterID, uint256 pickableIndex) public assertQuestsEnabled assertOwnsCharacter(characterID) assertOnQuest(characterID, false) returns (uint256) {
-        return setCharacterQuest(characterID, pickableTier, questTemplates[pickableTier][pickableIndex]);
+    function requestPickableQuest(uint256 characterID, uint256 questID) public assertQuestsEnabled assertOwnsCharacter(characterID) assertOnQuest(characterID, false) returns (uint256) {
+        require(questID == questTemplates[pickableTier][questIndexes[questID]]); // pickable quest tier check
+        return setCharacterQuest(characterID, pickableTier, questTemplates[pickableTier][questIndexes[questID]]);
     }
 
     function assignNewQuest(uint256 characterID) private returns (uint256) {
@@ -268,17 +269,25 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return tierQuestTemplates[index];
     }
 
-    function skipQuest(uint256 characterID) public assertQuestsEnabled assertOnQuest(characterID, true) returns (uint256) {
+    function skipQuest(uint256 characterID) public returns (uint256) {
+        return skipQuest(characterID, 0);
+    }
+
+    function skipQuest(uint256 characterID, uint256 pickedQuestID) public assertQuestsEnabled assertOnQuest(characterID, true) assertOwnsCharacter(characterID) returns (uint256) {
         if (hasFreeSkip(characterID)) {
             lastFreeSkipUsage[characterID] = now;
         } else {
             characters.getFightDataAndDrainStamina(msg.sender, characterID, uint8(vars[VAR_SKIP_QUEST_STAMINA_COST]), false, 0);
         }
         emit QuestSkipped(characterQuest[characterID], characterID);
-        return assignNewQuest(characterID);
+        return _assignNextQuest(characterID, pickedQuestID);
     }
 
-    function completeQuest(uint256 characterID) public assertQuestsEnabled assertOwnsCharacter(characterID) assertOnQuest(characterID, true) returns (uint256[] memory questRewards) {
+    function completeQuest(uint256 characterID) public returns (uint256[] memory questRewards) {
+        return completeQuest(characterID, 0);
+    }
+
+    function completeQuest(uint256 characterID, uint256 pickedQuestID) public assertQuestsEnabled assertOwnsCharacter(characterID) assertOnQuest(characterID, true) returns (uint256[] memory questRewards) {
         uint256[] memory questData = getCharacterQuestData(characterID);
         require(questData[0] >= quests[characterQuest[characterID]].requirementAmount, "Not completed");
         uint256 questID = characterQuest[characterID];
@@ -289,7 +298,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         characters.setNftVar(characterID, NFTVAR_REPUTATION, currentReputation + quests[questID].reputationAmount);
         emit QuestComplete(questID, characterID);
         weeklyCompletions[msg.sender][now / 1 weeks] += 1;
-        assignNewQuest(characterID);
+        _assignNextQuest(characterID, pickedQuestID);
     }
 
     function completeWalletQuest(uint256 questID) public assertQuestsEnabled returns (uint256[] memory questRewards) {
@@ -301,6 +310,15 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         weeklyCompletions[msg.sender][now / 1 weeks] += 1;
         walletQuestProgress[msg.sender][questID] = 0;
         decrementQuestSupply(walletTier, questID);
+    }
+
+    function _assignNextQuest(uint256 characterID, uint256 pickedQuestID) internal returns (uint256) {
+        if(pickedQuestID == 0) // random quest
+            return assignNewQuest(characterID);
+        else {
+            require(pickedQuestID == questTemplates[pickableTier][questIndexes[pickedQuestID]]); // pickable quest tier check
+            return setCharacterQuest(characterID, pickableTier, pickedQuestID);
+        }
     }
 
     function generateRewardQuestSeed(uint256 characterID) assertQuestsEnabled assertOwnsCharacter(characterID) assertOnQuest(characterID, true) public {
@@ -321,12 +339,12 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         uint256 seed = safeRandoms.popSingleSeed(address(this), RandomUtil.combineSeeds(SEED_REWARD_QUEST, characterID), true, false);
         return rewardQuest(getQuestReward(quests[questID]), characterID, seed);
     }
-    
+
     function rewardWalletQuest(uint256 questID) private returns (uint256[] memory) {
         uint256 seed = safeRandoms.popSingleSeed(msg.sender, RandomUtil.combineSeeds(SEED_REWARD_WALLET_QUEST, questID), true, false);
         return rewardQuest(getQuestReward(quests[questID]), SEED_REWARD_WALLET_QUEST/*hack number to avoid bumping 0 accidentally*/, seed);
     }
-    
+
     function rewardQuest(Reward memory reward, uint256 characterID, uint256 seed) private returns (uint256[] memory) {
         //reward.id is questID for quests and weekNumber for weekly rewards!
         if (reward.rewardType == ItemType.WEAPON) {
@@ -389,9 +407,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         incrementCharacterQuestProgress(characterID, questID, tokenIds.length);
     }
 
-    function submitWalletProgress(uint256 questID, uint256 indexInTier, uint256[] memory tokenIds) public {
+    function submitWalletProgress(uint256 questID, uint256[] memory tokenIds) public {
         _submitProgress(questID, tokenIds);
-        incrementWalletQuestProgress(questID, indexInTier, tokenIds.length);
+        incrementWalletQuestProgress(questID, tokenIds.length);
     }
 
     function _submitProgress(uint256 questID, uint256[] memory tokenIds) private assertQuestsEnabled {
@@ -427,6 +445,8 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             shields.burn(tokenIds);
         } else if (quest.requirementType == ItemType.EXTERNAL) {
             partnerVault.storeNfts(IERC721(quest.requirementExternalAddress), tokenIds);
+        } else if (quest.requirementType == ItemType.EXTERNAL_HOLD) {
+            partnerVault.showHeldNfts(IERC721(quest.requirementExternalAddress), tokenIds, msg.sender);
         } else {
             revert("Unknown requirement type");
         }
@@ -438,9 +458,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         incrementCharacterQuestProgress(characterID, questID, amount);
     }
 
-    function submitWalletProgressAmount(uint256 questID, uint256 indexInTier, uint256 amount) public {
+    function submitWalletProgressAmount(uint256 questID, uint256 amount) public {
         _submitProgressAmount(questID, SEED_REWARD_WALLET_QUEST/*hack number to avoid bumping 0 accidentally*/, amount);
-        incrementWalletQuestProgress(questID, indexInTier, amount);
+        incrementWalletQuestProgress(questID, amount);
     }
 
     function _submitProgressAmount(uint256 questID, uint256 characterID, uint256 amount) private assertQuestsEnabled {
@@ -472,9 +492,9 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function incrementWalletQuestProgress(uint256 questID, uint256 indexInTier, uint256 progress) private {
+    function incrementWalletQuestProgress(uint256 questID, uint256 progress) private {
         require(progress > 0);
-        require(questID == quests[questTemplates[walletTier][indexInTier]].id); // wallet quest check
+        require(questID == questTemplates[walletTier][questIndexes[questID]]); // wallet quest tier check
         uint totalProgress = walletQuestProgress[msg.sender][questID] + progress;
         walletQuestProgress[msg.sender][questID] = totalProgress;
         emit WalletQuestProgressed(questID, msg.sender);
@@ -526,7 +546,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         return characters.getNFTVars(characterID, questDataKeys);
     }
 
-    function getQuestReward(Quest memory quest) private view returns (Reward memory) {
+    function getQuestReward(Quest memory quest) private pure returns (Reward memory) {
         return Reward(quest.id, quest.rewardType, quest.rewardRarity, quest.rewardAmount, quest.rewardExternalAddress, quest.reputationAmount);
     }
 
@@ -581,6 +601,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
             require(deadline > 0, "Missing deadline");
             questSupplies[questID] = supply;
             questDeadlines[questID] = deadline;
+        }
+        if(tier == walletTier) {
+            require(requirementType != ItemType.STAMINA && requirementType != ItemType.RAID, "Wrong input");
+            require(reputationAmount == 0 && rewardType != ItemType.EXPERIENCE, "Wrong reward");
         }
     }
 

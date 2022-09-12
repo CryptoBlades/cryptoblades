@@ -205,7 +205,7 @@
     },
     "links": {},
     "address": "0x44A7445F61468b60C1EFE564a4d122413D167D22",
-    "transactionHash": "0x61b42c173b317c736777e479180824a9b041db3a30e64925fa13d0e80a4338af"
+    "transactionHash": "0xfacc42c19eea8d025684d1b5859db6bb87b126a6de3ef6780ce988d20c1b7743"
   },
   "build/contracts/BurningManager.json": {
     "events": {
@@ -2484,7 +2484,7 @@
     },
     "links": {},
     "address": "0x070b1A95898B927A900A1F9F42b114154648E51A",
-    "transactionHash": "0x067f0e27b8f49f9920b466c44da7653331e48da9c2a3f85d43259f7f16885546"
+    "transactionHash": "0x206cb7a8bf1b81ad10fe82890271d5ebf7fcd7fb740e494f6754c2801ad397e3"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {
@@ -4546,7 +4546,8 @@
       }
     },
     "links": {},
-    "address": "0x9369ddE99E574A598ba067c0Ff394D96142167B1"
+    "address": "0x9369ddE99E574A598ba067c0Ff394D96142167B1",
+    "transactionHash": "0x585b6b95628926c71ce9cc5e48b697a61dd3d1ddf60487766ed95c066ced5af6"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -6392,11 +6393,74 @@
         ],
         "name": "WeeklyRewardSet",
         "type": "event"
+      },
+      "0x645b576ea1b70b2a340735005c6d0c3302b40b8079e0cc149f1db4d606be382d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "questID",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          }
+        ],
+        "name": "WalletQuestComplete",
+        "type": "event"
+      },
+      "0x3a75beb9093482f20af9201d383d16205421572864f41cae38bb6ba6328efe75": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "questID",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          }
+        ],
+        "name": "WalletQuestProgressed",
+        "type": "event"
+      },
+      "0x52790295db8a9172d05ce63d6a89c332757ae1a1760f64d9543133b0efcc623f": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "questID",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256[]",
+            "name": "rewards",
+            "type": "uint256[]"
+          }
+        ],
+        "name": "WalletQuestRewarded",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0xc97011880a37139BD5eEEAE7A2cf683a82D615e0",
-    "transactionHash": "0xd1eefc319b6f22b2079951225ae549defdc647869710c71e46435406cac6d034"
+    "transactionHash": "0xe8c803ad5649d425c75e48bba21144947ba7ca4612df330328e19a6ffe0f17cb"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},

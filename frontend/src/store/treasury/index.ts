@@ -199,6 +199,22 @@ const treasury = {
       return ratio;
     },
 
+    async getCurrentBestMultiplier({ rootState }: {rootState: IState}) {
+      const { Treasury } = rootState.contracts();
+      if(!Treasury || !rootState.defaultAccount) return;
+
+      const ids = await Treasury.methods.getActivePartnerProjectsIds().call(defaultCallOptions(rootState));
+      let bestMultiplier = 0;
+      for(const id of ids) {
+        const mul = +await Treasury.methods.getProjectMultiplier(id).call(defaultCallOptions(rootState));
+        if(mul > bestMultiplier) {
+          bestMultiplier = mul;
+        }
+      }
+
+      return bestMultiplier;
+    },
+
     async claimPartnerToken({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch},
                             { id, skillAmount, currentMultiplier, slippage }:
                             {id: number, skillAmount: string, currentMultiplier: string, slippage: string}) {
@@ -212,7 +228,7 @@ const treasury = {
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardSkill'),
         dispatch('fetchPartnerProject', id)
       ]);
     },
