@@ -76,6 +76,7 @@ export interface IState {
   skillPriceInUsd: number;
 
   skillBalance: string;
+  balance: string;
   skillRewards: string;
   maxRewardsClaimTax: string;
   rewardsClaimTax: string;
