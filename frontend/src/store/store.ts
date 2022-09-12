@@ -16,6 +16,7 @@ import {burningManager as featureFlagBurningManager} from '@/feature-flags';
 import {ERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from '@/stake-types';
 import {Nft} from '@/interfaces/Nft';
+import {getNFTCall} from '@/utils/multicall';
 import {Element} from '@/enums/Element';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
