@@ -720,11 +720,22 @@ const quests = {
 
       return await SimpleQuests.methods.submitWalletProgressAmount(questID, amountTimesDecimals.toString()).send(defaultCallOptions(rootState));
     },
-    async completeWalletQuest({ rootState }: {rootState: IState}, {questID}: {questID: number}) {
+    async completeWalletQuest({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, {questID}: {questID: number}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
 
-      return await SimpleQuests.methods.completeWalletQuest(questID).send(defaultCallOptions(rootState));
+      const result = await SimpleQuests.methods.completeWalletQuest(questID).send(defaultCallOptions(rootState));
+
+      const questRewards = result.events.WalletQuestRewarded.returnValues.rewards;
+      await Promise.all([
+        dispatch('updateWeaponIds'),
+        dispatch('updateShieldIds'),
+        dispatch('updateTrinketIds'),
+        dispatch('updateJunkIds'),
+        dispatch('updateKeyLootboxIds'),
+        dispatch('fetchDustBalance'),
+      ]);
+      return questRewards;
     },
     async requestPickableQuest({ rootState }: {rootState: IState}, {characterID, questID}: {characterID: number, questID: number}) {
       const { SimpleQuests } = rootState.contracts();
