@@ -792,10 +792,8 @@ export default Vue.extend({
   text-align: right;
 }
 
-@media (max-width: 1037px) {
-  .select-wrapper-items {
-    margin-top: 10px;
-  }
+.filter-combat > div {
+  margin-bottom: 10px;
 }
 
 .select-wrapper-items > select,
