@@ -692,7 +692,7 @@ h5{
 
 .enemy-character {
   position: relative;
-  width: 20rem;
+  width: inherit;
   cursor: pointer;
   background-position: center;
   background-repeat: no-repeat;
@@ -1172,6 +1172,10 @@ h1 {
   }
   .header-row {
     justify-content: center !important;
+  }
+
+  .enemy-character {
+    width: 20rem;
   }
 
   .hideMenu{
