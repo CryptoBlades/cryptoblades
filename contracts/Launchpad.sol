@@ -73,6 +73,8 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
 
     CryptoBlades _game;
 
+    mapping(address => mapping(uint256 => bool)) public didUserCommitToLaunch;
+
     function initialize(CryptoBlades game) public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -505,9 +507,11 @@ contract Launchpad is Initializable, AccessControlUpgradeable {
         require(block.timestamp >= windowStartTime && block.timestamp <= windowStartTime.add(vars[VAR_UNCLAIMED_COMMIT_WINDOW]), "Not a commit window");
         uint256 committingValue = amount.mul(skillPrice).div(1e18);
         require((launchTotalUnclaimedSkillCommittedValue[launchId].add(committingValue)).mul(vars[VAR_UNCLAIMED_TO_ALLOCATION_MULTIPLIER]) <= vars[VAR_UNCLAIMED_ALLOCATION_PERCENTAGE].mul(launchFundsToRaise[launchId]).div(100), "Unclaimed limit reached");
-        _game.deductAfterPartnerClaim(amount, msg.sender);
+        //_game.deductAfterPartnerClaim(amount, msg.sender); // turned off (temporarily?), supposedly shouldn't deduct unclaimed on committing
+        require(!didUserCommitToLaunch[msg.sender][launchId], "Already committed");
         launchUserUnclaimedSkillCommittedValue[launchId][whitelistedWallet] += committingValue;
         launchTotalUnclaimedSkillCommittedValue[launchId] += committingValue;
+        didUserCommitToLaunch[msg.sender][launchId] = true;
         
         emit SkillCommitted(msg.sender, whitelistedWallet, launchId, amount);
     }

@@ -3164,7 +3164,7 @@
     "events": {},
     "links": {},
     "address": "0xB28142391AF21fF4364E66C225E8d0a77C25E7DE",
-    "transactionHash": "0x417c09dd49c08ee1743f2bd656fdf0af864280e71856f86caed2148b015cbcba"
+    "transactionHash": "0x855ab1c1121b0811386ccd4dceeae742180fa9d4608ec3c7e59247210d176d9e"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},

@@ -3603,7 +3603,7 @@
     },
     "links": {},
     "address": "0x653feAF671378De40054c5E92bb940fa7ca93eD6",
-    "transactionHash": "0xb8630c4d7bb893386da7da1015a3bd424e9307bb36ae152b8d4d330e7b4ab4dc"
+    "transactionHash": "0xb6bc7ab54b9331f43ffc9e00541973a3bebc6df0e3322a2df6492e02ef5a403e"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {
