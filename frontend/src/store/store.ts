@@ -1130,9 +1130,11 @@ export default new Vuex.Store<IState>({
 
     /**
      *
-     * @param characterId characterId of the character being fetched
-     * @param characterData the optional character data gotten from use of multiCall
-     * @param inGarrison true if from fetchGarrisonCharacters
+     * @param param0 object containing references to relevant globals
+     * @param param1 object containing the main params. They are:
+     * - characterId: characterId of the character being fetched
+     * - characterData: the optional character data gotten from use of multiCall
+     * - inGarrison: true if from fetchGarrisonCharacters
      */
     async fetchCharacter(
       { state, commit, dispatch },
@@ -2880,14 +2882,8 @@ export default new Vuex.Store<IState>({
         call.address.toLowerCase(),
         itf.encodeFunctionData(call.name, call.params),
       ]);
-      const a = MultiCall.methods.aggregate(data);
-      console.log('a: ', a);
-      // a.call(defaultCallOptions(state));
-      console.log('defaultCallOptions: ', defaultCallOptions(state));
       const { returnData } = await MultiCall.methods.aggregate(data).call(defaultCallOptions(state)) || [];
-      console.log('6');
       const res = returnData.map((call, i) => itf.decodeFunctionResult(calls[i].name, call));
-      console.log(res);
       return res;
     },
   }
