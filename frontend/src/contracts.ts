@@ -72,7 +72,7 @@ import { StakingContractEntry, stakingContractsInfo, nftStakingContractsInfo } f
 
 import {raid, pvp, quests, burningManager} from './feature-flags';
 import {currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
-import {abi as multicallAbi} from './data/MultiCall.json';
+import {abi as multicallAbi} from './data/Multicall.json';
 
 interface RaidContracts {
   Raid1?: Contracts['Raid1'];

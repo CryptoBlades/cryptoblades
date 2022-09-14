@@ -31,7 +31,6 @@ import {abi as erc721Abi} from '@/../../build/contracts/IERC721.json';
 import { abi as charactersAbi } from '@/../../build/contracts/Characters.json';
 import { abi as weaponsAbi } from '@/../../build/contracts/Weapons.json';
 import { abi as shieldsAbi } from '@/../../build/contracts/Shields.json';
-import { abi as marketAbi } from '@/../../build/contracts/NFTMarket.json';
 import { abi as raidTrinketsAbi } from '@/../../build/contracts/RaidTrinket.json';
 import { abi as junkAbi } from '@/../../build/contracts/Junk.json';
 import BigNumber from 'bignumber.js';
@@ -1103,13 +1102,17 @@ export default new Vuex.Store<IState>({
       const { Characters } = state.contracts();
       if (!Characters) return;
 
+      console.log('fetch 1');
+      console.log('address: ', Characters?.options.address);
+      console.log('getNFTCall: ', getNFTCall(charactersAbi, Characters?.options.address, 'get', characterIds.map(characterId => [characterId])));
       const multiCharacterDatas: string[] = await dispatch(
         'multicall',
         getNFTCall(charactersAbi, Characters?.options.address, 'get', characterIds.map(characterId => [characterId])));
-
+      console.log('fetch 2');
       characterIds.forEach((characterId, i) => {
         dispatch('fetchCharacter', { characterId, characterData: multiCharacterDatas[i] });
       });
+      console.log('fetch 3');
     },
 
     async fetchGarrisonCharacters({ state, dispatch }, garrisonCharacterIds: (string | number)[]) {
@@ -2870,14 +2873,21 @@ export default new Vuex.Store<IState>({
     },
 
     async multicall({state}, {abi, calls}) {
+      console.log('in multiCall');
       const { MultiCall } = state.contracts();
       const itf = new Interface(abi);
       const data = calls.map((call: any) => [
         call.address.toLowerCase(),
         itf.encodeFunctionData(call.name, call.params),
       ]);
-      const { returnData } = await MultiCall.methods.aggregate(data).call(defaultCallOptions(state));
+      const a = MultiCall.methods.aggregate(data);
+      console.log('a: ', a);
+      // a.call(defaultCallOptions(state));
+      console.log('defaultCallOptions: ', defaultCallOptions(state));
+      const { returnData } = await MultiCall.methods.aggregate(data).call(defaultCallOptions(state)) || [];
+      console.log('6');
       const res = returnData.map((call, i) => itf.decodeFunctionResult(calls[i].name, call));
+      console.log(res);
       return res;
     },
   }
