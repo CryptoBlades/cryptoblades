@@ -369,7 +369,8 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const treasuryContractAddr = getConfigValue('VUE_APP_TREASURY_CONTRACT_ADDRESS') || (treasuryNetworks as Networks)[networkId]!.address;
   const Treasury = new web3.eth.Contract(treasuryAbi as Abi, treasuryContractAddr);
 
-  const multicallAddr = getConfigValue('VUE_APP_CONTRACT_ADDRESS');
+  const multicallAddr = getConfigValue('VUE_APP_MULTICALL_CONTRACT_ADDRESS');
+  console.log('multicallAddr', multicallAddr);
   const MultiCall = new web3.eth.Contract(multicallAbi as Abi, multicallAddr);
 
   let BurningManager;
