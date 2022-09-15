@@ -2867,7 +2867,7 @@
     "events": {},
     "links": {},
     "address": "0x30b329028932408D0e1109aD050Ac45CA54846c5",
-    "transactionHash": "0x103bdfeb369e0115d8997c76d227d544b45cae771f35f315a966619e3a797304|{\"gasBurned\":14602481373932,\"tx\":\"47ZCVxLZwwXuLUbDzyJoxd6g3oGpbCWHqagQ48zDWNSg\"}"
+    "transactionHash": "0x608a21e0626298df3f2936326091c5c20601f174b35c5362bdb823078443d79f"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
