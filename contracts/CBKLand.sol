@@ -101,7 +101,6 @@ contract CBKLand is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     }
 
     // To be used by the NFT bridge. This is fine as the logic will still be maintend by CBKLandSale deployed to BSC.
-    // We are just mirroring on other chains
     // ChunkId set on global T1s or reseller T1s will include BE server which has access to BSC CBKLandSale
     function mintOrUpdate(uint256 tokenID, address minter, uint256 tier, uint256 chunkId, uint256 x, uint256 y, address reseller) public restricted returns (uint256) {
         
