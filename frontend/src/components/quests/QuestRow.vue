@@ -22,7 +22,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {Accessors, PropType} from 'vue/types/options';
-import QuestCharacter from '@/components/smart/QuestCharacter.vue';
+import QuestCharacter from '@/components/quests/QuestCharacter.vue';
 import QuestRequirements from '@/components/smart/QuestRequirements.vue';
 import QuestRewards from '@/components/smart/QuestRewards.vue';
 import QuestActions from '@/components/smart/QuestActions.vue';

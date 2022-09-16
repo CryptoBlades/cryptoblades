@@ -14,7 +14,7 @@ import Vue from 'vue';
 import {PropType} from 'vue/types/options';
 import {QuestItemType, Rarity} from '@/views/Quests.vue';
 import NftList, {NftIdType} from '@/components/smart/NftList.vue';
-import QuestComponentIcon from '@/components/smart/QuestComponentIcon.vue';
+import QuestComponentIcon from '@/components/quests/QuestComponentIcon.vue';
 import {questItemTypeSupportsStars, questItemTypeSupportsTimesValue} from '../../utils/common';
 
 export default Vue.extend({

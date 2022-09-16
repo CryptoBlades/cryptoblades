@@ -34,7 +34,7 @@
 import Vue from 'vue';
 import {mapActions} from 'vuex';
 import {Quest, Rarity, QuestTemplateType} from '@/views/Quests.vue';
-import QuestsList from './QuestsList.vue';
+import QuestsList from '../quests/QuestsList.vue';
 
 interface StoreMappedActions {
   getQuestTemplates(payload: { tier: number }): Promise<Quest[]>;

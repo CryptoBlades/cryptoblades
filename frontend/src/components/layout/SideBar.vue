@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import CharacterDisplay from '../smart/CharacterDisplay.vue';
+import CharacterDisplay from '../character/CharacterDisplay.vue';
 import '@/mixins/general';
 
 export default Vue.extend({

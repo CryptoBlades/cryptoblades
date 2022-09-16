@@ -13,7 +13,7 @@
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
 import {Quest, QuestItemType} from '@/views/Quests.vue';
-import QuestComponentIcon from './QuestComponentIcon.vue';
+import QuestComponentIcon from '../quests/QuestComponentIcon.vue';
 
 export default Vue.extend({
   components: {QuestComponentIcon},

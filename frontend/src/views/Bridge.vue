@@ -304,7 +304,7 @@ import {Contract, Contracts, IState} from '@/interfaces';
 import {NftIdType} from '@/components/smart/NftList.vue';
 import {Characters, Shields, Weapons} from '../../../build/abi-interfaces';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
-import CharacterList from '../components/smart/CharacterList.vue';
+import CharacterList from '../components/character/CharacterList.vue';
 import NftList from '../components/smart/NftList.vue';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
 import {fromWeiEther, toBN} from '@/utils/common';

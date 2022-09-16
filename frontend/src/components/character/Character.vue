@@ -236,9 +236,9 @@ import Vue from 'vue';
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { BModal } from 'bootstrap-vue';
 
-import SkinsTab from '@/components/smart/CharacterTabs/SkinsTab.vue';
-import OptionsTab from '@/components/smart/CharacterTabs/OptionsTab.vue';
-import UpgradeTab from '@/components/smart/CharacterTabs/UpgradeTab.vue';
+import SkinsTab from '@/components/character/CharacterTabs/SkinsTab.vue';
+import OptionsTab from '@/components/character/CharacterTabs/OptionsTab.vue';
+import UpgradeTab from '@/components/character/CharacterTabs/UpgradeTab.vue';
 import { Nft } from '@/interfaces/Nft';
 import { getCharacterArt } from '@/character-arts-placeholder';
 import { Quest, ReputationLevelRequirements, ReputationTier } from '@/views/Quests.vue';

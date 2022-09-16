@@ -336,7 +336,7 @@
 <script lang='ts'>
 import BN from 'bignumber.js';
 import BigButton from '../components/BigButton.vue';
-import CharacterList from '../components/smart/CharacterList.vue';
+import CharacterList from '../components/character/CharacterList.vue';
 import Hint from '../components/Hint.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
