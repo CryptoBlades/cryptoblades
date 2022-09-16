@@ -130,7 +130,7 @@ import QuestReward from '@/components/quests/QuestReward.vue';
 import QuestsList from '@/components/quests/QuestsList.vue';
 import hourglass from '@/assets/hourglass.png';
 import {getTimeRemaining} from '@/utils/common';
-import {NftIdType} from '@/components/smart/NftList.vue';
+import {NftIdType} from '@/components/nftList/NftList.vue';
 
 export interface WeeklyReward {
   id: number;

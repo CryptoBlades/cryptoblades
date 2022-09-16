@@ -1,7 +1,7 @@
 <template>
   <div class="body main-font options">
     <img
-      src="../assets/navbar-icons/burger-menu.png"
+      src="../../assets/navbar-icons/burger-menu.png"
       class="burger-icon"
       @click="openMenu"
     />
@@ -9,7 +9,7 @@
       <b-row>
         <b-col>
           <div @click="closeMenu" class="x-button text-right">
-            <img src="../assets/navbar-icons/Close.png" alt="Close"/> {{ $t("combat.close") }}
+            <img src="../../assets/navbar-icons/Close.png" alt="Close"/> {{ $t("combat.close") }}
           </div>
         </b-col>
       </b-row>
@@ -23,7 +23,7 @@
               :to="{ name: 'plaza' }"
               exact
             >
-              <img src="../assets/navbar-icons/plaza-icon.png" alt="Plaza"/>
+              <img src="../../assets/navbar-icons/plaza-icon.png" alt="Plaza"/>
               <span>{{ $t("viewLink.character") }}</span>
             </router-link>
 
@@ -32,7 +32,7 @@
               :to="{ name: 'blacksmith' }"
               exact
             >
-              <img src="../assets/navbar-icons/blacksmith-icon.png" alt="Blacksmith"/>
+              <img src="../../assets/navbar-icons/blacksmith-icon.png" alt="Blacksmith"/>
               <span>{{ $t("viewLink.blacksmith") }}</span>
             </router-link>
 
@@ -41,7 +41,7 @@
               :to="{ name: 'combat' }"
               exact
             >
-              <img src="../assets/navbar-icons/combat-icon.png" alt="Adventure"/>
+              <img src="../../assets/navbar-icons/combat-icon.png" alt="Adventure"/>
               <span>{{ $t("viewLink.adventure") }}</span>
             </router-link>
 
@@ -52,7 +52,7 @@
               exact
               :class="supportsPvP ? '' : 'disabled-link'"
             >
-              <img src="../assets/navbar-icons/arena-icon.png" alt="Arena"/>
+              <img src="../../assets/navbar-icons/arena-icon.png" alt="Arena"/>
               <span>{{ $t("viewLink.arena") }} <hint
                 v-if="!supportsPvP"
                 class="hint"
@@ -61,7 +61,7 @@
             </router-link>
 
             <div v-else class="menu-icon disabled-hover">
-              <img src="../assets/navbar-icons/arena-icon.png" alt="Arena"/>
+              <img src="../../assets/navbar-icons/arena-icon.png" alt="Arena"/>
               <span>{{ $t("viewLink.arena") }}</span>
             </div>
 
@@ -71,12 +71,12 @@
               :to="{ name: 'raid' }"
               exact
             >
-              <img src="../assets/navbar-icons/raid-icon.png" alt="Raid"/>
+              <img src="../../assets/navbar-icons/raid-icon.png" alt="Raid"/>
               <span>{{ $t("viewLink.raid") }}</span>
             </router-link>
 
             <div v-if="!raid" class="menu-icon disabled-hover">
-              <img src="../assets/navbar-icons/raid-icon.png" alt="Raid"/>
+              <img src="../../assets/navbar-icons/raid-icon.png" alt="Raid"/>
               <span>{{ $t("viewLink.raid") }}</span>
             </div>
 
@@ -87,7 +87,7 @@
               exact
               :class="supportsQuests ? '' : 'disabled-link'"
             >
-              <img src="../assets/navbar-icons/quests-icon.png" alt="Quests"/>
+              <img src="../../assets/navbar-icons/quests-icon.png" alt="Quests"/>
               <span>{{ $t("viewLink.quests") }} <hint
                 v-if="!supportsQuests"
                 class="hint"
@@ -100,7 +100,7 @@
               :href="BazaarLink()"
               target="_blank"
             >
-              <img src="../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
+              <img src="../../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
               <span>{{ $t("viewLink.bazaar") }}</span>
             </a>
 
@@ -110,7 +110,7 @@
               target="_blank"
               :class="supportsDrawbridge ? '' : 'disabled-link'"
             >
-              <img src="../assets/navbar-icons/drawbridge-icon.png" alt="Drawbridge"/>
+              <img src="../../assets/navbar-icons/drawbridge-icon.png" alt="Drawbridge"/>
               <span>{{ $t("viewLink.drawbridge") }} <hint
                 v-if="!supportsDrawbridge"
                 class="hint"
@@ -123,12 +123,12 @@
               :to="{ name: 'select-stake-type' }"
               exact
             >
-              <img src="../assets/navbar-icons/stake-icon.png" alt="Stake"/>
+              <img src="../../assets/navbar-icons/stake-icon.png" alt="Stake"/>
               <span>{{ $t("viewLink.stake") }}</span>
             </router-link>
 
             <router-link class="menu-icon" :to="{ name: 'treasury' }" exact>
-              <img src="../assets/navbar-icons/treasury-icon.png" alt="Treasury"/>
+              <img src="../../assets/navbar-icons/treasury-icon.png" alt="Treasury"/>
               <span>{{ $t("viewLink.treasury") }}</span>
             </router-link>
 
@@ -137,7 +137,7 @@
               :to="{ name: 'leaderboard' }"
               exact
             >
-              <img src="../assets/navbar-icons/leaderboard-icon.png" alt="Leaderboard"/>
+              <img src="../../assets/navbar-icons/leaderboard-icon.png" alt="Leaderboard"/>
               <span>{{ $t("viewLink.leaderboard") }}</span>
             </router-link>
 
@@ -147,12 +147,12 @@
               v-if="isBridgeEnabled"
               exact
             >
-              <img src="../assets/navbar-icons/bridge-icon.png" alt="Bridge"/>
+              <img src="../../assets/navbar-icons/bridge-icon.png" alt="Bridge"/>
               <span>{{ $t("viewLink.nftbridge") }}</span>
             </router-link>
 
             <div v-else class="menu-icon disabled-hover">
-              <img src="../assets/navbar-icons/bridge-icon.png" alt="Bridge"/>
+              <img src="../../assets/navbar-icons/bridge-icon.png" alt="Bridge"/>
               <span>{{ $t("viewLink.nftbridge") }}</span>
             </div>
 
@@ -161,17 +161,17 @@
               href="https://cryptoblades.gitbook.io/wiki/"
               target="_blank"
             >
-              <img src="../assets/navbar-icons/wiki-icon.png" alt="Wiki"/>
+              <img src="../../assets/navbar-icons/wiki-icon.png" alt="Wiki"/>
               <span>{{ $t("viewLink.wiki") }}</span>
             </a>
 
             <router-link class="menu-icon" :to="{ name: 'options' }" exact>
-              <img src="../assets/navbar-icons/gear-icon.png" alt="Options"/>
+              <img src="../../assets/navbar-icons/gear-icon.png" alt="Options"/>
               <span>{{ $t("viewLink.settings") }}</span>
             </router-link>
 
             <router-link class="menu-icon" :to="{ name: 'nft-display' }" exact>
-              <img src="../assets/navbar-icons/nft-display.svg" class="gold-icon" alt="NFT Display"/>
+              <img src="../../assets/navbar-icons/nft-display.svg" class="gold-icon" alt="NFT Display"/>
               <span>{{ $t("viewLink.nftDisplay") }}</span>
             </router-link>
 
@@ -181,7 +181,7 @@
               :to="{ name: 'admin' }"
               exact
             >
-              <img src="../assets/navbar-icons/gear-icon.png" alt="Admin"/>
+              <img src="../../assets/navbar-icons/gear-icon.png" alt="Admin"/>
               <span>{{ $t("viewLink.admin") }}</span>
             </router-link>
 
@@ -284,13 +284,13 @@
 </template>
 
 <script lang="ts">
-import Events from '../events';
+import Events from '../../events';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import BigNumber from 'bignumber.js';
 import {Accessors} from 'vue/types/options';
 import Vue from 'vue';
-import {fromWeiEther, toBN} from '../utils/common';
-import {nft_bridge as bridgeEnabled} from './../feature-flags';
+import {fromWeiEther, toBN} from '../../utils/common';
+import {nft_bridge as bridgeEnabled} from '../../feature-flags';
 import {SupportedProject} from '@/views/Treasury.vue';
 import Hint from '@/components/Hint.vue';
 import { portal, pvp, quests, raid} from '@/feature-flags';

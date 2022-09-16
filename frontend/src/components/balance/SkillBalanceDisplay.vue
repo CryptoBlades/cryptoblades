@@ -157,7 +157,7 @@ import i18n from '@/i18n';
 import {TranslateResult} from 'vue-i18n';
 import { ICharacter } from '@/interfaces';
 import { getCleanName } from '@/rename-censor';
-import ElementTrait from '@/components/smart/ElementTrait.vue';
+import ElementTrait from '@/components/element/ElementTrait.vue';
 import { SupportedProject } from '@/views/Treasury.vue';
 import PartneredProject from '../PartneredProject.vue';
 

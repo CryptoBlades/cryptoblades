@@ -17,7 +17,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
-import Loader from '../components/Loader.vue';
+import Loader from './loader/Loader.vue';
 export default Vue.extend({
   props:{
     title:{

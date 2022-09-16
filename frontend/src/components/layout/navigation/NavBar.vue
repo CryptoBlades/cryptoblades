@@ -28,8 +28,8 @@
 import Vue from 'vue';
 
 import ViewLinks from '../../ViewLinks.vue';
-import Options from '../../Options.vue';
-import SkillBalanceDisplay from '../../smart/SkillBalanceDisplay.vue';
+import Options from '../../options/Options.vue';
+import SkillBalanceDisplay from '../../balance/SkillBalanceDisplay.vue';
 
 import Events from '../../../events';
 import {mapGetters, mapMutations} from 'vuex';
