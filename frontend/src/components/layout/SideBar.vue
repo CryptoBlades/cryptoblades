@@ -13,7 +13,7 @@
                 coinzilla_display.push(c_display_preferences);
           </script2>
     </div>
-    <img src="../assets/infoDivider.png" class="info-divider" alt=""/>
+    <img src="../../assets/infoDivider.png" class="info-divider" alt=""/>
   </div>
 </template>
 

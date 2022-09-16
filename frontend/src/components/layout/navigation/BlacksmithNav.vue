@@ -4,7 +4,7 @@
           <div role="button" class="nav-char none-mobile" :class="['d-flex gap-3 align-items-center link',
             (activeTab === 'forge') ? 'active' : '']" @click="$emit('toggle', 'forge')">
             <div class="img-nav">
-              <img src="../assets/blacksmith/forge.png"/>
+              <img src="../../../assets/blacksmith/forge.png"/>
             </div>
             <span class="main-font text-muted fs-5">{{$t('blacksmith.forge')}}</span>
           </div>
@@ -13,7 +13,7 @@
           <div role="button" class="none-mobile" :class="['d-flex gap-3 align-items-center link mt-4 mt-md-0',
             (activeTab === 'salvage') ? 'active' : '']" @click="$emit('toggle', 'salvage')">
             <div class="img-nav">
-              <img src="../assets/blacksmith/salvage.png"/>
+              <img src="../../../assets/blacksmith/salvage.png"/>
             </div>
             <span  class="main-font text-muted fs-5">{{$t('blacksmith.salvage')}}</span>
           </div>
@@ -166,7 +166,7 @@ export default Vue.extend({
   vertical-align: middle;
   align-items: center;
   justify-content: space-between;
-  background-image: url('../assets/recruit-btn.svg');
+  background-image: url('../../../assets/recruit-btn.svg');
   background-color: transparent;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -188,7 +188,7 @@ export default Vue.extend({
   align-items: center;
   vertical-align: middle;
   justify-content: center;
-  background-image: url('../assets/recruit-btn.svg');
+  background-image: url('../../../assets/recruit-btn.svg');
   background-color: transparent;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -308,7 +308,7 @@ export default Vue.extend({
   }
 
   .recruit-btn{
-    background-image: url('../assets/recruit-btn.svg');
+    background-image: url('../../../assets/recruit-btn.svg');
   }
 
   .recruit-btn{

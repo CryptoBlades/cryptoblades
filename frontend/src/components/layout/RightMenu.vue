@@ -115,7 +115,7 @@ export default {
   }
 
   .forge-icon-x1{
-    content: url('../assets/blacksmith/x1.png');
+    content: url('../../assets/blacksmith/x1.png');
     height: 50px;
     width: 55px;
     position: absolute;
@@ -123,7 +123,7 @@ export default {
   }
 
   .forge-icon-x10{
-    content: url('../assets/blacksmith/x10.png');
+    content: url('../../assets/blacksmith/x10.png');
     height: 50px;
     width: 55px;
     position: absolute;
@@ -131,7 +131,7 @@ export default {
   }
 
   .reforge{
-    content: url('../assets/blacksmith/special.png');
+    content: url('../../assets/blacksmith/special.png');
     height: 50px;
     width: 50px;
     position: absolute;
@@ -139,7 +139,7 @@ export default {
   }
 
   .special{
-    content: url('../assets/blacksmith/reforge.png');
+    content: url('../../assets/blacksmith/reforge.png');
     height: 50px;
     width: 50px;
     position: absolute;
@@ -148,7 +148,7 @@ export default {
 
 
   .lb-dust{
-    content: url('../assets/dusts/lesserDust.png');
+    content: url('../../assets/dusts/lesserDust.png');
     height: 40px;
     width: 40px;
     position: absolute;
@@ -156,7 +156,7 @@ export default {
   }
 
    .four-dust{
-    content: url('../assets/dusts/greaterDust.png');
+    content: url('../../assets/dusts/greaterDust.png');
     height: 40px;
     width: 40px;
     position: absolute;
@@ -164,7 +164,7 @@ export default {
   }
 
    .five-dust{
-    content: url('../assets/dusts/powerfulDust.png');
+    content: url('../../assets/dusts/powerfulDust.png');
     height: 40px;
     width: 40px;
     position: absolute;
@@ -229,7 +229,7 @@ export default {
     }
 
     .icon-hint{
-      content: url('../assets/hint.png');
+      content: url('../../assets/hint.png');
       height: 30px;
       width: 30px;
     }

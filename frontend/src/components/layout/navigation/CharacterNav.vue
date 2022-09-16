@@ -13,7 +13,7 @@
             (activeTab === 'info' && havePlazaCharacters) ? 'active' : '']" @click="$emit('toggle', 'info')">
             <div class="img-nav">
               <div class="img-frame"></div>
-              <img src="../assets/navbar-icons/plaza-icon.png"/>
+              <img src="../../../assets/navbar-icons/plaza-icon.png"/>
             </div>
             <span class="main-font text-white fs-5">{{$t('Character.info')}}</span>
           </div>
@@ -24,11 +24,11 @@
             <div class="img-nav">
               <div class="img-frame"></div>
                 <div class="gar-container">
-                  <img class="gar" src="../assets/navbar-icons/plaza-icon.png"/>
+                  <img class="gar" src="../../../assets/navbar-icons/plaza-icon.png"/>
                 </div>
                 <div class="gar-container" >
-                  <img class="gar" src="../assets/navbar-icons/plaza-icon.png"/>
-                  <img class="gar" src="../assets/navbar-icons/plaza-icon.png"/>
+                  <img class="gar" src="../../../assets/navbar-icons/plaza-icon.png"/>
+                  <img class="gar" src="../../../assets/navbar-icons/plaza-icon.png"/>
                 </div>
             </div>
             <span  class="main-font text-white fs-5">{{$t('Character.garrison')}}</span>
@@ -38,7 +38,7 @@
             (activeTab === 'burn') ? 'active' : '']" @click="$emit('toggle', 'burn')">
             <div class="img-nav">
               <div class="img-frame"></div>
-              <img src="../assets/soul.png"/>
+              <img src="../../../assets/soul.png"/>
             </div>
             <span class="main-font text-white fs-5">{{$t('Character.characterBurn')}}</span>
           </div>
@@ -117,7 +117,7 @@ export default Vue.extend({
   vertical-align: middle;
   align-items: center;
   justify-content: space-between;
-  background-image: url('../assets/recruit-btn.svg');
+  background-image: url('../../../assets/recruit-btn.svg');
   background-color: transparent;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -139,7 +139,7 @@ export default Vue.extend({
   align-items: center;
   vertical-align: middle;
   justify-content: center;
-  background-image: url('../assets/recruit-btn.svg');
+  background-image: url('../../../assets/recruit-btn.svg');
   background-color: transparent;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -163,7 +163,7 @@ export default Vue.extend({
   vertical-align: middle;
   align-items: center;
   justify-content: space-between;
-  background-image: url('../assets/sool-border.svg');
+  background-image: url('../../../assets/sool-border.svg');
   background-color: transparent;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -183,14 +183,14 @@ export default Vue.extend({
 }
 
 .soul-icon{
-  content: url('../assets/soul-icon.png');
+  content: url('../../../assets/soul-icon.png');
   height: 17px;
   width: 12px;
   margin-right: 20px;
 }
 
 .add-skill{
-  content: url('../assets/add-skill-icon.svg');
+  content: url('../../../assets/add-skill-icon.svg');
   height: 17px;
   width: 17px;
   margin-left: 5px;
@@ -295,7 +295,7 @@ export default Vue.extend({
   }
 
   .recruit-btn{
-    background-image: url('../assets/recruit-btn.svg');
+    background-image: url('../../../assets/recruit-btn.svg');
   }
 
   .recruit-btn{
@@ -360,19 +360,19 @@ export default Vue.extend({
 }
 
 #plaza{
-  content: url('../assets/navbar-icons/plaza-icon.png');
+  content: url('../../../assets/navbar-icons/plaza-icon.png');
   height: 1.1em;
   margin-right: 1em;
 }
 
 #garisson{
-  content: url('../assets/garisson.png');
+  content: url('../../../assets/garisson.png');
   height: 1.1em;
   margin-right: 1em;
 }
 
 #burn{
-  content: url('../assets/soul.png');
+  content: url('../../../assets/soul.png');
   height: 1.1em;
   margin-right: 1em;
 }

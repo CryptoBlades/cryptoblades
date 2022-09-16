@@ -23,9 +23,9 @@
 import Vue from 'vue';
 import {Accessors, PropType} from 'vue/types/options';
 import QuestCharacter from '@/components/quests/QuestCharacter.vue';
-import QuestRequirements from '@/components/smart/QuestRequirements.vue';
-import QuestRewards from '@/components/smart/QuestRewards.vue';
-import QuestActions from '@/components/smart/QuestActions.vue';
+import QuestRequirements from '@/components/quests/QuestRequirements.vue';
+import QuestRewards from '@/components/quests/QuestRewards.vue';
+import QuestActions from '@/components/quests/QuestActions.vue';
 import {Quest, ReputationLevelRequirements, Rarity, RewardType, QuestTemplateType} from '@/views/Quests.vue';
 import {mapActions, mapGetters} from 'vuex';
 import {Nft, NftStatus} from '@/interfaces/Nft';

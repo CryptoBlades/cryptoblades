@@ -333,10 +333,10 @@ import {
   TierChances,
   QuestTemplateType
 } from '../../../views/Quests.vue';
-import QuestTemplatesDisplay from '../QuestTemplatesDisplay.vue';
-import QuestRequirements from '../QuestRequirements.vue';
-import QuestRewards from '../QuestRewards.vue';
-import QuestActions from '../QuestActions.vue';
+import QuestTemplatesDisplay from '../../quests/QuestTemplatesDisplay.vue';
+import QuestRequirements from '../../quests/QuestRequirements.vue';
+import QuestRewards from '../../quests/QuestRewards.vue';
+import QuestActions from '../../quests/QuestActions.vue';
 import {isValidWeb3Address} from '@/utils/common';
 
 interface StoreMappedActions {

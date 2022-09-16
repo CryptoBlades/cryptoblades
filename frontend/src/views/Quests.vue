@@ -126,7 +126,7 @@ import {Nft} from '@/interfaces/Nft';
 import {Accessors} from 'vue/types/options';
 import QuestRow from '@/components/quests/QuestRow.vue';
 import QuestComponentIcon from '@/components/quests/QuestComponentIcon.vue';
-import QuestReward from '@/components/smart/QuestReward.vue';
+import QuestReward from '@/components/quests/QuestReward.vue';
 import QuestsList from '@/components/quests/QuestsList.vue';
 import hourglass from '@/assets/hourglass.png';
 import {getTimeRemaining} from '@/utils/common';

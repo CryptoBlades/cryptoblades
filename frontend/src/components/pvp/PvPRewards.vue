@@ -33,7 +33,7 @@
 <script>
 import BN from 'bignumber.js';
 import { mapState, mapActions } from 'vuex';
-import PvPButton from '../smart/PvPButton.vue';
+import PvPButton from '../pvp/PvPButton.vue';
 
 export default {
   components: {

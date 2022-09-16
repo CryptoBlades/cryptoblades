@@ -74,7 +74,7 @@
 </template>
 
 <script>
-import PvPSeparator from '../smart/PvPSeparator.vue';
+import PvPSeparator from '../pvp/PvPSeparator.vue';
 
 export default {
   components: {
