@@ -94,7 +94,7 @@ import BigButton from './components/BigButton.vue';
 import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/layout/navigation/NavBar.vue';
 import CharacterBar from './components/layout/CharacterBar.vue';
-import WeaponRowGrid from './components/smart/WeaponRowGrid.vue';
+import WeaponRowGrid from './components/layout/WeaponRowGrid.vue';
 import { apiUrl } from './utils/common';
 import i18n from './i18n';
 import { getConfigValue } from './contracts';

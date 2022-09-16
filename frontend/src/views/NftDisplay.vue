@@ -104,7 +104,7 @@ import { Accessors } from 'vue/types/options';
 import { Contract, Contracts } from '@/interfaces';
 import { NftIdType } from '@/components/smart/NftList.vue';
 import { Characters, Shields, Weapons } from '../../../build/abi-interfaces';
-import WeaponGrid from '../components/smart/WeaponGrid.vue';
+import WeaponGrid from '../components/layout/WeaponGrid.vue';
 import CharacterList from '../components/character/CharacterList.vue';
 import NftList from '../components/smart/NftList.vue';
 import { fromWeiEther } from '@/utils/common';
