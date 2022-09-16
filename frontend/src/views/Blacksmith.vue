@@ -611,7 +611,7 @@
 <script lang='ts'>
 import BN from 'bignumber.js';
 import WeaponGrid from '../components/smart/WeaponGrid.vue';
-import RightMenu from '../components/RightMenu.vue';
+import RightMenu from '../components/layout/RightMenu.vue';
 import BigButton from '../components/BigButton.vue';
 import { getWeaponArt } from '@/weapon-arts-placeholder';
 import { getWeaponRarity } from '@/weapon-element';
@@ -629,7 +629,7 @@ import { fromWeiEther, toBN } from '@/utils/common';
 import i18n from '@/i18n';
 import Events from '../events';
 import SpecialWeaponForgeModal from '@/components/smart/SpecialWeaponForgeModal.vue';
-import BlacksmithNav from '@/components/BlacksmithNav.vue';
+import BlacksmithNav from '@/components/layout/navigation/BlacksmithNav.vue';
 import { getConfigValue } from '@/contracts';
 import {Element} from '@/enums/Element';
 

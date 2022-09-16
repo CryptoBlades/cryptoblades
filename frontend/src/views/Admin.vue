@@ -9,7 +9,7 @@
 import Vue from 'vue';
 import {mapGetters, mapState} from 'vuex';
 import {Contract} from '@/interfaces';
-import AdminTab from '@/components/smart/AdminTab.vue';
+import AdminTab from '@/components/admin/AdminTab.vue';
 
 interface Tab {
   title: string;

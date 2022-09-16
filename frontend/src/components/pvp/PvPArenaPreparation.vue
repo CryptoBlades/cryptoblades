@@ -200,7 +200,7 @@ import BN from 'bignumber.js';
 import { BPopover } from 'bootstrap-vue';
 import PvPWeapon from './PvPWeapon.vue';
 import PvPShield from './PvPShield.vue';
-import PvPCharacter from '../pvp/PvPCharacter.vue';
+import PvPCharacter from './PvPCharacter.vue';
 import PvPSeparator from './PvPSeparator.vue';
 import checkIcon from '../../assets/checkImage.svg';
 import ellipseIcon from '../../assets/ellipseImage.svg';

@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import CharacterDisplay from './smart/CharacterDisplay.vue';
+import CharacterDisplay from '../smart/CharacterDisplay.vue';
 import '@/mixins/general';
 
 

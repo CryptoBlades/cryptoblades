@@ -158,7 +158,7 @@ import { Nft } from '@/interfaces/Nft';
 import { CharacterPower } from '@/interfaces';
 import BigButton from '@/components/BigButton.vue';
 import CharacterList from '@/components/smart/CharacterList.vue';
-import CharacterNav from '@/components/CharacterNav.vue';
+import CharacterNav from '@/components/layout/navigation/CharacterNav.vue';
 import Character from '@/components/smart/Character.vue';
 import Events from '@/events';
 import { getConfigValue } from '@/contracts';

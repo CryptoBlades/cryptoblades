@@ -93,7 +93,7 @@ import { mapState, mapActions } from 'vuex';
 import PvPWeapon from './PvPWeapon.vue';
 import PvPShield from './PvPShield.vue';
 import PvPButton from './PvPButton.vue';
-import PvPCharacter from '../pvp/PvPCharacter.vue';
+import PvPCharacter from './PvPCharacter.vue';
 import dayjs from 'dayjs';
 import PvPArenaInfo from '../pvp/PvPArenaInfo.vue';
 import i18n from '../../i18n';

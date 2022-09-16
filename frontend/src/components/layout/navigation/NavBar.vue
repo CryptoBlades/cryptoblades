@@ -27,11 +27,11 @@
 <script lang="ts">
 import Vue from 'vue';
 
-import ViewLinks from './ViewLinks.vue';
-import Options from './Options.vue';
-import SkillBalanceDisplay from './smart/SkillBalanceDisplay.vue';
+import ViewLinks from '../../ViewLinks.vue';
+import Options from '../../Options.vue';
+import SkillBalanceDisplay from '../../smart/SkillBalanceDisplay.vue';
 
-import Events from '../events';
+import Events from '../../../events';
 import {mapGetters, mapMutations} from 'vuex';
 
 export default Vue.extend({

@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import Events from '../events';
+import Events from '../../events';
 
 export default {
   props: ['activeTab','dusts','showReforgeDust'],

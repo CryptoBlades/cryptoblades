@@ -80,11 +80,11 @@
 
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import PvPArenaPreparation from './PvPArenaPreparation.vue';
-import PvPArenaSummary from './PvPArenaSummary.vue';
-import PvPArenaMatchMaking from './PvPArenaMatchMaking.vue';
-import PvPKickedModal from './PvPKickedModal.vue';
-import PvPButton from './PvPButton.vue';
+import PvPArenaPreparation from '../smart/PvPArenaPreparation.vue';
+import PvPArenaSummary from '../smart/PvPArenaSummary.vue';
+import PvPArenaMatchMaking from '../smart/PvPArenaMatchMaking.vue';
+import PvPKickedModal from '../smart/PvPKickedModal.vue';
+import PvPButton from '../smart/PvPButton.vue';
 import { weaponFromContract as formatWeapon } from '../../contract-models';
 import { shieldFromContract as formatShield } from '../../contract-models';
 import { pvpFighterFromContract as formatFighter } from '../../contract-models';
