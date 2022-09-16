@@ -95,15 +95,15 @@
 <script lang="ts">
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import Events from '../../events';
-import NftIcon from '../NftIcon.vue';
+import NftIcon from './NftIcon.vue';
 import {Nft} from '@/interfaces/Nft';
 import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
 import { IState } from '@/interfaces';
 import _ from 'lodash';
 import i18n from '@/i18n';
-import { NftOption } from '../NftOptionsDropdown.vue';
-import NftOptionsDropdown from '../NftOptionsDropdown.vue';
+import { NftOption } from './NftOptionsDropdown.vue';
+import NftOptionsDropdown from './NftOptionsDropdown.vue';
 
 interface Land {
   tier: string,

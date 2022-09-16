@@ -422,8 +422,8 @@
 import Vue from 'vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import { getCharacterArt } from '../character-arts-placeholder';
-import NftIcon from '@/components/NftIcon.vue';
-import NftList, {NftIdType} from '@/components/nftList/NftList.vue';
+import NftIcon from '@/components/nft/NftIcon.vue';
+import NftList, {NftIdType} from '@/components/nft/NftList.vue';
 import WeaponInventory from '../components/WeaponInvetory.vue';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
 import {GetTotalMultiplierForTrait, IWeapon} from '@/interfaces/Weapon';

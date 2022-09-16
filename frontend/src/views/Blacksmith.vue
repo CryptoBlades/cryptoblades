@@ -620,7 +620,7 @@ import Vue from 'vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import WeaponIcon from '../components/WeaponIcon.vue';
 import { BModal } from 'bootstrap-vue';
-import NftList from '@/components/nftList/NftList.vue';
+import NftList from '@/components/nft/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
 import { ISpecialWeaponsManagerState } from '@/store/specialWeaponsManager';
 import { Accessors } from 'vue/types/options';

@@ -1,27 +1,27 @@
 <template>
   <div v-bind:class="isDefault ? 'default-icon-wrapper' : 'nft-icon-wrapper'">
     <div v-if="isDefault" class="nft-default-icon">
-      <img class="default-placeholder" v-if="nft.type === 'weapon'" src="../assets/placeholder/weapon3.png"
+      <img class="default-placeholder" v-if="nft.type === 'weapon'" src="../../assets/placeholder/weapon3.png"
         v-tooltip="$t('nftIcon.weaponTooltip', {stars: stars || '2-5'})"/>
       <div v-if="nft.type === 'weapon'" class="default-info">{{stars || '2-5'}}*</div>
-      <img class="default-junk-placeholder" v-if="nft.type === 'junk'" src="../assets/junk/junk3.png"
+      <img class="default-junk-placeholder" v-if="nft.type === 'junk'" src="../../assets/junk/junk3.png"
         v-tooltip="$t('nftIcon.junkTooltip', {stars: stars || '1-5'})" />
       <div v-if="nft.type === 'junk'" class="default-info">{{stars || '1-5'}}*</div>
-      <img class="default-trinket-placeholder" v-if="nft.type === 'trinket'" src="../assets/trinkets/trinket1.png"
+      <img class="default-trinket-placeholder" v-if="nft.type === 'trinket'" src="../../assets/trinkets/trinket1.png"
         v-tooltip="$t('nftIcon.trinketTooltip', {stars: stars || '1-5'})" />
       <div v-if="nft.type === 'trinket'" class="default-info">{{stars || '1-5'}}*</div>
-      <img class="default-shield-placeholder" v-if="nft.type === 'shield'" src="../assets/shield2.png"
+      <img class="default-shield-placeholder" v-if="nft.type === 'shield'" src="../../assets/shield2.png"
         v-tooltip="$t('nftIcon.shieldTooltip', {stars: stars || '1-5'})" />
       <div v-if="nft.type === 'shield'" class="default-info">{{stars || '1-5'}}*</div>
-      <img class="default-placeholder" v-if="nft.type === 'secret'" src="../assets/secret.png"
+      <img class="default-placeholder" v-if="nft.type === 'secret'" src="../../assets/secret.png"
         v-tooltip="$t('nftIcon.secretTooltip')" />
-      <img class="default-dust-placeholder" v-if="nft.type === 'lbdust'" src="../assets/dusts/lesserDust.png"
+      <img class="default-dust-placeholder" v-if="nft.type === 'lbdust'" src="../../assets/dusts/lesserDust.png"
         v-tooltip="$t('nftIcon.lesserDust')" />
-      <img class="default-dust-placeholder" v-if="nft.type === '4bdust'" src="../assets/dusts/greaterDust.png"
+      <img class="default-dust-placeholder" v-if="nft.type === '4bdust'" src="../../assets/dusts/greaterDust.png"
         v-tooltip="$t('nftIcon.greaterDust')" />
-      <img class="default-dust-placeholder" v-if="nft.type === '5bdust'" src="../assets/dusts/powerfulDust.png"
+      <img class="default-dust-placeholder" v-if="nft.type === '5bdust'" src="../../assets/dusts/powerfulDust.png"
         v-tooltip="$t('nftIcon.powerfulDust')" />
-      <img class="default-dust-placeholder" v-if="nft.type === 'soul'" src="../assets/dusts/soulDust.png"
+      <img class="default-dust-placeholder" v-if="nft.type === 'soul'" src="../../assets/dusts/soulDust.png"
            v-tooltip="$t('nftIcon.soul')" />
     </div>
 
@@ -60,11 +60,11 @@
       <div v-if="nft.type === 't1land' || nft.type === 't2land' || nft.type === 't3land'
       || nft.type === 'claimT2Land' || nft.type === 'claimT3Land' " class="nft-details glow-container"
         ref="el" :class="['glow-' + (nft.stars || 0)]">
-        <img class="placeholder-land" src="../assets/t1-frame.png" v-if="nft.type === 't1land'" />
-        <img class="placeholder-land" src="../assets/t2-frame.png" v-if="nft.type === 't2land'" />
-        <img class="placeholder-land" src="../assets/t3-frame.png" v-if="nft.type === 't3land'" />
-        <img class="placeholder-land" src="../assets/t2-frame.png" v-if="nft.type === 'claimT2Land'" />
-        <img class="placeholder-land" src="../assets/t3-frame.png" v-if="nft.type === 'claimT3Land'" />
+        <img class="placeholder-land" src="../../assets/t1-frame.png" v-if="nft.type === 't1land'" />
+        <img class="placeholder-land" src="../../assets/t2-frame.png" v-if="nft.type === 't2land'" />
+        <img class="placeholder-land" src="../../assets/t3-frame.png" v-if="nft.type === 't3land'" />
+        <img class="placeholder-land" src="../../assets/t2-frame.png" v-if="nft.type === 'claimT2Land'" />
+        <img class="placeholder-land" src="../../assets/t3-frame.png" v-if="nft.type === 'claimT3Land'" />
 
         <span class="nft-supply">Chunk Id: {{nft.chunkId}}</span>
         <span v-if="nft.type === 'claimT2Land'" class="nft-supply">Lands to claim: {{ totalT2LandsToClaim }} </span>
@@ -103,26 +103,26 @@
       <div v-if="nft.type === 'CharacterCosmetic'" class="nft-details glow-container"
         v-bind:class="['character-cosmetic-applied-' + nft.id, 'character-animation-applied-' + nft.id]">
         <div class="animation" />
-        <img class="placeholder" src="../assets/placeholder/chara-0.png" />
+        <img class="placeholder" src="../../assets/placeholder/chara-0.png" />
       </div>
 
       <div v-if="nft.type === 'dustLb'" class="nft-details">
-        <img class="placeholder-dust" src="../assets/dusts/lesserDust.png" />
+        <img class="placeholder-dust" src="../../assets/dusts/lesserDust.png" />
         <div class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
       </div>
 
       <div v-if="nft.type === 'dust4b'" class="nft-details">
-        <img class="placeholder-dust" src="../assets/dusts/greaterDust.png" />
+        <img class="placeholder-dust" src="../../assets/dusts/greaterDust.png" />
         <div class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
       </div>
 
       <div v-if="nft.type === 'dust5b'" class="nft-details">
-        <img class="placeholder-dust" src="../assets/dusts/powerfulDust.png" />
+        <img class="placeholder-dust" src="../../assets/dusts/powerfulDust.png" />
         <div class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
       </div>
 
       <div v-if="nft.type === 'soul'" class="nft-details">
-        <img class="placeholder-dust" src="../assets/dusts/soulDust.png" />
+        <img class="placeholder-dust" src="../../assets/dusts/soulDust.png" />
         <div class="amount">{{$t('nftIcon.amount')}} {{ nft.amount }}</div>
       </div>
 
@@ -137,7 +137,7 @@
       </div>
 
       <div v-if="nft.type === 'keybox'" class="nft-details">
-        <img class="placeholder-keybox" src="../assets/bounty.png" />
+        <img class="placeholder-keybox" src="../../assets/bounty.png" />
         <div class="id">{{$t('nftIcon.id')}} {{ nft.id }}</div>
       </div>
 
@@ -154,13 +154,13 @@
 
 <script>
 import {mapActions, mapGetters, mapState} from 'vuex';
-import { getJunkArt } from '../junk-arts-placeholder';
-import { getTrinketArt } from '../trinket-arts-placeholder';
-import { getCleanName } from '../rename-censor';
-import { getWeaponArt } from '../weapon-arts-placeholder';
-import { Stat1PercentForChar, Stat2PercentForChar, Stat3PercentForChar } from '../interfaces';
-import foundersShield from '../assets/shield1.png';
-import legendaryShield from '../assets/shield2.png';
+import { getJunkArt } from '../../junk-arts-placeholder';
+import { getTrinketArt } from '../../trinket-arts-placeholder';
+import { getCleanName } from '../../rename-censor';
+import { getWeaponArt } from '../../weapon-arts-placeholder';
+import { Stat1PercentForChar, Stat2PercentForChar, Stat3PercentForChar } from '../../interfaces';
+import foundersShield from '../../assets/shield1.png';
+import legendaryShield from '../../assets/shield2.png';
 
 export default {
   props: ['nft', 'isDefault', 'favorite', 'stars'],
@@ -261,7 +261,7 @@ export default {
       totalT3LandsToClaim: 0,
       fetchSupplyInterval: 0,
       quantityOwned: 0,
-      images: require.context('../assets/elements/', false, /\.png$/),
+      images: require.context('../../assets/elements/', false, /\.png$/),
       shieldFlag: 0,
     };
   },
@@ -294,8 +294,8 @@ export default {
 </script>
 
 <style scoped>
-@import '../styles/weapon-cosmetics.css';
-@import '../styles/character-cosmetics.css';
+@import '../../styles/weapon-cosmetics.css';
+@import '../../styles/character-cosmetics.css';
 .nft-icon {
   height: 100%;
   width: 100%;

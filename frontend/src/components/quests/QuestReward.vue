@@ -13,7 +13,7 @@
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
 import {QuestItemType, Rarity} from '@/views/Quests.vue';
-import NftList, {NftIdType} from '@/components/nftList/NftList.vue';
+import NftList, {NftIdType} from '@/components/nft/NftList.vue';
 import QuestComponentIcon from '@/components/quests/QuestComponentIcon.vue';
 import {questItemTypeSupportsStars, questItemTypeSupportsTimesValue} from '../../utils/common';
 

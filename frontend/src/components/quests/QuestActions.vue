@@ -104,7 +104,7 @@ import QuestReward from '@/components/quests/QuestReward.vue';
 import QuestRequirements from '@/components/quests/QuestRequirements.vue';
 import QuestRewards from '@/components/quests/QuestRewards.vue';
 import {mapActions} from 'vuex';
-import {NftIdType} from '@/components/nftList/NftList.vue';
+import {NftIdType} from '@/components/nft/NftList.vue';
 import {getTimeRemaining} from '@/utils/common';
 import { TranslateResult } from 'vue-i18n';
 import i18n from '@/i18n';
