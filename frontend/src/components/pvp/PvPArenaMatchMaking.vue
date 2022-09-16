@@ -190,17 +190,17 @@
 <script>
 import BN from 'bignumber.js';
 import {mapActions, mapState } from 'vuex';
-import PvPWeapon from './PvPWeapon.vue';
-import PvPShield from './PvPShield.vue';
+import PvPWeapon from '../pvp/PvPWeapon.vue';
+import PvPShield from '../pvp/PvPShield.vue';
 import PvPSeparator from './PvPSeparator.vue';
-import PvPCharacter from './PvPCharacter.vue';
+import PvPCharacter from '../pvp/PvPCharacter.vue';
 import PvPButton from './PvPButton.vue';
 import fireIcon from '../../assets/elements/fire.png';
 import waterIcon from '../../assets/elements/water.png';
 import earthIcon from '../../assets/elements/earth.png';
 import lightningIcon from '../../assets/elements/lightning.png';
-import PvPDuelModal from './PvPDuelModal.vue';
-import PvPUnderAttackModal from './PvPUnderAttackModal.vue';
+import PvPDuelModal from '../pvp/PvPDuelModal.vue';
+import PvPUnderAttackModal from '../pvp/PvPUnderAttackModal.vue';
 import { duelResultFromContract as formatDuelResult } from '../../contract-models';
 import i18n from '../../i18n';
 
