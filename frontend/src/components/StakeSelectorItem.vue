@@ -155,7 +155,7 @@ import {mapActions, mapState} from 'vuex';
 import i18n from '@/i18n';
 import { TranslateResult } from 'vue-i18n';
 import Events from '../events';
-import SkeletonLoader from '../components/SkeletonLoader.vue';
+import SkeletonLoader from './loader/SkeletonLoader.vue';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from '@/stake-types';
 
 interface StoreMappedStakingActions {

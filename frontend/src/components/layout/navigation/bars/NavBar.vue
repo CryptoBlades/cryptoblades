@@ -4,7 +4,7 @@
       <div class="nav-logo col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1">
         <router-link :to="{ name: 'dashboard' }" exact class="game-ui-logo">
           <img
-            src="../../../assets/cb-logo.png"
+            src="../../../../assets/cb-logo.png"
             class="logo d-inline-block align-top"
             alt="Logo"
           />
@@ -27,11 +27,11 @@
 <script lang="ts">
 import Vue from 'vue';
 
-import ViewLinks from '../../ViewLinks.vue';
-import Options from '../../options/Options.vue';
-import SkillBalanceDisplay from '../../balance/SkillBalanceDisplay.vue';
+import ViewLinks from '../../../ViewLinks.vue';
+import Options from '../../../options/Options.vue';
+import SkillBalanceDisplay from '../../../balance/SkillBalanceDisplay.vue';
 
-import Events from '../../../events';
+import Events from '../../../../events';
 import {mapGetters, mapMutations} from 'vuex';
 
 export default Vue.extend({

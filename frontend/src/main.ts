@@ -12,7 +12,7 @@ import store from './store/store';
 import createRouter from './router';
 
 import App from './App.vue';
-import CBButton from '@/components/CBButton.vue';
+import CBButton from '@/components/layout/buttons/CBButton.vue';
 
 import {
   raid as featureFlagRaid,

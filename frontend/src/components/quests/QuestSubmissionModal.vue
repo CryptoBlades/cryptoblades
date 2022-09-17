@@ -61,7 +61,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import WeaponGrid from '@/components/layout/WeaponGrid.vue';
+import WeaponGrid from '@/components/layout/grids/WeaponGrid.vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import NftList, {NftIdType} from '@/components/nft/NftList.vue';
 import {Quest, QuestTemplateType, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';

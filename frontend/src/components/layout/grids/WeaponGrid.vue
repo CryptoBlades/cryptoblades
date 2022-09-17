@@ -191,16 +191,16 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Events from '../../events';
+import Events from '../../../events';
 import gasp from 'gsap';
 import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
-import { IState, IWeapon } from '../../interfaces';
-import WeaponIcon from '../WeaponIcon.vue';
-import { NftOption } from '../nft/NftOptionsDropdown.vue';
+import { IState, IWeapon } from '../../../interfaces';
+import WeaponIcon from '../../blacksmith/WeaponIcon.vue';
+import { NftOption } from '../../nft/NftOptionsDropdown.vue';
 import { BModal } from 'bootstrap-vue';
-import { getCleanName, isProfaneIsh } from '../../rename-censor';
-import NftOptionsDropdown from '../nft/NftOptionsDropdown.vue';
+import { getCleanName, isProfaneIsh } from '../../../rename-censor';
+import NftOptionsDropdown from '../../nft/NftOptionsDropdown.vue';
 import i18n from '@/i18n';
 import { copyNftUrl } from '@/utils/common';
 import {WeaponCosmetic} from '@/enums/WeaponCosmetic';
@@ -976,7 +976,7 @@ export default Vue.extend({
   align-items: center;
   vertical-align: middle;
   justify-content: center;
-  background-image: url('../../assets/buttonOutline.svg');
+  background-image: url('../../../assets/buttonOutline.svg');
   background-color: transparent;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -1032,7 +1032,7 @@ export default Vue.extend({
   }
 
   .filter-icon{
-    content: url('../../assets/blacksmith/filter.svg');
+    content: url('../../../assets/blacksmith/filter.svg');
     height: 30px;
     width: 30px;
   }

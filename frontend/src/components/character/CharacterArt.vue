@@ -65,19 +65,19 @@
 </template>
 
 <script>
-import { getCharacterArt } from '../character-arts-placeholder';
+import { getCharacterArt } from '../../character-arts-placeholder';
 import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
-import prefabs from '../assets/characterPrefabs.json';
-import heads from '../assets/characterWardrobe_head.json';
-import arms from '../assets/characterWardrobe_arms.json';
-import torsos from '../assets/characterWardrobe_torso.json';
-import legs from '../assets/characterWardrobe_legs.json';
-import boots from '../assets/characterWardrobe_boots.json';
-import { CharacterTrait, RequiredXp } from '../interfaces';
-import { getCleanName } from '../rename-censor';
+import prefabs from '../../assets/characterPrefabs.json';
+import heads from '../../assets/characterWardrobe_head.json';
+import arms from '../../assets/characterWardrobe_arms.json';
+import torsos from '../../assets/characterWardrobe_torso.json';
+import legs from '../../assets/characterWardrobe_legs.json';
+import boots from '../../assets/characterWardrobe_boots.json';
+import { CharacterTrait, RequiredXp } from '../../interfaces';
+import { getCleanName } from '../../rename-censor';
 import { CharacterPower } from '@/interfaces';
-import { burningManager } from './../feature-flags';
+import { burningManager } from '../../feature-flags';
 import { ReputationTier } from '@/views/Quests.vue';
 import { mapState, mapGetters, mapActions } from 'vuex';
 
@@ -685,7 +685,7 @@ export default {
 
 
 .rounded-check{
-  content: url('../assets/check-round.svg');
+  content: url('../../assets/check-round.svg');
   height: 1.5em;
   width: 1.5em;
   z-index: 3;
@@ -828,19 +828,19 @@ export default {
 }
 
 .pow{
-  content: url('../assets/pow-icon.svg');
+  content: url('../../assets/pow-icon.svg');
   height: 0.7em;
   width: 0.7em;
 }
 
 .exp{
-  content: url('../assets/exp-icon.svg');
+  content: url('../../assets/exp-icon.svg');
   height: 0.7em;
   width: 0.7em;
 }
 
 .stam{
-  content: url('../assets/stamina-icon.svg');
+  content: url('../../assets/stamina-icon.svg');
   height: 0.7em;
   width: 0.7em;
 }

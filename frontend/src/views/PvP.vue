@@ -18,7 +18,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
-import PvPNavBar from '../components/layout/navigation/PvPNavBar.vue';
+import PvPNavBar from '../components/layout/navigation/bars/PvPNavBar.vue';
 import PvPLeaderboards from '../components/pvp/PvPLeaderboards.vue';
 import PvPRewards from '../components/pvp/PvPRewards.vue';
 import PvPArena from '../components/pvp/PvPArena.vue';

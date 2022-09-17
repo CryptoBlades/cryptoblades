@@ -156,7 +156,7 @@ import BN from 'bignumber.js';
 import i18n from '@/i18n';
 import { Nft } from '@/interfaces/Nft';
 import { CharacterPower } from '@/interfaces';
-import BigButton from '@/components/BigButton.vue';
+import BigButton from '@/components/layout/buttons/BigButton.vue';
 import CharacterList from '@/components/character/CharacterList.vue';
 import CharacterNav from '@/components/layout/navigation/CharacterNav.vue';
 import Character from '@/components/character/Character.vue';

@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import BigButton from '../components/BigButton.vue';
+import BigButton from '../components/layout/buttons/BigButton.vue';
 import * as waxjs from '@waxio/waxjs/dist';
 import { mapGetters, mapState } from 'vuex';
 const wax = new waxjs.WaxJS('https://wax.greymass.com', null, null, false);

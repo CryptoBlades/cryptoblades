@@ -76,20 +76,20 @@
 </template>
 
 <script>
-import { getWeaponArt } from '../weapon-arts-placeholder';
+import { getWeaponArt } from '../../weapon-arts-placeholder';
 import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
-import swordspecs from '../assets/swordspecs.json';
-import maskChroma from '../shaders/maskchroma_frag.glsl.js';
+import swordspecs from '../../assets/swordspecs.json';
+import maskChroma from '../../shaders/maskchroma_frag.glsl.js';
 import '@/mixins/general';
 import { Stat1PercentForChar,
   Stat2PercentForChar,
   Stat3PercentForChar
-} from '../interfaces';
+} from '../../interfaces';
 import Events from '@/events';
 
 import { mapGetters, mapState } from 'vuex';
-import { getCleanName } from '../rename-censor';
+import { getCleanName } from '../../rename-censor';
 
 const bladeCount = 24;
 const crossGuardCount = 24;
@@ -487,9 +487,9 @@ export default {
 </script>
 
 <style scoped>
-@import '../styles/weapon-cosmetics.css';
+@import '../../styles/weapon-cosmetics.css';
 .rounded-check{
-  content: url('../assets/check-round.svg');
+  content: url('../../assets/check-round.svg');
   height: 1.5em;
   width: 1.5em;
   z-index: 3;
@@ -672,7 +672,7 @@ export default {
 }
 
 .favorite-weapon{
-  content: url('../assets/blacksmith/favorite_icon.svg');
+  content: url('../../assets/blacksmith/favorite_icon.svg');
   height: 25px;
   width: 25px;
   position: absolute;

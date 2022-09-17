@@ -17,7 +17,7 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
-import Loader from './loader/Loader.vue';
+import Loader from '../../loader/Loader.vue';
 export default Vue.extend({
   props:{
     title:{
@@ -81,7 +81,7 @@ export default Vue.extend({
   align-items: center;
   vertical-align: middle;
   justify-content: center;
-  background-image: url('../assets/btn-long.svg');
+  background-image: url('../../../assets/btn-long.svg');
   background-color: transparent;
   background-repeat: no-repeat;
   background-size: 100% 100%;

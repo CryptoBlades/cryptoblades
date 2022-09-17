@@ -100,16 +100,16 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Events from '../../events';
+import Events from '../../../events';
 import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
-import { IState, IWeapon } from '../../interfaces';
-import WeaponInventory from '../WeaponInvetory.vue';
-import WeaponPopover from '../WeaponPopover.vue';
-import { NftOption } from '../nft/NftOptionsDropdown.vue';
+import { IState, IWeapon } from '../../../interfaces';
+import WeaponInventory from '../../WeaponInvetory.vue';
+import WeaponPopover from '../../WeaponPopover.vue';
+import { NftOption } from '../../nft/NftOptionsDropdown.vue';
 import { BModal } from 'bootstrap-vue';
-import { getCleanName, isProfaneIsh } from '../../rename-censor';
-import NftOptionsDropdown from '../nft/NftOptionsDropdown.vue';
+import { getCleanName, isProfaneIsh } from '../../../rename-censor';
+import NftOptionsDropdown from '../../nft/NftOptionsDropdown.vue';
 import i18n from '@/i18n';
 import {WeaponCosmetic} from '@/enums/WeaponCosmetic';
 import { ICombatState } from '@/store/combat';
@@ -512,7 +512,7 @@ export default Vue.extend({
 }
 
 .close-icon{
-  content: url('../../assets/close-btn.png');
+  content: url('../../../assets/close-btn.png');
   height: 30px;
   width: 30px;
   cursor: pointer;
