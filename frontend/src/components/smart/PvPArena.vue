@@ -432,8 +432,8 @@ export default {
         await this.withdrawFromOldArena(this.currentCharacterId);
 
         this.isCharacterInOldArena = false;
-      } catch (err) {
-        console.log('leave old arena error: ', err.message);
+      } catch (error) {
+        console.error('leave old arena error: ', error.message);
       } finally {
         this.loading = false;
       }

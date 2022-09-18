@@ -222,11 +222,11 @@ export default {
         await this.withdrawFromArena(this.currentCharacterId);
 
         this.$emit('leaveArena');
-      } catch (err) {
-        console.log('leave arena error: ', err.message);
+      } catch (error) {
+        console.error('leave arena error: ', error.message);
 
-        this.handleErrorMessage(err.message, 'N', i18n.t('pvp.charNotInArena'));
-        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.duelInProcess'));
+        this.handleErrorMessage(error.message, 'N', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(error.message, 'Q', i18n.t('pvp.duelInProcess'));
       } finally {
         this.loading = false;
       }
@@ -244,8 +244,8 @@ export default {
       if (this.duelQueue.includes(`${this.currentCharacterId}`)) {
         this.isCharacterInDuelQueue = true;
       }
-    } catch (err) {
-      console.log('get duel queue error: ', err.message);
+    } catch (error) {
+      console.error('get duel queue error: ', error.message);
       this.handleErrorMessage();
     }
 

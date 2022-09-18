@@ -669,8 +669,8 @@ export default Vue.extend({
         await this.joinRaid({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId});
         this.selectedWeaponId = '';
         this.selectedWeapon = null;
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
         (this as any).$dialog.notify.error(i18n.t('raid.errors.whoops'));
       } finally {
         this.isJoiningRaid = false;
