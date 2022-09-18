@@ -457,19 +457,16 @@ export default {
 
     async leaveArena() {
       this.loading = true;
-
       try {
         await this.withdrawFromArena(this.currentCharacterId);
-
         this.$emit('leaveArena');
       } catch (error) {
         console.error('leave arena error: ', error.message);
-
-        this.handleErrorMessage(err.message, 'N', i18n.t('pvp.charNotInArena'));
-        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.duelInProcess'));
+        this.handleErrorMessage(error.message, 'N', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(error.message, 'Q', i18n.t('pvp.duelInProcess'));
+      } finally {
+        this.loading = false;
       }
-
-      this.loading = false;
     },
 
     async findMatch() {
