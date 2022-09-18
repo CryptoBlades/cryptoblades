@@ -174,8 +174,8 @@ const combat = {
 
       const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
       await Promise.all([
-        await dispatch('combat/fetchTargets', {characterId, weaponId}),
-        await dispatch('fetchWeaponDurability', weaponId),
+        dispatch('combat/fetchTargets', {characterId, weaponId}),
+        dispatch('fetchWeaponDurability', weaponId),
       ]);
 
       return {
