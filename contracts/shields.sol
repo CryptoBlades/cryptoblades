@@ -90,33 +90,17 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender), "Not game admin");
     }
 
-    modifier noFreshLookup(uint256 id) {
-        _noFreshLookup(id);
-        _;
-    }
-
-    function _noFreshLookup(uint256 id) internal view {
-        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
-    }
-
     function getStats(uint256 id) internal view
         returns (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3) {
-
         Shield memory s = tokens[id];
         return (s.properties, s.stat1, s.stat2, s.stat3);
     }
 
-    function get(uint256 id) public view noFreshLookup(id)
-        returns (
-            uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3
-    ) {
+    function get(uint256 id) public view returns (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3) {
         return _get(id);
     }
 
-    function _get(uint256 id) internal view
-        returns (
-            uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3
-    ) {
+    function _get(uint256 id) internal view returns (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3) {
         return getStats(id);
     }
 
@@ -132,9 +116,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return tokens;
     }
 
-    function getCosmeticsSeed(uint256 id) public view noFreshLookup(id)
-        returns (uint256) {
-
+    function getCosmeticsSeed(uint256 id) public view returns (uint256) {
         ShieldCosmetics memory sc = cosmetics[id];
         return sc.seed;
     }
@@ -203,7 +185,6 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 stat1, uint16 stat2, uint16 stat3,
         uint256 cosmeticSeed
     ) public restricted returns(uint256 tokenID) {
-
         tokenID = tokens.length;
 
         if(block.number != lastMintedBlock)
@@ -317,11 +298,11 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint8(stars)-1;
     }
 
-    function getProperties(uint256 id) public view noFreshLookup(id) returns (uint16) {
+    function getProperties(uint256 id) public view returns (uint16) {
         return tokens[id].properties;
     }
 
-    function getStars(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getStars(uint256 id) public view returns (uint8) {
         return getStarsFromProperties(getProperties(id));
     }
 
@@ -337,7 +318,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint8(properties & 0x7); // first two bits for stars
     }
 
-    function getTrait(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getTrait(uint256 id) public view returns (uint8) {
         return getTraitFromProperties(getProperties(id));
     }
 
@@ -345,7 +326,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint8((properties >> 3) & 0x3); // two bits after star bits (3)
     }
 
-    function getStatPattern(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getStatPattern(uint256 id) public view returns (uint8) {
         return getStatPatternFromProperties(getProperties(id));
     }
 
@@ -365,19 +346,19 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint8(SafeMath.div(statPattern, 25) % 5); // 0-3 regular traits, 4 = traitless (DEF)
     }
 
-    function getStat1(uint256 id) public view noFreshLookup(id) returns (uint16) {
+    function getStat1(uint256 id) public view returns (uint16) {
         return tokens[id].stat1;
     }
 
-    function getStat2(uint256 id) public view noFreshLookup(id) returns (uint16) {
+    function getStat2(uint256 id) public view returns (uint16) {
         return tokens[id].stat2;
     }
 
-    function getStat3(uint256 id) public view noFreshLookup(id) returns (uint16) {
+    function getStat3(uint256 id) public view returns (uint16) {
         return tokens[id].stat3;
     }
 
-    function getDefenseMultiplier(uint256 id) public view noFreshLookup(id) returns (int128) {
+    function getDefenseMultiplier(uint256 id) public view returns (int128) {
         // returns a 64.64 fixed point number for defense multiplier
         // this function does not account for traits
         // it is used to calculate base enemy defenses for targeting
@@ -432,7 +413,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return getDefenseMultiplierForTrait(shd.properties, shd.stat1, shd.stat2, shd.stat3, trait);
     }
 
-    function getFightData(uint256 id, uint8 charTrait) public view noFreshLookup(id) returns (int128, int128, uint24, uint8) {
+    function getFightData(uint256 id, uint8 charTrait) public view returns (int128, int128, uint24, uint8) {
         Shield storage shd = tokens[id];
         return (
             shieldBaseMultiplier.add(defenseMultPerPointBasic.mul(
@@ -447,10 +428,7 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount) public
-        restricted noFreshLookup(id)
-    returns (int128, int128, uint24, uint8) {
-
+    function getFightDataAndDrainDurability(uint256 id, uint8 charTrait, uint8 drainAmount) public restricted returns (int128, int128, uint24, uint8) {
         require(nftVars[id][NFTVAR_BUSY] == 0, "Shield is busy");
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
         require(durabilityPoints >= drainAmount, "Not enough durability!");
