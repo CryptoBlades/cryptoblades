@@ -915,17 +915,14 @@ export default new Vuex.Store<IState>({
       commit('setContracts', () => contracts);
     },
 
-    async fetchUserDetails({ dispatch }) {
-      const promises = [
+    async fetchUserDetails({dispatch}) {
+      await Promise.all([
         dispatch('fetchSkillBalance'),
         dispatch('fetchWaxBridgeDetails'),
         dispatch('fetchDustBalance'),
-        dispatch('specialWeaponsManager/fetchShardsSupply')
-      ];
-
-      promises.push(dispatch('fetchUserGameDetails'));
-
-      await Promise.all([promises]);
+        dispatch('specialWeaponsManager/fetchShardsSupply'),
+        dispatch('fetchUserGameDetails')
+      ]);
     },
 
     async fetchUserGameDetails({ state, dispatch, commit }) {
