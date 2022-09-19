@@ -1,5 +1,6 @@
 <template>
-  <div class="d-flex align-items-center flex-column">
+<div class="bg">
+  <div class="d-flex align-items-center flex-column content">
     <div class="d-flex flex-column align-items-center w-50">
       <div class="d-flex mt-2">
         <h3 class="mt-2"> {{$t('Treasury.partneredProjects')}} </h3>
@@ -7,19 +8,20 @@
       </div>
       <div class="divider"></div>
     </div>
-    <div class="d-flex w-100 align-items-baseline mt-3 justify-content-center">
+    <div class="d-flex align-items-baseline mt-3 justify-content-center">
       <h5 class="mr-1">{{$t('Treasury.payoutCurrency')}}</h5>
       <b-form-select class="w-25 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
         <b-form-select-option v-for="p in this.getPartnerProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
       </b-form-select>
     </div>
-    <div class="d-flex w-100 pt-2 pb-2 flex-wrap justify-content-center projects-container">
+    <div class="d-flex pt-2 pb-2 flex-wrap justify-content-center projects-container">
       <PartneredProject v-for="partnerProject in this.getPartnerProjects" :key="partnerProject.id" :partnerProject="partnerProject" />
     </div>
     <b-modal ok-only class="centered-modal" ref="formula-details-modal" :title="$t('Treasury.formulaDetailsTitle')">
       <span class="white-space">{{$t('Treasury.payoutFormulaExplanation')}}</span>
     </b-modal>
   </div>
+</div>
 </template>
 
 <script lang='ts'>
@@ -118,6 +120,19 @@ export default Vue.extend({
   background: radial-gradient(circle, rgba(255, 255, 255, 0.873) 0%, rgba(71, 72, 73, 0.377)50%);
   width: 100%;
   height: 1px;
+}
+
+.bg {
+  height: 100%;
+  width: 100%;
+  background: url('../assets/blacksmith/cb-reforge-bg.jpg') rgba(0, 9, 26, 0.5);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-blend-mode: multiply;
+
+}
+.content > * {
+  width: clamp(200px, 100%, 1440px);
 }
 
 @media (max-width: 576px) {
