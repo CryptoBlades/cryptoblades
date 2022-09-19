@@ -100,7 +100,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Events from '../../../events';
+import Events from '../../../utils/events';
 import { Accessors, PropType } from 'vue/types/options';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '../../../interfaces';

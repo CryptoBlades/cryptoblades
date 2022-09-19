@@ -183,7 +183,7 @@ import Vue from 'vue';
 import {getEnemyArt} from '../enemy-art';
 import {CharacterTrait, GetTotalMultiplierForTrait, ICharacter, ITarget, IWeapon, WeaponElement} from '../interfaces';
 import Hint from '../components/common/Hint.vue';
-import Events from '../events';
+import Events from '../utils/events';
 import {fromWeiEther, toBN} from '../utils/common';
 import BigNumber from 'bignumber.js';
 import WeaponInventory from '../components/layout/WeaponInvetory.vue';

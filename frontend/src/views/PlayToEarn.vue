@@ -44,7 +44,7 @@
 
 <script>
 
-import Events from '../events';
+import Events from '../utils/events';
 import CardFrame from '../components/common/CardFrame.vue';
 import CardFrameToggled from '../components/common/CardFrameToggled.vue';
 

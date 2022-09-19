@@ -166,7 +166,7 @@ import {getCharacterArt} from '@/character-arts-placeholder';
 import CharacterArt from './CharacterArt.vue';
 import NftOptionsDropdown from '../nft/NftOptionsDropdown.vue';
 import {getCleanName, isProfaneIsh} from '@/rename-censor';
-import Events from '@/events';
+import Events from '@/utils/events';
 import i18n from '@/i18n';
 import {CharacterCosmetic} from '@/enums/CharacterCosmetic';
 

@@ -434,7 +434,7 @@ import {fromWeiEther, toBN} from '@/utils/common';
 import {staminaToHours} from '@/utils/date-time';
 import {BonusXp, Dust4b, Dust5b, DustLb, Junk, Keybox, RaidRewards, Weapon} from '@/interfaces/RaidRewards';
 import i18n from '@/i18n';
-import Events from '../events';
+import Events from '../utils/events';
 import { getCleanName } from '../rename-censor';
 import BigNumber from 'bignumber.js';
 

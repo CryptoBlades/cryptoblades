@@ -235,7 +235,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { IState, IWeapon } from '@/interfaces';
 import { ISpecialWeaponsManagerState } from '@/store/specialWeaponsManager';
 import { Accessors } from 'vue/types/options';
-import Events from '../../events';
+import Events from '../../utils/events';
 import { secondsToDDHHMMSS } from '@/utils/date-time';
 import eventShard from '../../assets/special-weapons/eventShard.png';
 import generalShard from '../../assets/special-weapons/generalShard.png';

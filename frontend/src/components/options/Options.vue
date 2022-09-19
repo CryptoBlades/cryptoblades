@@ -284,7 +284,7 @@
 </template>
 
 <script lang="ts">
-import Events from '../../events';
+import Events from '../../utils/events';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import BigNumber from 'bignumber.js';
 import {Accessors} from 'vue/types/options';

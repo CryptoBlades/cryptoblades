@@ -85,7 +85,7 @@
 <script lang="ts">
 import {mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 import { getCharacterArt } from '../../character-arts-placeholder';
-import Events from '../../events';
+import Events from '../../utils/events';
 import { CharacterPower, CharacterTrait } from '../../interfaces';
 import { RequiredXp } from '../../interfaces';
 import Vue from 'vue';

@@ -627,7 +627,7 @@ import { Accessors } from 'vue/types/options';
 import DustBalanceDisplay from '@/components/currency/DustBalanceDisplay.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
 import i18n from '@/i18n';
-import Events from '../events';
+import Events from '../utils/events';
 import SpecialWeaponForgeModal from '@/components/modals/SpecialWeaponForgeModal.vue';
 import BlacksmithNav from '@/components/layout/navigation/BlacksmithNav.vue';
 import { getConfigValue } from '@/contracts';

@@ -160,7 +160,7 @@ import BigButton from '@/components/layout/buttons/BigButton.vue';
 import CharacterList from '@/components/character/CharacterList.vue';
 import CharacterNav from '@/components/layout/navigation/CharacterNav.vue';
 import Character from '@/components/character/Character.vue';
-import Events from '@/events';
+import Events from '@/utils/events';
 import { getConfigValue } from '@/contracts';
 
 

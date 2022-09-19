@@ -31,7 +31,7 @@ import ViewLinks from '../ViewLinks.vue';
 import Options from '../../../options/Options.vue';
 import SkillBalanceDisplay from '../../../currency/SkillBalanceDisplay.vue';
 
-import Events from '../../../../events';
+import Events from '../../../../utils/events';
 import {mapGetters, mapMutations} from 'vuex';
 
 export default Vue.extend({

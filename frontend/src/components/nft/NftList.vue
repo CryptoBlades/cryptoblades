@@ -94,7 +94,7 @@
 
 <script lang="ts">
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
-import Events from '../../events';
+import Events from '../../utils/events';
 import NftIcon from './NftIcon.vue';
 import {Nft} from '@/interfaces/Nft';
 import Vue from 'vue';

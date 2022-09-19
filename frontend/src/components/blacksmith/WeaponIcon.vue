@@ -86,7 +86,7 @@ import { Stat1PercentForChar,
   Stat2PercentForChar,
   Stat3PercentForChar
 } from '../../interfaces';
-import Events from '@/events';
+import Events from '@/utils/events';
 
 import { mapGetters, mapState } from 'vuex';
 import { getCleanName } from '../../rename-censor';

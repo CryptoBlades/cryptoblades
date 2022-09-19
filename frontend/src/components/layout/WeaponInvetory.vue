@@ -188,7 +188,7 @@
 <script>
 import { getWeaponArt } from '../../weapon-arts-placeholder';
 import '@/mixins/general';
-import Events from '../../events';
+import Events from '../../utils/events';
 import {
   Stat1PercentForChar,
   Stat2PercentForChar,

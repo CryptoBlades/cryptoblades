@@ -88,7 +88,7 @@ import BN from 'bignumber.js';
 import {mapState, mapActions, mapGetters, mapMutations} from 'vuex';
 import _ from 'lodash';
 import Vue from 'vue';
-import Events from './events';
+import Events from './utils/events';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import BigButton from './components/layout/buttons/BigButton.vue';
 import SmallButton from './components/layout/buttons/SmallButton.vue';

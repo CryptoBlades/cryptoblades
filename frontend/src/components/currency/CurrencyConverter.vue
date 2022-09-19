@@ -7,7 +7,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { toBN } from '@/utils/common';
-import Events from '@/events';
+import Events from '@/utils/events';
 import { mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 
