@@ -12,7 +12,7 @@
       </b-form-select>
       <b-form-input v-model="selectedNonSeriesItem.price" :placeholder="$t('admin.blacksmith.nonSeriesItemPrice')"/>
       <b-button @click="setPriceOfNonSeriesItem()" :disabled="setFlatPriceOfNonSeriesItemButtonDisabled"
-                variant="primary"
+                variant="info"
                 class="text-nowrap">
         {{ $t('admin.blacksmith.setFlatPriceOfItem') }}
       </b-button>
@@ -30,7 +30,7 @@
       <div v-if="selectedSeriesItem.id === SeriesItem.ITEM_COSMETIC_WEAPON" class="w-100">
         <div v-for="(weaponCosmetic, index) in weaponCosmetics" :key="weaponCosmetic" class="d-flex mb-2">
           <label class="m-0 align-self-center w-50">{{
-              $t(`admin.blacksmith.weaponCosmetic.${WeaponCosmetic[weaponCosmetic]}`)
+              $t(`cosmetics.weaponCosmetic.${WeaponCosmetic[weaponCosmetic]}`)
             }}</label>
           <b-form-input v-model="selectedSeriesItem.prices[index]"
                         :placeholder="$t('admin.blacksmith.weaponCosmeticPriceInSkillOptional')" number type="number"/>
@@ -39,14 +39,14 @@
       <div v-else-if="selectedSeriesItem.id === SeriesItem.ITEM_COSMETIC_CHARACTER" class="w-100">
         <div v-for="(characterCosmetic, index) in characterCosmetics" :key="characterCosmetic" class="d-flex mb-2">
           <label class="m-0 align-self-center w-50">{{
-              $t(`admin.blacksmith.characterCosmetic.${CharacterCosmetic[characterCosmetic]}`)
+              $t(`cosmetics.characterCosmetic.${CharacterCosmetic[characterCosmetic]}`)
             }}</label>
           <b-form-input v-model="selectedSeriesItem.prices[index]"
                         :placeholder="$t('admin.blacksmith.characterCosmeticPriceInSkillOptional')" number
                         type="number"/>
         </div>
       </div>
-      <b-button @click="setPriceOfSeriesItems()" :disabled="setFlatPriceOfSeriesItemButtonDisabled" variant="primary"
+      <b-button @click="setPriceOfSeriesItems()" :disabled="setFlatPriceOfSeriesItemButtonDisabled" variant="info"
                 class="text-nowrap">
         {{ $t('admin.blacksmith.setFlatPriceOfItemSeries') }}
       </b-button>
@@ -57,6 +57,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
+import {WeaponCosmetic} from '@/enums/WeaponCosmetic';
+import {CharacterCosmetic} from '@/enums/CharacterCosmetic';
 
 enum NonSeriesItem {
   ITEM_WEAPON_RENAME = 1,
@@ -83,48 +85,6 @@ interface SelectedSeriesItem {
   prices: number[];
 }
 
-enum WeaponCosmetic {
-  GRAYSCALE = 1,
-  CONTRAST,
-  SEPIA,
-  INVERT,
-  BLUR,
-  FIRE_GLOW,
-  EARTH_GLOW,
-  LIGHTNING_GLOW,
-  WATER_GLOW,
-  RAINBOW_GLOW,
-  DARK_GLOW,
-  GHOST,
-  POLICE,
-  NEON_BORDER,
-  ROTATING_NEON_BORDER,
-  DIAMOND_BORDER,
-  GOLD_BORDER,
-  SILVER_BORDER,
-  BRONZE_BORDER,
-}
-
-enum CharacterCosmetic {
-  GRAYSCALE = 1,
-  CONTRAST,
-  SEPIA,
-  INVERT,
-  BLUR,
-  FIRE_GLOW,
-  EARTH_GLOW,
-  LIGHTNING_GLOW,
-  WATER_GLOW,
-  RAINBOW_GLOW,
-  DARK_GLOW,
-  GHOST,
-  POLICE,
-  NEON_BORDER,
-  DIAMOND_BORDER,
-  GOLD_BORDER,
-  SILVER_BORDER,
-  BRONZE_BORDER,
-}
 
 interface StoreMappedActions {
   setFlatPriceOfItem(payload: { itemIndex: NonSeriesItem, price: number }): Promise<void>;

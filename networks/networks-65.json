@@ -205,7 +205,7 @@
     },
     "links": {},
     "address": "0xe6eC0E3a8523ec76d94d63e3acd22372e3101FE4",
-    "transactionHash": "0x5ee87a0186767cc747fba7171e0553f7e08a77758b833ab66c6e8c90c9555418"
+    "transactionHash": "0x213c80a93a4ba4b7408403f7741e26019b33ec58157b3b9efa5ec6f180efc383"
   },
   "build/contracts/BurningManager.json": {
     "events": {
@@ -2484,7 +2484,13 @@
     },
     "links": {},
     "address": "0x1C7195cc9b4c9981602F6Bc3e41cBd6E36B497C0",
-    "transactionHash": "0xd9f34f1ff87a39ef1cbf2000a79069acca7ad14a0305a0d04dfc43c9ec596255"
+    "transactionHash": "0x48e36758e726665e05c81cb8eea738a97cb721c3b97d708de1eaa0b92ae44bfa"
+  },
+  "build/contracts/ERC20Bridge.json": {
+    "events": {},
+    "links": {},
+    "address": "0x1C8aAcbaf2318438a4B5760f6897E057a4105cAf",
+    "transactionHash": "0xd209f067ebdea9bb302211f53eb5465f9e1f28eab0c518b98e25d60bd9dc1f5b"
   },
   "build/contracts/ExperimentToken.json": {
     "events": {
@@ -3158,7 +3164,7 @@
     "events": {},
     "links": {},
     "address": "0xB28142391AF21fF4364E66C225E8d0a77C25E7DE",
-    "transactionHash": "0x417c09dd49c08ee1743f2bd656fdf0af864280e71856f86caed2148b015cbcba"
+    "transactionHash": "0x855ab1c1121b0811386ccd4dceeae742180fa9d4608ec3c7e59247210d176d9e"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
@@ -5054,6 +5060,12 @@
     "address": "0x907A9D51d1FdB01a368774d60Bb90d24208EDf2e",
     "transactionHash": "0x468e144751c521887dc76faad72aa4f06ecbb2d4e1de12e8add2c5b49667a8dd"
   },
+  "build/contracts/SkillERC20BridgeProxyContract.json": {
+    "events": {},
+    "links": {},
+    "address": "0xf43C488c22E82beA33195fE3c5Ee0824D179F065",
+    "transactionHash": "0x924199e02ca948012d5a5632a1d9ecd47af5ea25e6d9d2624d92bc54b4820e76"
+  },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
     "events": {},
     "links": {},
@@ -5289,7 +5301,7 @@
     },
     "links": {},
     "address": "0x82E806A0009F289150824EF7F62a31d92b81CE08",
-    "transactionHash": "0xf238d513cabd881b820a9226ce5876d5f25c8dceceea81e5b33f538a8636a067"
+    "transactionHash": "0x85faa1b8ad736211a29806e881ad07ab006e6270b36e9ec8f9cd452e6d6e60a6"
   },
   "build/contracts/Treasury.json": {
     "events": {},

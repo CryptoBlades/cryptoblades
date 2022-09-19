@@ -23,6 +23,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public tokensClaimed;
     uint256 public skillPrice;
 
+    event TreasuryClaimed(address indexed sender, uint256 indexed partnerId, uint256 claimedAmount, uint256 currentMultiplier);
+
     struct PartnerProject {
         uint256 id;
         string name;
@@ -162,7 +164,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
     function claim(uint256 partnerId, uint256 skillClaimingAmount, uint256 currentMultiplier, uint256 slippage) public {
         require(game.getTokenRewardsFor(msg.sender) >= skillClaimingAmount, 'Claim amount exceeds available rewards balance');
-        require(currentMultiplier.mul(uint(1e18).sub(slippage)).div(1e18) < getProjectMultiplier(partnerId), 'Slippage exceeded');
+        uint256 effectiveMultiplier = getProjectMultiplier(partnerId);
+        require(currentMultiplier.mul(uint(1e18).sub(slippage)).div(1e18) < effectiveMultiplier, 'Slippage exceeded');
         require(partneredProjects[partnerId].isActive == true, 'Project inactive');
 
         uint256 partnerTokenAmount = getAmountInPartnerToken(partnerId, skillClaimingAmount);
@@ -181,6 +184,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         IERC20(partneredProjects[partnerId].tokenAddress).safeTransfer(msg.sender, getAmountWithAdjustedDecimals(partnerTokenAmount, partnerTokenDecimals));
 
         multiplierTimestamp[partnerId] = multiplierTimestamp[partnerId].add(partnerTokenAmount.div(partneredProjects[partnerId].tokenSupply.div(projectDistributionTime[partnerId])).div(uint(1e18).div(multiplierUnit)));
+
+        emit TreasuryClaimed(msg.sender, partnerId, partnerTokenAmount, effectiveMultiplier);
     }
 
     // Setters

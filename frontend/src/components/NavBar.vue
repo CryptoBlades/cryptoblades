@@ -1,6 +1,6 @@
 <template>
   <div class="main-nav-div">
-    <b-navbar class="main-nav" toggleable="lg">
+    <b-navbar class="main-nav bg-dark border-bottom border-gray" toggleable="lg">
       <div class="nav-logo col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1">
         <router-link :to="{ name: 'dashboard' }" exact class="game-ui-logo">
           <img
@@ -97,20 +97,6 @@ a.router-link-active {
 .main-nav > .navbar-brand {
   align-self: center;
   padding-bottom: 0;
-}
-
-.dropdown-menu {
-  background: rgb(20, 20, 20);
-  background: linear-gradient(
-    45deg,
-    rgba(20, 20, 20, 1) 0%,
-    rgba(36, 39, 32, 1) 100%
-  );
-  border: none;
-}
-
-.dropdown-menu li a:hover {
-  background: transparent;
 }
 
 @media (max-width: 1024px) {
@@ -252,11 +238,6 @@ a.router-link-active {
   justify-content: center;
   display: flex;
   align-items: center;
-}
-
-.navbar {
-  background: linear-gradient(45deg, #141414, #242720);
-  border-bottom: 2px solid #404857;
 }
 
 .main-nav > .view-links {

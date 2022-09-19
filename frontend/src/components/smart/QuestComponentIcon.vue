@@ -19,7 +19,6 @@ import greaterDust from '@/assets/dusts/greaterDust.png';
 import powerfulDust from '@/assets/dusts/powerfulDust.png';
 import soul from '@/assets/dusts/soulDust.png';
 import sword from '@/assets/placeholder/sword-placeholder-1.png';
-import character from '@/assets/placeholder/chara-head-0.png';
 import junk from '@/assets/junk/junk3.png';
 import reputation from '@/assets/reputation.png';
 import stamina from '@/assets/stamina.png';
@@ -75,7 +74,11 @@ export default Vue.extend({
         this.tooltip = i18n.t(`quests.dustRarityType.${DustRarity[this.rarity]}`)
           + ' ' + i18n.t(`quests.questItemType.${QuestItemType[this.questItemType]}`);
       } else if (this.questItemType === QuestItemType.EXTERNAL || this.questItemType === QuestItemType.EXTERNAL_HOLD) {
-        this.tooltip = (questItemsInfo as QuestItemsInfo).questItems[this.externalAddress].name;
+        this.tooltip = `
+        - ${(questItemsInfo as QuestItemsInfo).questItems[this.externalAddress]?.name} -
+        ${(questItemsInfo as QuestItemsInfo).questItems[this.externalAddress]?.website}
+        ${(questItemsInfo as QuestItemsInfo).questItems[this.externalAddress]?.description}
+        `;
       } else {
         this.tooltip = i18n.t(`quests.questItemType.${QuestItemType[this.questItemType]}`).toString();
       }
@@ -87,8 +90,6 @@ export default Vue.extend({
       this.icon = reputation;
     } else if (this.questItemType === QuestItemType.WEAPON) {
       this.icon = sword;
-    } else if (this.questItemType === QuestItemType.CHARACTER) {
-      this.icon = character;
     } else if (this.questItemType === QuestItemType.JUNK) {
       this.icon = junk;
     } else if (this.questItemType === QuestItemType.DUST) {
@@ -112,8 +113,10 @@ export default Vue.extend({
     } else if (this.questItemType === QuestItemType.RAID) {
       this.icon = raid;
     } else if (this.questItemType === QuestItemType.EXTERNAL || this.questItemType === QuestItemType.EXTERNAL_HOLD) {
-      const fileName = (questItemsInfo as QuestItemsInfo).questItems[this.externalAddress].image;
-      this.icon = this.imgPath(fileName);
+      const fileName = (questItemsInfo as QuestItemsInfo).questItems[this.externalAddress]?.image;
+      if (fileName) {
+        this.icon = this.imgPath(fileName);
+      }
     }
     if (questItemTypeSupportsStars(this.questItemType)) {
       this.stars = Array(this.rarity + 1).fill('★').join('');
@@ -126,8 +129,8 @@ export default Vue.extend({
 
 <style scoped>
 .reward-icon-container {
-  background: #0B0B0B 0 0 no-repeat padding-box;
-  border: 1px solid #564B30;
+  background: #000E29 0 0 no-repeat padding-box;
+  border: 1px solid #43506A;
   border-radius: 5px;
   width: 75px;
   height: 75px;

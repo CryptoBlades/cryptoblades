@@ -109,7 +109,14 @@
               </div>
               <div>
                 <span class="raid-boss-value" v-if="raidData.raidStatus === '0' || raidData.raidStatus === ''">00:00</span>
-                <span class="raid-boss-value" v-else>{{this.remainingTime.minutes}}:{{this.remainingTime.seconds}}</span>
+                <span class="raid-boss-value" v-else>
+                  <span class="raid-boss-value" v-if="this.remainingTime.hours > 0">
+                    {{this.remainingTime.hours}}:{{this.remainingTime.minutes}}:{{this.remainingTime.seconds}}
+                  </span>
+                  <span class="raid-boss-value" v-else>
+                    {{this.remainingTime.minutes}}:{{this.remainingTime.seconds}}
+                  </span>
+                </span>
               </div>
             </div>
           </div>
@@ -215,14 +222,29 @@ export default Vue.extend({
   },
 
   computed: {
-    ...mapState(['characters', 'currentCharacterId', 'maxStamina', 'ownedCharacterIds', 'web3', 'ownedGarrisonCharacterIds',]),
-    ...mapGetters(['getCharacterName', 'getRaidState', 'ownCharacters','getCharacterPower', 'getCharacterRank',
-      'getCharacterElement', 'ownGarrisonCharacters', 'getCharacterStamina']),
+    ...mapState([
+      'characters',
+      'currentCharacterId',
+      'maxStamina',
+      'ownedCharacterIds',
+      'web3',
+      'ownedGarrisonCharacterIds',
+    ]),
+    ...mapGetters([
+      'getCharacterName',
+      'getRaidState',
+      'ownCharacters',
+      'getCharacterRank',
+      'getCharacterElement',
+      'ownGarrisonCharacters',
+      'getCharacterStamina',
+      'getCharacterPower',
+    ]),
     selectedCharacter(): Nft{
       return this.characters[this.currentCharacterId];
     },
     haveCharacters() {
-      return this.ownedGarrisonCharacterIds.length > 0 || this.ownCharacters?.length > 0;
+      return this.ownedGarrisonCharacterIds?.length > 0 || this.ownCharacters?.length > 0;
     },
     characterLvl(): number {
       return this.characters[this.currentCharacterId]?.level + 1 ?? 1;
@@ -629,8 +651,7 @@ export default Vue.extend({
 /* added this important coz there's a weird css issue that preventing the styling to applying in the div*/
 .lower-body-container > .raid-container > .raid-boss-image-container{
   background-position-y: 30px !important;
-  background-position-x: -80px !important;
-  background-size: 130% !important;
+  background-size: 100% !important;
   background-repeat: no-repeat !important;
 }
 
@@ -942,12 +963,9 @@ export default Vue.extend({
 
   .boss-images{
     display: inline;
-    position: absolute;
-    margin-top: 50px;
-    right: 0;
-    width: 40vw;
-    z-index: 2;
+    width: 100%;
     height: auto;
+    z-index: 2;
   }
 
   .pvp-and-pve-container {

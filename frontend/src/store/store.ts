@@ -1,43 +1,36 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
-import _, {isUndefined, values} from 'lodash';
-import {bnMinimum, currentChainSupportsPvP, currentChainSupportsQuests, gasUsedToBnb, toBN} from '@/utils/common';
+import _ from 'lodash';
+import {bnMinimum, currentChainSupportsDrawbridge, currentChainSupportsPvP, currentChainSupportsQuests, toBN} from '@/utils/common';
 
 import {getConfigValue, setUpContracts} from '@/contracts';
 
-import {
-  characterFromContract,
-  junkFromContract,
-  shieldFromContract,
-  targetFromContract,
-  trinketFromContract,
-  weaponFromContract
-} from '@/contract-models';
+import {characterFromContract, junkFromContract, shieldFromContract, trinketFromContract, weaponFromContract} from '@/contract-models';
 
-import {
-  CharacterPower,
-  Contract,
-  IPartnerProject,
-  isStakeType,
-  IState,
-  IWeb3EventSubscription,
-  StakeType
-} from '@/interfaces';
+import {CharacterPower, Contract, isStakeType, IState, IWeb3EventSubscription, StakeType} from '@/interfaces';
 import {getCharacterNameFromSeed} from '@/character-name';
-import {approveFee, approveFeeDynamic, approveFeeWalletOnly, approveFeeWalletOrRewards, getFeeInSkillFromUsd} from '@/contract-call-utils';
+import {approveFee, approveFeeDynamic, approveFeeFixed} from '@/contract-call-utils';
 
 import {burningManager as featureFlagBurningManager} from '@/feature-flags';
 import {ERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from '@/stake-types';
 import {Nft} from '@/interfaces/Nft';
+import {Element} from '@/enums/Element';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
-import {abi as ierc20Abi} from '@/../../build/contracts/IERC20.json';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';
-import {SupportedProject} from '@/views/Treasury.vue';
 import {abi as erc721Abi} from '@/../../build/contracts/IERC721.json';
 import BigNumber from 'bignumber.js';
+import bridge from './bridge';
+import pvp from './pvp';
+import quests from './quests';
+import raid from './raid';
+import staking from './staking';
+import land from './land';
+import treasury from './treasury';
+import specialWeaponsManager from './specialWeaponsManager';
+import combat from './combat';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -62,13 +55,6 @@ type WaxBridgeDetailsPayload = Pick<
 IState, 'waxBridgeWithdrawableBnb' | 'waxBridgeRemainingWithdrawableBnbDuringPeriod' | 'waxBridgeTimeUntilLimitExpires'
 >;
 
-import bridge from './bridge';
-import pvp from './pvp';
-import quests from './quests';
-import raid from './raid';
-import staking from './staking';
-import land from './land';
-
 Vue.use(Vuex);
 
 export default new Vuex.Store<IState>({
@@ -78,7 +64,10 @@ export default new Vuex.Store<IState>({
     quests,
     raid,
     staking,
-    land
+    land,
+    treasury,
+    specialWeaponsManager,
+    combat,
   },
   state: {
     web3: new Web3(),
@@ -90,10 +79,8 @@ export default new Vuex.Store<IState>({
     currentNetworkId: null,
     skillPriceInUsd: 0,
 
-    fightGasOffset: '0',
-    fightBaseline: '0',
-
     skillBalance: '0',
+    balance: '0',
     skillRewards: '0',
     maxRewardsClaimTax: '0',
     rewardsClaimTax: '0',
@@ -112,6 +99,7 @@ export default new Vuex.Store<IState>({
     ownedDust: [],
     currentChainSupportsPvP: false,
     currentChainSupportsQuests: false,
+    currentChainSupportsDrawbridge: false,
     hasAdminAccess: false,
     hasMinterAccess: false,
 
@@ -129,11 +117,8 @@ export default new Vuex.Store<IState>({
     weaponDurabilities: {},
     weaponRenames: {},
     maxDurability: 0,
-    isInCombat: false,
     weaponCosmetics: {},
     isCharacterViewExpanded: localStorage.getItem('isCharacterViewExpanded') ? localStorage.getItem('isCharacterViewExpanded') === 'true' : true,
-
-    targetsByCharacterIdAndWeaponId: {},
 
     shields: {},
     trinkets: {},
@@ -145,66 +130,6 @@ export default new Vuex.Store<IState>({
     waxBridgeWithdrawableBnb: '0',
     waxBridgeRemainingWithdrawableBnbDuringPeriod: '0',
     waxBridgeTimeUntilLimitExpires: 0,
-
-    partnerProjects: {},
-    partnerProjectMultipliers: {},
-    partnerProjectRatios: {},
-    payoutCurrencyId: localStorage.getItem('payoutCurrencyId') || '-1',
-    defaultSlippage: '0',
-
-    activeSpecialWeaponEventsIds: [],
-    inactiveSpecialWeaponEventsIds: [],
-    specialWeaponEvents: {},
-    specialWeaponArts: [],
-    specialWeaponEventId: localStorage.getItem('specialWeaponEventId') || '0',
-    shardsSupply: {},
-
-    itemPrices: {
-      itemWeaponRenamePrice: '',
-      itemCharacterRenamePrice: '',
-      itemCharacterTraitChangeEarthPrice: '',
-      itemCharacterTraitChangeFirePrice: '',
-      itemCharacterTraitChangeLightningPrice: '',
-      itemCharacterTraitChangeWaterPrice: '',
-      itemWeaponCosmeticGrayscalePrice: '',
-      itemWeaponCosmeticContrastPrice: '',
-      itemWeaponCosmeticSepiaPrice: '',
-      itemWeaponCosmeticInvertPrice: '',
-      itemWeaponCosmeticBlurPrice: '',
-      itemWeaponCosmeticFireGlowPrice: '',
-      itemWeaponCosmeticEarthGlowPrice: '',
-      itemWeaponCosmeticLightningGlowPrice: '',
-      itemWeaponCosmeticWaterGlowPrice: '',
-      itemWeaponCosmeticRainbowGlowPrice: '',
-      itemWeaponCosmeticDarkGlowPrice: '',
-      itemWeaponCosmeticGhostPrice: '',
-      itemWeaponCosmeticPoliceLightsPrice: '',
-      itemWeaponCosmeticNeonBorderPrice: '',
-      itemWeaponCosmeticRotatingNeonBorderPrice: '',
-      itemWeaponCosmeticDiamondBorderPrice: '',
-      itemWeaponCosmeticGoldBorderPrice: '',
-      itemWeaponCosmeticSilverBorderPrice: '',
-      itemWeaponCosmeticBronzeBorderPrice: '',
-      itemCharacterCosmeticGrayscalePrice: '',
-      itemCharacterCosmeticContrastPrice: '',
-      itemCharacterCosmeticSepiaPrice: '',
-      itemCharacterCosmeticInvertPrice: '',
-      itemCharacterCosmeticBlurPrice: '',
-      itemCharacterCosmeticFireGlowPrice: '',
-      itemCharacterCosmeticEarthGlowPrice: '',
-      itemCharacterCosmeticLightningGlowPrice: '',
-      itemCharacterCosmeticWaterGlowPrice: '',
-      itemCharacterCosmeticRainbowGlowPrice: '',
-      itemCharacterCosmeticDarkGlowPrice: '',
-      itemCharacterCosmeticGhostPrice: '',
-      itemCharacterCosmeticPoliceLightsPrice: '',
-      itemCharacterCosmeticNeonBorderPrice: '',
-      itemCharacterCosmeticDiamondBorderPrice: '',
-      itemCharacterCosmeticGoldBorderPrice: '',
-      itemCharacterCosmeticSilverBorderPrice: '',
-      itemCharacterCosmeticBronzeBorderPrice: '',
-    },
-
   },
 
   getters: {
@@ -215,15 +140,6 @@ export default new Vuex.Store<IState>({
       // our root component prevents the app from being active if contracts
       // are not set up, so we never need to worry about it being null anywhere else
       return _.isFunction(state.contracts) ? state.contracts() : null!;
-    },
-
-    getTargetsByCharacterIdAndWeaponId(state: IState) {
-      return (characterId: number, weaponId: number) => {
-        const targetsByWeaponId = state.targetsByCharacterIdAndWeaponId[characterId];
-        if (!targetsByWeaponId) return [];
-
-        return targetsByWeaponId[weaponId] ?? [];
-      };
     },
 
     getCharacterName(state: IState) {
@@ -302,6 +218,12 @@ export default new Vuex.Store<IState>({
     getExchangeUrl() {
       return getConfigValue('exchangeUrl');
     },
+    getBalanceUrl() {
+      return getConfigValue('balanceUrl');
+    },
+    getCurrencySymbol() {
+      return getConfigValue('currencySymbol');
+    },
     getExchangeTransakUrl() {
       const currencyNetwork = getConfigValue('currencyNetwork') || 'BNB';
       const currencyDefault = getConfigValue('currency') || 'BNB';
@@ -341,22 +263,19 @@ export default new Vuex.Store<IState>({
 
     getPowerfulDust(state) {
       return () => {
-        const dust = state.ownedDust[2];
-        return dust;
+        return state.ownedDust[2];
       };
     },
 
     getLesserDust(state) {
       return () => {
-        const dust = state.ownedDust[0];
-        return dust;
+        return state.ownedDust[0];
       };
     },
 
     getGreaterDust(state) {
       return () => {
-        const dust = state.ownedDust[1];
-        return dust;
+        return state.ownedDust[1];
       };
     },
 
@@ -366,6 +285,10 @@ export default new Vuex.Store<IState>({
 
     getCurrentChainSupportsQuests(state) {
       return state.currentChainSupportsQuests;
+    },
+
+    getCurrentChainSupportsDrawbridge(state) {
+      return state.currentChainSupportsDrawbridge;
     },
 
     getHasAdminAccess(state) {
@@ -510,18 +433,6 @@ export default new Vuex.Store<IState>({
       return toBN(state.rewardsClaimTax).dividedBy(toBN(2).exponentiatedBy(64));
     },
 
-    fightGasOffset(state) {
-      return state.fightGasOffset;
-    },
-
-    fightBaseline(state) {
-      return state.fightBaseline;
-    },
-
-    getIsInCombat(state: IState): boolean {
-      return state.isInCombat;
-    },
-
     getIsCharacterViewExpanded(state: IState): boolean {
       return state.isCharacterViewExpanded;
     },
@@ -530,9 +441,6 @@ export default new Vuex.Store<IState>({
       return bnMinimum(state.waxBridgeWithdrawableBnb, state.waxBridgeRemainingWithdrawableBnbDuringPeriod).toString();
     },
 
-    getPartnerProjects(state): IPartnerProject[] {
-      return values(state.partnerProjects);
-    }
   },
 
   mutations: {
@@ -570,12 +478,12 @@ export default new Vuex.Store<IState>({
       state.skillBalance = skillBalance;
     },
 
-    updateDustBalance(state: IState, { dustBalance }) {
-      state.ownedDust = dustBalance;
+    updateBalance(state: IState, { balance }) {
+      state.balance = balance;
     },
 
-    updateShardsSupply(state: IState, { eventId, shardsSupply }) {
-      Vue.set(state.shardsSupply, eventId, shardsSupply);
+    updateDustBalance(state: IState, { dustBalance }) {
+      state.ownedDust = dustBalance;
     },
 
     updateSkillRewards(state: IState, { skillRewards }: { skillRewards: string }) {
@@ -598,14 +506,6 @@ export default new Vuex.Store<IState>({
 
     updateInGameOnlyFunds(state, { inGameOnlyFunds }: Pick<IState, 'inGameOnlyFunds'>) {
       state.inGameOnlyFunds = inGameOnlyFunds;
-    },
-
-    updateFightGasOffset(state: IState, { fightGasOffset }: { fightGasOffset: string }) {
-      state.fightGasOffset = fightGasOffset;
-    },
-
-    updateFightBaseline(state: IState, { fightBaseline }: { fightBaseline: string }) {
-      state.fightBaseline = fightBaseline;
     },
 
     updateUserDetails(state: IState, payload) {
@@ -632,10 +532,6 @@ export default new Vuex.Store<IState>({
 
     setCurrentCharacter(state: IState, characterId: number) {
       state.currentCharacterId = characterId;
-    },
-
-    setIsInCombat(state: IState, isInCombat: boolean) {
-      state.isInCombat = isInCombat;
     },
 
     setIsCharacterViewExpanded(state: IState, isExpanded: boolean) {
@@ -673,6 +569,10 @@ export default new Vuex.Store<IState>({
 
     updateCurrentChainSupportsQuests(state: IState) {
       state.currentChainSupportsQuests = currentChainSupportsQuests();
+    },
+
+    updateCurrentChainSupportsDrawbridge(state: IState) {
+      state.currentChainSupportsDrawbridge = currentChainSupportsDrawbridge();
     },
 
     updateHasAdminAccess(state: IState, hasAdminAccess: boolean) {
@@ -759,14 +659,6 @@ export default new Vuex.Store<IState>({
     updateCharacterCosmetic(state: IState, { characterId, characterCosmetic }) {
       Vue.set(state.characterCosmetics, characterId, characterCosmetic);
     },
-    updateTargets(state: IState, { characterId, weaponId, targets }) {
-      if (!state.targetsByCharacterIdAndWeaponId[characterId]) {
-        Vue.set(state.targetsByCharacterIdAndWeaponId, characterId, {});
-      }
-
-      Vue.set(state.targetsByCharacterIdAndWeaponId[characterId], weaponId, targets);
-    },
-
     updateWaxBridgeDetails(state, payload: WaxBridgeDetailsPayload) {
       state.waxBridgeWithdrawableBnb = payload.waxBridgeWithdrawableBnb;
       state.waxBridgeRemainingWithdrawableBnbDuringPeriod = payload.waxBridgeRemainingWithdrawableBnbDuringPeriod;
@@ -777,259 +669,15 @@ export default new Vuex.Store<IState>({
       state.currentNftType = payload.type;
       state.currentNftId = payload.id;
     },
-
-    updatePartnerProjectsState(state: IState, { partnerProjectId, partnerProject }) {
-      Vue.set(state.partnerProjects, partnerProjectId, partnerProject);
-    },
-
-    updateDefaultSlippage(state: IState, slippage) {
-      state.defaultSlippage = slippage;
-    },
-
-    updatePartnerProjectMultiplier(state: IState, { partnerProjectId, multiplier }) {
-      Vue.set(state.partnerProjectMultipliers, partnerProjectId, multiplier);
-    },
-
-    updatePartnerProjectRatio(state: IState, { partnerProjectId, ratio }) {
-      Vue.set(state.partnerProjectRatios, partnerProjectId, ratio);
-    },
-
-    updatePayoutCurrencyId(state: IState, newPayoutCurrencyId) {
-      localStorage.setItem('payoutCurrencyId', newPayoutCurrencyId);
-      state.payoutCurrencyId = newPayoutCurrencyId;
-    },
-
-    updateItemPrices(state: IState, {itemPrice, id}) {
-      switch(id){
-      case '1': {
-        state.itemPrices.itemWeaponRenamePrice = itemPrice;
-        break;
-      }
-      case '2':{
-        state.itemPrices.itemCharacterRenamePrice = itemPrice;
-        break;
-      }
-      case '3':{
-        state.itemPrices.itemCharacterTraitChangeFirePrice = itemPrice;
-        break;
-      }
-      case '4':{
-        state.itemPrices.itemCharacterTraitChangeEarthPrice = itemPrice;
-        break;
-      }
-      case '5':{
-        state.itemPrices.itemCharacterTraitChangeWaterPrice = itemPrice;
-        break;
-      }
-      case '6':{
-        state.itemPrices.itemCharacterTraitChangeLightningPrice = itemPrice;
-        break;
-      }
-
-      }
-    },
-
-    updateWeaponCosmeticPrices(state: IState, {itemPrice, id}){
-      switch(id){
-      case '1':{
-        state.itemPrices.itemWeaponCosmeticGrayscalePrice = itemPrice;
-        break;
-      }
-      case '2':{
-        state.itemPrices.itemWeaponCosmeticContrastPrice = itemPrice;
-        break;
-      }
-      case '3':{
-        state.itemPrices.itemWeaponCosmeticSepiaPrice = itemPrice;
-        break;
-      }
-      case '4':{
-        state.itemPrices.itemWeaponCosmeticInvertPrice = itemPrice;
-        break;
-      }
-      case '5':{
-        state.itemPrices.itemWeaponCosmeticBlurPrice = itemPrice;
-        break;
-      }
-      case '6':{
-        state.itemPrices.itemWeaponCosmeticFireGlowPrice = itemPrice;
-        break;
-      }
-      case '7':{
-        state.itemPrices.itemWeaponCosmeticEarthGlowPrice = itemPrice;
-        break;
-      }
-      case '8':{
-        state.itemPrices.itemWeaponCosmeticLightningGlowPrice = itemPrice;
-        break;
-      }
-      case '9':{
-        state.itemPrices.itemWeaponCosmeticWaterGlowPrice = itemPrice;
-        break;
-      }
-      case '10':{
-        state.itemPrices.itemWeaponCosmeticRainbowGlowPrice = itemPrice;
-        break;
-      }
-      case '11':{
-        state.itemPrices.itemWeaponCosmeticDarkGlowPrice = itemPrice;
-        break;
-      }
-      case '12':{
-        state.itemPrices.itemWeaponCosmeticGhostPrice = itemPrice;
-        break;
-      }
-      case '13':{
-        state.itemPrices.itemWeaponCosmeticPoliceLightsPrice = itemPrice;
-        break;
-      }
-      case '14':{
-        state.itemPrices.itemWeaponCosmeticNeonBorderPrice = itemPrice;
-        break;
-      }
-      case '15':{
-        state.itemPrices.itemWeaponCosmeticRotatingNeonBorderPrice = itemPrice;
-        break;
-      }
-      case '16':{
-        state.itemPrices.itemWeaponCosmeticDiamondBorderPrice = itemPrice;
-        break;
-      }
-      case '17':{
-        state.itemPrices.itemWeaponCosmeticGoldBorderPrice = itemPrice;
-        break;
-      }
-      case '18':{
-        state.itemPrices.itemWeaponCosmeticSilverBorderPrice = itemPrice;
-        break;
-      }
-      case '19':{
-        state.itemPrices.itemWeaponCosmeticBronzeBorderPrice = itemPrice;
-      }
-      }
-    },
-
-    updateCharacterCosmeticPrices(state: IState, {itemPrice, id}){
-      switch(id){
-      case '1':{
-        state.itemPrices.itemCharacterCosmeticGrayscalePrice = itemPrice;
-        break;
-      }
-      case '2':{
-        state.itemPrices.itemCharacterCosmeticContrastPrice = itemPrice;
-        break;
-      }
-      case '3':{
-        state.itemPrices.itemCharacterCosmeticSepiaPrice = itemPrice;
-        break;
-      }
-      case '4':{
-        state.itemPrices.itemCharacterCosmeticInvertPrice = itemPrice;
-        break;
-      }
-      case '5':{
-        state.itemPrices.itemCharacterCosmeticBlurPrice = itemPrice;
-        break;
-      }
-      case '6':{
-        state.itemPrices.itemCharacterCosmeticFireGlowPrice = itemPrice;
-        break;
-      }
-      case '7':{
-        state.itemPrices.itemCharacterCosmeticEarthGlowPrice = itemPrice;
-        break;
-      }
-      case '8':{
-        state.itemPrices.itemCharacterCosmeticLightningGlowPrice = itemPrice;
-        break;
-      }
-      case '9':{
-        state.itemPrices.itemCharacterCosmeticWaterGlowPrice = itemPrice;
-        break;
-      }
-      case '10':{
-        state.itemPrices.itemCharacterCosmeticRainbowGlowPrice = itemPrice;
-        break;
-      }
-      case '11':{
-        state.itemPrices.itemCharacterCosmeticDarkGlowPrice = itemPrice;
-        break;
-      }
-      case '12':{
-        state.itemPrices.itemCharacterCosmeticGhostPrice = itemPrice;
-        break;
-      }
-      case '13':{
-        state.itemPrices.itemCharacterCosmeticPoliceLightsPrice = itemPrice;
-        break;
-      }
-      case '14':{
-        state.itemPrices.itemCharacterCosmeticNeonBorderPrice = itemPrice;
-        break;
-      }
-      case '15':{
-        state.itemPrices.itemCharacterCosmeticDiamondBorderPrice = itemPrice;
-        break;
-      }
-      case '16':{
-        state.itemPrices.itemCharacterCosmeticGoldBorderPrice = itemPrice;
-        break;
-      }
-      case '17':{
-        state.itemPrices.itemCharacterCosmeticSilverBorderPrice = itemPrice;
-        break;
-      }
-      case '18':{
-        state.itemPrices.itemCharacterCosmeticBronzeBorderPrice = itemPrice;
-        break;
-      }
-      }
-    },
-
-    updateSpecialWeaponEventsInfo(state: IState, {eventId, eventInfo}) {
-      Vue.set(state.specialWeaponEvents, eventId, eventInfo);
-    },
-
-    updateSpecialWeaponArt(state: IState, {eventId, art}) {
-      Vue.set(state.specialWeaponArts, eventId, art);
-    },
-
-    updateActiveSpecialWeaponEventsIds(state: IState, eventsIds) {
-      Vue.set(state, 'activeSpecialWeaponEventsIds', eventsIds);
-      if(!eventsIds.find((id: { toString: () => string; }) => id.toString() === state.specialWeaponEventId)) {
-        state.specialWeaponEventId = '0';
-      }
-    },
-
-    updateInactiveSpecialWeaponEventsIds(state: IState, eventsIds) {
-      Vue.set(state, 'inactiveSpecialWeaponEventsIds', eventsIds);
-    },
-
-    updateSpecialWeaponEventId(state: IState, newSpecialWeaponEventId) {
-      localStorage.setItem('specialWeaponEventId', newSpecialWeaponEventId.toString());
-      state.specialWeaponEventId = newSpecialWeaponEventId.toString();
-    },
-
-    updateForgingStatus(state: IState, { eventId, ordered, forged }) {
-      Vue.set(state.specialWeaponEvents[eventId], 'ordered', ordered);
-      Vue.set(state.specialWeaponEvents[eventId], 'forged', forged);
-    },
-
-    updateEventTotalOrderedCount(state: IState, { eventId, orderedCount }) {
-      Vue.set(state.specialWeaponEvents[eventId], 'orderedCount', orderedCount);
-    },
   },
 
   actions: {
-    async fetchIgoRewardsPerFight({ state }) {
+    async fetchUsdSkillValue({state}, payload){
       const { CryptoBlades } = state.contracts();
       if(!CryptoBlades || !state.defaultAccount) return;
-
-      const igoDefaultReward = await CryptoBlades.methods
-        .vars(27)
-        .call(defaultCallOptions(state));
-      return igoDefaultReward;
+      return await CryptoBlades.methods.usdToSkill(payload).call(defaultCallOptions(state));
     },
+
     async initializeStore({ dispatch }) {
       await dispatch('setUpContracts');
       await dispatch('setUpContractEvents');
@@ -1045,8 +693,8 @@ export default new Vuex.Store<IState>({
       await dispatch('setupWeaponRenames');
       await dispatch('setupWeaponCosmetics');
 
-      await dispatch('fetchSpecialWeaponEvents');
-      await dispatch('fetchSpecialWeaponArts');
+      await dispatch('specialWeaponsManager/fetchSpecialWeaponEvents');
+      await dispatch('specialWeaponsManager/fetchSpecialWeaponArts');
 
       await dispatch('fetchHasAdminAccess');
       await dispatch('fetchHasMinterAccess');
@@ -1070,7 +718,6 @@ export default new Vuex.Store<IState>({
 
       if(refreshUserDetails) {
         await Promise.all([
-          dispatch('setUpContractEvents'),
           dispatch('fetchUserDetails')
         ]);
       }
@@ -1092,18 +739,19 @@ export default new Vuex.Store<IState>({
 
 
 
-    setUpContractEvents({ state, dispatch, commit }) {
+    async setUpContractEvents({ state, dispatch, commit }) {
+      const { Characters, Weapons, Garrison, Shields, CryptoBlades } = state.contracts();
       state.eventSubscriptions().forEach(sub => sub.unsubscribe());
 
       const emptySubsPayload: SetEventSubscriptionsPayload = { eventSubscriptions: () => [] };
       commit('setEventSubscriptions', emptySubsPayload);
 
-      if(!state.defaultAccount) return;
+      if(!state.defaultAccount || !Characters || !Weapons || !Shields || !CryptoBlades || !Garrison) return;
 
       const subscriptions: IWeb3EventSubscription[] = [];
 
       subscriptions.push(
-        state.contracts().Characters!.events.NewCharacter(
+        Characters.events.NewCharacter(
           { filter: { minter: state.defaultAccount } },
           async (err: Error, data: any) => {
             if (err) {
@@ -1118,15 +766,15 @@ export default new Vuex.Store<IState>({
             await Promise.all([
               dispatch('fetchCharacter', { characterId }),
               dispatch('fetchSkillBalance'),
-              dispatch('fetchFightRewardSkill'),
-              dispatch('fetchFightRewardXp'),
+              dispatch('combat/fetchFightRewardSkill'),
+              dispatch('combat/fetchFightRewardXp'),
               dispatch('fetchDustBalance')
             ]);
           })
       );
 
       subscriptions.push(
-        state.contracts().Garrison!.events.CharacterReceived(
+        Garrison.events.CharacterReceived(
           { filter: { minter: state.defaultAccount } },
           async (err: Error, data: any) => {
             if (err) {
@@ -1142,8 +790,8 @@ export default new Vuex.Store<IState>({
             await Promise.all([
               dispatch('fetchCharacter', { characterId, inGarrison: true }),
               dispatch('fetchSkillBalance'),
-              dispatch('fetchFightRewardSkill'),
-              dispatch('fetchFightRewardXp'),
+              dispatch('combat/fetchFightRewardSkill'),
+              dispatch('combat/fetchFightRewardXp'),
               dispatch('fetchGarrisonCharactersXp'),
               dispatch('fetchDustBalance')
             ]);
@@ -1151,7 +799,7 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        state.contracts().Weapons!.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
+        Weapons.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
           if (err) {
             console.error(err, data);
             return;
@@ -1169,7 +817,7 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        state.contracts().Shields!.events.NewShield({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
+        Shields.events.NewShield({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
           if (err) {
             console.error(err, data);
             return;
@@ -1188,7 +836,7 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        state.contracts().CryptoBlades!.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
+        CryptoBlades.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
           if (err) {
             console.error(err, data);
             return;
@@ -1202,7 +850,7 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        state.contracts().CryptoBlades!.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
+        CryptoBlades.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
           if (err) {
             console.error(err, data);
             return;
@@ -1268,7 +916,12 @@ export default new Vuex.Store<IState>({
     },
 
     async fetchUserDetails({ dispatch }) {
-      const promises = [dispatch('fetchSkillBalance'), dispatch('fetchWaxBridgeDetails'), dispatch('fetchDustBalance'), dispatch('fetchShardsSupply')];
+      const promises = [
+        dispatch('fetchSkillBalance'),
+        dispatch('fetchWaxBridgeDetails'),
+        dispatch('fetchDustBalance'),
+        dispatch('specialWeaponsManager/fetchShardsSupply')
+      ];
 
       promises.push(dispatch('fetchUserGameDetails'));
 
@@ -1318,11 +971,11 @@ export default new Vuex.Store<IState>({
         dispatch('fetchTrinkets', ownedTrinketIds),
         dispatch('fetchJunks', ownedJunkIds),
         dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchFightRewardXp'),
+        dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardXp'),
         dispatch('fetchGarrisonCharactersXp'),
-        dispatch('fetchFightGasOffset'),
-        dispatch('fetchFightBaseline'),
+        dispatch('combat/fetchFightGasOffset'),
+        dispatch('combat/fetchFightBaseline'),
       ]);
     },
 
@@ -1398,8 +1051,17 @@ export default new Vuex.Store<IState>({
           }
         })(),
         dispatch('fetchInGameOnlyFunds'),
+        dispatch('fetchBalance'),
         dispatch('staking/fetchStakeDetails', { stakeType: stakeTypeThatCanHaveUnclaimedRewardsStakedTo })
       ]);
+    },
+
+    async fetchBalance({ state, commit }) {
+      const { defaultAccount } = state;
+      if(!defaultAccount) return;
+
+      const balance = await state.web3.eth.getBalance(defaultAccount);
+      commit('updateBalance', { balance });
     },
 
     async fetchDustBalance({ state, commit }) {
@@ -1414,17 +1076,6 @@ export default new Vuex.Store<IState>({
           commit('updateDustBalance', { dustBalance });
         })(),
       ]);
-    },
-
-    async fetchShardsSupply({ state, commit }) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      const eventCount = +await SpecialWeaponsManager.methods.eventCount().call(defaultCallOptions(state));
-      for(let i = 1; i <= eventCount; i++) {
-        const eventShardsSupply = await SpecialWeaponsManager.methods.getUserSpecialShardsSupply(state.defaultAccount, i).call(defaultCallOptions(state));
-        commit('updateShardsSupply', { eventId: i, shardsSupply: +eventShardsSupply });
-      }
     },
 
     async fetchSoulBalance({ state }) {
@@ -1662,28 +1313,17 @@ export default new Vuex.Store<IState>({
       ownedCharacterIds.push(...ownedGarrisonCharacterIds);
 
       for (const charId of ownedCharacterIds) {
-        dispatch('fetchCharacterStamina', charId);
+        dispatch('combat/fetchCharacterStamina', charId);
       }
     },
 
-    async fetchCharacterStamina({ state, commit }, characterId: number) {
-      const staminaString = await state.contracts().Characters!.methods
-        .getStaminaPoints('' + characterId)
-        .call(defaultCallOptions(state));
-
-      const stamina = parseInt(staminaString, 10);
-      if (state.characterStaminas[characterId] !== stamina) {
-        commit('updateCharacterStamina', { characterId, stamina });
-      }
-    },
     async getAccountCharacters({state}) {
       if(!state.defaultAccount) return;
       const numberOfCharacters = parseInt(await state.contracts().Characters!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
-      const characters = await Promise.all(
+      return await Promise.all(
         [...Array(numberOfCharacters).keys()].map(async (_, i) =>
           Number(await state.contracts().Characters!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state))))
       );
-      return characters;
     },
     async getAccountGarrisonCharacters({state}) {
       if(!state.defaultAccount) return;
@@ -1692,11 +1332,10 @@ export default new Vuex.Store<IState>({
     async getAccountWeapons({state}) {
       if(!state.defaultAccount) return;
       const numberOfWeapons = parseInt(await state.contracts().Weapons!.methods.balanceOf(state.defaultAccount).call(defaultCallOptions(state)), 10);
-      const weapons = await Promise.all(
+      return await Promise.all(
         [...Array(numberOfWeapons).keys()]
           .map(async (_, i) => Number(await state.contracts().Weapons!.methods.tokenOfOwnerByIndex(state.defaultAccount!, i).call(defaultCallOptions(state))))
       );
-      return weapons;
     },
     async setupCharacterRenames({ dispatch }) {
       const ownedCharacterIds = await dispatch('getAccountCharacters');
@@ -1729,11 +1368,6 @@ export default new Vuex.Store<IState>({
         dispatch('fetchCharacterCosmetic', charId);
       }
     },
-    async setupCharactersWithIdsCosmetics({ dispatch }, characterIds: string[]) {
-      for (const charId of characterIds) {
-        dispatch('fetchCharacterCosmetic', charId);
-      }
-    },
     async fetchCharacterCosmetic({ state, commit }, characterId: number) {
       const characterCosmetic = await state.contracts().CharacterCosmetics!.methods
         .getCharacterCosmetic(characterId)
@@ -1760,81 +1394,88 @@ export default new Vuex.Store<IState>({
       await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
 
       await Promise.all([
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchFightRewardXp'),
+        dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardXp'),
         dispatch('setupCharacterStaminas')
       ]);
     },
 
-    async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
-    { num: any, useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
-      const { CryptoBlades, SkillToken, Weapons } = state.contracts();
-      if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
-      const chosenElementFee = chosenElement === 100 ? 1 : 2;
-      const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
+    async hasWeaponsToClaim({ state }) {
+      const {CryptoBlades} = state.contracts();
+      if (!CryptoBlades || !state.defaultAccount) return;
 
-      if(useStakedSkillOnly) {
-        await CryptoBlades.methods
-          .mintWeaponNUsingStakedSkill(num, chosenElement, eventId)
-          .send({ from: state.defaultAccount, gas: '5000000', gasPrice: getGasPrice(), });
-      }
-      else {
-        await approveFee(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
-          { feeMultiplier: num * 4 * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
-        );
+      const USERVAR_CLAIM_WEAPON_DATA = await CryptoBlades.methods.USERVAR_CLAIM_WEAPON_DATA().call(defaultCallOptions(state));
 
-        await CryptoBlades.methods.mintWeaponN(num, chosenElement, eventId).send({ from: state.defaultAccount, gas: '5000000', gasPrice: getGasPrice(), });
-      }
+      return !!+await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
+    },
+
+    async quantityOfWeaponsToClaim({ state }) {
+      const {CryptoBlades} = state.contracts();
+      if (!CryptoBlades || !state.defaultAccount) return;
+
+      const USERVAR_CLAIM_WEAPON_DATA = await CryptoBlades.methods.USERVAR_CLAIM_WEAPON_DATA().call(defaultCallOptions(state));
+
+      const claimWeaponData = +await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
+      return Number(BigInt(claimWeaponData) >> BigInt(32));
+    },
+
+    async claimWeapons({ state, dispatch }) {
+      const {CryptoBlades} = state.contracts();
+      if (!CryptoBlades || !state.defaultAccount) return;
+
+      await CryptoBlades.methods.mintWeapon().send({from: state.defaultAccount, gasPrice: getGasPrice()});
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardSkill'),
         dispatch('updateWeaponIds'),
         dispatch('setupWeaponDurabilities'),
-        dispatch('fetchShardsSupply')
+        dispatch('specialWeaponsManager/fetchShardsSupply')
       ]);
     },
 
-    async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
-    { useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
-      const { CryptoBlades, SkillToken, Weapons } = state.contracts();
-      if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
+    async mintWeapons({state, dispatch}, {quantity = 1, useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved}:
+    { quantity: any, useStakedSkillOnly?: boolean, chosenElement: Element, eventId: any, mintSlippageApproved: boolean }) {
+      const {CryptoBlades, SkillToken} = state.contracts();
+      if (!CryptoBlades || !SkillToken || !state.defaultAccount) return;
       const chosenElementFee = chosenElement === 100 ? 1 : 2;
       const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
-      if(useStakedSkillOnly) {
-        await CryptoBlades.methods
-          .mintWeaponUsingStakedSkill(chosenElement, eventId)
-          .send({ from: state.defaultAccount, gasPrice: getGasPrice(), });
-      }
-      else {
-        await approveFee(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
-          { feeMultiplier: chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
-        );
+      const USERVAR_CLAIM_WEAPON_DATA = await CryptoBlades.methods.USERVAR_CLAIM_WEAPON_DATA().call(defaultCallOptions(state));
 
-        await CryptoBlades.methods.mintWeapon(chosenElement, eventId).send({ from: state.defaultAccount, gasPrice: getGasPrice(), });
+      const hasWeaponsToClaim = !!+await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
+
+      console.log('hasWeaponsToClaim', hasWeaponsToClaim);
+      console.log('eventId', eventId);
+
+      if (!hasWeaponsToClaim) {
+        if (useStakedSkillOnly) {
+          await CryptoBlades.methods
+            .generateWeaponSeedUsingStakedSkill(quantity, chosenElement, eventId)
+            .send({from: state.defaultAccount, gasPrice: getGasPrice(),});
+        } else {
+          await approveFee(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            state.skillRewards,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
+            {feeMultiplier: quantity * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true}
+          );
+          await CryptoBlades.methods.generateWeaponSeed(quantity, chosenElement, eventId).send(defaultCallOptions(state));
+        }
       }
+
+      await CryptoBlades.methods.mintWeapon().send({from: state.defaultAccount, gasPrice: getGasPrice(),});
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardSkill'),
         dispatch('updateWeaponIds'),
         dispatch('setupWeaponDurabilities'),
-        dispatch('fetchShardsSupply')
+        dispatch('specialWeaponsManager/fetchShardsSupply')
       ]);
     },
 
@@ -1885,8 +1526,8 @@ export default new Vuex.Store<IState>({
       await Promise.all([
         dispatch('fetchSkillBalance'),
         dispatch('updateWeaponIds'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchFightRewardXp')
+        dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardXp')
       ]);
     },
 
@@ -1942,8 +1583,8 @@ export default new Vuex.Store<IState>({
       await Promise.all([
         dispatch('fetchSkillBalance'),
         dispatch('updateWeaponIds'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchFightRewardXp'),
+        dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardXp'),
         dispatch('fetchDustBalance')
       ]);
     },
@@ -1988,88 +1629,28 @@ export default new Vuex.Store<IState>({
       await Promise.all([
         dispatch('fetchSkillBalance'),
         dispatch('updateWeaponIds'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchFightRewardXp'),
+        dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardXp'),
         dispatch('fetchDustBalance')
       ]);
     },
 
-    async fetchTargets({ state, commit }, { characterId, weaponId }) {
-      if(isUndefined(characterId) || isUndefined(weaponId)) {
-        commit('updateTargets', { characterId, weaponId, targets: [] });
-        return;
-      }
-
-      const targets = await state.contracts().CryptoBlades!.methods
-        .getTargets(characterId, weaponId)
-        .call(defaultCallOptions(state));
-
-      commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
+    async fetchReforgeWeaponFee({ state }) {
+      const { BurningManager } = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+      return await BurningManager.methods.reforgeWeaponFee().call({ from: state.defaultAccount });
     },
 
-    async doEncounter({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier }) {
-      const res = await state.contracts().CryptoBlades!.methods
-        .fight(
-          characterId,
-          weaponId,
-          targetString,
-          fightMultiplier
-        )
-        .send({ from: state.defaultAccount, gas: '300000', gasPrice: getGasPrice() });
-
-      await dispatch('fetchTargets', { characterId, weaponId });
-
-
-      const {
-        /*owner,
-        character,
-        weapon,
-        target,*/
-        playerRoll,
-        enemyRoll,
-        xpGain,
-        skillGain
-      } = res.events.FightOutcome.returnValues;
-
-      const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
-
-      const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
-
-      await dispatch('fetchWeaponDurability', weaponId);
-
-      return {
-        isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
-        playerRoll,
-        enemyRoll,
-        xpGain,
-        skillGain,
-        bnbGasUsed
-      };
+    async fetchReforgeWeaponWithDustFee({ state }) {
+      const { BurningManager } = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+      return await BurningManager.methods.reforgeWeaponWithDustFee().call({ from: state.defaultAccount });
     },
 
-    async fetchExpectedPayoutForMonsterPower({ state }, { power, isCalculator = false }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-      if(isCalculator) {
-        return await CryptoBlades.methods.getTokenGainForFight(power, false).call(defaultCallOptions(state));
-      }
-      return await CryptoBlades.methods.getTokenGainForFight(power, true).call(defaultCallOptions(state));
-    },
-
-    async fetchHourlyPowerAverage({ state }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-      return await CryptoBlades.methods.vars(4).call(defaultCallOptions(state));
-    },
-    async fetchHourlyPayPerFight({ state }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-      return await CryptoBlades.methods.vars(5).call(defaultCallOptions(state));
-    },
-    async fetchHourlyAllowance({ state }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-      return await CryptoBlades.methods.vars(18).call(defaultCallOptions(state));
+    async fetchBurnWeaponFee({ state }) {
+      const { BurningManager } = state.contracts();
+      if(!state.defaultAccount || !BurningManager) return;
+      return await BurningManager.methods.burnWeaponFee().call({ from: state.defaultAccount });
     },
 
     async fetchRemainingTokenClaimAmountPreTax({ state }) {
@@ -2111,137 +1692,6 @@ export default new Vuex.Store<IState>({
         .call(defaultCallOptions(state));
     },
 
-    async purchaseT1CBKLand({state}, {price, currency}) {
-      const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
-      if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
-
-      if(currency === 0) {
-        await approveFeeWalletOnly(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          price
-        );
-      } else {
-        const tokenAddress = await Blacksmith.methods
-          .getCurrency(currency)
-          .call(defaultCallOptions(state));
-
-        await new state.web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
-          .approve(Blacksmith.options.address, price)
-          .send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-      }
-
-      return await Blacksmith.methods
-        .purchaseT1CBKLand(price, currency)
-        .send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-    },
-
-    async purchaseT2CBKLand({state}, {price, chunkId, currency}) {
-      const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
-      if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
-
-      if(currency === 0) {
-        await approveFeeWalletOnly(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          price
-        );
-      } else {
-        const tokenAddress = await Blacksmith.methods
-          .getCurrency(currency)
-          .call(defaultCallOptions(state));
-
-        await new state.web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
-          .approve(Blacksmith.options.address, price)
-          .send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-      }
-
-      return await Blacksmith.methods
-        .purchaseT2CBKLand(price, chunkId, currency).send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-    },
-
-    async purchaseT3CBKLand({state}, {price, chunkId, currency}) {
-      const { CryptoBlades, Blacksmith, SkillToken } = state.contracts();
-      if(!CryptoBlades || !Blacksmith || !SkillToken || !state.defaultAccount) return;
-
-      if(currency === 0) {
-        await approveFeeWalletOnly(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          price
-        );
-      } else {
-        const tokenAddress = await Blacksmith.methods
-          .getCurrency(currency)
-          .call(defaultCallOptions(state));
-
-        await new state.web3.eth.Contract(ierc20Abi as any[], tokenAddress).methods
-          .approve(Blacksmith.options.address, price)
-          .send({
-            from: state.defaultAccount,
-            gasPrice: getGasPrice(),
-          });
-      }
-
-      return await Blacksmith.methods
-        .purchaseT3CBKLand(price, chunkId, currency).send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-    },
-
-    async getCBKLandPrice({state}, {tier, currency}) {
-      const Blacksmith = state.contracts().Blacksmith!;
-
-      return await Blacksmith.methods
-        .getCBKLandPrice(tier, currency)
-        .call(defaultCallOptions(state));
-    },
-
-    async getChunkPopulation({state}, {chunkIds}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      return await CBKLandSale.methods
-        .getChunkPopulation(chunkIds)
-        .call(defaultCallOptions(state));
-    },
-
-    async getPurchase({state}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      if(!state.defaultAccount) return;
-
-      const res = await CBKLandSale.methods
-        .getPurchase()
-        .call(defaultCallOptions(state));
-
-      const tier = res[0];
-      const chunkId = res[1];
-
-      return { tier, chunkId };
-    },
-
     async getAvailableLand({state}) {
       const CBKLandSale = state.contracts().CBKLandSale!;
 
@@ -2254,58 +1704,6 @@ export default new Vuex.Store<IState>({
       const t3Land = res[2];
 
       return { t1Land, t2Land, t3Land };
-    },
-
-    async getReservedChunksIds({state}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      return await CBKLandSale.methods
-        .getReservedChunksIds()
-        .call(defaultCallOptions(state));
-    },
-
-    async getPlayerReservedLand({state}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-      if (!state.defaultAccount || !CBKLandSale) return;
-
-      return await CBKLandSale.methods
-        .getPlayerReservedLand(state.defaultAccount)
-        .call(defaultCallOptions(state));
-    },
-
-    async getChunksOfReservation({state}, {reservationId}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      return await CBKLandSale.methods
-        .getChunksOfReservations(reservationId)
-        .call(defaultCallOptions(state));
-    },
-
-    async getTakenT3Chunks({state}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      return await CBKLandSale.methods
-        .getTakenT3Chunks()
-        .call(defaultCallOptions(state));
-    },
-
-    async claimPlayerReservedLand({state}, {reservationId, chunkId, tier}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      return await CBKLandSale.methods
-        .claimPlayerReservedLand(reservationId, chunkId, tier)
-        .send({
-          from: state.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-    },
-
-    async reservedSalesAllowed({state}) {
-      const CBKLandSale = state.contracts().CBKLandSale!;
-
-      return await CBKLandSale.methods
-        .reservedSalesAllowed()
-        .call(defaultCallOptions(state));
     },
 
     async getOwnedLands({state}) {
@@ -2329,13 +1727,10 @@ export default new Vuex.Store<IState>({
         .getOwned(state.defaultAccount)
         .call(defaultCallOptions(state));
 
-      const landIdsWithTier = await Promise.all(landsIds.map(async (landId: string) =>
-      {
+      return await Promise.all(landsIds.map(async (landId: string) => {
         const land = await CBKLand.methods.get(landId).call(defaultCallOptions(state));
-        return { id: landId, tier: land[0] };
+        return {id: landId, tier: land[0]};
       }));
-
-      return landIdsWithTier;
     },
 
     async mintCBKLand({state}, {minter, tier, chunkId, reseller}) {
@@ -2450,66 +1845,6 @@ export default new Vuex.Store<IState>({
         .call(defaultCallOptions(state));
     },
 
-    async fetchFightGasOffset({ state, commit }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-      const fightGasOffset = await getFeeInSkillFromUsd(
-        CryptoBlades,
-        defaultCallOptions(state),
-        cryptoBladesMethods => cryptoBladesMethods.fightRewardGasOffset()
-      );
-
-      commit('updateFightGasOffset', { fightGasOffset });
-      return fightGasOffset;
-    },
-
-    async fetchFightBaseline({ state, commit }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-
-      const fightBaseline = await getFeeInSkillFromUsd(
-        CryptoBlades,
-        defaultCallOptions(state),
-        cryptoBladesMethods => cryptoBladesMethods.fightRewardBaseline()
-      );
-
-      commit('updateFightBaseline', { fightBaseline });
-      return fightBaseline;
-    },
-
-    async fetchFightRewardSkill({ state, commit }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-
-      const [skillRewards] = await Promise.all([
-        (async () => {
-          const skillRewards = await CryptoBlades.methods
-            .getTokenRewards()
-            .call(defaultCallOptions(state));
-
-          commit('updateSkillRewards', { skillRewards });
-
-          return skillRewards;
-        })()
-      ]);
-
-      return skillRewards;
-    },
-
-    async fetchFightRewardXp({ state, commit }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-
-      const xps = await CryptoBlades.methods.getXpRewards(state.ownedCharacterIds.map(x => x.toString())).call(defaultCallOptions(state));
-
-      const xpCharaIdPairs = state.ownedCharacterIds.map((charaId, i) => {
-        return [charaId, xps[i]];
-      });
-
-      commit('updateXpRewards', { xpRewards: _.fromPairs(xpCharaIdPairs) });
-      return xpCharaIdPairs;
-    },
-
     async fetchGarrisonCharactersXp({ state, commit }) {
       const { CryptoBlades } = state.contracts();
       if(!CryptoBlades) return;
@@ -2531,33 +1866,6 @@ export default new Vuex.Store<IState>({
       await Promise.all([
         dispatch('fetchGarrisonCharacters', state.ownedGarrisonCharacterIds),
         dispatch('fetchGarrisonCharactersXp')
-      ]);
-    },
-
-    async purchaseShield({ state, dispatch }) {
-      const { CryptoBlades, SkillToken, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !Blacksmith || !state.defaultAccount) return;
-
-      await approveFeeWalletOrRewards(
-        CryptoBlades,
-        CryptoBlades,
-        SkillToken,
-        state.defaultAccount,
-        defaultCallOptions(state),
-        defaultCallOptions(state),
-        new BigNumber(state.web3.utils.toWei('100', 'ether')),
-        state.skillRewards
-      );
-
-      await Blacksmith.methods.purchaseShield().send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchTotalShieldSupply'),
-        dispatch('updateShieldIds'),
       ]);
     },
 
@@ -2593,7 +1901,7 @@ export default new Vuex.Store<IState>({
 
       const currencyContract = new state.web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
       const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
-      const amountTimesDecimals = state.web3.utils.toBN(amount * 10 ** currencyDecimals);
+      const amountTimesDecimals = new BigNumber(amount).multipliedBy(new BigNumber(10 ** currencyDecimals));
 
       await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
         from: state.defaultAccount,
@@ -2610,9 +1918,7 @@ export default new Vuex.Store<IState>({
       const {PartnerVault} = state.contracts();
       if(!PartnerVault || !state.defaultAccount) return;
 
-      const nftsInVault = await PartnerVault.methods.getNftsInVault(tokenAddress).call(defaultCallOptions(state));
-
-      return nftsInVault;
+      return await PartnerVault.methods.getNftsInVault(tokenAddress).call(defaultCallOptions(state));
     },
 
     async getCurrencyBalanceInPartnerVault({state}, {currencyAddress}){
@@ -2777,7 +2083,7 @@ export default new Vuex.Store<IState>({
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill')
+        dispatch('combat/fetchFightRewardSkill')
       ]);
     },
 
@@ -2792,7 +2098,7 @@ export default new Vuex.Store<IState>({
 
       await Promise.all([
         dispatch('fetchCharacters', state.ownedCharacterIds),
-        dispatch('fetchFightRewardXp')
+        dispatch('combat/fetchFightRewardXp')
       ]);
     },
 
@@ -2832,21 +2138,14 @@ export default new Vuex.Store<IState>({
       return Number(BigInt(fee) >> BigInt(64)) * 100;
     },
 
-    async getFightXpGain({state}) {
+    async setHourlyIncome({state}, {hourlyIncome}) {
       const {CryptoBlades} = state.contracts();
-      if (!CryptoBlades) return;
+      if(!state.defaultAccount || !CryptoBlades) return;
 
-      return +await CryptoBlades.methods.fightXpGain().call(defaultCallOptions(state));
-    },
+      const VAR_HOURLY_INCOME = await CryptoBlades.methods.VAR_HOURLY_INCOME().call(defaultCallOptions(state));
 
-    async setFightXpGain({state}, {xpGain}) {
-      const {CryptoBlades} = state.contracts();
-      if (!CryptoBlades) return;
-
-      await CryptoBlades.methods.setFightXpGain(xpGain).send({
-        from: state.defaultAccount,
-        gasPrice: getGasPrice(),
-      });
+      return await CryptoBlades.methods.setVar(VAR_HOURLY_INCOME, Web3.utils.toWei(hourlyIncome.toString(), 'ether').toString())
+        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
     async getRaidXpReward({state}) {
@@ -2921,79 +2220,10 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchWaxBridgeDetails');
     },
 
-    async fetchTotalShieldSupply({ state }) {
-      const { Shields } = state.contracts();
-      if(!Shields || !state.defaultAccount) return;
-
-      return await Shields.methods.totalSupply().call(defaultCallOptions(state));
-    },
-
     async fetchTotalRenameTags({ state }) {
       const { CharacterRenameTagConsumables } = state.contracts();
       if(!CharacterRenameTagConsumables || !state.defaultAccount) return;
       return await CharacterRenameTagConsumables.methods.getItemCount().call(defaultCallOptions(state));
-    },
-    async purchaseRenameTag({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterRenameTag(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice(),
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalRenameTags')
-      ]);
-    },
-    async purchaseRenameTagDeal({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, CharacterRenameTagConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterRenameTagDeal(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice(),
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalRenameTags')
-      ]);
     },
     async renameCharacter({ state, dispatch}, {id, name}) {
       const { CryptoBlades, SkillToken, CharacterRenameTagConsumables } = state.contracts();
@@ -3015,68 +2245,6 @@ export default new Vuex.Store<IState>({
       const { WeaponRenameTagConsumables } = state.contracts();
       if(!WeaponRenameTagConsumables || !state.defaultAccount) return;
       return await WeaponRenameTagConsumables.methods.getItemCount().call(defaultCallOptions(state));
-    },
-    async purchaseWeaponRenameTag({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseWeaponRenameTag(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice(),
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalWeaponRenameTags')
-      ]);
-    },
-    async purchaseWeaponRenameTagDeal({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, WeaponRenameTagConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !WeaponRenameTagConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseWeaponRenameTagDeal(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice(),
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalRenameTags')
-      ]);
     },
     async renameWeapon({ state, dispatch}, {id, name}) {
       const { CryptoBlades, SkillToken, WeaponRenameTagConsumables } = state.contracts();
@@ -3100,37 +2268,6 @@ export default new Vuex.Store<IState>({
       if(!CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
       return await CharacterFireTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
     },
-    async purchaseCharacterFireTraitChange({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterFireTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterFireTraitChange(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice(),
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalCharacterFireTraitChanges')
-      ]);
-    },
     async changeCharacterTraitFire({ state, dispatch}, { id }) {
       const { CryptoBlades, SkillToken, CharacterFireTraitChangeConsumables } = state.contracts();
       if(!CryptoBlades || !SkillToken || !CharacterFireTraitChangeConsumables || !state.defaultAccount) return;
@@ -3152,37 +2289,6 @@ export default new Vuex.Store<IState>({
       const { CharacterEarthTraitChangeConsumables } = state.contracts();
       if(!CharacterEarthTraitChangeConsumables || !state.defaultAccount) return;
       return await CharacterEarthTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
-    },
-    async purchaseCharacterEarthTraitChange({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, CharacterEarthTraitChangeConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterEarthTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterEarthTraitChange(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalCharacterEarthTraitChanges')
-      ]);
     },
     async changeCharacterTraitEarth({ state, dispatch}, { id }) {
       const { CryptoBlades, SkillToken, CharacterEarthTraitChangeConsumables } = state.contracts();
@@ -3206,37 +2312,6 @@ export default new Vuex.Store<IState>({
       if(!CharacterWaterTraitChangeConsumables || !state.defaultAccount) return;
       return await CharacterWaterTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
     },
-    async purchaseCharacterWaterTraitChange({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, CharacterWaterTraitChangeConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterWaterTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterWaterTraitChange(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice(),
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalCharacterWaterTraitChanges')
-      ]);
-    },
     async changeCharacterTraitWater({ state, dispatch}, { id }) {
       const { CryptoBlades, SkillToken, CharacterWaterTraitChangeConsumables } = state.contracts();
       if(!CryptoBlades || !SkillToken || !CharacterWaterTraitChangeConsumables || !state.defaultAccount) return;
@@ -3259,37 +2334,6 @@ export default new Vuex.Store<IState>({
       if(!CharacterLightningTraitChangeConsumables || !state.defaultAccount) return;
       return await CharacterLightningTraitChangeConsumables.methods.getItemCount().call(defaultCallOptions(state));
     },
-    async purchaseCharacterLightningTraitChange({ state, dispatch }, {price}) {
-      const { CryptoBlades, SkillToken, CharacterLightningTraitChangeConsumables, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterLightningTraitChangeConsumables || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(Web3.utils.toWei('' + price)),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterLightningTraitChange(Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchTotalCharacterLightningTraitChanges')
-      ]);
-    },
     async changeCharacterTraitLightning({ state, dispatch}, { id }) {
       const { CryptoBlades, SkillToken, CharacterLightningTraitChangeConsumables } = state.contracts();
       if(!CryptoBlades || !SkillToken || !CharacterLightningTraitChangeConsumables || !state.defaultAccount) return;
@@ -3310,36 +2354,6 @@ export default new Vuex.Store<IState>({
       const { WeaponCosmetics } = state.contracts();
       if(!WeaponCosmetics || !state.defaultAccount) return;
       return await WeaponCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
-    },
-    async purchaseWeaponCosmetic({ state, dispatch }, {cosmetic, price}) {
-      const { CryptoBlades, SkillToken, WeaponCosmetics, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !WeaponCosmetics || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(state.web3.utils.toWei('' + price, 'ether')),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseWeaponCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill')
-      ]);
     },
     async changeWeaponCosmetic({ state, dispatch}, { id, cosmetic }) {
       const { CryptoBlades, SkillToken, WeaponCosmetics } = state.contracts();
@@ -3378,36 +2392,6 @@ export default new Vuex.Store<IState>({
       if(!CharacterCosmetics || !state.defaultAccount) return;
       return await CharacterCosmetics.methods.getCosmeticCount(cosmetic).call(defaultCallOptions(state));
     },
-    async purchaseCharacterCosmetic({ state, dispatch }, {cosmetic, price}) {
-      const { CryptoBlades, SkillToken, CharacterCosmetics, Blacksmith } = state.contracts();
-      if(!CryptoBlades || !CharacterCosmetics || !Blacksmith || !state.defaultAccount) return;
-
-      try {
-        await approveFeeWalletOrRewards(
-          CryptoBlades,
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(state.web3.utils.toWei('' + price, 'ether')),
-          state.skillRewards
-        );
-      } catch(err) {
-        console.error(err);
-      }
-
-      await Blacksmith.methods.purchaseCharacterCosmetic(cosmetic, Web3.utils.toWei('' + price)).send({
-        from: state.defaultAccount,
-        gas: '500000',
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill')
-      ]);
-    },
     async changeCharacterCosmetic({ state, dispatch}, { id, cosmetic }) {
       const { CryptoBlades, SkillToken, CharacterCosmetics } = state.contracts();
       if(!CryptoBlades || !SkillToken || !CharacterCosmetics || !state.defaultAccount) return;
@@ -3438,172 +2422,6 @@ export default new Vuex.Store<IState>({
 
       await Promise.all([
         dispatch('fetchCharacterCosmetic', id)
-      ]);
-    },
-
-    async addPartnerProject({state}, {partnerProject}) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      return await Treasury.methods.addPartnerProject(
-        partnerProject.name,
-        partnerProject.tokenSymbol,
-        partnerProject.tokenAddress,
-        partnerProject.tokenSupply,
-        Web3.utils.toWei(partnerProject.tokenPrice.toString(), 'ether').toString(),
-        partnerProject.distributionTime,
-        partnerProject.isActive,
-        partnerProject.logo,
-        partnerProject.details,
-        partnerProject.website,
-        partnerProject.note,
-      ).send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async getActivePartnerProjects({state}) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      const ids = await Treasury.methods.getActivePartnerProjectsIds().call(defaultCallOptions(state));
-      const projects = [];
-      for(let i = 0; i < ids.length; i++) {
-        const project = await Treasury.methods.partneredProjects(ids[i]).call(defaultCallOptions(state));
-        projects.push(project);
-      }
-      return projects;
-    },
-
-    async setPartnerProjectLogo({state}, {id, logo}) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      await Treasury.methods.setProjectLogo(id, logo).send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async setPartnerProjectDetails({state}, {id, details}) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      await Treasury.methods.setProjectDetails(id, details).send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async setPartnerProjectWebsite({state}, {id, website}) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      await Treasury.methods.setProjectWebsite(id, website).send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async setPartnerProjectNote({state}, {id, note}) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      await Treasury.methods.setProjectNote(id, note).send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async setPartnerProjectIsActive({state}, {id, isActive}) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      await Treasury.methods.setIsActive(id, isActive).send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async fetchPartnerProjects({ state, dispatch }) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      const activePartnerProjectIds = await Treasury.methods.getActivePartnerProjectsIds().call(defaultCallOptions(state));
-      activePartnerProjectIds.forEach(async (id: string) => {
-        await dispatch('fetchPartnerProject', id);
-      });
-
-      await dispatch('fetchDefaultSlippage');
-    },
-
-    async fetchPartnerProject({ state, commit }, id) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      const partnerProjectRaw = await Treasury.methods.partneredProjects(id).call(defaultCallOptions(state));
-      const tokensClaimed = await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(state));
-      const data = await Treasury.methods.getProjectData(id).call(defaultCallOptions(state));
-
-      const partnerProject = {
-        id: +partnerProjectRaw[0],
-        name: partnerProjectRaw[1],
-        tokenSymbol: partnerProjectRaw[2],
-        tokenAddress: partnerProjectRaw[3],
-        tokenSupply: +partnerProjectRaw[4],
-        tokensClaimed: +tokensClaimed,
-        tokenPrice: +partnerProjectRaw[5],
-        isActive: partnerProjectRaw[6],
-        logo: data[0],
-        details: data[1],
-        website: data[2],
-        note: data[3],
-      } as SupportedProject;
-
-      commit('updatePartnerProjectsState', { partnerProjectId: partnerProject.id, partnerProject });
-    },
-
-    async fetchDefaultSlippage({ state, commit }) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      const slippage = await Treasury.methods.defaultSlippage().call(defaultCallOptions(state));
-
-      commit('updateDefaultSlippage', slippage);
-    },
-
-    async getPartnerProjectMultiplier({ state, commit }, id) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      const multiplier = await Treasury.methods.getProjectMultiplier(id).call(defaultCallOptions(state));
-      commit('updatePartnerProjectMultiplier', { partnerProjectId: id, multiplier });
-
-      return multiplier;
-    },
-
-    async getPartnerProjectDistributionTime({ state }, id) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      return await Treasury.methods.projectDistributionTime(id).call(defaultCallOptions(state));
-    },
-
-    async getPartnerProjectClaimedAmount({ state }, id) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      return await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(state));
-    },
-
-    async getSkillToPartnerRatio({ state, commit }, id) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      const ratio = await Treasury.methods.getSkillToPartnerRatio(id).call(defaultCallOptions(state));
-      commit('updatePartnerProjectRatio', { partnerProjectId: id, ratio });
-
-      return ratio;
-    },
-
-    async claimPartnerToken({ state, dispatch },
-                            { id, skillAmount, currentMultiplier, slippage }:
-                            {id: number, skillAmount: string, currentMultiplier: string, slippage: string}) {
-      const { Treasury } = state.contracts();
-      if(!Treasury || !state.defaultAccount) return;
-
-      await Treasury.methods.claim(id, skillAmount, currentMultiplier, slippage).send({
-        from: state.defaultAccount,
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchFightRewardSkill'),
-        dispatch('fetchPartnerProject', id)
       ]);
     },
 
@@ -3684,44 +2502,6 @@ export default new Vuex.Store<IState>({
       }
 
       window.location.reload();
-    },
-    async fetchItemPrices({state, commit}){
-      const { Blacksmith } = state.contracts();
-      if (!Blacksmith) return;
-
-      try{
-        //Fetch the flat prices of Skill Shop Items
-        for(let itemIndex = 1; itemIndex <= 6; itemIndex++ ){
-          const itemFlatPrices = await Blacksmith.methods
-            .getFlatPriceOfItem(itemIndex)
-            .call(defaultCallOptions(state));
-
-          commit('updateItemPrices', {itemPrice: itemFlatPrices, id: itemIndex.toString()});
-        }
-
-        //Fetch the flat prices of Weapon Cosmetics
-        for(let itemIndex = 1; itemIndex <= 19; itemIndex++){
-          const itemSeriesFlatPrices = await Blacksmith.methods
-            .getFlatPriceOfSeriesItem(7, itemIndex)
-            .call(defaultCallOptions(state));
-
-          commit('updateWeaponCosmeticPrices', {itemPrice: itemSeriesFlatPrices, id: itemIndex.toString()});
-        }
-
-        //Fetch the flat prices of Character Cosmetics
-        for(let itemIndex = 1; itemIndex <= 18; itemIndex++){
-          const itemSeriesFlatPrices = await Blacksmith.methods
-            .getFlatPriceOfSeriesItem(8, itemIndex)
-            .call(defaultCallOptions(state));
-
-          commit('updateCharacterCosmeticPrices', {itemPrice: itemSeriesFlatPrices, id: itemIndex.toString()});
-        }
-
-
-      } catch(err){
-        console.log('Blacksmith error');
-        console.log(err);
-      }
     },
     async transferNFT({ state, dispatch },{nftId, receiverAddress, nftType}: {nftId: number, receiverAddress: string, nftType: string}) {
       const { Characters, Garrison, Junk, KeyLootbox, RaidTrinket, Shields, Weapons } = state.contracts();
@@ -3814,27 +2594,21 @@ export default new Vuex.Store<IState>({
       const { Weapons } = state.contracts();
       if (!Weapons || !state.defaultAccount) return;
 
-      const weapon = await Weapons.methods.get(`${weaponId}`).call({ from: state.defaultAccount, gasPrice: getGasPrice() });
-
-      return weapon;
+      return await Weapons.methods.get(`${weaponId}`).call({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
     async getShield({ state }, shieldId) {
       const { Shields } = state.contracts();
       if (!Shields || !state.defaultAccount) return;
 
-      const shield = await Shields.methods.get(`${shieldId}`).call({ from: state.defaultAccount, gasPrice: getGasPrice() });
-
-      return shield;
+      return await Shields.methods.get(`${shieldId}`).call({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
     async getCharacter({ state }, characterId) {
       const { Characters } = state.contracts();
       if (!Characters || !state.defaultAccount) return;
 
-      const character = await Characters.methods.get(`${characterId}`).call({ from: state.defaultAccount, gasPrice: getGasPrice() });
-
-      return character;
+      return await Characters.methods.get(`${characterId}`).call({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
     async getRename({state}, characterId){
@@ -3849,29 +2623,21 @@ export default new Vuex.Store<IState>({
       return;
     },
 
-    async getCharacterPower({ state }, characterId) {
-      const { Characters } = state.contracts();
-      if (!Characters || !state.defaultAccount) return;
-
-      const characterPower = await Characters.methods.getPower(characterId).call({ from: state.defaultAccount, gasPrice: getGasPrice() });
-
-      return characterPower;
-    },
-
     async burnCharactersIntoCharacter({ state, dispatch }, {burnIds, targetId}) {
       const { CryptoBlades, BurningManager, SkillToken } = state.contracts();
       if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
 
       const burnCost = await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
-      await approveFeeWalletOrRewards(
+      await approveFeeFixed(
         CryptoBlades,
         CryptoBlades,
         SkillToken,
         state.defaultAccount,
+        state.skillRewards,
         defaultCallOptions(state),
         defaultCallOptions(state),
         new BigNumber(burnCost),
-        state.skillRewards
+        { allowSkillRewards: true, allowInGameOnlyFunds: false }
       );
 
       await BurningManager.methods.burnCharactersIntoCharacter(burnIds, targetId).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
@@ -3886,15 +2652,16 @@ export default new Vuex.Store<IState>({
       if(!CryptoBlades || !BurningManager || !SkillToken || !state.defaultAccount) return;
 
       const burnCost = await BurningManager.methods.burnCharactersFee(burnIds).call(defaultCallOptions(state));
-      await approveFeeWalletOrRewards(
+      await approveFeeFixed(
         CryptoBlades,
         CryptoBlades,
         SkillToken,
         state.defaultAccount,
+        state.skillRewards,
         defaultCallOptions(state),
         defaultCallOptions(state),
         new BigNumber(burnCost),
-        state.skillRewards
+        { allowSkillRewards: true, allowInGameOnlyFunds: false }
       );
 
       await BurningManager.methods.burnCharactersIntoSoul(burnIds).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
@@ -3945,268 +2712,6 @@ export default new Vuex.Store<IState>({
       if(!Weapons || !state.defaultAccount) return;
 
       await Weapons.methods.setBurnPointMultiplier(multiplier).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
-    },
-
-    async getActiveSpecialWeaponsEvents({state}) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      const ids = await SpecialWeaponsManager.methods.getActiveEventsIds().call(defaultCallOptions(state));
-      const events = [];
-      for(let i = 0; i < ids.length; i++) {
-        const project = await SpecialWeaponsManager.methods.eventInfo(ids[i]).call(defaultCallOptions(state));
-        events.push({id: ids[i], ...project});
-      }
-      return events;
-    },
-
-    async startNewEvent({state}, {event}) {
-      const {SpecialWeaponsManager} = state.contracts();
-      if (!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods
-        .startNewEvent(event.name, event.element, event.period, event.supply, event.art, event.details, event.website, event.note)
-        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async setSpecialWeaponArt({state}, {eventId, art}) {
-      const {SpecialWeaponsManager} = state.contracts();
-      if (!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods
-        .setSpecialWeaponArt(eventId, art)
-        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async setSpecialWeaponDetails({state}, {eventId, details}) {
-      const {SpecialWeaponsManager} = state.contracts();
-      if (!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods
-        .setSpecialWeaponDetails(eventId, details)
-        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async setSpecialWeaponWebsite({state}, {eventId, website}) {
-      const {SpecialWeaponsManager} = state.contracts();
-      if (!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods
-        .setSpecialWeaponWebsite(eventId, website)
-        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async setSpecialWeaponNote({state}, {eventId, note}) {
-      const {SpecialWeaponsManager} = state.contracts();
-      if (!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods
-        .setSpecialWeaponNote(eventId, note)
-        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async incrementEventCount({state}) {
-      const {SpecialWeaponsManager} = state.contracts();
-      if (!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods
-        .incrementEventCount()
-        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async addShards({state}, {user, eventId, shardsAmount}) {
-      const {SpecialWeaponsManager} = state.contracts();
-      if (!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods
-        .addShards(user, eventId, shardsAmount)
-        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async privatePartnerOrder({state}, {receivers, eventId, orderOption}) {
-      const {SpecialWeaponsManager} = state.contracts();
-      if (!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods
-        .privatePartnerOrder(receivers, eventId, orderOption)
-        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async privatePartnerMint({state}, {receivers, eventId, orderOption}) {
-      const {SpecialWeaponsManager} = state.contracts();
-      if (!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods
-        .privatePartnerMint(receivers, eventId, orderOption)
-        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async reserveForGiveaways({state}, {reservingAddress, eventId, orderOption, amount}) {
-      const {SpecialWeaponsManager} = state.contracts();
-      if (!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods
-        .reserveForGiveaways(reservingAddress, eventId, orderOption, amount)
-        .send({from: state.defaultAccount, gasPrice: getGasPrice()});
-    },
-
-    async fetchSpecialWeaponEvents({ state, dispatch, commit }) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      const activeSpecialWeaponEventsIds = await SpecialWeaponsManager.methods.getActiveEventsIds().call(defaultCallOptions(state));
-      commit('updateActiveSpecialWeaponEventsIds', activeSpecialWeaponEventsIds);
-
-      const eventCount = await SpecialWeaponsManager.methods.eventCount().call(defaultCallOptions(state));
-      const inactiveSpecialWeaponEventsIds = Array.from({length: +eventCount}, (_, i) =>
-        (i + 1).toString()).filter(id => !activeSpecialWeaponEventsIds.includes(id));
-      commit('updateInactiveSpecialWeaponEventsIds', inactiveSpecialWeaponEventsIds);
-
-      await dispatch('fetchSpecialWeaponEventsInfo', activeSpecialWeaponEventsIds.concat(inactiveSpecialWeaponEventsIds));
-      await dispatch('fetchShardsSupply');
-    },
-
-    async fetchSpecialWeaponArts({ state, commit }) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      const allSpecialWeaponEventsIds = state.activeSpecialWeaponEventsIds.concat(state.inactiveSpecialWeaponEventsIds);
-      for (let i = 0; i < allSpecialWeaponEventsIds.length; i++) {
-        const eventId = allSpecialWeaponEventsIds[i];
-        const art = await SpecialWeaponsManager.methods.specialWeaponArt(eventId).call(defaultCallOptions(state));
-        commit('updateSpecialWeaponArt', { eventId, art });
-      }
-    },
-
-    async fetchSpecialWeaponEventsInfo({ state, commit }, eventsIds) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      eventsIds.forEach(async (eventId: string) => {
-        const eventInfoRaw = await SpecialWeaponsManager.methods.getEventInfo(eventId).call(defaultCallOptions(state));
-        const ordered = +await SpecialWeaponsManager.methods.userOrderOptionForEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state)) > 0;
-        const forged = await SpecialWeaponsManager.methods.userForgedAtEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state));
-        const eventData = await SpecialWeaponsManager.methods.getSpecialWeaponData(eventId).call(defaultCallOptions(state));
-        const eventInfo = {
-          name: eventInfoRaw[0],
-          weaponElement: eventInfoRaw[1],
-          endTime: eventInfoRaw[2],
-          supply: eventInfoRaw[3],
-          orderedCount: eventInfoRaw[4],
-          ordered,
-          forged,
-          art: eventData[0],
-          details: eventData[1],
-          website: eventData[2],
-          notes: eventData[3]
-        };
-
-        commit('updateSpecialWeaponEventsInfo', { eventId, eventInfo });
-      });
-    },
-
-    async fetchForgeCosts({ state }) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      const shardsCostLow = await SpecialWeaponsManager.methods.vars(1).call(defaultCallOptions(state));
-      const shardsCostMedium = await SpecialWeaponsManager.methods.vars(2).call(defaultCallOptions(state));
-      const shardsCostHigh = await SpecialWeaponsManager.methods.vars(3).call(defaultCallOptions(state));
-      const skillCostLow = await SpecialWeaponsManager.methods.getSkillForgeCost(1).call(defaultCallOptions(state));
-      const skillCostMedium = await SpecialWeaponsManager.methods.getSkillForgeCost(2).call(defaultCallOptions(state));
-      const skillCostHigh = await SpecialWeaponsManager.methods.getSkillForgeCost(3).call(defaultCallOptions(state));
-
-      return [+shardsCostLow, +shardsCostMedium, +shardsCostHigh, +skillCostLow, +skillCostMedium, +skillCostHigh];
-    },
-
-    async convertShards({ state, dispatch }, { eventFromId, eventToId, amount }) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods.convertShards(eventFromId, eventToId, amount).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
-
-      await dispatch('fetchShardsSupply');
-    },
-
-    async fetchShardsConvertDenominator({ state }) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      return +await SpecialWeaponsManager.methods.vars(10).call(defaultCallOptions(state));
-    },
-
-    async orderSpecialWeapon({ state, dispatch }, { eventId, orderOption, orderWithSkill }) {
-      const { SpecialWeaponsManager, CryptoBlades, SkillToken } = state.contracts();
-      if(!SpecialWeaponsManager || !CryptoBlades || !SkillToken || !state.defaultAccount) return;
-
-      if(orderWithSkill) {
-        const price = await SpecialWeaponsManager.methods.getSkillForgeCost(orderOption).call(defaultCallOptions(state));
-        await approveFeeWalletOnly(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          new BigNumber(price)
-        );
-        await SpecialWeaponsManager.methods.orderSpecialWeaponWithSkill(eventId, orderOption).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
-      }
-      else {
-        await SpecialWeaponsManager.methods.orderSpecialWeaponWithShards(eventId, orderOption).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
-      }
-
-      await Promise.all([
-        dispatch('fetchForgingStatus', eventId),
-        dispatch('fetchShardsSupply'),
-        dispatch('fetchSkillBalance')
-      ]);
-    },
-
-    async forgeSpecialWeapon({ state, dispatch }, eventId) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods.forgeSpecialWeapon(eventId).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
-
-      await Promise.all([
-        dispatch('updateWeaponIds'),
-        dispatch('fetchForgingStatus', eventId),
-      ]);
-    },
-
-    async fetchForgingStatus({ state, commit }, eventId) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      const ordered = +await SpecialWeaponsManager.methods.userOrderOptionForEvent(state.defaultAccount!, eventId).call(defaultCallOptions(state)) > 0;
-      const forged = await SpecialWeaponsManager.methods.userForgedAtEvent(state.defaultAccount, eventId).call(defaultCallOptions(state));
-
-      commit('updateForgingStatus', { eventId, ordered, forged });
-    },
-
-    async fetchEventTotalOrderedCount({ state, commit }, eventId) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      const orderedCount = await SpecialWeaponsManager.methods.getTotalOrderedCount(eventId).call(defaultCallOptions(state));
-
-      commit('updateEventTotalOrderedCount', { eventId, orderedCount });
-    },
-
-    async fetchShardsStakingRewards({ state }) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      return await SpecialWeaponsManager.methods.getUserShardsRewards(state.defaultAccount).call(defaultCallOptions(state));
-    },
-
-    async claimShardsStakingRewards({ state, dispatch }, { eventId, amount }) {
-      const { SpecialWeaponsManager } = state.contracts();
-      if(!SpecialWeaponsManager || !state.defaultAccount) return;
-
-      await SpecialWeaponsManager.methods.claimShardRewards(eventId, amount).send(defaultCallOptions(state));
-
-      await dispatch('fetchShardsSupply');
     },
 
     async fetchMintWeaponPriceDecreasePerSecond({state}) {
@@ -4273,7 +2778,7 @@ export default new Vuex.Store<IState>({
 
     async fetchMintWeaponFee({state}) {
       const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades || !state.defaultAccount) return;
+      if(!CryptoBlades || !state.defaultAccount) return 0;
 
       return CryptoBlades.methods.getMintWeaponFee().call(defaultCallOptions(state));
     },
@@ -4283,97 +2788,6 @@ export default new Vuex.Store<IState>({
       if(!CryptoBlades || !state.defaultAccount) return;
 
       return CryptoBlades.methods.getMintCharacterFee().call(defaultCallOptions(state));
-    },
-
-    async getCurrentSkillPrice({ state }) {
-      const { TokensManager } = state.contracts();
-      if (!TokensManager || !state.defaultAccount) return;
-
-      return await TokensManager.methods.skillTokenPrice().call(defaultCallOptions(state));
-    },
-
-    async getNativeTokenPriceInUsd({ state }) {
-      const { TokensManager } = state.contracts();
-      if (!TokensManager || !state.defaultAccount) return;
-
-      return await TokensManager.methods.tokenPrice().call(defaultCallOptions(state));
-    },
-
-    async doEncounterPayNative({ state, dispatch }, { characterId, weaponId, targetString, fightMultiplier, offsetCost }) {
-      const { TokensManager, CryptoBlades } = state.contracts();
-      if (!TokensManager || !CryptoBlades || !state.defaultAccount) return;
-
-      const res = await TokensManager.methods
-        .fight(
-          characterId,
-          weaponId,
-          targetString,
-          fightMultiplier
-        )
-        .send({ from: state.defaultAccount, gas: '300000', value: +offsetCost });
-
-      await dispatch('fetchTargets', { characterId, weaponId });
-
-      let playerRoll = '';
-      let enemyRoll = '';
-      let xpGain;
-      let skillGain;
-
-      const currentBlock = await state.web3.eth.getBlockNumber();
-
-      await new Promise<void>((resolve, reject) => {
-        const subscription = state.web3.eth.subscribe('newBlockHeaders', async () => {
-          const fightOutcomeEvents = await CryptoBlades.getPastEvents('FightOutcome', {
-            filter: { owner: state.defaultAccount! },
-            toBlock: 'latest',
-            fromBlock: currentBlock
-          });
-
-          if (fightOutcomeEvents.length) {
-            playerRoll = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.playerRoll;
-            enemyRoll = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.enemyRoll;
-            xpGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.xpGain;
-            skillGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.skillGain;
-
-            subscription.unsubscribe((error, result) => {
-              if (!error) {
-                console.log(result);
-              } else {
-                console.log(error);
-                reject(error);
-              }
-            });
-
-            resolve();
-          }
-        });
-      });
-
-      const {gasPrice} = await state.web3.eth.getTransaction(res.transactionHash);
-
-      const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
-
-      await dispatch('fetchWeaponDurability', weaponId);
-
-      return {
-        isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
-        playerRoll,
-        enemyRoll,
-        xpGain,
-        skillGain,
-        bnbGasUsed
-      };
-    },
-
-    async getCombatTokenChargePercent({ state }) {
-      const { TokensManager } = state.contracts();
-      if(!TokensManager || !state.defaultAccount) return;
-
-      const res = await TokensManager.methods
-        .combatTokenChargePercent()
-        .call(defaultCallOptions(state));
-
-      return res;
     },
   }
 });

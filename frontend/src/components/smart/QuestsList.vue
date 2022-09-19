@@ -9,7 +9,11 @@
     <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row p-3 gap-5">
       <QuestRequirements :quest="quest" :index="index"/>
       <QuestRewards :quest="quest"/>
-      <QuestActions :quest="quest" :key="quest.id" :deletable="deletable" showSupply @refresh-quest-data="fetchQuests"/>
+      <QuestActions
+        :quest="quest" :key="quest.id" :deletable="deletable"
+        :questTemplateType="questTemplateType" :showActions="false"
+        showSupply @refresh-quest-data="fetchQuests"
+      />
     </div>
   </div>
 </template>
@@ -17,7 +21,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest} from '@/views/Quests.vue';
+import {Quest, QuestTemplateType} from '@/views/Quests.vue';
 import QuestRequirements from '@/components/smart/QuestRequirements.vue';
 import QuestRewards from '@/components/smart/QuestRewards.vue';
 import QuestActions from '@/components/smart/QuestActions.vue';
@@ -43,6 +47,10 @@ export default Vue.extend({
     deletable: {
       type: Boolean as PropType<boolean>,
       default: false,
+    },
+    questTemplateType: {
+      type: Number as PropType<QuestTemplateType>,
+      required: true,
     },
   },
 

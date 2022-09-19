@@ -1,5 +1,6 @@
 <template>
-  <div class="weapon-icon"
+  <div v-if="weapon"
+    class="weapon-icon"
     :id="'weapon-details'"
     :key="weapon.id"
     v-bind:class="[(getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '')]"
@@ -78,12 +79,12 @@
     <!-- raid selected weapon display  (DESKTOP VIEW)-->
     <div v-if="displayType === 'raid'" class="glow-container" ref="el">
       <div class="weapon-flex">
-        <div :class="'weapon-img-desktop frame-'+ (weapon.stars || 0)" style="border-radius:5px">
+        <div :class="'weapon-img-desktop selected frame-'+ (weapon.stars || 0)" style="border-radius:5px">
             <!-- WEAPON ID -->
           <div class="id">{{$t('weaponIcon.id')}} {{ weapon.id }}</div>
           <img v-if="showPlaceholder" class="placeholder" :src="getWeaponArt(weapon)"  />
         </div>
-        <div class="weapon-details">
+        <div class="weapon-details selected">
 
             <!-- FAVORITE -->
             <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
@@ -201,13 +202,17 @@ export default {
   props: ['weapon', 'favorite', 'displayType'],
 
   computed: {
-    ...mapState(['maxDurability', 'specialWeaponArts']),
+    ...mapState(['maxDurability']),
+    ...mapState('specialWeaponsManager',
+      ([
+        'specialWeaponArts',
+      ])),
     ...mapGetters([
       'currentCharacter',
-      'getWeaponDurability',
       'timeUntilWeaponHasMaxDurability',
       'getWeaponName',
-      'getWeaponCosmetic'
+      'getWeaponCosmetic',
+      'getWeaponDurability',
     ]),
     tooltipHtml() {
       if(!this.weapon) return '';
@@ -476,6 +481,28 @@ export default {
   text-transform: capitalize !important;
   font-weight: 500;
   font-family: Trajan;
+}
+
+.weapon-img-desktop.selected{
+  max-height: 70px;
+  min-height: 70px;
+  min-width: 70px;
+  max-width: 70px;
+}
+
+.weapon-img-desktop.selected > img{
+  max-height: 65px;
+  min-height: 65px;
+  min-width: 65px;
+  max-width: 65px;
+}
+
+.weapon-img-desktop.selected > div.id{
+  top: 20px;
+}
+
+.weapon-details.selected > .name-desktop{
+  color: #fff;
 }
 
 

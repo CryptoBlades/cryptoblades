@@ -1,7 +1,7 @@
 <template>
   <div v-bind:class="isDefault ? 'default-icon-wrapper' : 'nft-icon-wrapper'">
     <div v-if="isDefault" class="nft-default-icon">
-      <img class="default-placeholder" v-if="nft.type === 'weapon'" src="../assets/placeholder/sword-placeholder-1.png"
+      <img class="default-placeholder" v-if="nft.type === 'weapon'" src="../assets/placeholder/weapon3.png"
         v-tooltip="$t('nftIcon.weaponTooltip', {stars: stars || '2-5'})"/>
       <div v-if="nft.type === 'weapon'" class="default-info">{{stars || '2-5'}}*</div>
       <img class="default-junk-placeholder" v-if="nft.type === 'junk'" src="../assets/junk/junk3.png"
@@ -168,7 +168,10 @@ export default {
 
   },
   computed: {
-    ...mapState(['specialWeaponArts']),
+    ...mapState('specialWeaponsManager',
+      ([
+        'specialWeaponArts',
+      ])),
     ...mapGetters(['getWeaponName', 'currentCharacter',]),
     tooltipHtml() {
       if(!this.nft) return '';
@@ -304,7 +307,8 @@ export default {
   width: 100%;
   position: relative;
   background: rgba(4, 4, 4, 0.022);
-  border: 2px solid #9e8a57;
+  border: 1px solid #9e8a57;
+  border-radius: 5px;
 }
 
 .default-info {

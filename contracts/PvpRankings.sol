@@ -367,7 +367,7 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
         rankingPointsByCharacter[characterID] = points;
     }
 
-    function handleEnterArena(uint256 characterID, uint8 tier) external restricted {
+    function handleEnterArena(address fighter, uint256 characterID, uint8 tier) external restricted {
         bool isCharacterInTopRanks;
     
         for (uint i = 0; i < _topRankingCharactersByTier[tier].length; i++) {
@@ -388,19 +388,19 @@ contract PvpRankings is Initializable, AccessControlUpgradeable {
             seasonByCharacter[characterID] = currentRankedSeason;
         }
 
-        if (_ownerByCharacter[characterID] != tx.origin) {
-            _ownerByCharacter[characterID] = tx.origin;
+        if (_ownerByCharacter[characterID] != fighter) {
+            _ownerByCharacter[characterID] = fighter;
         }
     }
 
-    function handlePrepareDuel(uint256 characterID) external restricted {
+    function handlePrepareDuel(address fighter, uint256 characterID) external restricted {
         if (seasonByCharacter[characterID] != currentRankedSeason) {
             rankingPointsByCharacter[characterID] = 0;
             seasonByCharacter[characterID] = currentRankedSeason;
         }
 
-        if (_ownerByCharacter[characterID] != tx.origin) {
-            _ownerByCharacter[characterID] = tx.origin;
+        if (_ownerByCharacter[characterID] != fighter) {
+            _ownerByCharacter[characterID] = fighter;
         }
     }
 

@@ -97,11 +97,25 @@
 
             <a
               class="menu-icon"
-              href="https://bazaar.market"
+              :href="BazaarLink()"
               target="_blank"
             >
               <img src="../assets/navbar-icons/bazaar-icon.png" alt="Bazaar"/>
               <span>{{ $t("viewLink.bazaar") }}</span>
+            </a>
+
+            <a
+              class="menu-icon"
+              :href="DrawbridgeLink()"
+              target="_blank"
+              :class="supportsDrawbridge ? '' : 'disabled-link'"
+            >
+              <img src="../assets/navbar-icons/drawbridge-icon.png" alt="Drawbridge"/>
+              <span>{{ $t("viewLink.drawbridge") }} <hint
+                v-if="!supportsDrawbridge"
+                class="hint"
+                :text="$t('viewLink.DrawbridgeNotSupportedTooltip')"
+              /></span>
             </a>
 
             <router-link
@@ -157,7 +171,7 @@
             </router-link>
 
             <router-link class="menu-icon" :to="{ name: 'nft-display' }" exact>
-              <img src="../assets/navbar-icons/nft-display.svg" class="gold-icon" alt="Nft Display"/>
+              <img src="../assets/navbar-icons/nft-display.svg" class="gold-icon" alt="NFT Display"/>
               <span>{{ $t("viewLink.nftDisplay") }}</span>
             </router-link>
 
@@ -344,18 +358,23 @@ export default Vue.extend({
   },
   computed: {
     ...(mapState(['skillRewards', 'directStakeBonusPercent']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN', 'getPartnerProjects']) as Accessors<StoreMappedGetters>),
+    ...(mapGetters(['rewardsClaimTaxAsFactorBN', 'maxRewardsClaimTaxAsFactorBN']) as Accessors<StoreMappedGetters>),
     ...mapGetters([
       'getCurrentChainSupportsPvP',
       'getCurrentChainSupportsQuests',
+      'getCurrentChainSupportsDrawbridge',
       'getHasAdminAccess',
       'getHasMinterAccess',
     ]),
+    ...mapGetters('treasury', ['getPartnerProjects']),
     supportsPvP(): boolean {
       return this.getCurrentChainSupportsPvP;
     },
     supportsQuests(): boolean {
       return this.getCurrentChainSupportsQuests;
+    },
+    supportsDrawbridge(): boolean {
+      return this.getCurrentChainSupportsDrawbridge;
     },
     hasAdminAccess(): boolean {
       return this.getHasAdminAccess || this.getHasMinterAccess;
@@ -386,6 +405,18 @@ export default Vue.extend({
 
   methods: {
     ...(mapActions(['claimTokenRewards']) as StoreMappedActions),
+
+    BazaarLink() {
+      return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
+    },
+
+    DrawbridgeLink() {
+      if (!this.supportsDrawbridge) {
+        return;
+      }
+      return process.env.VUE_APP_DRAWBRIDGE_URL || 'https://drawbridge.cryptoblades.io/';
+    },
+
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
       if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
@@ -499,6 +530,11 @@ export default Vue.extend({
 .disabled-link {
   cursor: not-allowed;
   color: gray;
+}
+
+.disabled-link > *{
+  opacity: 0.4;
+  filter: grayscale(100%);
 }
 
 .x-button {

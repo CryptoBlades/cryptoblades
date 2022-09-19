@@ -203,6 +203,8 @@ export default Vue.extend({
         'fr',
         'pl',
         'de',
+        'id',
+        'pt'
       ]
     } as Data;
   },
@@ -249,19 +251,27 @@ export default Vue.extend({
   },
 
   methods: {
+    ...(mapActions(
+      'treasury',
+      [
+        'fetchPartnerProjects',
+      ]
+    ) as StoreMappedActions),
     ...(mapActions([
       'claimTokenRewards',
       'setUpContracts',
       'initialize',
-      'configureMetaMask',
-      'fetchPartnerProjects',
-    ]) as StoreMappedActions),
+      'configureMetaMask']
+    ) as StoreMappedActions),
     ...mapMutations([
       'setNetworkId',
-      'updatePayoutCurrencyId',
       'updateCurrentChainSupportsPvP',
       'updateCurrentChainSupportsQuests',
+      'updateCurrentChainSupportsDrawbridge',
       'setWeb3',
+    ]),
+    ...mapMutations('treasury', [
+      'updatePayoutCurrencyId',
     ]),
     toggleGraphics() {
       this.showGraphics = !this.showGraphics;
@@ -337,6 +347,7 @@ export default Vue.extend({
       localStorage.setItem('currentChain', this.currentChain);
       this.updateCurrentChainSupportsPvP();
       this.updateCurrentChainSupportsQuests();
+      this.updateCurrentChainSupportsDrawbridge();
       Events.$emit('setting:currentChain', { value: this.currentChain });
       addChainToRouter(this.currentChain);
       if(!this.connectingWalletConnect) await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));
@@ -385,7 +396,6 @@ export default Vue.extend({
 .list-group {
   border: 2px solid #9e8a57;
   border-radius: 5px;
-  background: linear-gradient(120deg, rgba(20, 20, 20, 1) 0%, rgb(41, 43, 38) 100%);
   max-width: 900px;
   margin: 0 auto;
 }

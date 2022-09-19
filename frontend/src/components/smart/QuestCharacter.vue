@@ -7,17 +7,17 @@
     <img class="quest-character-portrait m-4"
          :class="'character-animation-applied-' + getCharacterCosmetic(character.id)"
          :src="getCharacterArt(character)" alt="Character image"/>
-    <div class="d-flex flex-column flex-1 mr-5">
+    <div class="d-flex flex-column flex-1 character-info-container">
       <span class="text-uppercase gold-text">{{ getCleanCharacterName(character.id) }}</span>
-      <span class="gray-text">{{ $t(`quests.tier`) }}: <span class="gold-text">{{
+      <span class="custom-font-white-text">{{ $t(`quests.tier`) }}: <span class="gold-text">{{
           $t(`quests.reputationTier.${ReputationTier[getReputationLevel(quest.reputation)]}`)
         }}  <b-icon-question-circle
           class="pointer"
           @click="showReputationInfoModal"/></span></span>
-      <span class="gray-text">{{ $t('quests.reputationPoints') }}: <span class="gold-text">{{
+      <span class="custom-font-white-text">{{ $t('quests.reputationPoints') }}: <span class="gold-text">{{
           quest.reputation.toLocaleString()
         }}</span></span>
-      <span v-if="getReputationBreakpoint(quest.reputation)" class="gray-text">{{ $t('quests.nextReputationTierOn') }}: <span
+      <span v-if="getReputationBreakpoint(quest.reputation)" class="custom-font-white-text">{{ $t('quests.nextReputationTierOn') }}: <span
         class="gold-text">{{ getReputationBreakpoint(quest.reputation).toLocaleString() }}</span></span>
       <div v-if="getReputationBreakpoint(quest.reputation)" class="quest-progress">
         <div class="quest-progress-bar" role="progressbar"
@@ -201,15 +201,16 @@ export default Vue.extend({
 
 .quest-character-portrait {
   width: 93px;
-  height: 133px;
 }
 
 .gold-text {
   color: #DABE75;
+  font-family: Roboto;
 }
 
-.gray-text {
-  color: #B4B0A7;
+.custom-font-white-text{
+  font-family: Roboto;
+  color: #FFFFFF;
 }
 
 .quest-progress {
@@ -244,10 +245,17 @@ export default Vue.extend({
   text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
 }
 
+.character-info-container{
+  margin-right: 25px;
+}
+
 @media (max-width: 576px) {
   .quest-character-display {
     flex-direction: column;
     border: none;
+  }
+  .character-info-container{
+    margin: 0;
   }
 }
 </style>

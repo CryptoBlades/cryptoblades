@@ -381,7 +381,16 @@ interface Data {
 
 export default Vue.extend({
   computed: {
-    ...mapState(['characters', 'ownedGarrisonCharacterIds', 'maxStamina', 'currentCharacterId', 'defaultAccount', 'skillBalance', 'skillRewards', 'xpRewards']),
+    ...mapState([
+      'characters',
+      'ownedGarrisonCharacterIds',
+      'maxStamina',
+      'currentCharacterId',
+      'defaultAccount',
+      'skillBalance',
+      'skillRewards',
+      'xpRewards'
+    ]),
     ...mapGetters([
       'contracts',
       'ownCharacters',
@@ -390,8 +399,8 @@ export default Vue.extend({
       'currentCharacterStamina',
       'getCharacterName',
       'getExchangeUrl',
+      'getCharacterIsInArena',
       'getCharacterPower',
-      'getCharacterIsInArena'
     ]),
 
     character(): any {
@@ -503,7 +512,7 @@ export default Vue.extend({
     ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
       'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'claimGarrisonXp', 'fetchBurnPowerMultiplier',
       'transferSoul', 'fetchMintCharacterPriceDecreasePerSecond', 'fetchCharacterMintIncreasePrice',
-      'fetchMintCharacterMinPrice', 'fetchMintCharacterFee']),
+      'fetchMintCharacterMinPrice', 'fetchMintCharacterFee', 'fetchUsdSkillValue']),
     ...mapGetters(['getExchangeTransakUrl']),
 
     async onMintCharacter() {
@@ -653,7 +662,7 @@ export default Vue.extend({
 
     async updateMintCharacterFee() {
       const recruitCost = await this.fetchMintCharacterFee();
-      const skillRecruitCost = await this.contracts.CryptoBlades.methods.usdToSkill(recruitCost).call();
+      const skillRecruitCost = await this.fetchUsdSkillValue(recruitCost);
       this.recruitCost = new BN(skillRecruitCost).div(new BN(10).pow(18)).toFixed(4);
     }
   },

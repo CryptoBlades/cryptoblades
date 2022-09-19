@@ -1,6 +1,5 @@
 import { ICharacter } from './Character';
 import { IWeapon } from './Weapon';
-import { ITarget } from './Target';
 import { Contracts } from './Contracts';
 import { Nft } from './Nft';
 import { IShield } from './Shield';
@@ -67,67 +66,6 @@ export interface IPartnerProject {
   tokenPrice: string;
   isActive: boolean;
 }
-
-export interface ISpecialWeaponEvent {
-  name: string;
-  weaponElement: string;
-  endTime: string;
-  supply: string;
-  orderedCount: string;
-  ordered: boolean;
-  forged: boolean;
-  art: string;
-  details: string;
-  website: string;
-  note: string;
-}
-
-export interface IItemPrices {
-  itemWeaponRenamePrice: string;
-  itemCharacterRenamePrice: string;
-  itemCharacterTraitChangeFirePrice: string;
-  itemCharacterTraitChangeEarthPrice: string;
-  itemCharacterTraitChangeWaterPrice: string;
-  itemCharacterTraitChangeLightningPrice: string;
-  itemWeaponCosmeticGrayscalePrice: string;
-  itemWeaponCosmeticContrastPrice: string;
-  itemWeaponCosmeticSepiaPrice: string;
-  itemWeaponCosmeticInvertPrice: string;
-  itemWeaponCosmeticBlurPrice: string;
-  itemWeaponCosmeticFireGlowPrice: string;
-  itemWeaponCosmeticEarthGlowPrice: string;
-  itemWeaponCosmeticLightningGlowPrice: string;
-  itemWeaponCosmeticWaterGlowPrice: string;
-  itemWeaponCosmeticRainbowGlowPrice: string;
-  itemWeaponCosmeticDarkGlowPrice: string;
-  itemWeaponCosmeticGhostPrice: string;
-  itemWeaponCosmeticPoliceLightsPrice: string;
-  itemWeaponCosmeticNeonBorderPrice: string;
-  itemWeaponCosmeticRotatingNeonBorderPrice: string;
-  itemWeaponCosmeticDiamondBorderPrice: string;
-  itemWeaponCosmeticGoldBorderPrice: string;
-  itemWeaponCosmeticSilverBorderPrice: string;
-  itemWeaponCosmeticBronzeBorderPrice: string;
-  itemCharacterCosmeticGrayscalePrice: string;
-  itemCharacterCosmeticContrastPrice: string;
-  itemCharacterCosmeticSepiaPrice: string;
-  itemCharacterCosmeticInvertPrice: string;
-  itemCharacterCosmeticBlurPrice: string;
-  itemCharacterCosmeticFireGlowPrice: string;
-  itemCharacterCosmeticEarthGlowPrice: string;
-  itemCharacterCosmeticLightningGlowPrice: string;
-  itemCharacterCosmeticWaterGlowPrice: string;
-  itemCharacterCosmeticRainbowGlowPrice: string;
-  itemCharacterCosmeticDarkGlowPrice: string;
-  itemCharacterCosmeticGhostPrice: string;
-  itemCharacterCosmeticPoliceLightsPrice: string;
-  itemCharacterCosmeticNeonBorderPrice: string;
-  itemCharacterCosmeticDiamondBorderPrice: string;
-  itemCharacterCosmeticGoldBorderPrice: string;
-  itemCharacterCosmeticSilverBorderPrice: string;
-  itemCharacterCosmeticBronzeBorderPrice: string;
-}
-
 export interface IState {
   web3: Web3;
   contracts: () => Contracts;
@@ -137,10 +75,8 @@ export interface IState {
   currentNetworkId: number | null;
   skillPriceInUsd: number;
 
-  fightGasOffset: string;
-  fightBaseline: string;
-
   skillBalance: string;
+  balance: string;
   skillRewards: string;
   maxRewardsClaimTax: string;
   rewardsClaimTax: string;
@@ -158,6 +94,7 @@ export interface IState {
   ownedDust: string[];
   currentChainSupportsPvP: boolean;
   currentChainSupportsQuests: boolean;
+  currentChainSupportsDrawbridge: boolean;
   hasAdminAccess: boolean;
   hasMinterAccess: boolean;
 
@@ -176,7 +113,6 @@ export interface IState {
   weaponRenames: Record<number, string>;
   weaponCosmetics: Record<number, string>;
   maxDurability: number;
-  targetsByCharacterIdAndWeaponId: Record<number, Record<number, ITarget>>;
 
   currentNftType: string | null;
   currentNftId: number | null;
@@ -185,7 +121,6 @@ export interface IState {
   waxBridgeRemainingWithdrawableBnbDuringPeriod: string;
   waxBridgeTimeUntilLimitExpires: number;
 
-  isInCombat: boolean;
   isCharacterViewExpanded: boolean;
 
   shields: Record<number, IShield>;
@@ -195,19 +130,4 @@ export interface IState {
   keyboxes: Record<number, Nft>;
 
   nfts: Record<string, Record<number | string, Nft>>;
-
-  partnerProjects: Record<number, IPartnerProject>;
-  partnerProjectMultipliers: Record<number, string>;
-  partnerProjectRatios: Record<number, string>;
-  payoutCurrencyId: string;
-  defaultSlippage: string;
-
-  activeSpecialWeaponEventsIds: number[];
-  inactiveSpecialWeaponEventsIds: number[];
-  specialWeaponEvents: Record<number, ISpecialWeaponEvent>;
-  specialWeaponEventId: string;
-  specialWeaponArts: string[];
-  shardsSupply: Record<number, number>;
-
-  itemPrices: IItemPrices;
 }

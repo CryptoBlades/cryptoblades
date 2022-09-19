@@ -1,18 +1,18 @@
 <template>
   <div class="quest-requirement-display gap-3">
     <span class="quest-title">{{ $t('quests.quest') }}</span>
-    <div class="d-flex align-items-center gap-3" :key="quest.id">
+    <div class="d-flex align-items-center gap-3 flex-wrap" :key="quest.id">
       <QuestComponentIcon :questItemType="quest.requirementType" :amount="quest.requirementAmount"
                           :rarity="quest.requirementRarity" :externalAddress="quest.requirementExternalAddress"/>
-      <div class="d-flex flex-column"><span class="requirement-text">{{
+      <div class="d-flex flex-column requirement-text-container"><span class="requirement-text">{{
           quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.submit')
         }} {{ quest.requirementAmount }}<span
           v-if="questItemTypeSupportsTimesValue(quest.requirementType) && !isCurrency">x</span> <span
           v-if="questItemTypeSupportsStars(quest.requirementType)">{{
             Array(quest.requirementRarity + 1).fill('★').join('')
-          }} </span>{{ requirementName }} <i
+          }} </span>{{ requirementName }} <b-icon-question-circle
           v-if="quest.requirementType === RequirementType.EXTERNAL || quest.requirementType === RequirementType.EXTERNAL_HOLD"
-          :id="`external-hint-${quest.id}-${index}`" class="far fa-question-circle hint"/></span>
+          :id="`external-hint-${quest.id}-${index}`"/></span>
         <b-tooltip
           v-if="quest.requirementType === RequirementType.EXTERNAL || quest.requirementType === RequirementType.EXTERNAL_HOLD"
           :target="`external-hint-${quest.id}-${index}`">
@@ -72,7 +72,7 @@ export default Vue.extend({
     requirementName(): string {
       if (this.quest.requirementType === RequirementType.EXTERNAL || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
         if (this.quest?.requirementExternalAddress === undefined) return '';
-        return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].name;
+        return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress]?.name;
       } else if (this.quest.requirementType === RequirementType.DUST) {
         if(this.quest.requirementRarity === undefined) return '';
         return i18n.t(`quests.dustRarityType.${DustRarity[this.quest.requirementRarity]}`).toString() + ' ' +
@@ -84,11 +84,11 @@ export default Vue.extend({
     },
     externalTooltip(): string {
       if (!this.quest?.requirementExternalAddress) return '';
-      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].description;
+      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress]?.description;
     },
     externalWebsite(): string {
       if (!this.quest?.requirementExternalAddress) return '';
-      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress].website;
+      return (questItemsInfo as QuestItemsInfo).questItems[this.quest.requirementExternalAddress]?.website;
     },
   },
 
@@ -132,11 +132,13 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+*{
+  font-family: Roboto !important;
+}
 .quest-requirement-display {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  flex: 1;
 }
 
 .rarity-label {
@@ -153,10 +155,28 @@ export default Vue.extend({
 .requirement-text {
   font-size: 18px;
   color: #DABE75;
+  white-space: nowrap;
 }
 
 .quest-title {
   font: normal normal normal 16px/18px Arial;
   color: #B4B0A7;
 }
+
+@media screen and (max-width: 576px) {
+  .requirement-text {
+    white-space: normal;
+  }
+  .quest-requirement-display {
+    align-items: center;
+  }
+  .requirement-text-container{
+    align-items: center;
+  }
+  .rarity-label {
+    margin-top: 5px;
+    width: 100%;
+  }
+}
+
 </style>

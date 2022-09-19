@@ -1,11 +1,8 @@
 <template>
   <div>
-    <div class="tob-bg-img promotion-decoration">
-      <img class="vertical-decoration bottom" src="../assets/header-ads.png">
-    </div>
   <div class="results-panel">
     <div class="float-center">
-      <h1 class="text-center outcome pt-4 pb-4">{{ formattedOutcome.toUpperCase() }}</h1>
+      <h1 class="text-center outcome result-title">{{ formattedOutcome.toUpperCase() }}</h1>
       <b-container>
         <b-row class="power-rolled">
           <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
@@ -62,9 +59,6 @@
       </h6>
     </div>
   </div>
-    <div class="bot-bg-img promotion-decoration">
-      <img src="../assets/separator.png">
-    </div>
     <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
       <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
         <div class="coinzilla" data-zone="C-316621de2f7b8b25140"></div>
@@ -99,6 +93,10 @@ interface CombatResult {
   xpGain: string;
   skillGain: string;
   bnbGasUsed: string;
+}
+
+interface StoreMappedCombatActions {
+  fetchIgoRewardsPerFight(): Promise<string>;
 }
 
 export default Vue.extend({
@@ -152,7 +150,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions(['fetchIgoRewardsPerFight']),
+    ...(mapActions('combat', ['fetchIgoRewardsPerFight']) as StoreMappedCombatActions),
     async fetchPrices(): Promise<void> {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
       this.skillPrice = response.data?.cryptoblades.usd;
@@ -181,12 +179,12 @@ export default Vue.extend({
     },
   },
   async beforeMount(){
-    this.igoDefaultReward = await this.fetchIgoRewardsPerFight();
+    this.igoDefaultReward = parseInt(await this.fetchIgoRewardsPerFight(), 10);
   },
   async mounted() {
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
     await this.fetchPrices();
-    this.igoDefaultReward = await this.fetchIgoRewardsPerFight();
+    this.igoDefaultReward = parseInt(await this.fetchIgoRewardsPerFight(), 10);
     await new Promise(f => setTimeout(f, 1000));
     this.checkStorage();
   },
@@ -202,13 +200,18 @@ export default Vue.extend({
   margin: auto;
   text-align: center;
 }
+
+.result-title{
+  margin-bottom: 3em;
+  color: #EDCD90;
+}
+
 .outcome {
   font-family: Trajan;
   font-size: 2em;
-  font-weight: bold;
   padding: 0.1em;
   margin-top: 0.25em;
-  margin-bottom: 0;
+  margin-bottom: 1em;
 }
 .expander-divider {
   width: 100%;
@@ -313,14 +316,9 @@ export default Vue.extend({
 
 .top-bg-img > img, .bot-bg-img > img {
     width: 69% !important;
-    margin-bottom: -70px;
-
 }
 
 
-.tob-bg-img > img{
-  margin-top: -40px !important;
-}
 
 
 @media all and (max-width: 600px) {

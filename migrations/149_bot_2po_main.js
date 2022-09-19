@@ -18,8 +18,11 @@ module.exports = async function (deployer, network) {
   || network === 'hecomainnet'
   || network === 'okexmainnet'
   || network === 'polygonmainnet'
-  || network === 'avaxmainnet' || network === 'auroramainnet'
-  || network === 'avaxmainnet-fork') {
+  || network === 'avaxmainnet'
+  || network === 'avaxmainnet-fork'
+  || network === 'auroramainnet'
+  || network === 'skalemainnet'
+  || network === 'kavamainnet') {
     let storage = await upgradeProxy(NFTStorage.address, NFTStorage, { deployer });
     
     let weapons = await Weapons.deployed();

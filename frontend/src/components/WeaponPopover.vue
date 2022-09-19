@@ -87,12 +87,16 @@ export default {
     },
   },
   computed:{
-    ...mapState(['maxDurability', 'specialWeaponArts']),
+    ...mapState(['maxDurability']),
+    ...mapState('specialWeaponsManager',
+      ([
+        'specialWeaponArts',
+      ])),
     ...mapGetters([
-      'getWeaponDurability',
       'timeUntilWeaponHasMaxDurability',
       'getWeaponName',
       'getWeaponCosmetic',
+      'getWeaponDurability',
     ]),
   },
 };

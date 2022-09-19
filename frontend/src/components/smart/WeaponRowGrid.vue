@@ -58,29 +58,41 @@
         </li>
       </ul>
 
-      <b-modal class="centered-modal" ref="weapon-rename-modal"
-          @ok="renameWeaponCall()">
-          <template #modal-title>
-            {{$t('weaponGrid.renameWeapon')}}
-          </template>
+      <b-modal centered class="centered-modal" ref="weapon-rename-modal"
+          hide-footer hide-header>
+          <h3 class="confirmation-title">{{$t('weaponGrid.renameWeapon')}}</h3>
           <b-form-input type="string"
             class="modal-input" v-model="weaponRename" :placeholder="$t('weaponGrid.renamePlaceholder')" />
         <span v-if="isRenameProfanish">
           {{$t('weaponGrid.isProfanish')}} <em>{{cleanRename}}</em>
         </span>
+        <div class="footer-btn mb-4">
+          <button class="close-btn"   @click="renameWeaponCall()">{{$t('blacksmith.confirm')}}</button>
+        </div>
+        <div class="footer-close" @click="$refs['weapon-rename-modal'].hide()">
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+          <p class="close-icon"></p>
+        </div>
       </b-modal>
 
-      <b-modal class="centered-modal" ref="weapon-change-skin-modal"
-        @ok="changeWeaponSkinCall">
-        <template #modal-title>
-          {{$t('weaponGrid.changeWeaponSkill')}}
-        </template>
+      <b-modal centered class="centered-modal" ref="weapon-change-skin-modal"
+        hide-header hide-footer>
+        <h3 class="confirmation-title">{{$t('weaponGrid.changeWeaponSkill')}}</h3>
         <span >
           {{$t('weaponGrid.pickSkin')}}
         </span>
         <select class="form-control" v-model="targetSkin">
-          <option v-for="x in availableSkins" :value="x" :key="x">{{ x }}</option>
+          <option v-for="skin in availableSkins" :value="skin.id" :key="skin.id">
+            {{ skin.name || $t(`cosmetics.weaponCosmetic.${WeaponCosmetic[skin.id]}`) }}
+          </option>
         </select>
+        <div class="footer-btn mb-4">
+          <button class="close-btn"   @click="changeWeaponSkinCall()">{{$t('blacksmith.confirm')}}</button>
+        </div>
+        <div class="footer-close" @click="$refs['weapon-change-skin-modal'].hide()">
+          <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
+          <p class="close-icon"></p>
+        </div>
       </b-modal>
     </div>
   </div>
@@ -99,10 +111,18 @@ import { BModal } from 'bootstrap-vue';
 import { getCleanName, isProfaneIsh } from '../../rename-censor';
 import NftOptionsDropdown from '../NftOptionsDropdown.vue';
 import i18n from '@/i18n';
+import {WeaponCosmetic} from '@/enums/WeaponCosmetic';
+import { ICombatState } from '@/store/combat';
 
 type StoreMappedState = Pick<IState, 'ownedWeaponIds'>;
+interface Skin {
+  id: number;
+  name?: string;
+  amount: number;
+}
 interface StoreMappedGetters {
   weaponsWithIds(weaponIds: (string | number)[]): IWeapon[];
+  getWeaponDurability(state: ICombatState): number;
 }
 interface StoreMappedActions {
   fetchWeapons(weaponIds: string[]): Promise<void>;
@@ -124,7 +144,6 @@ interface Data {
   haveWeaponCosmetics: number[];
   targetSkin: string;
   currentWeaponId: number | string | null;
-  weaponCosmeticsNames: string[];
   hoveredWeapon: string [];
 }
 const sorts = [
@@ -226,27 +245,7 @@ export default Vue.extend({
       targetSkin: '',
       currentWeaponId: null,
       hoveredWeapon: [],
-      weaponCosmeticsNames: [
-        i18n.t('market.nftList.weaponGrayscale'),
-        i18n.t('market.nftList.weaponContrast'),
-        i18n.t('market.nftList.weaponSepia'),
-        i18n.t('market.nftList.weaponInvert'),
-        i18n.t('market.nftList.weaponBlur'),
-        i18n.t('market.nftList.weaponFireglow'),
-        i18n.t('market.nftList.weaponEarthglow'),
-        i18n.t('market.nftList.weaponLightningglow'),
-        i18n.t('market.nftList.weaponWaterglow'),
-        i18n.t('market.nftList.weaponRainbowglow'),
-        i18n.t('market.nftList.weaponDarkglow'),
-        i18n.t('market.nftList.weaponGhost'),
-        i18n.t('market.nftList.weaponPolicelights'),
-        i18n.t('market.nftList.weaponNeonborder'),
-        i18n.t('market.nftList.weaponRotatingNeonborder'),
-        i18n.t('market.nftList.weaponDiamondborder'),
-        i18n.t('market.nftList.weaponGoldborder'),
-        i18n.t('market.nftList.weaponSilverborder'),
-        i18n.t('market.nftList.weaponBronzeborder')
-      ]
+      WeaponCosmetic
     } as Data;
   },
   components: {
@@ -257,7 +256,7 @@ export default Vue.extend({
   },
   computed: {
     ...(mapState(['ownedWeaponIds']) as Accessors<StoreMappedState>),
-    ...(mapGetters(['weaponsWithIds','getWeaponDurability',]) as Accessors<StoreMappedGetters>),
+    ...(mapGetters(['weaponsWithIds', 'getWeaponDurability']) as Accessors<StoreMappedGetters>),
     weaponIdsToDisplay(): string[] {
       if (this.showGivenWeaponIds) {
         return this.weaponIds;
@@ -311,12 +310,21 @@ export default Vue.extend({
     cleanRename(): string {
       return getCleanName(this.weaponRename);
     },
-    availableSkins(): string[] {
+    availableSkins(): Skin[] {
       const availableSkins = [];
-      availableSkins.push('No Skin');
+
+      availableSkins.push({
+        id: 0,
+        name: 'No skin',
+        amount: 1
+      });
+
       for(let i = 0; i < 19; i++) {
         if(+this.haveWeaponCosmetics[i] > 0) {
-          availableSkins.push(this.weaponCosmeticsNames[i]);
+          availableSkins.push({
+            id: i + 1,
+            amount: +this.haveWeaponCosmetics[i]
+          });
         }
       }
       return availableSkins;
@@ -409,14 +417,12 @@ export default Vue.extend({
     },
     async changeWeaponSkinCall() {
       if(!this.currentWeaponId) return;
-      // +1 because cosmetics are 1 (not 0) based
-      const selectedSkinId = this.weaponCosmeticsNames.findIndex(x => x === this.targetSkin) + 1;
-      if(selectedSkinId === 0) {
+      if(+this.targetSkin === 0) {
         await this.removeWeaponCosmetic({ id: +this.currentWeaponId });
         await this.loadCosmeticsCount();
       } else {
-        await this.changeWeaponCosmetic({ id: +this.currentWeaponId, cosmetic: selectedSkinId });
-        this.haveWeaponCosmetics[selectedSkinId - 1] = await this.fetchOwnedWeaponCosmetics({cosmetic: selectedSkinId});
+        await this.changeWeaponCosmetic({ id: +this.currentWeaponId, cosmetic: +this.targetSkin });
+        this.haveWeaponCosmetics[+this.targetSkin] = await this.fetchOwnedWeaponCosmetics({cosmetic: +this.targetSkin});
         await this.loadCosmeticsCount();
       }
       this.updateOptions();
@@ -597,7 +603,7 @@ export default Vue.extend({
   height: 100vh;
   width: 450px;
   z-index: 5;
-  background-color: rgb(27, 29, 24);
+  background-color: rgb(1, 13, 34);
 }
 
 .cw-content h4{
