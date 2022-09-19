@@ -1,19 +1,19 @@
 <template>
   <div class="d-flex align-items-center flex-column">
     <div class="d-flex flex-column align-items-center w-50">
-      <div class="d-flex">
+      <div class="d-flex mt-2">
         <h3 class="mt-2"> {{$t('Treasury.partneredProjects')}} </h3>
         <b-icon-question-circle class="h3 mt-2 ml-3 pointer" @click="openFormulaDetails"/>
       </div>
-      <img src="../assets/divider4.png" class="expander-divider" alt="">
+      <div class="divider"></div>
     </div>
-    <div class="d-flex w-100 align-items-baseline mt-3">
-      <h5>{{$t('Treasury.payoutCurrency')}}:</h5>
+    <div class="d-flex w-100 align-items-baseline mt-3 justify-content-center">
+      <h5 class="mr-1">{{$t('Treasury.payoutCurrency')}}</h5>
       <b-form-select class="w-25 ml-1" size="sm" :value="payoutCurrencyId" @change="updatePayoutCurrencyId($event)">
         <b-form-select-option v-for="p in this.getPartnerProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
       </b-form-select>
     </div>
-    <div class="d-flex w-100 pt-2 pb-2 flex-wrap projects-container">
+    <div class="d-flex w-100 pt-2 pb-2 flex-wrap justify-content-center projects-container">
       <PartneredProject v-for="partnerProject in this.getPartnerProjects" :key="partnerProject.id" :partnerProject="partnerProject" />
     </div>
     <b-modal ok-only class="centered-modal" ref="formula-details-modal" :title="$t('Treasury.formulaDetailsTitle')">
@@ -112,6 +112,12 @@ export default Vue.extend({
 <style scoped>
 .white-space {
   white-space: break-spaces;
+}
+
+.divider{
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.873) 0%, rgba(71, 72, 73, 0.377)50%);
+  width: 100%;
+  height: 1px;
 }
 
 @media (max-width: 576px) {
