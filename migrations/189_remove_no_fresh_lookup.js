@@ -2,11 +2,10 @@ const { upgradeProxy} = require("@openzeppelin/truffle-upgrades");
 
 const Weapons = artifacts.require("Weapons");
 const Shields = artifacts.require("Shields");
-// TODO: Also remove in Characters?
-// const Characters = artifacts.require("Characters");
+const Characters = artifacts.require("Characters");
 
 module.exports = async function (deployer) {
   await upgradeProxy(Weapons.address, Weapons, { deployer });
   await upgradeProxy(Shields.address, Shields, { deployer });
-  // await upgradeProxy(Characters.address, Characters, { deployer });
+  await upgradeProxy(Characters.address, Characters, { deployer });
 };

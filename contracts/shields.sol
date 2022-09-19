@@ -64,8 +64,8 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     int128 public defenseMultPerPointDEF; // 0.2575% (+3%)
     int128 public defenseMultPerPointMatching; // 0.2675% (+7%)
 
-    uint256 private lastMintedBlock;
-    uint256 private firstMintedOfLastBlock;
+    uint256 private lastMintedBlock; // DEPRECATED
+    uint256 private firstMintedOfLastBlock; // DEPRECATED
 
     mapping(uint256 => uint64) durabilityTimestamp;
 
@@ -186,11 +186,6 @@ contract Shields is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint256 cosmeticSeed
     ) public restricted returns(uint256 tokenID) {
         tokenID = tokens.length;
-
-        if(block.number != lastMintedBlock)
-            firstMintedOfLastBlock = tokenID;
-        lastMintedBlock = block.number;
-
         tokens.push(Shield(properties, stat1, stat2, stat3));
         cosmetics.push(ShieldCosmetics(0, cosmeticSeed));
         _mint(minter, tokenID);

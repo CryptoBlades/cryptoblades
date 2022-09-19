@@ -107,8 +107,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     mapping(uint256 => uint256) public lastTransferTimestamp;
 
-    uint256 private lastMintedBlock;
-    uint256 private firstMintedOfLastBlock;
+    uint256 private lastMintedBlock; // DEPRECATED
+    uint256 private firstMintedOfLastBlock; // DEPRECATED
 
     mapping(uint256 => uint64) durabilityTimestamp;
 
@@ -279,13 +279,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 stat1, uint16 stat2, uint16 stat3,
         uint256 cosmeticSeed
     ) public minterOnly returns(uint256 tokenID) {
-
         tokenID = tokens.length;
-
-        if(block.number != lastMintedBlock)
-            firstMintedOfLastBlock = tokenID;
-        lastMintedBlock = block.number;
-
         tokens.push(Weapon(properties, stat1, stat2, stat3, 0));
         cosmetics.push(WeaponCosmetics(0, cosmeticSeed));
         _mint(minter, tokenID);
