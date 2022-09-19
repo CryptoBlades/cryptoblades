@@ -346,7 +346,7 @@ export default {
         this.loadingProgress();
 
       }, undefined, function ( error ) {
-        console.error( error );
+        console.error(error);
       } );
 
       modelLoader.load('models/crossguards/CrossGuard_' + crossGuard + '.FBX', model => {
@@ -357,7 +357,7 @@ export default {
         this.loadingProgress();
 
       }, undefined, function ( error ) {
-        console.error( error );
+        console.error(error);
       } );
 
       modelLoader.load('models/grips/Grip_' + grip + '.FBX', model => {
@@ -368,7 +368,7 @@ export default {
         this.loadingProgress();
 
       }, undefined, function ( error ) {
-        console.error( error );
+        console.error(error);
       } );
 
       modelLoader.load('models/pommels/Pommel_' + pommel + '.FBX', model => {
@@ -379,7 +379,7 @@ export default {
         this.loadingProgress();
 
       }, undefined, function ( error ) {
-        console.error( error );
+        console.error(error);
       } );
 
       this.allLoadStarted = true;

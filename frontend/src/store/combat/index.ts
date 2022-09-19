@@ -173,8 +173,10 @@ const combat = {
       const {gasPrice} = await rootState.web3.eth.getTransaction(res.transactionHash);
 
       const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
-      await dispatch('combat/fetchTargets', { characterId, weaponId });
-      await dispatch('fetchWeaponDurability', weaponId);
+      await Promise.all([
+        dispatch('combat/fetchTargets', {characterId, weaponId}),
+        dispatch('fetchWeaponDurability', weaponId),
+      ]);
 
       return {
         isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),

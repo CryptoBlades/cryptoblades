@@ -475,14 +475,14 @@ export default Vue.extend({
     }
     try {
       await this.initializeStore();
-    } catch (e: any) {
+    } catch (error: any) {
       this.errorMessage = i18n.t('app.warning.errorMessage.welcome').toString();
-      if (e.code === 4001) {
+      if (error.code === 4001) {
         this.errorMessage = i18n.t('app.warning.errorMessage.error').toString();
       }
 
-      console.error(e);
-      throw e;
+      console.error(error);
+      throw error;
     }
 
     this.pollCharacterStaminaIntervalId = setInterval(async () => {
@@ -500,8 +500,8 @@ export default Vue.extend({
 
       try {
         await this.pollAccountsAndNetwork();
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       }
     };
 
