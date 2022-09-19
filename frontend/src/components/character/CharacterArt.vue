@@ -65,7 +65,7 @@
 </template>
 
 <script>
-import { getCharacterArt } from '../../character-arts-placeholder';
+import { getCharacterArt } from '../../utils/placeholder/character-arts-placeholder';
 import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import prefabs from '../../assets/characterPrefabs.json';
@@ -75,9 +75,9 @@ import torsos from '../../assets/characterWardrobe_torso.json';
 import legs from '../../assets/characterWardrobe_legs.json';
 import boots from '../../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../../interfaces';
-import { getCleanName } from '../../rename-censor';
+import { getCleanName } from '../../utils/rename-censor';
 import { CharacterPower } from '@/interfaces';
-import { burningManager } from '../../feature-flags';
+import { burningManager } from '../../utils/feature-flags';
 import { ReputationTier } from '@/views/Quests.vue';
 import { mapState, mapGetters, mapActions } from 'vuex';
 

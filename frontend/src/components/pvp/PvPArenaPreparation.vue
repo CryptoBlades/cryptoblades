@@ -204,7 +204,7 @@ import PvPCharacter from '../pvp/PvPCharacter.vue';
 import PvPSeparator from './PvPSeparator.vue';
 import checkIcon from '../../assets/checkImage.svg';
 import ellipseIcon from '../../assets/ellipseImage.svg';
-import i18n from '../../i18n';
+import i18n from '../../utils/i18n';
 import PvPArenaInfo from '../pvp/PvPArenaInfo.vue';
 
 const defaultStarOptions = [

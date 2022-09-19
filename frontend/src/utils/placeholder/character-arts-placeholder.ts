@@ -1,14 +1,14 @@
 
-import WaterKnight from './assets/characters/KnightWater.png';
-import LightningKnight from './assets/characters/KnightLightning.png';
-import FireKnight from './assets/characters/KnightFire.png';
-import EarthKnight from './assets/characters/KnightEarth.png';
-import head1 from './assets/placeholder/chara-head-0.png';
-import head2 from './assets/placeholder/chara-head-1.png';
-import head3 from './assets/placeholder/chara-head-2.png';
-import head4 from './assets/placeholder/chara-head-3.png';
+import WaterKnight from '../../assets/characters/KnightWater.png';
+import LightningKnight from '../../assets/characters/KnightLightning.png';
+import FireKnight from '../../assets/characters/KnightFire.png';
+import EarthKnight from '../../assets/characters/KnightEarth.png';
+import head1 from '../../assets/placeholder/chara-head-0.png';
+import head2 from '../../assets/placeholder/chara-head-1.png';
+import head3 from '../../assets/placeholder/chara-head-2.png';
+import head4 from '../../assets/placeholder/chara-head-3.png';
 
-import { CharacterTrait, ICharacter } from './interfaces';
+import { CharacterTrait, ICharacter } from '../../interfaces';
 
 const characterImages = {earth: EarthKnight, fire: FireKnight, water: WaterKnight, lightning: LightningKnight};
 

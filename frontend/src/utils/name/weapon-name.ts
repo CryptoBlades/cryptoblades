@@ -1,6 +1,6 @@
 
 import seedrandom from 'seedrandom';
-import * as weaponNames from './assets/weapon-names.json';
+import * as weaponNames from '../../assets/weapon-names.json';
 
 const names: Record<string, string[]> = (weaponNames as any).default || weaponNames;
 

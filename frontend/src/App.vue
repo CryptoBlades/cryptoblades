@@ -96,7 +96,7 @@ import NavBar from './components/layout/navigation/bars/NavBar.vue';
 import CharacterBar from './components/layout/bars/CharacterBar.vue';
 import WeaponRowGrid from './components/layout/grids/WeaponRowGrid.vue';
 import { apiUrl } from './utils/common';
-import i18n from './i18n';
+import i18n from './utils/i18n';
 import { getConfigValue } from './contracts';
 import '@/mixins/general';
 import config from '../app-config.json';

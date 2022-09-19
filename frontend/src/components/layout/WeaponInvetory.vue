@@ -186,7 +186,7 @@
 </template>
 
 <script>
-import { getWeaponArt } from '../../weapon-arts-placeholder';
+import { getWeaponArt } from '../../utils/placeholder/weapon-arts-placeholder';
 import '@/mixins/general';
 import Events from '../../utils/events';
 import {
@@ -196,7 +196,7 @@ import {
 } from '../../interfaces';
 
 import { mapGetters, mapState } from 'vuex';
-import { getCleanName } from '../../rename-censor';
+import { getCleanName } from '../../utils/rename-censor';
 
 export default {
   props: ['weapon', 'favorite', 'displayType'],

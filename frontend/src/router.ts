@@ -17,7 +17,7 @@ import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
 import PlayToEarn from './views/PlayToEarn.vue';
 
-import { portal, pvp, quests, raid} from './feature-flags';
+import { portal, pvp, quests, raid} from './utils/feature-flags';
 import { currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 export default function createRouter() {

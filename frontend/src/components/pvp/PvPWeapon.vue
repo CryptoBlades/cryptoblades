@@ -37,7 +37,7 @@ import fire from '../../assets/elements/fire.png';
 import water from '../../assets/elements/water.png';
 import earth from '../../assets/elements/earth.png';
 import lightning from '../../assets/elements/lightning.png';
-import { getWeaponArt } from '../../weapon-arts-placeholder';
+import { getWeaponArt } from '../../utils/placeholder/weapon-arts-placeholder';
 import { BPopover } from 'bootstrap-vue';
 import {mapState} from 'vuex';
 

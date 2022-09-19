@@ -80,7 +80,7 @@ import {fromWeiEther, toBN} from '../../utils/common';
 import {PropType} from 'vue/types/options';
 import axios from 'axios';
 import {getConfigValue} from '@/contracts';
-import i18n from '@/i18n';
+import i18n from '@/utils/i18n';
 import {TranslateResult} from 'vue-i18n';
 import '@/mixins/general';
 import Hint from '@/components/common/Hint.vue';

@@ -7,7 +7,7 @@ import {Dispatch, Commit} from 'vuex';
 import { getGasPrice } from '../store';
 import BigNumber from 'bignumber.js';
 import Vue from 'vue';
-import { getFeeInSkillFromUsd } from '@/contract-call-utils';
+import { getFeeInSkillFromUsd } from '@/utils/contract-call-utils';
 
 export interface ICombatState {
   isInCombat: boolean;

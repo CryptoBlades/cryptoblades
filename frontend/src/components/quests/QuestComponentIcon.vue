@@ -28,7 +28,7 @@ import shield from '@/assets/shield2.png';
 import trinket from '@/assets/trinkets/trinket1.png';
 import questItemsInfo from '@/data/questItems.json';
 import {questItemTypeSupportsStars} from '@/utils/common';
-import i18n from '@/i18n';
+import i18n from '@/utils/i18n';
 
 interface Data {
   images: any;

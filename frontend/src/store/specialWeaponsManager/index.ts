@@ -3,7 +3,7 @@ import {Dispatch, Commit} from 'vuex';
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
 import {getGasPrice} from '../store';
 import {SpecialWeaponsEvent, OrderOption} from '@/components/admin/AdminTabs/SpecialWeaponsManagerAdmin.vue';
-import {approveFeeWalletOnly} from '@/contract-call-utils';
+import {approveFeeWalletOnly} from '@/utils/contract-call-utils';
 import BigNumber from 'bignumber.js';
 import Vue from 'vue';
 interface ISpecialWeaponEvent {

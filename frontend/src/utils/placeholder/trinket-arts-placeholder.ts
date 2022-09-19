@@ -1,5 +1,5 @@
 
-import img1 from './assets/trinkets/trinket1.png';
+import img1 from '../../assets/trinkets/trinket1.png';
 
 const allImages = [img1];
 

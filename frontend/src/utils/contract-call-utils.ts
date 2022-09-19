@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
-import { Web3JsCallOptions, Web3JsAbiCall, Web3JsSendOptions } from '../../abi-common';
-import { Contract, Contracts } from './interfaces';
+import { Web3JsCallOptions, Web3JsAbiCall, Web3JsSendOptions } from '../../../abi-common';
+import { Contract, Contracts } from '../interfaces';
 
 export type CryptoBladesAlias = NonNullable<Contracts['CryptoBlades']>;
 export type NFTMarketAlias = NonNullable<Contracts['NFTMarket']>;

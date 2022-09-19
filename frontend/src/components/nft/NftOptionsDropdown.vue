@@ -50,7 +50,7 @@
 import Vue from 'vue';
 import { PropType } from 'vue/types/options';
 import { mapActions } from 'vuex';
-import i18n from '@/i18n';
+import i18n from '@/utils/i18n';
 
 interface StoreMappedActions {
   transferNFT(payload: {

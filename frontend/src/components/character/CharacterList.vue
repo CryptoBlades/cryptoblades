@@ -162,12 +162,12 @@
 
 <script>
 import {mapActions, mapGetters, mapState} from 'vuex';
-import {getCharacterArt} from '@/character-arts-placeholder';
+import {getCharacterArt} from '@/utils/placeholder/character-arts-placeholder';
 import CharacterArt from './CharacterArt.vue';
 import NftOptionsDropdown from '../nft/NftOptionsDropdown.vue';
-import {getCleanName, isProfaneIsh} from '@/rename-censor';
+import {getCleanName, isProfaneIsh} from '@/utils/rename-censor';
 import Events from '@/utils/events';
-import i18n from '@/i18n';
+import i18n from '@/utils/i18n';
 import {CharacterCosmetic} from '@/enums/CharacterCosmetic';
 
 const sorts = [

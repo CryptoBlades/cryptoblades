@@ -2,12 +2,12 @@ import {
   IState,
 } from '@/interfaces';
 import {Dispatch, Commit} from 'vuex';
-import {approveFeeWalletOrRewards} from '@/contract-call-utils';
+import {approveFeeWalletOrRewards} from '@/utils/contract-call-utils';
 import BigNumber from 'bignumber.js';
 
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
 import { IRaidState } from '@/interfaces';
-import {raid as featureFlagRaid} from '@/feature-flags';
+import {raid as featureFlagRaid} from '@/utils/feature-flags';
 import { raidFromContract} from '@/contract-models';
 
 const raid = {

@@ -154,10 +154,10 @@
 
 <script>
 import {mapActions, mapGetters, mapState} from 'vuex';
-import { getJunkArt } from '../../junk-arts-placeholder';
-import { getTrinketArt } from '../../trinket-arts-placeholder';
-import { getCleanName } from '../../rename-censor';
-import { getWeaponArt } from '../../weapon-arts-placeholder';
+import { getJunkArt } from '../../utils/placeholder/junk-arts-placeholder';
+import { getTrinketArt } from '../../utils/placeholder/trinket-arts-placeholder';
+import { getCleanName } from '../../utils/rename-censor';
+import { getWeaponArt } from '../../utils/placeholder/weapon-arts-placeholder';
 import { Stat1PercentForChar, Stat2PercentForChar, Stat3PercentForChar } from '../../interfaces';
 import foundersShield from '../../assets/shield1.png';
 import legendaryShield from '../../assets/shield2.png';

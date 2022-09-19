@@ -1,6 +1,6 @@
 
 import seedrandom from 'seedrandom';
-import * as characterNames from './assets/character-names.json';
+import * as characterNames from '../../assets/character-names.json';
 
 const names: Record<string, string[]> = (characterNames as any).default || characterNames;
 

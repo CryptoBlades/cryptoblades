@@ -108,9 +108,9 @@ import WeaponInventory from '../WeaponInvetory.vue';
 import WeaponPopover from '../WeaponPopover.vue';
 import { NftOption } from '../../nft/NftOptionsDropdown.vue';
 import { BModal } from 'bootstrap-vue';
-import { getCleanName, isProfaneIsh } from '../../../rename-censor';
+import { getCleanName, isProfaneIsh } from '../../../utils/rename-censor';
 import NftOptionsDropdown from '../../nft/NftOptionsDropdown.vue';
-import i18n from '@/i18n';
+import i18n from '@/utils/i18n';
 import {WeaponCosmetic} from '@/enums/WeaponCosmetic';
 import { ICombatState } from '@/store/combat';
 

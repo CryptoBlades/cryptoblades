@@ -290,10 +290,10 @@ import BigNumber from 'bignumber.js';
 import {Accessors} from 'vue/types/options';
 import Vue from 'vue';
 import {fromWeiEther, toBN} from '../../utils/common';
-import {nft_bridge as bridgeEnabled} from '../../feature-flags';
+import {nft_bridge as bridgeEnabled} from '../../utils/feature-flags';
 import {SupportedProject} from '@/views/Treasury.vue';
 import Hint from '@/components/common/Hint.vue';
-import { portal, pvp, quests, raid} from '@/feature-flags';
+import { portal, pvp, quests, raid} from '@/utils/feature-flags';
 
 interface StoreMappedState {
   skillRewards: string;

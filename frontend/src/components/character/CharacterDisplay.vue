@@ -84,13 +84,13 @@
 
 <script lang="ts">
 import {mapActions, mapGetters, mapState, mapMutations } from 'vuex';
-import { getCharacterArt } from '../../character-arts-placeholder';
+import { getCharacterArt } from '../../utils/placeholder/character-arts-placeholder';
 import Events from '../../utils/events';
 import { CharacterPower, CharacterTrait } from '../../interfaces';
 import { RequiredXp } from '../../interfaces';
 import Vue from 'vue';
 import { toBN, fromWeiEther } from '../../utils/common';
-import { getCleanName } from '../../rename-censor';
+import { getCleanName } from '../../utils/rename-censor';
 import {Nft, NftStatus} from '../../interfaces/Nft';
 import {Accessors} from 'vue/types/options';
 
@@ -120,7 +120,7 @@ interface StoreMappedCombatGetters {
 interface StoreMappedActions {
   getCharacterBusyStatus(payload: { characterId: string | number }): Promise<number>;
 }
-import i18n from '@/i18n';
+import i18n from '@/utils/i18n';
 import EarningsCalculator from '../earningsCalculator/EarningsCalculator.vue';
 
 export default Vue.extend({

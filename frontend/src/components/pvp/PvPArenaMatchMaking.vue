@@ -202,7 +202,7 @@ import lightningIcon from '../../assets/elements/lightning.png';
 import PvPDuelModal from '../pvp/PvPDuelModal.vue';
 import PvPUnderAttackModal from '../pvp/PvPUnderAttackModal.vue';
 import { duelResultFromContract as formatDuelResult } from '../../contract-models';
-import i18n from '../../i18n';
+import i18n from '../../utils/i18n';
 
 export default {
   components: {

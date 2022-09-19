@@ -96,7 +96,7 @@ import PvPButton from './PvPButton.vue';
 import PvPCharacter from '../pvp/PvPCharacter.vue';
 import dayjs from 'dayjs';
 import PvPArenaInfo from '../pvp/PvPArenaInfo.vue';
-import i18n from '../../i18n';
+import i18n from '../../utils/i18n';
 
 export default {
   components: {

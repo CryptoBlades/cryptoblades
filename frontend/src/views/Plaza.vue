@@ -341,14 +341,14 @@ import Hint from '../components/common/Hint.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
 import Vue from 'vue';
-import i18n from '@/i18n';
+import i18n from '@/utils/i18n';
 import { BModal } from 'bootstrap-vue';
 import { CharacterPower } from '@/interfaces';
 import { isValidWeb3Address } from '../utils/common';
 
 import {
   burningManager as featureFlagBurningManager
-} from '../feature-flags';
+} from '../utils/feature-flags';
 
 interface Data {
   recruitCost: string;

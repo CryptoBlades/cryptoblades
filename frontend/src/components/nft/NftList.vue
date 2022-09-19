@@ -101,7 +101,7 @@ import Vue from 'vue';
 import { Accessors, PropType } from 'vue/types/options';
 import { IState } from '@/interfaces';
 import _ from 'lodash';
-import i18n from '@/i18n';
+import i18n from '@/utils/i18n';
 import { NftOption } from './NftOptionsDropdown.vue';
 import NftOptionsDropdown from './NftOptionsDropdown.vue';
 

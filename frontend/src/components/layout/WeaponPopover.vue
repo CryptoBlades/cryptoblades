@@ -61,9 +61,9 @@
 </template>
 
 <script>
-import { getWeaponArt } from '../../weapon-arts-placeholder';
-import { getWeaponRarity } from '../../weapon-element';
-import { getCleanName } from '../../rename-censor';
+import { getWeaponArt } from '../../utils/placeholder/weapon-arts-placeholder';
+import { getWeaponRarity } from '../../utils/weapon-element';
+import { getCleanName } from '../../utils/rename-censor';
 
 
 import { mapGetters, mapState } from 'vuex';

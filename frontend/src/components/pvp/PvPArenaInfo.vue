@@ -110,7 +110,7 @@
 <script>
 import BN from 'bignumber.js';
 import VueCountdown from '@chenfengyuan/vue-countdown';
-import i18n from '../../i18n';
+import i18n from '../../utils/i18n';
 
 export default {
   components: {

@@ -32,7 +32,7 @@
 import Vue from 'vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
 
-import { getCharacterArt } from '@/character-arts-placeholder';
+import { getCharacterArt } from '@/utils/placeholder/character-arts-placeholder';
 import {CharacterCosmetic} from '@/enums/CharacterCosmetic';
 
 

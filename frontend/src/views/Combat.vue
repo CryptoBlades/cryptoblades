@@ -180,7 +180,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import {getEnemyArt} from '../enemy-art';
+import {getEnemyArt} from '../utils/placeholder/enemy-art';
 import {CharacterTrait, GetTotalMultiplierForTrait, ICharacter, ITarget, IWeapon, WeaponElement} from '../interfaces';
 import Hint from '../components/common/Hint.vue';
 import Events from '../utils/events';
@@ -191,7 +191,7 @@ import WeaponGrid from '../components/layout/grids/WeaponGrid.vue';
 import ModalContainer from '../components/modals/ModalContainer.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
-import i18n from '../i18n';
+import i18n from '../utils/i18n';
 import { Accessors } from 'vue/types/options';
 
 interface StoreMappedCombatActions {

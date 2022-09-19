@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import { getWeaponArt } from '../../weapon-arts-placeholder';
+import { getWeaponArt } from '../../utils/placeholder/weapon-arts-placeholder';
 import * as Three from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import swordspecs from '../../assets/swordspecs.json';
@@ -89,7 +89,7 @@ import { Stat1PercentForChar,
 import Events from '@/utils/events';
 
 import { mapGetters, mapState } from 'vuex';
-import { getCleanName } from '../../rename-censor';
+import { getCleanName } from '../../utils/rename-censor';
 
 const bladeCount = 24;
 const crossGuardCount = 24;

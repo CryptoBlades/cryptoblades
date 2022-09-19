@@ -152,7 +152,7 @@ import {Multiselect} from 'vue-multiselect';
 import {PropType} from 'vue/types/options';
 import BN from 'bignumber.js';
 import {mapActions, mapState} from 'vuex';
-import i18n from '@/i18n';
+import i18n from '@/utils/i18n';
 import { TranslateResult } from 'vue-i18n';
 import Events from '../../utils/events';
 import SkeletonLoader from '../loader/SkeletonLoader.vue';

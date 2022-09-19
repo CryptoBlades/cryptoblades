@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import {portal, pvp, quests, raid} from '@/feature-flags';
+import {portal, pvp, quests, raid} from '@/utils/feature-flags';
 import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
 

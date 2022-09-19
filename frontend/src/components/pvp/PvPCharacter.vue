@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { getCharacterArtByTrait } from '@/character-arts-placeholder';
+import { getCharacterArtByTrait } from '@/utils/placeholder/character-arts-placeholder';
 export default {
   props: {
     characterTrait: {

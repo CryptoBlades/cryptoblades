@@ -153,7 +153,7 @@ import Vue from 'vue';
 import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 import { BModal } from 'bootstrap-vue';
 import BN from 'bignumber.js';
-import i18n from '@/i18n';
+import i18n from '@/utils/i18n';
 import { Nft } from '@/interfaces/Nft';
 import { CharacterPower } from '@/interfaces';
 import BigButton from '@/components/layout/buttons/BigButton.vue';
@@ -167,7 +167,7 @@ import { getConfigValue } from '@/contracts';
 import { fromWeiEther, toBN } from '../utils/common';
 import {
   burningManager as featureFlagBurningManager
-} from '../feature-flags';
+} from '../utils/feature-flags';
 
 
 interface StoreMappedActions {

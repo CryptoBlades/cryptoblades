@@ -107,7 +107,7 @@ import {mapActions} from 'vuex';
 import {NftIdType} from '@/components/nft/NftList.vue';
 import {getTimeRemaining} from '@/utils/common';
 import { TranslateResult } from 'vue-i18n';
-import i18n from '@/i18n';
+import i18n from '@/utils/i18n';
 
 enum ActionAfterPick {
   COMPLETE,

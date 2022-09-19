@@ -240,7 +240,7 @@ import SkinsTab from '@/components/character/CharacterTabs/SkinsTab.vue';
 import OptionsTab from '@/components/character/CharacterTabs/OptionsTab.vue';
 import UpgradeTab from '@/components/character/CharacterTabs/UpgradeTab.vue';
 import { Nft } from '@/interfaces/Nft';
-import { getCharacterArt } from '@/character-arts-placeholder';
+import { getCharacterArt } from '@/utils/placeholder/character-arts-placeholder';
 import { Quest, ReputationLevelRequirements, ReputationTier } from '@/views/Quests.vue';
 import { CharacterTrait, RequiredXp } from '@/interfaces';
 import { isValidWeb3Address } from '@/utils/common';

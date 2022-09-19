@@ -9,15 +9,15 @@ import {getConfigValue, setUpContracts} from '@/contracts';
 import {characterFromContract, junkFromContract, shieldFromContract, trinketFromContract, weaponFromContract} from '@/contract-models';
 
 import {CharacterPower, Contract, isStakeType, IState, IWeb3EventSubscription, StakeType} from '@/interfaces';
-import {getCharacterNameFromSeed} from '@/character-name';
-import {approveFee, approveFeeDynamic, approveFeeFixed} from '@/contract-call-utils';
+import {getCharacterNameFromSeed} from '@/utils/name/character-name';
+import {approveFee, approveFeeDynamic, approveFeeFixed} from '@/utils/contract-call-utils';
 
-import {burningManager as featureFlagBurningManager} from '@/feature-flags';
+import {burningManager as featureFlagBurningManager} from '@/utils/feature-flags';
 import {ERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from '@/stake-types';
 import {Nft} from '@/interfaces/Nft';
 import {Element} from '@/enums/Element';
-import {getWeaponNameFromSeed} from '@/weapon-name';
+import {getWeaponNameFromSeed} from '@/utils/name/weapon-name';
 import axios from 'axios';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';
 import {abi as erc721Abi} from '@/../../build/contracts/IERC721.json';
