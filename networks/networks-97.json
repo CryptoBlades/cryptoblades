@@ -2643,7 +2643,7 @@
     },
     "links": {},
     "address": "0x149529De3BDA6F95FbF027275DC5d7ccc270D5Bd",
-    "transactionHash": "0x253941539878b6c81113f308a05311b7ee1233ce1b09dfb159cddfe2853f9552"
+    "transactionHash": "0xeca9b573d31eb2235f3b1fdabeef64a634d6e4b72bbbe612d6a4e85d5d864f04"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -6125,7 +6125,7 @@
     },
     "links": {},
     "address": "0xF3e470DceE011E55b8912ebC58499CE33c863A17",
-    "transactionHash": "0x82c73c16b9a29e647efe05b9fa35e2d633d081d37c2d522d8db8d9a7242c4400"
+    "transactionHash": "0x1388c0baafe70b364b0d6ab76213c014fb00e6ed2f91d760b4e7852354658e26"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {
@@ -7881,6 +7881,6 @@
     },
     "links": {},
     "address": "0x672E4CddA311b3BfAd1e09313241C62B4eFF5782",
-    "transactionHash": "0xcda1b5ccc3a178fa1a80f497c1e23fa8884ab5649b625e9deda5a942974ccf60"
+    "transactionHash": "0x179be8f8fa433aeeae81898a5f50370a0bacb04f73956dcc4277d471a7bc3c7d"
   }
 }
