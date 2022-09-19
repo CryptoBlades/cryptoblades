@@ -346,7 +346,8 @@ export default Vue.extend({
       if (
         this.hideWalletWarning &&
         !this.showMetamaskWarning &&
-        (this.errorMessage || (this.ownCharacters.length === 0 && this.skillBalance === '0'))
+        (this.errorMessage.includes(i18n.t('app.warning.errorMessage.error').toString()) ||
+        (this.ownCharacters.length === 0 && this.skillBalance === '0'))
       ) {
         (this as any).$dialog.notify.warning(i18n.t('app.warning.message.hideWalletWarning'),
           {
