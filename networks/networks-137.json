@@ -587,7 +587,89 @@
     },
     "links": {},
     "address": "0x140d3a7fE604FA6d1dFa8b377eAA507D85cD37cF",
-    "transactionHash": "0x7e1ed8261e54e893438770bd518a15fcc167847505cbe6d78981c01418cea6cb"
+    "transactionHash": "0x19cf23727aa119276278cf7d3a0c2b81d43f1a20346f5451d5d7f1d9006bebcd"
+  },
+  "build/contracts/CBKLandBridgeProxyContract.json": {
+    "events": {
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0x4DFDbe58F08EBaE669Dd1F9032516448D260f4a5",
+    "transactionHash": "0xc122027658d31c4b23261994e6022409085447b0c63d394a093d95912fd86674"
   },
   "build/contracts/CBKLandSale.json": {
     "events": {
@@ -2120,7 +2202,7 @@
     },
     "links": {},
     "address": "0x929059Fef67b88CE2F4127e59B50bEA123981998",
-    "transactionHash": "0x5d4449ea002461f333dec031a2b63ae3898f62995a744b7fc2e25d2b087d191b"
+    "transactionHash": "0x4cbf5678b4448424e30cb292dc3559a1eb81e7f074bcb549f3a6f8e59852b460"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -6158,7 +6240,7 @@
     },
     "links": {},
     "address": "0x68a288c2A96e2cd5c45769e02f2bbc2E90BAE39B",
-    "transactionHash": "0x009871c931b0f0c590483566bf27f2341dc4aafe91a46eeafde8f372ac3cd1a8"
+    "transactionHash": "0xcc4401c688088902905d90c920743efd5b10df048cb98b07fea2b5e0d9e4762a"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {
@@ -7801,6 +7883,6 @@
     },
     "links": {},
     "address": "0xD9C5449EfB3f99952F73e824688724aAFB81dE6E",
-    "transactionHash": "0x2c916b5aa28a52f1aad8345af6441377832f546d6eea922ce22b1d62cea70afb"
+    "transactionHash": "0x42764f5f413197e55ff2085e08dfbb56a68c810c3774f44487cdd4e46494c349"
   }
 }
