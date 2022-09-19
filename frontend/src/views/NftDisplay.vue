@@ -109,7 +109,7 @@ import CharacterList from '../components/character/CharacterList.vue';
 import NftList from '../components/nft/NftList.vue';
 import { fromWeiEther } from '@/utils/common';
 import BigNumber from 'bignumber.js';
-import CurrencyConverter from '../components/CurrencyConverter.vue';
+import CurrencyConverter from '../components/currency/CurrencyConverter.vue';
 
 interface StoreMappedGetters {
   contracts: Contracts;

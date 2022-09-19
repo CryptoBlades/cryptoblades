@@ -7,14 +7,14 @@
     </li>
     <li class="top-nav-links ml-4">
       <router-link :to="{ name: 'plaza' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/plaza-icon.png" class="ui-link-icon" alt="Plaza"></div>
+        <div class="icon"><img src="../../../assets/navbar-icons/plaza-icon.png" class="ui-link-icon" alt="Plaza"></div>
         <div class="link-text">{{ $t("viewLink.character") }}</div>
       </router-link>
     </li>
 
     <li class="top-nav-links">
       <router-link :to="{ name: 'blacksmith', query: {tab: 'weapon'} }" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/blacksmith-icon.png" class="ui-link-icon" alt="Blacksmith">
+        <div class="icon"><img src="../../../assets/navbar-icons/blacksmith-icon.png" class="ui-link-icon" alt="Blacksmith">
         </div>
         <div class="link-text">{{ $t("viewLink.blacksmith") }}</div>
       </router-link>
@@ -22,7 +22,7 @@
 
     <li v-if="quests" class="top-nav-links">
       <router-link :to="{ name: 'quests'}" exact class="nav-link" :class="supportsQuests ? '' : 'disabled-link'">
-        <div class="icon"><img src="../assets/navbar-icons/quests-icon.png" class="ui-link-icon" alt="Quests"></div>
+        <div class="icon"><img src="../../../assets/navbar-icons/quests-icon.png" class="ui-link-icon" alt="Quests"></div>
         <div class="link-text">{{ $t("viewLink.quests") }}
           <hint
             v-if="!supportsQuests" class="hint"
@@ -33,7 +33,7 @@
 
     <li class="top-nav-links">
       <a :href="BazaarLink()" class="nav-link" target="_blank">
-        <div class="icon"><img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar"></div>
+        <div class="icon"><img src="../../../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar"></div>
         <div class="link-text d-flex  justify-content-center align-items-center">
           {{ $t("viewLink.bazaar") }}
           <b-icon-box-arrow-up-right scale="0.8"/>
@@ -43,7 +43,7 @@
 
     <li v-if="hasAdminAccess" class="top-nav-links">
       <router-link :to="{ name: 'admin' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/gear-icon.png" class="ui-link-icon" alt="Admin"></div>
+        <div class="icon"><img src="../../../assets/navbar-icons/gear-icon.png" class="ui-link-icon" alt="Admin"></div>
         <div class="link-text">{{ $t("viewLink.admin") }}</div>
       </router-link>
     </li>
@@ -56,7 +56,7 @@ import {portal, pvp, quests, raid} from '@/feature-flags';
 import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
 
-import Hint from '@/components/Hint';
+import Hint from '@/components/common/Hint';
 
 
 export default Vue.extend({
@@ -140,7 +140,7 @@ a {
   align-items: center;
   vertical-align: middle;
   justify-content: center;
-  background-image: url('../assets/btn-long.svg');
+  background-image: url('../../../assets/btn-long.svg');
   background-color: transparent;
   background-repeat: no-repeat;
   background-size: 100% 100%;

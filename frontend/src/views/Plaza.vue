@@ -337,7 +337,7 @@
 import BN from 'bignumber.js';
 import BigButton from '../components/layout/buttons/BigButton.vue';
 import CharacterList from '../components/character/CharacterList.vue';
-import Hint from '../components/Hint.vue';
+import Hint from '../components/common/Hint.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
 import Vue from 'vue';

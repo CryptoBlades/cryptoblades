@@ -27,7 +27,7 @@ import {Contract} from '@/interfaces';
 import {PropType} from 'vue/types/options';
 import RoleGranter from '@/components/role/RoleGranter.vue';
 import RoleRevoker from '@/components/role/RoleRevoker.vue';
-import Hint from '@/components/Hint.vue';
+import Hint from '@/components/common/Hint.vue';
 import QuestsAdmin from './AdminTabs/QuestsAdmin.vue';
 import CBKLandAdmin from './AdminTabs/CBKLandAdmin.vue';
 import WeaponsAdmin from './AdminTabs/WeaponsAdmin.vue';

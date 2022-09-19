@@ -186,17 +186,17 @@
 </template>
 
 <script>
-import { getWeaponArt } from '../weapon-arts-placeholder';
+import { getWeaponArt } from '../../weapon-arts-placeholder';
 import '@/mixins/general';
-import Events from '../events';
+import Events from '../../events';
 import {
   Stat1PercentForChar,
   Stat2PercentForChar,
   Stat3PercentForChar
-} from '../interfaces';
+} from '../../interfaces';
 
 import { mapGetters, mapState } from 'vuex';
-import { getCleanName } from '../rename-censor';
+import { getCleanName } from '../../rename-censor';
 
 export default {
   props: ['weapon', 'favorite', 'displayType'],
@@ -528,7 +528,7 @@ export default {
 }
 
 .change-icon{
-  content: url('../assets/swithc-wep.png');
+  content: url('../../assets/swithc-wep.png');
   height: 15px;
   width: 15px;
 }
@@ -606,7 +606,7 @@ export default {
 
   .mobile-info{
     display: inline-block;
-    content: url('../assets/hint.png');
+    content: url('../../assets/hint.png');
     height: 20px;
   }
   .img-adventure > span{

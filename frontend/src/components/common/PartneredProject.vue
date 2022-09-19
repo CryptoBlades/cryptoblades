@@ -75,7 +75,7 @@ export default Vue.extend({
 
   data() {
     return {
-      images: require.context('../assets/partners/', false, /\.png$/),
+      images: require.context('../../assets/partners/', false, /\.png$/),
       multiplier: '1',
       distributionTime: '0',
       tokensClaimed: '0',

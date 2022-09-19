@@ -9,7 +9,7 @@
             <h5>{{$t('combatResults.youRolled')}}</h5>
           </b-col>
           <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
-            <img src="../assets/arrow-right.png" alt="">
+            <img src="../../assets/arrow-right.png" alt="">
           </b-col>
           <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
             <h5>{{fightResults.playerRoll}}</h5>
@@ -20,7 +20,7 @@
             <h5>{{$t('combatResults.enemyRolled')}}</h5>
           </b-col>
           <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
-            <img src="../assets/arrow-right.png" alt="">
+            <img src="../../assets/arrow-right.png" alt="">
           </b-col>
           <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
             <h5>{{fightResults.enemyRoll}}</h5>
@@ -76,14 +76,14 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import {fromWeiEther, toBN} from '../utils/common';
+import {fromWeiEther, toBN} from '../../utils/common';
 import {PropType} from 'vue/types/options';
 import axios from 'axios';
 import {getConfigValue} from '@/contracts';
 import i18n from '@/i18n';
 import {TranslateResult} from 'vue-i18n';
 import '@/mixins/general';
-import Hint from '@/components/Hint.vue';
+import Hint from '@/components/common/Hint.vue';
 import { mapActions } from 'vuex';
 
 interface CombatResult {

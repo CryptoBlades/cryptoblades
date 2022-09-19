@@ -159,7 +159,7 @@ import { ICharacter } from '@/interfaces';
 import { getCleanName } from '@/rename-censor';
 import ElementTrait from '@/components/element/ElementTrait.vue';
 import { SupportedProject } from '@/views/Treasury.vue';
-import PartneredProject from '../PartneredProject.vue';
+import PartneredProject from '@/components/common/PartneredProject.vue';
 
 interface StoreMappedState {
   skillRewards: string;

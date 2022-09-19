@@ -98,7 +98,7 @@ import Vue from 'vue';
 import {PropType} from 'vue/types/options';
 import {Quest, Rarity, RequirementType, RewardType, QuestTemplateType} from '@/views/Quests.vue';
 import {Nft} from '../../interfaces/Nft';
-import Hint from '@/components/Hint.vue';
+import Hint from '@/components/common/Hint.vue';
 import QuestSubmissionModal from '@/components/quests/QuestSubmissionModal.vue';
 import QuestReward from '@/components/quests/QuestReward.vue';
 import QuestRequirements from '@/components/quests/QuestRequirements.vue';

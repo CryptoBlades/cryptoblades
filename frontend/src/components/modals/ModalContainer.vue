@@ -36,7 +36,7 @@
 
 <script>
 import Vue from 'vue';
-import CombatResult from '../CombatResults.vue';
+import CombatResult from '../combat/CombatResults.vue';
 
 export default Vue.extend({
   components: {

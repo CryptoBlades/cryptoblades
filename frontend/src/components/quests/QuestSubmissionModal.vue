@@ -65,7 +65,7 @@ import WeaponGrid from '@/components/layout/grids/WeaponGrid.vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import NftList, {NftIdType} from '@/components/nft/NftList.vue';
 import {Quest, QuestTemplateType, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
-import DustBalanceDisplay from '@/components/balance/DustBalanceDisplay.vue';
+import DustBalanceDisplay from '@/components/currency/DustBalanceDisplay.vue';
 import NftIcon from '@/components/nft/NftIcon.vue';
 import {PropType} from 'vue/types/options';
 import {Nft} from '../../interfaces/Nft';

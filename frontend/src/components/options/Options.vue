@@ -292,7 +292,7 @@ import Vue from 'vue';
 import {fromWeiEther, toBN} from '../../utils/common';
 import {nft_bridge as bridgeEnabled} from '../../feature-flags';
 import {SupportedProject} from '@/views/Treasury.vue';
-import Hint from '@/components/Hint.vue';
+import Hint from '@/components/common/Hint.vue';
 import { portal, pvp, quests, raid} from '@/feature-flags';
 
 interface StoreMappedState {

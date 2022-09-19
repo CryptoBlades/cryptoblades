@@ -144,18 +144,18 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { formatDurationFromSeconds } from '../utils/date-time';
-import { isStakeType, isNftStakeType, StakeType, NftStakeType } from '../interfaces/State';
+import { formatDurationFromSeconds } from '../../utils/date-time';
+import { isStakeType, isNftStakeType, StakeType, NftStakeType } from '../../interfaces/State';
 import { toBN } from '@/utils/common';
-import { secondsToDDHHMMSS } from '../utils/date-time';
+import { secondsToDDHHMMSS } from '../../utils/date-time';
 import {Multiselect} from 'vue-multiselect';
 import {PropType} from 'vue/types/options';
 import BN from 'bignumber.js';
 import {mapActions, mapState} from 'vuex';
 import i18n from '@/i18n';
 import { TranslateResult } from 'vue-i18n';
-import Events from '../events';
-import SkeletonLoader from './loader/SkeletonLoader.vue';
+import Events from '../../events';
+import SkeletonLoader from '../loader/SkeletonLoader.vue';
 import { stakeTypeThatCanHaveUnclaimedRewardsStakedTo } from '@/stake-types';
 
 interface StoreMappedStakingActions {

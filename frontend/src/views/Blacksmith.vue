@@ -624,7 +624,7 @@ import NftList from '@/components/nft/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
 import { ISpecialWeaponsManagerState } from '@/store/specialWeaponsManager';
 import { Accessors } from 'vue/types/options';
-import DustBalanceDisplay from '@/components/balance/DustBalanceDisplay.vue';
+import DustBalanceDisplay from '@/components/currency/DustBalanceDisplay.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
 import i18n from '@/i18n';
 import Events from '../events';

@@ -27,9 +27,9 @@
 <script lang="ts">
 import Vue from 'vue';
 
-import ViewLinks from '../../../ViewLinks.vue';
+import ViewLinks from '../ViewLinks.vue';
 import Options from '../../../options/Options.vue';
-import SkillBalanceDisplay from '../../../balance/SkillBalanceDisplay.vue';
+import SkillBalanceDisplay from '../../../currency/SkillBalanceDisplay.vue';
 
 import Events from '../../../../events';
 import {mapGetters, mapMutations} from 'vuex';

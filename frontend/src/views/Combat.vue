@@ -182,11 +182,11 @@
 import Vue from 'vue';
 import {getEnemyArt} from '../enemy-art';
 import {CharacterTrait, GetTotalMultiplierForTrait, ICharacter, ITarget, IWeapon, WeaponElement} from '../interfaces';
-import Hint from '../components/Hint.vue';
+import Hint from '../components/common/Hint.vue';
 import Events from '../events';
 import {fromWeiEther, toBN} from '../utils/common';
 import BigNumber from 'bignumber.js';
-import WeaponInventory from '../components/WeaponInvetory.vue';
+import WeaponInventory from '../components/layout/WeaponInvetory.vue';
 import WeaponGrid from '../components/layout/grids/WeaponGrid.vue';
 import ModalContainer from '../components/modals/ModalContainer.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
