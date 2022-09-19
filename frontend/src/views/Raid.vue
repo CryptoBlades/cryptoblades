@@ -23,7 +23,7 @@
                     <div class="boss-name">
                       <div>
                         <div class="elements">
-                          <div class="frame-element"/>
+                          <div class="frame-element"></div>
                           <span :class="traitNumberToName(bossTrait).toLowerCase() + '-icon trait-icon'" />
                         </div>
                         <h3>{{ bossName }}</h3>
@@ -102,7 +102,7 @@
                   <div class="col-lg-12 col-md-6 col-sm-12 drops">
                      <span>{{$t('viewLink.character')}}</span>
                      <div class="char-info">
-                        <div class="art" :style="'background-image: url('+getCharacterArt(currentCharacter)+')'"/>
+                        <div class="art" :style="'background-image: url('+getCharacterArt(currentCharacter)+')'"></div>
                         <div>
                           <p class="name character-name"> {{getCleanCharacterName(currentCharacterId).toUpperCase()}} </p>
                           <span v-if="currentCharacter" class="subtext subtext-stats">
@@ -288,7 +288,7 @@
                   <div class="col-lg-12 drops text-left">
                      <span>{{$t('raid.character')}}</span>
                      <div class="char-info">
-                        <div class="art" :style="'background-image: url('+getCharacterArt(currentCharacter)+')'"/>
+                        <div class="art" :style="'background-image: url('+getCharacterArt(currentCharacter)+')'"></div>
                         <div>
                           <p class="name bold character-name"> {{getCleanCharacterName(currentCharacterId)}} </p>
                           <span v-if="currentCharacter" class="subtext subtext-stats">
