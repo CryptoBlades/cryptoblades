@@ -661,8 +661,8 @@ export default Vue.extend({
           await this.updateOwnedLands();
           this.idsToStake = [];
         }
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       } finally {
         this.isLoadingStake = false;
         this.textAmount = '';
@@ -673,8 +673,8 @@ export default Vue.extend({
       try {
         this.isLoadingRestake = true;
         await this.stakeUnclaimedRewards({ stakeType: this.stakeType });
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       } finally {
         this.isLoadingRestake = false;
       }
@@ -691,8 +691,8 @@ export default Vue.extend({
         else {
           await this.claimReward({ stakeType: this.stakeType });
         }
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       } finally {
         this.isLoadingClaim = false;
       }
@@ -700,8 +700,8 @@ export default Vue.extend({
     async fetchData(): Promise<void> {
       try {
         await this.fetchStakeDetails({ stakeType: this.stakeType });
-      } catch (err) {
-        console.log(err);
+      } catch (error) {
+        console.error(error);
       }
     },
     async updateOwnedLands(): Promise<void> {

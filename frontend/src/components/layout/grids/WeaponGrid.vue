@@ -473,7 +473,6 @@ export default Vue.extend({
     },
     async weaponIdsToDisplay(newWeaponIds: string[]) {
       await this.fetchWeapons(newWeaponIds);
-      console.log('weapon forged');
       await this.createPagination(this.activePage);
     },
     starFilter(){

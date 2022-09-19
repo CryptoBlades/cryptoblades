@@ -71,8 +71,8 @@ export default {
         await this.withdrawRankedRewardsOldContract();
 
         this.availableSkill = +(await this.getPlayerPrizePoolRewards()) + +(await this.getPlayerPrizePoolRewardsOldContract());
-      } catch (err) {
-        console.log('withdraw rewards error: ', err);
+      } catch (error) {
+        console.error('withdraw rewards error: ', error);
       }
 
       this.loading = false;

@@ -107,9 +107,9 @@ export default {
         this.transactionResults = results;
         this.waitingResults = false;
         this.error = null;
-      } catch (e) {
-        console.error(e);
-        this.error = e.message;
+      } catch (error) {
+        console.error(error);
+        this.error = error.message;
       }
     },
 

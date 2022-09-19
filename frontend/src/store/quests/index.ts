@@ -546,7 +546,6 @@ const quests = {
       {characterID, pickedQuestID}: {characterID: number, pickedQuestID: number}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
-      console.log('skipQuest', characterID, pickedQuestID);
       await SimpleQuests.methods.skipQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
       await dispatch('combat/fetchCharacterStamina', characterID);
     },
@@ -560,7 +559,6 @@ const quests = {
       if (!await SimpleQuests.methods.hasRandomQuestRewardSeedRequested(characterID).call(defaultCallOptions(rootState))) {
         await SimpleQuests.methods.generateRewardQuestSeed(characterID).send(defaultCallOptions(rootState));
       }
-      console.log('completeQuest', pickedQuestID);
       const result = await SimpleQuests.methods.completeQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
 
       const questRewards = result.events.QuestRewarded.returnValues.rewards;
@@ -740,7 +738,6 @@ const quests = {
     async requestPickableQuest({ rootState }: {rootState: IState}, {characterID, questID}: {characterID: number, questID: number}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
-      console.log(characterID, questID);
       return await SimpleQuests.methods.requestPickableQuest(characterID, questID).send(defaultCallOptions(rootState));
     }
   },

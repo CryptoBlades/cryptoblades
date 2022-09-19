@@ -903,8 +903,8 @@ export default Vue.extend({
         });
         this.newForged = this.ownedWeaponIds.splice(this.ownedWeaponIds.length - amount, this.ownedWeaponIds.length);
         (this.$refs['new-forge-weapon'] as BModal).show();
-      } catch (e) {
-        console.error('Error while forging:', e);
+      } catch (error) {
+        console.error('Error while forging:', error);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
       } finally {
         this.disableForge = false;
@@ -975,8 +975,8 @@ export default Vue.extend({
         await this.claimWeapons();
         this.newForged = this.ownedWeaponIds.splice(this.ownedWeaponIds.length - quantity, this.ownedWeaponIds.length);
         (this.$refs['new-forge-weapon'] as BModal).show();
-      } catch (e) {
-        console.error('Error while claiming:', e);
+      } catch (error) {
+        console.error('Error while claiming:', error);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotForge'));
       } finally {
         this.disableForge = false;
@@ -1128,8 +1128,8 @@ export default Vue.extend({
         (this.$refs['succesful-reforge'] as BModal).show();
         // this.showModal = true;
         this.magicCircleSpeed = false;
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotReforge'));
       }
     },
@@ -1158,8 +1158,8 @@ export default Vue.extend({
         this.lesser = 0;
         this.greater = 0;
         this.powerful = 0;
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
         (this as any).$dialog.notify.error(i18n.t('blacksmith.couldNotBurn'));
         this.cooling = false;
       }
