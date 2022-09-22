@@ -1,7 +1,7 @@
 <template>
 <div class="w-100">
   <div v-if="(questTemplateType === QuestTemplateType.QUEST || questTemplateType === QuestTemplateType.PICKABLE) && character" class="quest-row"
-       :class="character.status !== undefined && (character.status !== NftStatus.AVAILABLE) ? 'busy-quest-row' : ''">
+        :class="character.status !== undefined && (character.status !== NftStatus.AVAILABLE) ? 'busy-quest-row' : ''">
     <QuestCharacter :character="character" :quest="character.quest"
                     :reputationLevelRequirements="reputationLevelRequirements"/>
     <QuestRequirements v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
@@ -27,7 +27,7 @@ import QuestRequirements from '@/components/smart/QuestRequirements.vue';
 import QuestRewards from '@/components/smart/QuestRewards.vue';
 import QuestActions from '@/components/smart/QuestActions.vue';
 import {Quest, ReputationLevelRequirements, Rarity, RewardType, QuestTemplateType} from '@/views/Quests.vue';
-import {mapActions, mapGetters} from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import {Nft, NftStatus} from '@/interfaces/Nft';
 
 interface StoreMappedActions {
@@ -43,6 +43,7 @@ interface StoreMappedGetters {
 interface Data {
   isLoading: boolean;
   character?: Nft;
+  //componentKey: number;
 }
 
 export default Vue.extend({
@@ -60,6 +61,14 @@ export default Vue.extend({
     questTemplateType: {
       type: Number as PropType<QuestTemplateType>,
     },
+    // defaultAccountProp: {
+    //   type: String as PropType<string>,
+    //   required: true,
+    // },
+    // currentNetworkIdProp: {
+    //   type: Number as PropType<number>,
+    //   required: true,
+    // },
   },
 
   data() {
@@ -69,12 +78,24 @@ export default Vue.extend({
       RewardType,
       Rarity,
       NftStatus,
-      QuestTemplateType
+      QuestTemplateType,
+      //componentKey: 0,
     } as Data;
   },
 
   computed: {
+    ...mapState(['defaultAccount', 'currentNetworkId']),
     ...mapGetters(['charactersWithIds']) as Accessors<StoreMappedGetters>,
+
+    // rerenderKey(): string {
+    //   console.log('rerender key triggered');
+    //   return this.defaultAccount + this.currentNetworkId;
+    // },
+
+    // hasStateChanged(): boolean {
+    //   console.log('got into hasStateChanged', this.currentNetworkId, this.defaultAccount, this.currentNetworkIdProp, this.defaultAccountProp);
+    //   return this.defaultAccount + this.currentNetworkId !== this.defaultAccountProp + this.currentNetworkIdProp;
+    // },
   },
 
   methods: {
@@ -83,11 +104,18 @@ export default Vue.extend({
       'getCharacterBusyStatus',
     ]) as StoreMappedActions,
     async onRefreshQuestData() {
+      // if (this.hasStateChanged) {
+      //   this.$emit('refresh-quest-data');
+      // }
       this.$emit('refresh-quest-data');
+      // console.log(this.componentKey);
+      // this.componentKey += 1;
+      // console.log(this.componentKey);
       await this.refreshQuestData();
     },
 
     async refreshQuestData() {
+      console.log('refresh quest data quest row');
       if (!this.character) return;
       try {
         this.isLoading = true;
@@ -107,8 +135,22 @@ export default Vue.extend({
       this.character = await this.charactersWithIds([this.characterId]).filter(Boolean)[0];
       this.character.status = +await this.getCharacterBusyStatus({characterId: this.characterId});
     }
+    console.log('mounted');
     await this.refreshQuestData();
   },
+
+  // watch: {
+  //   async defaultAccount(newDefaultAccount) {
+  //     console.log('questrow1');
+  //     this.rerenderComponentKey = newDefaultAccount + this.currentNetworkId;
+  //     //await this.refreshQuestData();
+  //   },
+  //   async currentNetworkId(newNetworkId) {
+  //     console.log('questrow2');
+  //     this.rerenderComponentKey = this.defaultAccount + newNetworkId;
+  //     //await this.refreshQuestData();
+  //   },
+  // },
 
 })
 ;

@@ -296,13 +296,16 @@ export default Vue.extend({
     },
 
     onCloseSubmissionModal() {
+      console.log('on close submission modal');
       this.showSubmissionModal = false;
       this.isLoading = false;
-      this.$emit('refresh-quest-data');
+      //conditionally?
+      this.$emit('refresh-quest-data'); //
       this.$forceUpdate();
     },
 
     onHideRewardsModal() {
+      console.log('on close submission modal');
       this.$emit('refresh-quest-data');
       this.$forceUpdate();
     },
@@ -316,6 +319,7 @@ export default Vue.extend({
         this.$emit('refresh-quest-data');
       } finally {
         this.isLoading = false;
+        console.log('on close submission modal');
         this.$forceUpdate();
       }
     },
@@ -346,6 +350,7 @@ export default Vue.extend({
         }
       } finally {
         this.isLoading = false;
+        console.log('on close submission modal');
         this.$forceUpdate();
       }
     },
@@ -362,6 +367,7 @@ export default Vue.extend({
           this.$emit('refresh-quest-data');
         } finally {
           this.isLoading = false;
+          console.log('on close submission modal');
           this.$forceUpdate();
         }
       }
@@ -382,6 +388,7 @@ export default Vue.extend({
         this.$emit('refresh-quest-data');
       } finally {
         this.isLoading = false;
+        console.log('on close submission modal');
         this.$forceUpdate();
       }
     },

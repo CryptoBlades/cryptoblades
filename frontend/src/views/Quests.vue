@@ -86,7 +86,8 @@
       <div v-else v-for="quest in walletQuests" :key="quest.id" class="d-flex w-100">
         <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
                   :reputationLevelRequirements="reputationLevelRequirements"
-                  @refresh-quest-data="onRefreshQuestData"/>
+                  @refresh-quest-data="onRefreshQuestData"
+                  :key="`${componentKey}-${quest.id}`"/>
       </div>
       <span class="quests-title-2">Character Quests</span>
       <div v-if="isLoading">
@@ -97,7 +98,8 @@
         <div v-for="character in characters" :key="character.id" class="w-100 my-3">
           <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id"
                     :reputationLevelRequirements="reputationLevelRequirements"
-                    @refresh-quest-data="onRefreshQuestData"/>
+                    @refresh-quest-data="onRefreshQuestData"
+                    :key="`${componentKey}-${character.id}`"/>
         </div>
         <br>
         <b-modal v-model="showWeeklyClaimedModal" ok-only class="centered-modal" :title="$t('quests.weeklyReward')">
@@ -288,6 +290,8 @@ interface Data {
   questTemplateType: QuestTemplateType;
   walletQuests: Quest[];
   walletQuestTier: Rarity;
+  componentKey: number;
+  hasNetworkStateChanged: boolean;
 }
 
 export default Vue.extend({
@@ -323,11 +327,13 @@ export default Vue.extend({
       questTemplateType: QuestTemplateType.QUEST,
       walletQuests:[],
       walletQuestTier: 0,
+      componentKey: 0,
+      hasNetworkStateChanged: false,
     } as Data;
   },
 
   computed: {
-    ...mapState(['ownedCharacterIds']),
+    ...mapState(['ownedCharacterIds', 'defaultAccount', 'currentNetworkId']),
     ...mapGetters(['charactersWithIds', 'getCharacterCosmetic']) as Accessors<StoreMappedGetters>,
 
     canClaimWeeklyReward(): boolean {
@@ -392,6 +398,8 @@ export default Vue.extend({
     },
 
     async refreshQuestData() {
+      console.log('refresh quest data quest');
+      console.log(this.currentNetworkId, this.defaultAccount);
       try {
         this.isLoading = true;
         this.isLoadingWalletQuests = true;
@@ -445,7 +453,13 @@ export default Vue.extend({
     },
 
     async onRefreshQuestData() {
-      await this.refreshQuestData();
+      if (this.hasNetworkStateChanged) {
+        await this.refreshQuestData();
+        this.hasNetworkStateChanged = false;
+      }
+      else {
+        this.componentKey += 1;
+      }
     },
   },
 
@@ -461,7 +475,12 @@ export default Vue.extend({
 
   watch: {
     async defaultAccount(){
-      await this.refreshQuestData();
+      console.log('quest1');
+      this.hasNetworkStateChanged = true;
+    },
+    async currentNetworkId() {
+      console.log('quest2');
+      this.hasNetworkStateChanged = true;
     },
     async ownedCharacterIds(characterIds) {
       await this.fetchCharacters(characterIds);

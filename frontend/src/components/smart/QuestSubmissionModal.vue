@@ -338,6 +338,11 @@ export default Vue.extend({
       this.amountToBurn = 0;
     },
 
+    // resetTokensAndRefresh() {
+    //   this.$emit('close-submission-modal');
+    //   this.resetTokens();
+    // },
+
     isSubmitDisabled() {
       return !this.quest
         || (this.quest.requirementType === RequirementType.DUST && this.amountToBurn === 0)
