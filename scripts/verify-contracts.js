@@ -46,8 +46,7 @@ const proxyAdminAbi = [
 async function getProxyImplementation(admin, proxyAddress) {
     try {
         return await admin.methods.getProxyImplementation(proxyAddress).call();
-    }
-    catch(err) {
+    } catch (error) {
         return null;
     }
 }
@@ -77,12 +76,10 @@ function isUpgradeableContract(buildArtifact, inheritanceGraph) {
     try {
         inheritanceGraph.shortestPath(contractName, 'Initializable');
         return true;
-    }
-    catch(err) {
-        if(/No path found/ig.test(err.message)) {
+    } catch (error) {
+        if (/No path found/ig.test(error.message)) {
             return false;
-        }
-        else throw err;
+        } else throw error;
     }
 }
 
@@ -154,4 +151,4 @@ async function main() {
     shell.exit(0);
 }
 
-main().catch(err => console.error(err));
+main().catch(error => console.error(error));

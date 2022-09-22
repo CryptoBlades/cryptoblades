@@ -587,7 +587,89 @@
     },
     "links": {},
     "address": "0x174e2BA3136387F5d8B7E4dB32ab197a359578f5",
-    "transactionHash": "0xb73034e606192e97606f7d312ce63385d04f8c6476d3d560279df79c9ec8fff3"
+    "transactionHash": "0xd1c7fafcb92b6a310ef2278ceebd0430cc375ba31e49a4733688d11027bac71b"
+  },
+  "build/contracts/CBKLandBridgeProxyContract.json": {
+    "events": {
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0x84d722Da631de0a2044152023cF09688cdD89596",
+    "transactionHash": "0x3c2f6d8b58cfb2bc583199e2ba80d15755ad3c1e4ec7aa84c9b732c441d3f39c"
   },
   "build/contracts/CBKLandSale.json": {
     "events": {
@@ -2079,7 +2161,7 @@
     },
     "links": {},
     "address": "0x28857ccCCa599f0876792094870758A18F581Dc0",
-    "transactionHash": "0xb88c9b064663150becdeca7f24602906b81d25e8383cda33984d77bbf4c88682"
+    "transactionHash": "0x2230ed39b422dc75bd404409e9dd247164dcb7abd64bf242b793132701655d1f"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -2989,7 +3071,7 @@
     "events": {},
     "links": {},
     "address": "0x30ff0aA322e0AB1C910840059Ef3014e51a46636",
-    "transactionHash": "0xf7cddf598316033a3a9fad12c379919d51b41d1f2ecafa0d331a875847fe2d7e"
+    "transactionHash": "0xfc5177913679334a1b06c648b32140c7e593ce27f9e688d3b1c4b07468a4edd0"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
@@ -4601,7 +4683,7 @@
     },
     "links": {},
     "address": "0x1609BD8ea43b1c23dE90071B82CD08FA098DdCF3",
-    "transactionHash": "0xcdeb0afde8e3786e2459d6ca293c628f96559539ebe350552061465be2c7b7f7"
+    "transactionHash": "0x473e646e69f5d550f64746d7b6a487e185214d3d84dc4d11c5373ce54562e7ed"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {
@@ -5893,6 +5975,6 @@
     },
     "links": {},
     "address": "0xe8f172B51186A4c8127D5eE05617dCA6aAf478fE",
-    "transactionHash": "0x21da3db08f4a94112c7a44e4dc3e8c5cf0daf60a3cbddbbef2c17e70ce244e16"
+    "transactionHash": "0xb51ce4ee98672425a7f21d02acf1dd2773d066a741689ce67a4a89cb8afc7c47"
   }
 }

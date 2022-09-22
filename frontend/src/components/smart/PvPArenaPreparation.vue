@@ -382,8 +382,8 @@ export default {
           } else {
             await this.approvePvpSkillSpending(this.entryWager);
           }
-        } catch(err) {
-          console.log('Enter Arena Approval Error: ', err);
+        } catch(error) {
+          console.error('Enter Arena Approval Error: ', error);
           this.loading = false;
           this.handleErrorMessage();
           return;
@@ -396,8 +396,8 @@ export default {
             useShield: isUsingShield,
             tierless
           });
-        } catch(err){
-          console.log('Enter Arena Error: ', err);
+        } catch(error){
+          console.error('Enter Arena Error: ', error);
           this.loading = false;
           this.handleErrorMessage();
           return;
