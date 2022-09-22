@@ -588,6 +588,87 @@
     "address": "0x7DeB32d9CD3E3b0b89ad2d573731522e1A699AB6",
     "transactionHash": "0x0c8124fe66d286b61445e43f39064a738c96a8fcd2c729182383bb2d0bc5f745"
   },
+  "build/contracts/CBKLandBridgeProxyContract.json": {
+    "events": {
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0xDBC06Ccf51F85b8Ae7a888f63a1156e26EFA8acc"
+  },
   "build/contracts/CBKLandSale.json": {
     "events": {
       "0x95efea0b44884c51b363ebbcf18c9b700645f0683bff755e933f51e243129d56": {
@@ -2119,7 +2200,7 @@
     },
     "links": {},
     "address": "0x38BFf8C60444B56D5cf0E08819E2518DB91B45c5",
-    "transactionHash": "0x273f336681dea6c80fdb0d1ef0c61b54fe5d85147a0f2f3240660205cba9e291|{\"gasBurned\":14742752458732,\"tx\":\"CtGyuRSmXRGDjfRe74h24mDXWssHXSCgU8ZLzXWwDBCp\"}"
+    "transactionHash": "0x6c71a98e0acfda53146c87e7b98f0c20cfb97ff52885f110fc4b495b8c88257c|{\"gasBurned\":14523512066247,\"tx\":\"7c14vVuRMxfdahFUtqcdAeLt53j6UmijRPPMnXoNWTfX\"}"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -4814,7 +4895,7 @@
     },
     "links": {},
     "address": "0x4fa018401fFF54804caB82b19F3dABA64C30C238",
-    "transactionHash": "0x043fa115f20d055f74fb146adc213cc6cff6be58015e2a43443e42ea62ed600a|{\"gasBurned\":16072228859358,\"tx\":\"CRSgNTbc11htNX1DZX4ysmBEnuMMdffHJyjjsDShs1Jz\"}"
+    "transactionHash": "0xd3b269ce896c4925e8f6f16a368234aad3aec2bf550d55eda4c29b790b5ac9fa|{\"gasBurned\":13989907484015,\"tx\":\"FisEugY1HaZoRoZAFusgNPsV8TaWJosXKqsjSeiEzdaj\"}"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {
@@ -6152,6 +6233,6 @@
     },
     "links": {},
     "address": "0x839eb6D49DF2c3eF9Ff3ab78387Dfc097B3d7f8e",
-    "transactionHash": "0x85d719956b9ef2a306cb6506e1a876bf71df0be8dcc33b51a776918cc25a5512|{\"gasBurned\":16862688769390,\"tx\":\"AkMdhymVxcmYmu2Cm1H6FEJq1n5rxkk9G7jg3NT7dZLb\"}"
+    "transactionHash": "0x99fadbbc7074449ca4bf84b18ffce73429137d95390bec5a6612b0a7a4737aeb|{\"gasBurned\":14910072989843,\"tx\":\"4H3K3WaxoC2o68jyUkS8P7rZDrqv32oVHTg5bKvW1HgL\"}"
   }
 }
