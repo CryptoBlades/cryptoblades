@@ -29,6 +29,8 @@ jobs:
 
       - run: npm run lint
 
+      - run: npm run validate-migrations
+
       - name: Setup frontend for testnet
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/testnet' }}
         run: node scripts/ci-setup-frontend-for-testnet.js
