@@ -7145,7 +7145,7 @@
           {
             "contract": "AccessControlUpgradeable",
             "label": "_roles",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)56625_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)59000_storage)",
             "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
           },
           {
@@ -7157,19 +7157,19 @@
           {
             "contract": "Garrison",
             "label": "characters",
-            "type": "t_contract(Characters)37892",
+            "type": "t_contract(Characters)40232",
             "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Garrison.sol:20"
           },
           {
             "contract": "Garrison",
             "label": "supportedTokenTypes",
-            "type": "t_struct(AddressSet)62750_storage",
+            "type": "t_struct(AddressSet)65125_storage",
             "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Garrison.sol:22"
           },
           {
             "contract": "Garrison",
             "label": "userGarrison",
-            "type": "t_mapping(t_address,t_struct(UintSet)62871_storage)",
+            "type": "t_mapping(t_address,t_struct(UintSet)65246_storage)",
             "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Garrison.sol:24"
           },
           {
@@ -7181,30 +7181,30 @@
           {
             "contract": "Garrison",
             "label": "allCharactersInGarrison",
-            "type": "t_struct(UintSet)62871_storage",
+            "type": "t_struct(UintSet)65246_storage",
             "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Garrison.sol:26"
           },
           {
             "contract": "Garrison",
             "label": "game",
-            "type": "t_contract(CryptoBlades)41860",
+            "type": "t_contract(CryptoBlades)44373",
             "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\Garrison.sol:28"
           }
         ],
         "types": {
-          "t_contract(Characters)37892": {
+          "t_contract(Characters)40232": {
             "label": "contract Characters"
           },
-          "t_struct(AddressSet)62750_storage": {
+          "t_struct(AddressSet)65125_storage": {
             "label": "struct EnumerableSet.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)62485_storage"
+                "type": "t_struct(Set)64860_storage"
               }
             ]
           },
-          "t_struct(Set)62485_storage": {
+          "t_struct(Set)64860_storage": {
             "label": "struct EnumerableSet.Set",
             "members": [
               {
@@ -7229,36 +7229,36 @@
           "t_uint256": {
             "label": "uint256"
           },
-          "t_mapping(t_address,t_struct(UintSet)62871_storage)": {
+          "t_mapping(t_address,t_struct(UintSet)65246_storage)": {
             "label": "mapping(address => struct EnumerableSet.UintSet)"
           },
           "t_address": {
             "label": "address"
           },
-          "t_struct(UintSet)62871_storage": {
+          "t_struct(UintSet)65246_storage": {
             "label": "struct EnumerableSet.UintSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)62485_storage"
+                "type": "t_struct(Set)64860_storage"
               }
             ]
           },
           "t_mapping(t_uint256,t_address)": {
             "label": "mapping(uint256 => address)"
           },
-          "t_contract(CryptoBlades)41860": {
+          "t_contract(CryptoBlades)44373": {
             "label": "contract CryptoBlades"
           },
-          "t_mapping(t_bytes32,t_struct(RoleData)56625_storage)": {
+          "t_mapping(t_bytes32,t_struct(RoleData)59000_storage)": {
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
           },
-          "t_struct(RoleData)56625_storage": {
+          "t_struct(RoleData)59000_storage": {
             "label": "struct AccessControlUpgradeable.RoleData",
             "members": [
               {
                 "label": "members",
-                "type": "t_struct(AddressSet)59820_storage"
+                "type": "t_struct(AddressSet)62195_storage"
               },
               {
                 "label": "adminRole",
@@ -7266,16 +7266,16 @@
               }
             ]
           },
-          "t_struct(AddressSet)59820_storage": {
+          "t_struct(AddressSet)62195_storage": {
             "label": "struct EnumerableSetUpgradeable.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)59555_storage"
+                "type": "t_struct(Set)61930_storage"
               }
             ]
           },
-          "t_struct(Set)59555_storage": {
+          "t_struct(Set)61930_storage": {
             "label": "struct EnumerableSetUpgradeable.Set",
             "members": [
               {
@@ -16476,73 +16476,73 @@
             "contract": "Characters",
             "label": "tokens",
             "type": "t_array(t_struct(Character)38367_storage)dyn_storage",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\characters.sol:83"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\characters.sol:83"
           },
           {
             "contract": "Characters",
             "label": "cosmetics",
             "type": "t_array(t_struct(CharacterCosmetics)38372_storage)dyn_storage",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\characters.sol:84"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\characters.sol:84"
           },
           {
             "contract": "Characters",
             "label": "experienceTable",
             "type": "t_array(t_uint256)256_storage",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\characters.sol:89"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\characters.sol:89"
           },
           {
             "contract": "Characters",
             "label": "lastTransferTimestamp",
             "type": "t_mapping(t_uint256,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\characters.sol:92"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\characters.sol:92"
           },
           {
             "contract": "Characters",
             "label": "promos",
             "type": "t_contract(Promos)21719",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\characters.sol:94"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\characters.sol:94"
           },
           {
             "contract": "Characters",
             "label": "lastMintedBlock",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\characters.sol:96"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\characters.sol:96"
           },
           {
             "contract": "Characters",
             "label": "firstMintedOfLastBlock",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\characters.sol:97"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\characters.sol:97"
           },
           {
             "contract": "Characters",
             "label": "characterLimit",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\characters.sol:99"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\characters.sol:99"
           },
           {
             "contract": "Characters",
             "label": "raidsDone",
             "type": "t_mapping(t_uint256,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\characters.sol:101"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\characters.sol:101"
           },
           {
             "contract": "Characters",
             "label": "raidsWon",
             "type": "t_mapping(t_uint256,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\characters.sol:102"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\characters.sol:102"
           },
           {
             "contract": "Characters",
             "label": "nftVars",
             "type": "t_mapping(t_uint256,t_mapping(t_uint256,t_uint256))",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\characters.sol:110"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\characters.sol:110"
           },
           {
             "contract": "Characters",
             "label": "garrison",
             "type": "t_contract(Garrison)11766",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\characters.sol:113"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\characters.sol:113"
           }
         ],
         "types": {

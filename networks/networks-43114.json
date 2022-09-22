@@ -2694,7 +2694,7 @@
     },
     "links": {},
     "address": "0xB861C1196BEb96856FD0733Bba108304b1B51806",
-    "transactionHash": "0xeb04dbdf1d5184ddfc389d544840b041c407e70d4dd9e5154801cda021dfd8a8"
+    "transactionHash": "0xb19f88302386880de783243b36def0fdb8f01c33ce780210c91fe33466bfe950"
   },
   "build/contracts/Junk.json": {
     "events": {
