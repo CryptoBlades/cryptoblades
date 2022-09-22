@@ -230,6 +230,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     SpecialWeaponsManager public specialWeaponsManager;
     mapping(uint256 => address) public links;
+    mapping(address => uint256) public goldRewards;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -298,15 +299,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         );
     }
 
-    function unpackFightData(uint96 playerData)
-        public pure returns (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) {
+    function unpackFightData(uint104 playerData)
+        public pure returns (uint16 charTraitAndVersion, uint24 basePowerLevel, uint64 timestamp) {
 
-        charTrait = uint8(playerData & 0xFF);
+        charTraitAndVersion = uint16(playerData & 0xFFFF);
         basePowerLevel = uint24((playerData >> 8) & 0xFFFFFF);
         timestamp = uint64((playerData >> 32) & 0xFFFFFFFFFFFFFFFF);
     }
 
-    function _getFightDataAndDrainStaminaUnpacked(address fighter, uint256 char, uint8 fightMultiplier) private returns(uint8, uint24, uint64) {
+    function _getFightDataAndDrainStaminaUnpacked(address fighter, uint256 char, uint8 fightMultiplier) private returns(uint16, uint24, uint64) {
         return unpackFightData(characters.getFightDataAndDrainStamina(fighter,
             char, staminaCostFight * fightMultiplier, false, 0));
     }
@@ -321,13 +322,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
 
-        (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
+        (uint16 charTraitAndVersion, uint24 basePowerLevel, uint64 timestamp) =
             _getFightDataAndDrainStaminaUnpacked(fighter, char, fightMultiplier);
 
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = _getFightDataAndDrainDurability(fighter, wep, charTrait, fightMultiplier);
+            uint8 weaponTrait) = _getFightDataAndDrainDurability(fighter, wep, uint8(charTraitAndVersion & 0xFF), fightMultiplier);
 
         // dirty variable reuse to avoid stack limits
         target = grabTarget(
@@ -339,7 +340,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         FightData memory data = FightData(
             Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
-            uint24(charTrait | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
+            uint24(uint8(charTraitAndVersion & 0xFF) | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
             uint24(target & 0xFFFFFF)
         );
 
@@ -348,7 +349,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             char,
             wep,
             data,
-            fightMultiplier
+            fightMultiplier,
+            uint8((charTraitAndVersion >> 8) & 0xFF )
         );
     }
 
@@ -357,7 +359,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 char,
         uint256 wep,
         FightData memory data,
-        uint8 fightMultiplier
+        uint8 fightMultiplier,
+        uint8 characterVersion
     ) private returns (uint256 tokens, uint256 expectedTokens) {
         uint256 seed = uint256(keccak256(abi.encodePacked(now, fighter)));
         uint24 playerRoll = getPlayerPowerRoll(data.playerFightPower,data.traitsCWE,seed);
@@ -379,7 +382,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
 
         // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
-        tokenRewards[fighter] += tokens;
+        if(characterVersion > 0) {
+            goldRewards[fighter] += tokens;
+        }
+        else {
+            tokenRewards[fighter] += tokens;
+        }
         vars[VAR_UNCLAIMED_SKILL] += tokens;
         vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
         xpRewards[char] += xp;

@@ -113,6 +113,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     Garrison public garrison;
 
     uint256 public constant NFTVAR_BONUS_POWER = 2;
+    uint256 public constant NFTVAR_NON_GENESIS_VERSION = 3;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -184,6 +185,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         else {
             _mint(minter, tokenID);
         }
+        nftVars[tokenID][NFTVAR_NON_GENESIS_VERSION] = 1;
         emit NewCharacter(tokenID, receiver);
     }
 
@@ -354,7 +356,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getFightDataAndDrainStamina(address fighter,
-        uint256 id, uint8 amount, bool allowNegativeStamina, uint256 busyFlag) public restricted returns(uint96) {
+        uint256 id, uint8 amount, bool allowNegativeStamina, uint256 busyFlag) public restricted returns(uint104) {
         require(fighter == ownerOf(id) && nftVars[id][NFTVAR_BUSY] == 0);
         nftVars[id][NFTVAR_BUSY] |= busyFlag;
 
@@ -372,7 +374,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
         }
         // bitwise magic to avoid stacking limitations later on
-        return uint96(char.trait | (getTotalPower(id) << 8) | (preTimestamp << 32));
+        return uint104(char.trait | nftVars[id][NFTVAR_NON_GENESIS_VERSION] << 8 | (getTotalPower(id) << 16) | (preTimestamp << 40));
     }
 
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {
