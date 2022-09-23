@@ -108,13 +108,14 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         return partneredProjects[partnerId].tokenSupply.mul(1e18).sub(tokensClaimed[partnerId]);
     }
 
-    function getAmountInPartnerToken(uint256 partnerId, uint256 skillAmount) public view returns (uint256 amountWithMultiplier) {
+    function getAmountInPartnerToken(uint256 partnerId, uint256 claimingAmount) public view returns (uint256 amountWithMultiplier) {
         uint256 baseAmount;
         if(projectIsGold[partnerId]) {
-            baseAmount = 1e18;
+            // GOLD/GOLD = 1:1
+            baseAmount = claimingAmount; 
         }
         else {
-            baseAmount = getSkillToPartnerRatio(partnerId).mulu(skillAmount);
+            baseAmount = getSkillToPartnerRatio(partnerId).mulu(claimingAmount);
         }
         amountWithMultiplier = baseAmount.mul(getProjectMultiplier(partnerId)).div(1e18);
     }
