@@ -40,7 +40,7 @@ enum Rarity {
 }
 
 enum ShieldType {
-  FOUNDERS = 1, LEGENDARY
+  NON_SERIES, FOUNDERS, LEGENDARY
 }
 
 interface GiveawayShieldMint {
@@ -64,7 +64,7 @@ export default Vue.extend({
         type: undefined,
       },
       rarities: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
-      shieldTypes: [ShieldType.FOUNDERS, ShieldType.LEGENDARY],
+      shieldTypes: [ShieldType.NON_SERIES, ShieldType.FOUNDERS, ShieldType.LEGENDARY],
       isLoading: false,
       Rarity,
       ShieldType,

@@ -974,6 +974,7 @@
         "LEGENDARY": "5 stars"
       },
       "types" : {
+        "NON_SERIES": "Non-series",
         "FOUNDERS": "Founders",
         "LEGENDARY": "Legendary"
       }
