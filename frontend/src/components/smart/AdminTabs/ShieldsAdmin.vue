@@ -32,7 +32,7 @@ import {mapActions} from 'vuex';
 import {isValidWeb3Address} from '@/utils/common';
 
 interface StoreMappedActions {
-  mintGiveawayShield(payload: { to: string, stars: number, chosenElement: number }): Promise<void>;
+  mintGiveawayShield(payload: { to: string, stars: number, type: number }): Promise<void>;
 }
 
 enum Rarity {
