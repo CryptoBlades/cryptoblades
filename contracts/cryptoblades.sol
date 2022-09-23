@@ -511,7 +511,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         (,, uint256 fromUserWallet) =
             getSkillToSubtract(
                 0,
-                tokenRewards[msg.sender],
+                0,
                 skillAmount
             );
         require(skillToken.balanceOf(msg.sender) >= fromUserWallet && promos.getBit(msg.sender, 4) == false);
