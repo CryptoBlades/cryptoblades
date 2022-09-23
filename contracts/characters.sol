@@ -169,7 +169,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function mint(address minter, uint256 seed) public restricted {
         uint256 tokenID = tokens.length;
-        uint16 xp = 0;
+        uint16 xp = 1;
         uint8 level = 0; // 1
         uint8 trait = uint8(RandomUtil.randomSeededMinMax(0,3,seed));
         uint64 staminaTimestamp = uint64(now.sub(getStaminaMaxWait()));
@@ -186,6 +186,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             _mint(minter, tokenID);
         }
         nftVars[tokenID][NFTVAR_NON_GENESIS_VERSION] = 1;
+
         emit NewCharacter(tokenID, receiver);
     }
 

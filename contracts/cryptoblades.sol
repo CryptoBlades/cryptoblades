@@ -521,6 +521,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         characters.mint(msg.sender, seed);
+        if(goldRewards[msg.sender] == 0) {
+            goldRewards[msg.sender] = 1;
+        }
 
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
