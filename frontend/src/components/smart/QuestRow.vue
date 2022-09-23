@@ -35,6 +35,8 @@ interface StoreMappedActions {
   getCharacterQuestData(payload: { characterId: string | number }): Promise<Quest>;
 
   getCharacterBusyStatus(payload: { characterId: string | number }): Promise<number>;
+
+  getQuestTemplates(payload: { tier: number }): Promise<Quest[]>;
 }
 
 interface StoreMappedGetters {
@@ -56,11 +58,17 @@ export default Vue.extend({
     quest: {
       type: Object as PropType<Quest>,
     },
+    // progress: {
+    //   type: Number as PropType<number>,
+    // },
     reputationLevelRequirements: {
       type: Object as PropType<ReputationLevelRequirements>,
     },
     questTemplateType: {
       type: Number as PropType<QuestTemplateType>,
+    },
+    walletQuestTier: {
+      type: Number as PropType<number>,
     },
     defaultAccountProp: {
       type: String as PropType<string>,
@@ -97,6 +105,7 @@ export default Vue.extend({
     ...mapActions([
       'getCharacterQuestData',
       'getCharacterBusyStatus',
+      'getQuestTemplates',
     ]) as StoreMappedActions,
     async onRefreshQuestData() {
       if (this.hasStateChanged) {
@@ -109,12 +118,22 @@ export default Vue.extend({
     },
 
     async refreshQuestData() {
-      if (!this.character) return;
+      //if (!this.character) return;
       try {
         this.isLoading = true;
-        if(this.questTemplateType === QuestTemplateType.QUEST){
+        //IF WALLET, DO THING FOR QUEST.ID INSTEAD -- look at getQuestTemplates
+        if(this.character && this.questTemplateType === QuestTemplateType.QUEST){
+          console.log('logged');
           this.character.quest = await this.getCharacterQuestData({characterId: this.characterId});
         }
+        else if(this.questTemplateType === QuestTemplateType.WALLET){
+          console.log('yep');
+          const questUpdate = (await this.getQuestTemplates({tier: this.walletQuestTier + 30})).find((x) => x.id === this.quest.id) as Quest;
+          console.log('wallet', questUpdate);
+          this.quest.progress = questUpdate.progress;
+          //this.$emit('update:progress', questUpdate.progress);
+        }
+        if (!this.character) return;
         this.$forceUpdate();
       } finally {
         this.isLoading = false;
@@ -128,6 +147,10 @@ export default Vue.extend({
       this.character = await this.charactersWithIds([this.characterId]).filter(Boolean)[0];
       this.character.status = +await this.getCharacterBusyStatus({characterId: this.characterId});
     }
+    // if(this.questTemplateType === QuestTemplateType.WALLET){
+    //   const questUpdate = (await this.getQuestTemplates({tier: this.walletQuestTier + 30})).find((x) => x.id === this.quest.id);
+    //   this.$emit('update:quest', questUpdate);
+    // }
     await this.refreshQuestData();
   },
 })

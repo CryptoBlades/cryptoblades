@@ -88,6 +88,7 @@
                   :reputationLevelRequirements="reputationLevelRequirements"
                   :currentNetworkIdProp="currentNetworkId"
                   :defaultAccountProp="defaultAccount"
+                  :walletQuestTier="walletQuestTier"
                   @refresh-quest-data="onRefreshQuestData"/>
       </div>
       <span class="quests-title-2">Character Quests</span>
