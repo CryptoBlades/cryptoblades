@@ -5530,7 +5530,7 @@
     },
     "links": {},
     "address": "0xCE34a87173130eF691ff81feF1a6E8b8a9DAcA6F",
-    "transactionHash": "0x81646c15fb64e88542318eb2673428336fe9552a261ba78cc6defde0e37f9795"
+    "transactionHash": "0xa09071dd3dd3ff23b987cdc185c3a4f4227f8a3b5e6a8e98c36a2e475860dae8"
   },
   "build/contracts/Treasury.json": {
     "events": {},

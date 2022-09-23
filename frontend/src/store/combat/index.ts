@@ -150,7 +150,7 @@ const combat = {
           targetString,
           fightMultiplier
         )
-        .send({ from: rootState.defaultAccount, gasPrice: getGasPrice(), gas: '300000', value: (+offsetCost ? +offsetCost : 1)*fightMultiplier });
+        .send({ from: rootState.defaultAccount, gasPrice: getGasPrice(), gas: '300000', value: +offsetCost * fightMultiplier });
 
       let playerRoll = '';
       let enemyRoll = '';
