@@ -1,19 +1,20 @@
 <template>
 <div class="w-100">
   <div v-if="(questTemplateType === QuestTemplateType.QUEST || questTemplateType === QuestTemplateType.PICKABLE) && character" class="quest-row"
-        :class="character.status !== undefined && (character.status !== NftStatus.AVAILABLE) ? 'busy-quest-row' : ''">
+        :class="character.status !== undefined && (character.status !== NftStatus.AVAILABLE) ? 'busy-quest-row' : ''"
+        :key="`${componentKey}-${character.quest.id}`">
     <QuestCharacter :character="character" :quest="character.quest"
-                    :reputationLevelRequirements="reputationLevelRequirements" :key="`${componentKey}-${character.quest.id}-character`"/>
+                    :reputationLevelRequirements="reputationLevelRequirements"/>
     <QuestRequirements v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
-                       :progress="character.quest.progress" :index="characterId" :key="`${componentKey}-${character.quest.id}-requirements`"/>
-    <QuestRewards v-if="character.quest && character.quest.id !== 0" :quest="character.quest" :key="`${componentKey}-${character.quest.id}-rewards`"/>
-    <QuestActions :character="character" :quest="character.quest" :key="`${componentKey}-${character.quest.id}`" showSupply
+                       :progress="character.quest.progress" :index="characterId"/>
+    <QuestRewards v-if="character.quest && character.quest.id !== 0" :quest="character.quest"/>
+    <QuestActions :character="character" :quest="character.quest" :key="character.quest.id" showSupply
                   @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
-  <div v-if="questTemplateType === QuestTemplateType.WALLET && quest" class="quest-row-wallet">
-    <QuestRequirements :quest="quest" :progress="quest.progress" :key="`${componentKey}-${quest.id}-requirements`"/>
-    <QuestRewards v-if="quest && quest.id !== 0" :quest="quest" :key="`${componentKey}-${quest.id}-rewards`"/>
-    <QuestActions :quest="quest" :key="`${componentKey}-${quest.id}`" showSupply
+  <div v-if="questTemplateType === QuestTemplateType.WALLET && quest" class="quest-row-wallet" :key="`${componentKey}-${quest.id}`">
+    <QuestRequirements :quest="quest" :progress="quest.progress"/>
+    <QuestRewards v-if="quest && quest.id !== 0" :quest="quest"/>
+    <QuestActions :quest="quest" :key="quest.id" showSupply
                   @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
 </div>
@@ -87,13 +88,7 @@ export default Vue.extend({
     ...mapState(['defaultAccount', 'currentNetworkId']),
     ...mapGetters(['charactersWithIds']) as Accessors<StoreMappedGetters>,
 
-    // rerenderKey(): string {
-    //   console.log('rerender key triggered');
-    //   return this.defaultAccount + this.currentNetworkId;
-    // },
-
     hasStateChanged(): boolean {
-      console.log('got into hasStateChanged', this.currentNetworkId, this.defaultAccount, this.currentNetworkIdProp, this.defaultAccountProp);
       return this.defaultAccount + this.currentNetworkId !== this.defaultAccountProp + this.currentNetworkIdProp;
     },
   },
@@ -114,7 +109,6 @@ export default Vue.extend({
     },
 
     async refreshQuestData() {
-      console.log('refresh quest data quest row');
       if (!this.character) return;
       try {
         this.isLoading = true;
@@ -134,23 +128,8 @@ export default Vue.extend({
       this.character = await this.charactersWithIds([this.characterId]).filter(Boolean)[0];
       this.character.status = +await this.getCharacterBusyStatus({characterId: this.characterId});
     }
-    console.log('mounted');
     await this.refreshQuestData();
   },
-
-  // watch: {
-  //   async defaultAccount(newDefaultAccount) {
-  //     console.log('questrow1');
-  //     this.rerenderComponentKey = newDefaultAccount + this.currentNetworkId;
-  //     //await this.refreshQuestData();
-  //   },
-  //   async currentNetworkId(newNetworkId) {
-  //     console.log('questrow2');
-  //     this.rerenderComponentKey = this.defaultAccount + newNetworkId;
-  //     //await this.refreshQuestData();
-  //   },
-  // },
-
 })
 ;
 </script>

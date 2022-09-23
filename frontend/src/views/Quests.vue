@@ -396,8 +396,6 @@ export default Vue.extend({
     },
 
     async refreshQuestData() {
-      console.log('refresh quest data quest');
-      console.log(this.currentNetworkId, this.defaultAccount);
       try {
         this.isLoading = true;
         this.isLoadingWalletQuests = true;
@@ -467,7 +465,6 @@ export default Vue.extend({
 
   watch: {
     async defaultAccount(){
-      console.log('quest1');
       await this.refreshQuestData();
     },
     // async currentNetworkId() {
