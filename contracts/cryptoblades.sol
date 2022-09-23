@@ -799,6 +799,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _trackIncome(amount);
     }
 
+    function deductGold(uint256 amount, address player) external restricted {
+        goldRewards[player] = goldRewards[player].sub(amount);
+    }
+
     function trackIncome(uint256 income) public restricted {
         _trackIncome(income);
     }
