@@ -54,8 +54,8 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         await this.grantRole({walletAddress: this.walletAddress, contract: this.contract, roleMethod: this.roleMethod});
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       } finally {
         this.walletAddress = '';
         this.isLoading = false;

@@ -212,9 +212,6 @@ export default Vue.extend({
       } else if (this.quest.requirementType === RequirementType.DUST) {
         if (this.quest.requirementRarity === Rarity.COMMON) {
           this.amountToBurn = remainingAmount > this.getLesserDust() ? this.getLesserDust() : remainingAmount;
-          console.log(this.getLesserDust());
-          console.log(remainingAmount);
-          console.log(this.amountToBurn);
         } else if (this.quest.requirementRarity === Rarity.UNCOMMON) {
           this.amountToBurn = remainingAmount > this.getGreaterDust() ? this.getGreaterDust() : remainingAmount;
         } else if (this.quest.requirementRarity === Rarity.RARE) {

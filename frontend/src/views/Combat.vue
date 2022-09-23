@@ -559,9 +559,9 @@ export default Vue.extend({
         await this.fetchCharacterStamina(this.currentCharacterId);
 
         this.error = null;
-      } catch (e: any) {
-        console.error(e);
-        this.error = e.message;
+      } catch (error: any) {
+        console.error(error);
+        this.error = error.message;
       }
     },
 

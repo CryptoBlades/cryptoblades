@@ -753,9 +753,9 @@ export default new Vuex.Store<IState>({
       subscriptions.push(
         Characters.events.NewCharacter(
           { filter: { minter: state.defaultAccount } },
-          async (err: Error, data: any) => {
-            if (err) {
-              console.error(err, data);
+          async (error: Error, data: any) => {
+            if (error) {
+              console.error(error, data);
               return;
             }
 
@@ -776,9 +776,9 @@ export default new Vuex.Store<IState>({
       subscriptions.push(
         Garrison.events.CharacterReceived(
           { filter: { minter: state.defaultAccount } },
-          async (err: Error, data: any) => {
-            if (err) {
-              console.error(err, data);
+          async (error: Error, data: any) => {
+            if (error) {
+              console.error(error, data);
               return;
             }
 
@@ -799,9 +799,9 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        Weapons.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
-          if (err) {
-            console.error(err, data);
+        Weapons.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (error: Error, data: any) => {
+          if (error) {
+            console.error(error, data);
             return;
           }
 
@@ -817,9 +817,9 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        Shields.events.NewShield({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
-          if (err) {
-            console.error(err, data);
+        Shields.events.NewShield({ filter: { minter: state.defaultAccount } }, async (error: Error, data: any) => {
+          if (error) {
+            console.error(error, data);
             return;
           }
 
@@ -836,9 +836,9 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        CryptoBlades.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
-          if (err) {
-            console.error(err, data);
+        CryptoBlades.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (error: Error, data: any) => {
+          if (error) {
+            console.error(error, data);
             return;
           }
 
@@ -850,9 +850,9 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        CryptoBlades.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
-          if (err) {
-            console.error(err, data);
+        CryptoBlades.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (error: Error, data: any) => {
+          if (error) {
+            console.error(error, data);
             return;
           }
 
@@ -866,9 +866,9 @@ export default new Vuex.Store<IState>({
         if(!StakingRewards) return;
 
         subscriptions.push(
-          StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err: Error, data: any) => {
-            if (err) {
-              console.error(err, data);
+          StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (error: Error, data: any) => {
+            if (error) {
+              console.error(error, data);
               return;
             }
 
@@ -877,9 +877,9 @@ export default new Vuex.Store<IState>({
         );
 
         subscriptions.push(
-          StakingRewards.events.RewardAdded(async (err: Error, data: any) => {
-            if (err) {
-              console.error(err, data);
+          StakingRewards.events.RewardAdded(async (error: Error, data: any) => {
+            if (error) {
+              console.error(error, data);
               return;
             }
 
@@ -888,9 +888,9 @@ export default new Vuex.Store<IState>({
         );
 
         subscriptions.push(
-          StakingRewards.events.RewardsDurationUpdated(async (err: Error, data: any) => {
-            if (err) {
-              console.error(err, data);
+          StakingRewards.events.RewardsDurationUpdated(async (error: Error, data: any) => {
+            if (error) {
+              console.error(error, data);
               return;
             }
 
@@ -915,17 +915,14 @@ export default new Vuex.Store<IState>({
       commit('setContracts', () => contracts);
     },
 
-    async fetchUserDetails({ dispatch }) {
-      const promises = [
+    async fetchUserDetails({dispatch}) {
+      await Promise.all([
         dispatch('fetchSkillBalance'),
         dispatch('fetchWaxBridgeDetails'),
         dispatch('fetchDustBalance'),
-        dispatch('specialWeaponsManager/fetchShardsSupply')
-      ];
-
-      promises.push(dispatch('fetchUserGameDetails'));
-
-      await Promise.all([promises]);
+        dispatch('specialWeaponsManager/fetchShardsSupply'),
+        dispatch('fetchUserGameDetails')
+      ]);
     },
 
     async fetchUserGameDetails({ state, dispatch, commit }) {
@@ -1445,9 +1442,6 @@ export default new Vuex.Store<IState>({
 
       const hasWeaponsToClaim = !!+await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
 
-      console.log('hasWeaponsToClaim', hasWeaponsToClaim);
-      console.log('eventId', eventId);
-
       if (!hasWeaponsToClaim) {
         if (useStakedSkillOnly) {
           await CryptoBlades.methods
@@ -1792,6 +1786,13 @@ export default new Vuex.Store<IState>({
       return await Weapons.methods.mintGiveawayWeapon(to, stars, chosenElement).send({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
+    async mintGiveawayShield({state}, {to, stars, type}) {
+      const {Shields} = state.contracts();
+      if(!state.defaultAccount || !Shields) return;
+
+      return await Shields.methods.mintGiveawayShield(to, stars, type).send({from: state.defaultAccount, gasPrice: getGasPrice()});
+    },
+
     async giveAwaySoul({state}, {user, soulAmount}) {
       const {BurningManager} = state.contracts();
       if(!state.defaultAccount || !BurningManager) return;
@@ -1997,6 +1998,7 @@ export default new Vuex.Store<IState>({
       const {SimpleQuests,
         CBKLand,
         Weapons,
+        Shields,
         BurningManager,
         PartnerVault,
         Treasury,
@@ -2006,6 +2008,7 @@ export default new Vuex.Store<IState>({
       if (!SimpleQuests
         || !CBKLand
         || !Weapons
+        || !Shields
         || !BurningManager
         || !PartnerVault
         || !Treasury
@@ -2016,6 +2019,7 @@ export default new Vuex.Store<IState>({
       const simpleQuestsAdminRole = await SimpleQuests.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const cbkLandAdminRole = await CBKLand.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const weaponsAdminRole = await Weapons.methods.GAME_ADMIN().call(defaultCallOptions(state));
+      const shieldsAdminRole = await Shields.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const burningManagerAdminRole = await BurningManager.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const partnerVaultAdminRole = await PartnerVault.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const treasuryAdminRole = await Treasury.methods.GAME_ADMIN().call(defaultCallOptions(state));
@@ -2026,6 +2030,7 @@ export default new Vuex.Store<IState>({
         SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         CBKLand.methods.hasRole(cbkLandAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         Weapons.methods.hasRole(weaponsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+        Shields.methods.hasRole(shieldsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         BurningManager.methods.hasRole(burningManagerAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         PartnerVault.methods.hasRole(partnerVaultAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         Treasury.methods.hasRole(treasuryAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
@@ -2478,8 +2483,8 @@ export default new Vuex.Store<IState>({
               },
             ],
           });
-        } catch (addError) {
-          console.error(addError);
+        } catch (error) {
+          console.error(error);
           return;
         }
       }

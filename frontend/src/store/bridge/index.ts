@@ -102,7 +102,7 @@ const bridge = {
           from: rootState.defaultAccount,
           gasPrice: getGasPrice(),
         });
-      dispatch('fetchSkillBalance');
+      await dispatch('fetchSkillBalance');
     },
     async getNFTChainId({rootState}: {rootState: IState, dispatch: Dispatch}, {nftContractAddr, tokenId}: { nftContractAddr: string, tokenId: number}) {
       const { NFTStorage } = rootState.contracts();
