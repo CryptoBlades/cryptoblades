@@ -3,17 +3,17 @@
   <div v-if="(questTemplateType === QuestTemplateType.QUEST || questTemplateType === QuestTemplateType.PICKABLE) && character" class="quest-row"
         :class="character.status !== undefined && (character.status !== NftStatus.AVAILABLE) ? 'busy-quest-row' : ''">
     <QuestCharacter :character="character" :quest="character.quest"
-                    :reputationLevelRequirements="reputationLevelRequirements"/>
+                    :reputationLevelRequirements="reputationLevelRequirements" :key="`${componentKey}-${character.quest.id}-character`"/>
     <QuestRequirements v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
-                       :progress="character.quest.progress" :index="characterId"/>
-    <QuestRewards v-if="character.quest && character.quest.id !== 0" :quest="character.quest"/>
-    <QuestActions :character="character" :quest="character.quest" :key="character.quest.id" showSupply
+                       :progress="character.quest.progress" :index="characterId" :key="`${componentKey}-${character.quest.id}-requirements`"/>
+    <QuestRewards v-if="character.quest && character.quest.id !== 0" :quest="character.quest" :key="`${componentKey}-${character.quest.id}-rewards`"/>
+    <QuestActions :character="character" :quest="character.quest" :key="`${componentKey}-${character.quest.id}`" showSupply
                   @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
   <div v-if="questTemplateType === QuestTemplateType.WALLET && quest" class="quest-row-wallet">
-    <QuestRequirements :quest="quest" :progress="quest.progress"/>
-    <QuestRewards v-if="quest && quest.id !== 0" :quest="quest"/>
-    <QuestActions :quest="quest" :key="quest.id" showSupply
+    <QuestRequirements :quest="quest" :progress="quest.progress" :key="`${componentKey}-${quest.id}-requirements`"/>
+    <QuestRewards v-if="quest && quest.id !== 0" :quest="quest" :key="`${componentKey}-${quest.id}-rewards`"/>
+    <QuestActions :quest="quest" :key="`${componentKey}-${quest.id}`" showSupply
                   @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
 </div>
@@ -43,7 +43,7 @@ interface StoreMappedGetters {
 interface Data {
   isLoading: boolean;
   character?: Nft;
-  //componentKey: number;
+  componentKey: number;
 }
 
 export default Vue.extend({
@@ -61,14 +61,14 @@ export default Vue.extend({
     questTemplateType: {
       type: Number as PropType<QuestTemplateType>,
     },
-    // defaultAccountProp: {
-    //   type: String as PropType<string>,
-    //   required: true,
-    // },
-    // currentNetworkIdProp: {
-    //   type: Number as PropType<number>,
-    //   required: true,
-    // },
+    defaultAccountProp: {
+      type: String as PropType<string>,
+      required: true,
+    },
+    currentNetworkIdProp: {
+      type: Number as PropType<number>,
+      required: true,
+    },
   },
 
   data() {
@@ -79,7 +79,7 @@ export default Vue.extend({
       Rarity,
       NftStatus,
       QuestTemplateType,
-      //componentKey: 0,
+      componentKey: 0,
     } as Data;
   },
 
@@ -92,10 +92,10 @@ export default Vue.extend({
     //   return this.defaultAccount + this.currentNetworkId;
     // },
 
-    // hasStateChanged(): boolean {
-    //   console.log('got into hasStateChanged', this.currentNetworkId, this.defaultAccount, this.currentNetworkIdProp, this.defaultAccountProp);
-    //   return this.defaultAccount + this.currentNetworkId !== this.defaultAccountProp + this.currentNetworkIdProp;
-    // },
+    hasStateChanged(): boolean {
+      console.log('got into hasStateChanged', this.currentNetworkId, this.defaultAccount, this.currentNetworkIdProp, this.defaultAccountProp);
+      return this.defaultAccount + this.currentNetworkId !== this.defaultAccountProp + this.currentNetworkIdProp;
+    },
   },
 
   methods: {
@@ -104,13 +104,12 @@ export default Vue.extend({
       'getCharacterBusyStatus',
     ]) as StoreMappedActions,
     async onRefreshQuestData() {
-      // if (this.hasStateChanged) {
-      //   this.$emit('refresh-quest-data');
-      // }
-      this.$emit('refresh-quest-data');
-      // console.log(this.componentKey);
-      // this.componentKey += 1;
-      // console.log(this.componentKey);
+      if (this.hasStateChanged) {
+        this.$emit('refresh-quest-data');
+      }
+      console.log(this.componentKey);
+      this.componentKey += 1;
+      console.log(this.componentKey);
       await this.refreshQuestData();
     },
 

@@ -86,8 +86,9 @@
       <div v-else v-for="quest in walletQuests" :key="quest.id" class="d-flex w-100">
         <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
                   :reputationLevelRequirements="reputationLevelRequirements"
-                  @refresh-quest-data="onRefreshQuestData"
-                  :key="`${componentKey}-${quest.id}`"/>
+                  :currentNetworkIdProp="currentNetworkId"
+                  :defaultAccountProp="defaultAccount"
+                  @refresh-quest-data="onRefreshQuestData"/>
       </div>
       <span class="quests-title-2">Character Quests</span>
       <div v-if="isLoading">
@@ -98,8 +99,9 @@
         <div v-for="character in characters" :key="character.id" class="w-100 my-3">
           <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id"
                     :reputationLevelRequirements="reputationLevelRequirements"
-                    @refresh-quest-data="onRefreshQuestData"
-                    :key="`${componentKey}-${character.id}`"/>
+                    :currentNetworkIdProp="currentNetworkId"
+                    :defaultAccountProp="defaultAccount"
+                    @refresh-quest-data="onRefreshQuestData"/>
         </div>
         <br>
         <b-modal v-model="showWeeklyClaimedModal" ok-only class="centered-modal" :title="$t('quests.weeklyReward')">
@@ -290,8 +292,6 @@ interface Data {
   questTemplateType: QuestTemplateType;
   walletQuests: Quest[];
   walletQuestTier: Rarity;
-  componentKey: number;
-  hasNetworkStateChanged: boolean;
 }
 
 export default Vue.extend({
@@ -327,8 +327,6 @@ export default Vue.extend({
       questTemplateType: QuestTemplateType.QUEST,
       walletQuests:[],
       walletQuestTier: 0,
-      componentKey: 0,
-      hasNetworkStateChanged: false,
     } as Data;
   },
 
@@ -453,13 +451,7 @@ export default Vue.extend({
     },
 
     async onRefreshQuestData() {
-      if (this.hasNetworkStateChanged) {
-        await this.refreshQuestData();
-        this.hasNetworkStateChanged = false;
-      }
-      else {
-        this.componentKey += 1;
-      }
+      await this.refreshQuestData();
     },
   },
 
@@ -476,12 +468,12 @@ export default Vue.extend({
   watch: {
     async defaultAccount(){
       console.log('quest1');
-      this.hasNetworkStateChanged = true;
+      await this.refreshQuestData();
     },
-    async currentNetworkId() {
-      console.log('quest2');
-      this.hasNetworkStateChanged = true;
-    },
+    // async currentNetworkId() {
+    //   console.log('quest2');
+    //   await this.refreshQuestData();
+    // },
     async ownedCharacterIds(characterIds) {
       await this.fetchCharacters(characterIds);
       await this.refreshQuestData();

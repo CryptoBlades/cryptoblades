@@ -299,8 +299,7 @@ export default Vue.extend({
       console.log('on close submission modal');
       this.showSubmissionModal = false;
       this.isLoading = false;
-      //conditionally?
-      this.$emit('refresh-quest-data'); //
+      this.$emit('refresh-quest-data');
       this.$forceUpdate();
     },
 
