@@ -58,9 +58,6 @@ export default Vue.extend({
     quest: {
       type: Object as PropType<Quest>,
     },
-    // progress: {
-    //   type: Number as PropType<number>,
-    // },
     reputationLevelRequirements: {
       type: Object as PropType<ReputationLevelRequirements>,
     },
@@ -118,20 +115,14 @@ export default Vue.extend({
     },
 
     async refreshQuestData() {
-      //if (!this.character) return;
       try {
         this.isLoading = true;
-        //IF WALLET, DO THING FOR QUEST.ID INSTEAD -- look at getQuestTemplates
         if(this.character && this.questTemplateType === QuestTemplateType.QUEST){
-          console.log('logged');
           this.character.quest = await this.getCharacterQuestData({characterId: this.characterId});
         }
         else if(this.questTemplateType === QuestTemplateType.WALLET){
-          console.log('yep');
           const questUpdate = (await this.getQuestTemplates({tier: this.walletQuestTier + 30})).find((x) => x.id === this.quest.id) as Quest;
-          console.log('wallet', questUpdate);
           this.quest.progress = questUpdate.progress;
-          //this.$emit('update:progress', questUpdate.progress);
         }
         if (!this.character) return;
         this.$forceUpdate();
@@ -147,10 +138,6 @@ export default Vue.extend({
       this.character = await this.charactersWithIds([this.characterId]).filter(Boolean)[0];
       this.character.status = +await this.getCharacterBusyStatus({characterId: this.characterId});
     }
-    // if(this.questTemplateType === QuestTemplateType.WALLET){
-    //   const questUpdate = (await this.getQuestTemplates({tier: this.walletQuestTier + 30})).find((x) => x.id === this.quest.id);
-    //   this.$emit('update:quest', questUpdate);
-    // }
     await this.refreshQuestData();
   },
 })

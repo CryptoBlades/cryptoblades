@@ -468,10 +468,6 @@ export default Vue.extend({
     async defaultAccount(){
       await this.refreshQuestData();
     },
-    // async currentNetworkId() {
-    //   console.log('quest2');
-    //   await this.refreshQuestData();
-    // },
     async ownedCharacterIds(characterIds) {
       await this.fetchCharacters(characterIds);
       await this.refreshQuestData();
