@@ -17609,7 +17609,7 @@
           {
             "contract": "AccessControlUpgradeable",
             "label": "_roles",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)58841_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)59248_storage)",
             "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
           },
           {
@@ -17621,177 +17621,177 @@
           {
             "contract": "SimpleQuests",
             "label": "characters",
-            "type": "t_contract(Characters)39911",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:41"
+            "type": "t_contract(Characters)40318",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:41"
           },
           {
             "contract": "SimpleQuests",
             "label": "weapons",
-            "type": "t_contract(Weapons)58394",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:42"
+            "type": "t_contract(Weapons)58801",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:42"
           },
           {
             "contract": "SimpleQuests",
             "label": "junk",
-            "type": "t_contract(Junk)44620",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:43"
+            "type": "t_contract(Junk)45027",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:43"
           },
           {
             "contract": "SimpleQuests",
             "label": "trinket",
-            "type": "t_contract(RaidTrinket)45237",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:44"
+            "type": "t_contract(RaidTrinket)45644",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:44"
           },
           {
             "contract": "SimpleQuests",
             "label": "shields",
-            "type": "t_contract(Shields)50737",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:45"
+            "type": "t_contract(Shields)51144",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:45"
           },
           {
             "contract": "SimpleQuests",
             "label": "burningManager",
             "type": "t_contract(BurningManager)2801",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:46"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:46"
           },
           {
             "contract": "SimpleQuests",
             "label": "safeRandoms",
-            "type": "t_contract(SafeRandoms)29832",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:47"
+            "type": "t_contract(SafeRandoms)30239",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:47"
           },
           {
             "contract": "SimpleQuests",
             "label": "partnerVault",
-            "type": "t_contract(PartnerVault)21067",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:48"
+            "type": "t_contract(PartnerVault)21474",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:48"
           },
           {
             "contract": "SimpleQuests",
             "label": "nextQuestID",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:92"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:92"
           },
           {
             "contract": "SimpleQuests",
             "label": "nextRewardID",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:93"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:93"
           },
           {
             "contract": "SimpleQuests",
             "label": "questTemplates",
             "type": "t_mapping(t_uint256,t_array(t_uint256)dyn_storage)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:95"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:95"
           },
           {
             "contract": "SimpleQuests",
             "label": "quests",
-            "type": "t_mapping(t_uint256,t_struct(Quest)30266_storage)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:96"
+            "type": "t_mapping(t_uint256,t_struct(Quest)30673_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:96"
           },
           {
             "contract": "SimpleQuests",
             "label": "questSupplies",
             "type": "t_mapping(t_uint256,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:97"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:97"
           },
           {
             "contract": "SimpleQuests",
             "label": "questDeadlines",
             "type": "t_mapping(t_uint256,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:98"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:98"
           },
           {
             "contract": "SimpleQuests",
             "label": "questIndexes",
             "type": "t_mapping(t_uint256,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:99"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:99"
           },
           {
             "contract": "SimpleQuests",
             "label": "characterQuest",
             "type": "t_mapping(t_uint256,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:100"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:100"
           },
           {
             "contract": "SimpleQuests",
             "label": "tierChances",
             "type": "t_mapping(t_uint256,t_array(t_uint256)4_storage)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:101"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:101"
           },
           {
             "contract": "SimpleQuests",
             "label": "vars",
             "type": "t_mapping(t_uint256,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:102"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:102"
           },
           {
             "contract": "SimpleQuests",
             "label": "lastFreeSkipUsage",
             "type": "t_mapping(t_uint256,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:103"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:103"
           },
           {
             "contract": "SimpleQuests",
             "label": "weeklyCompletions",
             "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:104"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:104"
           },
           {
             "contract": "SimpleQuests",
             "label": "weeklyRewardClaimed",
             "type": "t_mapping(t_address,t_mapping(t_uint256,t_bool))",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:105"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:105"
           },
           {
             "contract": "SimpleQuests",
             "label": "rewards",
-            "type": "t_mapping(t_uint256,t_struct(Reward)30279_storage)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:106"
+            "type": "t_mapping(t_uint256,t_struct(Reward)30686_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:106"
           },
           {
             "contract": "SimpleQuests",
             "label": "weeklyRewards",
             "type": "t_mapping(t_uint256,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:107"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:107"
           },
           {
             "contract": "SimpleQuests",
             "label": "weeklyCompletionsGoal",
             "type": "t_mapping(t_uint256,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:108"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:108"
           },
           {
             "contract": "SimpleQuests",
             "label": "walletQuestProgress",
             "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
-            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SimpleQuests.sol:109"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:109"
           }
         ],
         "types": {
-          "t_contract(Characters)39911": {
+          "t_contract(Characters)40318": {
             "label": "contract Characters"
           },
-          "t_contract(Weapons)58394": {
+          "t_contract(Weapons)58801": {
             "label": "contract Weapons"
           },
-          "t_contract(Junk)44620": {
+          "t_contract(Junk)45027": {
             "label": "contract Junk"
           },
-          "t_contract(RaidTrinket)45237": {
+          "t_contract(RaidTrinket)45644": {
             "label": "contract RaidTrinket"
           },
-          "t_contract(Shields)50737": {
+          "t_contract(Shields)51144": {
             "label": "contract Shields"
           },
           "t_contract(BurningManager)2801": {
             "label": "contract BurningManager"
           },
-          "t_contract(SafeRandoms)29832": {
+          "t_contract(SafeRandoms)30239": {
             "label": "contract SafeRandoms"
           },
-          "t_contract(PartnerVault)21067": {
+          "t_contract(PartnerVault)21474": {
             "label": "contract PartnerVault"
           },
           "t_uint256": {
@@ -17803,10 +17803,10 @@
           "t_array(t_uint256)dyn_storage": {
             "label": "uint256[]"
           },
-          "t_mapping(t_uint256,t_struct(Quest)30266_storage)": {
+          "t_mapping(t_uint256,t_struct(Quest)30673_storage)": {
             "label": "mapping(uint256 => struct SimpleQuests.Quest)"
           },
-          "t_struct(Quest)30266_storage": {
+          "t_struct(Quest)30673_storage": {
             "label": "struct SimpleQuests.Quest",
             "members": [
               {
@@ -17815,11 +17815,11 @@
               },
               {
                 "label": "tier",
-                "type": "t_enum(Rarity)30299"
+                "type": "t_enum(Rarity)30706"
               },
               {
                 "label": "requirementType",
-                "type": "t_enum(ItemType)30293"
+                "type": "t_enum(ItemType)30700"
               },
               {
                 "label": "requirementRarity",
@@ -17835,7 +17835,7 @@
               },
               {
                 "label": "rewardType",
-                "type": "t_enum(ItemType)30293"
+                "type": "t_enum(ItemType)30700"
               },
               {
                 "label": "rewardRarity",
@@ -17855,7 +17855,7 @@
               }
             ]
           },
-          "t_enum(Rarity)30299": {
+          "t_enum(Rarity)30706": {
             "label": "enum SimpleQuests.Rarity",
             "members": [
               "COMMON",
@@ -17865,7 +17865,7 @@
               "LEGENDARY"
             ]
           },
-          "t_enum(ItemType)30293": {
+          "t_enum(ItemType)30700": {
             "label": "enum SimpleQuests.ItemType",
             "members": [
               "NONE",
@@ -17907,10 +17907,10 @@
           "t_bool": {
             "label": "bool"
           },
-          "t_mapping(t_uint256,t_struct(Reward)30279_storage)": {
+          "t_mapping(t_uint256,t_struct(Reward)30686_storage)": {
             "label": "mapping(uint256 => struct SimpleQuests.Reward)"
           },
-          "t_struct(Reward)30279_storage": {
+          "t_struct(Reward)30686_storage": {
             "label": "struct SimpleQuests.Reward",
             "members": [
               {
@@ -17919,7 +17919,7 @@
               },
               {
                 "label": "rewardType",
-                "type": "t_enum(ItemType)30293"
+                "type": "t_enum(ItemType)30700"
               },
               {
                 "label": "rewardRarity",
@@ -17939,18 +17939,18 @@
               }
             ]
           },
-          "t_mapping(t_bytes32,t_struct(RoleData)58841_storage)": {
+          "t_mapping(t_bytes32,t_struct(RoleData)59248_storage)": {
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
           },
           "t_bytes32": {
             "label": "bytes32"
           },
-          "t_struct(RoleData)58841_storage": {
+          "t_struct(RoleData)59248_storage": {
             "label": "struct AccessControlUpgradeable.RoleData",
             "members": [
               {
                 "label": "members",
-                "type": "t_struct(AddressSet)62036_storage"
+                "type": "t_struct(AddressSet)62443_storage"
               },
               {
                 "label": "adminRole",
@@ -17958,16 +17958,16 @@
               }
             ]
           },
-          "t_struct(AddressSet)62036_storage": {
+          "t_struct(AddressSet)62443_storage": {
             "label": "struct EnumerableSetUpgradeable.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)61771_storage"
+                "type": "t_struct(Set)62178_storage"
               }
             ]
           },
-          "t_struct(Set)61771_storage": {
+          "t_struct(Set)62178_storage": {
             "label": "struct EnumerableSetUpgradeable.Set",
             "members": [
               {

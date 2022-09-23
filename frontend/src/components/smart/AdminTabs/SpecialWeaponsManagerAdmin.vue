@@ -370,7 +370,6 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         this.activeSpecialWeaponsEvents = await this.getActiveSpecialWeaponsEvents();
-        console.log(this.activeSpecialWeaponsEvents);
       } finally {
         this.isLoading = false;
       }

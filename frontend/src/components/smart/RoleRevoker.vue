@@ -58,8 +58,8 @@ export default Vue.extend({
           contract: this.contract,
           roleMethod: this.roleMethod
         });
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       } finally {
         this.walletAddress = '';
         this.isLoading = false;

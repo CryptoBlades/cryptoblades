@@ -346,7 +346,8 @@ export default Vue.extend({
       if (
         this.hideWalletWarning &&
         !this.showMetamaskWarning &&
-        (this.errorMessage || (this.ownCharacters.length === 0 && this.skillBalance === '0'))
+        (this.errorMessage.includes(i18n.t('app.warning.errorMessage.error').toString()) ||
+        (this.ownCharacters.length === 0 && this.skillBalance === '0'))
       ) {
         (this as any).$dialog.notify.warning(i18n.t('app.warning.message.hideWalletWarning'),
           {
@@ -474,14 +475,14 @@ export default Vue.extend({
     }
     try {
       await this.initializeStore();
-    } catch (e: any) {
+    } catch (error: any) {
       this.errorMessage = i18n.t('app.warning.errorMessage.welcome').toString();
-      if (e.code === 4001) {
+      if (error.code === 4001) {
         this.errorMessage = i18n.t('app.warning.errorMessage.error').toString();
       }
 
-      console.error(e);
-      throw e;
+      console.error(error);
+      throw error;
     }
 
     this.pollCharacterStaminaIntervalId = setInterval(async () => {
@@ -499,8 +500,8 @@ export default Vue.extend({
 
       try {
         await this.pollAccountsAndNetwork();
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
       }
     };
 

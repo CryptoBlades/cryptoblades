@@ -93,8 +93,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     Promos public promos;
 
-    uint256 private lastMintedBlock;
-    uint256 private firstMintedOfLastBlock;
+    uint256 private lastMintedBlock; // DEPRECATED
+    uint256 private firstMintedOfLastBlock; // DEPRECATED
 
     uint256 public characterLimit;
 
@@ -127,11 +127,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         require(hasRole(GAME_ADMIN, msg.sender), "NA");
     }
 
-    modifier noFreshLookup(uint256 id) {
-        _noFreshLookup(id);
-        _;
-    }
-
     modifier minterOnly() {
         _minterOnly();
         _;
@@ -141,11 +136,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         require(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender), 'no access');
     }
 
-    function _noFreshLookup(uint256 id) internal view {
-        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
-    }
-
-    function get(uint256 id) public view noFreshLookup(id) returns (uint16, uint8, uint8, uint64, uint16, uint16, uint16, uint16, uint16, uint16) {
+    function get(uint256 id) public view returns (uint16, uint8, uint8, uint64, uint16, uint16, uint16, uint16, uint16, uint16) {
         Character memory c = tokens[id];
         CharacterCosmetics memory cc = cosmetics[id];
         return (c.xp, c.level, c.trait, c.staminaTimestamp,
@@ -162,7 +153,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint16(RandomUtil.randomSeededMinMax(0, limit, RandomUtil.combineSeeds(seed, seed2)));
     }
 
-    function getCosmeticsSeed(uint256 id) public view noFreshLookup(id) returns (uint256) {
+    function getCosmeticsSeed(uint256 id) public view returns (uint256) {
         CharacterCosmetics memory cc = cosmetics[id];
         return cc.seed;
     }
@@ -177,11 +168,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function mint(address minter, uint256 seed) public restricted {
         uint256 tokenID = tokens.length;
-
-        if(block.number != lastMintedBlock)
-            firstMintedOfLastBlock = tokenID;
-        lastMintedBlock = block.number;
-
         uint16 xp = 0;
         uint8 level = 0; // 1
         uint8 trait = uint8(RandomUtil.randomSeededMinMax(0,3,seed));
@@ -206,11 +192,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
         if(tokenID == 0){
             tokenID = tokens.length;
-
-            if(block.number != lastMintedBlock)
-                firstMintedOfLastBlock = tokenID;
-            lastMintedBlock = block.number;
-
             tokens.push(Character(xp, level, trait, staminaTimestamp));
             cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
             address receiver = minter;
@@ -283,7 +264,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
     }
 
-    function getLevel(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getLevel(uint256 id) public view returns (uint8) {
         return tokens[id].level; // this is used by dataminers and it benefits us
     }
 
@@ -291,11 +272,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint16(experienceTable[currentLevel]); // this is helpful to users as the array is private
     }
 
-    function getPower(uint256 id) public view noFreshLookup(id) returns (uint24) {
+    function getPower(uint256 id) public view returns (uint24) {
         return getPowerAtLevel(tokens[id].level);
     }
 
-    function getTotalPower(uint256 id) public view noFreshLookup(id) returns (uint256) {
+    function getTotalPower(uint256 id) public view returns (uint256) {
         return nftVars[id][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[id].level));
     }
 
@@ -303,7 +284,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return Common.getPowerAtLevel(level);
     }
 
-    function getTrait(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getTrait(uint256 id) public view returns (uint8) {
         return tokens[id].trait;
     }
 
@@ -311,7 +292,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         tokens[id].trait = trait;
     }
 
-    function getXp(uint256 id) public view noFreshLookup(id) returns (uint32) {
+    function getXp(uint256 id) public view returns (uint32) {
         return tokens[id].xp;
     }
 
@@ -341,7 +322,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             _gainXp(chars[i], xps[i]);
     }
 
-    function getStaminaTimestamp(uint256 id) public view noFreshLookup(id) returns (uint64) {
+    function getStaminaTimestamp(uint256 id) public view returns (uint64) {
         return tokens[id].staminaTimestamp;
     }
 
@@ -349,7 +330,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         tokens[id].staminaTimestamp = timestamp;
     }
 
-    function getStaminaPoints(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getStaminaPoints(uint256 id) public view returns (uint8) {
         return getStaminaPointsFromTimestamp(tokens[id].staminaTimestamp);
     }
 
@@ -364,7 +345,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint8(points);
     }
 
-    function isStaminaFull(uint256 id) public view noFreshLookup(id) returns (bool) {
+    function isStaminaFull(uint256 id) public view returns (bool) {
         return getStaminaPoints(id) >= maxStamina;
     }
 

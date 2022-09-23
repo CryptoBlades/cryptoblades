@@ -28,5 +28,7 @@ module.exports = async function (deployer, network) {
     await pvp.setPvpBotAddress("0xC24658012D08a8A575Aa140C7EE45e83c9100F73");
 
     await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
-    await upgradeProxy(Raid1.address, Raid1, { deployer });
+    const raid1 = await upgradeProxy(Raid1.address, Raid1, { deployer });
+    await raid1.setXpReward(120);
+    await raid1.setJoinCostInCents(63);
 };

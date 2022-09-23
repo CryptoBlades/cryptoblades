@@ -98,7 +98,7 @@
     "events": {},
     "links": {},
     "address": "0x737DE423f5DC41552a8e165eE51D5d070988f29D",
-    "transactionHash": "0x84dfbc9dc2ae531d74d12a3ec605d3264f51fc0eeaa20b162de28edadcb2b0b8|{\"gasBurned\":12536113167764,\"tx\":\"ETm28UyAs2gBdUhMmEbA1HWGHUjLT755S7MrpqjUBLdf\"}"
+    "transactionHash": "0x143e0a3d50dc9ab87a6d6379f3f76f7c6b785821e74f9d5df995deaed6bf3090"
   },
   "build/contracts/BurningManager.json": {
     "events": {
@@ -480,7 +480,89 @@
     },
     "links": {},
     "address": "0x9810A3f2D59772f04846acA2Ba0F01caE6f43B9c",
-    "transactionHash": "0x15c37ff9b274e229e5ef1c1d0e6c391d35be4ad2f6bd9cc8e55ec68e11b81ac0|{\"gasBurned\":15929560418819,\"tx\":\"4gKay85PzKRYVr7W3qBuAow1UNQdx1NMoHuzzrvbFm5P\"}"
+    "transactionHash": "0xc394c01a03e36506a3ebbeac20145d9ca95813f3596864a91b26ef2b6898d879"
+  },
+  "build/contracts/CBKLandBridgeProxyContract.json": {
+    "events": {
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0xf3c6fB23A25ed7811a6cF73Ba575420f02fBf47D",
+    "transactionHash": "0xd80408fade3baf70fd7c75a8f404b62ad4c17f32d84883b732607576305a1a38"
   },
   "build/contracts/CBKLandSale.json": {
     "events": {
@@ -2013,7 +2095,7 @@
     },
     "links": {},
     "address": "0x3A7279866A6e7e9f86c5Afd5696131E5C92956af",
-    "transactionHash": "0x5b87e74e96b1150042493b8313f72ad4747b744f35751b7c9d6e9a54b34db34d|{\"gasBurned\":15940902115764,\"tx\":\"BjPduCQRgq9Fgh9zxUikwN7GrxxZsyzDi661wRndbZyh\"}"
+    "transactionHash": "0x92a1ae9076b28ee9aa615f77eb71d990368f6c90204321aa42fd17d20740c911"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -2377,7 +2459,7 @@
     },
     "links": {},
     "address": "0x3F715995647fe44Db45411bb9e81b7A1aD5A8387",
-    "transactionHash": "0xd7085421f0b9421ff12c6702a8b3cdbc8b7c35a0ac708995fdfdb66eda22b36a"
+    "transactionHash": "0x3ca7be1a7893949d260dc6fe17f9a6213bca48699ea6ef3d633081242a2c559c"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
@@ -2490,7 +2572,7 @@
     },
     "links": {},
     "address": "0x59dd354428B308055A19EdaA501b4df29970B58B",
-    "transactionHash": "0xa0080f894c6622e6de4344d9f1c8144d7388d7068dec15085294c6295ece168c|{\"gasBurned\":14254426350656,\"tx\":\"9RAk1xWQPC9Ezsya3Hbiz5GNBeb1nKNeoXBBTEHW7VnZ\"}"
+    "transactionHash": "0xd66800c8e6db03f469cbe806bebc4935ba9d7470b4c87ebc28f7fe2faf0a9768"
   },
   "build/contracts/Junk.json": {
     "events": {
@@ -2867,7 +2949,7 @@
     "events": {},
     "links": {},
     "address": "0x30b329028932408D0e1109aD050Ac45CA54846c5",
-    "transactionHash": "0x103bdfeb369e0115d8997c76d227d544b45cae771f35f315a966619e3a797304|{\"gasBurned\":14602481373932,\"tx\":\"47ZCVxLZwwXuLUbDzyJoxd6g3oGpbCWHqagQ48zDWNSg\"}"
+    "transactionHash": "0x608a21e0626298df3f2936326091c5c20601f174b35c5362bdb823078443d79f"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
     "events": {},
@@ -4527,7 +4609,7 @@
     },
     "links": {},
     "address": "0xb29076d3cfbA902d8D1d1A53BF57CC696098839e",
-    "transactionHash": "0xdab52662ed595358e78f3308c30b7509a8a2028a3765afcd61dc983bbc55ea43|{\"gasBurned\":15527439239904,\"tx\":\"5C3umTaE2qxQvubtP848HfM5q1GMgqb5QcfTsur5VJG\"}"
+    "transactionHash": "0xe8720e9a504a2a02c30a0129e5a70ffcfe6ad6449029b025d75acb2a3b3ecb64"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {
@@ -4955,7 +5037,7 @@
     },
     "links": {},
     "address": "0xe1bAf442A842aa68D30b09513841B917AB2cAD28",
-    "transactionHash": "0x7f5065a93f5bee67aff0894597ee1bbadb1d681c076f416927e9f303823493df"
+    "transactionHash": "0x3536187055636ddb86ef6e7c3a4eef9214e989224a3d58268fe5c04ce8c2d844"
   },
   "build/contracts/Treasury.json": {
     "events": {},
@@ -5820,6 +5902,6 @@
     },
     "links": {},
     "address": "0x48bdd9a266fF01eEb81b1F89daB76b3816Ee848a",
-    "transactionHash": "0xc7b6135fca8cc87f1ce21fd84173c78fae8bd79b7ecc5b7fca8c6f01077648bf|{\"gasBurned\":16446495121492,\"tx\":\"2uHopgVyGquFCv2MjssTdcZVA5SYBaqdAUmN3Q2Ns4hQ\"}"
+    "transactionHash": "0x95c2afb3e0e38bbf69698a713607d4f8262b239090a1a8e4377d66f57c30d0a8"
   }
 }

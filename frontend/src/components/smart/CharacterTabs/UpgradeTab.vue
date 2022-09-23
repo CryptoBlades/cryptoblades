@@ -105,11 +105,11 @@ export default Vue.extend({
       return souls;
     },
     async onUpgradeConfirm() {
-      if(!this.currentCharacterId || this.powerAmount === 0) return;
+      if (!this.currentCharacterId || this.powerAmount === 0) return;
       try {
-        await this.upgradeCharacterWithSoul({ charId: this.currentCharacterId, soulAmount: this.powerAmount/10 });
-      }
-      catch(err) {
+        await this.upgradeCharacterWithSoul({charId: this.currentCharacterId, soulAmount: this.powerAmount / 10});
+      } catch (error) {
+        console.error(error);
         return;
       }
       this.$emit('fetchSoulBalance');
