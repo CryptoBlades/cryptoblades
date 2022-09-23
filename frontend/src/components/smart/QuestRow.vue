@@ -93,6 +93,9 @@ export default Vue.extend({
     ...mapState(['defaultAccount', 'currentNetworkId']),
     ...mapGetters(['charactersWithIds']) as Accessors<StoreMappedGetters>,
 
+    /**
+     * detect if the defaultAccount/networkId have changed.
+     */
     hasStateChanged(): boolean {
       return this.defaultAccount + this.currentNetworkId !== this.defaultAccountProp + this.currentNetworkIdProp;
     },
@@ -105,27 +108,29 @@ export default Vue.extend({
       'getQuestTemplates',
     ]) as StoreMappedActions,
     async onRefreshQuestData() {
+      // if state has changed, trigger full page reload.
       if (this.hasStateChanged) {
         this.$emit('refresh-quest-data');
       }
-      console.log(this.componentKey);
-      this.componentKey += 1;
-      console.log(this.componentKey);
-      await this.refreshQuestData();
+      // change key of current row to triggering automatic, efficient content update
+      else {
+        await this.refreshQuestData();
+        this.componentKey += 1;
+      }
     },
 
     async refreshQuestData() {
       try {
         this.isLoading = true;
+        //update row character-quest
         if(this.character && this.questTemplateType === QuestTemplateType.QUEST){
           this.character.quest = await this.getCharacterQuestData({characterId: this.characterId});
         }
-        else if(this.questTemplateType === QuestTemplateType.WALLET){
+        //update row wallet-quest
+        else if(!this.character && this.questTemplateType === QuestTemplateType.WALLET){
           const questUpdate = (await this.getQuestTemplates({tier: this.walletQuestTier + 30})).find((x) => x.id === this.quest.id) as Quest;
           this.quest.progress = questUpdate.progress;
         }
-        if (!this.character) return;
-        this.$forceUpdate();
       } finally {
         this.isLoading = false;
       }
@@ -135,7 +140,7 @@ export default Vue.extend({
 
   async mounted() {
     if(this.questTemplateType === QuestTemplateType.QUEST){
-      this.character = await this.charactersWithIds([this.characterId]).filter(Boolean)[0];
+      this.character = this.charactersWithIds([this.characterId]).filter(Boolean)[0];
       this.character.status = +await this.getCharacterBusyStatus({characterId: this.characterId});
     }
     await this.refreshQuestData();
