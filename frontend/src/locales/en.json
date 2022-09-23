@@ -784,7 +784,8 @@
       "DUST": "Dust",
       "EXPERIENCE": "Experience",
       "SOUL": "Soul",
-      "EXTERNAL": "External"
+      "EXTERNAL": "External",
+      "CHARACTER": "Character"
     },
     "questItemType": {
       "NONE": "None",
@@ -908,6 +909,7 @@
       "quests": "Quests",
       "cbkLand": "CBK Land",
       "weapons": "Weapons",
+      "shields": "Shields",
       "burningManager": "Burning Manager",
       "partnerVault": "Partner Vault",
       "treasury": "Treasury",
@@ -957,6 +959,25 @@
       "setBurnPointMultiplierCurrent": "Set burn point multiplier (current: {multiplier})",
       "multiplier": "Multiplier",
       "setBurnPointMultiplier": "Set burn point multiplier"
+    },
+    "shields": {
+      "playerAddress": "Player address",
+      "mintGiveawayShield": "Mint giveaway shield",
+      "pleaseSelectStars": "Please select stars",
+      "pleaseSelectShieldType": "Please select shield type",
+      "mintShield": "Mint shield",
+      "rarities": {
+        "COMMON": "1 star",
+        "UNCOMMON": "2 stars",
+        "RARE": "3 stars",
+        "EPIC": "4 stars ",
+        "LEGENDARY": "5 stars"
+      },
+      "types" : {
+        "NON_SERIES": "Non-series",
+        "FOUNDERS": "Founders",
+        "LEGENDARY": "Legendary"
+      }
     },
     "burningManager": {
       "playerAddress": "Player address",

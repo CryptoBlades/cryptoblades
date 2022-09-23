@@ -1786,6 +1786,13 @@ export default new Vuex.Store<IState>({
       return await Weapons.methods.mintGiveawayWeapon(to, stars, chosenElement).send({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
+    async mintGiveawayShield({state}, {to, stars, type}) {
+      const {Shields} = state.contracts();
+      if(!state.defaultAccount || !Shields) return;
+
+      return await Shields.methods.mintGiveawayShield(to, stars, type).send({from: state.defaultAccount, gasPrice: getGasPrice()});
+    },
+
     async giveAwaySoul({state}, {user, soulAmount}) {
       const {BurningManager} = state.contracts();
       if(!state.defaultAccount || !BurningManager) return;
@@ -1991,6 +1998,7 @@ export default new Vuex.Store<IState>({
       const {SimpleQuests,
         CBKLand,
         Weapons,
+        Shields,
         BurningManager,
         PartnerVault,
         Treasury,
@@ -2000,6 +2008,7 @@ export default new Vuex.Store<IState>({
       if (!SimpleQuests
         || !CBKLand
         || !Weapons
+        || !Shields
         || !BurningManager
         || !PartnerVault
         || !Treasury
@@ -2010,6 +2019,7 @@ export default new Vuex.Store<IState>({
       const simpleQuestsAdminRole = await SimpleQuests.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const cbkLandAdminRole = await CBKLand.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const weaponsAdminRole = await Weapons.methods.GAME_ADMIN().call(defaultCallOptions(state));
+      const shieldsAdminRole = await Shields.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const burningManagerAdminRole = await BurningManager.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const partnerVaultAdminRole = await PartnerVault.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const treasuryAdminRole = await Treasury.methods.GAME_ADMIN().call(defaultCallOptions(state));
@@ -2020,6 +2030,7 @@ export default new Vuex.Store<IState>({
         SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         CBKLand.methods.hasRole(cbkLandAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         Weapons.methods.hasRole(weaponsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+        Shields.methods.hasRole(shieldsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         BurningManager.methods.hasRole(burningManagerAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         PartnerVault.methods.hasRole(partnerVaultAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         Treasury.methods.hasRole(treasuryAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
