@@ -8,6 +8,7 @@ import type {
   WeaponCosmetics, CharacterCosmetics, NFTStorage, CBKLandSale, CBKLand, Treasury, Promos, BurningManager, SimpleQuests,
   PartnerVault, SpecialWeaponsManager, PvpCore, PvpRankings, TokensManager
 } from '../../../build/abi-interfaces';
+import { MultiCall } from './Multicall';
 import { StakeType, NftStakeType } from './State';
 
 interface TypeSafeContract<Abi> {
@@ -70,4 +71,5 @@ export interface Contracts {
   SimpleQuests?: Contract<SimpleQuests>;
   PartnerVault?: Contract<PartnerVault>;
   SpecialWeaponsManager?: Contract<SpecialWeaponsManager>;
+  MultiCall: Contract<MultiCall>;
 }

@@ -2,7 +2,13 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _ from 'lodash';
-import {bnMinimum, currentChainSupportsDrawbridge, currentChainSupportsPvP, currentChainSupportsQuests, toBN} from '@/utils/common';
+import {
+  bnMinimum,
+  currentChainSupportsDrawbridge,
+  currentChainSupportsPvP,
+  currentChainSupportsQuests,
+  toBN,
+} from '@/utils/common';
 
 import {getConfigValue, setUpContracts} from '@/contracts';
 
@@ -16,11 +22,17 @@ import {burningManager as featureFlagBurningManager} from '@/feature-flags';
 import {ERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from '@/stake-types';
 import {Nft} from '@/interfaces/Nft';
+import { Interface } from '@ethersproject/abi';
 import {Element} from '@/enums/Element';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';
 import {abi as erc721Abi} from '@/../../build/contracts/IERC721.json';
+import { abi as charactersAbi } from '@/../../build/contracts/Characters.json';
+import { abi as weaponsAbi } from '@/../../build/contracts/Weapons.json';
+import { abi as shieldsAbi } from '@/../../build/contracts/Shields.json';
+import { abi as raidTrinketsAbi } from '@/../../build/contracts/RaidTrinket.json';
+import { abi as junkAbi } from '@/../../build/contracts/Junk.json';
 import BigNumber from 'bignumber.js';
 import bridge from './bridge';
 import pvp from './pvp';
@@ -31,6 +43,7 @@ import land from './land';
 import treasury from './treasury';
 import specialWeaponsManager from './specialWeaponsManager';
 import combat from './combat';
+import { getNFTCall } from '@/utils/multicall';
 
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
@@ -1102,23 +1115,57 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchSkillBalance');
     },
 
-    async fetchCharacters({ dispatch }, characterIds: (string | number)[]) {
-      await Promise.all(characterIds.map(id => dispatch('fetchCharacter', { characterId: id })));
-    },
-
-    async fetchGarrisonCharacters({ dispatch }, garrisonCharacterIds: (string | number)[]) {
-      await Promise.all(garrisonCharacterIds.map(id => dispatch('fetchCharacter', { characterId: id, inGarrison: true })));
-    },
-
-    async fetchCharacter({ state, commit, dispatch }, { characterId, inGarrison = false }: { characterId: string | number, inGarrison: boolean}) {
+    async fetchCharacters({ state, dispatch }, characterIds: (string | number)[]) {
       const { Characters } = state.contracts();
-      if(!Characters) return;
+      if (!Characters) return;
+
+      console.log('fetch 1');
+      console.log('address: ', Characters?.options.address);
+      console.log('getNFTCall: ', getNFTCall(charactersAbi, Characters?.options.address, 'get', characterIds.map(characterId => [characterId])));
+      const multiCharacterDatas: string[] = await dispatch(
+        'multicall',
+        getNFTCall(charactersAbi, Characters?.options.address, 'get', characterIds.map(characterId => [characterId])));
+      console.log('fetch 2');
+      characterIds.forEach((characterId, i) => {
+        dispatch('fetchCharacter', { characterId, characterData: multiCharacterDatas[i] });
+      });
+      console.log('fetch 3');
+    },
+
+    async fetchGarrisonCharacters({ state, dispatch }, garrisonCharacterIds: (string | number)[]) {
+      const { Characters } = state.contracts();
+      if (!Characters) return;
+
+      const multiCharacterDatas: string[] = await dispatch(
+        'multicall',
+        getNFTCall(charactersAbi, Characters?.options.address, 'get', garrisonCharacterIds.map(garrisonCharacterId => [garrisonCharacterId])));
+
+      garrisonCharacterIds.forEach((garrisonCharacterId, i) => {
+        dispatch('fetchCharacter', { characterId: garrisonCharacterId, characterData: multiCharacterDatas[i], inGarrison: true });
+      });
+    },
+
+    /**
+     *
+     * @param param0 object containing references to relevant globals
+     * @param param1 object containing the main params. They are:
+     * - characterId: characterId of the character being fetched
+     * - characterData: the optional character data gotten from use of multiCall
+     * - inGarrison: true if from fetchGarrisonCharacters
+     */
+    async fetchCharacter(
+      { state, commit, dispatch },
+      { characterId, characterData = [], inGarrison = false }:
+      { characterId: string | number, characterData: string[], inGarrison: boolean}) {
+
+      const { Characters } = state.contracts();
+      if (!Characters) return;
 
       await Promise.all([
         (async () => {
           const character = characterFromContract(
             characterId,
-            await Characters.methods.get('' + characterId).call(defaultCallOptions(state))
+            characterData.length > 0 ? characterData : await Characters.methods.get('' + characterId).call(defaultCallOptions(state))
           );
           await dispatch('fetchCharacterPower', characterId);
           await dispatch('getIsCharacterInArena', characterId);
@@ -1147,11 +1194,25 @@ export default new Vuex.Store<IState>({
       }
     },
 
-    async fetchWeapons({ dispatch }, weaponIds: (string | number)[]) {
-      await Promise.all(weaponIds.map(id => dispatch('fetchWeapon', id)));
+    async fetchWeapons({ state, dispatch }, weaponIds: (string | number)[]) {
+      const { Weapons } = state.contracts();
+      if(!Weapons) return;
+
+      const multiWeaponDatas: string[] = await dispatch(
+        'multicall',
+        getNFTCall(weaponsAbi, Weapons?.options.address, 'get', weaponIds.map(weaponId => [weaponId])));
+
+      weaponIds.forEach((weaponId, i) => {
+        dispatch('fetchCharacter', { weaponId, weaponData: multiWeaponDatas[i] });
+      });
     },
 
-    async fetchWeapon({ state, commit, dispatch }, weaponId: string | number) {
+    /**
+     *
+     * @param weaponId weaponId of the weapon being fetched
+     * @param weaponData the optional weapon data gotten from use of multiCall
+     */
+    async fetchWeapon({ state, commit, dispatch }, weaponId: string | number, weaponData: string[] = []) {
       const { Weapons } = state.contracts();
       if(!Weapons) return;
 
@@ -1159,7 +1220,7 @@ export default new Vuex.Store<IState>({
         (async () => {
           const weapon = weaponFromContract(
             weaponId,
-            await Weapons.methods.get('' + weaponId).call(defaultCallOptions(state))
+            weaponData.length > 0 ? weaponData : await Weapons.methods.get('' + weaponId).call(defaultCallOptions(state))
           );
 
           commit('updateWeapon', { weaponId, weapon });
@@ -1172,11 +1233,26 @@ export default new Vuex.Store<IState>({
       if(!Shields || !state.defaultAccount) return;
       return await Shields.methods.getNftVar(shieldId, 2).call(defaultCallOptions(state));
     },
-    async fetchShields({ dispatch }, shieldIds: (string | number)[]) {
-      await Promise.all(shieldIds.map(id => dispatch('fetchShield', id)));
+
+    async fetchShields({ state, dispatch }, shieldIds: (string | number)[]) {
+      const { Shields } = state.contracts();
+      if(!Shields) return;
+
+      const multiShieldDatas: string[] = await dispatch(
+        'multicall',
+        getNFTCall(shieldsAbi, Shields?.options.address, 'get', shieldIds.map(shieldId => [shieldId])));
+
+      shieldIds.forEach((shieldId, i) => {
+        dispatch('fetchShield', { shieldId, shieldData: multiShieldDatas[i] });
+      });
     },
 
-    async fetchShield({ state, commit }, shieldId: string | number) {
+    /**
+     *
+     * @param shieldId shieldId of the shield being fetched
+     * @param shieldData the optional shield data gotten from use of multiCall
+     */
+    async fetchShield({ state, commit }, shieldId: string | number, shieldData: string[] = []) {
       const { Shields } = state.contracts();
       if(!Shields) return;
 
@@ -1184,7 +1260,7 @@ export default new Vuex.Store<IState>({
         (async () => {
           const shield = shieldFromContract(
             shieldId,
-            await Shields.methods.get('' + shieldId).call(defaultCallOptions(state))
+            shieldData.length > 0 ? shieldData : await Shields.methods.get('' + shieldId).call(defaultCallOptions(state))
           );
 
           commit('updateShield', { shieldId, shield });
@@ -1192,11 +1268,25 @@ export default new Vuex.Store<IState>({
       ]);
     },
 
-    async fetchTrinkets({ dispatch }, trinketIds: (string | number)[]) {
-      await Promise.all(trinketIds.map(id => dispatch('fetchTrinket', id)));
+    async fetchTrinkets({ state, dispatch }, trinketIds: (string | number)[]) {
+      const { RaidTrinket } = state.contracts();
+      if(!RaidTrinket) return;
+
+      const multiTrinketDatas: string[] = await dispatch(
+        'multicall',
+        getNFTCall(raidTrinketsAbi, RaidTrinket?.options.address, 'get', trinketIds.map(trinketId => [trinketId])));
+
+      trinketIds.forEach((trinketId, i) => {
+        dispatch('fetchTrinket', { trinketId, trinketData: multiTrinketDatas[i] });
+      });
     },
 
-    async fetchTrinket({ state, commit }, trinketId: string | number) {
+    /**
+     *
+     * @param trinketId trinketId of the trinket being fetched
+     * @param trinketData the optional trinket data gotten from use of multiCall
+     */
+    async fetchTrinket({ state, commit }, trinketId: string | number, trinketData: string[] = []) {
       const { RaidTrinket } = state.contracts();
       if(!RaidTrinket) return;
 
@@ -1204,7 +1294,7 @@ export default new Vuex.Store<IState>({
         (async () => {
           const trinket = trinketFromContract(
             trinketId,
-            await RaidTrinket.methods.get('' + trinketId).call(defaultCallOptions(state))
+            trinketData.length > 0 ? trinketData : await RaidTrinket.methods.get('' + trinketId).call(defaultCallOptions(state))
           );
 
           commit('updateTrinket', { trinketId, trinket });
@@ -1212,11 +1302,25 @@ export default new Vuex.Store<IState>({
       ]);
     },
 
-    async fetchJunks({ dispatch }, junkIds: (string | number)[]) {
-      await Promise.all(junkIds.map(id => dispatch('fetchJunk', id)));
+    async fetchJunks({ state, dispatch }, junkIds: (string | number)[]) {
+      const { Junk } = state.contracts();
+      if(!Junk) return;
+
+      const multiJunkDatas = await dispatch(
+        'multicall',
+        getNFTCall(junkAbi, Junk?.options.address, 'get', junkIds.map(junkId => [junkId])));
+
+      junkIds.forEach((junkId, i) => {
+        dispatch('fetchJunk', { junkId, junkData: multiJunkDatas[i] });
+      });
     },
 
-    async fetchJunk({ state, commit }, junkId: string | number) {
+    /**
+     *
+     * @param junkId junkId of the junk being fetched
+     * @param junkData the optional junk data gotten from use of multiCall
+     */
+    async fetchJunk({ state, commit }, junkId: string | number, junkData: string = '') {
       const { Junk } = state.contracts();
       if(!Junk) return;
 
@@ -1224,7 +1328,7 @@ export default new Vuex.Store<IState>({
         (async () => {
           const junk = junkFromContract(
             junkId,
-            await Junk.methods.get('' + junkId).call(defaultCallOptions(state))
+            junkData ? junkData : await Junk.methods.get('' + junkId).call(defaultCallOptions(state))
           );
 
           commit('updateJunk', { junkId, junk });
@@ -2793,6 +2897,19 @@ export default new Vuex.Store<IState>({
       if(!CryptoBlades || !state.defaultAccount) return;
 
       return CryptoBlades.methods.getMintCharacterFee().call(defaultCallOptions(state));
+    },
+
+    async multicall({state}, {abi, calls}) {
+      console.log('in multiCall');
+      const { MultiCall } = state.contracts();
+      const itf = new Interface(abi);
+      const data = calls.map((call: any) => [
+        call.address.toLowerCase(),
+        itf.encodeFunctionData(call.name, call.params),
+      ]);
+      const { returnData } = await MultiCall.methods.aggregate(data).call(defaultCallOptions(state)) || [];
+      const res = returnData.map((call, i) => itf.decodeFunctionResult(calls[i].name, call));
+      return res;
     },
   }
 });

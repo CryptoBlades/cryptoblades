@@ -72,6 +72,7 @@ import { StakingContractEntry, stakingContractsInfo, nftStakingContractsInfo } f
 
 import {raid, pvp, quests, burningManager} from './feature-flags';
 import {currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
+import {abi as multicallAbi} from './data/Multicall.json';
 
 interface RaidContracts {
   Raid1?: Contracts['Raid1'];
@@ -368,6 +369,10 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const treasuryContractAddr = getConfigValue('VUE_APP_TREASURY_CONTRACT_ADDRESS') || (treasuryNetworks as Networks)[networkId]!.address;
   const Treasury = new web3.eth.Contract(treasuryAbi as Abi, treasuryContractAddr);
 
+  const multicallAddr = getConfigValue('VUE_APP_MULTICALL_CONTRACT_ADDRESS');
+  console.log('multicallAddr', multicallAddr);
+  const MultiCall = new web3.eth.Contract(multicallAbi as Abi, multicallAddr);
+
   let BurningManager;
   if(burningManager) {
     const burningManagerContractAddr = getConfigValue('VUE_APP_BURNING_MANAGER_CONTRACT_ADDRESS') || (burningManagerNetworks as Networks)[networkId]!.address;
@@ -413,6 +418,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     KingStakingRewardsUpgradeable,
     KingStakingRewardsUpgradeable90,
     KingStakingRewardsUpgradeable180,
-    SpecialWeaponsManager
+    SpecialWeaponsManager,
+    MultiCall
   };
 }
