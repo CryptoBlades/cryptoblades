@@ -68,6 +68,7 @@ const treasury = {
         partnerProject.details,
         partnerProject.website,
         partnerProject.note,
+        partnerProject.isGold
       ).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
     },
 
@@ -117,6 +118,13 @@ const treasury = {
       if(!Treasury || !rootState.defaultAccount) return;
 
       await Treasury.methods.setIsActive(id, isActive).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
+    },
+
+    async setPartnerProjectIsGold({ rootState }: {rootState: IState}, {id, isGold}: {id: number | string, isGold: boolean}) {
+      const { Treasury } = rootState.contracts();
+      if(!Treasury || !rootState.defaultAccount) return;
+
+      await Treasury.methods.setIsGold(id, isGold).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
     },
 
     async fetchPartnerProjects({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}) {

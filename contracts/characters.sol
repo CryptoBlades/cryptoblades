@@ -113,7 +113,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     Garrison public garrison;
 
     uint256 public constant NFTVAR_BONUS_POWER = 2;
-    uint256 public constant NFTVAR_NON_GENESIS_VERSION = 3;
+    uint256 public constant NFTVAR_NON_GENESIS_VERSION = 3; // 0 = genesis, 1 = v2
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -190,7 +190,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         emit NewCharacter(tokenID, receiver);
     }
 
-    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID, uint24 bonusPower, uint16 reputation) minterOnly public returns (uint256) {
+    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID, uint24 bonusPower, uint16 reputation, uint8 version) minterOnly public returns (uint256) {
         uint64 staminaTimestamp = uint64(now); // 0 on purpose to avoid chain jumping abuse
 
         if(tokenID == 0){
@@ -221,6 +221,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
         nftVars[tokenID][NFTVAR_BONUS_POWER] = bonusPower;
         nftVars[tokenID][NFTVAR_REPUTATION] = reputation;
+        nftVars[tokenID][NFTVAR_NON_GENESIS_VERSION] = version;
 
         return tokenID;
     }

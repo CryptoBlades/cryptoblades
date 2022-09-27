@@ -586,7 +586,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         mintedId =
             characters.customMint(address(this), xp,
-            level, trait, seed, mintedId, bonusPower, reputation);
+            level, trait, seed, mintedId, bonusPower, reputation, 0);
 
             if(appliedCosmetic > 0) {
                 characterCosmetics.setCharacterCosmetic(mintedId, appliedCosmetic);

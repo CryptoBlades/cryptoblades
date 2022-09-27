@@ -1120,6 +1120,7 @@ export default new Vuex.Store<IState>({
             characterId,
             await Characters.methods.get('' + characterId).call(defaultCallOptions(state))
           );
+          character.version = +await dispatch('fetchCharacterVersion', characterId);
           await dispatch('fetchCharacterPower', characterId);
           await dispatch('getIsCharacterInArena', characterId);
 
@@ -1145,6 +1146,13 @@ export default new Vuex.Store<IState>({
         const power = await Characters.methods.getTotalPower(characterId).call(defaultCallOptions(state));
         commit('updateCharacterPower', { characterId, power });
       }
+    },
+
+    async fetchCharacterVersion({state}, characterId) {
+      const { Characters } = state.contracts();
+      if(!Characters || !state.defaultAccount) return;
+
+      return await Characters.methods.nftVars(characterId, 3).call(defaultCallOptions(state));
     },
 
     async fetchWeapons({ dispatch }, weaponIds: (string | number)[]) {

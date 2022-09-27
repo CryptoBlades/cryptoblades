@@ -218,6 +218,10 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         partneredProjects[id].isActive = isActive;
     }
 
+    function setIsGold(uint256 id, bool isGold) public restricted {
+        projectIsGold[id] = isGold;
+    }
+
     function setSkillPrice(uint256 newPrice) external restricted {
         require(newPrice > 0);
         skillPrice = newPrice;

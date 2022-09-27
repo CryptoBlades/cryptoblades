@@ -1009,6 +1009,7 @@
       "details": "Details",
       "websiteUrl": "Website URL",
       "noteOptional": "Note (optional)",
+      "isGold":"Is Gold",
       "findActivePartnerProjects": "Find active partner projects",
       "name": "Name",
       "symbol": "Symbol",
