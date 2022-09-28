@@ -82,6 +82,7 @@ export default new Vuex.Store<IState>({
     skillBalance: '0',
     balance: '0',
     skillRewards: '0',
+    goldRewards: '0',
     maxRewardsClaimTax: '0',
     rewardsClaimTax: '0',
     xpRewards: {},
@@ -490,6 +491,10 @@ export default new Vuex.Store<IState>({
       state.skillRewards = skillRewards;
     },
 
+    updateGoldRewards(state: IState, { goldRewards }: { goldRewards: string }) {
+      state.goldRewards = goldRewards;
+    },
+
     updateRewardsClaimTax(
       state,
       { maxRewardsClaimTax, rewardsClaimTax }: { maxRewardsClaimTax: string, rewardsClaimTax: string }
@@ -767,6 +772,7 @@ export default new Vuex.Store<IState>({
               dispatch('fetchCharacter', { characterId }),
               dispatch('fetchSkillBalance'),
               dispatch('combat/fetchFightRewardSkill'),
+              dispatch('combat/fetchFightRewardGold'),
               dispatch('combat/fetchFightRewardXp'),
               dispatch('fetchDustBalance')
             ]);
@@ -969,6 +975,7 @@ export default new Vuex.Store<IState>({
         dispatch('fetchJunks', ownedJunkIds),
         dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
         dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardGold'),
         dispatch('combat/fetchFightRewardXp'),
         dispatch('fetchGarrisonCharactersXp'),
         dispatch('combat/fetchFightGasOffset'),
@@ -1389,7 +1396,7 @@ export default new Vuex.Store<IState>({
         state.contracts().CryptoBlades!,
         state.contracts().SkillToken,
         state.defaultAccount,
-        state.skillRewards,
+        '0',
         defaultCallOptions(state),
         defaultCallOptions(state),
         cryptoBladesMethods => cryptoBladesMethods.getMintCharacterFee(),

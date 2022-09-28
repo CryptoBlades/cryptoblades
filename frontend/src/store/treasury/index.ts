@@ -143,8 +143,15 @@ const treasury = {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
       const partnerProjectRaw = await Treasury.methods.partneredProjects(id).call(defaultCallOptions(rootState));
-      const tokensClaimed = await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(rootState));
-      const data = await Treasury.methods.getProjectData(id).call(defaultCallOptions(rootState));
+      const [
+        isGold,
+        tokensClaimed,
+        data
+      ] = await Promise.all([
+        await Treasury.methods.projectIsGold(id).call(defaultCallOptions(rootState)),
+        await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(rootState)),
+        await Treasury.methods.getProjectData(id).call(defaultCallOptions(rootState))
+      ]);
 
       const partnerProject = {
         id: +partnerProjectRaw[0],
@@ -155,6 +162,7 @@ const treasury = {
         tokensClaimed: +tokensClaimed,
         tokenPrice: +partnerProjectRaw[5],
         isActive: partnerProjectRaw[6],
+        isGold,
         logo: data[0],
         details: data[1],
         website: data[2],
@@ -237,6 +245,7 @@ const treasury = {
       await Promise.all([
         dispatch('fetchSkillBalance'),
         dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardGold'),
         dispatch('fetchPartnerProject', id)
       ]);
     },

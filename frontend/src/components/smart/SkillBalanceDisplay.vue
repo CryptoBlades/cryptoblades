@@ -46,6 +46,10 @@
           <span>{{getUnclaimed()}}</span>
           <span> {{$t('ClaimRewardsBar.unclaimed')}}</span>
         </div>
+        <div :class="isMobile() ? 'mr-2' : ''">
+          <span>{{getUnclaimedGold()}}</span>
+          <span> {{$t('ClaimRewardsBar.unclaimedGold')}}</span>
+        </div>
       </div>
     </div>
     <div class="d-flex justify-content-end align-items-center animate-slide" v-if="!isMobile() || (isMobile() && isToggled)"
@@ -163,6 +167,7 @@ import PartneredProject from '../PartneredProject.vue';
 
 interface StoreMappedState {
   skillRewards: string;
+  goldRewards: string;
   skillBalance: string;
   inGameOnlyFunds: string;
   waxBridgeWithdrawableBnb: string;
@@ -238,7 +243,7 @@ export default Vue.extend({
     };
   },
   computed: {
-    ...(mapState(['skillRewards', 'skillBalance', 'inGameOnlyFunds', 'waxBridgeWithdrawableBnb',
+    ...(mapState(['skillRewards', 'goldRewards', 'skillBalance', 'inGameOnlyFunds', 'waxBridgeWithdrawableBnb',
       'waxBridgeTimeUntilLimitExpires', 'ownedCharacterIds', 'xpRewards', 'balance']) as Accessors<StoreMappedState>),
     ...(mapState('treasury',
       ['payoutCurrencyId','partnerProjectMultipliers', 'partnerProjectRatios','defaultSlippage'])as Accessors<StoreMappedTreasuryState>),
@@ -420,6 +425,11 @@ export default Vue.extend({
       const skillRewards = fromWeiEther(this.skillRewards);
       if(parseFloat(skillRewards) === 0) return 0;
       return toBN(skillRewards).toFixed(4);
+    },
+    getUnclaimedGold(): number | string {
+      const goldRewards = fromWeiEther(this.goldRewards);
+      if(parseFloat(goldRewards) === 0) return 0;
+      return toBN(goldRewards).toFixed(4);
     },
     async claimSkill(stage: ClaimStage) {
       if(stage === ClaimStage.WaxBridge) {

@@ -5023,7 +5023,7 @@
     },
     "links": {},
     "address": "0x5BbeBa3afFe39e0f9747897dA32eE7590814026c",
-    "transactionHash": "0xb9c9d535bcc90a452189b218172e3ac0d426d62e0da192035438bac98b198d51"
+    "transactionHash": "0x8f9a7d7ceeabe2a483a714ef6cfdd220221db31b68fc622bc178f2997efd7318"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},
@@ -5210,7 +5210,7 @@
     },
     "links": {},
     "address": "0xf62FD2c40688bB67bFAeC19fF91B6739202d0E8a",
-    "transactionHash": "0x0a1b5353ccb90fca1e32fe48a5d8b2c72c81405aef146ee8afbb0d27d22cc6be"
+    "transactionHash": "0x511c0a9eff97e587981fc76ecd16eeb6bdde7f997305548fea0790ecd827d27b"
   },
   "build/contracts/Treasury.json": {
     "events": {},

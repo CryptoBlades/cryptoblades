@@ -366,6 +366,7 @@ const staking = {
         dispatch('fetchSkillBalance'),
         dispatch('fetchStakeDetails', { stakeType }),
         dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardGold')
       ]);
     },
 

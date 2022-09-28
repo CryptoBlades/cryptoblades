@@ -374,6 +374,10 @@ export default Vue.extend({
     updateResults(): any[] {
       return [this.fightResults, this.error];
     },
+
+    isGenesisCharacter(): boolean {
+      return this.currentCharacter.version === 0;
+    }
   },
 
   watch: {
@@ -542,8 +546,8 @@ export default Vue.extend({
         const tokenChargePercentage = (await this.getCombatTokenChargePercent());
 
         const offsetToPayInNativeToken = (
-          expectedPayoutWei.multipliedBy(tokenChargePercentage).div(100).multipliedBy(skillPriceUsd)
-        ).div(nativeTokenPriceUsd).integerValue(BigNumber.ROUND_DOWN);
+          expectedPayoutWei.multipliedBy(tokenChargePercentage).div(100).multipliedBy(skillPriceUsd.gt(0) ? skillPriceUsd : 1)
+        ).div(nativeTokenPriceUsd.gt(0) ? nativeTokenPriceUsd : 1).integerValue(BigNumber.ROUND_DOWN);
 
         this.fightResults = await this.doEncounterPayNative({
           characterId: this.currentCharacterId,
@@ -567,7 +571,7 @@ export default Vue.extend({
 
     formattedSkill(skill: stringOrNumber) {
       const skillBalance = fromWeiEther(skill.toString());
-      return `${toBN(skillBalance).toFixed(6)} SKILL`;
+      return `${toBN(skillBalance).toFixed(6)} ${this.isGenesisCharacter ? 'SKILL' : 'GOLD'}`;
     },
 
     getPotentialXp(targetToFight: ITarget) {

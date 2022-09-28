@@ -359,8 +359,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function getFightDataAndDrainStamina(address fighter,
         uint256 id, uint8 amount, bool allowNegativeStamina, uint256 busyFlag) public restricted returns(uint104) {
-        require(fighter == ownerOf(id) && nftVars[id][NFTVAR_BUSY] == 0);
-        nftVars[id][NFTVAR_BUSY] |= busyFlag;
+        require(fighter == ownerOf(id)/* && nftVars[id][NFTVAR_BUSY] == 0*/);
+        //nftVars[id][NFTVAR_BUSY] |= busyFlag;
 
         Character storage char = tokens[id];
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);

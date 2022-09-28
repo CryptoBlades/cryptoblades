@@ -4923,7 +4923,7 @@
     },
     "links": {},
     "address": "0x443424799fDF95e20aAB84d348d53A585fD2f442",
-    "transactionHash": "0x41e5ba075d5f06c03ee220123b0cdf40559056e0de5588e70dfa4af9c14197f8"
+    "transactionHash": "0x99a3e8e2a3d9c3af11dd81f8c81d87fa1f3e4c17d761afdb0d90d078b49c03fb"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},

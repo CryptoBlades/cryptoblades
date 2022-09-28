@@ -143,6 +143,8 @@ const combat = {
       const { TokensManager, CryptoBlades } = rootState.contracts();
       if (!TokensManager || !CryptoBlades || !rootState.defaultAccount) return;
 
+      console.log('test', characterId,weaponId,targetString,fightMultiplier);
+
       const res = await TokensManager.methods
         .fight(
           characterId,
@@ -214,6 +216,26 @@ const combat = {
       ]);
 
       return skillRewards;
+    },
+
+    async fetchFightRewardGold({ rootState, commit }: {rootState: IState, commit: Commit}) {
+      const { CryptoBlades } = rootState.contracts();
+      const defaultAccount = rootState.defaultAccount;
+      if(!CryptoBlades || !defaultAccount) return;
+
+      const [goldRewards] = await Promise.all([
+        (async () => {
+          const goldRewards = await CryptoBlades.methods
+            .goldRewards(defaultAccount)
+            .call(defaultCallOptions(rootState));
+
+          commit('updateGoldRewards', { goldRewards }, { root: true });
+
+          return goldRewards;
+        })()
+      ]);
+
+      return goldRewards;
     },
 
     async fetchFightRewardXp({ rootState, commit }: {rootState: IState, commit: Commit}) {

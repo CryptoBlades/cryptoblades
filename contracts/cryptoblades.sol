@@ -366,15 +366,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 playerRoll = getPlayerPowerRoll(data.playerFightPower,data.traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(data.targetPower, RandomUtil.combineSeeds(seed,1));
 
-        updateHourlyPayouts(); // maybe only check in trackIncome? (or do via bot)
-
         uint16 xp = getXpGainForFight(data.playerFightPower, data.targetPower) * fightMultiplier;
         tokens = getTokenGainForFight(data.targetPower, true) * fightMultiplier;
         expectedTokens = tokens;
-
-        if(tokenRewards[fighter] == 0 && tokens > 0) {
-            _rewardsClaimTaxTimerStart[fighter] = block.timestamp;
-        }
 
         if (playerRoll < monsterRoll) {
             tokens = 0;
@@ -388,13 +382,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         else {
             tokenRewards[fighter] += tokens;
         }
-        vars[VAR_UNCLAIMED_SKILL] += tokens;
-        vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
         xpRewards[char] += xp;
-
-
-        vars[VAR_HOURLY_FIGHTS] += fightMultiplier;
-        vars[VAR_HOURLY_POWER_SUM] += data.playerFightPower * fightMultiplier;
 
         emit FightOutcome(fighter, char, wep, (data.targetPower | ((uint32(data.traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
@@ -405,18 +393,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function getTokenGainForFight(uint24 monsterPower, bool applyLimit) public view returns (uint256) {
         // monsterPower / avgPower * payPerFight * powerMultiplier
-        uint256 amount = ABDKMath64x64.divu(monsterPower, vars[VAR_HOURLY_POWER_AVERAGE])
-            .mulu(vars[VAR_HOURLY_PAY_PER_FIGHT]);
-
-        if(amount > vars[VAR_PARAM_MAX_FIGHT_PAYOUT])
-            amount = vars[VAR_PARAM_MAX_FIGHT_PAYOUT];
-        if(vars[VAR_HOURLY_DISTRIBUTION] < amount * 5 && applyLimit) // the * 5 is a temp measure until we can sync frontend on main
-            amount = 0;
-        return amount;
+        return monsterPower * vars[VAR_HOURLY_PAY_PER_FIGHT] / vars[VAR_HOURLY_POWER_AVERAGE];
     }
 
     function getXpGainForFight(uint24 playerPower, uint24 monsterPower) internal view returns (uint16) {
-        return uint16(ABDKMath64x64.divu(monsterPower, playerPower).mulu(fightXpGain));
+        return uint16(monsterPower * fightXpGain / playerPower);
     }
 
     function getPlayerPowerRoll(
