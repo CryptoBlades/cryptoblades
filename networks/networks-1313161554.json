@@ -2572,7 +2572,7 @@
     },
     "links": {},
     "address": "0x59dd354428B308055A19EdaA501b4df29970B58B",
-    "transactionHash": "0xa0080f894c6622e6de4344d9f1c8144d7388d7068dec15085294c6295ece168c|{\"gasBurned\":14254426350656,\"tx\":\"9RAk1xWQPC9Ezsya3Hbiz5GNBeb1nKNeoXBBTEHW7VnZ\"}"
+    "transactionHash": "0xd66800c8e6db03f469cbe806bebc4935ba9d7470b4c87ebc28f7fe2faf0a9768"
   },
   "build/contracts/Junk.json": {
     "events": {
@@ -4849,7 +4849,7 @@
     },
     "links": {},
     "address": "0x89995f8C61d7366119773Ac791e9B427e1B63a4A",
-    "transactionHash": "0x9acbad59335cfe0904b4f096933634b19a1190f4473b0699e61575f567a14736"
+    "transactionHash": "0xe35942097bf9ad29f11fcb2683c4a3cb5ee9c9a900eb45e94357b556b48359ec"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},
@@ -5037,7 +5037,7 @@
     },
     "links": {},
     "address": "0xe1bAf442A842aa68D30b09513841B917AB2cAD28",
-    "transactionHash": "0x7f5065a93f5bee67aff0894597ee1bbadb1d681c076f416927e9f303823493df"
+    "transactionHash": "0x3536187055636ddb86ef6e7c3a4eef9214e989224a3d58268fe5c04ce8c2d844"
   },
   "build/contracts/Treasury.json": {
     "events": {},
