@@ -18,12 +18,14 @@
       ref="character-transfer-modal"
       :ok-title="$t('nftOptionsDropdown.transferOkButton')"
       @ok="transfer"
+      @shown="$refs.receiverAddress.focus()"
       :ok-disabled="!isValidAddress || receiverAddress === ''  || isSending"
       :cancel-disabled="isSending"
       >
       <div class="p-4">
         <h3 class="confirmation-title mb-5">{{$t('nftOptionsDropdown.sendYour')}} {{nftType}} {{$t('nftOptionsDropdown.toAnother')}} </h3>
-        <b-form-input class="transfer-input" :placeholder="$t('nftOptionsDropdown.receiverAddress')" v-model="receiverAddress"/>
+        <b-form-input ref="receiverAddress" class="transfer-input" @keydown.enter.native="transfer"
+                      :placeholder="$t('nftOptionsDropdown.receiverAddress')" v-model="receiverAddress"/>
         <div class="transferResultContainer">
           <div class="loader" v-if="isSending">
             <i class="fas fa-spinner fa-spin"></i>
@@ -34,7 +36,8 @@
         </div>
         <div class="footer-btn">
           <button class="close-btn" @click="transfer">
-            {{isSending ? t('nftOptionsDropdown.sending') : $t('nftOptionsDropdown.transfer')}}</button>
+            {{isSending ? t('nftOptionsDropdown.sending') : $t('nftOptionsDropdown.transfer')}}
+          </button>
         </div>
       </div>
       <div class="footer-close" @click="$refs['character-transfer-modal'].hide()">
@@ -51,6 +54,7 @@ import Vue from 'vue';
 import { PropType } from 'vue/types/options';
 import { mapActions } from 'vuex';
 import i18n from '@/i18n';
+import {isValidWeb3Address} from '../utils/common';
 
 interface StoreMappedActions {
   transferNFT(payload: {
@@ -97,7 +101,7 @@ export default Vue.extend({
   }),
   computed: {
     isValidAddress() {
-      return /^0x[a-fA-F0-9]{40}$/.test(this.receiverAddress);
+      return isValidWeb3Address(this.receiverAddress);
     },
   },
   methods: {
@@ -116,6 +120,7 @@ export default Vue.extend({
           receiverAddress: this.receiverAddress,
           nftType: this.nftType
         });
+        this.$refs['character-transfer-modal'].hide();
       }
       catch(e: any) {
         if(e.code as number === 4001) this.resultMsg = i18n.t('nftOptionsDropdown.cancelledTransaction').toString();
