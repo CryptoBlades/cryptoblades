@@ -72,6 +72,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
     uint256 public constant USERVAR_CLAIM_TIMESTAMP = 10002;
     uint256 public constant USERVAR_CLAIM_WEAPON_DATA = 10003;
+    // RESERVED USERVAR: 10010
+    uint256 public constant USERVAR_GEN2_UNCLAIMED = 10011;
+    // RESERVED USERVARS: 10012-10019
 
     Characters public characters;
     Weapons public weapons;
@@ -230,7 +233,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     SpecialWeaponsManager public specialWeaponsManager;
     mapping(uint256 => address) public links;
-    mapping(address => uint256) public goldRewards;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -366,35 +368,23 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 playerRoll = getPlayerPowerRoll(data.playerFightPower,data.traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(data.targetPower, RandomUtil.combineSeeds(seed,1));
 
-        updateHourlyPayouts(); // maybe only check in trackIncome? (or do via bot)
-
+        // to avoid guessing outcome based on gas estimates, yield is calculated for loss too
         uint16 xp = getXpGainForFight(data.playerFightPower, data.targetPower) * fightMultiplier;
-        tokens = getTokenGainForFight(data.targetPower, true) * fightMultiplier;
+        tokens = getTokenGainForFight(data.targetPower) * fightMultiplier;
         expectedTokens = tokens;
-
-        if(tokenRewards[fighter] == 0 && tokens > 0) {
-            _rewardsClaimTaxTimerStart[fighter] = block.timestamp;
-        }
 
         if (playerRoll < monsterRoll) {
             tokens = 0;
             xp = 0;
         }
 
-        // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
         if(characterVersion > 0) {
-            goldRewards[fighter] += tokens;
+            userVars[fighter][USERVAR_GEN2_UNCLAIMED] += tokens;
         }
         else {
             tokenRewards[fighter] += tokens;
         }
-        vars[VAR_UNCLAIMED_SKILL] += tokens;
-        vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
         xpRewards[char] += xp;
-
-
-        vars[VAR_HOURLY_FIGHTS] += fightMultiplier;
-        vars[VAR_HOURLY_POWER_SUM] += data.playerFightPower * fightMultiplier;
 
         emit FightOutcome(fighter, char, wep, (data.targetPower | ((uint32(data.traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
@@ -403,20 +393,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return uint24(target & 0xFFFFFF);
     }
 
-    function getTokenGainForFight(uint24 monsterPower, bool applyLimit) public view returns (uint256) {
+    function getTokenGainForFight(uint24 monsterPower) public view returns (uint256) {
         // monsterPower / avgPower * payPerFight * powerMultiplier
-        uint256 amount = ABDKMath64x64.divu(monsterPower, vars[VAR_HOURLY_POWER_AVERAGE])
-            .mulu(vars[VAR_HOURLY_PAY_PER_FIGHT]);
-
-        if(amount > vars[VAR_PARAM_MAX_FIGHT_PAYOUT])
-            amount = vars[VAR_PARAM_MAX_FIGHT_PAYOUT];
-        if(vars[VAR_HOURLY_DISTRIBUTION] < amount * 5 && applyLimit) // the * 5 is a temp measure until we can sync frontend on main
-            amount = 0;
-        return amount;
+        return monsterPower * vars[VAR_HOURLY_PAY_PER_FIGHT] / vars[VAR_HOURLY_POWER_AVERAGE];
     }
-
+    
     function getXpGainForFight(uint24 playerPower, uint24 monsterPower) internal view returns (uint16) {
-        return uint16(ABDKMath64x64.divu(monsterPower, playerPower).mulu(fightXpGain));
+        return uint16(monsterPower * fightXpGain / playerPower);
     }
 
     function getPlayerPowerRoll(
@@ -520,9 +503,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _payContractTokenOnly(msg.sender, convertedAmount);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
-        characters.mint(msg.sender, seed);
-        if(goldRewards[msg.sender] == 0) {
-            goldRewards[msg.sender] = 1;
+        uint256 id = characters.mint(msg.sender, seed);
+        xpRewards[id] = 1;
+        if(userVars[msg.sender][USERVAR_GEN2_UNCLAIMED] == 0) {
+            userVars[msg.sender][USERVAR_GEN2_UNCLAIMED] = 1;
         }
 
         // first weapon free with a character mint, max 1 star
@@ -803,7 +787,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function deductGold(uint256 amount, address player) external restricted {
-        goldRewards[player] = goldRewards[player].sub(amount);
+        userVars[player][USERVAR_GEN2_UNCLAIMED] = userVars[player][USERVAR_GEN2_UNCLAIMED].sub(amount);
     }
 
     function trackIncome(uint256 income) public restricted {
@@ -915,88 +899,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function usdToSkill(int128 usdAmount) public view returns (uint256) {
         return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
-    }
-
-    function claimTokenRewards() public {
-        claimTokenRewards(getRemainingTokenClaimAmountPreTax());
-    }
-
-    function claimTokenRewards(uint256 _claimingAmount) public {
-
-        trackDailyClaim(_claimingAmount);
-
-        uint256 _tokenRewardsToPayOut = _claimingAmount.sub(
-            _getRewardsClaimTax(msg.sender).mulu(_claimingAmount)
-        );
-
-        // Tax goes to game contract itself, which would mean
-        // transferring from the game contract to ...itself.
-        // So we don't need to do anything with the tax part of the rewards.
-        if(promos.getBit(msg.sender, 4) == false) {
-            _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
-            if(_tokenRewardsToPayOut <= vars[VAR_UNCLAIMED_SKILL])
-                vars[VAR_UNCLAIMED_SKILL] -= _tokenRewardsToPayOut;
-        }
-    }
-
-    function trackDailyClaim(uint256 _claimingAmount) internal {
-
-        if(isDailyTokenClaimAmountExpired()) {
-            userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] = now;
-            userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] = 0;
-        }
-        require(_claimingAmount <= getRemainingTokenClaimAmountPreTax() && _claimingAmount > 0);
-        // safemath throws error on negative
-        tokenRewards[msg.sender] = tokenRewards[msg.sender].sub(_claimingAmount);
-        userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] += _claimingAmount;
-    }
-
-    function isDailyTokenClaimAmountExpired() public view returns (bool) {
-        return userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] <= now - 1 days;
-    }
-
-    function getClaimedTokensToday() public view returns (uint256) {
-        // if claim timestamp is older than a day, it's reset to 0
-        return isDailyTokenClaimAmountExpired() ? 0 : userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT];
-    }
-
-    function getRemainingTokenClaimAmountPreTax() public view returns (uint256) {
-        // used to get how much can be withdrawn until the daily withdraw timer expires
-        uint256 max = getMaxTokenClaimAmountPreTax();
-        uint256 claimed = getClaimedTokensToday();
-        if(claimed >= max)
-            return 0; // all tapped out for today
-        uint256 remainingOfMax = max-claimed;
-        return tokenRewards[msg.sender] >= remainingOfMax ? remainingOfMax : tokenRewards[msg.sender];
-    }
-
-    function getMaxTokenClaimAmountPreTax() public view returns(uint256) {
-        // if tokenRewards is above VAR_CLAIM_DEPOSIT_AMOUNT, we let them withdraw more
-        // this function does not account for amount already withdrawn today
-        if(tokenRewards[msg.sender] >= vars[VAR_CLAIM_DEPOSIT_AMOUNT]) { // deposit bonus active
-            // max is either 10% of amount above deposit, or 2x the regular limit, whichever is higher
-            uint256 aboveDepositAdjusted = ABDKMath64x64.divu(vars[VAR_PARAM_DAILY_CLAIM_DEPOSIT_PERCENT],100)
-                .mulu(tokenRewards[msg.sender]-vars[VAR_CLAIM_DEPOSIT_AMOUNT]); // 10% above deposit
-            if(aboveDepositAdjusted > vars[VAR_DAILY_MAX_CLAIM] * 2) {
-                return aboveDepositAdjusted;
-            }
-            return vars[VAR_DAILY_MAX_CLAIM] * 2;
-        }
-        return vars[VAR_DAILY_MAX_CLAIM];
-    }
-
-    function stakeUnclaimedRewards() public {
-        stakeUnclaimedRewards(getRemainingTokenClaimAmountPreTax());
-    }
-
-    function stakeUnclaimedRewards(uint256 amount) public {
-
-        trackDailyClaim(amount);
-
-        if(promos.getBit(msg.sender, 4) == false) {
-            skillToken.approve(address(stakeFromGameImpl), amount);
-            stakeFromGameImpl.stakeFromGame(msg.sender, amount);
-        }
     }
 
     function claimXpRewards() public {
