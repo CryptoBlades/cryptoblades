@@ -65,6 +65,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_MIN_CHARACTER_FEE = 24;
     uint256 public constant VAR_WEAPON_MINT_TIMESTAMP = 25;
     uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 26;
+    uint256 public constant VAR_GAS_OFFSET_PER_FIGHT_MULTIPLIER = 27;
 
     uint256 public constant LINK_SAFE_RANDOMS = 1;
 
@@ -392,8 +393,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function getTokenGainForFight(uint24 monsterPower, bool applyLimit) public view returns (uint256) {
-        // monsterPower / avgPower * payPerFight * powerMultiplier
-        return monsterPower * vars[VAR_HOURLY_PAY_PER_FIGHT] / vars[VAR_HOURLY_POWER_AVERAGE];
+        // monsterPower / avgPower * payPerFight * powerMultiplier + gasoffset
+        return monsterPower * vars[VAR_HOURLY_PAY_PER_FIGHT] / vars[VAR_HOURLY_POWER_AVERAGE]
+            + vars[VAR_GAS_OFFSET_PER_FIGHT_MULTIPLIER];
     }
 
     function getXpGainForFight(uint24 playerPower, uint24 monsterPower) internal view returns (uint16) {
