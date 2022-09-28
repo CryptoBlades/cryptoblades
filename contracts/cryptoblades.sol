@@ -520,10 +520,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _payContractTokenOnly(msg.sender, convertedAmount);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
-        characters.mint(msg.sender, seed);
+        uint256 tokenID = characters.mint(msg.sender, seed);
         if(goldRewards[msg.sender] == 0) {
             goldRewards[msg.sender] = 1;
         }
+        xpRewards[tokenID] = 1;
 
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
@@ -917,82 +918,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
     }
 
-    function claimTokenRewards() public {
-        claimTokenRewards(getRemainingTokenClaimAmountPreTax());
-    }
-
-    function claimTokenRewards(uint256 _claimingAmount) public {
-
-        trackDailyClaim(_claimingAmount);
-
-        uint256 _tokenRewardsToPayOut = _claimingAmount.sub(
-            _getRewardsClaimTax(msg.sender).mulu(_claimingAmount)
-        );
-
-        // Tax goes to game contract itself, which would mean
-        // transferring from the game contract to ...itself.
-        // So we don't need to do anything with the tax part of the rewards.
-        if(promos.getBit(msg.sender, 4) == false) {
-            _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
-            if(_tokenRewardsToPayOut <= vars[VAR_UNCLAIMED_SKILL])
-                vars[VAR_UNCLAIMED_SKILL] -= _tokenRewardsToPayOut;
-        }
-    }
-
-    function trackDailyClaim(uint256 _claimingAmount) internal {
-
-        if(isDailyTokenClaimAmountExpired()) {
-            userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] = now;
-            userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] = 0;
-        }
-        require(_claimingAmount <= getRemainingTokenClaimAmountPreTax() && _claimingAmount > 0);
-        // safemath throws error on negative
-        tokenRewards[msg.sender] = tokenRewards[msg.sender].sub(_claimingAmount);
-        userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] += _claimingAmount;
-    }
-
-    function isDailyTokenClaimAmountExpired() public view returns (bool) {
-        return userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] <= now - 1 days;
-    }
-
-    function getClaimedTokensToday() public view returns (uint256) {
-        // if claim timestamp is older than a day, it's reset to 0
-        return isDailyTokenClaimAmountExpired() ? 0 : userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT];
-    }
-
-    function getRemainingTokenClaimAmountPreTax() public view returns (uint256) {
-        // used to get how much can be withdrawn until the daily withdraw timer expires
-        uint256 max = getMaxTokenClaimAmountPreTax();
-        uint256 claimed = getClaimedTokensToday();
-        if(claimed >= max)
-            return 0; // all tapped out for today
-        uint256 remainingOfMax = max-claimed;
-        return tokenRewards[msg.sender] >= remainingOfMax ? remainingOfMax : tokenRewards[msg.sender];
-    }
-
-    function getMaxTokenClaimAmountPreTax() public view returns(uint256) {
-        // if tokenRewards is above VAR_CLAIM_DEPOSIT_AMOUNT, we let them withdraw more
-        // this function does not account for amount already withdrawn today
-        if(tokenRewards[msg.sender] >= vars[VAR_CLAIM_DEPOSIT_AMOUNT]) { // deposit bonus active
-            // max is either 10% of amount above deposit, or 2x the regular limit, whichever is higher
-            uint256 aboveDepositAdjusted = ABDKMath64x64.divu(vars[VAR_PARAM_DAILY_CLAIM_DEPOSIT_PERCENT],100)
-                .mulu(tokenRewards[msg.sender]-vars[VAR_CLAIM_DEPOSIT_AMOUNT]); // 10% above deposit
-            if(aboveDepositAdjusted > vars[VAR_DAILY_MAX_CLAIM] * 2) {
-                return aboveDepositAdjusted;
-            }
-            return vars[VAR_DAILY_MAX_CLAIM] * 2;
-        }
-        return vars[VAR_DAILY_MAX_CLAIM];
-    }
-
     function stakeUnclaimedRewards() public {
-        stakeUnclaimedRewards(getRemainingTokenClaimAmountPreTax());
+        stakeUnclaimedRewards(tokenRewards[msg.sender]);
     }
 
     function stakeUnclaimedRewards(uint256 amount) public {
-
-        trackDailyClaim(amount);
-
         if(promos.getBit(msg.sender, 4) == false) {
             skillToken.approve(address(stakeFromGameImpl), amount);
             stakeFromGameImpl.stakeFromGame(msg.sender, amount);

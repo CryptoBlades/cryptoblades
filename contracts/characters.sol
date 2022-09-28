@@ -167,9 +167,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return soulAmount;
     }
 
-    function mint(address minter, uint256 seed) public restricted {
-        uint256 tokenID = tokens.length;
-        uint16 xp = 1;
+    function mint(address minter, uint256 seed) public restricted returns(uint256 tokenID) {
+        tokenID = tokens.length;
+        uint16 xp = 0;
         uint8 level = 0; // 1
         uint8 trait = uint8(RandomUtil.randomSeededMinMax(0,3,seed));
         uint64 staminaTimestamp = uint64(now.sub(getStaminaMaxWait()));

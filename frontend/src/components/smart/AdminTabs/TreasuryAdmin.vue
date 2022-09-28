@@ -248,7 +248,7 @@ export default Vue.extend({
             isActive: this.selectedPartnerProject.propertyBooleanValue
           });
           break;
-          case PartnerProperty.IS_GOLD:
+        case PartnerProperty.IS_GOLD:
           await this.setPartnerProjectIsGold({
             id: this.selectedPartnerProject.id,
             isGold: this.selectedPartnerProject.propertyBooleanValue
