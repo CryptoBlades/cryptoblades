@@ -36,6 +36,13 @@ For Windows developers experiencing errors follow these steps:
 
 If you're using VSCode, we recommend these extensions: Auto Rename Tag, EditorConfig for VSCode, Eslint, Github Pull Requests, Gitlens, Javascript and Typescript, Live Share, Solidity, Typescript Hero, Vetur
 
+### Truffle Setup
+
+- `npm install -g truffle` will install truffle globally
+> NOTE: if you are debugging with Firefox you may need to run 
+```let s=await NFTStorage.deployed()
+s.setStorageEnabled(true)```
+
 ## Environment Variables
 
 There are optional environment variables, most of which have sensible defaults if copied from `.env.local`:
