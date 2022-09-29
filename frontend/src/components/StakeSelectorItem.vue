@@ -537,6 +537,11 @@ export default Vue.extend({
     this.secondsInterval = setInterval(() => {
       this.updateEstimates();
     }, 1000);
+
+    await this.fetchData();
+    if(this.stakeType.startsWith('cbkLand')) {
+      await this.updateOwnedLands();
+    }
   },
   beforeDestroy() {
     if(this.stakeRewardProgressInterval) clearInterval(this.stakeRewardProgressInterval);
