@@ -39,12 +39,12 @@ If you're using VSCode, we recommend these extensions: Auto Rename Tag, EditorCo
 ### Truffle Setup
 
 - `npm install -g truffle` will install truffle globally
-> NOTE: if you are debugging with Firefox you may need to run
-
+> NOTE: if you are debugging with Firefox you may need to run the following in truffle console (`truffle console` in the project root directory):
 ```
 let s=await NFTStorage.deployed()
 s.setStorageEnabled(true)
 ```
+This will enable storage, which is disabled by default.
 
 ## Environment Variables
 
