@@ -670,7 +670,7 @@ export default Vue.extend({
 .characterImg {
   width: 100%;
   object-fit: contain;
-  max-height: 60vh;
+  max-height: 45vh;
   max-width: 100%;
   transform: none;
 }

@@ -44,17 +44,28 @@ export function getCharacterArt(character: ICharacter) {
   }
 }
 
-export function getCharacterArtByTrait(characterTrait: string) {
+export function getCharacterArtByTraitAndVersion(characterTrait: string, version: number) {
   if (!characterTrait) {
     return null;
   }
 
-  switch (characterTrait) {
-  case 'Earth': return characterImages.earth;
-  case 'Fire': return characterImages.fire;
-  case 'Water': return characterImages.water;
-  case 'Lightning': return characterImages.lightning;
-  default: return characterImages.earth;
+  if(version === 0) {
+    switch (characterTrait) {
+    case 'Earth': return characterImages.earth;
+    case 'Fire': return characterImages.fire;
+    case 'Water': return characterImages.water;
+    case 'Lightning': return characterImages.lightning;
+    default: return characterImages.earth;
+    }
+  }
+  else {
+    switch (characterTrait) {
+    case 'Earth': return characterV2Images.earth;
+    case 'Fire': return characterV2Images.fire;
+    case 'Water': return characterV2Images.water;
+    case 'Lightning': return characterV2Images.lightning;
+    default: return characterV2Images.earth;
+    }
   }
 }
 
