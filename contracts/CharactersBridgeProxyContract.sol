@@ -53,7 +53,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
 
     // for future use, bot will probe the returned value to know if the proxy contract has proper signature behavior
     function sigVersion() external view override returns (uint256) {
-        return 1;
+        return 2;
     }
 
     function isEnabled() external view override returns (bool) {
@@ -112,5 +112,9 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
 
     function _packCharactersData(uint32 appliedCosmetic, uint16 xp, uint8 level, uint16 traitAndVersion, uint24 bonusPower, uint16 reputation) internal pure returns (uint256) {
         return  uint256(uint256(traitAndVersion) | (uint256(level) << 16) | (uint256(xp) << 24) | (uint256(appliedCosmetic) << 40) | (uint256(bonusPower) << 72) | (uint256(reputation) << 96));
+    }
+
+    function canBridge(address wallet, uint256 tokenId, uint256 targetChain) external view override returns (bool) {
+        return characters.getNftVar(tokenId, 3) == 0; // Only gen 1 is allowed
     }
 }
