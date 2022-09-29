@@ -36,9 +36,12 @@
         <b-row>
           <b-col class="earned">
             <p class="h5 text-white">
-              <span v-html="$t('combatResults.earnedSkill', {
+              <span v-if="!isGold" v-html="$t('combatResults.earnedSkill', {
                   noIGO: +igoDefaultReward ? formattedSkillNoIGO : formattedSkill,
                   inUSD: formattedInUsd(calculateSkillPriceInUsd(+igoDefaultReward ? formattedSkillNoIGO : formattedSkill).toFixed(4))
+                })"> </span>
+              <span v-else v-html="$t('combatResults.earnedGold', {
+                  noIGO: formattedSkill
                 })"> </span>
               <Hint :text="$t('combatResults.hint')" />
               <span v-if="+igoDefaultReward" v-html="$t('combatResults.earnedIGOSkill', {
@@ -114,6 +117,10 @@ export default Vue.extend({
       type: Number,
       default: 0,
     },
+    isGold: {
+      type: Boolean,
+      default: false
+    }
   },
 
   data() {
@@ -141,9 +148,6 @@ export default Vue.extend({
     },
     formattedStaminaUsed(): number {
       return this.staminaUsed / 40;
-    },
-    formattedSkillTooltip(): string {
-      return fromWeiEther(this.fightResults.skillGain)+' SKILL';
     },
     formattedXpGain(): string {
       return this.fightResults.xpGain + ' xp';

@@ -46,6 +46,9 @@
           <span>{{getUnclaimed()}}</span>
           <span> {{$t('ClaimRewardsBar.unclaimed')}}</span>
         </div>
+        <div class="mx-2 mb-1">
+          <span class="border-line-custom"> | </span>
+        </div>
         <div :class="isMobile() ? 'mr-2' : ''">
           <span>{{getUnclaimedGold()}}</span>
           <span> {{$t('ClaimRewardsBar.unclaimedGold')}}</span>
@@ -107,7 +110,7 @@
       :ok-title="$t('ClaimRewardsBar.claim')" @ok="onClaimTokens()"
       :ok-disabled="(selectedPartneredProject && !canClaimSelectedProject)
         || (!selectedPartneredProject && !canClaimTokens)
-        || !isSkillAmountValid">
+        || (isGold ? !isGoldAmountValid : !isSkillAmountValid)">
       <div class="d-flex flex-column align-items-center">
         <div class="d-flex flex-row align-items-center w-100 align-items-baseline">
           <span>{{$t('ClaimRewardsBar.payoutCurrency')}}:</span>
@@ -117,10 +120,12 @@
         </div>
         <div v-if="selectedPartneredProject" class="d-flex mt-2">
           <div class="d-flex justify-content-center align-items-center">
-            <h6 class="claim-input-text">{{$t('ClaimRewardsBar.skillAmount')}}:</h6>
-            <b-form-input v-bind:class="!isSkillAmountValid ? 'invalid-amount' : ''"
+            <h6 class="claim-input-text">{{isGold ? $t('ClaimRewardsBar.goldAmount') : $t('ClaimRewardsBar.skillAmount')}}:</h6>
+            <b-form-input v-if="!isGold" v-bind:class="!isSkillAmountValid ? 'invalid-amount' : ''"
               type="number" min="0" step="0.0001" :max="skillRewardNumber" v-model="skillAmount" class="claim-input" />
-            <a class="" @click="setMaxSkillAmount">(Max)</a>
+            <b-form-input v-else v-bind:class="!isGoldAmountValid ? 'invalid-amount' : ''"
+              type="number" min="0" step="0.0001" :max="goldRewardNumber" v-model="goldAmount" class="claim-input" />
+            <a role="button" @click="selectedPartneredProject && isGold ? setMaxGoldAmount() : setMaxSkillAmount()">(Max)</a>
           </div>
           <div class="d-flex justify-content-center align-items-center">
             <h6 class="claim-input-text">{{$t('ClaimRewardsBar.slippage')}} (%):</h6>
@@ -135,9 +140,10 @@
           <h6 v-if="formattedMultiplier < 0.5" class="very-low-multiplier">{{$t('ClaimRewardsBar.lowMultiplier', {currentMultiplier})}}</h6>
           <h6 >{{
               $t('ClaimRewardsBar.realWithdrawValueClaimable', {
-                actualAmount: (skillAmount / nonFormattedRatio * formattedMultiplier).toFixed(4),
+                actualAmount: ((isGold ? goldAmount : skillAmount) / nonFormattedRatio * formattedMultiplier).toFixed(4),
                 tokenSymbol: selectedPartneredProject.tokenSymbol,
-                skillAmount: (+skillAmount).toFixed(4)
+                skillAmount: (isGold ? +goldAmount : +skillAmount).toFixed(4),
+                token: isGold ? 'GOLD' : 'SKILL'
               })
             }}</h6>
         </div>
@@ -203,8 +209,6 @@ interface StoreMappedActions {
   addMoreSkill(skillToAdd: string): Promise<void>;
   withdrawBnbFromWaxBridge(): Promise<void>;
   claimXpRewards(): Promise<void>;
-  fetchRemainingTokenClaimAmountPreTax(): Promise<string>;
-  claimTokenRewards(): Promise<void>;
 }
 
 interface StoreMappedTreasuryActions{
@@ -236,8 +240,8 @@ export default Vue.extend({
   data(){
     return{
       ClaimStage,
-      remainingTokenClaimAmountPreTax: '0',
       skillAmount: 0,
+      goldAmount: 0,
       slippage: 0,
       isToggled: true
     };
@@ -271,13 +275,18 @@ export default Vue.extend({
     skillRewardNumber(): number {
       return +toBN(fromWeiEther(this.skillRewards.substr(0, this.skillRewards.length - 3) + '000'));
     },
+    goldRewardNumber(): number {
+      return +toBN(fromWeiEther(this.goldRewards.substr(0, this.goldRewards.length - 3) + '000'));
+    },
     isSkillAmountValid(): boolean {
       return this.skillAmount <= this.skillRewardNumber && this.skillAmount > 0;
     },
+    isGoldAmountValid(): boolean {
+      return this.goldAmount <= this.goldRewardNumber && this.goldAmount > 0;
+    },
     canClaimTokens(): boolean {
-      const areSkillRewardsZeroOrLess = toBN(this.skillRewards).lte(0);
-      const isRemainingTokenClaimAmountPreTaxZeroOrLess = toBN(this.remainingTokenClaimAmountPreTax).lte(0);
-      return !(areSkillRewardsZeroOrLess || isRemainingTokenClaimAmountPreTaxZeroOrLess);
+      const areRewardsZeroOrLess = toBN(this.isGold ? this.goldRewards : this.skillRewards).lte(0);
+      return areRewardsZeroOrLess;
     },
     canClaimSelectedProject(): boolean {
       if(this.selectedPartneredProject) {
@@ -386,11 +395,14 @@ export default Vue.extend({
       const inGameOnlyFundsBalance = fromWeiEther(this.inGameOnlyFunds);
       return parseFloat(inGameOnlyFundsBalance) !== 0;
     },
+    isGold(): boolean {
+      return this.selectedPartneredProject?.isGold || false;
+    }
   },
 
   methods: {
     ...(mapActions(['addMoreSkill', 'withdrawBnbFromWaxBridge',
-      'claimXpRewards','fetchRemainingTokenClaimAmountPreTax', 'claimTokenRewards']) as StoreMappedActions),
+      'claimXpRewards']) as StoreMappedActions),
     ...(mapActions('treasury', ['fetchPartnerProjects',
       'getPartnerProjectMultiplier', 'claimPartnerToken']) as StoreMappedTreasuryActions),
     ...(mapMutations('treasury', ['updatePayoutCurrencyId']) as StoreMappedMutations),
@@ -408,18 +420,12 @@ export default Vue.extend({
         await this.claimPartnerToken(
           {
             id: +this.payoutCurrencyId,
-            skillAmount: toBN(this.skillAmount).multipliedBy(toBN(10).pow(18)).toString(),
+            skillAmount: toBN(this.isGold ? this.goldAmount : this.skillAmount).multipliedBy(toBN(10).pow(18)).toString(),
             currentMultiplier: toBN(currentMultiplier).toString(),
             slippage: toBN(this.slippage).multipliedBy(toBN(10).pow(16)).toString()
           }
         );
       }
-      else if(this.canClaimTokens) {
-        await this.claimTokenRewards();
-      }
-    },
-    async getRemainingTokenClaimAmountPreTax() {
-      this.remainingTokenClaimAmountPreTax = await this.fetchRemainingTokenClaimAmountPreTax();
     },
     getUnclaimed(): number | string{
       const skillRewards = fromWeiEther(this.skillRewards);
@@ -448,7 +454,6 @@ export default Vue.extend({
         this.slippage = +toBN(this.defaultSlippage).dividedBy(toBN(10).pow(16));
         (this.$refs['claim-summary-modal'] as any).show();
       }
-      await this.getRemainingTokenClaimAmountPreTax();
     },
     choosePayoutCurrencyIfNotChosenBefore() {
       const supportedProjects = this.getPartnerProjects;
@@ -458,6 +463,9 @@ export default Vue.extend({
     },
     setMaxSkillAmount(): void {
       this.skillAmount = this.skillRewardNumber;
+    },
+    setMaxGoldAmount(): void {
+      this.goldAmount = this.goldRewardNumber;
     },
     getCleanCharacterName(id: number): string {
       return getCleanName(this.getCharacterName(id));

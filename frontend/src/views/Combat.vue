@@ -10,7 +10,8 @@
         :modalType="'combat-result'"
         :componentProps="{
           fightResults:fightResults,
-          staminaUsed:staminaPerFight
+          staminaUsed:staminaPerFight,
+          isGold: !isGenesisCharacter
         }"/>
 
       <div class="waitingForResult" v-if="waitingResults">
@@ -219,10 +220,11 @@ interface StoreMappedCombatActions {
     bnbGasUsed: string,
   }>;
   fetchFightRewardSkill(): Promise<string>;
+  fetchFightRewardGold(): Promise<string>;
   fetchFightRewardXp(): Promise<string[][]>;
   fetchExpectedPayoutForMonsterPower(
-    { power, isCalculator }:
-    { power: stringOrNumber, isCalculator: boolean }): Promise<string>;
+    { power }:
+    { power: stringOrNumber }): Promise<string>;
   fetchHourlyAllowance(): Promise<string>;
   fetchHourlyPowerAverage(): Promise<string>;
   fetchHourlyPayPerFight(): Promise<string>;
@@ -406,6 +408,7 @@ export default Vue.extend({
         'fetchTargets',
         'doEncounterPayNative',
         'fetchFightRewardSkill',
+        'fetchFightRewardGold',
         'fetchFightRewardXp',
         'fetchExpectedPayoutForMonsterPower',
         'fetchHourlyAllowance',
@@ -539,7 +542,7 @@ export default Vue.extend({
       this.setIsInCombat(this.waitingResults);
       try {
         const targetPower = targetToFight.power;
-        const expectedPayoutWei = new BigNumber(await this.fetchExpectedPayoutForMonsterPower({ power: targetPower, isCalculator: true }));
+        const expectedPayoutWei = new BigNumber(await this.fetchExpectedPayoutForMonsterPower({ power: targetPower }));
 
         const nativeTokenPriceUsd = new BigNumber(await this.getNativeTokenPriceInUsd());
         const skillPriceUsd = new BigNumber(await this.getCurrentSkillPrice());
@@ -558,6 +561,7 @@ export default Vue.extend({
         });
 
         await this.fetchFightRewardSkill();
+        await this.fetchFightRewardGold();
         await this.fetchFightRewardXp();
 
         await this.fetchCharacterStamina(this.currentCharacterId);
@@ -630,7 +634,7 @@ export default Vue.extend({
       const expectedPayouts = new Array(4);
       const targets = this.targets as ITarget[];
       for(let i = 0; i < targets.length; i++) {
-        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: targets[i].power, isCalculator: false });
+        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: targets[i].power });
         expectedPayouts[i] = expectedPayout;
       }
       this.targetExpectedPayouts = expectedPayouts;

@@ -171,7 +171,14 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     }
 
     function claim(uint256 partnerId) public {
-        claim(partnerId, game.getTokenRewardsFor(msg.sender), getProjectMultiplier(partnerId), defaultSlippage);
+        uint256 claimingAmount;
+        if(projectIsGold[partnerId]) {
+            claimingAmount = game.userVars(msg.sender,GAMEUSERVAR_GEN2_UNCLAIMED);
+        }
+        else {
+            claimingAmount = game.getTokenRewardsFor(msg.sender);
+        }
+        claim(partnerId, claimingAmount, getProjectMultiplier(partnerId), defaultSlippage);
     }
 
     function claim(uint256 partnerId, uint256 claimingAmount, uint256 currentMultiplier, uint256 slippage) public {

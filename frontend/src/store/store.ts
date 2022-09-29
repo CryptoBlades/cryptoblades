@@ -1662,13 +1662,6 @@ export default new Vuex.Store<IState>({
       return await BurningManager.methods.burnWeaponFee().call({ from: state.defaultAccount });
     },
 
-    async fetchRemainingTokenClaimAmountPreTax({ state }) {
-      if(!_.isFunction(state.contracts)) return;
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-      return await CryptoBlades.methods.getRemainingTokenClaimAmountPreTax().call(defaultCallOptions(state));
-    },
-
     async fetchIsLandSaleAllowed({state}) {
       const CBKLandSale = state.contracts().CBKLandSale!;
 
@@ -2090,21 +2083,6 @@ export default new Vuex.Store<IState>({
       const totalSkill = +unclaimedSkill + +walletSkill;
 
       return totalSkill >= payingAmount;
-    },
-
-    async claimTokenRewards({ state, dispatch }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-
-      await CryptoBlades.methods.claimTokenRewards().send({
-        from: state.defaultAccount,
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('combat/fetchFightRewardSkill')
-      ]);
     },
 
     async claimXpRewards({ state, dispatch }) {

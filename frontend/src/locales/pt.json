@@ -912,7 +912,7 @@
     "partnerTokenClaimed": "Esses tokens de parceiro já foram reivindicados.",
     "payoutCurrency": "Moeda de Pagamento",
     "readyToClaim": "Recompensas prontas para reivindicar!",
-    "realWithdrawValueClaimable": "Atualmente, você receberá aproximadamente {actualAmount} {tokenSymbol} por retirar {skillAmount} SKILL.",
+    "realWithdrawValueClaimable": "Atualmente, você receberá aproximadamente {actualAmount} {tokenSymbol} por retirar {skillAmount} {token}.",
     "rewards": "Recompensas",
     "skillAmount": "Quantidade de Skill",
     "slippage": "Deslizamento",

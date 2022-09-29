@@ -56,9 +56,10 @@
     "partnerTokenClaimed": "This partner tokens have been claimed already.",
     "slippage": "Slippage",
     "skillAmount": "Skill Amount",
+    "goldAmount": "Gold Amount",
     "multiplierAtZero": "Multiplier is at x0, try again later...",
     "lowMultiplier": "Current multiplier is low, you will receive only {currentMultiplier} of claimed tokens.",
-    "realWithdrawValueClaimable": "Currently you'll receive approximately {actualAmount} {tokenSymbol} for withdrawing {skillAmount} SKILL."
+    "realWithdrawValueClaimable": "Currently you'll receive approximately {actualAmount} {tokenSymbol} for withdrawing {skillAmount} {token}."
   },
   "Character": {
     "cancelledTransaction": "You cancelled the transaction.",
@@ -125,11 +126,12 @@
     "won": "You won the fight!",
     "lost": "You lost the fight!",
     "earned": "You earned:",
-    "hint": "SKILL earned is based on gas costs of the network plus a factor of your power",
+    "hint": "SKILL/GOLD earned is based on gas costs of the network plus a factor of your power",
     "gasFee": "You spent {bnbGasUsed} {gasToken} on gas fees ",
     "youRolled": "You rolled:",
     "enemyRolled": "Enemy rolled:",
     "earnedSkill": "<b>{noIGO}</b> <small>UNCLAIMED SKILL</small> <b>{inUSD}</b> ",
+    "earnedGold": "<b>{noIGO}</b> <small>UNCLAIMED GOLD</small> ",
     "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> "
   },
   "homePage":{

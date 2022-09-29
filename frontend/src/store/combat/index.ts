@@ -70,7 +70,7 @@ const combat = {
       if(!CryptoBlades || !rootState.defaultAccount) return;
 
       return await CryptoBlades.methods
-        .vars(27)
+        .vars(28)
         .call(defaultCallOptions(rootState));
     },
 
@@ -113,13 +113,10 @@ const combat = {
     },
 
     async fetchExpectedPayoutForMonsterPower(
-      { rootState }: {rootState: IState}, { power, isCalculator = false }: {power: string | number, isCalculator: boolean}) {
+      { rootState }: {rootState: IState}, { power }: {power: string | number}) {
       const { CryptoBlades } = rootState.contracts();
       if(!CryptoBlades) return;
-      if(isCalculator) {
-        return await CryptoBlades.methods.getTokenGainForFight(power, false).call(defaultCallOptions(rootState));
-      }
-      return await CryptoBlades.methods.getTokenGainForFight(power, true).call(defaultCallOptions(rootState));
+      return await CryptoBlades.methods.getTokenGainForFight(power).call(defaultCallOptions(rootState));
     },
 
     async getNativeTokenPriceInUsd({ rootState }: {rootState: IState}) {
@@ -226,7 +223,7 @@ const combat = {
       const [goldRewards] = await Promise.all([
         (async () => {
           const goldRewards = await CryptoBlades.methods
-            .goldRewards(defaultAccount)
+            .userVars(defaultAccount, 10011)
             .call(defaultCallOptions(rootState));
 
           commit('updateGoldRewards', { goldRewards }, { root: true });

@@ -15,13 +15,13 @@
       </b-form-select>
     </div>
     <div class="d-flex flex-column align-items-center mt-3">
-      <h2>Genesis Treasuries</h2>
+      <h2 v-if="genesisPartnerProjects.length > 0">Genesis Treasuries</h2>
       <div class="d-flex pt-2 pb-2 flex-wrap justify-content-center projects-container">
         <PartneredProject v-for="partnerProject in genesisPartnerProjects" :key="partnerProject.id" :partnerProject="partnerProject" />
       </div>
     </div>
     <div class="d-flex flex-column align-items-center mt-3">
-      <h2>Non-Genesis Treasuries</h2>
+      <h2 v-if="nonGenesisPartnerProjects.length > 0">Non-Genesis Treasuries</h2>
       <div class="d-flex pt-2 pb-2 flex-wrap justify-content-center projects-container">
         <PartneredProject v-for="partnerProject in nonGenesisPartnerProjects" :key="partnerProject.id" :partnerProject="partnerProject" />
       </div>
