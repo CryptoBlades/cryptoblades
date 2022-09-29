@@ -82,7 +82,7 @@ export default new Vuex.Store<IState>({
     skillBalance: '0',
     balance: '0',
     skillRewards: '0',
-    goldRewards: '0',
+    valorRewards: '0',
     maxRewardsClaimTax: '0',
     rewardsClaimTax: '0',
     xpRewards: {},
@@ -491,8 +491,8 @@ export default new Vuex.Store<IState>({
       state.skillRewards = skillRewards;
     },
 
-    updateGoldRewards(state: IState, { goldRewards }: { goldRewards: string }) {
-      state.goldRewards = goldRewards;
+    updateValorRewards(state: IState, { valorRewards }: { valorRewards: string }) {
+      state.valorRewards = valorRewards;
     },
 
     updateRewardsClaimTax(
@@ -772,7 +772,7 @@ export default new Vuex.Store<IState>({
               dispatch('fetchCharacter', { characterId }),
               dispatch('fetchSkillBalance'),
               dispatch('combat/fetchFightRewardSkill'),
-              dispatch('combat/fetchFightRewardGold'),
+              dispatch('combat/fetchFightRewardValor'),
               dispatch('combat/fetchFightRewardXp'),
               dispatch('fetchDustBalance')
             ]);
@@ -975,7 +975,7 @@ export default new Vuex.Store<IState>({
         dispatch('fetchJunks', ownedJunkIds),
         dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
         dispatch('combat/fetchFightRewardSkill'),
-        dispatch('combat/fetchFightRewardGold'),
+        dispatch('combat/fetchFightRewardValor'),
         dispatch('combat/fetchFightRewardXp'),
         dispatch('fetchGarrisonCharactersXp'),
         dispatch('combat/fetchFightGasOffset'),
@@ -1158,8 +1158,8 @@ export default new Vuex.Store<IState>({
     async fetchCharacterVersion({state}, characterId) {
       const { Characters } = state.contracts();
       if(!Characters || !state.defaultAccount) return;
-
-      return await Characters.methods.nftVars(characterId, 3).call(defaultCallOptions(state));
+      const NFTVAR_NON_GENESIS_VERSION = 3;
+      return await Characters.methods.nftVars(characterId, NFTVAR_NON_GENESIS_VERSION).call(defaultCallOptions(state));
     },
 
     async fetchWeapons({ dispatch }, weaponIds: (string | number)[]) {

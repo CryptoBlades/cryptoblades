@@ -1,7 +1,7 @@
 pragma solidity ^0.6.2;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title SimpleToken
@@ -10,11 +10,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * `ERC20` functions.
  * Based on https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v2.5.1/contracts/examples/SimpleToken.sol
  */
-contract GoldToken is ERC20, Ownable {
-    /**
-     * @dev Constructor that gives msg.sender all of existing tokens.
-     */
-    constructor() public ERC20("Gold Token", "GOLD") {
+contract ValorToken is ERC20Upgradeable, OwnableUpgradeable {
+    function initialize()
+        public
+        initializer
+    {
+        __ERC20_init("Valor Token", "VALOR");
+        __Ownable_init();
         _mint(address(this), 100000000 * (10 ** uint256(decimals())));
         _approve(address(this), msg.sender, totalSupply());
     }

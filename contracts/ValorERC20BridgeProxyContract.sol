@@ -6,7 +6,7 @@ import "./interfaces/IERC20BridgeProxy.sol";
 import "./Promos.sol";
 
 
-contract GoldERC20BridgeProxyContract is Initializable, AccessControlUpgradeable, IERC20BridgeProxy {
+contract ValorERC20BridgeProxyContract is Initializable, AccessControlUpgradeable, IERC20BridgeProxy {
   
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
     

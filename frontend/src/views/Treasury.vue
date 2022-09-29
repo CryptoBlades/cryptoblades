@@ -48,7 +48,7 @@ export interface SupportedProject {
   tokensClaimed: number;
   tokenPrice: number;
   isActive: boolean;
-  isGold: boolean;
+  isValor: boolean;
   logo: string;
   details: string;
   website: string;
@@ -90,11 +90,11 @@ export default Vue.extend({
     ...(mapState('treasury',['payoutCurrencyId'])as Accessors<StoreMappedTreasuryState>),
 
     genesisPartnerProjects(): SupportedProject[] {
-      return this.getPartnerProjects.filter(p => !p.isGold);
+      return this.getPartnerProjects.filter(p => !p.isValor);
     },
 
     nonGenesisPartnerProjects(): SupportedProject[] {
-      return this.getPartnerProjects.filter(p => p.isGold);
+      return this.getPartnerProjects.filter(p => p.isValor);
     }
   },
 

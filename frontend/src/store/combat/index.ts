@@ -68,9 +68,9 @@ const combat = {
     async fetchIgoRewardsPerFight({ rootState }: {rootState: IState}) {
       const { CryptoBlades } = rootState.contracts();
       if(!CryptoBlades || !rootState.defaultAccount) return;
-
+      const IGO = 28;
       return await CryptoBlades.methods
-        .vars(28)
+        .vars(IGO)
         .call(defaultCallOptions(rootState));
     },
 
@@ -222,24 +222,24 @@ const combat = {
       return skillRewards;
     },
 
-    async fetchFightRewardGold({ rootState, commit }: {rootState: IState, commit: Commit}) {
+    async fetchFightRewardValor({ rootState, commit }: {rootState: IState, commit: Commit}) {
       const { CryptoBlades } = rootState.contracts();
       const defaultAccount = rootState.defaultAccount;
       if(!CryptoBlades || !defaultAccount) return;
 
-      const [goldRewards] = await Promise.all([
+      const [valorRewards] = await Promise.all([
         (async () => {
-          const goldRewards = await CryptoBlades.methods
+          const valorRewards = await CryptoBlades.methods
             .userVars(defaultAccount, 10011)
             .call(defaultCallOptions(rootState));
 
-          commit('updateGoldRewards', { goldRewards }, { root: true });
+          commit('updateValorRewards', { valorRewards }, { root: true });
 
-          return goldRewards;
+          return valorRewards;
         })()
       ]);
 
-      return goldRewards;
+      return valorRewards;
     },
 
     async fetchFightRewardXp({ rootState, commit }: {rootState: IState, commit: Commit}) {

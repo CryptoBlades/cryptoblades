@@ -11,7 +11,7 @@
         :componentProps="{
           fightResults:fightResults,
           staminaUsed:staminaPerFight,
-          isGold: !isGenesisCharacter
+          isValor: !isGenesisCharacter
         }"/>
 
       <div class="waitingForResult" v-if="waitingResults">
@@ -220,7 +220,7 @@ interface StoreMappedCombatActions {
     bnbGasUsed: string,
   }>;
   fetchFightRewardSkill(): Promise<string>;
-  fetchFightRewardGold(): Promise<string>;
+  fetchFightRewardValor(): Promise<string>;
   fetchFightRewardXp(): Promise<string[][]>;
   fetchExpectedPayoutForMonsterPower(
     { power }:
@@ -408,7 +408,7 @@ export default Vue.extend({
         'fetchTargets',
         'doEncounterPayNative',
         'fetchFightRewardSkill',
-        'fetchFightRewardGold',
+        'fetchFightRewardValor',
         'fetchFightRewardXp',
         'fetchExpectedPayoutForMonsterPower',
         'fetchHourlyAllowance',
@@ -561,7 +561,7 @@ export default Vue.extend({
         });
 
         await this.fetchFightRewardSkill();
-        await this.fetchFightRewardGold();
+        await this.fetchFightRewardValor();
         await this.fetchFightRewardXp();
 
         await this.fetchCharacterStamina(this.currentCharacterId);
@@ -575,7 +575,7 @@ export default Vue.extend({
 
     formattedSkill(skill: stringOrNumber) {
       const skillBalance = fromWeiEther(skill.toString());
-      return `${toBN(skillBalance).toFixed(6)} ${this.isGenesisCharacter ? 'SKILL' : 'GOLD'}`;
+      return `${toBN(skillBalance).toFixed(6)} ${this.isGenesisCharacter ? 'SKILL' : 'VALOR'}`;
     },
 
     getPotentialXp(targetToFight: ITarget) {

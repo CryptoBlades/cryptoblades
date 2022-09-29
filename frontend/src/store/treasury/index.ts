@@ -68,7 +68,7 @@ const treasury = {
         partnerProject.details,
         partnerProject.website,
         partnerProject.note,
-        partnerProject.isGold
+        partnerProject.isValor
       ).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
     },
 
@@ -120,11 +120,11 @@ const treasury = {
       await Treasury.methods.setIsActive(id, isActive).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
     },
 
-    async setPartnerProjectIsGold({ rootState }: {rootState: IState}, {id, isGold}: {id: number | string, isGold: boolean}) {
+    async setPartnerProjectIsValor({ rootState }: {rootState: IState}, {id, isValor}: {id: number | string, isValor: boolean}) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
 
-      await Treasury.methods.setIsGold(id, isGold).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
+      await Treasury.methods.setIsValor(id, isValor).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
     },
 
     async fetchPartnerProjects({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}) {
@@ -144,11 +144,11 @@ const treasury = {
       if(!Treasury || !rootState.defaultAccount) return;
       const partnerProjectRaw = await Treasury.methods.partneredProjects(id).call(defaultCallOptions(rootState));
       const [
-        isGold,
+        isValor,
         tokensClaimed,
         data
       ] = await Promise.all([
-        await Treasury.methods.projectIsGold(id).call(defaultCallOptions(rootState)),
+        await Treasury.methods.projectIsValor(id).call(defaultCallOptions(rootState)),
         await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(rootState)),
         await Treasury.methods.getProjectData(id).call(defaultCallOptions(rootState))
       ]);
@@ -162,7 +162,7 @@ const treasury = {
         tokensClaimed: +tokensClaimed,
         tokenPrice: +partnerProjectRaw[5],
         isActive: partnerProjectRaw[6],
-        isGold,
+        isValor,
         logo: data[0],
         details: data[1],
         website: data[2],
@@ -245,7 +245,7 @@ const treasury = {
       await Promise.all([
         dispatch('fetchSkillBalance', '', { root: true }),
         dispatch('combat/fetchFightRewardSkill', '', { root: true }),
-        dispatch('combat/fetchFightRewardGold', '', { root: true }),
+        dispatch('combat/fetchFightRewardValor', '', { root: true }),
         dispatch('fetchPartnerProject', id)
       ]);
     },

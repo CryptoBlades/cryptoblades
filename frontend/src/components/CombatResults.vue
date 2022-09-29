@@ -36,17 +36,17 @@
         <b-row>
           <b-col class="earned">
             <p class="h5 text-white">
-              <span v-if="!isGold" v-html="$t('combatResults.earnedSkill', {
+              <span v-if="!isValor" v-html="$t('combatResults.earnedSkill', {
                   noIGO: +igoDefaultReward ? formattedSkillNoIGO : formattedSkill,
                   inUSD: formattedInUsd(calculateSkillPriceInUsd(+igoDefaultReward ? formattedSkillNoIGO : formattedSkill).toFixed(4))
                 })"> </span>
-              <span v-else v-html="$t('combatResults.earnedGold', {
+              <span v-else v-html="$t('combatResults.earnedValor', {
                   noIGO: formattedSkill
                 })"> </span>
               <Hint :text="$t('combatResults.hint')" />
               <span v-if="+gasOffsetPerFight" v-html="$t('combatResults.gasOffset', {
                   offset: formattedSkillGasOffsetRewards,
-                  inUSD: isGold ? '' : formattedInUsd(calculateSkillPriceInUsd(formattedSkillGasOffsetRewards).toFixed(4))
+                  inUSD: isValor ? '' : formattedInUsd(calculateSkillPriceInUsd(formattedSkillGasOffsetRewards).toFixed(4))
                 })"></span>
               <span v-if="+igoDefaultReward" v-html="$t('combatResults.earnedIGOSkill', {
                   IGO: formattedSkillIGOReward,
@@ -122,7 +122,7 @@ export default Vue.extend({
       type: Number,
       default: 0,
     },
-    isGold: {
+    isValor: {
       type: Boolean,
       default: false
     }

@@ -46,7 +46,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     mapping(uint256 => string) public projectDetails;
     mapping(uint256 => string) public projectWebsite;
     mapping(uint256 => string) public projectNote;
-    mapping(uint256 => bool) public projectIsGold;
+    mapping(uint256 => bool) public projectIsValor;
 
     function initialize(CryptoBlades _game) public initializer {
         __AccessControl_init_unchained();
@@ -112,8 +112,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
     function getAmountInPartnerToken(uint256 partnerId, uint256 claimingAmount) public view returns (uint256 amountWithMultiplier) {
         uint256 baseAmount;
-        if(projectIsGold[partnerId]) {
-            // GOLD/GOLD = 1:1
+        if(projectIsValor[partnerId]) {
+            // Valor/Valor = 1:1
             baseAmount = claimingAmount; 
         }
         else {
@@ -148,7 +148,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         string memory details,
         string memory website,
         string memory note,
-        bool isGold)
+        bool isValor)
     public restricted {
         uint256 id = partneredProjects.length;
         multiplierTimestamp[id] = block.timestamp;
@@ -167,12 +167,12 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         projectDetails[id] = details;
         projectWebsite[id] = website;
         projectNote[id] = note;
-        projectIsGold[id] = isGold;
+        projectIsValor[id] = isValor;
     }
 
     function claim(uint256 partnerId) public {
         uint256 claimingAmount;
-        if(projectIsGold[partnerId]) {
+        if(projectIsValor[partnerId]) {
             claimingAmount = game.userVars(msg.sender,GAMEUSERVAR_GEN2_UNCLAIMED);
         }
         else {
@@ -182,7 +182,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     }
 
     function claim(uint256 partnerId, uint256 claimingAmount, uint256 currentMultiplier, uint256 slippage) public {
-        if(projectIsGold[partnerId]) {
+        if(projectIsValor[partnerId]) {
             require(game.userVars(msg.sender,GAMEUSERVAR_GEN2_UNCLAIMED) >= claimingAmount, 'Claim amount exceeds available rewards balance');
         }
         else {
@@ -201,8 +201,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
             partnerTokenAmount = remainingPartnerTokenSupply;
         }
 
-        if(projectIsGold[partnerId]) {
-            game.deductGold(tokensToDeduct, msg.sender);
+        if(projectIsValor[partnerId]) {
+            game.deductValor(tokensToDeduct, msg.sender);
         }
         else {
             game.deductAfterPartnerClaim(tokensToDeduct, msg.sender);
@@ -227,8 +227,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         partneredProjects[id].isActive = isActive;
     }
 
-    function setIsGold(uint256 id, bool isGold) public restricted {
-        projectIsGold[id] = isGold;
+    function setIsValor(uint256 id, bool isValor) public restricted {
+        projectIsValor[id] = isValor;
     }
 
     function setSkillPrice(uint256 newPrice) external restricted {
