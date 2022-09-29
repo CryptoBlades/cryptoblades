@@ -73,6 +73,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
     uint256 public constant USERVAR_CLAIM_TIMESTAMP = 10002;
     uint256 public constant USERVAR_CLAIM_WEAPON_DATA = 10003;
+    // RESERVED USERVAR: 10010
+    uint256 public constant USERVAR_GEN2_UNCLAIMED = 10011;
+    // RESERVED USERVARS: 10012-10019
 
     Characters public characters;
     Weapons public weapons;
@@ -231,7 +234,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     SpecialWeaponsManager public specialWeaponsManager;
     mapping(uint256 => address) public links;
-    mapping(address => uint256) public goldRewards;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -368,7 +370,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 monsterRoll = getMonsterPowerRoll(data.targetPower, RandomUtil.combineSeeds(seed,1));
 
         uint16 xp = getXpGainForFight(data.playerFightPower, data.targetPower) * fightMultiplier;
-        tokens = getTokenGainForFight(data.targetPower, true) * fightMultiplier;
+        tokens = getTokenGainForFight(data.targetPower) * fightMultiplier;
         expectedTokens = tokens;
 
         if (playerRoll < monsterRoll) {
@@ -376,9 +378,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             xp = 0;
         }
 
-        // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
         if(characterVersion > 0) {
-            goldRewards[fighter] += tokens;
+            userVars[fighter][USERVAR_GEN2_UNCLAIMED] += tokens;
         }
         else {
             tokenRewards[fighter] += tokens;
@@ -392,12 +393,12 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return uint24(target & 0xFFFFFF);
     }
 
-    function getTokenGainForFight(uint24 monsterPower, bool applyLimit) public view returns (uint256) {
+    function getTokenGainForFight(uint24 monsterPower) public view returns (uint256) {
         // monsterPower / avgPower * payPerFight * powerMultiplier + gasoffset
         return monsterPower * vars[VAR_HOURLY_PAY_PER_FIGHT] / vars[VAR_HOURLY_POWER_AVERAGE]
             + vars[VAR_GAS_OFFSET_PER_FIGHT_MULTIPLIER];
     }
-
+    
     function getXpGainForFight(uint24 playerPower, uint24 monsterPower) internal view returns (uint16) {
         return uint16(monsterPower * fightXpGain / playerPower);
     }
@@ -503,11 +504,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _payContractTokenOnly(msg.sender, convertedAmount);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
-        uint256 tokenID = characters.mint(msg.sender, seed);
-        if(goldRewards[msg.sender] == 0) {
-            goldRewards[msg.sender] = 1;
+        uint256 id = characters.mint(msg.sender, seed);
+        xpRewards[id] = 1;
+        if(userVars[msg.sender][USERVAR_GEN2_UNCLAIMED] == 0) {
+            userVars[msg.sender][USERVAR_GEN2_UNCLAIMED] = 1;
         }
-        xpRewards[tokenID] = 1;
 
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
@@ -787,7 +788,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function deductGold(uint256 amount, address player) external restricted {
-        goldRewards[player] = goldRewards[player].sub(amount);
+        userVars[player][USERVAR_GEN2_UNCLAIMED] = userVars[player][USERVAR_GEN2_UNCLAIMED].sub(amount);
     }
 
     function trackIncome(uint256 income) public restricted {
@@ -899,17 +900,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function usdToSkill(int128 usdAmount) public view returns (uint256) {
         return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
-    }
-
-    function stakeUnclaimedRewards() public {
-        stakeUnclaimedRewards(tokenRewards[msg.sender]);
-    }
-
-    function stakeUnclaimedRewards(uint256 amount) public {
-        if(promos.getBit(msg.sender, 4) == false) {
-            skillToken.approve(address(stakeFromGameImpl), amount);
-            stakeFromGameImpl.stakeFromGame(msg.sender, amount);
-        }
     }
 
     function claimXpRewards() public {

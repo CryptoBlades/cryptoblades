@@ -16,6 +16,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
+    uint256 public constant GAMEUSERVAR_GEN2_UNCLAIMED = 10011;
+
     uint256 public multiplierUnit;
 
     PartnerProject[] public partneredProjects;
@@ -174,7 +176,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
     function claim(uint256 partnerId, uint256 claimingAmount, uint256 currentMultiplier, uint256 slippage) public {
         if(projectIsGold[partnerId]) {
-            require(game.goldRewards(msg.sender) >= claimingAmount, 'Claim amount exceeds available rewards balance');
+            require(game.userVars(msg.sender,GAMEUSERVAR_GEN2_UNCLAIMED) >= claimingAmount, 'Claim amount exceeds available rewards balance');
         }
         else {
             require(game.getTokenRewardsFor(msg.sender) >= claimingAmount, 'Claim amount exceeds available rewards balance');
