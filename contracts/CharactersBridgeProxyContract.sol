@@ -107,7 +107,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         uint24 bonusPower = uint24(characters.getNftVar(characterId, 2)); // 2 => bonus Power
         uint16 reputation = uint16(characters.getNftVar(characterId, 103)); // 103 => reputation
         uint8 version = uint8(characters.getNftVar(characterId, 3)); // 3 => version
-        packedData = _packCharactersData(appliedCosmetic, xp, level, uint16(trait & (version << 8)), bonusPower, reputation);
+        packedData = _packCharactersData(appliedCosmetic, xp, level, uint16(trait | (version << 8)), bonusPower, reputation);
     }
 
     function _packCharactersData(uint32 appliedCosmetic, uint16 xp, uint8 level, uint16 traitAndVersion, uint24 bonusPower, uint16 reputation) internal pure returns (uint256) {
