@@ -204,7 +204,7 @@
                     class="ml-3 gtag-link-others"
                     @click="onMintCharacter"
                     v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
-                    {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
+                    {{$t('plaza.recruit')}} ({{ recruitCost }} SKILL) <i class="fas fa-plus"></i>
                   </b-button>
                   <b-checkbox
                     variant="primary"
@@ -261,7 +261,7 @@
                     class="ml-3 gtag-link-others"
                     @click="onMintCharacter"
                     v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
-                    {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
+                    {{$t('plaza.recruit')}} ({{ recruitCost }} SKILL) <i class="fas fa-plus"></i>
                   </b-button>
                   <b-checkbox
                     v-if="ownCharacters.length === 4"

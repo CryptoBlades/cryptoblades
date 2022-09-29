@@ -54,7 +54,7 @@
               class="ml-3 mt-4 mt-md-0 ml-md-auto recruit-btn text-uppercase custom-recruit-text-size mint-character"
               @click="$emit('mintCharacter')"
               v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
-              <span class="gtag-link-others custom-recruit-text"> <span>{{$t('plaza.recruit')}}</span> ({{ recruitCost }} NON-IGO SKILL)</span>
+              <span class="gtag-link-others custom-recruit-text"> <span>{{$t('plaza.recruit')}}</span> ({{ recruitCost }} SKILL)</span>
           </div>
           <div v-if="ownCharacters.length <= 4 && activeTab === 'info'"
               class="ml-3 mt-4 mt-md-0 ml-md-auto soul-border text-uppercase custom-recruit-text-size mint-character"
