@@ -306,8 +306,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         public pure returns (uint16 charTraitAndVersion, uint24 basePowerLevel, uint64 timestamp) {
 
         charTraitAndVersion = uint16(playerData & 0xFFFF);
-        basePowerLevel = uint24((playerData >> 8) & 0xFFFFFF);
-        timestamp = uint64((playerData >> 32) & 0xFFFFFFFFFFFFFFFF);
+        basePowerLevel = uint24((playerData >> 16) & 0xFFFFFF);
+        timestamp = uint64((playerData >> 40) & 0xFFFFFFFFFFFFFFFF);
     }
 
     function _getFightDataAndDrainStaminaUnpacked(address fighter, uint256 char, uint8 fightMultiplier) private returns(uint16, uint24, uint64) {

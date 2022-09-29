@@ -74,6 +74,15 @@ const combat = {
         .call(defaultCallOptions(rootState));
     },
 
+    async fetchGasOffsetPerFight({ rootState }: {rootState: IState}) {
+      const { CryptoBlades } = rootState.contracts();
+      if(!CryptoBlades || !rootState.defaultAccount) return;
+
+      return await CryptoBlades.methods
+        .vars(27)
+        .call(defaultCallOptions(rootState));
+    },
+
     async fetchHourlyPowerAverage({ rootState }: {rootState: IState}) {
       const { CryptoBlades } = rootState.contracts();
       if(!CryptoBlades) return;
@@ -139,8 +148,6 @@ const combat = {
       { characterId: number, weaponId: number, targetString: number, fightMultiplier: number, offsetCost: BigNumber }) {
       const { TokensManager, CryptoBlades } = rootState.contracts();
       if (!TokensManager || !CryptoBlades || !rootState.defaultAccount) return;
-
-      console.log('test', characterId,weaponId,targetString,fightMultiplier);
 
       const res = await TokensManager.methods
         .fight(

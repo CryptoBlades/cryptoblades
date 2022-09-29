@@ -376,7 +376,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
         }
         // bitwise magic to avoid stacking limitations later on
-        return uint104(char.trait | nftVars[id][NFTVAR_NON_GENESIS_VERSION] << 8 | (getTotalPower(id) << 16) | (preTimestamp << 40));
+        return uint104(char.trait | (nftVars[id][NFTVAR_NON_GENESIS_VERSION] << 8) | (getTotalPower(id) << 16) | (preTimestamp << 40));
     }
 
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {

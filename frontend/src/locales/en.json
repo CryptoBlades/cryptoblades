@@ -132,7 +132,8 @@
     "enemyRolled": "Enemy rolled:",
     "earnedSkill": "<b>{noIGO}</b> <small>UNCLAIMED SKILL</small> <b>{inUSD}</b> ",
     "earnedGold": "<b>{noIGO}</b> <small>UNCLAIMED GOLD</small> ",
-    "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> "
+    "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> ",
+    "gasOffset": "<br/> <small>INCLUDING</small> <b>{offset}</b> <small>GAS OFFSET</small> <b>{inUSD}</b> "
   },
   "homePage":{
     "level": "Level",
