@@ -105,8 +105,10 @@ export function getConfigValue(key: string, chain?: string): any {
     return process.env[key];
   }
 
+  // To test local against testnet, comment out these two lines and uncomment the line below them
   if(process.env.NODE_ENV === 'development') return '';
   const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
+  // const env = 'test';
 
   if(chain) return (config as Config).environments[env].chains[chain][key];
 
