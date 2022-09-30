@@ -352,23 +352,6 @@ const staking = {
       await dispatch('fetchStakeDetails', { stakeType: 'king' });
     },
 
-    async stakeUnclaimedRewards({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, { stakeType }: { stakeType: StakeType }) {
-      if(stakeType !== stakeTypeThatCanHaveUnclaimedRewardsStakedTo) return;
-
-      const { CryptoBlades } = rootState.contracts();
-      if(!CryptoBlades) return;
-
-      await CryptoBlades.methods
-        .stakeUnclaimedRewards()
-        .send(defaultCallOptions(rootState));
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchStakeDetails', { stakeType }),
-        dispatch('combat/fetchFightRewardSkill'),
-      ]);
-    },
-
     async claimReward({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, { stakeType }: { stakeType: StakeType }) {
       const { StakingRewards } = getStakingContracts(rootState.contracts(), stakeType);
       if(!StakingRewards) return;

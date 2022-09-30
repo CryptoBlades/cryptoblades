@@ -12,6 +12,7 @@ export interface ICharacter {
   legs: string;
   boots: string;
   race: string;
+  version: number;
 }
 
 export enum CharacterTrait {

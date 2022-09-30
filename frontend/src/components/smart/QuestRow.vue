@@ -132,6 +132,7 @@ export default Vue.extend({
 
 .quest-row-wallet {
   height: clamp(150px, 10vh, 200px);
+  height: auto;
 }
 
 .quest-row {

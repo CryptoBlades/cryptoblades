@@ -78,6 +78,7 @@ export interface IState {
   skillBalance: string;
   balance: string;
   skillRewards: string;
+  valorRewards: string;
   maxRewardsClaimTax: string;
   rewardsClaimTax: string;
   xpRewards: Record<string, string>;

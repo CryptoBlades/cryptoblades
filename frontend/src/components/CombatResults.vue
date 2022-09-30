@@ -36,11 +36,18 @@
         <b-row>
           <b-col class="earned">
             <p class="h5 text-white">
-              <span v-html="$t('combatResults.earnedSkill', {
+              <span v-if="!isValor" v-html="$t('combatResults.earnedSkill', {
                   noIGO: +igoDefaultReward ? formattedSkillNoIGO : formattedSkill,
                   inUSD: formattedInUsd(calculateSkillPriceInUsd(+igoDefaultReward ? formattedSkillNoIGO : formattedSkill).toFixed(4))
                 })"> </span>
+              <span v-else v-html="$t('combatResults.earnedValor', {
+                  noIGO: formattedSkill
+                })"> </span>
               <Hint :text="$t('combatResults.hint')" />
+              <span v-if="+gasOffsetPerFight" v-html="$t('combatResults.gasOffset', {
+                  offset: formattedSkillGasOffsetRewards,
+                  inUSD: isValor ? '' : formattedInUsd(calculateSkillPriceInUsd(formattedSkillGasOffsetRewards).toFixed(4))
+                })"></span>
               <span v-if="+igoDefaultReward" v-html="$t('combatResults.earnedIGOSkill', {
                   IGO: formattedSkillIGOReward,
                   inUSD: formattedInUsd(calculateSkillPriceInUsd(formattedSkillIGOReward).toFixed(4))
@@ -97,6 +104,7 @@ interface CombatResult {
 
 interface StoreMappedCombatActions {
   fetchIgoRewardsPerFight(): Promise<string>;
+  fetchGasOffsetPerFight(): Promise<string>;
 }
 
 export default Vue.extend({
@@ -114,6 +122,10 @@ export default Vue.extend({
       type: Number,
       default: 0,
     },
+    isValor: {
+      type: Boolean,
+      default: false
+    }
   },
 
   data() {
@@ -122,6 +134,7 @@ export default Vue.extend({
       gasToken: '',
       showAds: false,
       igoDefaultReward: 0,
+      gasOffsetPerFight: 0
     };
   },
 
@@ -139,18 +152,18 @@ export default Vue.extend({
     formattedSkillIGOReward(): string {
       return toBN(fromWeiEther((this.igoDefaultReward * this.formattedStaminaUsed).toString())).toFixed(6);
     },
+    formattedSkillGasOffsetRewards(): string {
+      return toBN(fromWeiEther((this.gasOffsetPerFight * this.formattedStaminaUsed).toString())).toFixed(6);
+    },
     formattedStaminaUsed(): number {
       return this.staminaUsed / 40;
-    },
-    formattedSkillTooltip(): string {
-      return fromWeiEther(this.fightResults.skillGain)+' SKILL';
     },
     formattedXpGain(): string {
       return this.fightResults.xpGain + ' xp';
     }
   },
   methods: {
-    ...(mapActions('combat', ['fetchIgoRewardsPerFight']) as StoreMappedCombatActions),
+    ...(mapActions('combat', ['fetchIgoRewardsPerFight', 'fetchGasOffsetPerFight']) as StoreMappedCombatActions),
     async fetchPrices(): Promise<void> {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
       this.skillPrice = response.data?.cryptoblades.usd;
@@ -180,6 +193,7 @@ export default Vue.extend({
   },
   async beforeMount(){
     this.igoDefaultReward = parseInt(await this.fetchIgoRewardsPerFight(), 10);
+    this.gasOffsetPerFight = parseInt(await this.fetchGasOffsetPerFight(), 10);
   },
   async mounted() {
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
