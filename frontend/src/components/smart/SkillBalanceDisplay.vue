@@ -120,11 +120,11 @@
         </div>
         <div v-if="selectedPartneredProject" class="d-flex mt-2">
           <div class="d-flex justify-content-center align-items-center">
-            <h6 class="claim-input-text">{{isValor ? $t('ClaimRewardsBar.ValorAmount') : $t('ClaimRewardsBar.skillAmount')}}:</h6>
+            <h6 class="claim-input-text">{{isValor ? $t('ClaimRewardsBar.valorAmount') : $t('ClaimRewardsBar.skillAmount')}}:</h6>
             <b-form-input v-if="!isValor" v-bind:class="!isSkillAmountValid ? 'invalid-amount' : ''"
               type="number" min="0" step="0.0001" :max="skillRewardNumber" v-model="skillAmount" class="claim-input" />
             <b-form-input v-else v-bind:class="!isValorAmountValid ? 'invalid-amount' : ''"
-              type="number" min="0" step="0.0001" :max="ValorRewardNumber" v-model="ValorAmount" class="claim-input" />
+              type="number" min="0" step="0.0001" :max="valorRewardNumber" v-model="valorAmount" class="claim-input" />
             <a role="button" @click="selectedPartneredProject && isValor ? setMaxValorAmount() : setMaxSkillAmount()">(Max)</a>
           </div>
           <div class="d-flex justify-content-center align-items-center">
@@ -140,9 +140,9 @@
           <h6 v-if="formattedMultiplier < 0.5" class="very-low-multiplier">{{$t('ClaimRewardsBar.lowMultiplier', {currentMultiplier})}}</h6>
           <h6 >{{
               $t('ClaimRewardsBar.realWithdrawValueClaimable', {
-                actualAmount: ((isValor ? ValorAmount : skillAmount) / nonFormattedRatio * formattedMultiplier).toFixed(4),
+                actualAmount: ((isValor ? valorAmount : skillAmount) / nonFormattedRatio * formattedMultiplier).toFixed(4),
                 tokenSymbol: selectedPartneredProject.tokenSymbol,
-                skillAmount: (isValor ? +ValorAmount : +skillAmount).toFixed(4),
+                skillAmount: (isValor ? +valorAmount : +skillAmount).toFixed(4),
                 token: isValor ? 'VALOR' : 'SKILL'
               })
             }}</h6>
@@ -173,7 +173,7 @@ import PartneredProject from '../PartneredProject.vue';
 
 interface StoreMappedState {
   skillRewards: string;
-  ValorRewards: string;
+  valorRewards: string;
   skillBalance: string;
   inGameOnlyFunds: string;
   waxBridgeWithdrawableBnb: string;
@@ -241,13 +241,13 @@ export default Vue.extend({
     return{
       ClaimStage,
       skillAmount: 0,
-      ValorAmount: 0,
+      valorAmount: 0,
       slippage: 0,
       isToggled: true
     };
   },
   computed: {
-    ...(mapState(['skillRewards', 'ValorRewards', 'skillBalance', 'inGameOnlyFunds', 'waxBridgeWithdrawableBnb',
+    ...(mapState(['skillRewards', 'valorRewards', 'skillBalance', 'inGameOnlyFunds', 'waxBridgeWithdrawableBnb',
       'waxBridgeTimeUntilLimitExpires', 'ownedCharacterIds', 'xpRewards', 'balance']) as Accessors<StoreMappedState>),
     ...(mapState('treasury',
       ['payoutCurrencyId','partnerProjectMultipliers', 'partnerProjectRatios','defaultSlippage'])as Accessors<StoreMappedTreasuryState>),
@@ -275,17 +275,17 @@ export default Vue.extend({
     skillRewardNumber(): number {
       return +toBN(fromWeiEther(this.skillRewards.substr(0, this.skillRewards.length - 3) + '000'));
     },
-    ValorRewardNumber(): number {
-      return +toBN(fromWeiEther(this.ValorRewards.substr(0, this.ValorRewards.length - 3) + '000'));
+    valorRewardNumber(): number {
+      return +toBN(fromWeiEther(this.valorRewards.substr(0, this.valorRewards.length - 3) + '000'));
     },
     isSkillAmountValid(): boolean {
       return this.skillAmount <= this.skillRewardNumber && this.skillAmount > 0;
     },
     isValorAmountValid(): boolean {
-      return this.ValorAmount <= this.ValorRewardNumber && this.ValorAmount > 0;
+      return this.valorAmount <= this.valorRewardNumber && this.valorAmount > 0;
     },
     canClaimTokens(): boolean {
-      const areRewardsZeroOrLess = toBN(this.isValor ? this.ValorRewards : this.skillRewards).lte(0);
+      const areRewardsZeroOrLess = toBN(this.isValor ? this.valorRewards : this.skillRewards).lte(0);
       return areRewardsZeroOrLess;
     },
     canClaimSelectedProject(): boolean {
@@ -420,7 +420,7 @@ export default Vue.extend({
         await this.claimPartnerToken(
           {
             id: +this.payoutCurrencyId,
-            skillAmount: toBN(this.isValor ? this.ValorAmount : this.skillAmount).multipliedBy(toBN(10).pow(18)).toString(),
+            skillAmount: toBN(this.isValor ? this.valorAmount : this.skillAmount).multipliedBy(toBN(10).pow(18)).toString(),
             currentMultiplier: toBN(currentMultiplier).toString(),
             slippage: toBN(this.slippage).multipliedBy(toBN(10).pow(16)).toString()
           }
@@ -433,9 +433,9 @@ export default Vue.extend({
       return toBN(skillRewards).toFixed(4);
     },
     getUnclaimedValor(): number | string {
-      const ValorRewards = fromWeiEther(this.ValorRewards);
-      if(parseFloat(ValorRewards) === 0) return 0;
-      return toBN(ValorRewards).toFixed(4);
+      const valorRewards = fromWeiEther(this.valorRewards);
+      if(parseFloat(valorRewards) === 0) return 0;
+      return toBN(valorRewards).toFixed(4);
     },
     async claimSkill(stage: ClaimStage) {
       if(stage === ClaimStage.WaxBridge) {
@@ -465,7 +465,7 @@ export default Vue.extend({
       this.skillAmount = this.skillRewardNumber;
     },
     setMaxValorAmount(): void {
-      this.ValorAmount = this.ValorRewardNumber;
+      this.valorAmount = this.valorRewardNumber;
     },
     getCleanCharacterName(id: number): string {
       return getCleanName(this.getCharacterName(id));

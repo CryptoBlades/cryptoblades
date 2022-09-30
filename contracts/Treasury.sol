@@ -113,7 +113,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     function getAmountInPartnerToken(uint256 partnerId, uint256 claimingAmount) public view returns (uint256 amountWithMultiplier) {
         uint256 baseAmount;
         if(projectIsValor[partnerId]) {
-            // Valor/Valor = 1:1
+            // VALOR/VALOR = 1:1
             baseAmount = claimingAmount; 
         }
         else {

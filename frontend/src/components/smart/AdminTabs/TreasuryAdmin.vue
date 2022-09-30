@@ -61,7 +61,7 @@
                        v-model="selectedPartnerProject.propertyBooleanValue" class="text-nowrap">
         {{ $t(`admin.treasury.property.${PartnerProperty[selectedPartnerProject.selectedProperty]}`) }}
       </b-form-checkbox>
-      <b-form-checkbox v-if="selectedPartnerProject.selectedProperty === PartnerProperty.IS_Valor"
+      <b-form-checkbox v-if="selectedPartnerProject.selectedProperty === PartnerProperty.IS_VALOR"
                        v-model="selectedPartnerProject.propertyBooleanValue" class="text-nowrap">
         {{ $t(`admin.treasury.property.${PartnerProperty[selectedPartnerProject.selectedProperty]}`) }}
       </b-form-checkbox>
@@ -82,7 +82,7 @@ import {mapActions} from 'vuex';
 import {isValidWeb3Address} from '../../../utils/common';
 
 enum PartnerProperty {
-  LOGO, DETAILS, WEBSITE, NOTE, IS_ACTIVE, IS_Valor
+  LOGO, DETAILS, WEBSITE, NOTE, IS_ACTIVE, IS_VALOR
 }
 
 interface SelectedPartnerProject {
@@ -248,7 +248,7 @@ export default Vue.extend({
             isActive: this.selectedPartnerProject.propertyBooleanValue
           });
           break;
-        case PartnerProperty.IS_Valor:
+        case PartnerProperty.IS_VALOR:
           await this.setPartnerProjectIsValor({
             id: this.selectedPartnerProject.id,
             isValor: this.selectedPartnerProject.propertyBooleanValue
