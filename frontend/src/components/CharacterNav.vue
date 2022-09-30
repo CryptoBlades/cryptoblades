@@ -43,7 +43,7 @@
             <span class="main-font text-white fs-5">{{$t('Character.characterBurn')}}</span>
           </div>
         </div>
-        <div class="d-flex flex-column flex-md-row justify-contenct-center">
+        <div class="d-flex flex-column flex-md-row justify-content-center">
           <div v-if="activeTab === 'garrison'"
               class="mt-4 mt-md-0 ml-md-auto recruit-btn-custom text-uppercase custom-recruit-text-size mint-character"
               @click="$emit('onClaimGarrisonXp')"

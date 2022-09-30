@@ -351,7 +351,7 @@ export default Vue.extend({
 .dashboard-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: auto;
   z-index: 1;
   overflow:hidden;
 }
@@ -851,7 +851,11 @@ export default Vue.extend({
   }
 }
 
-@media all and (max-width: 600px) {
+.raid-boss-button-and-drops > a > .pve-button{
+  width: max-content;
+}
+
+@media all and (max-width: 742px) { /* tried778 start600 next742*/
   .upper-body-container,
   .lower-body-container {
     display: flex;
