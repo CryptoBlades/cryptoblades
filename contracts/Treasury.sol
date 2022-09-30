@@ -16,6 +16,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
 
+    uint256 public constant GAMEUSERVAR_GEN2_UNCLAIMED = 10011;
+
     uint256 public multiplierUnit;
 
     PartnerProject[] public partneredProjects;
@@ -44,6 +46,7 @@ contract Treasury is Initializable, AccessControlUpgradeable {
     mapping(uint256 => string) public projectDetails;
     mapping(uint256 => string) public projectWebsite;
     mapping(uint256 => string) public projectNote;
+    mapping(uint256 => bool) public projectIsValor;
 
     function initialize(CryptoBlades _game) public initializer {
         __AccessControl_init_unchained();
@@ -107,8 +110,15 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         return partneredProjects[partnerId].tokenSupply.mul(1e18).sub(tokensClaimed[partnerId]);
     }
 
-    function getAmountInPartnerToken(uint256 partnerId, uint256 skillAmount) public view returns (uint256 amountWithMultiplier) {
-        uint256 baseAmount = getSkillToPartnerRatio(partnerId).mulu(skillAmount);
+    function getAmountInPartnerToken(uint256 partnerId, uint256 claimingAmount) public view returns (uint256 amountWithMultiplier) {
+        uint256 baseAmount;
+        if(projectIsValor[partnerId]) {
+            // VALOR/VALOR = 1:1
+            baseAmount = claimingAmount; 
+        }
+        else {
+            baseAmount = getSkillToPartnerRatio(partnerId).mulu(claimingAmount);
+        }
         amountWithMultiplier = baseAmount.mul(getProjectMultiplier(partnerId)).div(1e18);
     }
 
@@ -137,7 +147,8 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         string memory logo,
         string memory details,
         string memory website,
-        string memory note)
+        string memory note,
+        bool isValor)
     public restricted {
         uint256 id = partneredProjects.length;
         multiplierTimestamp[id] = block.timestamp;
@@ -156,28 +167,46 @@ contract Treasury is Initializable, AccessControlUpgradeable {
         projectDetails[id] = details;
         projectWebsite[id] = website;
         projectNote[id] = note;
+        projectIsValor[id] = isValor;
     }
 
     function claim(uint256 partnerId) public {
-        claim(partnerId, game.getTokenRewardsFor(msg.sender), getProjectMultiplier(partnerId), defaultSlippage);
+        uint256 claimingAmount;
+        if(projectIsValor[partnerId]) {
+            claimingAmount = game.userVars(msg.sender,GAMEUSERVAR_GEN2_UNCLAIMED);
+        }
+        else {
+            claimingAmount = game.getTokenRewardsFor(msg.sender);
+        }
+        claim(partnerId, claimingAmount, getProjectMultiplier(partnerId), defaultSlippage);
     }
 
-    function claim(uint256 partnerId, uint256 skillClaimingAmount, uint256 currentMultiplier, uint256 slippage) public {
-        require(game.getTokenRewardsFor(msg.sender) >= skillClaimingAmount, 'Claim amount exceeds available rewards balance');
+    function claim(uint256 partnerId, uint256 claimingAmount, uint256 currentMultiplier, uint256 slippage) public {
+        if(projectIsValor[partnerId]) {
+            require(game.userVars(msg.sender,GAMEUSERVAR_GEN2_UNCLAIMED) >= claimingAmount, 'Claim amount exceeds available rewards balance');
+        }
+        else {
+            require(game.getTokenRewardsFor(msg.sender) >= claimingAmount, 'Claim amount exceeds available rewards balance');
+        }
         uint256 effectiveMultiplier = getProjectMultiplier(partnerId);
         require(currentMultiplier.mul(uint(1e18).sub(slippage)).div(1e18) < effectiveMultiplier, 'Slippage exceeded');
         require(partneredProjects[partnerId].isActive == true, 'Project inactive');
 
-        uint256 partnerTokenAmount = getAmountInPartnerToken(partnerId, skillClaimingAmount);
+        uint256 partnerTokenAmount = getAmountInPartnerToken(partnerId, claimingAmount);
         uint256 remainingPartnerTokenSupply = getRemainingPartnerTokenSupply(partnerId);
-        uint256 skillToDeduct = skillClaimingAmount;
+        uint256 tokensToDeduct = claimingAmount;
 
         if (partnerTokenAmount > remainingPartnerTokenSupply) {
-            skillToDeduct = skillToDeduct.mul(remainingPartnerTokenSupply).div(partnerTokenAmount);
+            tokensToDeduct = tokensToDeduct.mul(remainingPartnerTokenSupply).div(partnerTokenAmount);
             partnerTokenAmount = remainingPartnerTokenSupply;
         }
 
-        game.deductAfterPartnerClaim(skillToDeduct, msg.sender);
+        if(projectIsValor[partnerId]) {
+            game.deductValor(tokensToDeduct, msg.sender);
+        }
+        else {
+            game.deductAfterPartnerClaim(tokensToDeduct, msg.sender);
+        }
         tokensClaimed[partnerId] += partnerTokenAmount;
 
         uint256 partnerTokenDecimals = ERC20(partneredProjects[partnerId].tokenAddress).decimals();
@@ -196,6 +225,10 @@ contract Treasury is Initializable, AccessControlUpgradeable {
 
     function setIsActive(uint256 id, bool isActive) public restricted {
         partneredProjects[id].isActive = isActive;
+    }
+
+    function setIsValor(uint256 id, bool isValor) public restricted {
+        projectIsValor[id] = isValor;
     }
 
     function setSkillPrice(uint256 newPrice) external restricted {

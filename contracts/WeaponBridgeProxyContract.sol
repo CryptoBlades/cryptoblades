@@ -58,7 +58,7 @@ contract WeaponBridgeProxyContract is Initializable, AccessControlUpgradeable, I
 
     // for future use, bot will probe the returned value to know if the proxy contract has proper signature behavior
     function sigVersion() external view override returns (uint256) {
-        return 1;
+        return 2;
     }
 
     function isEnabled() external view override returns (bool) {
@@ -90,5 +90,9 @@ contract WeaponBridgeProxyContract is Initializable, AccessControlUpgradeable, I
 
     function _packWeaponsData(uint32 appliedCosmetic, uint16 properties, uint16 stat1, uint16 stat2, uint16 stat3, uint8 weaponLevel, uint8 lowStarBurnPoints, uint8 fourStarBurnPoints, uint8 fiveStarBurnPoints, uint24 weaponType) internal pure returns (uint256) {
         return  uint256(fiveStarBurnPoints | (uint256(fourStarBurnPoints) << 8) | (uint256(lowStarBurnPoints) << 16) | (uint256(weaponLevel) << 24) | (uint256(stat3) << 32) | (uint256(stat2) << 48) | (uint256(stat1) << 64) | (uint256(properties) << 80) | (uint256(appliedCosmetic) << 96) | (uint256(weaponType) << 128));
+    }
+
+    function canBridge(address wallet, uint256 tokenId, uint256 targetChain) external view override returns (bool) {
+        return true;
     }
 }
