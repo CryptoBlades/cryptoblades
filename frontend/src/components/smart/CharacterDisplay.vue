@@ -393,7 +393,6 @@ export default Vue.extend({
 
 .character-display-container {
   margin-top: -20px;
-  height: 90vh;
 }
 
 

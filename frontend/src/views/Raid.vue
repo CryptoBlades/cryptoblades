@@ -40,40 +40,45 @@
                     <p class="no-margin" v-else>{{$t('raid.noPendingRaid')}}</p>
 
                     <div class="w-limit" v-if="raidStatus==='0'">
-                        <div class="day">
-                          <p>00</p>
-                          <span>{{ remainingTime.days > 1 ? $t('raid.days') : $t('raid.day') }}</span>
-                        </div>
-                        <div class="hour">
-                          <p>00</p>
-                          <span>{{ remainingTime.hours > 1 ? $t('raid.hrs') : $t('raid.hr')}}</span>
-                        </div>
-                        <div class="min">
-                          <p>00</p>
-                          <span>{{ remainingTime.minutes > 1 ? $t('raid.mins') : $t('raid.min')}}</span>
-                        </div>
-                        <div class="sec">
-                          <p>00</p>
-                          <span>{{ remainingTime.seconds > 1 ? $t('raid.sec') : $t('raid.sec')}}</span>
-                        </div>
+                      <div class="day">
+                        <p>00</p>
+                        <span>{{ remainingTime.days > 1 ? $t('raid.days') : $t('raid.day') }}</span>
+                      </div>
+                      <div class="hour">
+                        <p>00</p>
+                        <span>{{ remainingTime.hours > 1 ? $t('raid.hrs') : $t('raid.hr')}}</span>
+                      </div>
+                      <div class="min">
+                        <p>00</p>
+                        <span>{{ remainingTime.minutes > 1 ? $t('raid.mins') : $t('raid.min')}}</span>
+                      </div>
+                      <div class="sec">
+                        <p>00</p>
+                        <span>{{ remainingTime.seconds > 1 ? $t('raid.sec') : $t('raid.sec')}}</span>
+                      </div>
+                    </div>
+                    <div class="w-limit" v-else-if="remainingTime.seconds > -1 && remainingTime.minutes > -1">
+                      <div class="day" v-if="remainingTime.days > 0">
+                        <p>{{ zeroPad(remainingTime.days, 2) }}</p>
+                        <span>{{ remainingTime.days > 1 ? $t('raid.days') : $t('raid.day') }}</span>
+                      </div>
+                      <div class="hour" v-if="remainingTime.hours > 0">
+                        <p>{{ zeroPad(remainingTime.hours, 2)}}</p>
+                        <span>{{ remainingTime.hours > 1 ? $t('raid.hrs') : $t('raid.hr')}}</span>
+                      </div>
+                      <div class="min">
+                        <p>{{ zeroPad(remainingTime.minutes, 2)}}</p>
+                        <span>{{ remainingTime.minutes > 1 ? $t('raid.mins') : $t('raid.min')}}</span>
+                      </div>
+                      <div class="sec">
+                        <p>{{ zeroPad(remainingTime.seconds, 2)}}</p>
+                        <span>{{ remainingTime.seconds > 1 ? $t('raid.sec') : $t('raid.sec')}}</span>
+                      </div>
                     </div>
                     <div class="w-limit" v-else>
-                        <div class="day" v-if="remainingTime.days > 0">
-                          <p>{{ zeroPad(remainingTime.days, 2) }}</p>
-                          <span>{{ remainingTime.days > 1 ? $t('raid.days') : $t('raid.day') }}</span>
-                        </div>
-                        <div class="hour" v-if="remainingTime.hours > 0">
-                          <p>{{ zeroPad(remainingTime.hours, 2)}}</p>
-                          <span>{{ remainingTime.hours > 1 ? $t('raid.hrs') : $t('raid.hr')}}</span>
-                        </div>
-                        <div class="min">
-                          <p>{{ zeroPad(remainingTime.minutes, 2)}}</p>
-                          <span>{{ remainingTime.minutes > 1 ? $t('raid.mins') : $t('raid.min')}}</span>
-                        </div>
-                        <div class="sec">
-                          <p>{{ zeroPad(remainingTime.seconds, 2)}}</p>
-                          <span>{{ remainingTime.seconds > 1 ? $t('raid.sec') : $t('raid.sec')}}</span>
-                        </div>
+                      <div class="raidNotStarted">
+                        <p>{{$t('raid.raidOver')}}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1697,10 +1702,14 @@ hr.divider {
 
 .w-limit > div{
   width: 5em;
-    justify-content: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.w-limit > div.raidOver {
+  width: inherit;
 }
 
 .boss-name > div{
