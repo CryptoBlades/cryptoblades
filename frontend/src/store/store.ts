@@ -82,6 +82,7 @@ export default new Vuex.Store<IState>({
     skillBalance: '0',
     balance: '0',
     skillRewards: '0',
+    valorRewards: '0',
     maxRewardsClaimTax: '0',
     rewardsClaimTax: '0',
     xpRewards: {},
@@ -490,6 +491,10 @@ export default new Vuex.Store<IState>({
       state.skillRewards = skillRewards;
     },
 
+    updateValorRewards(state: IState, { valorRewards }: { valorRewards: string }) {
+      state.valorRewards = valorRewards;
+    },
+
     updateRewardsClaimTax(
       state,
       { maxRewardsClaimTax, rewardsClaimTax }: { maxRewardsClaimTax: string, rewardsClaimTax: string }
@@ -767,6 +772,7 @@ export default new Vuex.Store<IState>({
               dispatch('fetchCharacter', { characterId }),
               dispatch('fetchSkillBalance'),
               dispatch('combat/fetchFightRewardSkill'),
+              dispatch('combat/fetchFightRewardValor'),
               dispatch('combat/fetchFightRewardXp'),
               dispatch('fetchDustBalance')
             ]);
@@ -969,6 +975,7 @@ export default new Vuex.Store<IState>({
         dispatch('fetchJunks', ownedJunkIds),
         dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
         dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardValor'),
         dispatch('combat/fetchFightRewardXp'),
         dispatch('fetchGarrisonCharactersXp'),
         dispatch('combat/fetchFightGasOffset'),
@@ -1075,10 +1082,16 @@ export default new Vuex.Store<IState>({
       ]);
     },
 
-    async fetchSoulBalance({ state }) {
+    async fetchGenesisSoulBalance({ state }) {
       const { BurningManager } = state.contracts();
       if(!BurningManager || !state.defaultAccount) return;
       return await BurningManager.methods.userVars(state.defaultAccount, 1).call(defaultCallOptions(state));
+    },
+
+    async fetchNonGenesisSoulBalance({ state }) {
+      const { BurningManager } = state.contracts();
+      if(!BurningManager || !state.defaultAccount) return;
+      return await BurningManager.methods.userVars(state.defaultAccount, 2).call(defaultCallOptions(state));
     },
 
     async fetchInGameOnlyFunds({ state, commit }) {
@@ -1120,6 +1133,7 @@ export default new Vuex.Store<IState>({
             characterId,
             await Characters.methods.get('' + characterId).call(defaultCallOptions(state))
           );
+          character.version = +await dispatch('fetchCharacterVersion', characterId);
           await dispatch('fetchCharacterPower', characterId);
           await dispatch('getIsCharacterInArena', characterId);
 
@@ -1145,6 +1159,13 @@ export default new Vuex.Store<IState>({
         const power = await Characters.methods.getTotalPower(characterId).call(defaultCallOptions(state));
         commit('updateCharacterPower', { characterId, power });
       }
+    },
+
+    async fetchCharacterVersion({state}, characterId) {
+      const { Characters } = state.contracts();
+      if(!Characters || !state.defaultAccount) return;
+      const NFTVAR_NON_GENESIS_VERSION = 3;
+      return await Characters.methods.nftVars(characterId, NFTVAR_NON_GENESIS_VERSION).call(defaultCallOptions(state));
     },
 
     async fetchWeapons({ dispatch }, weaponIds: (string | number)[]) {
@@ -1377,15 +1398,16 @@ export default new Vuex.Store<IState>({
       if(!state.defaultAccount) return;
       const slippageMultiplier = approveMintSlippage ? 1.05 : 1;
 
-      await approveFee(
+      await approveFeeDynamic(
+        state.contracts().CryptoBlades!,
         state.contracts().CryptoBlades!,
         state.contracts().SkillToken,
         state.defaultAccount,
-        state.skillRewards,
+        '0',
         defaultCallOptions(state),
         defaultCallOptions(state),
         cryptoBladesMethods => cryptoBladesMethods.getMintCharacterFee(),
-        { feeMultiplier: slippageMultiplier, allowInGameOnlyFunds: false }
+        { feeMultiplier: slippageMultiplier, allowInGameOnlyFunds: false, allowSkillRewards: false }
       );
 
       await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
@@ -1646,13 +1668,6 @@ export default new Vuex.Store<IState>({
       const { BurningManager } = state.contracts();
       if(!state.defaultAccount || !BurningManager) return;
       return await BurningManager.methods.burnWeaponFee().call({ from: state.defaultAccount });
-    },
-
-    async fetchRemainingTokenClaimAmountPreTax({ state }) {
-      if(!_.isFunction(state.contracts)) return;
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-      return await CryptoBlades.methods.getRemainingTokenClaimAmountPreTax().call(defaultCallOptions(state));
     },
 
     async fetchIsLandSaleAllowed({state}) {
@@ -2076,21 +2091,6 @@ export default new Vuex.Store<IState>({
       const totalSkill = +unclaimedSkill + +walletSkill;
 
       return totalSkill >= payingAmount;
-    },
-
-    async claimTokenRewards({ state, dispatch }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-
-      await CryptoBlades.methods.claimTokenRewards().send({
-        from: state.defaultAccount,
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('combat/fetchFightRewardSkill')
-      ]);
     },
 
     async claimXpRewards({ state, dispatch }) {
@@ -2685,11 +2685,26 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchCharacterPower', charId);
     },
 
+    async upgradeNonGenesisCharacterWithSoul({ state, dispatch }, {charId, soulAmount}) {
+      const { BurningManager } = state.contracts();
+      if(!BurningManager || !state.defaultAccount) return;
+
+      await BurningManager.methods.upgradeNonGenesisCharacterWithSoul(charId, soulAmount).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
+      await dispatch('fetchCharacterPower', charId);
+    },
+
     async transferSoul({ state }, {targetAddress, soulAmount}) {
       const { BurningManager } = state.contracts();
       if(!BurningManager || !state.defaultAccount) return;
 
       await BurningManager.methods.transferSoul(targetAddress, soulAmount).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
+    },
+
+    async transferNonGenesisSoul({ state }, {targetAddress, soulAmount}) {
+      const { BurningManager } = state.contracts();
+      if(!BurningManager || !state.defaultAccount) return;
+
+      await BurningManager.methods.transferNonGenesisSoul(targetAddress, soulAmount).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
     },
 
     async fetchCharactersBurnCost({ state }, burnIds) {

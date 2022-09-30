@@ -182,8 +182,8 @@ interface StoreMappedCombatGetters {
 
 interface StoreMappedCombatActions {
   fetchExpectedPayoutForMonsterPower(
-    { power, isCalculator }:
-    { power: string | number, isCalculator: boolean }): Promise<string>;
+    { power }:
+    { power: string | number }): Promise<string>;
   getCombatTokenChargePercent(): Promise<string>;
 }
 
@@ -405,7 +405,7 @@ export default Vue.extend({
     },
 
     async getAverageRewardForPower(power: number) {
-      const expectedPayout = parseInt(await this.fetchExpectedPayoutForMonsterPower({ power: Math.round(power), isCalculator: true }), 10);
+      const expectedPayout = parseInt(await this.fetchExpectedPayoutForMonsterPower({ power: Math.round(power) }), 10);
       return this.formattedSkill(expectedPayout);
     },
 

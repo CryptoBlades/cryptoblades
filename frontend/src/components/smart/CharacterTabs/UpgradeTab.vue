@@ -52,6 +52,7 @@ interface Data {
 
 interface StoreMappedActions {
   upgradeCharacterWithSoul(payload: {charId: number, soulAmount: number}): Promise<void>;
+  upgradeNonGenesisCharacterWithSoul(payload: {charId: number, soulAmount: number}): Promise<void>;
 }
 
 
@@ -73,9 +74,12 @@ export default Vue.extend({
     remainingPowerLimit(): number {
       return( 4 * CharacterPower(this.characters[this.currentCharacterId]?.level ?? 0) - this.getCharacterPower(this.currentCharacterId.toString()) ?? 0);
     },
+    isGenesisCharacter(): boolean {
+      return this.characters[this.currentCharacterId]?.version === 0;
+    }
   },
   methods: {
-    ...mapActions(['upgradeCharacterWithSoul']) as StoreMappedActions,
+    ...mapActions(['upgradeCharacterWithSoul', 'upgradeNonGenesisCharacterWithSoul']) as StoreMappedActions,
     handlePower(e: { target: HTMLInputElement }){
       if ((this.remainingPowerLimit > (this.soulBalance * 10) && +e.target.value > (this.soulBalance * 10))) {
         this.powerAmount = this.soulBalance * 10;
@@ -107,7 +111,12 @@ export default Vue.extend({
     async onUpgradeConfirm() {
       if (!this.currentCharacterId || this.powerAmount === 0) return;
       try {
-        await this.upgradeCharacterWithSoul({charId: this.currentCharacterId, soulAmount: this.powerAmount / 10});
+        if(this.isGenesisCharacter) {
+          await this.upgradeCharacterWithSoul({charId: this.currentCharacterId, soulAmount: this.powerAmount / 10});
+        }
+        else {
+          await this.upgradeNonGenesisCharacterWithSoul({charId: this.currentCharacterId, soulAmount: this.powerAmount / 10});
+        }
       } catch (error) {
         console.error(error);
         return;

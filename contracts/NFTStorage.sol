@@ -290,6 +290,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         require(_id != 0, "BNS1"); // avoid sanity issues with mappings; just dont support 0
         require(nftAllowedChains[address(_tokenAddress)].contains(targetChain), "BNS2"); // We support bridging from this chain to that chain
         require(IBridgeProxy(nftProxyContract[address(_tokenAddress)]).isEnabled(), "BNS3");
+        require(IBridgeProxy(nftProxyContract[address(_tokenAddress)]).canBridge(msg.sender, _id, targetChain), "BNS4");
         _;
     }
     
@@ -586,7 +587,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         mintedId =
             characters.customMint(address(this), xp,
-            level, trait, seed, mintedId, bonusPower, reputation);
+            level, trait, seed, mintedId, bonusPower, reputation, 0);
 
             if(appliedCosmetic > 0) {
                 characterCosmetics.setCharacterCosmetic(mintedId, appliedCosmetic);

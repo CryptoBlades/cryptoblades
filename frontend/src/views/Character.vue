@@ -33,7 +33,8 @@
         :havePlazaCharacters="havePlazaCharacters"
         @toggle="toggleGarrison"
         :recruitCost="recruitCost"
-        :soulBalance="soulBalance"
+        :genesisSoulBalance="genesisSoulBalance"
+        :nonGenesisSoulBalance="nonGenesisSoulBalance"
         :ownCharacters="ownCharacters"
         @mintCharacter="onMintCharacter"
         @onClaimGarrisonXp="onClaimGarrisonXp"
@@ -77,6 +78,8 @@
                     <div class="soul-container">
                       <div class="soul-img" :class="glowImage ? 'glowUp' : ''"></div>
                       <p>+{{totalSoul.toLocaleString()}}</p>
+                      <div class="soul-img-non-genesis" :class="glowImageNonGenesis ? 'glowUpNonGenesis' : ''"></div>
+                      <p>+{{totalSoulNonGenesis.toLocaleString()}}</p>
                     </div>
                   </div>
                   <div class="btn-container">
@@ -176,7 +179,8 @@ interface StoreMappedActions {
   fetchMintCharacterPriceDecreasePerSecond(): Promise<number>;
   fetchCharacterMintIncreasePrice(): Promise<number>;
   fetchMintCharacterMinPrice(): Promise<number>;
-  fetchSoulBalance(): Promise<string>;
+  fetchGenesisSoulBalance(): Promise<string>;
+  fetchNonGenesisSoulBalance(): Promise<string>;
   fetchBurnPowerMultiplier(): Promise<string>;
   fetchCharactersBurnCost(payload: string[]): Promise<string>;
   burnCharactersIntoSoul(payload: string[]): Promise<void>;
@@ -198,7 +202,8 @@ interface Data {
   mintCharacterPriceIncrease: string;
   mintCharacterMinPrice: string;
   activeTab: string;
-  soulBalance: number;
+  genesisSoulBalance: number;
+  nonGenesisSoulBalance: number;
   disableCharacterBurn: boolean;
   burnCost: number;
   burnPowerMultiplier: number;
@@ -214,7 +219,9 @@ interface Data {
   isBurnInProgress: boolean;
   isClaimingXp: boolean;
   totalSoul: number;
+  totalSoulNonGenesis: number;
   glowImage: boolean;
+  glowImageNonGenesis: boolean;
 }
 
 export default Vue.extend({
@@ -228,7 +235,8 @@ export default Vue.extend({
       mintCharacterPriceIncrease: '0',
       mintCharacterMinPrice: '0',
       showAds: false,
-      soulBalance: 0,
+      genesisSoulBalance: 0,
+      nonGenesisSoulBalance: 0,
       disableCharacterBurn: (getConfigValue('featureSupport').disableDynamicMinting),
       burnCost: 0,
       burnPowerMultiplier: 1,
@@ -244,7 +252,9 @@ export default Vue.extend({
       isBurnInProgress: false,
       isClaimingXp: false,
       totalSoul: 0,
-      glowImage: false
+      totalSoulNonGenesis: 0,
+      glowImage: false,
+      glowImageNonGenesis: false
     };
   },
   computed: {
@@ -256,6 +266,7 @@ export default Vue.extend({
       'characterStaminas',
       'skillBalance',
       'skillRewards',
+      'valorRewards',
       'ownedCharacterIds',
       'xpRewards',
       'characterCosmetics',
@@ -317,7 +328,8 @@ export default Vue.extend({
       'fetchCharacterMintIncreasePrice',
       'fetchMintCharacterMinPrice',
       'fetchMintCharacterFee',
-      'fetchSoulBalance',
+      'fetchGenesisSoulBalance',
+      'fetchNonGenesisSoulBalance',
       'fetchBurnPowerMultiplier',
       'fetchCharactersBurnCost',
       'burnCharactersIntoSoul',
@@ -362,20 +374,35 @@ export default Vue.extend({
 
       if(!this.burnCharacterIds.includes(id.toString())){
         this.burnCharacterIds.push(id.toString());
-        this.totalSoul += this.getCharacterPower(id)/10;
+        if(this.characters[id].version === 0) {
+          this.totalSoul += this.getCharacterPower(id)/10;
+        }
+        else {
+          this.totalSoulNonGenesis += this.getCharacterPower(id)/10;
+        }
       }else{
         this.burnCharacterIds = this.burnCharacterIds.filter(val => val !== id.toString());
-        this.totalSoul -= this.getCharacterPower(id)/10;
+        if(this.characters[id].version === 0) {
+          this.totalSoul -= this.getCharacterPower(id)/10;
+        }
+        else {
+          this.totalSoulNonGenesis -= this.getCharacterPower(id)/10;
+        }
       }
       await this.updateBurnCost();
     },
     async removeBurnCharacter(id: number) {
       this.burnCharacterIds = this.burnCharacterIds.filter(val => !val.includes(id.toString()));
-      this.totalSoul -= this.getCharacterPower(id)/10;
+      if(this.characters[id].version === 0) {
+        this.totalSoul -= this.getCharacterPower(id)/10;
+      }
+      else {
+        this.totalSoulNonGenesis -= this.getCharacterPower(id)/10;
+      }
     },
     canBurn() {
       const cost = toBN(this.burnCost);
-      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards) + +fromWeiEther(this.valorRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     showBurnConfirmation() {
@@ -385,7 +412,8 @@ export default Vue.extend({
       }
     },
     async toggleSoulCreation() {
-      this.soulBalance = +(await this.fetchSoulBalance());
+      this.genesisSoulBalance = +(await this.fetchGenesisSoulBalance());
+      this.nonGenesisSoulBalance = +(await this.fetchNonGenesisSoulBalance());
       await this.updateBurnCost();
       this.burnPowerMultiplier = +fromWeiEther(await this.fetchBurnPowerMultiplier());
       if(this.activeTab === 'burn') {
@@ -413,13 +441,6 @@ export default Vue.extend({
       this.burnCost = 0;
       this.totalSoul = 0;
     },
-    setMaxSoulAmount() {
-      if (this.isTransferring) {
-        this.soulAmount = this.soulBalance;
-      } else {
-        this.soulAmount = this.remainingPowerLimit > this.soulBalance * 10 ? this.soulBalance : this.remainingPowerLimit / 10;
-      }
-    },
     async updateBurnCost() {
       this.burnCost = this.burnCharacterIds.length > 0 ? +fromWeiEther(await this.fetchCharactersBurnCost(this.burnCharacterIds)) : 0;
     },
@@ -429,7 +450,7 @@ export default Vue.extend({
     },
     canRecruit() {
       const cost = toBN(this.recruitCost);
-      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards) + +fromWeiEther(this.valorRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     formatSkill() {
@@ -463,7 +484,9 @@ export default Vue.extend({
         (this.$refs['burn-confirmation-modal'] as BModal).hide();
         this.isBurnInProgress = false;
       }
-      this.soulBalance = +(await this.fetchSoulBalance());
+
+      this.genesisSoulBalance = +(await this.fetchGenesisSoulBalance());
+      this.nonGenesisSoulBalance = +(await this.fetchNonGenesisSoulBalance());
       this.burnCharacterIds = [];
       this.burnCost = 0;
       this.toggleSoulCreation();
@@ -494,6 +517,12 @@ export default Vue.extend({
       this.glowImage = true;
       setTimeout(() => {
         this.glowImage = false;
+      }, 500);
+    },
+    totalSoulNonGenesis(){
+      this.glowImageNonGenesis = true;
+      setTimeout(() => {
+        this.glowImageNonGenesis = false;
       }, 500);
     }
   },
@@ -674,13 +703,25 @@ export default Vue.extend({
 
 .soul-img{
   content: url('../assets/soul-icon.png');
-  width: 50px;
+  width: 35px;
   height: auto;
   -webkit-filter: drop-shadow(0px 0px 7px rgba(255, 255, 255, 0.521));
 }
 
+.soul-img-non-genesis{
+  content: url('../assets/soul-icon.png');
+  width: 35px;
+  height: auto;
+  -webkit-filter: drop-shadow(0px 0px 7px rgba(255, 255, 255, 0.521)) grayscale(0.7);
+}
+
 .glowUp{
   -webkit-filter: drop-shadow(0px 0px 15px rgb(255, 255, 255));
+  transition: all 0.3s ease;
+}
+
+.glowUpNonGenesis {
+  -webkit-filter: drop-shadow(0px 0px 15px rgb(255, 255, 255)) grayscale(0.7);
   transition: all 0.3s ease;
 }
 

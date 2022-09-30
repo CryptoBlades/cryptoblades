@@ -127,6 +127,7 @@ export default {
         untieredFullPower: null,
         rank: null,
         element: null,
+        version: null
       },
       availableWeaponIds: [],
       availableShieldIds: [],
@@ -169,7 +170,7 @@ export default {
 
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds', 'web3']),
-    ...mapGetters(['getCharacterName'])
+    ...mapGetters(['getCharacterName', 'currentCharacter'])
   },
 
   methods: {
@@ -453,6 +454,8 @@ export default {
 
       this.characterInformation.name = rename ? rename : this.getCharacterName(this.currentCharacterId);
 
+      this.characterInformation.version = this.currentCharacter.version;
+
       this.characterInformation.tier = await this.getArenaTier(this.currentCharacterId);
 
       this.characterInformation.level = Number(await this.getCharacterLevel(this.currentCharacterId)) + 1;
@@ -602,6 +605,8 @@ export default {
 
       if (value !== null) {
         this.characterInformation.name = this.getCharacterName(value);
+
+        this.characterInformation.version = this.currentCharacter.version;
 
         this.characterInformation.tier = await this.getArenaTier(value);
 
