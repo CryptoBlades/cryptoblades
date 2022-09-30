@@ -16,6 +16,7 @@
       <b-form-input v-model="newPartnerProject.details" :placeholder="$t('admin.treasury.details')"/>
       <b-form-input v-model="newPartnerProject.website" :placeholder="$t('admin.treasury.websiteUrl')"/>
       <b-form-input v-model="newPartnerProject.note" :placeholder="$t('admin.treasury.noteOptional')"/>
+      <b-form-checkbox v-model="newPartnerProject.isValor">{{$t('admin.treasury.isValor')}}</b-form-checkbox>
       <b-button @click="addNewPartnerProject()" :disabled="addNewPartnerProjectButtonDisabled" variant="info"
                 class="text-nowrap">
         {{ $t('admin.treasury.addNewPartnerProject') }}
@@ -60,6 +61,10 @@
                        v-model="selectedPartnerProject.propertyBooleanValue" class="text-nowrap">
         {{ $t(`admin.treasury.property.${PartnerProperty[selectedPartnerProject.selectedProperty]}`) }}
       </b-form-checkbox>
+      <b-form-checkbox v-if="selectedPartnerProject.selectedProperty === PartnerProperty.IS_VALOR"
+                       v-model="selectedPartnerProject.propertyBooleanValue" class="text-nowrap">
+        {{ $t(`admin.treasury.property.${PartnerProperty[selectedPartnerProject.selectedProperty]}`) }}
+      </b-form-checkbox>
       <b-form-input v-else v-model="selectedPartnerProject.propertyStringValue"
                     :placeholder="$t('admin.treasury.propertyValue')"/>
       <b-button @click="setPartnerProjectProperty()" :disabled="setPartnerProjectPropertyButtonDisabled"
@@ -77,7 +82,7 @@ import {mapActions} from 'vuex';
 import {isValidWeb3Address} from '../../../utils/common';
 
 enum PartnerProperty {
-  LOGO, DETAILS, WEBSITE, NOTE, IS_ACTIVE
+  LOGO, DETAILS, WEBSITE, NOTE, IS_ACTIVE, IS_VALOR
 }
 
 interface SelectedPartnerProject {
@@ -100,6 +105,7 @@ export interface NewPartnerProject {
   details: string;
   website: string;
   note: string;
+  isValor: boolean;
 }
 
 interface StoreMappedTreasuryActions {
@@ -116,6 +122,8 @@ interface StoreMappedTreasuryActions {
   setPartnerProjectNote(payload: { id: number, note: string }): Promise<void>;
 
   setPartnerProjectIsActive(payload: { id: number, isActive: boolean }): Promise<void>;
+
+  setPartnerProjectIsValor(payload: { id: number, isValor: boolean }): Promise<void>;
 }
 
 interface Data {
@@ -141,6 +149,7 @@ export default Vue.extend({
         details: '',
         website: '',
         note: '',
+        isValor: false
       },
       partnerProjectProperties: [
         PartnerProperty.LOGO,
@@ -192,6 +201,7 @@ export default Vue.extend({
         'setPartnerProjectWebsite',
         'setPartnerProjectNote',
         'setPartnerProjectIsActive',
+        'setPartnerProjectIsValor'
       ]) as StoreMappedTreasuryActions,
 
     async getActiveProjects() {
@@ -236,6 +246,12 @@ export default Vue.extend({
           await this.setPartnerProjectIsActive({
             id: this.selectedPartnerProject.id,
             isActive: this.selectedPartnerProject.propertyBooleanValue
+          });
+          break;
+        case PartnerProperty.IS_VALOR:
+          await this.setPartnerProjectIsValor({
+            id: this.selectedPartnerProject.id,
+            isValor: this.selectedPartnerProject.propertyBooleanValue
           });
           break;
         }
