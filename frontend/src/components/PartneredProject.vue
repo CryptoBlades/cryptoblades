@@ -21,7 +21,7 @@
     </div>
     <div class="mt-1 progress w-90 justify-items-center">
       <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-           :style="[{'width': progressBarWidth, 'background-color': '#9e8a57'}]"/>
+           :style="[{'width': progressBarWidth, 'background-color': '#1168D0'}]"/>
     </div>
     <h6 class="mt-1 text-center">{{ $t('PartneredProject.claimed') }} {{ tokensClaimed }} / {{ partnerProject.tokenSupply }}</h6>
     <div class="d-flex flex-column align-items-center w-100">
@@ -145,10 +145,10 @@ export default Vue.extend({
 .partner-div {
   width: 290px;
   height: 250px;
-  border: 2px solid #9e8a57;
+  border: 2px solid rgba(245, 245, 245, 0.116);
   border-radius: 10px;
   padding: 5px;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  background: #000E29;
   position: relative;
 }
 
@@ -164,9 +164,9 @@ export default Vue.extend({
 
 .collapse-style {
   width: 290px;
-  border: 2px solid #9e8a57;
+  border: 2px solid rgba(245, 245, 245, 0.116);
   border-radius: 10px;
-  background: linear-gradient(45deg, rgba(20, 20, 20, 1) 0%, rgba(36, 39, 32, 1) 100%);
+  background: #000E29;
   overflow: hidden;
 }
 
