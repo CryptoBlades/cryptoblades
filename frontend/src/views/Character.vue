@@ -266,6 +266,7 @@ export default Vue.extend({
       'characterStaminas',
       'skillBalance',
       'skillRewards',
+      'valorRewards',
       'ownedCharacterIds',
       'xpRewards',
       'characterCosmetics',
@@ -401,7 +402,7 @@ export default Vue.extend({
     },
     canBurn() {
       const cost = toBN(this.burnCost);
-      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards) + +fromWeiEther(this.valorRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     showBurnConfirmation() {
@@ -449,7 +450,7 @@ export default Vue.extend({
     },
     canRecruit() {
       const cost = toBN(this.recruitCost);
-      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards) + +fromWeiEther(this.valorRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     formatSkill() {

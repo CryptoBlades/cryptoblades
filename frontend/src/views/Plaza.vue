@@ -391,6 +391,7 @@ export default Vue.extend({
       'defaultAccount',
       'skillBalance',
       'skillRewards',
+      'valorRewards',
       'xpRewards'
     ]),
     ...mapGetters([
@@ -533,12 +534,12 @@ export default Vue.extend({
     },
     canRecruit() {
       const cost = toBN(this.recruitCost);
-      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards) + +fromWeiEther(this.valorRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     canBurn() {
       const cost = toBN(this.burnCost);
-      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards) + +fromWeiEther(this.valorRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     checkStorage() {

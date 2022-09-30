@@ -1398,7 +1398,8 @@ export default new Vuex.Store<IState>({
       if(!state.defaultAccount) return;
       const slippageMultiplier = approveMintSlippage ? 1.05 : 1;
 
-      await approveFee(
+      await approveFeeDynamic(
+        state.contracts().CryptoBlades!,
         state.contracts().CryptoBlades!,
         state.contracts().SkillToken,
         state.defaultAccount,
@@ -1406,7 +1407,7 @@ export default new Vuex.Store<IState>({
         defaultCallOptions(state),
         defaultCallOptions(state),
         cryptoBladesMethods => cryptoBladesMethods.getMintCharacterFee(),
-        { feeMultiplier: slippageMultiplier, allowInGameOnlyFunds: false }
+        { feeMultiplier: slippageMultiplier, allowInGameOnlyFunds: false, allowSkillRewards: false }
       );
 
       await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));

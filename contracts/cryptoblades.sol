@@ -266,24 +266,30 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (_available, _needed);
     }
 
-    function getSkillToSubtract(uint256 _inGameOnlyFunds, uint256 _tokenRewards, uint256 _skillNeeded)
+    function getSkillToSubtract(uint256 _inGameOnlyFunds, uint256 _tokenRewards, uint256 _valorTokenRewards, uint256 _skillNeeded)
         public
         pure
-        returns (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromUserWallet) {
+        returns (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromValorTokenRewards, uint256 fromUserWallet) {
 
         if(_skillNeeded <= _inGameOnlyFunds) {
-            return (_skillNeeded, 0, 0);
+            return (_skillNeeded, 0, 0, 0);
         }
 
         _skillNeeded -= _inGameOnlyFunds;
 
         if(_skillNeeded <= _tokenRewards) {
-            return (_inGameOnlyFunds, _skillNeeded, 0);
+            return (_inGameOnlyFunds, _skillNeeded, 0, 0);
         }
 
         _skillNeeded -= _tokenRewards;
 
-        return (_inGameOnlyFunds, _tokenRewards, _skillNeeded);
+        if(_skillNeeded <= _valorTokenRewards) {
+            return (_inGameOnlyFunds, _tokenRewards, _skillNeeded, 0);
+        }
+
+        _skillNeeded -= _valorTokenRewards;
+
+        return (_inGameOnlyFunds, _tokenRewards, _valorTokenRewards, _skillNeeded);
     }
 
     function getSkillNeededFromUserWallet(address playerAddress, uint256 skillNeeded, bool allowInGameOnlyFunds)
@@ -295,9 +301,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         if (allowInGameOnlyFunds) {
             inGameOnlyFundsToUse = inGameOnlyFunds[playerAddress];
         }
-        (,, skillNeededFromUserWallet) = getSkillToSubtract(
+        (,,, skillNeededFromUserWallet) = getSkillToSubtract(
             inGameOnlyFundsToUse,
             tokenRewards[playerAddress],
+            userVars[playerAddress][USERVAR_GEN2_UNCLAIMED],
             skillNeeded
         );
     }
@@ -492,8 +499,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function mintCharacter() public onlyNonContract oncePerBlock(msg.sender) {
 
         uint256 skillAmount = usdToSkill(mintCharacterFee);
-        (,, uint256 fromUserWallet) =
+        (,,, uint256 fromUserWallet) =
             getSkillToSubtract(
+                0,
                 0,
                 0,
                 skillAmount
@@ -501,7 +509,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(skillToken.balanceOf(msg.sender) >= fromUserWallet && promos.getBit(msg.sender, 4) == false);
 
         uint256 convertedAmount = usdToSkill(getMintCharacterFee());
-        _payContractTokenOnly(msg.sender, convertedAmount);
+        _deductPlayerSkillStandard(msg.sender, 0, 0, 0, convertedAmount, true);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
         uint256 id = characters.mint(msg.sender, seed);
@@ -659,14 +667,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _payContractTokenOnly(address playerAddress, uint256 convertedAmount, bool track) internal {
-        (, uint256 fromTokenRewards, uint256 fromUserWallet) =
+        (, uint256 fromTokenRewards, uint256 fromValorTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
                 0,
                 tokenRewards[playerAddress],
+                userVars[playerAddress][USERVAR_GEN2_UNCLAIMED],
                 convertedAmount
             );
 
-        _deductPlayerSkillStandard(playerAddress, 0, fromTokenRewards, fromUserWallet, track);
+        _deductPlayerSkillStandard(playerAddress, 0, fromTokenRewards, fromValorTokenRewards, fromUserWallet, track);
     }
 
     function _payContract(address playerAddress, int128 usdAmount) internal
@@ -678,17 +687,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function _payContractConverted(address playerAddress, uint256 convertedAmount) internal
         returns (uint256 _fromInGameOnlyFunds, uint256 _fromTokenRewards, uint256 _fromUserWallet) {
 
-        (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromUserWallet) =
+        (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromValorTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
                 inGameOnlyFunds[playerAddress],
                 tokenRewards[playerAddress],
+                userVars[playerAddress][USERVAR_GEN2_UNCLAIMED],
                 convertedAmount
             );
 
         require(skillToken.balanceOf(playerAddress) >= fromUserWallet,
             string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(convertedAmount))));
 
-        _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
+        _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromValorTokenRewards, fromUserWallet);
 
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
     }
@@ -711,10 +721,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             uint256 _fromStaked
         ) {
 
-        (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 _remainder) =
+        (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromValorTokenRewards, uint256 _remainder) =
             getSkillToSubtract(
                 inGameOnlyFunds[playerAddress],
                 tokenRewards[playerAddress],
+                userVars[playerAddress][USERVAR_GEN2_UNCLAIMED],
                 convertedAmount
             );
 
@@ -724,7 +735,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 skillToken.balanceOf(playerAddress)
             );
 
-        _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
+        _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromValorTokenRewards, fromUserWallet);
 
         if(fromStaked > 0) {
             stakeFromGameImpl.unstakeToGame(playerAddress, fromStaked);
@@ -747,12 +758,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         address playerAddress,
         uint256 fromInGameOnlyFunds,
         uint256 fromTokenRewards,
+        uint256 fromValorTokenRewards,
         uint256 fromUserWallet
     ) internal {
         _deductPlayerSkillStandard(
             playerAddress,
             fromInGameOnlyFunds,
             fromTokenRewards,
+            fromValorTokenRewards,
             fromUserWallet,
             true
         );
@@ -762,6 +775,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         address playerAddress,
         uint256 fromInGameOnlyFunds,
         uint256 fromTokenRewards,
+        uint256 fromValorTokenRewards,
         uint256 fromUserWallet,
         bool trackInflow
     ) internal {
@@ -772,6 +786,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
         if(fromTokenRewards > 0) {
             tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
+        }
+
+        if(fromValorTokenRewards > 0) {
+            userVars[playerAddress][USERVAR_GEN2_UNCLAIMED] = userVars[playerAddress][USERVAR_GEN2_UNCLAIMED].sub(fromValorTokenRewards);
         }
 
         if(fromUserWallet > 0) {
