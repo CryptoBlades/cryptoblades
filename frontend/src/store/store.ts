@@ -1413,6 +1413,7 @@ export default new Vuex.Store<IState>({
       await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
 
       await Promise.all([
+        dispatch('updateCharacterIds'),
         dispatch('combat/fetchFightRewardSkill'),
         dispatch('combat/fetchFightRewardXp'),
         dispatch('setupCharacterStaminas')

@@ -133,9 +133,9 @@
     <!-- Character Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-modal"
       centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
-      dialog-class="dialog-character" size="lg">
+      dialog-class="dialog-character" size="lg" @shown="$refs.receiverAddress.focus()">
         <h3 class="confirmation-title">{{$t('Character.transfer')}}</h3>
-        <b-form-input class="input" placeholder="Enter address" v-model="receiverAddress"/>
+        <b-form-input ref="receiverAddress" class="input" placeholder="Enter address" v-model="receiverAddress" @keydown.enter.native="transfer"/>
         <div class="transferResultContainer">
           <div class="loader" v-if="isSending">
             <i class="fas fa-spinner fa-spin"></i>
@@ -143,7 +143,9 @@
           </div>
           <span class="resultMsg text-center"> {{resultMsg}} </span>
         </div>
-        <button :disabled="isSending || receiverAddress === ''" @click="transfer">Transfer</button>
+        <button :disabled="isSending || receiverAddress === ''" @click="transfer">
+          {{isSending ? t('nftOptionsDropdown.sending') : $t('nftOptionsDropdown.transfer')}}
+        </button>
         <div class="footer-close" @click="$refs['character-transfer-modal'].hide()">
           <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
@@ -152,7 +154,7 @@
     <!-- Character Soul Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-soul-modal"
       centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
-      dialog-class="dialog-character" size="lg">
+      dialog-class="dialog-character" size="lg" @shown="$refs.receiverAddress.focus()">
         <h3 class="confirmation-title">{{$t('Character.transferSoul')}}</h3>
         <div class="d-flex flex-column">
           <div class="d-flex align-items-center mb-2">
@@ -194,7 +196,8 @@
             <h5>to</h5>
           </div>
           <div>
-            <b-form-input class="input" placeholder="Enter address" v-model="receiverAddress"/>
+            <b-form-input ref="receiverAddress" class="input" placeholder="Enter address" v-model="receiverAddress"
+                          @keydown.enter.native="onSoulTransferConfirm"/>
             <div class="transferResultContainer">
               <div class="loader" v-if="isSending">
                 <i class="fas fa-spinner fa-spin"></i>
@@ -204,7 +207,9 @@
             </div>
           </div>
         </div>
-        <button :disabled="isSending || receiverAddress === ''" @click="onSoulTransferConfirm">Transfer</button>
+        <button :disabled="isSending || receiverAddress === ''" @click="onSoulTransferConfirm">
+          {{isSending ? t('nftOptionsDropdown.sending') : $t('nftOptionsDropdown.transfer')}}
+        </button>
         <div class="footer-close" @click="$refs['character-transfer-soul-modal'].hide()">
           <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>

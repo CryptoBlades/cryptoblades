@@ -378,7 +378,7 @@ export default Vue.extend({
     },
 
     rewardsDepleted(): boolean {
-      return this.stakeRewardDistributionTimeLeftCurrentEstimate === 0 && !this.stakedBalance.isZero();
+      return this.stakeRewardDistributionTimeLeftCurrentEstimate === 0;
     },
 
     stakedBalance(): BN{
@@ -537,6 +537,11 @@ export default Vue.extend({
     this.secondsInterval = setInterval(() => {
       this.updateEstimates();
     }, 1000);
+
+    await this.fetchData();
+    if(this.stakeType.startsWith('cbkLand')) {
+      await this.updateOwnedLands();
+    }
   },
   beforeDestroy() {
     if(this.stakeRewardProgressInterval) clearInterval(this.stakeRewardProgressInterval);

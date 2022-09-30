@@ -594,6 +594,7 @@
     "nextRaid" : "Next Raid",
     "finishesOn": "Finishes on",
     "raidStatus": "Raid status",
+    "raidOver": "Next raid starting soon",
     "claimRewards": "Claim rewards",
     "raidRewardsSelector": "Raid rewards selector",
     "selectRaid": "Select a raid to claim rewards from",

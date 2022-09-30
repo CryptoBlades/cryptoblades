@@ -2202,7 +2202,7 @@
     },
     "links": {},
     "address": "0x929059Fef67b88CE2F4127e59B50bEA123981998",
-    "transactionHash": "0x4cbf5678b4448424e30cb292dc3559a1eb81e7f074bcb549f3a6f8e59852b460"
+    "transactionHash": "0x87d308923ba4f180f6dabe4fce5a0642701ba19a2e5f84c64df58b69311a9e0b"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -2566,7 +2566,7 @@
     },
     "links": {},
     "address": "0x070b1A95898B927A900A1F9F42b114154648E51A",
-    "transactionHash": "0x206cb7a8bf1b81ad10fe82890271d5ebf7fcd7fb740e494f6754c2801ad397e3"
+    "transactionHash": "0xc57efe63e3777db47e8e6845dc6a31b5daeeb95b82cf1ada2cd7e7b534cd1324"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {
@@ -7883,6 +7883,6 @@
     },
     "links": {},
     "address": "0xD9C5449EfB3f99952F73e824688724aAFB81dE6E",
-    "transactionHash": "0x42764f5f413197e55ff2085e08dfbb56a68c810c3774f44487cdd4e46494c349"
+    "transactionHash": "0x6a6ab9c38e99fcf5a1e816bbee3347e12e94d3bf6b84bef163114d1368d8046d"
   }
 }

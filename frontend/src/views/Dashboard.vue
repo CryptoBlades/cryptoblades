@@ -113,8 +113,11 @@
                   <span class="raid-boss-value" v-if="this.remainingTime.hours > 0">
                     {{this.remainingTime.hours}}:{{this.remainingTime.minutes}}:{{this.remainingTime.seconds}}
                   </span>
-                  <span class="raid-boss-value" v-else>
+                  <span class="raid-boss-value" v-else-if="remainingTime.seconds > -1 && remainingTime.minutes > -1">
                     {{this.remainingTime.minutes}}:{{this.remainingTime.seconds}}
+                  </span>
+                  <span class="raid-boss-value" v-else>
+                    {{$t('raid.raidOver')}}
                   </span>
                 </span>
               </div>
