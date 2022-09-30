@@ -378,7 +378,7 @@ export default Vue.extend({
     },
 
     rewardsDepleted(): boolean {
-      return this.stakeRewardDistributionTimeLeftCurrentEstimate === 0 && !this.stakedBalance.isZero();
+      return this.stakeRewardDistributionTimeLeftCurrentEstimate === 0;
     },
 
     stakedBalance(): BN{
