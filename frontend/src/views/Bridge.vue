@@ -6,7 +6,7 @@
     <div class="row m-3 justify-content-center">
       <h3>{{$t('bridge.transferNftsToAnotherChain')}}</h3>
     </div>
-    <div class="row mt-3 justify-content-center">
+    <div class="w-100 row mt-3 justify-content-center">
       <p v-if="bridgeFee">
         {{$t('bridge.bridgeTransferFee')}}: <CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/> &nbsp;
         <b-icon-question-circle class="centered-icon" scale="0.8"

@@ -39,8 +39,8 @@
           </div>
         </div>
       </div>
-      <div v-if="titleType=='combat'" class="none-mobile filter-combat">
-        <div>
+      <div v-if="titleType=='combat'" class="none-mobile filter-combat flex-wrap">
+        <div class="flex-wrap">
           <div class="select-wrapper-star" :data-content="$t('nftList.star')">
             <select class="form-control" v-model="starFilter" >
             <option v-for="starOption in starsOptions" :value="starOption" :key="starOption">{{ starOption || $t('nftList.sorts.any') }}</option>
@@ -53,11 +53,6 @@
               :value="['', 'Earth', 'Fire', 'Lightning', 'Water'][index]" :key="x">{{ x || $t('nftList.sorts.any') }}</option>
             </select>
           </div>
-          <div v-if="showFavoriteToggle" class="show-reforged show-favorite none-mobile">
-            <b-check class="show-reforged-checkbox" v-model="showFavoriteWeapons" />
-            <span>{{$t('weaponGrid.showFavorite')}}</span>
-          </div>
-          <button class="btn-clear-filter"  @click="clearFilters" v-if="!newWeapon">{{$t('nftList.clearFilters')}}</button>
         </div>
         <div class="d-flex align-items-center select-wrapper-items">
           <span>{{$t('nftList.show')}}</span>
@@ -796,6 +791,10 @@ export default Vue.extend({
   text-align: right;
 }
 
+.filter-combat > div {
+  margin-bottom: 10px;
+}
+
 .select-wrapper-items > select,
 .select-wrapper-element > select,
 .select-wrapper-star > select{
@@ -1036,11 +1035,15 @@ export default Vue.extend({
     width: 30px;
   }
 }
-/* Needed to adjust weapon list */
-@media all and (max-width: 767.98px) {
+
+@media all and (max-width: 570px) {
   .remove-flex-wrap-mobile{
     flex-wrap: nowrap !important;
   }
+}
+
+/* Needed to adjust weapon list */
+@media all and (max-width: 767.98px) {
   .weapon-grid {
     padding-left: 2em;
     justify-content: center;

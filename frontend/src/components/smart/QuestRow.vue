@@ -132,6 +132,7 @@ export default Vue.extend({
 
 .quest-row-wallet {
   height: clamp(150px, 10vh, 200px);
+  height: auto;
 }
 
 /* Character */
@@ -146,7 +147,7 @@ export default Vue.extend({
 }
 /* QuestRequirements for Wallet Quests */
 .quest-row-wallet > div:nth-child(1) {
-  width: clamp(550px, 20vw, 700px);
+  width: clamp(350px, 20vw, 700px);
 }
 
 .busy-quest-row {
