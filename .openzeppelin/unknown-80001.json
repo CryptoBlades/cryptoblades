@@ -30442,13 +30442,13 @@
           {
             "contract": "ERC721Upgradeable",
             "label": "_holderTokens",
-            "type": "t_mapping(t_address,t_struct(UintSet)62316_storage)",
+            "type": "t_mapping(t_address,t_struct(UintSet)63325_storage)",
             "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:34"
           },
           {
             "contract": "ERC721Upgradeable",
             "label": "_tokenOwners",
-            "type": "t_struct(UintToAddressMap)61693_storage",
+            "type": "t_struct(UintToAddressMap)62702_storage",
             "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:37"
           },
           {
@@ -30496,7 +30496,7 @@
           {
             "contract": "AccessControlUpgradeable",
             "label": "_roles",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)59000_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)59401_storage)",
             "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
           },
           {
@@ -30579,18 +30579,18 @@
           "t_address": {
             "label": "address"
           },
-          "t_mapping(t_bytes32,t_struct(RoleData)59000_storage)": {
+          "t_mapping(t_bytes32,t_struct(RoleData)59401_storage)": {
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
           },
           "t_bytes32": {
             "label": "bytes32"
           },
-          "t_struct(RoleData)59000_storage": {
+          "t_struct(RoleData)59401_storage": {
             "label": "struct AccessControlUpgradeable.RoleData",
             "members": [
               {
                 "label": "members",
-                "type": "t_struct(AddressSet)62195_storage"
+                "type": "t_struct(AddressSet)63204_storage"
               },
               {
                 "label": "adminRole",
@@ -30598,16 +30598,16 @@
               }
             ]
           },
-          "t_struct(AddressSet)62195_storage": {
+          "t_struct(AddressSet)63204_storage": {
             "label": "struct EnumerableSetUpgradeable.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)61930_storage"
+                "type": "t_struct(Set)62939_storage"
               }
             ]
           },
-          "t_struct(Set)61930_storage": {
+          "t_struct(Set)62939_storage": {
             "label": "struct EnumerableSetUpgradeable.Set",
             "members": [
               {
@@ -30629,33 +30629,33 @@
           "t_array(t_uint256)49_storage": {
             "label": "uint256[49]"
           },
-          "t_mapping(t_address,t_struct(UintSet)62316_storage)": {
+          "t_mapping(t_address,t_struct(UintSet)63325_storage)": {
             "label": "mapping(address => struct EnumerableSetUpgradeable.UintSet)"
           },
-          "t_struct(UintSet)62316_storage": {
+          "t_struct(UintSet)63325_storage": {
             "label": "struct EnumerableSetUpgradeable.UintSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)61930_storage"
+                "type": "t_struct(Set)62939_storage"
               }
             ]
           },
-          "t_struct(UintToAddressMap)61693_storage": {
+          "t_struct(UintToAddressMap)62702_storage": {
             "label": "struct EnumerableMapUpgradeable.UintToAddressMap",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Map)61375_storage"
+                "type": "t_struct(Map)62384_storage"
               }
             ]
           },
-          "t_struct(Map)61375_storage": {
+          "t_struct(Map)62384_storage": {
             "label": "struct EnumerableMapUpgradeable.Map",
             "members": [
               {
                 "label": "_entries",
-                "type": "t_array(t_struct(MapEntry)61367_storage)dyn_storage"
+                "type": "t_array(t_struct(MapEntry)62376_storage)dyn_storage"
               },
               {
                 "label": "_indexes",
@@ -30663,10 +30663,10 @@
               }
             ]
           },
-          "t_array(t_struct(MapEntry)61367_storage)dyn_storage": {
+          "t_array(t_struct(MapEntry)62376_storage)dyn_storage": {
             "label": "struct EnumerableMapUpgradeable.MapEntry[]"
           },
-          "t_struct(MapEntry)61367_storage": {
+          "t_struct(MapEntry)62376_storage": {
             "label": "struct EnumerableMapUpgradeable.MapEntry",
             "members": [
               {
@@ -30793,6 +30793,129 @@
             ]
           },
           "t_struct(Set)61930_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "f00f6da0cab766f85fb37fac1d967be71cfe7a346dd9a4102f6a2d3650b79912": {
+      "address": "0x9D38BF3ca5E9B9B725348DDBB82866D2e7093c86",
+      "txHash": "0x85ba307e0d59ef1ab93c59d2eabd6f1877da7646f09c4aee9f82416c17044c42",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)59401_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "CBKLandBridgeProxyContract",
+            "label": "_cbkLand",
+            "type": "t_contract(CBKLand)3658",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\CBKLandBridgeProxyContract.sol:13"
+          },
+          {
+            "contract": "CBKLandBridgeProxyContract",
+            "label": "_nftStorageAddress",
+            "type": "t_address",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\CBKLandBridgeProxyContract.sol:14"
+          },
+          {
+            "contract": "CBKLandBridgeProxyContract",
+            "label": "_enabled",
+            "type": "t_bool",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\CBKLandBridgeProxyContract.sol:15"
+          }
+        ],
+        "types": {
+          "t_contract(CBKLand)3658": {
+            "label": "contract CBKLand"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)59401_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(RoleData)59401_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)63204_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)63204_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)62939_storage"
+              }
+            ]
+          },
+          "t_struct(Set)62939_storage": {
             "label": "struct EnumerableSetUpgradeable.Set",
             "members": [
               {
