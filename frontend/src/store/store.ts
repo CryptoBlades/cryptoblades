@@ -1082,10 +1082,16 @@ export default new Vuex.Store<IState>({
       ]);
     },
 
-    async fetchSoulBalance({ state }) {
+    async fetchGenesisSoulBalance({ state }) {
       const { BurningManager } = state.contracts();
       if(!BurningManager || !state.defaultAccount) return;
       return await BurningManager.methods.userVars(state.defaultAccount, 1).call(defaultCallOptions(state));
+    },
+
+    async fetchNonGenesisSoulBalance({ state }) {
+      const { BurningManager } = state.contracts();
+      if(!BurningManager || !state.defaultAccount) return;
+      return await BurningManager.methods.userVars(state.defaultAccount, 2).call(defaultCallOptions(state));
     },
 
     async fetchInGameOnlyFunds({ state, commit }) {
@@ -2677,11 +2683,26 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchCharacterPower', charId);
     },
 
+    async upgradeNonGenesisCharacterWithSoul({ state, dispatch }, {charId, soulAmount}) {
+      const { BurningManager } = state.contracts();
+      if(!BurningManager || !state.defaultAccount) return;
+
+      await BurningManager.methods.upgradeNonGenesisCharacterWithSoul(charId, soulAmount).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
+      await dispatch('fetchCharacterPower', charId);
+    },
+
     async transferSoul({ state }, {targetAddress, soulAmount}) {
       const { BurningManager } = state.contracts();
       if(!BurningManager || !state.defaultAccount) return;
 
       await BurningManager.methods.transferSoul(targetAddress, soulAmount).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
+    },
+
+    async transferNonGenesisSoul({ state }, {targetAddress, soulAmount}) {
+      const { BurningManager } = state.contracts();
+      if(!BurningManager || !state.defaultAccount) return;
+
+      await BurningManager.methods.transferNonGenesisSoul(targetAddress, soulAmount).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
     },
 
     async fetchCharactersBurnCost({ state }, burnIds) {

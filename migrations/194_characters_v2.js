@@ -3,6 +3,7 @@ const { upgradeProxy, deployProxy} = require("@openzeppelin/truffle-upgrades");
 const Characters = artifacts.require("Characters");
 const CryptoBlades = artifacts.require("CryptoBlades");
 const Treasury = artifacts.require("Treasury");
+const BurningManager = artifacts.require("BurningManager");
 const ValorToken = artifacts.require("ValorToken");
 
 const ERC20Bridge = artifacts.require("ERC20Bridge");
@@ -18,6 +19,7 @@ module.exports = async function (deployer) {
   await upgradeProxy(Characters.address, Characters, { deployer });
   await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
   await upgradeProxy(Treasury.address, Treasury, { deployer });
+  await upgradeProxy(BurningManager.address, BurningManager, { deployer });
   let valorToken = await deployProxy(ValorToken, [], { deployer });
   
   

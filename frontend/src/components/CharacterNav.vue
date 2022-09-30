@@ -59,10 +59,12 @@
           <div v-if="ownCharacters.length <= 4 && activeTab === 'info'"
               class="ml-3 mt-4 mt-md-0 ml-md-auto soul-border text-uppercase custom-recruit-text-size mint-character"
               @click="$emit('changeTab', 'burn')"
-              v-tooltip="'Soul Balance'" tagname="recruit_character">
+              v-tooltip="'Soul Balance Genesis / Non Genesis'" tagname="recruit_character">
               <span class="gtag-link-others custom-recruit-text">
                 <span class="soul-icon"></span>
-                {{ soulBalance.toLocaleString() }}
+                {{ genesisSoulBalance.toLocaleString() }}
+                <span class="soul-icon-non-genesis"></span>
+                {{ nonGenesisSoulBalance.toLocaleString() }}
                 <span class="add-skill"></span>
               </span>
           </div>
@@ -76,7 +78,11 @@ import Vue from 'vue';
 
 export default Vue.extend({
   props: {
-    soulBalance: {
+    genesisSoulBalance: {
+      type: Number,
+      default: 0
+    },
+    nonGenesisSoulBalance: {
       type: Number,
       default: 0
     },
@@ -186,7 +192,16 @@ export default Vue.extend({
   content: url('../assets/soul-icon.png');
   height: 17px;
   width: 12px;
-  margin-right: 20px;
+  margin-right: 10px;
+}
+
+.soul-icon-non-genesis{
+  content: url('../assets/soul-icon.png');
+  height: 17px;
+  width: 12px;
+  margin-right: 10px;
+  margin-left: 10px;
+  filter: grayscale(0.7);
 }
 
 .add-skill{

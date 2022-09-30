@@ -159,12 +159,16 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return cc.seed;
     }
 
-    function getSoulForBurns(uint256[] calldata burnIds) external view returns (uint256) {
-        uint256 soulAmount = 0;
+    function getSoulForBurns(uint256[] calldata burnIds) external view returns (uint256 genesisSoulAmount, uint256 nonGenesisSoulAmount) {
         for(uint i = 0; i < burnIds.length; i++) {
-            soulAmount += getTotalPower(burnIds[i]).div(10);
+            uint256 power = getTotalPower(burnIds[i]).div(10);
+            if(nftVars[burnIds[i]][NFTVAR_NON_GENESIS_VERSION] == 0) {
+                genesisSoulAmount += power;
+            }
+            else {
+                nonGenesisSoulAmount += power;
+            }
         }
-        return soulAmount;
     }
 
     function mint(address minter, uint256 seed) public restricted returns (uint256 tokenID) {
@@ -229,6 +233,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function burnIntoCharacter(uint256[] calldata burnIds, uint256 targetCharId, uint256 burnPowerMultiplier) external restricted {
         uint256 burnPower = 0;
         for(uint i = 0; i < burnIds.length; i++) {
+            require(nftVars[burnIds[i]][NFTVAR_NON_GENESIS_VERSION] == nftVars[targetCharId][NFTVAR_NON_GENESIS_VERSION], "Character version mismatch");
             burnPower += nftVars[burnIds[i]][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[burnIds[i]].level));
             address burnOwner = ownerOf(burnIds[i]);
             if(burnOwner == address(garrison)) {
@@ -262,7 +267,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         }
     }
 
-    function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount) external restricted {
+    function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount, bool isCharacterGenesis) external restricted {
+        if(isCharacterGenesis) {
+            require(nftVars[targetCharId][NFTVAR_NON_GENESIS_VERSION] == 0);
+        }
+        else {
+            require(nftVars[targetCharId][NFTVAR_NON_GENESIS_VERSION] > 0);
+        }
         uint256 burnPower = soulAmount.mul(10);
         require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
         nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);

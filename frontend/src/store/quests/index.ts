@@ -571,7 +571,7 @@ const quests = {
         dispatch('updateKeyLootboxIds'),
         dispatch('fetchDustBalance'),
         dispatch('combat/fetchCharacterStamina', characterID),
-        dispatch('fetchSoulBalance', characterID),
+        dispatch('fetchGenesisSoulBalance', characterID),
       ]);
       return questRewards;
     },
@@ -609,7 +609,7 @@ const quests = {
       await SimpleQuests.methods.submitProgressAmount(characterID, amount).send(defaultCallOptions(rootState));
       await Promise.all([
         dispatch('combat/fetchCharacterStamina', characterID),
-        dispatch('fetchSoulBalance', characterID),
+        dispatch('fetchGenesisSoulBalance', characterID),
         dispatch('fetchDustBalance'),
       ]);
     },
