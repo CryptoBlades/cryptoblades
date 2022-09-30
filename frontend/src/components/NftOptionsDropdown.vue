@@ -120,7 +120,7 @@ export default Vue.extend({
           receiverAddress: this.receiverAddress,
           nftType: this.nftType
         });
-        this.$refs['character-transfer-modal'].hide();
+        (this.$refs['character-transfer-modal'] as any).hide();
       }
       catch(e: any) {
         if(e.code as number === 4001) this.resultMsg = i18n.t('nftOptionsDropdown.cancelledTransaction').toString();
