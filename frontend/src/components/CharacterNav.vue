@@ -192,15 +192,15 @@ export default Vue.extend({
   content: url('../assets/soul-icon.png');
   height: 17px;
   width: 12px;
-  margin-right: 10px;
+  margin-right: 1px;
 }
 
 .soul-icon-non-genesis{
   content: url('../assets/soul-icon.png');
   height: 17px;
   width: 12px;
-  margin-right: 10px;
-  margin-left: 10px;
+  margin-right: 1px;
+  margin-left: 3px;
   filter: grayscale(0.7);
 }
 
@@ -208,7 +208,7 @@ export default Vue.extend({
   content: url('../assets/add-skill-icon.svg');
   height: 17px;
   width: 17px;
-  margin-left: 5px;
+  margin-left: 3px;
   margin-bottom: -2px;
 }
 
