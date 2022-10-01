@@ -10,11 +10,14 @@
           <h6>Token: {{ partnerProject.tokenSymbol }}</h6>
           <a @click="addTokenToMetamask" class="ml-1 a-button">({{ $t('PartneredProject.add') }})</a>
         </div>
-        <span class="multiplier-text">{{ skillToPartnerRatio }} SKILL/{{ partnerProject.tokenSymbol }}</span>
+        <span v-if="!isValor" class="multiplier-text">{{ skillToPartnerRatio }} SKILL/{{ partnerProject.tokenSymbol }}</span>
+        <span v-else class="multiplier-text">1.0000 VALOR/VALOR</span>
         <span :class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
               class="multiplier-text">{{ $t('PartneredProject.multiplier') }}: x{{ multiplier }}</span>
-        <span :class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
+        <span v-if="!isValor" :class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
               class="multiplier-text">$/{{ $t('PartneredProject.unclaimed') }}: ${{ moneyPerUnclaimed }}</span>
+        <span v-else :class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
+              class="multiplier-text">$/{{ $t('PartneredProject.unclaimed') }}: Coming soon</span>
         <span
           class="multiplier-text">{{ $t('PartneredProject.distribution') }}: {{ distributionTime }} {{ $t('PartneredProject.days') }}</span>
       </div>
@@ -93,6 +96,10 @@ export default Vue.extend({
 
     moneyPerUnclaimed(): string {
       return toBN(this.partnerProject.tokenPrice).div(toBN(10).pow(18)).div(+this.skillToPartnerRatio).times(+this.multiplier).toFixed(2);
+    },
+
+    isValor(): boolean {
+      return this.partnerProject.isValor;
     }
   },
 

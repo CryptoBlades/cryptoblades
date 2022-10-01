@@ -64,7 +64,7 @@
     "partnerTokenClaimed": "Partner tokens ini telah diklaim.",
     "payoutCurrency": "Mata Uang Pembayaran",
     "readyToClaim": "Hadiah siap untuk di klaim!",
-    "realWithdrawValueClaimable": "Saat ini kamu akan mendapatkan kira-kira {actualAmount} {tokenSymbol} untuk pengambilan {skillAmount} SKILL.",
+    "realWithdrawValueClaimable": "Saat ini kamu akan mendapatkan kira-kira {actualAmount} {tokenSymbol} untuk pengambilan {skillAmount} {token}.",
     "rewards": "Hadiah",
     "skillAmount": "Jumlah Skill",
     "slippage": "Slippage",

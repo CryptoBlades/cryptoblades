@@ -21,6 +21,7 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
 
     mapping(address => mapping(uint256 => uint256)) public userVars;
     uint256 public constant USERVAR_SOUL_SUPPLY = 1;
+    uint256 public constant USERVAR_NON_GENESIS_SOUL_SUPPLY = 2;
     mapping(uint256 => uint256) public vars;
     uint256 public constant VAR_ROI_DAYS = 1;
     uint256 public constant VAR_BURN_POWER_MULTIPLIER = 2;
@@ -133,7 +134,9 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         game.payContractTokenOnly(tx.origin, burnCharacterFee(burnId));
         uint256[] memory burnIds = new uint256[](1);
         burnIds[0] = burnId;
-        userVars[tx.origin][USERVAR_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds).mul(vars[VAR_BURN_POWER_MULTIPLIER]).div(1e18);
+        (uint256 genesisSoul, uint256 nonGenesisSoul) = characters.getSoulForBurns(burnIds);
+        userVars[tx.origin][USERVAR_SOUL_SUPPLY] += genesisSoul.mul(vars[VAR_BURN_POWER_MULTIPLIER]).div(1e18);
+        userVars[tx.origin][USERVAR_NON_GENESIS_SOUL_SUPPLY] += nonGenesisSoul.mul(vars[VAR_BURN_POWER_MULTIPLIER]).div(1e18);
         characters.burnIntoSoul(burnIds);
     }
 
@@ -144,7 +147,9 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
 
     function burnCharactersIntoSoul(uint256[] memory burnIds) public isCharactersOwner(burnIds) burningEnabled {
         game.payContractTokenOnly(msg.sender, burnCharactersFee(burnIds));
-        userVars[msg.sender][USERVAR_SOUL_SUPPLY] += characters.getSoulForBurns(burnIds).mul(vars[VAR_BURN_POWER_MULTIPLIER]).div(1e18);
+        (uint256 genesisSoul, uint256 nonGenesisSoul) = characters.getSoulForBurns(burnIds);
+        userVars[msg.sender][USERVAR_SOUL_SUPPLY] += genesisSoul.mul(vars[VAR_BURN_POWER_MULTIPLIER]).div(1e18);
+        userVars[msg.sender][USERVAR_NON_GENESIS_SOUL_SUPPLY] += nonGenesisSoul.mul(vars[VAR_BURN_POWER_MULTIPLIER]).div(1e18);
         characters.burnIntoSoul(burnIds);
     }
 
@@ -153,9 +158,19 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
         userVars[targetAddress][USERVAR_SOUL_SUPPLY] = userVars[targetAddress][USERVAR_SOUL_SUPPLY].add(soulAmount);
     }
 
+     function transferNonGenesisSoul(address targetAddress, uint256 soulAmount) public {
+        userVars[msg.sender][USERVAR_NON_GENESIS_SOUL_SUPPLY] = userVars[msg.sender][USERVAR_NON_GENESIS_SOUL_SUPPLY].sub(soulAmount);
+        userVars[targetAddress][USERVAR_NON_GENESIS_SOUL_SUPPLY] = userVars[targetAddress][USERVAR_NON_GENESIS_SOUL_SUPPLY].add(soulAmount);
+    }
+
     function upgradeCharacterWithSoul(uint256 targetId, uint256 soulAmount) public burningEnabled {
         userVars[msg.sender][USERVAR_SOUL_SUPPLY] = userVars[msg.sender][USERVAR_SOUL_SUPPLY].sub(soulAmount);
-        characters.upgradeWithSoul(targetId, soulAmount);
+        characters.upgradeWithSoul(targetId, soulAmount, true);
+    }
+
+    function upgradeNonGenesisCharacterWithSoul(uint256 targetId, uint256 soulAmount) public burningEnabled {
+        userVars[msg.sender][USERVAR_NON_GENESIS_SOUL_SUPPLY] = userVars[msg.sender][USERVAR_NON_GENESIS_SOUL_SUPPLY].sub(soulAmount);
+        characters.upgradeWithSoul(targetId, soulAmount, false);
     }
 
     // Weapons burning

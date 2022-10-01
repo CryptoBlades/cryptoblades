@@ -113,6 +113,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     Garrison public garrison;
 
     uint256 public constant NFTVAR_BONUS_POWER = 2;
+    uint256 public constant NFTVAR_NON_GENESIS_VERSION = 3; // 0 = genesis, 1 = v2
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -158,16 +159,20 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return cc.seed;
     }
 
-    function getSoulForBurns(uint256[] calldata burnIds) external view returns (uint256) {
-        uint256 soulAmount = 0;
+    function getSoulForBurns(uint256[] calldata burnIds) external view returns (uint256 genesisSoulAmount, uint256 nonGenesisSoulAmount) {
         for(uint i = 0; i < burnIds.length; i++) {
-            soulAmount += getTotalPower(burnIds[i]).div(10);
+            uint256 power = getTotalPower(burnIds[i]).div(10);
+            if(nftVars[burnIds[i]][NFTVAR_NON_GENESIS_VERSION] == 0) {
+                genesisSoulAmount += power;
+            }
+            else {
+                nonGenesisSoulAmount += power;
+            }
         }
-        return soulAmount;
     }
 
-    function mint(address minter, uint256 seed) public restricted {
-        uint256 tokenID = tokens.length;
+    function mint(address minter, uint256 seed) public restricted returns (uint256 tokenID) {
+        tokenID = tokens.length;
         uint16 xp = 0;
         uint8 level = 0; // 1
         uint8 trait = uint8(RandomUtil.randomSeededMinMax(0,3,seed));
@@ -184,10 +189,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         else {
             _mint(minter, tokenID);
         }
+        nftVars[tokenID][NFTVAR_NON_GENESIS_VERSION] = 1;
+
         emit NewCharacter(tokenID, receiver);
     }
 
-    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID, uint24 bonusPower, uint16 reputation) minterOnly public returns (uint256) {
+    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID, uint24 bonusPower, uint16 reputation, uint8 version) minterOnly public returns (uint256) {
         uint64 staminaTimestamp = uint64(now); // 0 on purpose to avoid chain jumping abuse
 
         if(tokenID == 0){
@@ -218,6 +225,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
         nftVars[tokenID][NFTVAR_BONUS_POWER] = bonusPower;
         nftVars[tokenID][NFTVAR_REPUTATION] = reputation;
+        nftVars[tokenID][NFTVAR_NON_GENESIS_VERSION] = version;
 
         return tokenID;
     }
@@ -225,6 +233,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function burnIntoCharacter(uint256[] calldata burnIds, uint256 targetCharId, uint256 burnPowerMultiplier) external restricted {
         uint256 burnPower = 0;
         for(uint i = 0; i < burnIds.length; i++) {
+            require(nftVars[burnIds[i]][NFTVAR_NON_GENESIS_VERSION] == nftVars[targetCharId][NFTVAR_NON_GENESIS_VERSION], "Character version mismatch");
             burnPower += nftVars[burnIds[i]][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[burnIds[i]].level));
             address burnOwner = ownerOf(burnIds[i]);
             if(burnOwner == address(garrison)) {
@@ -258,7 +267,13 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         }
     }
 
-    function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount) external restricted {
+    function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount, bool isCharacterGenesis) external restricted {
+        if(isCharacterGenesis) {
+            require(nftVars[targetCharId][NFTVAR_NON_GENESIS_VERSION] == 0);
+        }
+        else {
+            require(nftVars[targetCharId][NFTVAR_NON_GENESIS_VERSION] > 0);
+        }
         uint256 burnPower = soulAmount.mul(10);
         require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
         nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
@@ -354,7 +369,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getFightDataAndDrainStamina(address fighter,
-        uint256 id, uint8 amount, bool allowNegativeStamina, uint256 busyFlag) public restricted returns(uint96) {
+        uint256 id, uint8 amount, bool allowNegativeStamina, uint256 busyFlag) public restricted returns(uint104) {
         require(fighter == ownerOf(id)/* && nftVars[id][NFTVAR_BUSY] == 0*/);
         //nftVars[id][NFTVAR_BUSY] |= busyFlag;
 
@@ -372,7 +387,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
         }
         // bitwise magic to avoid stacking limitations later on
-        return uint96(char.trait | (getTotalPower(id) << 8) | (preTimestamp << 32));
+        return uint104(char.trait | (nftVars[id][NFTVAR_NON_GENESIS_VERSION] << 8) | (getTotalPower(id) << 16) | (uint104(preTimestamp) << 40));
     }
 
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {
