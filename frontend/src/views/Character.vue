@@ -494,6 +494,7 @@ export default Vue.extend({
   },
   async mounted(){
     this.checkStorage();
+    await this.updateMintCharacterFee();
     Events.$on('select-all', (filteredCharacters: any[])=>{
       this.selectAll(filteredCharacters);
     });
