@@ -1526,5 +1526,12 @@
     "more": "More",
     "less": "Less",
     "unclaimed": "Unclaimed"
+  },
+  "banner": {
+    "linkText": "Join the Event",
+    "octoblades": {
+      "octoblades": "The OctoBlades Event is Live on BNB Chain! Over 5x Rewards, Weekly PvP Tournaments, and SO MUCH MORE!!",
+      "link": "https://app.cryptoblades.io/#/?chain=BNB"
+    }
   }
 }
