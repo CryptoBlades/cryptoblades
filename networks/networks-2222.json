@@ -2201,7 +2201,7 @@
     },
     "links": {},
     "address": "0x863D6074aFaF02D9D41A5f8Ea83278DF7089aA86",
-    "transactionHash": "0x5c1dea819bbeaf488fb54b77c1954cc56d05be6d21795e6b32074b43b97d621e"
+    "transactionHash": "0x21a42afc5d29e55760f43c5cf56600a5bc18343333cf163ca4be5b40da9bb54b"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
