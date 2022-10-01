@@ -264,7 +264,6 @@
                     {{$t('plaza.recruit')}} ({{ recruitCost }} SKILL) <i class="fas fa-plus"></i>
                   </b-button>
                   <b-checkbox
-                    v-if="ownCharacters.length === 4"
                     variant="primary"
                     class="mx-3 my-auto"
                     v-model="mintSlippageApproved">
