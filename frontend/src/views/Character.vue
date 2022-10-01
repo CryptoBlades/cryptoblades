@@ -41,7 +41,7 @@
         @changeTab="onChangeTab"
       />
       <template v-if="activeTab === 'info' && havePlazaCharacters">
-        <div class="d-flex justify-content-end pr-5 pt-4 slippage-checkbox" v-if="ownCharacters.length === 4">
+        <div class="d-flex justify-content-end pr-5 pt-4 slippage-checkbox">
           <b-checkbox variant="primary" v-model="mintSlippageApproved">
             <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
             <b-icon-question-circle class="ml-1 centered-icon" v-tooltip.bottom="$t('plaza.dynamicPricesDetails',
@@ -230,7 +230,7 @@ export default Vue.extend({
       activeTab: 'info',
       updateInterval: null as ReturnType<typeof setInterval> | null,
       recruitCost: '0',
-      mintSlippageApproved: false,
+      mintSlippageApproved: true,
       mintPriceDecreasePerHour: '0',
       mintCharacterPriceIncrease: '0',
       mintCharacterMinPrice: '0',
