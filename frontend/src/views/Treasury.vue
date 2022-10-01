@@ -14,8 +14,17 @@
         <b-form-select-option v-for="p in this.getPartnerProjects" :key="p.id" :value="p.id">{{p.tokenSymbol}} ({{p.name}})</b-form-select-option>
       </b-form-select>
     </div>
-    <div class="d-flex pt-2 pb-2 flex-wrap justify-content-center projects-container">
-      <PartneredProject v-for="partnerProject in this.getPartnerProjects" :key="partnerProject.id" :partnerProject="partnerProject" />
+    <div class="d-flex flex-column align-items-center mt-3">
+      <h2 v-if="genesisPartnerProjects.length > 0">Genesis Treasuries</h2>
+      <div class="d-flex pt-2 pb-2 flex-wrap justify-content-center projects-container">
+        <PartneredProject v-for="partnerProject in genesisPartnerProjects" :key="partnerProject.id" :partnerProject="partnerProject" />
+      </div>
+    </div>
+    <div class="d-flex flex-column align-items-center mt-3">
+      <h2 v-if="nonGenesisPartnerProjects.length > 0">Non-Genesis Treasuries</h2>
+      <div class="d-flex pt-2 pb-2 flex-wrap justify-content-center projects-container">
+        <PartneredProject v-for="partnerProject in nonGenesisPartnerProjects" :key="partnerProject.id" :partnerProject="partnerProject" />
+      </div>
     </div>
     <b-modal ok-only class="centered-modal" ref="formula-details-modal" :title="$t('Treasury.formulaDetailsTitle')">
       <span class="white-space">{{$t('Treasury.payoutFormulaExplanation')}}</span>
@@ -39,6 +48,7 @@ export interface SupportedProject {
   tokensClaimed: number;
   tokenPrice: number;
   isActive: boolean;
+  isValor: boolean;
   logo: string;
   details: string;
   website: string;
@@ -79,6 +89,13 @@ export default Vue.extend({
     ...(mapState(['currentNetworkId']) as Accessors<StoreMappedState>),
     ...(mapState('treasury',['payoutCurrencyId'])as Accessors<StoreMappedTreasuryState>),
 
+    genesisPartnerProjects(): SupportedProject[] {
+      return this.getPartnerProjects.filter(p => !p.isValor);
+    },
+
+    nonGenesisPartnerProjects(): SupportedProject[] {
+      return this.getPartnerProjects.filter(p => p.isValor);
+    }
   },
 
   methods: {

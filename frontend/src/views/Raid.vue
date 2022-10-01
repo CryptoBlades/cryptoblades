@@ -202,7 +202,7 @@
                      <button v-else class="btn-raid"  v-tooltip="$t('raid.joiningCostStamina', {formatStaminaHours})" @click="openEquipItems()">
                       {{$t('raid.signup')}}
                     </button>
-                    <div>
+                    <div class="d-inline-block">
                       <p>{{$t('raid.joiningCost')}}</p>
                       <span>{{ staminaCost }} {{$t('raid.stamina')}}</span>|
                       <span>{{ durabilityCost }} {{$t('raid.durability')}}</span> |
@@ -1631,7 +1631,7 @@ hr.divider {
 .drop-chance .raid-loot{
   background-image: url('../assets/chest.png');
   background-position: center;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
   height: 150px;
   width: 155px;
   margin-right: -100px;
@@ -2128,7 +2128,6 @@ hr.divider {
     padding-left: 0px;
   }
 
-
   .float-center .container .power-rolled {
     padding: 0px !important;
     width: 50% !important;
@@ -2180,6 +2179,13 @@ hr.divider {
 }
 
 @media only screen and (max-width: 992px) and (min-width: 601px){
+  .join-raid > div{
+    position: absolute;
+    margin-bottom: -125px;
+    padding-bottom: 25px;
+    padding-top: 25px;
+  }
+
   .nav-raid{
     margin-top: 20px;
   }
@@ -2209,6 +2215,15 @@ hr.divider {
   .powers > div > p {
       color: #fff;
       font-size: 2.8vw !important;
+  }
+}
+
+@media only screen and (max-width: 1200px) and (min-width: 993px) {
+  .join-raid > div{
+    position: absolute;
+    margin-bottom: -125px;
+    padding-bottom: 25px;
+    padding-top: 25px;
   }
 }
 

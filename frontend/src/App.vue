@@ -540,23 +540,43 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
 }
 
 .app{
-  width: auto;
+  width: 100%;
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  overflow: auto;
 }
 
+.app .content.bg-dark{
+  flex: 1;
+}
+
+@media all and (max-width: 767.98px) {
+  div.content.bg-dark .row{
+    margin-left: -10px;
+    margin-right: -10px;
+  }
+}
 
 .set-normal{
   margin-left: auto;
   margin-right: auto;
   transition: 1s width;
   padding: 0px;
+  width: auto;
+  overflow-x: clip;
 }
 
 hr.hr-divider {
   border-top: 1px solid #9e8a57;
   margin-bottom: 0.5rem !important;
 }
-body {
+html, body {
   margin: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #000E29 !important;
+  overflow: hidden;
 }
 
 .no-margin {
@@ -616,8 +636,7 @@ button,
 }
 
 .blank-slate {
-  width: calc(100vw - 36px);
-  height: 95vh;
+  height: clamp(50vh, 50vh, 95vh);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1004,15 +1023,13 @@ a.character-tab:focus {
   background: #404857;
 }
 </style>
-<style scoped>
+<style lang="scss" scoped>
 .app {
   margin: 0;
 }
 
 .content {
   padding: 0 1em;
-  height: auto;
-  margin: auto;
 }
 
 .fullscreen-warning {
@@ -1098,7 +1115,7 @@ a.character-tab:focus {
   background: rgba(20, 20, 20, 1);
   background-image: url("./assets/blacksmith/blacksmith-bg.png");
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
 }
 
 .can-show-app{
