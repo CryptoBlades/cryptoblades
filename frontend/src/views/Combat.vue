@@ -231,6 +231,7 @@ interface StoreMappedCombatActions {
   getCurrentSkillPrice(): Promise<string>;
   getNativeTokenPriceInUsd(): Promise<string>;
   getCombatTokenChargePercent(): Promise<string>;
+  getFightXpGain(): Promise<number>;
 }
 
 interface StoreMappedState {
@@ -325,6 +326,7 @@ export default Vue.extend({
   },
   async mounted() {
     this.selectedWeaponId = this.currentWeaponId;
+    this.fightXpGain = await this.getFightXpGain();
     Events.$on('chooseweapon', (id: number) => {
       this.selectedWeaponId = id;
       this.index++;
@@ -417,7 +419,8 @@ export default Vue.extend({
         'getCurrentSkillPrice',
         'getNativeTokenPriceInUsd',
         'getCombatTokenChargePercent',
-        'fetchCharacterStamina'
+        'fetchCharacterStamina',
+        'getFightXpGain',
       ]) as StoreMappedCombatActions),
     ...(mapMutations('combat', ['setIsInCombat']) as StoreMappedCombatMutations),
     getEnemyArt,
