@@ -507,7 +507,7 @@ export default Vue.extend({
       isTransferInProgress: false,
       isValidWeb3Address,
       updateInterval: null as ReturnType<typeof setInterval> | null,
-      mintSlippageApproved: false,
+      mintSlippageApproved: true,
       mintPriceDecreasePerHour: '0',
       mintCharacterPriceIncrease: '0',
       mintCharacterMinPrice: '0',
