@@ -2202,7 +2202,7 @@
     },
     "links": {},
     "address": "0x48bdd9a266fF01eEb81b1F89daB76b3816Ee848a",
-    "transactionHash": "0xa1f2264ca06e9dc98b264d6443c545aa1dc73cd8ea7599f37ceb83da88eb2a59"
+    "transactionHash": "0xafb8bf1059dc263aeac26dd393c165d819ebd1f3a3617d54c38efe38e5b1c756"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {

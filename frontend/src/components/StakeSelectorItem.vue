@@ -350,6 +350,7 @@ export default Vue.extend({
       switch(this.stakeType as AllStakeTypes) {
       case 'skill':
       case 'skill2':
+      case 'skill60':
       case 'skill90':
       case 'skill180':
         return 'SKILL';
@@ -360,10 +361,16 @@ export default Vue.extend({
       case 'lp':
       case 'lp2':
         return 'SKILL-WBNB';
+      case 'lpValor':
+        return 'SKILL-VALOR';
+      case 'lpValor2':
+        return 'KING-VALOR';
       case 'cbkLandT1':
       case 'cbkLandT2':
       case 'cbkLandT3':
         return 'CBKL';
+      case 'valor':
+        return 'VALOR';
       default:
         return 'unknown';
       }

@@ -28,6 +28,34 @@ export const stakingContractsInfo: Partial<Record<StakeType, Partial<StakingCont
   }
 };
 
+if(availableStakingContracts.includes('skill60')) {
+  stakingContractsInfo.skill60 = {
+    stakingRewardsAddress: getConfigValue('VUE_APP_SKILL_STAKING_REWARDS_60_CONTRACT_ADDRESS'),
+    stakingTokenAddress: getConfigValue('VUE_APP_SKILL_TOKEN_CONTRACT_ADDRESS')
+  };
+}
+
+if(availableStakingContracts.includes('valor')) {
+  stakingContractsInfo.valor = {
+    stakingRewardsAddress: getConfigValue('VUE_APP_VALOR_STAKING_REWARDS_CONTRACT_ADDRESS'),
+    stakingTokenAddress: getConfigValue('VUE_APP_VALOR_TOKEN_CONTRACT_ADDRESS')
+  };
+}
+
+if(availableStakingContracts.includes('lpValor')) {
+  stakingContractsInfo.lpValor = {
+    stakingRewardsAddress: getConfigValue('VUE_APP_LP_VALOR_STAKING_REWARDS_CONTRACT_ADDRESS'),
+    stakingTokenAddress: getConfigValue('VUE_APP_LP_VALOR_TOKEN_CONTRACT_ADDRESS')
+  };
+}
+
+if(availableStakingContracts.includes('lpValor2')) {
+  stakingContractsInfo.lpValor2 = {
+    stakingRewardsAddress: getConfigValue('VUE_APP_LP_VALOR_2_STAKING_REWARDS_CONTRACT_ADDRESS'),
+    stakingTokenAddress: getConfigValue('VUE_APP_LP_VALOR_2_TOKEN_CONTRACT_ADDRESS')
+  };
+}
+
 if(availableStakingContracts.includes('skill2')) {
   stakingContractsInfo.skill2 = {
     stakingRewardsAddress: getConfigValue('VUE_APP_SKILL2_STAKING_REWARDS_CONTRACT_ADDRESS'),
@@ -84,6 +112,7 @@ if(availableStakingContracts.includes('skill180')) {
   };
 }
 
+
 export const nftStakingContractsInfo: Partial<Record<NftStakeType, Partial<StakingContractEntry>>> = {};
 
 if(availableNftStakingContracts.includes('cbkLandT1')) {
@@ -134,6 +163,16 @@ const defaultHumanReadableDetailsForStakeTypes: Record<StakeType, HumanReadableD
     rewardTokenName: 'SKILL',
     stakeTitle: 'SKILL-BNB for SKILL V2'
   },
+  lpValor: {
+    stakeTokenName: 'SKILL-VALOR',
+    rewardTokenName: 'VALOR',
+    stakeTitle: '30 days SKILL-VALOR (APE LP) for VALOR'
+  },
+  lpValor2: {
+    stakeTokenName: 'KING-VALOR',
+    rewardTokenName: 'VALOR',
+    stakeTitle: '30 days SKILL-KING (APE LP) for VALOR'
+  },
   king: {
     stakeTokenName: 'KING',
     rewardTokenName: 'KING',
@@ -149,6 +188,11 @@ const defaultHumanReadableDetailsForStakeTypes: Record<StakeType, HumanReadableD
     rewardTokenName: 'KING',
     stakeTitle: '180 days KING for KING'
   },
+  skill60: {
+    stakeTokenName: 'SKILL',
+    rewardTokenName: 'SKILL',
+    stakeTitle: '60 days SKILL for SKILL'
+  },
   skill90: {
     stakeTokenName: 'SKILL',
     rewardTokenName: 'SKILL',
@@ -158,6 +202,11 @@ const defaultHumanReadableDetailsForStakeTypes: Record<StakeType, HumanReadableD
     stakeTokenName: 'SKILL',
     rewardTokenName: 'SKILL',
     stakeTitle: '180 days SKILL for SKILL'
+  },
+  valor: {
+    stakeTokenName: 'VALOR',
+    rewardTokenName: 'VALOR',
+    stakeTitle: '30 days VALOR for VALOR'
   }
 };
 
