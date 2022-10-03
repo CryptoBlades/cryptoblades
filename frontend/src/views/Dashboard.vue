@@ -366,6 +366,7 @@ export default Vue.extend({
   background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/dashboard-bg.png");
   background-size: cover;
   background-repeat: no-repeat;
+  background-position-x: right;
   height: 50%;
   width: 100%;
   z-index: 1;
