@@ -10,8 +10,7 @@
           <h6>Token: {{ partnerProject.tokenSymbol }}</h6>
           <a @click="addTokenToMetamask" class="ml-1 a-button">({{ $t('PartneredProject.add') }})</a>
         </div>
-        <span v-if="!isValor" class="multiplier-text">{{ skillToPartnerRatio }} SKILL/{{ partnerProject.tokenSymbol }}</span>
-        <span v-else class="multiplier-text">1.0000 VALOR/VALOR</span>
+        <span class="multiplier-text">{{ skillToPartnerRatio }} {{ isValor ? 'VALOR' : 'SKILL' }}/{{ partnerProject.tokenSymbol }}</span>
         <span :class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
               class="multiplier-text">{{ $t('PartneredProject.multiplier') }}: x{{ multiplier }}</span>
         <span v-if="!isValor" :class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
