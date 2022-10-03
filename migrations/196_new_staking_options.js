@@ -8,7 +8,7 @@ const ValorToken = artifacts.require("ValorToken");
 const Treasury = artifacts.require("Treasury");
 const Raid1 = artifacts.require("Raid1");
 
-module.exports = async function (deployer) {
+module.exports = async function (deployer, network) {
   await upgradeProxy(Treasury.address, Treasury, { deployer });
   await upgradeProxy(Raid1.address, Raid1, { deployer });
 
