@@ -193,7 +193,12 @@ const defaultHumanReadableDetailsForStakeTypes: Record<StakeType, HumanReadableD
     stakeTokenName: 'SKILL',
     rewardTokenName: 'SKILL',
     stakeTitle: '60 days SKILL for SKILL (Revenue Share)',
-    note: 'This pool allows your tokens to be used as rewards within CryptoBlades, and in return you gain 2 months of high-APR SKILL, and additionally collect revenue-share from CryptoBlades from 2 months onwards. Once you unstake, you are removed from the revenue share. Same as staking, revenue share is determined based on your share of the staking pool. So as more people unstake, their share gets distributed amongst the remaining stakers.'
+    note: 'This pool allows your tokens to be used as rewards within CryptoBlades,\
+      and in return you gain 2 months of high-APR SKILL, and additionally collect\
+      revenue-share from CryptoBlades from 2 months onwards. Once you unstake,\
+      you are removed from the revenue share. Same as staking, revenue share is\
+      determined based on your share of the staking pool. So as more people unstake,\
+      their share gets distributed amongst the remaining stakers.'
   },
   skill90: {
     stakeTokenName: 'SKILL',
