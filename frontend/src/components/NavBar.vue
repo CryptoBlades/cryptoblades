@@ -1,6 +1,6 @@
 <template>
   <div class="main-nav-div">
-    <b-navbar class="main-nav bg-dark border-bottom border-gray" toggleable="lg">
+    <b-navbar class="main-nav bg-dark border-bottom border-gray" toggleable="md">
       <div class="nav-logo col-xl-2 col-lg-3 col-md-4 col-sm-4 cols-1">
         <router-link :to="{ name: 'dashboard' }" exact class="game-ui-logo">
           <img
@@ -10,17 +10,17 @@
           />
         </router-link>
       </div>
-      <b-collapse id="navbar-toggle-collapse" class="d-sm-none none-mobile" is-nav>
+      <b-collapse id="navbar-toggle-collapse" is-nav>
         <view-links class="view-links d-none d-xl-flex"></view-links>
       </b-collapse>
 
       <skill-balance-display class="ml-auto d-none d-sm-flex none-mobile"/>
-      <options class="d-none d-sm-flex none-mobile"/>
+      <options class="options-dispay d-none d-sm-flex none-mobile"/>
 
       <!-- Render only on mobile view -->
         <options class="options-display-mobile d-sm-none"/>
     </b-navbar>
-    <skill-balance-display class="skill-display-mobile d-sm-none"/>
+    <skill-balance-display class="skill-display-mobile"/>
   </div>
 </template>
 
@@ -99,6 +99,12 @@ a.router-link-active {
   padding-bottom: 0;
 }
 
+@media (max-width: 1415px){
+  #navbar-toggle-collapse {
+    display: none !important;
+  }
+}
+
 @media (max-width: 1024px) {
   .navbar-expand-sm {
     text-align: center;
@@ -106,9 +112,19 @@ a.router-link-active {
   }
 }
 
-@media (max-width: 576px) {
+@media (min-width: 820px) {
+  .custom-skill-balance-mobile.skill-display-mobile {
+    display: none !important;
+  }
+}
+
+@media (max-width: 820px) {
   .main-nav > .navbar-brand {
     align-self: center;
+  }
+
+  .options-dispay {
+    margin-left: auto;
   }
 
   .main-nav > .navbar-nav {

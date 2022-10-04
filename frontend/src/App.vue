@@ -654,7 +654,6 @@ button,
 }
 
 .blank-slate {
-  height: clamp(50vh, 50vh, 95vh);
   display: flex;
   flex-direction: column;
   justify-content: center;

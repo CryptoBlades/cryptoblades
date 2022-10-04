@@ -1,6 +1,6 @@
 <template>
   <div class="skill-balance-display d-flex flex-column flex-wrap p-2 custom-skill-balance-mobile" :style="isToggled ? 'padding-bottom: 10px !important': '' ">
-    <div class="d-flex justify-content-end align-items-center pr-2 pb-1">
+    <div class="skill-balance-display-wrapper d-flex justify-content-end align-items-center pr-2 pb-1">
       <div v-if="getBalanceUrl"
         size="sm" class="my-2 my-sm-0 skill-tooltip" variant="primary"
         v-tooltip="$t('skillBalanceDisplay.buyBalanceTooltip')"
@@ -55,8 +55,7 @@
         </div>
       </div>
     </div>
-    <div class="d-flex justify-content-end align-items-center animate-slide" v-if="!isMobile() || (isMobile() && isToggled)"
-      :style="isToggled ? 'margin-top: -10px': ''">
+    <div class="d-flex justify-content-end align-items-center animate-slide" v-if="!isMobile() || (isMobile() && isToggled)">
       <div class="deposit-withdraw px-2">
         <span id="claim-xp-popover" @click="onClaimXp" :class="!canClaimXp ? 'no-claimable' : ''">{{$t('ClaimRewardsBar.claim').toUpperCase()}} EXP</span>
         <b-popover target="claim-xp-popover" custom-class="claim-exp-popover" triggers="hover" placement="bottom">
@@ -501,7 +500,10 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-@media (max-width: 576px) {
+@media (max-width: 820px) {
+  .skill-balance-display-wrapper {
+    flex-wrap: wrap;
+  }
   .custom-skill-balance-mobile{
     font-size: 3.3vw !important;
     border-left: 1px solid #424A59;
@@ -580,7 +582,7 @@ export default Vue.extend({
 }
 .skill-balance-display {
   border-right: 1px solid #424A59;
-  font-size: clamp(.9rem, .7vw, 1rem) !important;
+  font-size: clamp(.8rem, .65vw, 1rem) !important;
 }
 
 .skill-tooltip > img{

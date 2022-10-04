@@ -9,7 +9,7 @@
     <span v-else-if="afterDeadline" class="text-center">
       {{ $t('quests.questDeadlineOverCannotBeCompleted') }}
     </span>
-    <b-button v-if="character && character.quest.id === 0" :disabled="isLoading" variant="primary custom-action-btn" @click="request">
+    <b-button v-if="character && character.quest.id === 0" :disabled="isLoading" variant="primary" class="request-quest custom-action-btn" @click="request">
       <span> {{ pickable ? $t('quests.chooseSpecialQuest')  : $t('quests.requestQuest') }} </span>
     </b-button>
     <b-button v-else-if="questCanBeCompleted && !afterDeadline && !deletable" :disabled="isLoading" variant="primary"
@@ -494,6 +494,12 @@ export default Vue.extend({
   width: 100%;
   max-height: 50px;
 }
+
+.custom-action-btn.request-quest {
+  min-height: 50px;
+  max-height: 63px;
+}
+
 .custom-action-btn:disabled {
   border-color: #FFF !important;
 }
