@@ -4152,11 +4152,21 @@
     "links": {},
     "address": "0x63B0Ea209400041b59410dE7a07F309cACA6ca99"
   },
+  "build/contracts/LP2StakingRewardsUpgradeableValor.json": {
+    "events": {},
+    "links": {},
+    "address": "0xd4e0C207E3bC2224e0907AD936EfFe5beA4EE73A"
+  },
   "build/contracts/LPStakingRewardsUpgradeable.json": {
     "events": {},
     "links": {},
     "address": "0x4168062aB151Da9fDF2c5ae0Bc503BCA7Abd8952",
     "transactionHash": "0x3d1100af1e951cec13905220fa08d31add43c63773a4a048b5763f29f02da984"
+  },
+  "build/contracts/LPStakingRewardsUpgradeableValor.json": {
+    "events": {},
+    "links": {},
+    "address": "0xbE555D81117EEe690ACBaC54aF735AC32d763Fd2"
   },
   "build/contracts/Merchandise.json": {
     "events": {
@@ -5508,7 +5518,7 @@
     "events": {},
     "links": {},
     "address": "0x86Ab07F69046475D14d69127d76Cef9bA91fbC39",
-    "transactionHash": "0xfca3a0fcfc19528dd7149c667e7c4865c0baf423999d4b4daf25dd5ad3883a1e"
+    "transactionHash": "0xc4f20ac92b08c78719af249fe2fbe12b9b9b76cc82f5837f1811f704cdb30656"
   },
   "build/contracts/RaidBasic.json": {
     "events": {},
@@ -6564,6 +6574,11 @@
     "links": {},
     "address": "0x889B23070D2eA8a4f673e1b007984B8218D769bb"
   },
+  "build/contracts/SkillStakingRewardsUpgradeable60.json": {
+    "events": {},
+    "links": {},
+    "address": "0x8ebA72091aEdA7FB76cAe0d513674c06bEDD975f"
+  },
   "build/contracts/SkillStakingRewardsUpgradeable90.json": {
     "events": {
       "0xe68101b30364d616deefc8cd307b7e27ccbd9c73f138bd478179497563d97a11": {
@@ -6974,12 +6989,17 @@
     "events": {},
     "links": {},
     "address": "0xe676452f2C650F80C3D282E723112aA67bE617c7",
-    "transactionHash": "0x8bff366d4b1554e0618b7954ca38aceb5a591fbc502ebfca4c78b3f089d5e3f5"
+    "transactionHash": "0xf4de8ee09ee10bac17e59c714419e5fc9d10c6dab559cc888d7cd36b55231d88"
   },
   "build/contracts/ValorERC20BridgeProxyContract.json": {
     "events": {},
     "links": {},
     "address": "0xE72A702CCEc784475bfd93cE679423Fb6200dfC5"
+  },
+  "build/contracts/ValorStakingRewardsUpgradeable.json": {
+    "events": {},
+    "links": {},
+    "address": "0x08c1bcDeAc373872C4975E033D3492688C4B5C73"
   },
   "build/contracts/ValorToken.json": {
     "events": {},
