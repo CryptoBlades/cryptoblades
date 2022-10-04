@@ -399,7 +399,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
         xpRewards[char] += xp;
 
-        emit FightOutcome(fighter, char, wep, (data.targetPower | ((uint32(data.traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, (tokens + vars[VAR_FIGHT_FLAT_IGO_BONUS] * fightMultiplier));
+        emit FightOutcome(fighter, char, wep, (data.targetPower | ((uint32(data.traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
@@ -522,6 +522,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         xpRewards[id] = 1;
         if(userVars[msg.sender][USERVAR_GEN2_UNCLAIMED] == 0) {
             userVars[msg.sender][USERVAR_GEN2_UNCLAIMED] = 1;
+        }
+        if(inGameOnlyFunds[msg.sender] == 0) {
+            inGameOnlyFunds[msg.sender] = 1;
         }
 
         // first weapon free with a character mint, max 1 star
@@ -786,7 +789,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         bool trackInflow
     ) internal {
         if(fromInGameOnlyFunds > 0) {
-            totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
+            if(totalInGameOnlyFunds >= fromInGameOnlyFunds) // might revert otherwise due to .sub
+                totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
             inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
         }
 
@@ -912,7 +916,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _giveInGameOnlyFundsFromContractBalance(address to, uint256 skillAmount) internal {
-        totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
+        //totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
         inGameOnlyFunds[to] = inGameOnlyFunds[to].add(skillAmount);
 
         emit InGameOnlyFundsGiven(to, skillAmount);
