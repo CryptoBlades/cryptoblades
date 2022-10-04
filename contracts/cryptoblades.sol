@@ -66,6 +66,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_WEAPON_MINT_TIMESTAMP = 25;
     uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 26;
     uint256 public constant VAR_GAS_OFFSET_PER_FIGHT_MULTIPLIER = 27;
+    uint256 public constant VAR_FIGHT_FLAT_IGO_BONUS = 28;
 
     uint256 public constant LINK_SAFE_RANDOMS = 1;
 
@@ -384,6 +385,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             tokens = 0;
             xp = 0;
         }
+        //TEMP FOR EVENT
+        else {
+            _giveInGameOnlyFundsFromContractBalance(fighter, vars[VAR_FIGHT_FLAT_IGO_BONUS] * fightMultiplier);
+        }
+        //^ TEMP
 
         if(characterVersion > 0) {
             userVars[fighter][USERVAR_GEN2_UNCLAIMED] += tokens;
@@ -516,6 +522,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         xpRewards[id] = 1;
         if(userVars[msg.sender][USERVAR_GEN2_UNCLAIMED] == 0) {
             userVars[msg.sender][USERVAR_GEN2_UNCLAIMED] = 1;
+        }
+        if(inGameOnlyFunds[msg.sender] == 0) {
+            inGameOnlyFunds[msg.sender] = 1;
         }
 
         // first weapon free with a character mint, max 1 star
@@ -780,7 +789,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         bool trackInflow
     ) internal {
         if(fromInGameOnlyFunds > 0) {
-            totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
+            if(totalInGameOnlyFunds >= fromInGameOnlyFunds) // might revert otherwise due to .sub
+                totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
             inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
         }
 
@@ -906,7 +916,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _giveInGameOnlyFundsFromContractBalance(address to, uint256 skillAmount) internal {
-        totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
+        //totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
         inGameOnlyFunds[to] = inGameOnlyFunds[to].add(skillAmount);
 
         emit InGameOnlyFundsGiven(to, skillAmount);
