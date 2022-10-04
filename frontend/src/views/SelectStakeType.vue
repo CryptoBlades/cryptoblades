@@ -1,7 +1,7 @@
 <template>
   <div class="body main-font">
     <h1 class="text-center">{{$t('stake.staking')}}</h1>
-    <h2 class="text-center">OCTOBLADES STAKINGS</h2>
+    <h2 class="text-center text-uppercase">{{$t('stake.octobladesStakings')}}</h2>
     <ul class="stake-select-list">
       <li class="stake-select-item" v-for="e in eventEntries" :key="e.stakeType">
         <stake-selector-item
@@ -21,7 +21,26 @@
           :walletBalance="staking[e.stakeType].ownBalance"/>
       </li>
     </ul>
-    <h2 class="text-center">NORMAL STAKINGS</h2>
+    <h2 class="text-center text-uppercase">{{$t('stake.landStakings')}}</h2>
+    <ul class="stake-select-list">
+      <li class="stake-select-item" v-for="e in landEntries" :key="e.stakeType">
+        <stake-selector-item
+          :isLoading="e.isLoading"
+          :stakeTitle="e.stakeTitle"
+          :stakeTokenName="e.stakeTokenName"
+          :rewardTokenName="e.rewardTokenName"
+          :stakeType="e.stakeType"
+          :minimumStakeTime="stakeOverviews[e.stakeType].minimumStakeTime"
+          :estimatedYield="estimatedYields[e.stakeType]"
+          :rewardsDuration="stakeOverviews[e.stakeType].rewardsDuration"
+          :deprecated="e.deprecated"
+          :rewardDistributionTimeLeft="stakeOverviews[e.stakeType].rewardDistributionTimeLeft"
+          :currentRewardEarned="staking[e.stakeType].currentRewardEarned"
+          :totalStaked="staking[e.stakeType].contractBalance"
+          :walletBalance="staking[e.stakeType].ownBalance"/>
+      </li>
+    </ul>
+    <h2 class="text-center text-uppercase">{{$t('stake.normalStakings')}}</h2>
     <ul class="stake-select-list">
       <li class="stake-select-item" v-for="e in nonEventEntries" :key="e.stakeType">
         <stake-selector-item
@@ -92,6 +111,14 @@ export default Vue.extend({
       }));
     },
 
+    landEntries() {
+      return this.availableNftStakeTypes.filter(stakeType => ['cbkLandT1', 'cbkLandT2', 'cbkLandT3'].includes(stakeType)).map(stakeType => ({
+        stakeType, ...humanReadableDetailsForNftStakeTypes[stakeType],
+        // make the isLoading = true as a default value to set the loader as initial display
+        isLoading: true
+      }));
+    },
+
     nonEventEntries() {
       return this.availableStakeTypes.filter(stakeType => !['skill60','valor','lpValor','lpValor2'].includes(stakeType)).map(stakeType => ({
         stakeType, ...humanReadableDetailsForStakeTypes[stakeType],
@@ -138,6 +165,11 @@ export default Vue.extend({
 
     setIsLoading(stakeType){
       this.eventEntries.forEach((entry) =>{
+        if(stakeType === entry.stakeType){
+          entry.isLoading = false;
+        }
+      });
+      this.landEntries.forEach((entry) =>{
         if(stakeType === entry.stakeType){
           entry.isLoading = false;
         }
