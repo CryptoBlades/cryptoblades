@@ -456,7 +456,6 @@ export default Vue.extend({
     //   );
     // });
     Events.$on('setting:currentChain', (chain: {value: string}) => {
-      localStorage.setItem('bannerHidden', 'false');
       this.isBNB = chain.value === 'BNB';
     });
     Events.$on('weapon-inventory', (bol: boolean) =>{
