@@ -66,6 +66,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_WEAPON_MINT_TIMESTAMP = 25;
     uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 26;
     uint256 public constant VAR_GAS_OFFSET_PER_FIGHT_MULTIPLIER = 27;
+    uint256 public constant VAR_FIGHT_FLAT_IGO_BONUS = 28;
 
     uint256 public constant LINK_SAFE_RANDOMS = 1;
 
@@ -384,6 +385,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             tokens = 0;
             xp = 0;
         }
+        //TEMP FOR EVENT
+        else {
+            _giveInGameOnlyFundsFromContractBalance(fighter, vars[VAR_FIGHT_FLAT_IGO_BONUS] * fightMultiplier);
+        }
+        //^ TEMP
 
         if(characterVersion > 0) {
             userVars[fighter][USERVAR_GEN2_UNCLAIMED] += tokens;
@@ -393,7 +399,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
         xpRewards[char] += xp;
 
-        emit FightOutcome(fighter, char, wep, (data.targetPower | ((uint32(data.traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
+        emit FightOutcome(fighter, char, wep, (data.targetPower | ((uint32(data.traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, (tokens + vars[VAR_FIGHT_FLAT_IGO_BONUS] * fightMultiplier));
     }
 
     function getMonsterPower(uint32 target) public pure returns (uint24) {
