@@ -135,9 +135,13 @@ export default Vue.extend({
   height: auto;
 }
 
+.quest-row {
+  height: auto;
+}
+
 /* Character */
 .quest-row > div:nth-child(1) {
-  width: clamp(250px, 20vw, 550px);
+  width: clamp(352px, 20vw, 550px);
 }
 
 /* QuestActions */

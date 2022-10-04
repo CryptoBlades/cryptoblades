@@ -2,6 +2,8 @@
   <skeleton-loader v-if="isLoading"/>
   <div v-else class="container">
     <h1 class="stake-type-title">{{ stakeTitle }}
+      <b-icon-cash-stack v-if="note" class="note"
+        v-tooltip="note" />
       <b-icon-question-circle-fill v-if="deprecated" class="quesition-mark"
         v-tooltip="$t('stake.StakeSelectorItem.deprecatedTooltip')" />
       <b-icon-exclamation-circle-fill v-if="rewardsDepleted" class="exclamation-mark"
@@ -271,6 +273,9 @@ export default Vue.extend({
     },
     deprecated: {
       type: Boolean,
+    },
+    note: {
+      type: String
     },
     rewardDistributionTimeLeft: {
       type: Number,
@@ -932,6 +937,11 @@ export default Vue.extend({
 
 .quesition-mark {
   margin-right:5px;
+}
+
+.note {
+  margin-left: 5px;
+  scale: 1.2;
 }
 
 .exclamation-mark {
