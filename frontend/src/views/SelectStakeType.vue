@@ -1,7 +1,7 @@
 <template>
   <div class="body main-font">
     <h1 class="text-center">{{$t('stake.staking')}}</h1>
-    <h2 class="text-center">OCTOBLADES STAKINGS</h2>
+    <h2 class="text-center text-uppercase">{{$t('stake.octobladesStakings')}}</h2>
     <ul class="stake-select-list">
       <li class="stake-select-item" v-for="e in eventEntries" :key="e.stakeType">
         <stake-selector-item
@@ -21,7 +21,7 @@
           :walletBalance="staking[e.stakeType].ownBalance"/>
       </li>
     </ul>
-    <h2 class="text-center">LAND STAKINGS</h2>
+    <h2 class="text-center text-uppercase">{{$t('stake.landStakings')}}</h2>
     <ul class="stake-select-list">
       <li class="stake-select-item" v-for="e in landEntries" :key="e.stakeType">
         <stake-selector-item
@@ -40,7 +40,7 @@
           :walletBalance="staking[e.stakeType].ownBalance"/>
       </li>
     </ul>
-    <h2 class="text-center">NORMAL STAKINGS</h2>
+    <h2 class="text-center text-uppercase">{{$t('stake.normalStakings')}}</h2>
     <ul class="stake-select-list">
       <li class="stake-select-item" v-for="e in nonEventEntries" :key="e.stakeType">
         <stake-selector-item
