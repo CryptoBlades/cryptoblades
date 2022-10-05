@@ -63,7 +63,7 @@ interface Data {
   images: any;
   multiplier: string;
   distributionTime: string;
-  tokensClaimed: string;
+  tokensClaimed: number;
   skillToPartnerRatio: string;
   updateInterval: ReturnType<typeof setInterval> | null;
   detailsOpened: boolean;
@@ -82,7 +82,7 @@ export default Vue.extend({
       images: require.context('../assets/partners/', false, /\.png$/),
       multiplier: '1',
       distributionTime: '0',
-      tokensClaimed: '0',
+      tokensClaimed: 0,
       skillToPartnerRatio: '0',
       updateInterval: null,
       detailsOpened: false,
@@ -92,7 +92,7 @@ export default Vue.extend({
   computed: {
     progressBarWidth(): string {
       if (!this.partnerProject.tokenSupply) return '0%';
-      return `${Math.round((+this.tokensClaimed / +this.partnerProject.tokenSupply) * 100)}%`;
+      return `${Math.round((this.tokensClaimed / +this.partnerProject.tokenSupply) * 100)}%`;
     },
 
     moneyPerUnclaimed(): string {
