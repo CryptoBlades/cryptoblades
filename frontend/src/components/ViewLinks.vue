@@ -48,16 +48,46 @@
       </router-link>
     </li>
 
+    <li class="top-nav-links" id="update-notifications" > <!-- v-for="update in getUpdateNotifications" :key="update.hash"> -->
+      <div class="icon"><img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar">
+        <span class="unreadUpdates"></span>
+      </div>
+      <div class="link-text">{{ $t("viewLink.admin") }}</div>
+      <update-popup/>
+    </li>
+    <!-- <div v-else v-for="quest in walletQuests" :key="quest.id" class="d-flex w-100">
+      <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
+                :reputationLevelRequirements="reputationLevelRequirements"
+                @refresh-quest-data="onRefreshQuestData"/>
+    </div> -->
+
   </b-navbar-nav>
 </template>
 
-<script>
+<script lang="ts">
+// import { apiUrl } from '@/utils/common';
 import {portal, pvp, quests, raid} from '@/feature-flags';
 import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
 
-import Hint from '@/components/Hint';
+import Hint from '@/components/Hint.vue';
+import UpdatePopup from './UpdatePopup.vue';
+// import Update from '@/components/Update.vue';
 
+interface Data {
+  raid: boolean,
+  portal: boolean,
+  pvp: boolean,
+  quests: boolean,
+  //updateNotifications: Notification[],
+}
+
+// interface Notification {
+//   hash: string,
+//   title: string,
+//   link: string,
+//   timestamp: number,
+// }
 
 export default Vue.extend({
   data() {
@@ -66,7 +96,8 @@ export default Vue.extend({
       portal,
       pvp,
       quests,
-    };
+      //updateNotifications: [],
+    } as Data;
   },
 
   computed: {
@@ -77,24 +108,84 @@ export default Vue.extend({
       'getHasAdminAccess',
       'getHasMinterAccess',
     ]),
-    supportsPvP() {
+    supportsPvP(): boolean {
       return this.getCurrentChainSupportsPvP;
     },
-    supportsQuests() {
+    supportsQuests(): boolean {
       return this.getCurrentChainSupportsQuests;
     },
-    hasAdminAccess() {
+    hasAdminAccess(): boolean {
       return this.getHasAdminAccess || this.getHasMinterAccess;
     },
   },
   components: {
     Hint,
+    UpdatePopup,
+    //Update,
   },
   methods: {
     BazaarLink() {
       return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
-    }
-  }
+    },
+
+    // async getUpdateNotifications() {
+    //   console.log('getUpdateNotifications');
+    //   const response = await fetch(apiUrl('static/notifications'));
+    //   const notifications = await response.json() as Notification[];
+    //   const updatesOrderedByTimestamp = notifications.sort((a, b) => {
+    //     return a.timestamp - b.timestamp;
+    //   });
+    //   const topNotifications = updatesOrderedByTimestamp.slice(0, 10);
+    //   this.updateNotifications = topNotifications;
+    //   //return topNotifications;
+    // },
+
+    /**
+     * current checkNotifications method
+     * Grabs notifications from the API correctly but then immediately sets a localStorage variable
+     * that prevents any more from being shown again.
+     *
+     */
+    // async checkNotifications() {
+    //   const response = await fetch(apiUrl('static/notifications'));
+    //   const notifications = await response.json() as Notification[];
+    //   // const updatesOrderedByTimestamp = notifications.sort((a, b) => {
+    //   //   return a.timestamp - b.timestamp;
+    //   // });
+
+    //   //updatesOrderedByTimestamp.slice(0, 10);
+    //   // console.log(notifications);
+    //   // console.log(notifications[0].link);
+
+    //   const lastHash = localStorage.getItem('lastnotification');
+    //   // console.log(lastHash);
+    //   let shouldContinue = true;
+
+    //   notifications.forEach((notification: Notification) => {
+    //     if (!shouldContinue) return;
+
+    //     if (lastHash === notification.hash) {
+    //       shouldContinue = false;
+    //       return;
+    //     }
+
+    //     (this as any).$dialog.notify.warning(
+    //       `${notification.title}
+    //       <br>
+    //       <a href="${notification.link}" target="_blank">Check it out!</a>
+    //       `,
+    //       {
+    //         timeout: 300000,
+    //       },
+    //     );
+    //   });
+
+    //   localStorage.setItem('lastnotification', notifications[0].hash);
+    // },
+  },
+  // async created() {
+  //   this.getUpdateNotifications();
+  // },
 });
 </script>
 
@@ -200,6 +291,16 @@ li .nav-link .icon {
   border: 1px solid #EDCD90;
   display: block;
   padding: 20px;
+}
+
+.unreadUpdates {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  padding: 5px 10px;
+  border-radius: 50%;
+  background: red;
+  z-index: 10;
 }
 
 @media (max-width: 1366px) {
