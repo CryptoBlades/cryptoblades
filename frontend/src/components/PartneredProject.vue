@@ -63,7 +63,7 @@ interface Data {
   images: any;
   multiplier: string;
   distributionTime: string;
-  tokensClaimed: string;
+  tokensClaimed: number;
   skillToPartnerRatio: string;
   updateInterval: ReturnType<typeof setInterval> | null;
   detailsOpened: boolean;
