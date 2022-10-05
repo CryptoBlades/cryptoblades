@@ -29,13 +29,13 @@ export default {
     };
   },
   created() {
-    if(localStorage.getItem('bannerHidden') === 'true'){
+    if(sessionStorage.getItem('bannerHidden') === 'true'){
       this.hidden = true;
     }
   },
   methods: {
     hide() {
-      localStorage.setItem('bannerHidden', 'true');
+      sessionStorage.setItem('bannerHidden', 'true');
       this.hidden = true;
     },
   },
