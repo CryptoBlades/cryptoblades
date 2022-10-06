@@ -1,30 +1,17 @@
 <template>
 <!-- TODO: implement link-prevue -->
   <a :href="this.link" target="_blank" class="w-100">
-    <!-- <div class="update-hash">
-      <span>{{this.hash}}</span>
-    </div> -->
+    <b-checkbox class="isRead" :id="'checkbox' + this.hash" :checked="this.isRead"
+      :disabled="isDisabled" :value="this.isRead" @change="updateIsRead($event)">
+    </b-checkbox>
     <div class="update-title">
       <span>{{this.title}}</span>
     </div>
-    <!-- <div class="update-link">
-      <span>{{this.link}}</span>
-    </div> -->
-    <!-- <div class="update-test">
-      <span>{{this.test}}</span>
-    </div> -->
   </a>
 </template>
 
 <script lang="ts">
-// import { apiUrl } from '@/utils/common';
 import Vue, { PropType } from 'vue';
-
-// interface Notification {
-//   hash: string,
-//   title: string,
-//   link: string,
-// }
 
 export default Vue.extend({
   props: {
@@ -37,55 +24,31 @@ export default Vue.extend({
     link: {
       type: String as PropType<string>,
     },
-    // isRead: {
-    //   type: Boolean as PropType<boolean>,
-    // }
+    isRead: {
+      type: Boolean as PropType<boolean | undefined>,
+    }
   },
   data(){
-    return {
-      test: 'test Value',
-      isRead: false,
-    };
+    return {};
   },
-  computed: {},
+  computed: {
+    isDisabled(): boolean {
+      return !!this.isRead;
+    }
+  },
   methods: {
-    // /**
-    //  * current checkNotifications method
-    //  * Grabs notifications from the API correctly but then immediately sets a localStorage variable
-    //  * that prevents any more from being shown again.
-    //  *
-    //  */
-    // async checkNotifications() {
-    //   const response = await fetch(apiUrl('static/notifications'));
-    //   const notifications = await response.json();
-    //   // console.log(notifications);
-    //   // console.log(notifications[0].link);
+    /**
+     * updates the checkbox for the notification
+     * checked if read/marked
+     */
+    updateIsRead(isReadClicked: any) {
+      console.log(isReadClicked, this);
+      this.$emit('update:isRead', isReadClicked);
+    }
+  },
+  components: {},
+  async created() {
 
-    //   const lastHash = localStorage.getItem('lastnotification');
-    //   // console.log(lastHash);
-    //   let shouldContinue = true;
-
-    //   notifications.forEach((notification: Notification) => {
-    //     if (!shouldContinue) return;
-
-    //     if (lastHash === notification.hash) {
-    //       shouldContinue = false;
-    //       return;
-    //     }
-
-    //     (this as any).$dialog.notify.warning(
-    //       `${notification.title}
-    //       <br>
-    //       <a href="${notification.link}" target="_blank">Check it out!</a>
-    //       `,
-    //       {
-    //         timeout: 300000,
-    //       },
-    //     );
-    //   });
-
-    //   localStorage.setItem('lastnotification', notifications[0].hash);
-    // },
   },
 });
 </script>
@@ -94,7 +57,7 @@ export default Vue.extend({
   .update-title > span {
     color: black;
   }
-  /* .update-link > span {
-    color: black;
+  /* .isRead:checked {
+    pointer
   } */
 </style>
