@@ -19,6 +19,7 @@
     "nftbridge": "NFT Bridge",
     "wiki": "Wiki",
     "nftDisplay": "NFT Display",
+    "updates": "Updates",
     "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality.",
     "DrawbridgeNotSupportedTooltip": "Drawbridge is only available for SKALE and BSC chains."
   },
@@ -1533,5 +1534,8 @@
       "octoblades": "The OctoBlades Event is Live on BNB Chain! Over 5x Rewards, Weekly PvP Tournaments, and SO MUCH MORE!!",
       "link": "https://app.cryptoblades.io/#/?chain=BNB"
     }
+  },
+  "updates": {
+    "markAllAsRead": "Mark All As Read"
   }
 }

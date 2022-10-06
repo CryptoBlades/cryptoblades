@@ -49,11 +49,14 @@
     </li>
 
     <li class="top-nav-links" id="update-notifications" > <!-- v-for="update in getUpdateNotifications" :key="update.hash"> -->
-      <div class="icon"><img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar">
-        <span class="unreadUpdates"></span>
-      </div>
-      <div class="link-text">{{ $t("viewLink.admin") }}</div>
-      <update-popup/>
+      <a class="nav-link" target="_blank">
+        <div class="icon">
+          <img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar">
+          <span class="unreadUpdates"/>
+        </div>
+        <div class="link-text">{{ $t("viewLink.updates") }}</div>
+        <update-popup/>
+      </a>
     </li>
     <!-- <div v-else v-for="quest in walletQuests" :key="quest.id" class="d-flex w-100">
       <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
@@ -301,6 +304,10 @@ li .nav-link .icon {
   border-radius: 50%;
   background: red;
   z-index: 10;
+}
+
+#update-notifications > .nav-link {
+  cursor: pointer;
 }
 
 @media (max-width: 1366px) {

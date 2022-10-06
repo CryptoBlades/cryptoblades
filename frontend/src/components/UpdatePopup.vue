@@ -2,6 +2,9 @@
   <b-popover custom-class="h-50 overflow-auto" target="update-notifications" placement="bottom" triggers="click">
     <!-- <span>THIS IS A TEST</span>
     <span>{{updateNotifications}}</span> -->
+    <b-checkbox class="markAllAsRead">
+      <span>{{$(updates.markAllAsRead)}}</span>
+    </b-checkbox>
     <div v-for="update in updateNotifications" :key="update.hash">
       <Update :hash="update.hash" :link="update.link" :title="update.title"/>
     </div>
@@ -102,5 +105,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-
+  .markAllAsRead {
+    color: black;
+  }
 </style>

@@ -1,18 +1,19 @@
 <template>
-  <div class="w-100">
-    <div class="update-hash">
+<!-- TODO: implement link-prevue -->
+  <a :href="this.link" target="_blank" class="w-100">
+    <!-- <div class="update-hash">
       <span>{{this.hash}}</span>
-    </div>
+    </div> -->
     <div class="update-title">
       <span>{{this.title}}</span>
     </div>
-    <div class="update-link">
+    <!-- <div class="update-link">
       <span>{{this.link}}</span>
-    </div>
-    <div class="update-test">
+    </div> -->
+    <!-- <div class="update-test">
       <span>{{this.test}}</span>
-    </div>
-  </div>
+    </div> -->
+  </a>
 </template>
 
 <script lang="ts">
@@ -93,7 +94,7 @@ export default Vue.extend({
   .update-title > span {
     color: black;
   }
-  .update-link > span {
+  /* .update-link > span {
     color: black;
-  }
+  } */
 </style>
