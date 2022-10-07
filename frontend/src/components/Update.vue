@@ -44,6 +44,7 @@ export default Vue.extend({
     updateIsRead(isReadClicked: any) {
       console.log(isReadClicked, this);
       this.$emit('update:isRead', isReadClicked);
+      this.$emit('refresh-update-popup');
     }
   },
   components: {},

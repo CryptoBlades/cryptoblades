@@ -6,7 +6,8 @@
     </b-checkbox>
     <div v-for="update in updateNotifications" :key="update.hash">
       <Update :hash="update.hash" :link="update.link" :title="update.title"
-        v-bind:isRead.sync="update.isRead"/>
+        v-bind:isRead.sync="update.isRead"
+        @refresh-update-popup="updateStorage"/>
     </div>
   </b-popover>
 </template>
@@ -36,45 +37,63 @@ export default Vue.extend({
   },
 
   methods: {
+    /**
+     * Mark all notifications as read
+     */
     async setAllAsRead() {
       this.updateNotifications.forEach((notification) => {
         notification.isRead = true;
       });
-      //const lastHash = localStorage.getItem('lastnotification');
+      this.updateStorage();
     },
 
+    /**
+     * Check for updates from API. If there are new notifications from the API
+     * then we add them to the front of the user's notifications on localStorage.
+     * If this is the user's first time, we add fresh API data to localStorage.
+     */
     async checkForNotificationUpdatesFromAPI() {
+      const notificationsFromAPI = await this.getNotificationsFromAPI();
+      this.updateNotifications = this.getStorage();
+      const notificationChanges = [];
+
+      if (this.updateNotifications.length > 0) {
+        let j = 0;
+        for(let i = 0; i < notificationsFromAPI.length; i++) {
+          if (notificationsFromAPI[i].hash !== this.updateNotifications[i + j].hash) {
+            notificationChanges.push(notificationsFromAPI[i]);
+            j++;
+          }
+          else {
+            break;
+          }
+        }
+        if (notificationChanges.length > 0) {
+          this.updateNotifications.unshift(...notificationChanges);
+          this.setUpdateNotificationsFromAPI(this.updateNotifications.slice(0, 10));
+        }
+      }
+      else {
+        this.setUpdateNotificationsFromAPI(notificationsFromAPI);
+      }
+    },
+
+
+    /**
+     * Get up to the 10 most recent notifications from the API
+     */
+    async getNotificationsFromAPI() {
       const response = await fetch(apiUrl('static/notifications'));
       const notifications = await response.json() as Notification[];
       const updatesOrderedByTimestamp = notifications.sort((a, b) => {
         return a.timestamp - b.timestamp;
       });
       const topNotifications = updatesOrderedByTimestamp.slice(0, 10);
-
-      //compare this to what's currently stored
-      //if heads are different, remove head and add, going down the line until
-      // hashs match
+      return topNotifications;
     },
 
-    async setUpdateNotificationsFromAPI() {
-      // const response = await fetch(apiUrl('static/notifications'));
-      // const notifications = await response.json() as Notification[];
-      // const updatesOrderedByTimestamp = notifications.sort((a, b) => {
-      //   return a.timestamp - b.timestamp;
-      // });
-      // const topNotifications = updatesOrderedByTimestamp.slice(0, 10);
-      // check if we currently have anything saved in localStorage,
-      // if we do, compare against our hashes and timestamp. Latest gets kicked from storage.
-      this.updateNotifications = topNotifications;
-      this.updateStorage();
-    },
-
-    /**
-     * update Notification with hash of updated notification
-     */
-    updateClientsUpdateNotifications(notification: Notification) {
-      //const notif = this.updateNotifications.find((x) => x.hash === notification.hash);
-      Object.assign(this.updateNotifications.find((x) => x.hash === notification.hash), notification);
+    async setUpdateNotificationsFromAPI(notificationsFromAPI: Notification[]) {
+      this.updateNotifications = notificationsFromAPI;
       this.updateStorage();
     },
 
@@ -83,61 +102,19 @@ export default Vue.extend({
      */
     updateStorage() {
       localStorage.setItem('updateNotifications', JSON.stringify(this.updateNotifications));
-    }
+    },
 
     /**
-     * current checkNotifications method
-     * Grabs notifications from the API correctly but then immediately sets a localStorage variable
-     * that prevents any more from being shown again.
-     *
+     * get updateNotifications data from localStorage
      */
-    // async checkNotifications() {
-    //   const response = await fetch(apiUrl('static/notifications'));
-    //   const notifications = await response.json() as Notification[];
-    //   // const updatesOrderedByTimestamp = notifications.sort((a, b) => {
-    //   //   return a.timestamp - b.timestamp;
-    //   // });
-
-    //   //updatesOrderedByTimestamp.slice(0, 10);
-    //   // console.log(notifications);
-    //   // console.log(notifications[0].link);
-
-    //   const lastHash = localStorage.getItem('lastnotification');
-    //   // console.log(lastHash);
-    //   let shouldContinue = true;
-
-    //   notifications.forEach((notification: Notification) => {
-    //     if (!shouldContinue) return;
-
-    //     if (lastHash === notification.hash) {
-    //       shouldContinue = false;
-    //       return;
-    //     }
-
-    //     (this as any).$dialog.notify.warning(
-    //       `${notification.title}
-    //       <br>
-    //       <a href="${notification.link}" target="_blank">Check it out!</a>
-    //       `,
-    //       {
-    //         timeout: 300000,
-    //       },
-    //     );
-    //   });
-
-    //   localStorage.setItem('lastnotification', notifications[0].hash);
-    // },
+    getStorage() {
+      return JSON.parse(localStorage.getItem('updateNotifications') ?? '');
+    }
   },
 
   async created() {
-    console.log('tripped');
-    // need to check if data from API has changed from what we have locally
-    // await this.checkForNotificationUpdatesFromAPI();
-    await this.setUpdateNotificationsFromAPI();
+    await this.checkForNotificationUpdatesFromAPI();
   },
-  // async beforeDestroy() {
-  //   this.updateStorage();
-  // },
   components: {
     Update,
   },
