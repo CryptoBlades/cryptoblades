@@ -150,6 +150,9 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     mapping(address => EnumerableSet.UintSet) private nftAllowedChains;
     // Target network => allowed nfts
     mapping(uint256 => EnumerableSet.AddressSet) private targetChainAllowedNFTs;
+    // Is NFT bridged or only stored
+    mapping(address => mapping(uint256 => bool)) private isNftBridged;
+    uint256 public withdrawFromStorageNativeFee;
 
     event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTWithdrawn(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
@@ -378,7 +381,11 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         isStored(_tokenAddress, _id)
         isOwner(_tokenAddress, _id)
         notBridged(_tokenAddress, _id)
+        payable
     {
+        if(isNftBridged[address(_tokenAddress)][_id]) {
+            require(msg.value == withdrawFromStorageNativeFee, 'Bad fee amount');
+        }
         storedItems[msg.sender][address(_tokenAddress)].remove(_id);
         allStoredItems[address(_tokenAddress)].remove(_id);
         delete storedItemsOwners[address(_tokenAddress)][_id];
@@ -723,6 +730,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         require(IERC721(nftAddress).ownerOf(mintedId) == address(this), "NA2");
         _logMintOrUpdate(sourceChain, sourceTransfer, nftAddress, mintedId, chainId);
         _attachToWallet(receiver, nftAddress, mintedId);
+        isNftBridged[nftAddress][mintedId] = true;
     }
 
     function _logMintOrUpdate(uint256 sourceChain, uint256 sourceTransfer, address nftAddress, uint256 tokenId, string memory chainId) internal {
@@ -769,6 +777,14 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
                 targetChainAllowedNFTs[chainId].remove(nft);
             }
         }
+    }
+
+    function setWithdrawFromStorageNativeFee(uint256 newFee) external restricted {
+        withdrawFromStorageNativeFee = newFee;
+    }
+
+    function recoverFees(address receiver, uint256 amount) external restricted {
+        payable(receiver).transfer(amount);
     }
 
     function getChainsSupportingNFT(address nft) public view returns (uint256[] memory chains) {
