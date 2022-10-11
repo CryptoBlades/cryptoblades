@@ -41,22 +41,22 @@
       </a>
     </li>
 
-    <li v-if="hasAdminAccess" class="top-nav-links">
-      <router-link :to="{ name: 'admin' }" exact class="nav-link">
-        <div class="icon"><img src="../assets/navbar-icons/gear-icon.png" class="ui-link-icon" alt="Admin"></div>
-        <div class="link-text">{{ $t("viewLink.admin") }}</div>
-      </router-link>
-    </li>
-
-    <li class="top-nav-links" id="update-notifications"> <!-- href=# tabindex="0"> -->
+    <li class="top-nav-links" id="update-notifications" href=# tabindex="0">
       <a class="nav-link" target="_blank">
         <div class="icon">
-          <img src="../assets/navbar-icons/bazaar-icon.png" class="ui-link-icon" alt="Bazaar">
+          <img src="../assets/navbar-icons/updates.svg" class="ui-link-icon gold-icon" alt="Updates">
           <span class="unreadUpdates"/>
         </div>
         <div class="link-text">{{ $t("viewLink.updates") }}</div>
         <update-popup/>
       </a>
+    </li>
+
+    <li v-if="hasAdminAccess" class="top-nav-links">
+      <router-link :to="{ name: 'admin' }" exact class="nav-link">
+        <div class="icon"><img src="../assets/navbar-icons/gear-icon.png" class="ui-link-icon" alt="Admin"></div>
+        <div class="link-text">{{ $t("viewLink.admin") }}</div>
+      </router-link>
     </li>
   </b-navbar-nav>
 </template>
@@ -121,6 +121,10 @@ export default Vue.extend({
 
 a {
   font-weight: bold;
+}
+
+.gold-icon {
+  filter: invert(81%) sepia(97%) saturate(276%) hue-rotate(317deg) brightness(97%) contrast(91%);
 }
 
 .nav-top-links {

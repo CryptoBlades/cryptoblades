@@ -175,6 +175,11 @@
               <span>{{ $t("viewLink.nftDisplay") }}</span>
             </router-link>
 
+            <router-link class="menu-icon" :to="{ name: 'updates' }" exact>
+              <img src="../assets/navbar-icons/updates.svg" class="gold-icon" alt="Updates"/>
+              <span>{{ $t("viewLink.updates") }}</span>
+            </router-link>
+
             <router-link
               v-if="hasAdminAccess"
               class="menu-icon"

@@ -1,10 +1,9 @@
 <template>
-<!-- TODO: implement link-prevue -->
-  <a :href="this.link" target="_blank" class="w-100">
+  <a :href="this.link" target="_blank" class="w-100 d-inline-flex mt-1 mb-1">
     <b-checkbox class="isRead" :id="'checkbox' + this.hash" :checked="this.isRead"
       :disabled="isDisabled" :value="this.isRead" @change="updateIsRead($event)">
     </b-checkbox>
-    <div class="update-title">
+    <div class="update-title" @click="updateIsRead(true)">
       <span>{{this.title}}</span>
     </div>
   </a>
@@ -55,9 +54,9 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-  .update-title > span {
+  /* .update-title > span {
     color: black;
-  }
+  } */
   /* .isRead:checked {
     pointer
   } */

@@ -16,6 +16,7 @@ import NftDisplay from './views/NftDisplay.vue';
 import Bridge from './views/Bridge.vue';
 import Treasury from './views/Treasury.vue';
 import PlayToEarn from './views/PlayToEarn.vue';
+import Updates from './views/Updates.vue';
 
 import { portal, pvp, quests, raid} from './feature-flags';
 import { currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
@@ -37,6 +38,7 @@ export default function createRouter() {
       {path: '/treasury', name: 'treasury', component: Treasury},
       {path: '/admin', name: 'admin', component: Admin},
       {path: '/play-to-earn', name: 'play-to-earn', component: PlayToEarn},
+      {path: '/updates', name: 'updates', component: Updates},
     ]
   });
 
