@@ -1227,6 +1227,7 @@ export default Vue.extend({
 }
 #weapon-bg{
   background-image: url('../assets/blacksmith/blacksmith-bg.png');
+  background-size: clamp(100%, 100%, 100%) auto;
 }
 
 .weapon-header{
@@ -1683,7 +1684,6 @@ export default Vue.extend({
   background-size: cover;
   background-repeat: no-repeat;
   background-position: top right;
-  min-height: calc(100vh - 120px);
   height: 100%;
   z-index: 0;
 }
@@ -2915,14 +2915,17 @@ img.elements-modal:hover {
 }
 }
 .blacksmith-content{
+   overflow: clip;
+   position: relative;
+
    div.menu-nav{
-    height: 60px;
     padding-left: 50px;
     padding-right: 50px;
     padding-top: 10px;
     padding-bottom: 10px;
     border-bottom: 1px solid #424A59;
     background-color:#000E1D;
+    flex-wrap: wrap;
    }
  }
 

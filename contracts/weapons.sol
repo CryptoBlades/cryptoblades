@@ -697,8 +697,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         bool allowNegativeDurability,
         uint256 busyFlag
     ) public restricted returns (int128, int128, uint24, uint8) {
-        require(fighter == ownerOf(id) && nftVars[id][NFTVAR_BUSY] == 0);
-        nftVars[id][NFTVAR_BUSY] |= busyFlag;
+        require(fighter == ownerOf(id)/* && nftVars[id][NFTVAR_BUSY] == 0*/);
+        //nftVars[id][NFTVAR_BUSY] |= busyFlag;
         drainDurability(id, drainAmount, allowNegativeDurability);
         Weapon storage wep = tokens[id];
         return (

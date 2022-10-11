@@ -49,7 +49,7 @@
           <img :src="getCharacterElementSrc" alt="element" />
         </div>
         <div class="characterImageWrapper">
-          <pvp-character :characterTrait="characterInformation.element" />
+          <pvp-character :characterTrait="characterInformation.element" :characterVersion="characterInformation.version" />
         </div>
         <div v-if="characterInformation" class="info">
           <h1 class="characterName">{{ characterInformation.name }}</h1>
@@ -134,7 +134,7 @@
           <img v-if="opponentInformation.id" :src="getOpponentElementSrc" alt="opponent element" />
         </div>
         <div v-if="opponentInformation.id" class="characterImageWrapper">
-          <pvp-character :characterTrait="opponentInformation.element" />
+          <pvp-character :characterTrait="opponentInformation.element" :characterVersion="characterInformation.version" />
         </div>
         <div v-if="opponentInformation.id" class="info">
           <h1 class="characterName">{{ opponentInformation.name }}</h1>

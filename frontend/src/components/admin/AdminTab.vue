@@ -31,6 +31,7 @@ import Hint from '@/components/common/Hint.vue';
 import QuestsAdmin from './AdminTabs/QuestsAdmin.vue';
 import CBKLandAdmin from './AdminTabs/CBKLandAdmin.vue';
 import WeaponsAdmin from './AdminTabs/WeaponsAdmin.vue';
+import ShieldsAdmin from './AdminTabs/ShieldsAdmin.vue';
 import BurningManagerAdmin from './AdminTabs/BurningManagerAdmin.vue';
 import PartnerVaultAdmin from './AdminTabs/PartnerVaultAdmin.vue';
 import TreasuryAdmin from './AdminTabs/TreasuryAdmin.vue';
@@ -60,6 +61,7 @@ export default Vue.extend({
     QuestsAdmin,
     CBKLandAdmin,
     WeaponsAdmin,
+    ShieldsAdmin,
     BurningManagerAdmin,
     PartnerVaultAdmin,
     TreasuryAdmin,

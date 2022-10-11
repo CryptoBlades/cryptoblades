@@ -1,7 +1,7 @@
 <template>
   <div class="quest-reward-display gap-3">
     <span class="reward-title">{{ $t('quests.reward') }}</span>
-    <div class="d-flex align-items-center gap-2" :key="quest.id">
+    <div class="d-flex align-items-center gap-2 flex-wrap" :key="quest.id">
       <QuestComponentIcon :questItemType="quest.rewardType" :amount="quest.rewardAmount"
                           :rarity="quest.rewardRarity" :externalAddress="quest.rewardExternalAddress"/>
       <QuestComponentIcon :questItemType="QuestItemType.REPUTATION" :amount="quest.reputationAmount"/>

@@ -179,6 +179,7 @@ li .nav-link {
   text-transform: uppercase;
   font-weight: 500;
   text-align: center;
+  display: revert;
 }
 
 li.active a,

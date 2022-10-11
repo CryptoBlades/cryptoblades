@@ -5,17 +5,21 @@
 </template>
 
 <script>
-import { getCharacterArtByTrait } from '@/utils/placeholder/character-arts-placeholder';
+import { getCharacterArtByTraitAndVersion } from '@/utils/placeholder/character-arts-placeholder';
 export default {
   props: {
     characterTrait: {
       default: '',
       required: true
+    },
+    characterVersion: {
+      default: 0,
+      required: true
     }
   },
   computed: {
     characterArtSrc() {
-      return getCharacterArtByTrait(this.characterTrait);
+      return getCharacterArtByTraitAndVersion(this.characterTrait, this.characterVersion);
     }
   }
 };
@@ -37,7 +41,7 @@ export default {
 .characterImg {
   width: 100%;
   object-fit: contain;
-  max-height: 60vh;
+  max-height: 45vh;
   max-width: 100%;
   transform: none;
 }

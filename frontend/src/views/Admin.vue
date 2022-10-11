@@ -56,6 +56,11 @@ export default Vue.extend({
       component: 'WeaponsAdmin',
     });
     this.tabs.push({
+      title: 'shields',
+      contract: this.contracts.Shields,
+      component: 'ShieldsAdmin',
+    });
+    this.tabs.push({
       title: 'burningManager',
       contract: this.contracts.BurningManager,
       component: 'BurningManagerAdmin',

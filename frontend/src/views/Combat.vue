@@ -10,7 +10,8 @@
         :modalType="'combat-result'"
         :componentProps="{
           fightResults:fightResults,
-          staminaUsed:staminaPerFight
+          staminaUsed:staminaPerFight,
+          isValor: !isGenesisCharacter
         }"/>
 
       <div class="waitingForResult" v-if="waitingResults">
@@ -65,7 +66,7 @@
           <div  v-if="currentCharacterStamina >= staminaPerFight" class="combat-enemy-container">
               <!-- selected weapon for combat details -->
               <div class="weapon-selection mb-4">
-                <div class="header-row d-flex justify-content-between">
+                <div class="header-row justify-content-between">
                   <div class="selectedWeaponDetails">
                     <div class="select-weapons" v-if="!selectedWeaponId || !weaponHasDurability(selectedWeaponId)">
                       <span class="isMobile label-title">{{$t('combat.selectAWeapon')}}</span>
@@ -219,16 +220,18 @@ interface StoreMappedCombatActions {
     bnbGasUsed: string,
   }>;
   fetchFightRewardSkill(): Promise<string>;
+  fetchFightRewardValor(): Promise<string>;
   fetchFightRewardXp(): Promise<string[][]>;
   fetchExpectedPayoutForMonsterPower(
-    { power, isCalculator }:
-    { power: stringOrNumber, isCalculator: boolean }): Promise<string>;
+    { power }:
+    { power: stringOrNumber }): Promise<string>;
   fetchHourlyAllowance(): Promise<string>;
   fetchHourlyPowerAverage(): Promise<string>;
   fetchHourlyPayPerFight(): Promise<string>;
   getCurrentSkillPrice(): Promise<string>;
   getNativeTokenPriceInUsd(): Promise<string>;
   getCombatTokenChargePercent(): Promise<string>;
+  getFightXpGain(): Promise<number>;
 }
 
 interface StoreMappedState {
@@ -323,6 +326,7 @@ export default Vue.extend({
   },
   async mounted() {
     this.selectedWeaponId = this.currentWeaponId;
+    this.fightXpGain = await this.getFightXpGain();
     Events.$on('chooseweapon', (id: number) => {
       this.selectedWeaponId = id;
       this.index++;
@@ -374,6 +378,10 @@ export default Vue.extend({
     updateResults(): any[] {
       return [this.fightResults, this.error];
     },
+
+    isGenesisCharacter(): boolean {
+      return this.currentCharacter.version === 0;
+    }
   },
 
   watch: {
@@ -402,6 +410,7 @@ export default Vue.extend({
         'fetchTargets',
         'doEncounterPayNative',
         'fetchFightRewardSkill',
+        'fetchFightRewardValor',
         'fetchFightRewardXp',
         'fetchExpectedPayoutForMonsterPower',
         'fetchHourlyAllowance',
@@ -410,7 +419,8 @@ export default Vue.extend({
         'getCurrentSkillPrice',
         'getNativeTokenPriceInUsd',
         'getCombatTokenChargePercent',
-        'fetchCharacterStamina'
+        'fetchCharacterStamina',
+        'getFightXpGain',
       ]) as StoreMappedCombatActions),
     ...(mapMutations('combat', ['setIsInCombat']) as StoreMappedCombatMutations),
     getEnemyArt,
@@ -535,15 +545,15 @@ export default Vue.extend({
       this.setIsInCombat(this.waitingResults);
       try {
         const targetPower = targetToFight.power;
-        const expectedPayoutWei = new BigNumber(await this.fetchExpectedPayoutForMonsterPower({ power: targetPower, isCalculator: true }));
+        const expectedPayoutWei = new BigNumber(await this.fetchExpectedPayoutForMonsterPower({ power: targetPower }));
 
         const nativeTokenPriceUsd = new BigNumber(await this.getNativeTokenPriceInUsd());
         const skillPriceUsd = new BigNumber(await this.getCurrentSkillPrice());
         const tokenChargePercentage = (await this.getCombatTokenChargePercent());
 
         const offsetToPayInNativeToken = (
-          expectedPayoutWei.multipliedBy(tokenChargePercentage).div(100).multipliedBy(skillPriceUsd)
-        ).div(nativeTokenPriceUsd).integerValue(BigNumber.ROUND_DOWN);
+          expectedPayoutWei.multipliedBy(tokenChargePercentage).div(100).multipliedBy(skillPriceUsd.gt(0) ? skillPriceUsd : 1)
+        ).div(nativeTokenPriceUsd.gt(0) ? nativeTokenPriceUsd : 1).integerValue(BigNumber.ROUND_DOWN);
 
         this.fightResults = await this.doEncounterPayNative({
           characterId: this.currentCharacterId,
@@ -554,6 +564,7 @@ export default Vue.extend({
         });
 
         await this.fetchFightRewardSkill();
+        await this.fetchFightRewardValor();
         await this.fetchFightRewardXp();
 
         await this.fetchCharacterStamina(this.currentCharacterId);
@@ -567,7 +578,7 @@ export default Vue.extend({
 
     formattedSkill(skill: stringOrNumber) {
       const skillBalance = fromWeiEther(skill.toString());
-      return `${toBN(skillBalance).toFixed(6)} SKILL`;
+      return `${toBN(skillBalance).toFixed(6)} ${this.isGenesisCharacter ? 'SKILL' : 'VALOR'}`;
     },
 
     getPotentialXp(targetToFight: ITarget) {
@@ -626,7 +637,7 @@ export default Vue.extend({
       const expectedPayouts = new Array(4);
       const targets = this.targets as ITarget[];
       for(let i = 0; i < targets.length; i++) {
-        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: targets[i].power, isCalculator: false });
+        const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: targets[i].power });
         expectedPayouts[i] = expectedPayout;
       }
       this.targetExpectedPayouts = expectedPayouts;
@@ -672,7 +683,8 @@ export default Vue.extend({
 }
 .body{
   background: linear-gradient(0deg, rgba(0, 14, 41, 0.68), rgba(0, 14, 41, 0.68)), url('../assets/combat-bg.png');
-  background-size:cover;
+  background-size: clamp(100%, 100%, 100%) auto;
+  background-repeat: no-repeat;
   min-height: 100%;
 }
 h5{
@@ -691,11 +703,11 @@ h5{
 
 .enemy-character {
   position: relative;
-  width: 20rem;
+  width: inherit;
   cursor: pointer;
   background-position: center;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
   background-image: url('../assets/enemy-bg-transparent.png');
   background-color: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, #242720 100%);
   border: 1px solid #a28d54;
@@ -1040,7 +1052,7 @@ h1 {
 }
 
 .select-weapons > div{
-  width: 80vw;
+  width: 100%;
 }
 
 .select-weapons > div > ul{
@@ -1171,6 +1183,10 @@ h1 {
   }
   .header-row {
     justify-content: center !important;
+  }
+
+  .enemy-character {
+    width: 20rem;
   }
 
   .hideMenu{

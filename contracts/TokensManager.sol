@@ -48,7 +48,7 @@ contract TokensManager is Initializable, AccessControlUpgradeable {
         uint256 offset = ABDKMath64x64.mulu(getSkillToNativeRatio(), expectedTokens.mul(combatTokenChargePercent).div(100));
 
         require(
-            msg.value > offset.mul(100 - offsetSlippage).div(100) && msg.value < offset.mul(100 + offsetSlippage).div(100),
+            msg.value >= offset.mul(100 - offsetSlippage).div(100) && msg.value <= offset.mul(100 + offsetSlippage).div(100),
             'Offset error'
             );
 

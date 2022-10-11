@@ -91,7 +91,7 @@
       <!-- Character Tabs -->
       <div>
         <b-tabs pills fill nav-wrapper-class="mt-5 mb-4" >
-          <upgrade-tab :soulBalance="soulBalance" @fetchSoulBalance="refreshData" />
+          <upgrade-tab :soulBalance="isGenesisCharacter ? genesisSoulBalance : nonGenesisSoulBalance" @fetchSoulBalance="refreshData" />
           <skins-tab :availableSkins="availableSkins" @loadCosmeticsCount="loadCosmeticsCount" />
           <options-tab @openTransferModal="openTransferModal" @onSendToGarrison="onSendToGarrison" @openChangeTrait="openChangeTrait"
           @openTransferSoulModal="openTransferSoulModal" />
@@ -133,9 +133,9 @@
     <!-- Character Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-modal"
       centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
-      dialog-class="dialog-character" size="lg">
+      dialog-class="dialog-character" size="lg" @shown="$refs.receiverAddress.focus()">
         <h3 class="confirmation-title">{{$t('Character.transfer')}}</h3>
-        <b-form-input class="input" placeholder="Enter address" v-model="receiverAddress"/>
+        <b-form-input ref="receiverAddress" class="input" placeholder="Enter address" v-model="receiverAddress" @keydown.enter.native="transfer"/>
         <div class="transferResultContainer">
           <div class="loader" v-if="isSending">
             <i class="fas fa-spinner fa-spin"></i>
@@ -143,7 +143,9 @@
           </div>
           <span class="resultMsg text-center"> {{resultMsg}} </span>
         </div>
-        <button :disabled="isSending || receiverAddress === ''" @click="transfer">Transfer</button>
+        <button :disabled="isSending || receiverAddress === ''" @click="transfer">
+          {{isSending ? t('nftOptionsDropdown.sending') : $t('nftOptionsDropdown.transfer')}}
+        </button>
         <div class="footer-close" @click="$refs['character-transfer-modal'].hide()">
           <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
@@ -152,9 +154,18 @@
     <!-- Character Soul Transfer Modal -->
     <b-modal class="centered-modal" ref="character-transfer-soul-modal"
       centered :content-class="isMobile() ? 'character-modal character-modal-mobile' : 'character-modal'" hide-footer hide-header-close
-      dialog-class="dialog-character" size="lg">
+      dialog-class="dialog-character" size="lg" @shown="$refs.receiverAddress.focus()">
         <h3 class="confirmation-title">{{$t('Character.transferSoul')}}</h3>
         <div class="d-flex flex-column">
+          <div class="d-flex align-items-center mb-2">
+            <h5 class="text-nowrap mb-0">
+              Soul Variant:
+            </h5>
+            <select class="form-control ml-2" v-model="isTransferringNonGenesis">
+              <b-form-select-option :value="false">Genesis</b-form-select-option>
+              <b-form-select-option :value="true">Non Genesis</b-form-select-option>
+            </select>
+          </div>
           <div class="row d-flex justify-content-between align-items-center mb-4">
             <div class="col col-md-3 d-flex justify-content-center align-items-center">
               <div class="soul-container mr-2">
@@ -162,7 +173,7 @@
               </div>
               <div class="character-text">
                 <p class="mb-0 text-white soul-title">{{$t(`Character.soulTransferLabel`)}}</p>
-                <p class="mb-0">{{ soulBalance }}</p>
+                <p class="mb-0">{{ genesisSoulBalance }}</p>
               </div>
             </div>
             <div class="w-col col-md-6 d-flex flex-column">
@@ -171,13 +182,13 @@
                 class="range-character py-3"
                 type="range"
                 min="0"
-                :max="soulBalance"
-                :disabled="soulBalance <= 0"
+                :max="isTransferringNonGenesis ? nonGenesisSoulBalance : genesisSoulBalance"
+                :disabled="isTransferringNonGenesis ? nonGenesisSoulBalance <= 0 : genesisSoulBalance <= 0"
                 steps="10"
               />
             </div>
             <div class="col col-md-3 character-text d-flex justify-content-center align-items-center">
-              <input id="powerAmount" type="number" v-model="soulAmountToTransfer" :min="0" :max="soulBalance"/>
+              <input id="powerAmount" type="number" v-model="soulAmountToTransfer" :min="0" :max="genesisSoulBalance"/>
               <button class="mx-1 px-2"  @click="handleMax">{{$t(`Character.max`)}}</button>
             </div>
           </div>
@@ -185,7 +196,8 @@
             <h5>to</h5>
           </div>
           <div>
-            <b-form-input class="input" placeholder="Enter address" v-model="receiverAddress"/>
+            <b-form-input ref="receiverAddress" class="input" placeholder="Enter address" v-model="receiverAddress"
+                          @keydown.enter.native="onSoulTransferConfirm"/>
             <div class="transferResultContainer">
               <div class="loader" v-if="isSending">
                 <i class="fas fa-spinner fa-spin"></i>
@@ -195,7 +207,9 @@
             </div>
           </div>
         </div>
-        <button :disabled="isSending || receiverAddress === ''" @click="onSoulTransferConfirm">Transfer</button>
+        <button :disabled="isSending || receiverAddress === ''" @click="onSoulTransferConfirm">
+          {{isSending ? t('nftOptionsDropdown.sending') : $t('nftOptionsDropdown.transfer')}}
+        </button>
         <div class="footer-close" @click="$refs['character-transfer-soul-modal'].hide()">
           <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
@@ -242,7 +256,7 @@ import UpgradeTab from '@/components/character/CharacterTabs/UpgradeTab.vue';
 import { Nft } from '@/interfaces/Nft';
 import { getCharacterArt } from '@/utils/placeholder/character-arts-placeholder';
 import { Quest, ReputationLevelRequirements, ReputationTier } from '@/views/Quests.vue';
-import { CharacterTrait, RequiredXp } from '@/interfaces';
+import { CharacterTrait, ICharacter, RequiredXp } from '@/interfaces';
 import { isValidWeb3Address } from '@/utils/common';
 
 
@@ -256,7 +270,8 @@ interface Skin {
 interface Data {
   ReputationTier: typeof ReputationTier;
   reputationLevelRequirements?: ReputationLevelRequirements;
-  soulBalance: number;
+  genesisSoulBalance: number;
+  nonGenesisSoulBalance: number;
   powerAmount: number;
   haveRename: number;
   targetTrait: string;
@@ -265,18 +280,19 @@ interface Data {
   haveChangeTraitWater: number;
   haveChangeTraitLightning: number;
   quest: null | Quest;
-  haveCharacterCosmetics: Skin[]
-  isSending: boolean
-  resultMsg: string
-  receiverAddress: string
-  newName: string,
-  soulToTransfer: number,
-  soulAmountToTransfer: number
+  haveCharacterCosmetics: Skin[];
+  isSending: boolean;
+  resultMsg: string;
+  receiverAddress: string;
+  newName: string;
+  isTransferringNonGenesis: boolean;
+  soulAmountToTransfer: number;
 }
 
 interface StoreMappedActions {
   getReputationLevelRequirements(): Promise<ReputationLevelRequirements>;
-  fetchSoulBalance(): Promise<number>;
+  fetchGenesisSoulBalance(): Promise<number>;
+  fetchNonGenesisSoulBalance(): Promise<number>;
   getCharacterQuestData(payload: { characterId: string | number }): Promise<Quest>;
   fetchTotalRenameTags(): Promise<number>;
   fetchTotalCharacterFireTraitChanges(): Promise<number>;
@@ -297,6 +313,7 @@ interface StoreMappedActions {
   }): Promise<void>;
   sendToGarrison(id: string): Promise<void>;
   transferSoul(payload: {targetAddress: string, soulAmount: number}): Promise<void>;
+  transferNonGenesisSoul(payload: {targetAddress: string, soulAmount: number}): Promise<void>;
 }
 
 export default Vue.extend({
@@ -304,7 +321,8 @@ export default Vue.extend({
   data(): Data{
     return {   ReputationTier,
       reputationLevelRequirements: undefined,
-      soulBalance: 0,
+      genesisSoulBalance: 0,
+      nonGenesisSoulBalance: 0,
       powerAmount: 0,
       haveRename: 0,
       targetTrait: '',
@@ -322,7 +340,7 @@ export default Vue.extend({
       resultMsg: '',
       receiverAddress: '',
       newName: '',
-      soulToTransfer: 0,
+      isTransferringNonGenesis: false,
       soulAmountToTransfer: 0,
     };
   },
@@ -366,7 +384,7 @@ export default Vue.extend({
       const characterWithId = this.characters[this.currentCharacterId];
       return CharacterTrait[characterWithId?.trait] ?? '';
     },
-    selectedCharacter(): Nft{
+    selectedCharacter(): ICharacter{
       return this.characters[this.currentCharacterId];
     },
     characterStamina(): number {
@@ -410,12 +428,16 @@ export default Vue.extend({
     totalCharacterPower(): number {
       return this.getCharacterPower(this.currentCharacterId);
     },
+    isGenesisCharacter(): boolean {
+      return this.characters[this.currentCharacterId]?.version === 0;
+    }
   },
   methods: {
     ...mapActions([
       'getReputationLevelRequirements',
       'getCharacterQuestData',
-      'fetchSoulBalance',
+      'fetchGenesisSoulBalance',
+      'fetchNonGenesisSoulBalance',
       'fetchTotalCharacterFireTraitChanges',
       'fetchTotalCharacterEarthTraitChanges',
       'fetchTotalCharacterWaterTraitChanges',
@@ -430,6 +452,7 @@ export default Vue.extend({
       'fetchOwnedCharacterCosmetics',
       'fetchTotalRenameTags',
       'transferSoul',
+      'transferNonGenesisSoul'
     ]) as StoreMappedActions,
     getCharacterArt,
     RequiredXp,
@@ -439,9 +462,15 @@ export default Vue.extend({
     async onSoulTransferConfirm() {
       if(!isValidWeb3Address(this.receiverAddress) || this.soulAmountToTransfer === 0) return;
       this.isSending = true;
-      await this.transferSoul({ targetAddress: this.receiverAddress, soulAmount: this.soulAmountToTransfer });
+      if(this.isTransferringNonGenesis) {
+        await this.transferNonGenesisSoul({ targetAddress: this.receiverAddress, soulAmount: this.soulAmountToTransfer });
+        this.nonGenesisSoulBalance = +(await this.fetchNonGenesisSoulBalance());
+      }
+      else {
+        await this.transferSoul({ targetAddress: this.receiverAddress, soulAmount: this.soulAmountToTransfer });
+        this.genesisSoulBalance = +(await this.fetchGenesisSoulBalance());
+      }
       this.isSending = false;
-      this.soulBalance = await this.fetchSoulBalance();
       this.soulAmountToTransfer = 0;
       this.receiverAddress = '';
       (this.$refs['character-transfer-soul-modal'] as BModal).hide();
@@ -461,7 +490,12 @@ export default Vue.extend({
       }
     },
     handleMax(){
-      this.soulAmountToTransfer = this.soulBalance;
+      if(this.isTransferringNonGenesis) {
+        this.soulAmountToTransfer = this.nonGenesisSoulBalance;
+      }
+      else {
+        this.soulAmountToTransfer = this.genesisSoulBalance;
+      }
     },
     openTransferSoulModal(){
       (this.$refs['character-transfer-soul-modal'] as BModal).show();
@@ -496,7 +530,8 @@ export default Vue.extend({
     },
     async refreshData(){
       this.reputationLevelRequirements =  await this.getReputationLevelRequirements();
-      this.soulBalance = +(await this.fetchSoulBalance());
+      this.genesisSoulBalance = +(await this.fetchGenesisSoulBalance());
+      this.nonGenesisSoulBalance = +(await this.fetchNonGenesisSoulBalance());
     },
     async fetchCharacterQuestData(){
       this.quest = await this.getCharacterQuestData({characterId: this.currentCharacterId});
@@ -670,7 +705,7 @@ export default Vue.extend({
 .characterImg {
   width: 100%;
   object-fit: contain;
-  max-height: 60vh;
+  max-height: 45vh;
   max-width: 100%;
   transform: none;
 }

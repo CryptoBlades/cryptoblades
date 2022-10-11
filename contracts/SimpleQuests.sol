@@ -258,7 +258,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         if (questSupplies[questID] > 0) {
             questSupplies[questID]--;
             if (questSupplies[questID] == 0) {
-                deleteQuestTemplate(tier, questID);
+                _deleteQuestTemplate(tier, questID);
             }
         }
     }
@@ -615,6 +615,10 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function deleteQuestTemplate(uint256 tier, uint256 questID) public restricted {
+        _deleteQuestTemplate(tier, questID);
+    }
+
+    function _deleteQuestTemplate(uint256 tier, uint256 questID) internal {
         uint256 questIndex = questIndexes[questID];
         uint256 lastQuestId = questTemplates[tier][questTemplates[tier].length - 1];
         questTemplates[tier][questIndex] = lastQuestId;

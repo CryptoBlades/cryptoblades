@@ -89,7 +89,7 @@ interface StoreMappedActions {
 
   isExternalCurrency(payload: { currencyAddress: string }): Promise<boolean>;
 
-  fetchSoulBalance(): Promise<number>;
+  fetchGenesisSoulBalance(): Promise<number>;
 }
 
 interface Data {
@@ -189,7 +189,7 @@ export default Vue.extend({
       'submitWalletExternalProgress',
       'submitExternalProgressAmount',
       'submitWalletExternalProgressAmount',
-      'fetchSoulBalance',
+      'fetchGenesisSoulBalance',
       'isExternalCurrency',
     ]) as StoreMappedActions,
 
@@ -376,7 +376,7 @@ export default Vue.extend({
           this.ownedTokens = this.ownedShieldIds;
           this.ownedShieldIds?.forEach((id: string) => this.ownedNftIdTypes.push({id, type: 'shield'}));
         } else if (this.quest.requirementType === RequirementType.SOUL) {
-          this.soulBalance = await this.fetchSoulBalance();
+          this.soulBalance = await this.fetchGenesisSoulBalance();
         } else if (this.quest.requirementType === RequirementType.EXTERNAL
           || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
           await this.isExternalCurrencyAddress();

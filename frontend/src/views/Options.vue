@@ -123,7 +123,6 @@ interface StoreMappedState {
 }
 
 interface StoreMappedActions {
-  claimTokenRewards(): Promise<void>;
   setUpContracts(): Promise<void>;
   initialize(): Promise<void>;
   configureMetaMask(networkId: number): Promise<void>;
@@ -258,7 +257,6 @@ export default Vue.extend({
       ]
     ) as StoreMappedActions),
     ...(mapActions([
-      'claimTokenRewards',
       'setUpContracts',
       'initialize',
       'configureMetaMask']
@@ -294,11 +292,6 @@ export default Vue.extend({
       else localStorage.setItem('hideAdvanced', 'false');
 
       Events.$emit('setting:hideAdvanced', { value: this.hideAdvanced });
-    },
-    async onClaimTokens() {
-      if (this.canClaimTokens) {
-        await this.claimTokenRewards();
-      }
     },
     async claimSkill(stage: ClaimStage) {
       if (stage === ClaimStage.WaxBridge) {

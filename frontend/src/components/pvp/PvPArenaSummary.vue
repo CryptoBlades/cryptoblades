@@ -70,7 +70,7 @@
         </div>
       </div>
       <div class="characterImage">
-        <pvp-character :characterTrait="characterInformation.element" />
+        <pvp-character :characterTrait="characterInformation.element" :characterVersion="characterInformation.version" />
       </div>
       <pvp-arena-information
         class="arenaInformation"
@@ -136,6 +136,7 @@ export default {
         untieredFullPower: null,
         rank: null,
         element: null,
+        version: null
       }
     },
     activeWeaponWithInformation: {

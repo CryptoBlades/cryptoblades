@@ -44,10 +44,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
 
  
     function collectData(uint256 tokenId) external view override returns (uint256[] memory uintVars,  string memory stringVar) {
-        (uint16 xp, uint8 level, uint8 trait,,,,,,, ) = characters.get(tokenId);
-        uint32 appliedCosmetic = characterCosmetics.getCharacterCosmetic(tokenId);
         string memory rename = characterRenameTagConsumables.getCharacterRename(tokenId);
-        uint256 seed3dCosmetics = characters.getCosmeticsSeed(tokenId);
         uintVars = new uint256[](2);
         (uintVars[UINT_NFT_VAR_META], uintVars[UINT_NFT_VAR_SEED3DCOSMETIC], stringVar) = _packedCharacterData(tokenId);
 
@@ -56,7 +53,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
 
     // for future use, bot will probe the returned value to know if the proxy contract has proper signature behavior
     function sigVersion() external view override returns (uint256) {
-        return 1;
+        return 2;
     }
 
     function isEnabled() external view override returns (bool) {
@@ -70,9 +67,9 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
     function mintOrUpdate(uint256 tokenId, uint256[] calldata uintVars,  string calldata stringVar) external restricted override returns (uint256) {
         require(enabled, "not enabled");
 
-        (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower, uint16 reputation) = _unpackCharactersData(uintVars[UINT_NFT_VAR_META]); 
+        (uint32 appliedCosmetic, uint16 xp, uint8 level, uint16 traitAndVersion, uint24 bonusPower, uint16 reputation) = _unpackCharactersData(uintVars[UINT_NFT_VAR_META]); 
 
-        tokenId =  _mintOrUpdate(tokenId, xp, level, trait, uintVars[UINT_NFT_VAR_SEED3DCOSMETIC], bonusPower, reputation);
+        tokenId =  _mintOrUpdate(tokenId, xp, level, traitAndVersion, uintVars[UINT_NFT_VAR_SEED3DCOSMETIC], bonusPower, reputation);
         
         if(appliedCosmetic > 0) {
             characterCosmetics.setCharacterCosmetic(tokenId, uint32(appliedCosmetic));
@@ -85,34 +82,39 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         return tokenId;
     }
 
-    function _mintOrUpdate(uint256 tokenId, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint24 bonusPower, uint16 reputation) internal returns (uint256) {
+    function _mintOrUpdate(uint256 tokenId, uint16 xp, uint8 level, uint16 traitAndVersion, uint256 seed, uint24 bonusPower, uint16 reputation) internal returns (uint256) {
         tokenId = 
-            characters.customMint(nftStorageAddress, xp, level, trait, seed, tokenId, bonusPower, reputation);
+            characters.customMint(nftStorageAddress, xp, level, uint8(traitAndVersion & 0xFF), seed, tokenId, bonusPower, reputation, uint8((traitAndVersion >> 8) & 0xFF));
 
         return tokenId;
     }
 
-    function _unpackCharactersData(uint256 metaData) internal pure returns (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower, uint16 reputation) {
-        trait = uint8((metaData) & 0xFF);
-        level = uint8((metaData >> 8) & 0xFF);
-        xp = uint16(metaData  >> 16 & 0xFFFF);
-        appliedCosmetic = uint32((metaData >> 32) & 0xFFFFFFFF);
-        bonusPower = uint24((metaData >> 64) & 0xFFFFFF);
-        reputation = uint16((metaData >> 88) & 0xFFFF);
+    function _unpackCharactersData(uint256 metaData) internal pure returns (uint32 appliedCosmetic, uint16 xp, uint8 level, uint16 traitAndVersion, uint24 bonusPower, uint16 reputation) {
+        traitAndVersion = uint16((metaData) & 0xFFFF);
+        level = uint8((metaData >> 16) & 0xFF);
+        xp = uint16(metaData  >> 24 & 0xFFFF);
+        appliedCosmetic = uint32((metaData >> 40) & 0xFFFFFFFF);
+        bonusPower = uint24((metaData >> 72) & 0xFFFFFF);
+        reputation = uint16((metaData >> 96) & 0xFFFF);
     }
 
 
     function _packedCharacterData(uint256 characterId) internal view returns (uint256 packedData, uint256 seed3dCosmetics, string memory rename) {
-        (uint16 xp, uint8 level, uint8 trait,,,,,,, ) = characters.get(characterId);
+        (uint16 xp, uint8 level, uint8 trait,,,,,,,) = characters.get(characterId);
         uint32 appliedCosmetic = characterCosmetics.getCharacterCosmetic(characterId);
         rename = characterRenameTagConsumables.getCharacterRename(characterId);
         seed3dCosmetics = characters.getCosmeticsSeed(characterId);
         uint24 bonusPower = uint24(characters.getNftVar(characterId, 2)); // 2 => bonus Power
         uint16 reputation = uint16(characters.getNftVar(characterId, 103)); // 103 => reputation
-        packedData = _packCharactersData(appliedCosmetic, xp, level, trait, bonusPower, reputation);
+        uint8 version = uint8(characters.getNftVar(characterId, 3)); // 3 => version
+        packedData = _packCharactersData(appliedCosmetic, xp, level, uint16(trait | (version << 8)), bonusPower, reputation);
     }
 
-    function _packCharactersData(uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower, uint16 reputation) internal pure returns (uint256) {
-        return  uint256(uint256(trait) | (uint256(level) << 8) | (uint256(xp) << 16) | (uint256(appliedCosmetic) << 32) | (uint256(bonusPower) << 64) | (uint256(reputation) << 88));
+    function _packCharactersData(uint32 appliedCosmetic, uint16 xp, uint8 level, uint16 traitAndVersion, uint24 bonusPower, uint16 reputation) internal pure returns (uint256) {
+        return  uint256(uint256(traitAndVersion) | (uint256(level) << 16) | (uint256(xp) << 24) | (uint256(appliedCosmetic) << 40) | (uint256(bonusPower) << 72) | (uint256(reputation) << 96));
+    }
+
+    function canBridge(address wallet, uint256 tokenId, uint256 targetChain) external view override returns (bool) {
+        return characters.getNftVar(tokenId, 3) == 0; // Only gen 1 is allowed
     }
 }

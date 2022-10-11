@@ -256,7 +256,7 @@
     },
     "links": {},
     "address": "0x827C2f617b67634262C5811aB2F2A8104f81dF20",
-    "transactionHash": "0x3693787aa7d850902e095f73eebf38fb5bcd0d847fcc4136792ade5d83974887"
+    "transactionHash": "0x81a8d426431689443de19b8b76feb14fe948389cd7d05b0d5bbd9f211fc3cf1d"
   },
   "build/contracts/CBKLand.json": {
     "events": {
@@ -2134,7 +2134,7 @@
     },
     "links": {},
     "address": "0x58E7a90eEf2bEe6494c8d99d74a244b21B3c1239",
-    "transactionHash": "0x61493be903cf14144af313325408053c222ec932e0aebeb9fe1ad63f647cf3f8"
+    "transactionHash": "0x5d26cd5caca0c719674c27326226761e2a2861d7212be8757791910b21cc9422"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -2215,7 +2215,8 @@
       }
     },
     "links": {},
-    "address": "0x21db8Bf00689d44c225f22b668a24d71ead04D4d"
+    "address": "0x21db8Bf00689d44c225f22b668a24d71ead04D4d",
+    "transactionHash": "0x7b2c461b760f7c7edec9174c47792a701c4eb295e387ad9f608e087d85afc978"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2497,7 +2498,7 @@
     },
     "links": {},
     "address": "0xD9AC0Cc8BBDBA6616De0F07119D61d40Fb5258DE",
-    "transactionHash": "0x666f663199f1f5a3c1cb3fa458604424e3a8b733feacbcf2aa09ef11fc6f0f02"
+    "transactionHash": "0xc3fc1bcff5260e50b7c8d135462e332e7c2c9923e20651c7c8d96e6c24553d03"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
@@ -3882,7 +3883,7 @@
     },
     "links": {},
     "address": "0x7EB3237Ba499A05e8915870AeA5c897048F709b1",
-    "transactionHash": "0x36682fb1d4cec90a0b8c1973c9b13db50d1c0e49b7833efebfb2c74272961cc9"
+    "transactionHash": "0x484bc8c0a320007f129c198a918d475437ec21c992702a0ac88a89d34eda338f"
   },
   "build/contracts/PartnerGiveaways.json": {
     "events": {},
@@ -4930,7 +4931,8 @@
       }
     },
     "links": {},
-    "address": "0x1C7195cc9b4c9981602F6Bc3e41cBd6E36B497C0"
+    "address": "0x1C7195cc9b4c9981602F6Bc3e41cBd6E36B497C0",
+    "transactionHash": "0x659e0d4b544bdaf7cb310ccbdb6e0c40483f8f7777c73cab008afdc7cfb5bbe6"
   },
   "build/contracts/Shields.json": {
     "events": {
@@ -5125,7 +5127,7 @@
     },
     "links": {},
     "address": "0xbbCA928DddEDE7615f45823Cf30c7F05063ef1Cb",
-    "transactionHash": "0x41f63b65f9bd46d90c41c076bbdce2b242588417928261266336da38a82eec38"
+    "transactionHash": "0xcbc710478c60d9a270981f51edcf05077519511d5f51a86dfaba3da6179acd94"
   },
   "build/contracts/SimpleQuests.json": {
     "events": {
@@ -5365,7 +5367,7 @@
     },
     "links": {},
     "address": "0x188AbFD45709005Adb43A21910B6D68364959a82",
-    "transactionHash": "0xbef810c5e4f69a920463c7000f8d6b6b206c6065ebb6cdb6e59f862db22eab45"
+    "transactionHash": "0xa010f51dbf346280ea3a4a094236700e2c270173f997b4ab72f46bafd7657034"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},
@@ -5598,13 +5600,24 @@
     },
     "links": {},
     "address": "0x2E0695973B07ad3AEF9104bEFE9919fC1d6bEbFA",
-    "transactionHash": "0x1bf008135de6b367263190cc2ec8e750de0743982cec4b87d93d72e7fdf62aac"
+    "transactionHash": "0xa527bf7e772e0ac2eacc1b16cbeca02b71f3742c65b4695c95097a32026e4745"
   },
   "build/contracts/Treasury.json": {
     "events": {},
     "links": {},
     "address": "0xB4a1661a19AA4Ef3DfCD0cE11f474952bd5Ca140",
-    "transactionHash": "0x39ca51799b6d1a1e1d6e2f93a58b5740c4d88f4e4a8a9391716a0fbbce027ab8"
+    "transactionHash": "0x7f11148ea8dcc9967412f197075795c4ea99945ea6d1714fb44f6c3743ed5585"
+  },
+  "build/contracts/ValorERC20BridgeProxyContract.json": {
+    "events": {},
+    "links": {},
+    "address": "0x13F5a1E01106e0d200181Ef8E884e201D707E64f"
+  },
+  "build/contracts/ValorToken.json": {
+    "events": {},
+    "links": {},
+    "address": "0xB3d491701f40b882bF745e0C4bff31A247a92039",
+    "transactionHash": "0x070984452a38e8f2463fba69b31036b548170769ed7c43b10b897d0c859e8f0f"
   },
   "build/contracts/WaxBridge.json": {
     "events": {
@@ -5767,7 +5780,8 @@
       }
     },
     "links": {},
-    "address": "0x1DCb19641a27Fe55Bc26C9FD0Fb50f2d52B9a68E"
+    "address": "0x1DCb19641a27Fe55Bc26C9FD0Fb50f2d52B9a68E",
+    "transactionHash": "0x70ebeb3fe711a005114d15826517b9bc24104db429412a0537f5cf4e732c4e36"
   },
   "build/contracts/WeaponCosmetics.json": {
     "events": {
@@ -6462,6 +6476,6 @@
     },
     "links": {},
     "address": "0xA4DEB2aC411f8BaA1F9A353Db0c80ABF4f3AfB8a",
-    "transactionHash": "0x50c2c1b960bf9f4b0a533aa35b3de1efb909cd1ec6f345090d7c5e6648276a13"
+    "transactionHash": "0xa4479d34d003866757900089122208962bc1279653f52846cda1bb055e46cf94"
   }
 }

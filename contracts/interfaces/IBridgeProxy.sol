@@ -8,4 +8,5 @@ interface IBridgeProxy {
     function isEnabled() external view returns (bool);
 
     function sigVersion() external view returns (uint256);
+    function canBridge(address wallet, uint256 tokenId, uint256 targetChain) external view returns (bool);
 }

@@ -6,7 +6,7 @@
     <div class="row m-3 justify-content-center">
       <h3>{{$t('bridge.transferNftsToAnotherChain')}}</h3>
     </div>
-    <div class="row mt-3 justify-content-center">
+    <div class="w-100 row mt-3 justify-content-center">
       <p v-if="bridgeFee">
         {{$t('bridge.bridgeTransferFee')}}: <CurrencyConverter :skill="convertWeiToSkill(bridgeFee)"/> &nbsp;
         <b-icon-question-circle class="centered-icon" scale="0.8"
@@ -53,7 +53,9 @@
         </div>
 
         <div class="sell-grid" v-if="nftType === 'character'">
-          <character-list :showFilters="true" v-model="selectedNftId" />
+          <character-list  v-if="bridgeableCharacters.length > 0" :showFilters="true" v-model="selectedNftId" showGivenCharacterIds
+            :characterIds="bridgeableCharacters" />
+          <h4 v-else class="text-center mt-5">As for now only Genesis Characters can be bridged</h4>
         </div>
 
         <div class="sell-grid" v-if="nftType === 'shield'">
@@ -500,6 +502,9 @@ export default Vue.extend({
       const totalBalance = balance.plus(skillRewards);
       return totalBalance.isGreaterThanOrEqualTo(cost);
     },
+    bridgeableCharacters(): number | string[] {
+      return this.ownCharacters.filter(c => c.version === 0).map(c => c.id);
+    }
   },
   watch: {
     defaultAccount() {

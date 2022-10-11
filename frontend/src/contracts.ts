@@ -2,13 +2,18 @@ import { abi as erc20Abi } from '../../build/contracts/IERC20.json';
 import { abi as erc721Abi } from '../../build/contracts/IERC721.json';
 
 import { networks as skillStakingRewardsNetworks } from '../../build/contracts/SkillStakingRewardsUpgradeable.json';
+import { networks as skillStakingRewards60Networks } from '../../build/contracts/SkillStakingRewardsUpgradeable60.json';
 import { networks as skillStakingRewards90Networks } from '../../build/contracts/SkillStakingRewardsUpgradeable90.json';
 import { networks as skillStakingRewards180Networks } from '../../build/contracts/SkillStakingRewardsUpgradeable180.json';
 import { networks as lpStakingRewardsNetworks } from '../../build/contracts/LPStakingRewardsUpgradeable.json';
 import { networks as lp2StakingRewardsNetworks } from '../../build/contracts/LP2StakingRewardsUpgradeable.json';
+import { networks as lpStakingRewardsValorNetworks } from '../../build/contracts/LPStakingRewardsUpgradeableValor.json';
+import { networks as lp2StakingRewardsValorNetworks } from '../../build/contracts/LP2StakingRewardsUpgradeableValor.json';
+import { networks as valorStakingRewardsNetworks } from '../../build/contracts/ValorStakingRewardsUpgradeable.json';
 import { networks as skillTokenNetworks } from '../../build/contracts/SkillToken.json';
 import { networks as lpTokenNetworks } from '../../build/contracts/ExperimentToken.json';
 import { networks as lp2TokenNetworks } from '../../build/contracts/ExperimentToken2.json';
+import { networks as valorTokenNetworks } from '../../build/contracts/ExperimentToken.json';
 import { networks as cbkLandT1StakingRewardsNetworks } from '../../build/contracts/CBKLandT1StakingRewardsUpgradeable.json';
 import { networks as cbkLandT2StakingRewardsNetworks } from '../../build/contracts/CBKLandT2StakingRewardsUpgradeable.json';
 import { networks as cbkLandT3StakingRewardsNetworks } from '../../build/contracts/CBKLandT3StakingRewardsUpgradeable.json';
@@ -131,6 +136,10 @@ const stakingContractAddressesFromBuild: Partial<Record<StakeType, Partial<Staki
     stakingRewardsAddress: (skillStakingRewardsNetworks as Networks)[networkId]?.address,
     stakingTokenAddress: (skillTokenNetworks as Networks)[networkId]?.address
   },
+  skill60: {
+    stakingRewardsAddress: (skillStakingRewards60Networks as Networks)[networkId]?.address,
+    stakingTokenAddress: (skillTokenNetworks as Networks)[networkId]?.address
+  },
   skill90: {
     stakingRewardsAddress: (skillStakingRewards90Networks as Networks)[networkId]?.address,
     stakingTokenAddress: (skillTokenNetworks as Networks)[networkId]?.address
@@ -146,6 +155,18 @@ const stakingContractAddressesFromBuild: Partial<Record<StakeType, Partial<Staki
   lp2: {
     stakingRewardsAddress: (lp2StakingRewardsNetworks as Networks)[networkId]?.address,
     stakingTokenAddress: (lp2TokenNetworks as Networks)[networkId]?.address
+  },
+  lpValor: {
+    stakingRewardsAddress: (lpStakingRewardsValorNetworks as Networks)[networkId]?.address,
+    stakingTokenAddress: (lpTokenNetworks as Networks)[networkId]?.address
+  },
+  lpValor2: {
+    stakingRewardsAddress: (lp2StakingRewardsValorNetworks as Networks)[networkId]?.address,
+    stakingTokenAddress: (lp2TokenNetworks as Networks)[networkId]?.address
+  },
+  valor: {
+    stakingRewardsAddress: (valorStakingRewardsNetworks as Networks)[networkId]?.address,
+    stakingTokenAddress: (valorTokenNetworks as Networks)[networkId]?.address
   }
 };
 
