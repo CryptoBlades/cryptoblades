@@ -384,7 +384,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         payable
     {
         if(isNftBridged[address(_tokenAddress)][_id]) {
-            require(msg.value == withdrawFromStorageNativeFee(address([_tokenAddress)], 'Bad fee amount');
+            require(msg.value == withdrawFromStorageNativeFee[address(_tokenAddress)], 'Bad fee amount');
             delete isNftBridged[address(_tokenAddress)][_id];
         }
         storedItems[msg.sender][address(_tokenAddress)].remove(_id);
