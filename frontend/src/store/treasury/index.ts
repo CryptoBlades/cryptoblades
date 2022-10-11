@@ -4,7 +4,7 @@ import Web3 from 'web3';
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });
 import {getGasPrice} from '../store';
 import {SupportedProject} from '@/views/Treasury.vue';
-import {NewPartnerProject} from '@/components/smart/AdminTabs/TreasuryAdmin.vue';
+import {NewPartnerProject} from '@/components/admin/AdminTabs/TreasuryAdmin.vue';
 import {values} from 'lodash';
 import Vue from 'vue';
 

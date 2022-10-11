@@ -73,8 +73,10 @@
 import {mapActions, mapGetters, mapState} from 'vuex';
 import BN from 'bignumber.js';
 import _ from 'lodash';
-import Events from '../events';
-import StakeSelectorItem from '../components/StakeSelectorItem.vue';
+import Events from '../utils/events';
+BN.config({ ROUNDING_MODE: BN.ROUND_DOWN });
+BN.config({ EXPONENTIAL_AT: 100 });
+import StakeSelectorItem from '../components/stake/StakeSelectorItem.vue';
 import Vue from 'vue';
 import {humanReadableDetailsForNftStakeTypes, humanReadableDetailsForStakeTypes} from '../stake-types';
 import {isNftStakeType} from '@/interfaces';

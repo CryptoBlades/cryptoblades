@@ -4,7 +4,7 @@ import {
 } from '@/interfaces';
 import {Dispatch} from 'vuex';
 import {NftTransfer, TransferedNft} from '@/interfaces/Nft';
-import {approveFeeWalletOnly} from '@/contract-call-utils';
+import {approveFeeWalletOnly} from '@/utils/contract-call-utils';
 import BigNumber from 'bignumber.js';
 
 const defaultCallOptions = (rootState:  IState) => ({ from: rootState.defaultAccount });

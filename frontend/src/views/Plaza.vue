@@ -334,20 +334,20 @@
 
 <script lang='ts'>
 import BN from 'bignumber.js';
-import BigButton from '../components/BigButton.vue';
-import CharacterList from '../components/smart/CharacterList.vue';
-import Hint from '../components/Hint.vue';
+import BigButton from '../components/layout/buttons/BigButton.vue';
+import CharacterList from '../components/character/CharacterList.vue';
+import Hint from '../components/common/Hint.vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
 import { fromWeiEther, toBN } from '../utils/common';
 import Vue from 'vue';
-import i18n from '@/i18n';
+import i18n from '@/utils/i18n';
 import { BModal } from 'bootstrap-vue';
 import { CharacterPower } from '@/interfaces';
 import { isValidWeb3Address } from '../utils/common';
 
 import {
   burningManager as featureFlagBurningManager
-} from '../feature-flags';
+} from '../utils/feature-flags';
 
 interface Data {
   recruitCost: string;

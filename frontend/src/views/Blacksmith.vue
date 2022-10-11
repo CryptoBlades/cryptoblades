@@ -610,26 +610,26 @@
 
 <script lang='ts'>
 import BN from 'bignumber.js';
-import WeaponGrid from '../components/smart/WeaponGrid.vue';
-import RightMenu from '../components/RightMenu.vue';
-import BigButton from '../components/BigButton.vue';
-import { getWeaponArt } from '@/weapon-arts-placeholder';
-import { getWeaponRarity } from '@/weapon-element';
-import { getCleanName } from '@/rename-censor';
+import WeaponGrid from '../components/layout/grids/WeaponGrid.vue';
+import RightMenu from '../components/blacksmith/RightMenu.vue';
+import BigButton from '../components/layout/buttons/BigButton.vue';
+import { getWeaponArt } from '@/utils/placeholder/weapon-arts-placeholder';
+import { getWeaponRarity } from '@/utils/weapon-element';
+import { getCleanName } from '@/utils/rename-censor';
 import Vue from 'vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
-import WeaponIcon from '../components/WeaponIcon.vue';
+import WeaponIcon from '../components/blacksmith/WeaponIcon.vue';
 import { BModal } from 'bootstrap-vue';
-import NftList from '@/components/smart/NftList.vue';
+import NftList from '@/components/nft/NftList.vue';
 import { Contracts, IState } from '@/interfaces';
 import { ISpecialWeaponsManagerState } from '@/store/specialWeaponsManager';
 import { Accessors } from 'vue/types/options';
-import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
+import DustBalanceDisplay from '@/components/currency/DustBalanceDisplay.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
-import i18n from '@/i18n';
-import Events from '../events';
-import SpecialWeaponForgeModal from '@/components/smart/SpecialWeaponForgeModal.vue';
-import BlacksmithNav from '@/components/BlacksmithNav.vue';
+import i18n from '@/utils/i18n';
+import Events from '../utils/events';
+import SpecialWeaponForgeModal from '@/components/modals/SpecialWeaponForgeModal.vue';
+import BlacksmithNav from '@/components/layout/navigation/BlacksmithNav.vue';
 import { getConfigValue } from '@/contracts';
 import {Element} from '@/enums/Element';
 

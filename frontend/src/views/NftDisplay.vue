@@ -102,14 +102,14 @@ import { mapActions, mapGetters } from 'vuex';
 import { isNftType, Nft, allNftTypes } from '../interfaces/Nft';
 import { Accessors } from 'vue/types/options';
 import { Contract, Contracts } from '@/interfaces';
-import { NftIdType } from '@/components/smart/NftList.vue';
+import { NftIdType } from '@/components/nft/NftList.vue';
 import { Characters, Shields, Weapons } from '../../../build/abi-interfaces';
-import WeaponGrid from '../components/smart/WeaponGrid.vue';
-import CharacterList from '../components/smart/CharacterList.vue';
-import NftList from '../components/smart/NftList.vue';
+import WeaponGrid from '../components/layout/grids/WeaponGrid.vue';
+import CharacterList from '../components/character/CharacterList.vue';
+import NftList from '../components/nft/NftList.vue';
 import { fromWeiEther } from '@/utils/common';
 import BigNumber from 'bignumber.js';
-import CurrencyConverter from '../components/CurrencyConverter.vue';
+import CurrencyConverter from '../components/currency/CurrencyConverter.vue';
 
 interface StoreMappedGetters {
   contracts: Contracts;

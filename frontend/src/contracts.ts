@@ -75,7 +75,7 @@ import { Contracts, isStakeType, isNftStakeType, StakeType, NftStakeType, Stakin
 
 import { StakingContractEntry, stakingContractsInfo, nftStakingContractsInfo } from './stake-types';
 
-import {raid, pvp, quests, burningManager} from './feature-flags';
+import {raid, pvp, quests, burningManager} from './utils/feature-flags';
 import {currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 interface RaidContracts {

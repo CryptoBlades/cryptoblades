@@ -1,6 +1,6 @@
 import {IState} from '@/interfaces';
 import {Dispatch, Commit} from 'vuex';
-import {approveFeeWalletOnly} from '@/contract-call-utils';
+import {approveFeeWalletOnly} from '@/utils/contract-call-utils';
 import BigNumber from 'bignumber.js';
 import { getGasPrice } from '../store';
 

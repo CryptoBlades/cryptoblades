@@ -34,7 +34,7 @@
 </template>
 
 <script lang='ts'>
-import PartneredProject from '@/components/PartneredProject.vue';
+import PartneredProject from '@/components/common/PartneredProject.vue';
 import Vue from 'vue';
 import {Accessors} from 'vue/types/options';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';

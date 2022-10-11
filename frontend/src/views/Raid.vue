@@ -422,21 +422,21 @@
 
 import Vue from 'vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
-import { getCharacterArt } from '../character-arts-placeholder';
-import NftIcon from '@/components/NftIcon.vue';
-import NftList, {NftIdType} from '@/components/smart/NftList.vue';
-import WeaponInventory from '../components/WeaponInvetory.vue';
-import CurrencyConverter from '../components/CurrencyConverter.vue';
+import { getCharacterArt } from '../utils/placeholder/character-arts-placeholder';
+import NftIcon from '@/components/nft/NftIcon.vue';
+import NftList, {NftIdType} from '@/components/nft/NftList.vue';
+import WeaponInventory from '../components/layout/WeaponInvetory.vue';
+import CurrencyConverter from '../components/currency/CurrencyConverter.vue';
 import {GetTotalMultiplierForTrait, IWeapon} from '@/interfaces/Weapon';
 import {IRaidState, IState} from '@/interfaces';
-import {getBossArt, getBossName} from '@/raid-boss-art-placeholder';
+import {getBossArt, getBossName} from '@/utils/placeholder/raid-boss-art-placeholder';
 import {traitNumberToName} from '@/contract-models';
 import {fromWeiEther, toBN} from '@/utils/common';
 import {staminaToHours} from '@/utils/date-time';
 import {BonusXp, Dust4b, Dust5b, DustLb, Junk, Keybox, RaidRewards, Weapon} from '@/interfaces/RaidRewards';
-import i18n from '@/i18n';
-import Events from '../events';
-import { getCleanName } from '../rename-censor';
+import i18n from '@/utils/i18n';
+import Events from '../utils/events';
+import { getCleanName } from '../utils/rename-censor';
 import BigNumber from 'bignumber.js';
 
 interface RaidMappedActions {

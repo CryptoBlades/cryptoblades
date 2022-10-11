@@ -101,13 +101,13 @@
 </template>
 
 <script lang="ts">
-import Events from '../events';
+import Events from '../utils/events';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import BigNumber from 'bignumber.js';
 import {Accessors} from 'vue/types/options';
 import Vue from 'vue';
 import {fromWeiEther, toBN} from '../utils/common';
-import i18n from '../i18n';
+import i18n from '../utils/i18n';
 import {getConfigValue} from '@/contracts';
 import config from '../../app-config.json';
 import {SupportedProject} from './Treasury.vue';

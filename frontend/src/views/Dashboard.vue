@@ -190,7 +190,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex';
-import {getBossArt, getBossName} from '@/raid-boss-art-placeholder';
+import {getBossArt, getBossName} from '@/utils/placeholder/raid-boss-art-placeholder';
 import {traitNumberToName} from '@/contract-models';
 import { Nft } from '@/interfaces/Nft';
 import { CharacterTrait } from '@/interfaces';

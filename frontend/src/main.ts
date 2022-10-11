@@ -12,15 +12,15 @@ import store from './store/store';
 import createRouter from './router';
 
 import App from './App.vue';
-import CBButton from '@/components/CBButton.vue';
+import CBButton from '@/components/layout/buttons/CBButton.vue';
 
 import {
   raid as featureFlagRaid,
   reforging as featureFlagReforging
-} from './feature-flags';
+} from './utils/feature-flags';
 import { getConfigValue } from './contracts';
 
-import i18n from './i18n';
+import i18n from './utils/i18n';
 
 let expectedNetworkId: number | null = null;
 if(getConfigValue('VUE_APP_EXPECTED_NETWORK_ID')) {
