@@ -151,7 +151,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     // Target network => allowed nfts
     mapping(uint256 => EnumerableSet.AddressSet) private targetChainAllowedNFTs;
     // Is NFT bridged or only stored
-    mapping(address => mapping(uint256 => bool)) private isNftBridged;
+    mapping(address => mapping(uint256 => bool)) public isNftBridged;
     mapping(address => uint256) public withdrawFromStorageNativeFee;
 
     event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);

@@ -104,7 +104,7 @@
             <b-button :disabled="!canWithdraw"
             variant="info"
             @click="withdrawItem()" class="gtag-link-others"
-            tagname="click_transfer_bridge">{{$t('bridge.withdrawFromStorage')}}<br><span>{{formattedWithdrawFee}}</span></b-button>
+            tagname="click_transfer_bridge">{{$t('bridge.withdrawFromStorage')}}<br><span v-if="isNftBridged">{{formattedWithdrawFee}}</span></b-button>
           </div>
           <div class="p-2">
             <b-button :disabled="!canBridge" variant="info" @click="requestBridge()" class="gtag-link-others"
@@ -361,6 +361,7 @@ interface StoreMappedActions {
   }): Promise<boolean>;
   fetchBridgeFee(): Promise<string>;
   fetchBridgeWithdrawFee(payload: {tokenAddress: string}): Promise<string>;
+  fetchIsNftBridged(payload: {tokenAddress: string, tokenId: number | string}): Promise<boolean>;
 }
 
 enum transferStates{
@@ -423,6 +424,7 @@ export default Vue.extend({
       withdrawFee: '',
       loadedStorage: false,
       refreshIntervall: 0 as number,
+      isNftBridged: false
     };
   },
 
@@ -520,6 +522,9 @@ export default Vue.extend({
     },
     nftType() {
       this.getWithdrawFee();
+    },
+    selectedNftId() {
+      this.getIsNftBridged();
     }
   },
   created(){
@@ -567,7 +572,8 @@ export default Vue.extend({
       'getReceivedNFT',
       'chainEnabled',
       'fetchBridgeFee',
-      'fetchBridgeWithdrawFee'
+      'fetchBridgeWithdrawFee',
+      'fetchIsNftBridged'
     ]) as StoreMappedActions),
     convertWeiToSkill(wei: string): string {
       return fromWeiEther(wei);
@@ -731,6 +737,9 @@ export default Vue.extend({
     },
     async getWithdrawFee() {
       this.withdrawFee = await this.fetchBridgeWithdrawFee({tokenAddress: this.contractAddress});
+    },
+    async getIsNftBridged() {
+      this.isNftBridged = await this.fetchIsNftBridged({tokenAddress: this.contractAddress, tokenId: this.selectedNftId});
     }
   },
   components: {
