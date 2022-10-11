@@ -107,7 +107,7 @@ import Web3 from 'web3';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import { Contracts, ICharacter } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
-import Banner from './components/Banner.vue';
+import Banner from './components/layout/Banner.vue';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';

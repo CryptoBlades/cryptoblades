@@ -196,7 +196,7 @@ export default Vue.extend({
 }
 
 .soul-icon-non-genesis{
-  content: url('../assets/soul-icon.png');
+  content: url('../../../assets/soul-icon.png');
   height: 17px;
   width: 12px;
   margin-right: 1px;
