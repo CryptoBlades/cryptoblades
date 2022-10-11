@@ -204,7 +204,7 @@
                     class="ml-3 gtag-link-others"
                     @click="onMintCharacter"
                     v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
-                    {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
+                    {{$t('plaza.recruit')}} ({{ recruitCost }} SKILL) <i class="fas fa-plus"></i>
                   </b-button>
                   <b-checkbox
                     variant="primary"
@@ -261,10 +261,9 @@
                     class="ml-3 gtag-link-others"
                     @click="onMintCharacter"
                     v-tooltip="$t('plaza.recruitNew')" tagname="recruit_character">
-                    {{$t('plaza.recruit')}} ({{ recruitCost }} NON-IGO SKILL) <i class="fas fa-plus"></i>
+                    {{$t('plaza.recruit')}} ({{ recruitCost }} SKILL) <i class="fas fa-plus"></i>
                   </b-button>
                   <b-checkbox
-                    v-if="ownCharacters.length === 4"
                     variant="primary"
                     class="mx-3 my-auto"
                     v-model="mintSlippageApproved">
@@ -359,11 +358,13 @@ interface Data {
   remainingCharactersIds: string[];
   targetCharacterId: string;
   burnOption: number;
-  soulBalance: number;
+  genesisSoulBalance: number;
+  nonGenesisSoulBalance: number;
   burnCost: number;
   isBurning: boolean;
   isUpgrading: boolean;
   isTransferring: boolean;
+  isTransferringNonGenesis: boolean;
   soulAmount: number;
   receiverAddress: string;
   remainingPowerLimit: number;
@@ -389,6 +390,7 @@ export default Vue.extend({
       'defaultAccount',
       'skillBalance',
       'skillRewards',
+      'valorRewards',
       'xpRewards'
     ]),
     ...mapGetters([
@@ -467,6 +469,8 @@ export default Vue.extend({
     this.mintCharacterMinPrice = new BN(await this.fetchMintCharacterMinPrice()).div(new BN(10).pow(18)).toFixed(4);
     this.updateMintCharacterFee();
     this.updateInterval = setInterval(async () => { await this.updateMintCharacterFee(); }, 2000);
+    this.genesisSoulBalance = +await this.fetchGenesisSoulBalance();
+    this.nonGenesisSoulBalance = +await this.fetchNonGenesisSoulBalance();
   },
 
   destroyed() {
@@ -485,11 +489,13 @@ export default Vue.extend({
       remainingCharactersIds: [],
       targetCharacterId: '',
       burnOption: 0,
-      soulBalance: 0,
+      genesisSoulBalance: 0,
+      nonGenesisSoulBalance: 0,
       burnCost: 0,
       isBurning: true,
       isUpgrading: false,
       isTransferring: false,
+      isTransferringNonGenesis: false,
       soulAmount: 0,
       receiverAddress: '',
       remainingPowerLimit: 0,
@@ -500,7 +506,7 @@ export default Vue.extend({
       isTransferInProgress: false,
       isValidWeb3Address,
       updateInterval: null as ReturnType<typeof setInterval> | null,
-      mintSlippageApproved: false,
+      mintSlippageApproved: true,
       mintPriceDecreasePerHour: '0',
       mintCharacterPriceIncrease: '0',
       mintCharacterMinPrice: '0',
@@ -509,7 +515,7 @@ export default Vue.extend({
 
   methods: {
     ...mapMutations(['setCurrentCharacter']),
-    ...mapActions(['mintCharacter', 'fetchSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
+    ...mapActions(['mintCharacter', 'fetchGenesisSoulBalance', 'fetchNonGenesisSoulBalance', 'fetchCharactersBurnCost', 'upgradeCharacterWithSoul',
       'burnCharactersIntoSoul', 'burnCharactersIntoCharacter', 'claimGarrisonXp', 'fetchBurnPowerMultiplier',
       'transferSoul', 'fetchMintCharacterPriceDecreasePerSecond', 'fetchCharacterMintIncreasePrice',
       'fetchMintCharacterMinPrice', 'fetchMintCharacterFee', 'fetchUsdSkillValue']),
@@ -527,12 +533,12 @@ export default Vue.extend({
     },
     canRecruit() {
       const cost = toBN(this.recruitCost);
-      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards) + +fromWeiEther(this.valorRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     canBurn() {
       const cost = toBN(this.burnCost);
-      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards) + +fromWeiEther(this.valorRewards));
       return balance.isGreaterThanOrEqualTo(cost);
     },
     checkStorage() {
@@ -541,7 +547,8 @@ export default Vue.extend({
     },
     async toggleSoulCreation() {
       this.soulCreationActive = !this.soulCreationActive;
-      this.soulBalance = await this.fetchSoulBalance();
+      this.genesisSoulBalance = await this.fetchGenesisSoulBalance();
+      this.nonGenesisSoulBalance = await this.fetchNonGenesisSoulBalance();
       await this.updateBurnCost();
       this.burnPowerMultiplier = +fromWeiEther(await this.fetchBurnPowerMultiplier());
       if(this.soulCreationActive) {
@@ -614,7 +621,8 @@ export default Vue.extend({
       finally {
         this.isBurnInProgress = false;
       }
-      this.soulBalance = await this.fetchSoulBalance();
+      this.genesisSoulBalance = await this.fetchGenesisSoulBalance();
+      this.nonGenesisSoulBalance = await this.fetchNonGenesisSoulBalance();
       this.burnCharacterIds = [];
       this.burnCost = 0;
     },
@@ -628,10 +636,12 @@ export default Vue.extend({
         this.isUpgradeInProgress = false;
       }
       this.updatedRemainingPowerLimit();
-      this.soulBalance = await this.fetchSoulBalance();
+      this.genesisSoulBalance = await this.fetchGenesisSoulBalance();
+      this.nonGenesisSoulBalance = await this.fetchNonGenesisSoulBalance();
       this.soulAmount = 0;
     },
     async onTransferConfirm() {
+      // NOT SHOWING ANYWHERE, IF EVER DOES NEEDS ADJUSTING TO NON-GENESIS SOUL TRANSFERS LIKE DONE IN CHARACTERS.VUE
       if(!isValidWeb3Address(this.receiverAddress) || this.soulAmount === 0) return;
       this.isTransferInProgress = true;
       try {
@@ -640,7 +650,8 @@ export default Vue.extend({
       finally {
         this.isUpgradeInProgress = false;
       }
-      this.soulBalance = await this.fetchSoulBalance();
+      this.genesisSoulBalance = await this.fetchGenesisSoulBalance();
+      this.nonGenesisSoulBalance = await this.fetchNonGenesisSoulBalance();
       this.soulAmount = 0;
     },
     async onClaimGarrisonXp() {
@@ -654,9 +665,21 @@ export default Vue.extend({
     },
     setMaxSoulAmount() {
       if (this.isTransferring) {
-        this.soulAmount = this.soulBalance;
+        if(this.isTransferringNonGenesis) {
+          this.soulAmount = this.nonGenesisSoulBalance;
+        }
+        else {
+          this.soulAmount = this.genesisSoulBalance;
+        }
       } else {
-        this.soulAmount = this.remainingPowerLimit > this.soulBalance * 10 ? this.soulBalance : this.remainingPowerLimit / 10;
+        let soulBalance;
+        if(this.characters[this.targetCharacterId].version === 0) {
+          soulBalance = this.genesisSoulBalance;
+        }
+        else {
+          soulBalance = this.nonGenesisSoulBalance;
+        }
+        this.soulAmount = this.remainingPowerLimit > soulBalance * 10 ? soulBalance : this.remainingPowerLimit / 10;
       }
     },
 

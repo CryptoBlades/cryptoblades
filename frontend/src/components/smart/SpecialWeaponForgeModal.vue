@@ -243,7 +243,7 @@ import forgingGif from '../../assets/special-weapons/forging.gif';
 import WeaponIcon from '../WeaponIcon.vue';
 import { fromWeiEther, toBN } from '@/utils/common';
 
-type StoreMappedState = Pick<IState,'ownedWeaponIds' |'skillBalance' | 'skillRewards'>;
+type StoreMappedState = Pick<IState,'ownedWeaponIds' |'skillBalance' | 'skillRewards' | 'valorRewards'>;
 
 type StoreMappedSpecialWeaponsManagerState = Pick<ISpecialWeaponsManagerState,
 'specialWeaponEvents' | 'activeSpecialWeaponEventsIds' | 'specialWeaponEventId' | 'shardsSupply' | 'inactiveSpecialWeaponEventsIds'>;
@@ -326,7 +326,8 @@ export default Vue.extend({
     ...(mapState([
       'ownedWeaponIds',
       'skillBalance',
-      'skillRewards'
+      'skillRewards',
+      'valorRewards'
     ]) as Accessors<StoreMappedState>),
     ...mapState('specialWeaponsManager',
       ([
@@ -374,7 +375,7 @@ export default Vue.extend({
 
     canForgeWithSkill(): boolean {
       const cost = toBN(this.forgeCostSkill);
-      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards));
+      const balance = toBN(+fromWeiEther(this.skillBalance) + +fromWeiEther(this.skillRewards) + +fromWeiEther(this.valorRewards));
       return !!this.selectedSpecialWeaponEventId &&
          balance.isGreaterThanOrEqualTo(cost) &&
         this.endsIn > 0;

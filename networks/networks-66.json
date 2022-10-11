@@ -256,7 +256,7 @@
     },
     "links": {},
     "address": "0x81Cf70E8D62Ec8903FA0364aB2147349AC1F2125",
-    "transactionHash": "0x3b308d42d4f9aa7d2e2455067ea87e5d8dd141d8fb87a8687c4a162d036342ce"
+    "transactionHash": "0xb90641a658b6f783549c88c81421f7cdcd49e14f2a0552437cadf9cbde5ede07"
   },
   "build/contracts/CBKLand.json": {
     "events": {
@@ -2054,7 +2054,7 @@
     },
     "links": {},
     "address": "0x6A1d1803d4EDF5CF27EDb64ae95A22F81707eA38",
-    "transactionHash": "0x16ff3880b156294e5fec5b6a9e92927654755fdfc739a10cfa62c182db9d32d5"
+    "transactionHash": "0xf26af82a5bf0e1572052ffabd9c99bd6de8274c20a300f8bb1b5b5a6f6aa3b3c"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -2136,7 +2136,7 @@
     },
     "links": {},
     "address": "0x0f8663c2EbEf2dE5D6f19175E8fB8193B496fFAB",
-    "transactionHash": "0x7880060a35a708836d92251687982b4593e70f57008fc4c347e422960a3fa529"
+    "transactionHash": "0x5cabfe8f2e129b5ba2f58da8ea0f2e7c457265229def566207d5969ec216f546"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2418,7 +2418,7 @@
     },
     "links": {},
     "address": "0x98145a2fEBac238280bbdEDc2757dC162318b16e",
-    "transactionHash": "0xcfa5ba76a17225722827346b632720e0610025621b29591aea9431142d00a55e"
+    "transactionHash": "0x1b4ae1d834d2045b02b46b9fddcd164d8d49d0cb0046ba45ea486916926eeed7"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
@@ -3301,7 +3301,7 @@
     "events": {},
     "links": {},
     "address": "0x7f25686b5a211280C2555c08B7e6d2930e7e87e6",
-    "transactionHash": "0x5886044a8e499e1d5d8c880c3f8cf30e2d907565ddbb400396524c1d6475ef50"
+    "transactionHash": "0xebbccc67eb8e82b28e12265dac3d0bd736896a708741f82a1526da15b5d0dba7"
   },
   "build/contracts/PartnerGiveaways.json": {
     "events": {},
@@ -4325,7 +4325,7 @@
     },
     "links": {},
     "address": "0xa3Bb7B500cd751519C9cFa86216D276fAf38Bad8",
-    "transactionHash": "0x553a80cebb59cad024c7f98420d2da3710551dc1aa8cafbef8fc423bb5c73a8e"
+    "transactionHash": "0x91fd0665ea3f2d0a6ed071524b761703cf51b844f0d24c8cb3f62dfcc777ee8b"
   },
   "build/contracts/Shields.json": {
     "events": {
@@ -4760,7 +4760,7 @@
     },
     "links": {},
     "address": "0x47a3c3e3925624beBf5193717d80EF494Bc9B8A7",
-    "transactionHash": "0x8868b3533e32be717df19e48a036f223552ecdb4d36fc890cd1fa6fc9d0ba2a1"
+    "transactionHash": "0xe435ae269a143422ced2ede4e9418759981067fb44bb46b4db6f380c1ddd6f0e"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},
@@ -4954,7 +4954,18 @@
     "events": {},
     "links": {},
     "address": "0xcBEfF02841370997054AdfF624dC490C8cB20406",
-    "transactionHash": "0xe448f27e8dae8ddfdd054e4fabac0135f4f35f55c2865252c26137e16c8266e8"
+    "transactionHash": "0xfb795b9395b4a4cbf2356802f4a95ce7d5198b296235667a5bbe4dc13127ad46"
+  },
+  "build/contracts/ValorERC20BridgeProxyContract.json": {
+    "events": {},
+    "links": {},
+    "address": "0xb8a6D6E2AAfEc9dBE3d032D87764E3812C65E561"
+  },
+  "build/contracts/ValorToken.json": {
+    "events": {},
+    "links": {},
+    "address": "0x97B5696E2B4BEDbafbf1dc943bFF918297021bed",
+    "transactionHash": "0x1f37df50245bcfd6fa91d9f11dec88ce8915308a1dae157836205e4db33992f2"
   },
   "build/contracts/WaxBridge.json": {
     "events": {
@@ -5118,7 +5129,7 @@
     },
     "links": {},
     "address": "0x24c75754Dc64cad43208E7EC968bB41AfDaE3F21",
-    "transactionHash": "0x9ecb619ae0b8db8bd8f582bbe7037e14320df8e50fb27f7a96e2ce5fbafdd5f7"
+    "transactionHash": "0xba3ed09f16401c83c8914ab60404c8c4dc8d9648375591743252188f9b995171"
   },
   "build/contracts/WeaponCosmetics.json": {
     "events": {
@@ -5813,6 +5824,6 @@
     },
     "links": {},
     "address": "0x364759180A6484e57ECD73C042264A6Da75770e8",
-    "transactionHash": "0x4c760fd79c828695bee5545ac614f5c15e10e06bb26a53668bdeebee69933668"
+    "transactionHash": "0x7f1b67547f6b0ac5d1803a7305e274576593ab843505f312aadd1de70ad57746"
   }
 }

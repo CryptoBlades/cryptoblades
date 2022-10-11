@@ -63,6 +63,14 @@ export default{
     position: absolute;
   }
 
+  @media all and (max-width: 600px) {
+    .frame-card{
+      height: 30%;
+      width: 50vw;
+      margin-bottom: 2.5%;
+    }
+  }
+
   .frame-card > g > g > g:nth-child(1) > line{
     stroke-dasharray: 500;
     stroke-dashoffset: 500;

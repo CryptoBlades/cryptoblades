@@ -49,15 +49,17 @@
     "characterName": "Character Name",
     "unclaimedExp": "Unclaimed EXP",
     "unclaimed": "UNCLAIMED SKILL",
+    "unclaimedValor": "UNCLAIMED VALOR",
     "widthraw": "WITHDRAW",
     "claimRewards": "Claim Rewards",
     "payoutCurrency": "Payout Currency",
     "partnerTokenClaimed": "This partner tokens have been claimed already.",
     "slippage": "Slippage",
     "skillAmount": "Skill Amount",
+    "valorAmount": "Valor Amount",
     "multiplierAtZero": "Multiplier is at x0, try again later...",
     "lowMultiplier": "Current multiplier is low, you will receive only {currentMultiplier} of claimed tokens.",
-    "realWithdrawValueClaimable": "Currently you'll receive approximately {actualAmount} {tokenSymbol} for withdrawing {skillAmount} SKILL."
+    "realWithdrawValueClaimable": "Currently you'll receive approximately {actualAmount} {tokenSymbol} for withdrawing {skillAmount} {token}."
   },
   "Character": {
     "cancelledTransaction": "You cancelled the transaction.",
@@ -124,12 +126,14 @@
     "won": "You won the fight!",
     "lost": "You lost the fight!",
     "earned": "You earned:",
-    "hint": "SKILL earned is based on gas costs of the network plus a factor of your power",
+    "hint": "SKILL/VALOR earned is based on gas costs of the network plus a factor of your power",
     "gasFee": "You spent {bnbGasUsed} {gasToken} on gas fees ",
     "youRolled": "You rolled:",
     "enemyRolled": "Enemy rolled:",
     "earnedSkill": "<b>{noIGO}</b> <small>UNCLAIMED SKILL</small> <b>{inUSD}</b> ",
-    "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> "
+    "earnedValor": "<b>{noIGO}</b> <small>UNCLAIMED VALOR</small> ",
+    "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> ",
+    "gasOffset": "<br/> <small>INCLUDING</small> <b>{offset}</b> <small>GAS OFFSET</small> <b>{inUSD}</b> "
   },
   "homePage":{
     "level": "Level",
@@ -590,6 +594,7 @@
     "nextRaid" : "Next Raid",
     "finishesOn": "Finishes on",
     "raidStatus": "Raid status",
+    "raidOver": "Next raid starting soon",
     "claimRewards": "Claim rewards",
     "raidRewardsSelector": "Raid rewards selector",
     "selectRaid": "Select a raid to claim rewards from",
@@ -1009,6 +1014,7 @@
       "details": "Details",
       "websiteUrl": "Website URL",
       "noteOptional": "Note (optional)",
+      "isValor":"Is Valor",
       "findActivePartnerProjects": "Find active partner projects",
       "name": "Name",
       "symbol": "Symbol",
@@ -1124,6 +1130,9 @@
   },
   "stake": {
     "staking": "Staking",
+    "octobladesStakings": "OctoBlades Stakings",
+    "landStakings": "Land Stakings",
+    "normalStakings": "Normal Stakings",
     "unknownStakeType": "Unknown stake type, please try again.",
     "rewardsAvailable": "Rewards are available!",
     "have": "You have:",
@@ -1520,5 +1529,12 @@
     "more": "More",
     "less": "Less",
     "unclaimed": "Unclaimed"
+  },
+  "banner": {
+    "linkText": "Join the Event",
+    "octoblades": {
+      "octoblades": "The OctoBlades Event is Live on BNB Chain! Over 5x Rewards, Weekly PvP Tournaments, and SO MUCH MORE!!",
+      "link": "https://app.cryptoblades.io/#/?chain=BNB"
+    }
   }
 }

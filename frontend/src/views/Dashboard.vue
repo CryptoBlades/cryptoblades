@@ -113,8 +113,11 @@
                   <span class="raid-boss-value" v-if="this.remainingTime.hours > 0">
                     {{this.remainingTime.hours}}:{{this.remainingTime.minutes}}:{{this.remainingTime.seconds}}
                   </span>
-                  <span class="raid-boss-value" v-else>
+                  <span class="raid-boss-value" v-else-if="remainingTime.seconds > -1 && remainingTime.minutes > -1">
                     {{this.remainingTime.minutes}}:{{this.remainingTime.seconds}}
+                  </span>
+                  <span class="raid-boss-value" v-else>
+                    {{$t('raid.raidOver')}}
                   </span>
                 </span>
               </div>
@@ -348,7 +351,7 @@ export default Vue.extend({
 .dashboard-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: auto;
   z-index: 1;
   overflow:hidden;
 }
@@ -363,6 +366,7 @@ export default Vue.extend({
   background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/dashboard-bg.png");
   background-size: cover;
   background-repeat: no-repeat;
+  background-position-x: right;
   height: 50%;
   width: 100%;
   z-index: 1;
@@ -848,7 +852,11 @@ export default Vue.extend({
   }
 }
 
-@media all and (max-width: 600px) {
+.raid-boss-button-and-drops > a > .pve-button{
+  width: max-content;
+}
+
+@media all and (max-width: 742px) { /* tried778 start600 next742*/
   .upper-body-container,
   .lower-body-container {
     display: flex;

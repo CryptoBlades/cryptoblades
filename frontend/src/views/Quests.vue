@@ -486,11 +486,7 @@ export default Vue.extend({
 @import '../styles/character-cosmetics.css';
 .quest-wrapper{
   background: transparent url("../../src/assets/questsBackground.png") 0 0 no-repeat padding-box;
-}
-.quests-container {
-  width: clamp(600px, 80%, 1200px);
-  margin: 0 auto;
-  padding: 50px 0;
+  background-size: clamp(100%, 100%, 100%) auto;
 }
 .top-button{
   margin: 10px 0 !important;
@@ -499,7 +495,7 @@ export default Vue.extend({
 .quests-container-wrapper{
   background-image: url('../../src/assets/questsBackground.png');
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
   background-position: center;
   min-height: 95vh;
   min-width: 100%;
@@ -509,6 +505,7 @@ export default Vue.extend({
 .quests-container{
   width: clamp(200px, 75vw, 1200px);
   margin: 0 auto;
+  padding: 50px 0;
 }
 
 .quests-title {

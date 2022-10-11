@@ -256,36 +256,12 @@
           }}</span>
       </a>
     </b-modal>
-    <b-modal
-      class="centered-modal"
-      ref="claim-confirmation-modal"
-      :title="$t('stakeModal.confirmModal.title')"
-      :ok-title="$t('stakeModal.confirmModal.okTitle')"
-      :cancel-title="$t('stakeModal.confirmModal.cancelTitle')"
-      @ok="onClaimTokens()"
-    >
-      <span v-if="this.rewardsClaimTaxAsFactorBN > 0">
-        {{
-          $t("stakeModal.confirmModal.claimWarning2", {
-            formattedRewardsClaimTax,
-            formattedTaxAmount: this.formattedTaxAmount,
-            formattedBonusLost,
-          })
-        }}
-      </span>
-      <span v-else>
-        {{
-          $t("stakeModal.confirmModal.claimWarning1", {formattedBonusLost})
-        }}
-      </span>
-      <b>{{ $t("stakeModal.confirmModal.cantBeUndone") }}</b>
-    </b-modal>
   </div>
 </template>
 
 <script lang="ts">
 import Events from '../events';
-import {mapActions, mapGetters, mapState} from 'vuex';
+import {mapGetters, mapState} from 'vuex';
 import BigNumber from 'bignumber.js';
 import {Accessors} from 'vue/types/options';
 import Vue from 'vue';
@@ -298,10 +274,6 @@ import { portal, pvp, quests, raid} from '@/feature-flags';
 interface StoreMappedState {
   skillRewards: string;
   directStakeBonusPercent: number;
-}
-
-interface StoreMappedActions {
-  claimTokenRewards(): Promise<void>;
 }
 
 interface Data {
@@ -404,7 +376,6 @@ export default Vue.extend({
   },
 
   methods: {
-    ...(mapActions(['claimTokenRewards']) as StoreMappedActions),
 
     BazaarLink() {
       return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
@@ -439,11 +410,6 @@ export default Vue.extend({
       else localStorage.setItem('hideRewards', 'false');
 
       Events.$emit('setting:hideRewards', {value: this.hideRewards});
-    },
-    async onClaimTokens() {
-      if (this.canClaimTokens) {
-        await this.claimTokenRewards();
-      }
     },
     async claimSkill(stage: ClaimStage) {
       if (stage === ClaimStage.WaxBridge) {
