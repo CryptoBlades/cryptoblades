@@ -152,7 +152,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     mapping(uint256 => EnumerableSet.AddressSet) private targetChainAllowedNFTs;
     // Is NFT bridged or only stored
     mapping(address => mapping(uint256 => bool)) private isNftBridged;
-    uint256 public withdrawFromStorageNativeFee;
+    mapping(address => uint256) public withdrawFromStorageNativeFee;
 
     event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTWithdrawn(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
@@ -384,7 +384,8 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         payable
     {
         if(isNftBridged[address(_tokenAddress)][_id]) {
-            require(msg.value == withdrawFromStorageNativeFee, 'Bad fee amount');
+            require(msg.value == withdrawFromStorageNativeFee(address([_tokenAddress)], 'Bad fee amount');
+            delete isNftBridged[address(_tokenAddress)][_id];
         }
         storedItems[msg.sender][address(_tokenAddress)].remove(_id);
         allStoredItems[address(_tokenAddress)].remove(_id);
@@ -779,8 +780,8 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         }
     }
 
-    function setWithdrawFromStorageNativeFee(uint256 newFee) external restricted {
-        withdrawFromStorageNativeFee = newFee;
+    function setWithdrawFromStorageNativeFee(address nftAddress, uint256 newFee) external restricted {
+        withdrawFromStorageNativeFee[nftAddress] = newFee;
     }
 
     function recoverFees(address receiver, uint256 amount) external restricted {
