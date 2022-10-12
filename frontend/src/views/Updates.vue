@@ -1,6 +1,7 @@
 <template>
   <div class="bg-dark">
-    <b-checkbox class="markAllAsRead mb-1" @click="setAllAsRead" >
+    <b-checkbox id="markAllAsRead" class="mb-1" @change="setAllAsRead($event)"
+      :value="this.readAll" :checked="this.readAll" :disabled="isDisabled">
       {{$t("updates.markAllAsRead")}}
     </b-checkbox>
     <div v-for="update in updateNotifications" :key="update.hash">
@@ -19,6 +20,7 @@ import Update from '@/components/Update.vue';
 
 interface Data {
   updateNotifications: Notification[],
+  readAll: boolean,
 }
 
 interface Notification {
@@ -33,18 +35,34 @@ export default Vue.extend({
   data() {
     return {
       updateNotifications: [],
+      readAll: false,
     } as Data;
   },
-
+  computed: {
+    isDisabled(): boolean {
+      return !!this.readAll;
+    }
+  },
   methods: {
     /**
      * Mark all notifications as read
      */
-    async setAllAsRead() {
+    setAllAsRead(isReadAllClicked: any) {
+      this.readAll = isReadAllClicked;
       this.updateNotifications.forEach((notification) => {
         notification.isRead = true;
       });
       this.updateStorage();
+    },
+
+    /**
+     * Check if there are any elements that aren't currently read
+     */
+    isEveryUpdateRead() {
+      const unreadUpdate = this.updateNotifications.find((notification) => !notification.isRead);
+      if (!unreadUpdate) {
+        this.readAll = true;
+      }
     },
 
     /**
@@ -122,11 +140,9 @@ export default Vue.extend({
      */
     refreshUpdatePopup() {
       this.updateStorage();
-      // need to check child checkboxes and see if
-      // there are any unchecked.
+      this.isEveryUpdateRead();
     },
   },
-
   async created() {
     await this.checkForNotificationUpdatesFromAPI();
   },
@@ -137,10 +153,10 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-  .markAllAsRead {
+  #markAllAsRead {
     color: #EDCD90;
   }
-  .markAllAsRead:hover {
+  #markAllAsRead:hover {
     text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #e1bb34, 0 0 10px #e1bb34;
   }
 

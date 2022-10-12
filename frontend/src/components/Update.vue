@@ -41,7 +41,6 @@ export default Vue.extend({
      * checked if read/marked
      */
     updateIsRead(isReadClicked: any) {
-      console.log(isReadClicked, this);
       this.$emit('update:isRead', isReadClicked);
       this.$emit('refresh-update-popup');
     }
@@ -54,10 +53,4 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-  /* .update-title > span {
-    color: black;
-  } */
-  /* .isRead:checked {
-    pointer
-  } */
 </style>
