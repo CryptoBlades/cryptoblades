@@ -66,7 +66,7 @@
           <div  v-if="currentCharacterStamina >= staminaPerFight" class="combat-enemy-container">
               <!-- selected weapon for combat details -->
               <div class="weapon-selection mb-4">
-                <div class="header-row d-flex justify-content-between">
+                <div class="header-row justify-content-between">
                   <div class="selectedWeaponDetails">
                     <div class="select-weapons" v-if="!selectedWeaponId || !weaponHasDurability(selectedWeaponId)">
                       <span class="isMobile label-title">{{$t('combat.selectAWeapon')}}</span>
@@ -231,6 +231,7 @@ interface StoreMappedCombatActions {
   getCurrentSkillPrice(): Promise<string>;
   getNativeTokenPriceInUsd(): Promise<string>;
   getCombatTokenChargePercent(): Promise<string>;
+  getFightXpGain(): Promise<number>;
 }
 
 interface StoreMappedState {
@@ -325,6 +326,7 @@ export default Vue.extend({
   },
   async mounted() {
     this.selectedWeaponId = this.currentWeaponId;
+    this.fightXpGain = await this.getFightXpGain();
     Events.$on('chooseweapon', (id: number) => {
       this.selectedWeaponId = id;
       this.index++;
@@ -417,7 +419,8 @@ export default Vue.extend({
         'getCurrentSkillPrice',
         'getNativeTokenPriceInUsd',
         'getCombatTokenChargePercent',
-        'fetchCharacterStamina'
+        'fetchCharacterStamina',
+        'getFightXpGain',
       ]) as StoreMappedCombatActions),
     ...(mapMutations('combat', ['setIsInCombat']) as StoreMappedCombatMutations),
     getEnemyArt,
@@ -680,7 +683,8 @@ export default Vue.extend({
 }
 .body{
   background: linear-gradient(0deg, rgba(0, 14, 41, 0.68), rgba(0, 14, 41, 0.68)), url('../assets/combat-bg.png');
-  background-size:cover;
+  background-size: clamp(100%, 100%, 100%) auto;
+  background-repeat: no-repeat;
   min-height: 100%;
 }
 h5{
@@ -699,11 +703,11 @@ h5{
 
 .enemy-character {
   position: relative;
-  width: 20rem;
+  width: inherit;
   cursor: pointer;
   background-position: center;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
   background-image: url('../assets/enemy-bg-transparent.png');
   background-color: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, #242720 100%);
   border: 1px solid #a28d54;
@@ -1048,7 +1052,7 @@ h1 {
 }
 
 .select-weapons > div{
-  width: 80vw;
+  width: 100%;
 }
 
 .select-weapons > div > ul{
@@ -1179,6 +1183,10 @@ h1 {
   }
   .header-row {
     justify-content: center !important;
+  }
+
+  .enemy-character {
+    width: 20rem;
   }
 
   .hideMenu{

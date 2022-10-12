@@ -147,7 +147,7 @@ export default Vue.extend({
       return toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6);
     },
     formattedSkillNoIGO(): string {
-      return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10) - this.igoDefaultReward).toString())).toFixed(6);
+      return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10)).toString())).toFixed(6);
     },
     formattedSkillIGOReward(): string {
       return toBN(fromWeiEther((this.igoDefaultReward * this.formattedStaminaUsed).toString())).toFixed(6);

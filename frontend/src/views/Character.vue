@@ -41,7 +41,7 @@
         @changeTab="onChangeTab"
       />
       <template v-if="activeTab === 'info' && havePlazaCharacters">
-        <div class="d-flex justify-content-end pr-5 pt-4 slippage-checkbox" v-if="ownCharacters.length === 4">
+        <div class="d-flex justify-content-end pr-5 pt-4 slippage-checkbox">
           <b-checkbox variant="primary" v-model="mintSlippageApproved">
             <span><b>{{$t('plaza.approveMintSlippage')}}</b></span>
             <b-icon-question-circle class="ml-1 centered-icon" v-tooltip.bottom="$t('plaza.dynamicPricesDetails',
@@ -230,7 +230,7 @@ export default Vue.extend({
       activeTab: 'info',
       updateInterval: null as ReturnType<typeof setInterval> | null,
       recruitCost: '0',
-      mintSlippageApproved: false,
+      mintSlippageApproved: true,
       mintPriceDecreasePerHour: '0',
       mintCharacterPriceIncrease: '0',
       mintCharacterMinPrice: '0',
@@ -494,6 +494,7 @@ export default Vue.extend({
   },
   async mounted(){
     this.checkStorage();
+    await this.updateMintCharacterFee();
     Events.$on('select-all', (filteredCharacters: any[])=>{
       this.selectAll(filteredCharacters);
     });
@@ -530,7 +531,7 @@ export default Vue.extend({
     this.mintPriceDecreasePerHour = new BN(await this.fetchMintCharacterPriceDecreasePerSecond()).div(new BN(10).pow(18)).multipliedBy(60*60).toFixed(6);
     this.mintCharacterPriceIncrease = new BN(await this.fetchCharacterMintIncreasePrice()).div(new BN(10).pow(18)).toFixed(6);
     this.mintCharacterMinPrice = new BN(await this.fetchMintCharacterMinPrice()).div(new BN(10).pow(18)).toFixed(4);
-    this.updateMintCharacterFee();
+    await this.updateMintCharacterFee();
   },
   components:{
     BigButton,
@@ -544,7 +545,7 @@ export default Vue.extend({
 
 .background-image {
   background-image: url('../assets/artwork-fantasy-art-ruins.png') ;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
   background-repeat: no-repeat;
   background-position: top right;
   min-height: calc(100vh - 120px);
@@ -554,6 +555,7 @@ export default Vue.extend({
 .content {
   z-index: 10;
   position: relative;
+  height: inherit;
 }
 
 .background-image > div:nth-child(1){

@@ -264,7 +264,6 @@
                     {{$t('plaza.recruit')}} ({{ recruitCost }} SKILL) <i class="fas fa-plus"></i>
                   </b-button>
                   <b-checkbox
-                    v-if="ownCharacters.length === 4"
                     variant="primary"
                     class="mx-3 my-auto"
                     v-model="mintSlippageApproved">
@@ -507,7 +506,7 @@ export default Vue.extend({
       isTransferInProgress: false,
       isValidWeb3Address,
       updateInterval: null as ReturnType<typeof setInterval> | null,
-      mintSlippageApproved: false,
+      mintSlippageApproved: true,
       mintPriceDecreasePerHour: '0',
       mintCharacterPriceIncrease: '0',
       mintCharacterMinPrice: '0',

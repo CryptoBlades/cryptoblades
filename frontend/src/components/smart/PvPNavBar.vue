@@ -98,6 +98,13 @@ export default {
   }
   button:nth-of-type(2) {
     margin: 0 2.5rem;
+    @media only screen and (max-width: 415px) {
+      margin: 0 1.5rem;
+    }
+    @media only screen and (max-width: 375px) {
+      margin: 0 1rem;
+    }
   }
+
 }
 </style>

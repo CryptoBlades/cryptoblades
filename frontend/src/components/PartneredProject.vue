@@ -10,8 +10,7 @@
           <h6>Token: {{ partnerProject.tokenSymbol }}</h6>
           <a @click="addTokenToMetamask" class="ml-1 a-button">({{ $t('PartneredProject.add') }})</a>
         </div>
-        <span v-if="!isValor" class="multiplier-text">{{ skillToPartnerRatio }} SKILL/{{ partnerProject.tokenSymbol }}</span>
-        <span v-else class="multiplier-text">1.0000 VALOR/VALOR</span>
+        <span class="multiplier-text">{{ skillToPartnerRatio }} {{ isValor ? 'VALOR' : 'SKILL' }}/{{ partnerProject.tokenSymbol }}</span>
         <span :class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
               class="multiplier-text">{{ $t('PartneredProject.multiplier') }}: x{{ multiplier }}</span>
         <span v-if="!isValor" :class="+multiplier < 0.5 ? 'very-low-multiplier' : (+multiplier < 0.75 ? 'low-multiplier' : '')"
@@ -26,7 +25,9 @@
       <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
            :style="[{'width': progressBarWidth, 'background-color': '#1168D0'}]"/>
     </div>
-    <h6 class="mt-1 text-center">{{ $t('PartneredProject.claimed') }} {{ tokensClaimed }} / {{ partnerProject.tokenSupply }}</h6>
+    <h6 class="mt-1 text-center">
+      {{ $t('PartneredProject.claimed') }} {{ tokensClaimed.toLocaleString() }} / {{ partnerProject.tokenSupply.toLocaleString() }}
+    </h6>
     <div class="d-flex flex-column align-items-center w-100">
       <b-card no-body class="collapse-style" :class="detailsOpened ? 'on-top' : ''">
         <b-card-header class="d-flex flex-column align-items-center w-100 mt-1 p-0" v-b-toggle="'collapse-' + partnerProject.id"
@@ -62,7 +63,7 @@ interface Data {
   images: any;
   multiplier: string;
   distributionTime: string;
-  tokensClaimed: string;
+  tokensClaimed: number;
   skillToPartnerRatio: string;
   updateInterval: ReturnType<typeof setInterval> | null;
   detailsOpened: boolean;
@@ -81,7 +82,7 @@ export default Vue.extend({
       images: require.context('../assets/partners/', false, /\.png$/),
       multiplier: '1',
       distributionTime: '0',
-      tokensClaimed: '0',
+      tokensClaimed: 0,
       skillToPartnerRatio: '0',
       updateInterval: null,
       detailsOpened: false,
@@ -91,7 +92,7 @@ export default Vue.extend({
   computed: {
     progressBarWidth(): string {
       if (!this.partnerProject.tokenSupply) return '0%';
-      return `${Math.round((+this.tokensClaimed / +this.partnerProject.tokenSupply) * 100)}%`;
+      return `${Math.round((this.tokensClaimed / +this.partnerProject.tokenSupply) * 100)}%`;
     },
 
     moneyPerUnclaimed(): string {
@@ -113,7 +114,7 @@ export default Vue.extend({
       this.distributionTime = await this.getPartnerProjectDistributionTime(this.partnerProject.id);
 
       const currentClaimedTokens = await this.getPartnerProjectClaimedAmount(this.partnerProject.id);
-      this.tokensClaimed = toBN(currentClaimedTokens).div(toBN(10).pow(18)).toFixed(2);
+      this.tokensClaimed = +toBN(currentClaimedTokens).div(toBN(10).pow(18)).toFixed(2);
 
       const currentSkillToPartnerRatio = await this.getSkillToPartnerRatio(this.partnerProject.id);
       this.skillToPartnerRatio = toBN(1).dividedBy(toBN(currentSkillToPartnerRatio).dividedBy(toBN(2).exponentiatedBy(64))).toFixed(4);

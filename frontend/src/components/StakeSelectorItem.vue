@@ -2,6 +2,8 @@
   <skeleton-loader v-if="isLoading"/>
   <div v-else class="container">
     <h1 class="stake-type-title">{{ stakeTitle }}
+      <b-icon-cash-stack v-if="note" class="note"
+        v-tooltip="note" />
       <b-icon-question-circle-fill v-if="deprecated" class="quesition-mark"
         v-tooltip="$t('stake.StakeSelectorItem.deprecatedTooltip')" />
       <b-icon-exclamation-circle-fill v-if="rewardsDepleted" class="exclamation-mark"
@@ -272,6 +274,9 @@ export default Vue.extend({
     deprecated: {
       type: Boolean,
     },
+    note: {
+      type: String
+    },
     rewardDistributionTimeLeft: {
       type: Number,
       required: true,
@@ -350,6 +355,7 @@ export default Vue.extend({
       switch(this.stakeType as AllStakeTypes) {
       case 'skill':
       case 'skill2':
+      case 'skill60':
       case 'skill90':
       case 'skill180':
         return 'SKILL';
@@ -360,10 +366,16 @@ export default Vue.extend({
       case 'lp':
       case 'lp2':
         return 'SKILL-WBNB';
+      case 'lpValor':
+        return 'SKILL-VALOR';
+      case 'lpValor2':
+        return 'KING-VALOR';
       case 'cbkLandT1':
       case 'cbkLandT2':
       case 'cbkLandT3':
         return 'CBKL';
+      case 'valor':
+        return 'VALOR';
       default:
         return 'unknown';
       }
@@ -925,6 +937,11 @@ export default Vue.extend({
 
 .quesition-mark {
   margin-right:5px;
+}
+
+.note {
+  margin-left: 5px;
+  scale: 1.2;
 }
 
 .exclamation-mark {
