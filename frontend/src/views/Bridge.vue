@@ -524,7 +524,12 @@ export default Vue.extend({
       this.getWithdrawFee();
     },
     selectedNftId() {
-      this.getIsNftBridged();
+      if(this.selectedNftId) {
+        this.getIsNftBridged();
+      }
+      else {
+        this.isNftBridged = false;
+      }
     }
   },
   created(){
@@ -612,6 +617,7 @@ export default Vue.extend({
         await this.getStoredIds();
       }
       catch(e){
+        console.error(e);
         this.transferingFromStorage = false;
       }
     },
