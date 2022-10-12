@@ -4891,7 +4891,7 @@
     },
     "links": {},
     "address": "0xE8cEE8309c5705c8b5004BBB031686a1029ab977",
-    "transactionHash": "0x19a3c57c3d4922483a4e1c73877147cd82c7338bdf9ac3d170ecefdc0b862683"
+    "transactionHash": "0x626845834f17fbd90065a70061b6ec7fd89d1768386e9716d53735e2d4fc1536"
   },
   "build/contracts/PartnerGiveaways.json": {
     "events": {},

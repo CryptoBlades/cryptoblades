@@ -30442,13 +30442,13 @@
           {
             "contract": "ERC721Upgradeable",
             "label": "_holderTokens",
-            "type": "t_mapping(t_address,t_struct(UintSet)63325_storage)",
+            "type": "t_mapping(t_address,t_struct(UintSet)63449_storage)",
             "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:34"
           },
           {
             "contract": "ERC721Upgradeable",
             "label": "_tokenOwners",
-            "type": "t_struct(UintToAddressMap)62702_storage",
+            "type": "t_struct(UintToAddressMap)62826_storage",
             "src": "..\\@openzeppelin\\contracts-upgradeable\\token\\ERC721\\ERC721Upgradeable.sol:37"
           },
           {
@@ -30496,7 +30496,7 @@
           {
             "contract": "AccessControlUpgradeable",
             "label": "_roles",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)59401_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)59525_storage)",
             "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
           },
           {
@@ -30579,18 +30579,18 @@
           "t_address": {
             "label": "address"
           },
-          "t_mapping(t_bytes32,t_struct(RoleData)59401_storage)": {
+          "t_mapping(t_bytes32,t_struct(RoleData)59525_storage)": {
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
           },
           "t_bytes32": {
             "label": "bytes32"
           },
-          "t_struct(RoleData)59401_storage": {
+          "t_struct(RoleData)59525_storage": {
             "label": "struct AccessControlUpgradeable.RoleData",
             "members": [
               {
                 "label": "members",
-                "type": "t_struct(AddressSet)63204_storage"
+                "type": "t_struct(AddressSet)63328_storage"
               },
               {
                 "label": "adminRole",
@@ -30598,16 +30598,16 @@
               }
             ]
           },
-          "t_struct(AddressSet)63204_storage": {
+          "t_struct(AddressSet)63328_storage": {
             "label": "struct EnumerableSetUpgradeable.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)62939_storage"
+                "type": "t_struct(Set)63063_storage"
               }
             ]
           },
-          "t_struct(Set)62939_storage": {
+          "t_struct(Set)63063_storage": {
             "label": "struct EnumerableSetUpgradeable.Set",
             "members": [
               {
@@ -30629,33 +30629,33 @@
           "t_array(t_uint256)49_storage": {
             "label": "uint256[49]"
           },
-          "t_mapping(t_address,t_struct(UintSet)63325_storage)": {
+          "t_mapping(t_address,t_struct(UintSet)63449_storage)": {
             "label": "mapping(address => struct EnumerableSetUpgradeable.UintSet)"
           },
-          "t_struct(UintSet)63325_storage": {
+          "t_struct(UintSet)63449_storage": {
             "label": "struct EnumerableSetUpgradeable.UintSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)62939_storage"
+                "type": "t_struct(Set)63063_storage"
               }
             ]
           },
-          "t_struct(UintToAddressMap)62702_storage": {
+          "t_struct(UintToAddressMap)62826_storage": {
             "label": "struct EnumerableMapUpgradeable.UintToAddressMap",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Map)62384_storage"
+                "type": "t_struct(Map)62508_storage"
               }
             ]
           },
-          "t_struct(Map)62384_storage": {
+          "t_struct(Map)62508_storage": {
             "label": "struct EnumerableMapUpgradeable.Map",
             "members": [
               {
                 "label": "_entries",
-                "type": "t_array(t_struct(MapEntry)62376_storage)dyn_storage"
+                "type": "t_array(t_struct(MapEntry)62500_storage)dyn_storage"
               },
               {
                 "label": "_indexes",
@@ -30663,10 +30663,10 @@
               }
             ]
           },
-          "t_array(t_struct(MapEntry)62376_storage)dyn_storage": {
+          "t_array(t_struct(MapEntry)62500_storage)dyn_storage": {
             "label": "struct EnumerableMapUpgradeable.MapEntry[]"
           },
-          "t_struct(MapEntry)62376_storage": {
+          "t_struct(MapEntry)62500_storage": {
             "label": "struct EnumerableMapUpgradeable.MapEntry",
             "members": [
               {
