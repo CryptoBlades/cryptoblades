@@ -26,7 +26,7 @@ module.exports = async (callback) => {
         try {
             const seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
             await retry(async () => {
-                await characters.customMint(mintData.receiver, mintData.level, mintData.trait, mintData.bonusPower, seed, tokenID, version, xp, reputation);
+                await characters.customMint(mintData.receiver, xp, mintData.level, mintData.trait, seed, tokenID, mintData.bonusPower, reputation, version);
             });
             console.log("Character minted:", mintData);
         } catch (e) {
