@@ -45,7 +45,7 @@
       <a class="nav-link" target="_blank">
         <div class="icon">
           <img src="../assets/navbar-icons/updates.svg" class="ui-link-icon gold-icon" alt="Updates">
-          <span class="unreadUpdates"/>
+          <span v-if="unreadUpdates" class="icon__badge" @refresh-unread-updates="refreshUnreadUpdates">{{unreadUpdates}}</span>
         </div>
         <div class="link-text">{{ $t("viewLink.updates") }}</div>
         <update-popup/>
@@ -74,6 +74,7 @@ interface Data {
   portal: boolean,
   pvp: boolean,
   quests: boolean,
+  unreadUpdates: number,
 }
 
 export default Vue.extend({
@@ -83,6 +84,7 @@ export default Vue.extend({
       portal,
       pvp,
       quests,
+      unreadUpdates: 0,
     } as Data;
   },
 
@@ -112,6 +114,11 @@ export default Vue.extend({
     BazaarLink() {
       return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
     },
+
+    refreshUnreadUpdates(unreadUpdates: any) {
+      console.log('unreadUpdates: ', unreadUpdates, this.unreadUpdates);
+      this.unreadUpdates = unreadUpdates;
+    }
   },
 });
 </script>
@@ -224,18 +231,27 @@ li .nav-link .icon {
   padding: 20px;
 }
 
-.unreadUpdates {
+#update-notifications > a > div > .icon__badge {
   position: absolute;
-  bottom: -10px;
-  right: -10px;
-  padding: 5px 10px;
-  border-radius: 50%;
+  bottom: 25px;
+  right: 15px;
   background: red;
-  z-index: 10;
+  color: white;
+  width: 20px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #update-notifications > .nav-link {
   cursor: pointer;
+}
+
+#update-notifications {
+  position: relative;
+  display: flex;
 }
 
 @media (max-width: 1366px) {

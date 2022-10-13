@@ -1,7 +1,7 @@
 <template>
   <div class="bg-dark">
     <b-checkbox id="markAllAsRead" class="mb-1" @change="setAllAsRead($event)"
-      :value="this.readAll" :checked="this.readAll" :disabled="isDisabled">
+      :checked="this.readAll" :disabled="isDisabled">
       {{$t("updates.markAllAsRead")}}
     </b-checkbox>
     <div v-for="update in updateNotifications" :key="update.hash">
@@ -21,6 +21,7 @@ import Update from '@/components/Update.vue';
 interface Data {
   updateNotifications: Notification[],
   readAll: boolean,
+  unreadUpdates: number,
 }
 
 interface Notification {
@@ -36,6 +37,7 @@ export default Vue.extend({
     return {
       updateNotifications: [],
       readAll: false,
+      unreadUpdates: 0,
     } as Data;
   },
   computed: {
@@ -49,9 +51,11 @@ export default Vue.extend({
      */
     setAllAsRead(isReadAllClicked: any) {
       this.readAll = isReadAllClicked;
+      console.log(this.readAll);
       this.updateNotifications.forEach((notification) => {
         notification.isRead = true;
       });
+      this.unreadUpdates = 0;
       this.updateStorage();
     },
 
@@ -59,10 +63,15 @@ export default Vue.extend({
      * Check if there are any elements that aren't currently read
      */
     isEveryUpdateRead() {
-      const unreadUpdate = this.updateNotifications.find((notification) => !notification.isRead);
-      if (!unreadUpdate) {
+      // const unreadUpdate = this.updateNotifications.find((notification) => !notification.isRead);
+      // if (!unreadUpdate) {
+      //   this.readAll = true;
+      // }
+      if (this.unreadUpdates === 0) {
+        console.log(this.unreadUpdates);
         this.readAll = true;
       }
+      //return this.unreadUpdates === 0;
     },
 
     /**
@@ -71,6 +80,7 @@ export default Vue.extend({
      * If this is the user's first time, we add fresh API data to localStorage.
      */
     async checkForNotificationUpdatesFromAPI() {
+      //TODO: move this to store.js?
       const notificationsFromAPI = await this.getNotificationsFromAPI();
       this.updateNotifications = this.getStorage();
       const notificationChanges = [];
@@ -88,11 +98,17 @@ export default Vue.extend({
         }
         if (notificationChanges.length > 0) {
           this.updateNotifications.unshift(...notificationChanges);
+          this.unreadUpdates = Math.min(notificationChanges.length, 10);
+          this.readAll = !!this.unreadUpdates;
+          console.log(this.unreadUpdates, 'path 1');
           this.setUpdateNotificationsFromAPI(this.updateNotifications.slice(0, 10));
         }
       }
       else {
         this.setUpdateNotificationsFromAPI(notificationsFromAPI);
+        this.unreadUpdates = notificationsFromAPI.length;
+        console.log(this.unreadUpdates, 'path 2');
+        this.readAll = !!this.unreadUpdates;
       }
     },
 
@@ -110,6 +126,9 @@ export default Vue.extend({
       return topNotifications;
     },
 
+    /**
+     * set the notifications from the API
+     */
     async setUpdateNotificationsFromAPI(notificationsFromAPI: Notification[]) {
       this.updateNotifications = notificationsFromAPI;
       this.updateStorage();
@@ -141,6 +160,8 @@ export default Vue.extend({
     refreshUpdatePopup() {
       this.updateStorage();
       this.isEveryUpdateRead();
+      console.log(this.unreadUpdates, 'is unreadUpdates');
+      this.$emit('refresh-unread-updates', this.unreadUpdates);
     },
   },
   async created() {
