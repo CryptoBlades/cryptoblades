@@ -56,7 +56,7 @@ contract JunkBridgeProxyContract is Initializable, AccessControlUpgradeable, IBr
         enabled = _enabled;
     }
 
-    function mintOrUpdate(uint256 tokenId, uint256[] calldata uintVars, string calldata stringVar) external restricted override returns (uint256) {
+    function mintOrUpdate(address /*receiver*/, uint256 tokenId, uint256[] calldata uintVars, string calldata stringVar) external restricted override returns (uint256) {
         require(enabled, "not enabled");
 
          tokenId = 

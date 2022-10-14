@@ -59,7 +59,7 @@ contract CBKLandBridgeProxyContract is Initializable, AccessControlUpgradeable, 
         _enabled = enabled;
     }
 
-    function mintOrUpdate(uint256 tokenId, uint256[] calldata uintVars, string calldata stringVar) external restricted override returns (uint256) {
+    function mintOrUpdate(address /*receiver*/, uint256 tokenId, uint256[] calldata uintVars, string calldata stringVar) external restricted override returns (uint256) {
         require(_enabled, "not enabled");
 
         (uint256 tier, uint256 chunkId, uint256 x, uint256 y) = _unpackCBKLandData(uintVars[UINT_NFT_VAR_META]);
