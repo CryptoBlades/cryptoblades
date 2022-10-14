@@ -19,6 +19,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
     CharacterRenameTagConsumables characterRenameTagConsumables;
     address nftStorageAddress;
     bool enabled;
+    bool giveawayGen2Enabled;
 
     uint8 public constant UINT_NFT_VAR_META = 0;
     uint8 public constant UINT_NFT_VAR_SEED3DCOSMETIC = 1;
@@ -81,12 +82,16 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         enabled = _enabled;
     }
 
+    function setGiveawayGen2Enabled(bool _enabled) external restricted {
+        giveawayGen2Enabled = _enabled;
+    }
+
     function mintOrUpdate(address receiver, uint256 tokenId, uint256[] calldata uintVars,  string calldata stringVar) external restricted override returns (uint256) {
         require(enabled, "not enabled");
 
         (uint32 appliedCosmetic, uint16 xp, uint8 level, uint16 traitAndVersion, uint24 bonusPower, uint16 reputation) = _unpackCharactersData(uintVars[UINT_NFT_VAR_META]); 
 
-        if(uint8((traitAndVersion >> 8) & 0xFF) == 0 && !promos.getBit(receiver, BIT_FIRST_CHARACTER)) {
+        if(giveawayGen2Enabled && uint8((traitAndVersion >> 8) & 0xFF) == 0 && !promos.getBit(receiver, BIT_FIRST_CHARACTER)) {
             uint256 seed = randoms.getRandomSeed(receiver);
             characters.mint(receiver, seed);
         }

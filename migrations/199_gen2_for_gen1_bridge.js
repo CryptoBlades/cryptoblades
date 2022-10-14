@@ -15,11 +15,20 @@ const Blacksmith = artifacts.require("Blacksmith");
 
 
 module.exports = async function (deployer, network) {
-  let charactersBridgeProxy;
+  await upgradeProxy(ShieldBridgeProxyContract.address, ShieldBridgeProxyContract, { deployer }); 
+  await upgradeProxy(WeaponBridgeProxyContract.address, WeaponBridgeProxyContract, { deployer }); 
+  await upgradeProxy(JunkBridgeProxyContract.address, JunkBridgeProxyContract, { deployer }); 
+  await upgradeProxy(CBKLandBridgeProxyContract.address, CBKLandBridgeProxyContract, { deployer }); 
+  const charactersBridgeProxy = await upgradeProxy(CharactersBridgeProxyContract.address, CharactersBridgeProxyContract, { deployer }); 
+  await upgradeProxy(NFTStorage.address, NFTStorage, { deployer });
+
+  const promos = await Promos.deployed();
+  await charactersBridgeProxy.migrate_c906001(promos.address);
+
   if (network === 'development' || network === 'development-fork') {
     const dummyRandoms = await DummyRandoms.deployed();
-    charactersBridgeProxy = await upgradeProxy(CharactersBridgeProxyContract.address, CharactersBridgeProxyContract, { deployer }); 
     await charactersBridgeProxy.migrateRandoms(dummyRandoms.address);
+    await charactersBridgeProxy.setGiveawayGen2Enabled(true);
   }
   else if (network === 'bsctestnet' || network === 'bsctestnet-fork' || network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'hecotestnet' || network === 'hecomainnet' || network === 'okexmainnet' || network === 'okextestnet' || network === 'polygonmainnet' || network === 'avaxmainnet' || network === 'auroramainnet' || network === 'skalemainnet' || network === 'kavamainnet' || network === 'polygontestnet' || network === 'avaxtestnet' || network === 'avaxtestnet-fork' || network === 'auroratestnet' || network === 'kavatestnet' || network === 'skaletestnet') {
     let openZeppelinRelayerAddress, linkToken, vrfCoordinator, keyHash, fee;
@@ -58,20 +67,10 @@ module.exports = async function (deployer, network) {
 
     await game.migrateRandoms(randoms.address);
     await blacksmith.migrateRandoms(randoms.address);
+    await charactersBridgeProxy.migrateRandoms(randoms.address);
 
     if(!await oldRandoms.paused()) {
       await oldRandoms.pause();
     }
-
-    await upgradeProxy(ShieldBridgeProxyContract.address, ShieldBridgeProxyContract, { deployer }); 
-    await upgradeProxy(WeaponBridgeProxyContract.address, WeaponBridgeProxyContract, { deployer }); 
-    await upgradeProxy(JunkBridgeProxyContract.address, JunkBridgeProxyContract, { deployer }); 
-    await upgradeProxy(CBKLandBridgeProxyContract.address, CBKLandBridgeProxyContract, { deployer }); 
-    charactersBridgeProxy = await upgradeProxy(CharactersBridgeProxyContract.address, CharactersBridgeProxyContract, { deployer }); 
-    await upgradeProxy(NFTStorage.address, NFTStorage, { deployer });
-    await charactersBridgeProxy.migrateRandoms(randoms.address);
   }
-
-  const promos = await Promos.deployed();
-  await charactersBridgeProxy.migrate_c906001(promos.address);
 };
