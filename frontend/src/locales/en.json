@@ -805,7 +805,8 @@
       "EXTERNAL": "External",
       "EXTERNAL_HOLD": "External Hold",
       "EXPERIENCE": "Experience",
-      "REPUTATION": "Reputation"
+      "REPUTATION": "Reputation",
+      "CHARACTER": "Character"
     },
     "reputationTier": {
       "PEASANT": "Peasant",

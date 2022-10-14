@@ -571,7 +571,8 @@ const quests = {
         dispatch('updateKeyLootboxIds'),
         dispatch('fetchDustBalance'),
         dispatch('combat/fetchCharacterStamina', characterID),
-        dispatch('fetchGenesisSoulBalance', characterID),
+        dispatch('fetchGenesisSoulBalance'),
+        dispatch('updateCharacterIds'),
       ]);
       return questRewards;
     },
@@ -732,6 +733,8 @@ const quests = {
         dispatch('updateJunkIds'),
         dispatch('updateKeyLootboxIds'),
         dispatch('fetchDustBalance'),
+        dispatch('fetchGenesisSoulBalance'),
+        dispatch('updateCharacterIds'),
       ]);
       return questRewards;
     },
