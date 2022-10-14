@@ -1,8 +1,9 @@
 <template>
   <div class="bg-dark">
-    <b-checkbox id="markAllAsRead" class="mb-1" @change="setAllAsRead($event)"
-      :checked="this.readAll" :disabled="isDisabled">
-      {{$t("updates.markAllAsRead")}}
+    <b-checkbox id="markAllAsRead" class="mb-1" @change="setAllAsRead(true)"
+      :checked="this.readAll" :value="this.readAll" :disabled="isDisabled">
+      <!-- {{$t("updates.markAllAsRead")}} -->
+      {{this.readAll}}
     </b-checkbox>
     <div v-for="update in updateNotifications" :key="update.hash">
       <Update :hash="update.hash" :link="update.link" :title="update.title"
@@ -50,8 +51,9 @@ export default Vue.extend({
      * Mark all notifications as read
      */
     setAllAsRead(isReadAllClicked: any) {
+      console.log('israc',isReadAllClicked);
       this.readAll = isReadAllClicked;
-      console.log(this.readAll);
+      console.log('readall',this.readAll);
       this.updateNotifications.forEach((notification) => {
         notification.isRead = true;
       });
@@ -68,7 +70,7 @@ export default Vue.extend({
       //   this.readAll = true;
       // }
       if (this.unreadUpdates === 0) {
-        console.log(this.unreadUpdates);
+        console.log('isEveryUpdateRead',this.unreadUpdates);
         this.readAll = true;
       }
       //return this.unreadUpdates === 0;
@@ -99,16 +101,20 @@ export default Vue.extend({
         if (notificationChanges.length > 0) {
           this.updateNotifications.unshift(...notificationChanges);
           this.unreadUpdates = Math.min(notificationChanges.length, 10);
-          this.readAll = !!this.unreadUpdates;
+          this.readAll = !this.unreadUpdates;
           console.log(this.unreadUpdates, 'path 1');
           this.setUpdateNotificationsFromAPI(this.updateNotifications.slice(0, 10));
+        }
+        else {
+          this.readAll = false;
+          console.log('in else block, woopsie');
         }
       }
       else {
         this.setUpdateNotificationsFromAPI(notificationsFromAPI);
         this.unreadUpdates = notificationsFromAPI.length;
         console.log(this.unreadUpdates, 'path 2');
-        this.readAll = !!this.unreadUpdates;
+        this.readAll = !this.unreadUpdates;
       }
     },
 
@@ -166,6 +172,7 @@ export default Vue.extend({
   },
   async created() {
     await this.checkForNotificationUpdatesFromAPI();
+    console.log('created');
   },
   components: {
     Update,
