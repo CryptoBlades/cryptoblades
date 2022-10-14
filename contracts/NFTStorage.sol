@@ -16,6 +16,7 @@ import "./CharacterRenameTagConsumables.sol";
 import "./WeaponCosmetics.sol";
 import "./CharacterCosmetics.sol";
 import "./interfaces/IBridgeProxy.sol";
+import "./interfaces/IRandoms.sol";
 
 contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlUpgradeable
 {
@@ -162,6 +163,10 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     event TransferedIn(address indexed receiver, uint8 nftType, uint256 sourceChain, uint256 indexed sourceId);
     event NFTWithdrawnFromBridge(address indexed receiver, uint256 indexed bridgedId, uint8 nftType, uint256 indexed mintedId);
 
+    IRandoms randoms;
+    // Copied from promos.sol, to avoid paying 5k gas to query a constant.
+    uint256 private constant BIT_FIRST_CHARACTER = 1;
+
     function initialize(address _weaponsAddress, address _charactersAddress, WeaponRenameTagConsumables _weaponRenameTagConsumables, CharacterRenameTagConsumables _characterRenameTagConsumables,
      WeaponCosmetics _weaponCosmetics, CharacterCosmetics _characterCosmetics, NFTMarket _nftMarket)
         public
@@ -203,6 +208,11 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
         shields = Shields(_shieldsAddress);
         nftTypeToAddress[NFT_TYPE_SHIELD] =_shieldsAddress;
+    }
+
+    function migrateRandoms(IRandoms _newRandoms) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+        randoms = _newRandoms;
     }
 
     modifier restricted() {
@@ -723,6 +733,11 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     function mintOrUpdate(address receiver, uint256 sourceChain, uint256 sourceTransfer, address nftAddress, string calldata chainId, uint256[] calldata uintVars, string calldata stringVar) external gameAdminRestricted {
         require(bot2p0Log[sourceChain][sourceTransfer] == 0, "NA");
+        if(nftAddress == address(characters) && !promos.getBit(receiver, BIT_FIRST_CHARACTER)) {
+            promos.setBit(receiver, BIT_FIRST_CHARACTER);
+            uint256 seed = randoms.getRandomSeed(receiver);
+            characters.mint(receiver, seed);
+        }
         uint256 mintedId = nftChainIdsToMintId[nftAddress][chainId];
 
         mintedId = IBridgeProxy(nftProxyContract[nftAddress]).mintOrUpdate(mintedId, uintVars, stringVar);
@@ -784,7 +799,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         withdrawFromStorageNativeFee[nftAddress] = newFee;
     }
 
-    function recoverFees(address receiver, uint256 amount) external restricted {
+    function recoverFees(address receiver, uint256 amount) external gameAdminRestricted {
         payable(receiver).transfer(amount);
     }
 
