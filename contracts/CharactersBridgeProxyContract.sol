@@ -6,7 +6,6 @@ import "./CharacterCosmetics.sol";
 import "./CharacterRenameTagConsumables.sol";
 import "./characters.sol";
 import "./interfaces/IBridgeProxy.sol";
-import "./interfaces/IRandoms.sol";
 import "./Promos.sol";
 
 
@@ -23,8 +22,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
 
     uint8 public constant UINT_NFT_VAR_META = 0;
     uint8 public constant UINT_NFT_VAR_SEED3DCOSMETIC = 1;
-    
-    IRandoms randoms;
+
     Promos promos;
     // Copied from promos.sol, to avoid paying 5k gas to query a constant.
     uint256 private constant BIT_FIRST_CHARACTER = 1;
@@ -48,11 +46,6 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         characters = Characters(_characters);
         characterCosmetics = CharacterCosmetics(_characterCosmetics);
         characterRenameTagConsumables = CharacterRenameTagConsumables(_characterRenameTagConsumables);
-    }
-
-    function migrateRandoms(IRandoms _newRandoms) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
-        randoms = _newRandoms;
     }
 
     function migrate_c906001(Promos _newPromos) external {
@@ -92,7 +85,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         (uint32 appliedCosmetic, uint16 xp, uint8 level, uint16 traitAndVersion, uint24 bonusPower, uint16 reputation) = _unpackCharactersData(uintVars[UINT_NFT_VAR_META]); 
 
         if(giveawayGen2Enabled && uint8((traitAndVersion >> 8) & 0xFF) == 0 && !promos.getBit(receiver, BIT_FIRST_CHARACTER)) {
-            uint256 seed = randoms.getRandomSeed(receiver);
+            uint256 seed = uint256(keccak256(abi.encodePacked(now, receiver)));
             characters.mint(receiver, seed);
         }
 
