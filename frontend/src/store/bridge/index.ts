@@ -147,16 +147,6 @@ const bridge = {
         status: +nft[6],
       }as NftTransfer;
     },
-    async withdrawFromBridge({ rootState }: {rootState: IState, dispatch: Dispatch}, {tokenId}: {tokenId: number}) {
-      const { NFTStorage } = rootState.contracts();
-      if(!NFTStorage || !rootState.defaultAccount) return;
-      await NFTStorage.methods
-        .withdrawFromBridge(tokenId)
-        .send({
-          from: rootState.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-    },
     async cancelBridge({ rootState }: {rootState: IState, dispatch: Dispatch}) {
       const { NFTStorage } = rootState.contracts();
       if(!NFTStorage || !rootState.defaultAccount) return;
