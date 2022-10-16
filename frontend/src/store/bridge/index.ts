@@ -103,11 +103,15 @@ const bridge = {
         defaultCallOptions(rootState),
         new BigNumber(bridgeFee)
       );
+
+      const bridgeNativeFee = await dispatch('fetchBridgeRequestNativeFee', { tokenAddress: nftContractAddr });
+
       await NFTStorage.methods
         .bridgeItem(nftContractAddr, tokenId, targetChain)
         .send({
           from: rootState.defaultAccount,
           gasPrice: getGasPrice(),
+          value: bridgeNativeFee
         });
       await dispatch('fetchSkillBalance');
     },
@@ -210,6 +214,13 @@ const bridge = {
       const { NFTStorage } = rootState.contracts();
       if(!NFTStorage || !rootState.defaultAccount) return;
       return await NFTStorage.methods.isNftBridged(tokenAddress, tokenId).call(defaultCallOptions(rootState));
+    },
+    async fetchBridgeRequestNativeFee({ rootState }: {rootState: IState, dispatch: Dispatch}, {tokenAddress}: {tokenAddress: string}) {
+      const { NFTStorage } = rootState.contracts();
+      if(!NFTStorage || !rootState.defaultAccount) return;
+      return await NFTStorage.methods.requestBridgeNativeFee(tokenAddress).call({
+        from: rootState.defaultAccount,
+      });
     },
   },
 };
