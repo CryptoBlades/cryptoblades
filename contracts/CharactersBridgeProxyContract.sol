@@ -6,6 +6,7 @@ import "./CharacterCosmetics.sol";
 import "./CharacterRenameTagConsumables.sol";
 import "./characters.sol";
 import "./interfaces/IBridgeProxy.sol";
+import "./Promos.sol";
 
 
 contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeable, IBridgeProxy {
@@ -17,9 +18,12 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
     CharacterRenameTagConsumables characterRenameTagConsumables;
     address nftStorageAddress;
     bool enabled;
+    bool giveawayGen2Enabled;
 
     uint8 public constant UINT_NFT_VAR_META = 0;
     uint8 public constant UINT_NFT_VAR_SEED3DCOSMETIC = 1;
+
+    Promos promos;
 
 
     modifier restricted() {
@@ -42,6 +46,11 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         characterRenameTagConsumables = CharacterRenameTagConsumables(_characterRenameTagConsumables);
     }
 
+    function migrate_c906001(Promos _newPromos) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+        promos = _newPromos;
+    }
+
  
     function collectData(uint256 tokenId) external view override returns (uint256[] memory uintVars,  string memory stringVar) {
         string memory rename = characterRenameTagConsumables.getCharacterRename(tokenId);
@@ -53,7 +62,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
 
     // for future use, bot will probe the returned value to know if the proxy contract has proper signature behavior
     function sigVersion() external view override returns (uint256) {
-        return 2;
+        return 3;
     }
 
     function isEnabled() external view override returns (bool) {
@@ -64,7 +73,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         enabled = _enabled;
     }
 
-    function mintOrUpdate(uint256 tokenId, uint256[] calldata uintVars,  string calldata stringVar) external restricted override returns (uint256) {
+    function mintOrUpdate(address receiver, uint256 tokenId, uint256[] calldata uintVars,  string calldata stringVar) external restricted override returns (uint256) {
         require(enabled, "not enabled");
 
         (uint32 appliedCosmetic, uint16 xp, uint8 level, uint16 traitAndVersion, uint24 bonusPower, uint16 reputation) = _unpackCharactersData(uintVars[UINT_NFT_VAR_META]); 

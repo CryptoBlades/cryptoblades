@@ -162,6 +162,12 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     event NFTTransferUpdate(uint256 indexed requestId, uint8 status, bool forced);
     event TransferedIn(address indexed receiver, uint8 nftType, uint256 sourceChain, uint256 indexed sourceId);
     event NFTWithdrawnFromBridge(address indexed receiver, uint256 indexed bridgedId, uint8 nftType, uint256 indexed mintedId);
+    
+    // Copied from promos.sol, to avoid paying 5k gas to query a constant.
+    uint256 private constant BIT_FIRST_CHARACTER = 1;
+    // Copied from characters.sol, to avoid paying 5k gas to query a constant.
+    uint256 public constant NFTVAR_NON_GENESIS_VERSION = 3;
+    bool giveawayGen2Enabled;
 
     function initialize(address _weaponsAddress, address _charactersAddress, WeaponRenameTagConsumables _weaponRenameTagConsumables, CharacterRenameTagConsumables _characterRenameTagConsumables,
      WeaponCosmetics _weaponCosmetics, CharacterCosmetics _characterCosmetics, NFTMarket _nftMarket)
@@ -387,7 +393,12 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         if(isNftBridged[address(_tokenAddress)][_id]) {
             require(msg.value == withdrawFromStorageNativeFee[address(_tokenAddress)], 'Bad fee amount');
             delete isNftBridged[address(_tokenAddress)][_id];
+            if(address(_tokenAddress) == address(characters) && giveawayGen2Enabled && characters.getNftVar(_id, NFTVAR_NON_GENESIS_VERSION) == 0 && !promos.getBit(msg.sender, BIT_FIRST_CHARACTER)) {
+                uint256 seed = uint256(keccak256(abi.encodePacked(now, msg.sender)));
+                characters.mint(msg.sender, seed);
+            }
         }
+
         storedItems[msg.sender][address(_tokenAddress)].remove(_id);
         allStoredItems[address(_tokenAddress)].remove(_id);
         delete storedItemsOwners[address(_tokenAddress)][_id];
@@ -633,7 +644,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         require(bot2p0Log[sourceChain][sourceTransfer] == 0, "NA");
         uint256 mintedId = nftChainIdsToMintId[nftAddress][chainId];
 
-        mintedId = IBridgeProxy(nftProxyContract[nftAddress]).mintOrUpdate(mintedId, uintVars, stringVar);
+        mintedId = IBridgeProxy(nftProxyContract[nftAddress]).mintOrUpdate(receiver, mintedId, uintVars, stringVar);
 
         // Whether minted or updated, the bridge owns the NFT
         require(IERC721(nftAddress).ownerOf(mintedId) == address(this), "NA2");
@@ -692,11 +703,15 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         withdrawFromStorageNativeFee[nftAddress] = newFee;
     }
 
+    function setGiveawayGen2Enabled(bool _enabled) external restricted {
+        giveawayGen2Enabled = _enabled;
+    }
+
     function setRequestBridgeNativeFee(address nftAddress, uint256 newFee) external restricted {
         requestBridgeNativeFee[nftAddress] = newFee;
     }
 
-    function recoverFees(address receiver, uint256 amount) external restricted {
+    function recoverFees(address receiver, uint256 amount) external gameAdminRestricted {
         payable(receiver).transfer(amount);
     }
 

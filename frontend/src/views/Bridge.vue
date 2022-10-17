@@ -229,71 +229,6 @@
           </div>
         </b-modal>
       </b-tab>
-      <!-- OLD BRIDGE: This tab is only useful for people who didn't withdraw their NFTs from the earlier bridge version -->
-      <b-tab v-if="incomingNftIds.length !== 0" :title="$t('bridge.incomingNfts')" @click="getIncoming(); selectedNftId = ''">
-        <div v-if="incomingNftIds.length === 0">
-          <h3 class="text-center p-4">{{$t('bridge.noIncomingNfts')}}</h3>
-        </div>
-        <div v-else>
-          <div class="d-flex flex-row flex-wrap bd-highlight mb-3 justify-content-center">
-            <div v-if="incomingWeapons.length !== 0" class="p-4 w-20">
-              <h4 class="text-center withdrawText">{{$t('bridge.selectWeaponToWithdraw')}}</h4>
-              <select class="form-control withdrawSelect" v-model="weaponIdToWithdraw">
-                <option value="" disabled selected>{{$t('bridge.selectYourWeapon')}}</option>
-                <option v-for="weapon in incomingWeapons"
-                :value="weapon.targetId"
-                :key="weapon.sourceId">
-                  {{$t('bridge.weaponId')}}: {{ weapon.sourceId }}
-                  {{$t('bridge.fromChain')}}: {{supportedChains[supportedChainIds.indexOf(weapon.sourceChain)]}}
-                </option>
-              </select>
-              <div class="mt-2 text-center">
-                <b-button :disabled="!weaponIdToWithdraw" variant="info" @click="withdrawBridge(weaponIdToWithdraw)"
-                          class="gtag-link-others withdrawBtn" tagname="click_transfer_bridge"> {{ $t('bridge.withdrawWeapon') }}
-                </b-button>
-              </div>
-            </div>
-            <div v-if="incomingChars.length !== 0" class="p-4 w-20">
-              <h4 class="text-center withdrawText">{{$t('bridge.selectCharacterToWithdraw')}}</h4>
-              <select class="form-control withdrawSelect" v-model="characterIdToWithdraw">
-                <option value="" disabled selected>{{$t('bridge.selectYourCharacter')}}</option>
-                <option v-for="character in incomingChars"
-                :value="character.targetId"
-                :key="character.sourceId">
-                  {{$t('bridge.characterId')}}: {{ character.sourceId }} {{$t('bridge.fromChain')}}:
-                  {{supportedChains[supportedChainIds.indexOf(character.sourceChain)]}}
-                </option>
-              </select>
-              <div class="mt-2 text-center">
-                <b-button :disabled="!characterIdToWithdraw" variant="info"
-                  @click="withdrawBridge(characterIdToWithdraw)" class="gtag-link-others withdrawBtn"
-                  tagname="click_transfer_bridge">{{$t('bridge.withdrawCharacter')}}</b-button>
-              </div>
-            </div>
-            <div v-if="incomingShields.length !== 0" class="p-4 w-20">
-              <h4 class="text-center withdrawText">{{$t('bridge.selectYourShieldToWithdraw')}}</h4>
-              <select class="form-control withdrawSelect" v-model="shieldIdToWithdraw">
-                <option value="" disabled selected>{{$t('bridge.selectYourShield')}}</option>
-                <option v-for="shield in incomingShields"
-                :value="shield.targetId"
-                :key="shield.sourceId">
-                  {{$t('bridge.shieldId')}}: {{ shield.sourceId }}
-                  {{$t('bridge.fromChain')}}: {{supportedChains[supportedChainIds.indexOf(shield.sourceChain)]}}
-                </option>
-              </select>
-              <div class="mt-2 text-center">
-                <b-button :disabled="!shieldIdToWithdraw" variant="info" @click="withdrawBridge(shieldIdToWithdraw)"
-                          class="gtag-link-others withdrawBtn" tagname="click_transfer_bridge"> {{$t('bridge.withdrawShield')}}
-                </b-button>
-              </div>
-            </div>
-          </div>
-          <div class="outcome" v-if="withdrawingFromBridge">
-            <i class="fas fa-spinner fa-spin"></i>
-            {{$t('loading')}}
-          </div>
-        </div>
-      </b-tab>
     </b-tabs>
   </div>
 </template>
@@ -348,9 +283,6 @@ interface StoreMappedActions {
   getBridgeTransfer(payload: {
     transferId: string;
   }): Promise<NftTransfer>;
-  withdrawFromBridge(payload: {
-    tokenId: number;
-  }): Promise<void>;
   cancelBridge(): Promise<void>;
   getReceivedNFTs(): Promise<number[]>;
   getReceivedNFT(payload: {
@@ -575,7 +507,6 @@ export default Vue.extend({
       'bridgeItem',
       'getBridgeTransfer',
       'getBridgeTransferId',
-      'withdrawFromBridge',
       'cancelBridge',
       'getReceivedNFTs',
       'getReceivedNFT',
@@ -631,22 +562,6 @@ export default Vue.extend({
       await this.cancelBridge();
       this.cancellingRequest = false;
       await this.getStatus();
-    },
-    async withdrawBridge(tokenId: number){
-      if(this.nftType !== 'weapon' && this.nftType !== 'character') this.selectedNftId = this.selectedNftId.split('.')[1];
-
-      this.withdrawingFromBridge = true;
-      try{
-        await this.withdrawFromBridge({
-          tokenId });
-        await this.getIncoming();
-        this.withdrawingFromBridge = false;
-        this.weaponIdToWithdraw = '';
-        this.characterIdToWithdraw = '';
-        this.shieldIdToWithdraw = '';
-      } catch(e){
-        this.withdrawingFromBridge = false;
-      }
     },
     async getIncoming(){
       this.incomingWeapons = [];
