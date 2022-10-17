@@ -84,7 +84,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     CharacterCosmetics[] private cosmetics;
 
     uint256 public constant maxStamina = 200;
-    uint256 public constant secondsPerStamina = 300; //5 * 60
 
     uint256[256] private experienceTable; // fastest lookup in the west
 
@@ -114,6 +113,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     uint256 public constant NFTVAR_BONUS_POWER = 2;
     uint256 public constant NFTVAR_NON_GENESIS_VERSION = 3; // 0 = genesis, 1 = v2
+
+    uint256 public secondsPerStamina = 300;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -364,7 +365,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return getStaminaPoints(id) >= maxStamina;
     }
 
-    function getStaminaMaxWait() public pure returns (uint64) {
+    function getStaminaMaxWait() public view returns (uint64) {
         return uint64(maxStamina * secondsPerStamina);
     }
 
@@ -467,5 +468,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function setBaseURI(string memory baseUri) public restricted {
         _setBaseURI(baseUri);
+    }
+
+    function setSecondsPerStamina(uint256 _secondsPerStamina) external restricted {
+        secondsPerStamina = _secondsPerStamina;
     }
 }
