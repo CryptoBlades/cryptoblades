@@ -49,7 +49,7 @@ contract ShieldBridgeProxyContract is Initializable, AccessControlUpgradeable, I
 
     // for future use, bot will probe the returned value to know if the proxy contract has proper signature behavior
     function sigVersion() external view override returns (uint256) {
-        return 2;
+        return 3;
     }
 
     function isEnabled() external view override returns (bool) {
@@ -60,7 +60,7 @@ contract ShieldBridgeProxyContract is Initializable, AccessControlUpgradeable, I
         enabled = _enabled;
     }
 
-    function mintOrUpdate(uint256 tokenId, uint256[] calldata uintVars, string calldata stringVar) external restricted override returns (uint256) {
+    function mintOrUpdate(address /*receiver*/, uint256 tokenId, uint256[] calldata uintVars, string calldata stringVar) external restricted override returns (uint256) {
         require(enabled, "not enabled");
 
          tokenId = 
