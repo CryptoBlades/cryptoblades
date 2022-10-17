@@ -70,9 +70,9 @@ const bridge = {
       if(!NFTStorage || !Weapons || !Characters || !Shields || !rootState.defaultAccount) return;
 
       let withdrawFee = '0';
-      const isNftBridged = await dispatch('fetchIsNftBridged', { nftContractAddr, tokenId });
+      const isNftBridged = await dispatch('fetchIsNftBridged', { tokenAddress: nftContractAddr, tokenId });
       if(isNftBridged) {
-        withdrawFee = await dispatch('fetchBridgeWithdrawFee', nftContractAddr);
+        withdrawFee = await dispatch('fetchBridgeWithdrawFee', { tokenAddress: nftContractAddr });
       }
 
       await NFTStorage.methods
@@ -143,16 +143,6 @@ const bridge = {
         status: +nft[6],
       }as NftTransfer;
     },
-    async withdrawFromBridge({ rootState }: {rootState: IState, dispatch: Dispatch}, {tokenId}: {tokenId: number}) {
-      const { NFTStorage } = rootState.contracts();
-      if(!NFTStorage || !rootState.defaultAccount) return;
-      await NFTStorage.methods
-        .withdrawFromBridge(tokenId)
-        .send({
-          from: rootState.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
-    },
     async cancelBridge({ rootState }: {rootState: IState, dispatch: Dispatch}) {
       const { NFTStorage } = rootState.contracts();
       if(!NFTStorage || !rootState.defaultAccount) return;
@@ -206,10 +196,10 @@ const bridge = {
         from: rootState.defaultAccount,
       });
     },
-    async fetchIsNftBridged({ rootState }: {rootState: IState }, { nftContractAddr, tokenId }: { nftContractAddr: string, tokenId: number }) {
+    async fetchIsNftBridged({ rootState }: {rootState: IState }, { tokenAddress, tokenId }: { tokenAddress: string, tokenId: number }) {
       const { NFTStorage } = rootState.contracts();
       if(!NFTStorage || !rootState.defaultAccount) return;
-      return await NFTStorage.methods.isNftBridged(nftContractAddr, tokenId).call(defaultCallOptions(rootState));
+      return await NFTStorage.methods.isNftBridged(tokenAddress, tokenId).call(defaultCallOptions(rootState));
     },
   },
 };

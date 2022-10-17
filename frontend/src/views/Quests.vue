@@ -203,6 +203,7 @@ export enum QuestItemType {
   EXPERIENCE,
   EXTERNAL,
   EXTERNAL_HOLD,
+  CHARACTER,
   REPUTATION = 99
 }
 

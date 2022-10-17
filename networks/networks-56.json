@@ -548,7 +548,7 @@
     },
     "links": {},
     "address": "0x95f1AD7d60dC5857637Bca4651c547B6203c11Ec",
-    "transactionHash": "0x85d280ca92b08e00923154e6e60cde132f302c7e26e836336cafb54ab8a88bc2"
+    "transactionHash": "0x32339803f80591d3394e684be60f535c46b4a48f11f2db7ccf65c2514286cb19"
   },
   "build/contracts/CBKLandSale.json": {
     "events": {
@@ -2106,7 +2106,7 @@
     },
     "links": {},
     "address": "0xa53735eFc648b2185631965a37Bc1E48041Dec06",
-    "transactionHash": "0x59e4b47fd80d994ca6cb6d3097a54ee340a94b3dbaea9852c8828d09e4acba87"
+    "transactionHash": "0x587a029850bc3ed0ece145e24df69a876e9fbcabc635d7c0f53b3e3212890da0"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {},
@@ -3530,7 +3530,7 @@
     "events": {},
     "links": {},
     "address": "0x32Abf3872b1399E8C17FCA1c574A02096B339e3F",
-    "transactionHash": "0x4e16165b2080ec672e9194783895271343b34d408c3c840c6d255305042f9d62"
+    "transactionHash": "0xbed97330c08dabd2b5ad516c62553df13676a7de2ca5511c49a046524d2a7a38"
   },
   "build/contracts/PartnerGiveaways.json": {
     "events": {},
