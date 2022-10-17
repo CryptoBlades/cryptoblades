@@ -6,6 +6,7 @@ import "./CharacterCosmetics.sol";
 import "./CharacterRenameTagConsumables.sol";
 import "./characters.sol";
 import "./interfaces/IBridgeProxy.sol";
+import "./Promos.sol";
 
 
 contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeable, IBridgeProxy {
@@ -17,9 +18,14 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
     CharacterRenameTagConsumables characterRenameTagConsumables;
     address nftStorageAddress;
     bool enabled;
+    bool giveawayGen2Enabled;
 
     uint8 public constant UINT_NFT_VAR_META = 0;
     uint8 public constant UINT_NFT_VAR_SEED3DCOSMETIC = 1;
+
+    Promos promos;
+    // Copied from promos.sol, to avoid paying 5k gas to query a constant.
+    uint256 private constant BIT_FIRST_CHARACTER = 1;
 
 
     modifier restricted() {
@@ -42,6 +48,11 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         characterRenameTagConsumables = CharacterRenameTagConsumables(_characterRenameTagConsumables);
     }
 
+    function migrate_c906001(Promos _newPromos) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+        promos = _newPromos;
+    }
+
  
     function collectData(uint256 tokenId) external view override returns (uint256[] memory uintVars,  string memory stringVar) {
         string memory rename = characterRenameTagConsumables.getCharacterRename(tokenId);
@@ -53,7 +64,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
 
     // for future use, bot will probe the returned value to know if the proxy contract has proper signature behavior
     function sigVersion() external view override returns (uint256) {
-        return 2;
+        return 3;
     }
 
     function isEnabled() external view override returns (bool) {
@@ -64,10 +75,19 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         enabled = _enabled;
     }
 
-    function mintOrUpdate(uint256 tokenId, uint256[] calldata uintVars,  string calldata stringVar) external restricted override returns (uint256) {
+    function setGiveawayGen2Enabled(bool _enabled) external restricted {
+        giveawayGen2Enabled = _enabled;
+    }
+
+    function mintOrUpdate(address receiver, uint256 tokenId, uint256[] calldata uintVars,  string calldata stringVar) external restricted override returns (uint256) {
         require(enabled, "not enabled");
 
         (uint32 appliedCosmetic, uint16 xp, uint8 level, uint16 traitAndVersion, uint24 bonusPower, uint16 reputation) = _unpackCharactersData(uintVars[UINT_NFT_VAR_META]); 
+
+        if(giveawayGen2Enabled && uint8((traitAndVersion >> 8) & 0xFF) == 0 && !promos.getBit(receiver, BIT_FIRST_CHARACTER)) {
+            uint256 seed = uint256(keccak256(abi.encodePacked(now, receiver)));
+            characters.mint(receiver, seed);
+        }
 
         tokenId =  _mintOrUpdate(tokenId, xp, level, traitAndVersion, uintVars[UINT_NFT_VAR_SEED3DCOSMETIC], bonusPower, reputation);
         

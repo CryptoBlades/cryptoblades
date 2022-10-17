@@ -150,6 +150,9 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     mapping(address => EnumerableSet.UintSet) private nftAllowedChains;
     // Target network => allowed nfts
     mapping(uint256 => EnumerableSet.AddressSet) private targetChainAllowedNFTs;
+    // Is NFT bridged or only stored
+    mapping(address => mapping(uint256 => bool)) public isNftBridged;
+    mapping(address => uint256) public withdrawFromStorageNativeFee;
 
     event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTWithdrawn(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
@@ -378,7 +381,12 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         isStored(_tokenAddress, _id)
         isOwner(_tokenAddress, _id)
         notBridged(_tokenAddress, _id)
+        payable
     {
+        if(isNftBridged[address(_tokenAddress)][_id]) {
+            require(msg.value == withdrawFromStorageNativeFee[address(_tokenAddress)], 'Bad fee amount');
+            delete isNftBridged[address(_tokenAddress)][_id];
+        }
         storedItems[msg.sender][address(_tokenAddress)].remove(_id);
         allStoredItems[address(_tokenAddress)].remove(_id);
         delete storedItemsOwners[address(_tokenAddress)][_id];
@@ -513,101 +521,6 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         return (transferIn.owner, transferIn.nftType, transferIn.sourceChain, transferIn.sourceId, transferIn.status, transferInsMeta[receivedNFT]);
     }
 
-    // to be removed eventually; bot will now mint into storage
-    function withdrawFromBridge(uint256 bridgedNFT) ownsBridgedNFT(bridgedNFT) canWithdrawBridgedNFT(bridgedNFT) canStore() public {
-        uint256 mintedItem;
-        TransferIn storage transferIn = transferIns[bridgedNFT];
-        uint256 seed = transferInSeeds[bridgedNFT];
-
-        if(transferIn.nftType == NFT_TYPE_WEAPON) {
-            mintedItem = _withdrawWeaponFromBridge(bridgedNFT, transferIn.sourceChain, transferIn.sourceId);
-            require(weapons.ownerOf(mintedItem) == address(this), "NAW"); // The minted item, if already existed, should be in storage
-            if(bytes(transferIn.rename).length > 0) {
-                weaponRenameTagConsumables.setName(mintedItem, transferIn.rename);
-            }
-        }
-        else if(transferIn.nftType == NFT_TYPE_CHARACTER) {
-            mintedItem = _withdrawCharacterFromBridge(bridgedNFT, transferInsMeta[bridgedNFT], seed);
-            require(characters.ownerOf(mintedItem) == address(this), "NAC"); // The minted item, if already existed, should be in storage
-            if(bytes(transferIn.rename).length > 0) {
-                characterRenameTagConsumables.setName(mintedItem, transferIn.rename);
-            }
-        }
-        else if(transferIn.nftType == NFT_TYPE_SHIELD) {
-            mintedItem = _withdrawShieldFromBridge(bridgedNFT, transferIn.sourceChain, transferIn.sourceId);
-            require(shields.ownerOf(mintedItem) == address(this), "NAS"); // The minted item, if already existed, should be in storage
-        }
-
-        if(transferOuts[transferOutOfNFTs[nftTypeToAddress[transferIn.nftType]][mintedItem]].status == TRANSFER_OUT_STATUS_DONE) {
-            transferOuts[transferOutOfNFTs[nftTypeToAddress[transferIn.nftType]][mintedItem]].status = TRANSFER_OUT_STATUS_RESTORED;
-        }
-
-        address nftAddress = nftTypeToAddress[transferIn.nftType];
-        allStoredItems[nftAddress].add(mintedItem);
-        storedItemsOwners[nftAddress][mintedItem] = transferIn.owner;
-        storedItems[transferIn.owner][nftAddress].add(mintedItem);
-
-        receivedNFTs[msg.sender].remove(bridgedNFT);
-        transferIns[bridgedNFT].status = TRANSFER_IN_STATUS_WITHDRAWN;
-        transferIns[bridgedNFT].lastUpdateBlock = block.number;
-
-        // local mint id => global chain id
-        nftChainIds[nftTypeToAddress[transferIn.nftType]][mintedItem] = transferInChainId[bridgedNFT];
-        // global chain id => local mint id (to restore)
-        nftChainIdsToMintId[nftTypeToAddress[transferIn.nftType]][transferInChainId[bridgedNFT]] = mintedItem;
-        _withdrawFromBridgeLog[bridgedNFT] = mintedItem;
-
-        emit NFTWithdrawnFromBridge(transferIn.owner, bridgedNFT, transferIn.nftType, mintedItem);
-    }
-
-    // to be removed eventually; bot will now mint into storage
-    function _withdrawWeaponFromBridge(uint256 bridgedNFT, uint256 chainId, uint256 sourceId) internal returns (uint256 mintedId) {
-        // Get any existing mint that has this global id
-        mintedId = nftChainIdsToMintId[nftTypeToAddress[NFT_TYPE_WEAPON]][transferInChainId[bridgedNFT]];
-
-        uint256 seed = transferInSeeds[bridgedNFT];
-
-        uint256 meta = transferInsMeta[bridgedNFT];
-
-        uint32 appliedCosmetic = uint32((meta >> 96) & 0xFFFFFFFF);
-
-         mintedId =
-            weapons.performMintWeaponDetailed(address(this), meta, seed, mintedId);
-
-        if(appliedCosmetic > 0) {
-            weaponCosmetics.setWeaponCosmetic(mintedId, appliedCosmetic);
-         }
-    }
-
-    // to be removed eventually; bot will now mint into storage
-    function _withdrawCharacterFromBridge(uint256 bridgedNFT, uint256 metaData, uint256 seed) internal returns (uint256 mintedId) {
-        (uint32 appliedCosmetic, uint16 xp, uint8 level, uint8 trait, uint24 bonusPower, uint16 reputation)  = unpackCharactersData(metaData);
-
-        mintedId = nftChainIdsToMintId[nftTypeToAddress[NFT_TYPE_CHARACTER]][transferInChainId[bridgedNFT]];
-
-        mintedId =
-            characters.customMint(address(this), xp,
-            level, trait, seed, mintedId, bonusPower, reputation, 0);
-
-            if(appliedCosmetic > 0) {
-                characterCosmetics.setCharacterCosmetic(mintedId, appliedCosmetic);
-            }
-    }
-
-    // to be removed eventually; bot will now mint into storage
-    function _withdrawShieldFromBridge(uint256 bridgedNFT, uint256 chainId, uint256 sourceId) internal returns (uint256 mintedId) {
-        mintedId = nftChainIdsToMintId[nftTypeToAddress[NFT_TYPE_SHIELD]][transferInChainId[bridgedNFT]];
-
-        uint256 seed = transferInSeeds[bridgedNFT];
-
-        uint256 meta = transferInsMeta[bridgedNFT];
-
-        uint32 appliedCosmetic = uint32((meta >> 96) & 0xFFFFFFFF);
-
-         mintedId =
-            shields.performMintShieldDetailed(address(this), meta, seed, mintedId);
-    }
-
     function getNFTChainId(address nftAddress, uint256 nftId) public view returns (string memory chainId) {
         chainId = nftChainIds[nftAddress][nftId];
     }
@@ -717,12 +630,13 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         require(bot2p0Log[sourceChain][sourceTransfer] == 0, "NA");
         uint256 mintedId = nftChainIdsToMintId[nftAddress][chainId];
 
-        mintedId = IBridgeProxy(nftProxyContract[nftAddress]).mintOrUpdate(mintedId, uintVars, stringVar);
+        mintedId = IBridgeProxy(nftProxyContract[nftAddress]).mintOrUpdate(receiver, mintedId, uintVars, stringVar);
 
         // Whether minted or updated, the bridge owns the NFT
         require(IERC721(nftAddress).ownerOf(mintedId) == address(this), "NA2");
         _logMintOrUpdate(sourceChain, sourceTransfer, nftAddress, mintedId, chainId);
         _attachToWallet(receiver, nftAddress, mintedId);
+        isNftBridged[nftAddress][mintedId] = true;
     }
 
     function _logMintOrUpdate(uint256 sourceChain, uint256 sourceTransfer, address nftAddress, uint256 tokenId, string memory chainId) internal {
@@ -769,6 +683,14 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
                 targetChainAllowedNFTs[chainId].remove(nft);
             }
         }
+    }
+
+    function setWithdrawFromStorageNativeFee(address nftAddress, uint256 newFee) external restricted {
+        withdrawFromStorageNativeFee[nftAddress] = newFee;
+    }
+
+    function recoverFees(address receiver, uint256 amount) external gameAdminRestricted {
+        payable(receiver).transfer(amount);
     }
 
     function getChainsSupportingNFT(address nft) public view returns (uint256[] memory chains) {

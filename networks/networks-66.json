@@ -638,7 +638,7 @@
     },
     "links": {},
     "address": "0x5bbAD2Ea0c6094b94A79f0856acb4705A185b92C",
-    "transactionHash": "0x84eef6fda5c9852297ed1029dd6725cf2a2570632e562028eac21f40f546dc35"
+    "transactionHash": "0x0cffff6c9a3202c521abfff505f0750e7de023262352cfaff8d6eab9f95d9890"
   },
   "build/contracts/CBKLandSale.json": {
     "events": {
@@ -2136,7 +2136,7 @@
     },
     "links": {},
     "address": "0x0f8663c2EbEf2dE5D6f19175E8fB8193B496fFAB",
-    "transactionHash": "0x5cabfe8f2e129b5ba2f58da8ea0f2e7c457265229def566207d5969ec216f546"
+    "transactionHash": "0x1b1053f54a3ad0c85b67ccc77bcfcc12843fedb7271fbd2e3f634986ad8678cd"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -2418,7 +2418,7 @@
     },
     "links": {},
     "address": "0x98145a2fEBac238280bbdEDc2757dC162318b16e",
-    "transactionHash": "0x8f452b68bef57d1edd54ed5a72e3de98fa1eb7755f2cb8c243264d93fd3f3e16"
+    "transactionHash": "0x1b4ae1d834d2045b02b46b9fddcd164d8d49d0cb0046ba45ea486916926eeed7"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
@@ -3301,7 +3301,7 @@
     "events": {},
     "links": {},
     "address": "0x7f25686b5a211280C2555c08B7e6d2930e7e87e6",
-    "transactionHash": "0xebbccc67eb8e82b28e12265dac3d0bd736896a708741f82a1526da15b5d0dba7"
+    "transactionHash": "0x3dae6819a20fa369479dc6555bfc8101ea40cffbaab38857a6e0e8cac4c136db"
   },
   "build/contracts/PartnerGiveaways.json": {
     "events": {},
