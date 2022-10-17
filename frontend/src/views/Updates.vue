@@ -1,10 +1,14 @@
 <template>
   <div class="bg-dark">
-    <b-checkbox id="markAllAsRead" class="mb-1" @change="setAllAsRead(true)"
+    <div class="notification-header">
+      <span>Notifications</span>
+      <span id="markAllAsRead" @click="setAllAsRead">Mark All As Read</span>
+
+    </div>
+    <!-- <b-checkbox id="markAllAsRead" class="mb-1" @change="setAllAsRead(true)"
       :checked="this.readAll" :value="this.readAll" :disabled="isDisabled">
-      <!-- {{$t("updates.markAllAsRead")}} -->
-      {{this.readAll}}
-    </b-checkbox>
+      {{$t("updates.markAllAsRead")}}
+    </b-checkbox> -->
     <div v-for="update in updateNotifications" :key="update.hash">
       <Update :hash="update.hash" :link="update.link" :title="update.title"
         v-bind:isRead.sync="update.isRead"
@@ -42,23 +46,26 @@ export default Vue.extend({
     } as Data;
   },
   computed: {
-    isDisabled(): boolean {
-      return !!this.readAll;
-    }
+    // isDisabled(): boolean {
+    //   return !!this.readAll;
+    // }
   },
   methods: {
     /**
      * Mark all notifications as read
      */
-    setAllAsRead(isReadAllClicked: any) {
-      console.log('israc',isReadAllClicked);
-      this.readAll = isReadAllClicked;
-      console.log('readall',this.readAll);
-      this.updateNotifications.forEach((notification) => {
-        notification.isRead = true;
-      });
-      this.unreadUpdates = 0;
-      this.updateStorage();
+    setAllAsRead() {
+      if (!this.readAll)
+      {
+        console.log('israc',true);
+        this.readAll = true;
+        console.log('readall',this.readAll);
+        this.updateNotifications.forEach((notification) => {
+          notification.isRead = true;
+        });
+        this.unreadUpdates = 0;
+        this.updateStorage();
+      }
     },
 
     /**
@@ -182,10 +189,20 @@ export default Vue.extend({
 
 <style scoped>
   #markAllAsRead {
-    color: #EDCD90;
+    cursor: pointer;
   }
   #markAllAsRead:hover {
     text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #e1bb34, 0 0 10px #e1bb34;
+  }
+
+  .notification-header {
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid;
+    border-bottom-color: #EDCD90;
   }
 
 </style>
