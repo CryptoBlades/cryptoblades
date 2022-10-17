@@ -27,6 +27,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        secondsPerStamina = 300;
     }
 
     function migrateTo_1ee400a(uint256[255] memory _experienceTable) public {
@@ -114,7 +115,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     uint256 public constant NFTVAR_BONUS_POWER = 2;
     uint256 public constant NFTVAR_NON_GENESIS_VERSION = 3; // 0 = genesis, 1 = v2
 
-    uint256 public secondsPerStamina = 300;
+    uint256 public secondsPerStamina;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
