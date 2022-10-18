@@ -41,17 +41,6 @@
       </a>
     </li>
 
-    <li class="top-nav-links" id="update-notifications" href=# tabindex="0">
-      <a class="nav-link" target="_blank">
-        <div class="icon">
-          <img src="../assets/navbar-icons/updates.svg" class="ui-link-icon gold-icon" alt="Updates">
-          <span v-if="unreadUpdates" class="icon__badge" @refresh-unread-updates="refreshUnreadUpdates">{{unreadUpdates}}</span>
-        </div>
-        <div class="link-text">{{ $t("viewLink.updates") }}</div>
-        <update-popup/>
-      </a>
-    </li>
-
     <li v-if="hasAdminAccess" class="top-nav-links">
       <router-link :to="{ name: 'admin' }" exact class="nav-link">
         <div class="icon"><img src="../assets/navbar-icons/gear-icon.png" class="ui-link-icon" alt="Admin"></div>
@@ -67,14 +56,12 @@ import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
 
 import Hint from '@/components/Hint.vue';
-import UpdatePopup from './UpdatePopup.vue';
 
 interface Data {
   raid: boolean,
   portal: boolean,
   pvp: boolean,
   quests: boolean,
-  unreadUpdates: number,
 }
 
 export default Vue.extend({
@@ -84,7 +71,6 @@ export default Vue.extend({
       portal,
       pvp,
       quests,
-      unreadUpdates: 0,
     } as Data;
   },
 
@@ -108,17 +94,11 @@ export default Vue.extend({
   },
   components: {
     Hint,
-    UpdatePopup,
   },
   methods: {
     BazaarLink() {
       return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
     },
-
-    refreshUnreadUpdates(unreadUpdates: any) {
-      console.log('unreadUpdates: ', unreadUpdates, this.unreadUpdates);
-      this.unreadUpdates = unreadUpdates;
-    }
   },
 });
 </script>
@@ -128,10 +108,6 @@ export default Vue.extend({
 
 a {
   font-weight: bold;
-}
-
-.gold-icon {
-  filter: invert(81%) sepia(97%) saturate(276%) hue-rotate(317deg) brightness(97%) contrast(91%);
 }
 
 .nav-top-links {
@@ -229,29 +205,6 @@ li .nav-link .icon {
   border: 1px solid #EDCD90;
   display: block;
   padding: 20px;
-}
-
-#update-notifications > a > div > .icon__badge {
-  position: absolute;
-  bottom: 25px;
-  right: 15px;
-  background: red;
-  color: white;
-  width: 20px;
-  height: 18px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#update-notifications > .nav-link {
-  cursor: pointer;
-}
-
-#update-notifications {
-  position: relative;
-  display: flex;
 }
 
 @media (max-width: 1366px) {

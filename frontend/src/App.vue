@@ -97,7 +97,6 @@ import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
 import WeaponRowGrid from './components/smart/WeaponRowGrid.vue';
-//import { apiUrl } from './utils/common';
 import i18n from './i18n';
 import { getConfigValue } from './contracts';
 import '@/mixins/general';
@@ -170,12 +169,6 @@ interface StoreMappedMutations {
   updateCurrentChainSupportsQuests: () => void,
   updateCurrentChainSupportsDrawbridge: () => void,
 }
-
-// interface Notification {
-//   hash: string,
-//   title: string,
-//   link: string,
-// }
 
 export default Vue.extend({
   components: {
@@ -387,44 +380,6 @@ export default Vue.extend({
       return toDisplay;
     },
 
-    /**
-     * current checkNotifications method
-     * Grabs notifications from the API correctly but then immediately sets a localStorage variable
-     * that prevents any more from being shown again.
-     *
-     */
-    // async checkNotifications() {
-    //   const response = await fetch(apiUrl('static/notifications'));
-    //   const notifications = await response.json();
-    //   // console.log(notifications);
-    //   // console.log(notifications[0].link);
-
-    //   const lastHash = localStorage.getItem('lastnotification');
-    //   // console.log(lastHash);
-    //   let shouldContinue = true;
-
-    //   notifications.forEach((notification: Notification) => {
-    //     if (!shouldContinue) return;
-
-    //     if (lastHash === notification.hash) {
-    //       shouldContinue = false;
-    //       return;
-    //     }
-
-    //     (this as any).$dialog.notify.warning(
-    //       `${notification.title}
-    //       <br>
-    //       <a href="${notification.link}" target="_blank">Check it out!</a>
-    //       `,
-    //       {
-    //         timeout: 300000,
-    //       },
-    //     );
-    //   });
-
-    //   localStorage.setItem('lastnotification', notifications[0].hash);
-    // },
-
     initializeSettings(){
       if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
       if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
@@ -534,7 +489,6 @@ export default Vue.extend({
 
     pollAccounts();
 
-    //this.checkNotifications();
     this.initializeRecruitCost();
   },
 

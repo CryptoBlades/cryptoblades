@@ -7,10 +7,6 @@
         @click="setAllAsRead">{{$t("updates.markAllAsRead")}}
       </b-button>
     </div>
-    <!-- <b-checkbox id="markAllAsRead" class="mb-1" @change="setAllAsRead(true)"
-      :checked="this.readAll" :value="this.readAll" :disabled="isDisabled">
-      {{$t("updates.markAllAsRead")}}
-    </b-checkbox> -->
     <div v-for="update in updateNotifications" :key="update.hash">
       <Update :hash="update.hash" :link="update.link" :title="update.title"
         v-bind:isRead.sync="update.isRead"
@@ -47,11 +43,7 @@ export default Vue.extend({
       unreadUpdates: 0,
     } as Data;
   },
-  computed: {
-    // isDisabled(): boolean {
-    //   return !!this.readAll;
-    // }
-  },
+  computed: {},
   methods: {
     /**
      * Mark all notifications as read
@@ -59,9 +51,7 @@ export default Vue.extend({
     setAllAsRead() {
       if (!this.readAll)
       {
-        console.log('israc',true);
         this.readAll = true;
-        console.log('readall',this.readAll);
         this.updateNotifications.forEach((notification) => {
           notification.isRead = true;
         });
@@ -176,8 +166,8 @@ export default Vue.extend({
     refreshUpdatePopup() {
       this.updateStorage();
       this.isEveryUpdateRead();
-      console.log(this.unreadUpdates, 'is unreadUpdates');
-      this.$emit('refresh-unread-updates', this.unreadUpdates);
+      //console.log(this.unreadUpdates, 'is unreadUpdates');
+      this.$emit('refresh-unread-updates');
     },
   },
   async created() {

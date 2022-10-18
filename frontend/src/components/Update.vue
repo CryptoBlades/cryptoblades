@@ -1,7 +1,7 @@
 <template>
 <!-- if isRead, toggle classes read and isReadBadge? -->
 <!-- this.isRead ? 'read': 'unread' -->
-  <b-link :class="{read: this.isRead, unread: !this.isRead}" :id="this.hash" :href="this.link"
+  <b-link :key="`${this.hash}-${this.isRead}`" :class="{read: this.isRead, unread: !this.isRead}" :id="this.hash" :href="this.link"
     target="_blank" @click="updateIsRead">
     <!-- this.isRead ? 'read__badge' : 'unread__badge' -->
     <span :class="{read__badge: this.isRead, unread__badge: !this.isRead}"></span>
