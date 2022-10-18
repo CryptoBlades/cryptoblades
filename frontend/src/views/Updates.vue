@@ -24,10 +24,9 @@ import Update from '@/components/Update.vue';
 interface Data {
   updateNotifications: Notification[],
   readAll: boolean,
-  unreadUpdates: number,
 }
 
-interface Notification {
+export interface Notification {
   hash: string;
   title: string,
   link: string,
@@ -40,7 +39,6 @@ export default Vue.extend({
     return {
       updateNotifications: [],
       readAll: false,
-      unreadUpdates: 0,
     } as Data;
   },
   computed: {},
@@ -55,8 +53,7 @@ export default Vue.extend({
         this.updateNotifications.forEach((notification) => {
           notification.isRead = true;
         });
-        this.unreadUpdates = 0;
-        this.$emit('refresh-unread-updates', this.unreadUpdates);
+        this.$emit('refresh-unread-updates');
         this.updateStorage();
       }
     },
@@ -69,10 +66,10 @@ export default Vue.extend({
       // if (!unreadUpdate) {
       //   this.readAll = true;
       // }
-      if (this.unreadUpdates === 0) {
-        console.log('isEveryUpdateRead',this.unreadUpdates);
-        this.readAll = true;
-      }
+      // if (this.unreadUpdates === 0) {
+      //   console.log('isEveryUpdateRead',this.unreadUpdates);
+      //   this.readAll = true;
+      // }
       //return this.unreadUpdates === 0;
     },
 
@@ -100,21 +97,21 @@ export default Vue.extend({
         }
         if (notificationChanges.length > 0) {
           this.updateNotifications.unshift(...notificationChanges);
-          this.unreadUpdates = Math.min(notificationChanges.length, 10);
-          this.readAll = !this.unreadUpdates;
-          console.log(this.unreadUpdates, 'path 1');
+          //this.unreadUpdates = Math.min(notificationChanges.length, 10);
+          //this.readAll = !this.unreadUpdates;
+          //console.log(this.unreadUpdates, 'path 1');
           this.setUpdateNotificationsFromAPI(this.updateNotifications.slice(0, 10));
         }
         else {
-          this.readAll = false;
-          console.log('in else block, woopsie');
+          // this.readAll = false;
+          // console.log('in else block, woopsie');
         }
       }
       else {
         this.setUpdateNotificationsFromAPI(notificationsFromAPI);
-        this.unreadUpdates = notificationsFromAPI.length;
-        console.log(this.unreadUpdates, 'path 2');
-        this.readAll = !this.unreadUpdates;
+        //this.unreadUpdates = notificationsFromAPI.length;
+        //console.log(this.unreadUpdates, 'path 2');
+        //this.readAll = !this.unreadUpdates;
       }
     },
 
