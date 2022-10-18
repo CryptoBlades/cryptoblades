@@ -1,8 +1,10 @@
 <template>
 <!-- if isRead, toggle classes read and isReadBadge? -->
-  <b-link :class="this.isRead ? 'read': 'unread'" :id="this.hash" :href="this.link"
+<!-- this.isRead ? 'read': 'unread' -->
+  <b-link :class="{read: this.isRead, unread: !this.isRead}" :id="this.hash" :href="this.link"
     target="_blank" @click="updateIsRead">
-    <span :class="this.isRead ? 'read__badge' : 'unread__badge'"></span>
+    <!-- this.isRead ? 'read__badge' : 'unread__badge' -->
+    <span :class="{read__badge: this.isRead, unread__badge: !this.isRead}"></span>
     <span class="notification-title">{{this.title}}</span>
   </b-link>
 
@@ -70,13 +72,7 @@ export default Vue.extend({
   color: #EDCD90;
 }
 
-.unread {
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-}
-
-.read {
+.read, .unread {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
@@ -115,7 +111,7 @@ export default Vue.extend({
   height:9px;
   background-color:#ccc;
   left:5px;
-  top:4px;
+  top:1px;
 }
 
 .read__badge:after {
@@ -125,6 +121,6 @@ export default Vue.extend({
   height:3px;
   background-color:#ccc;
   left:2px;
-  top:10px;
+  top:7px;
 }
 </style>

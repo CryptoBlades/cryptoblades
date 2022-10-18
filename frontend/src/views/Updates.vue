@@ -1,9 +1,11 @@
 <template>
   <div class="bg-dark">
     <div class="notification-header">
-      <span>Notifications</span>
-      <span id="markAllAsRead" @click="setAllAsRead">Mark All As Read</span>
-
+      <span>{{$t("updates.notifications")}}</span>
+      <b-button id="markAllAsRead"
+        v-bind:readAll.sync="this.readAll"
+        @click="setAllAsRead">{{$t("updates.markAllAsRead")}}
+      </b-button>
     </div>
     <!-- <b-checkbox id="markAllAsRead" class="mb-1" @change="setAllAsRead(true)"
       :checked="this.readAll" :value="this.readAll" :disabled="isDisabled">
@@ -64,6 +66,7 @@ export default Vue.extend({
           notification.isRead = true;
         });
         this.unreadUpdates = 0;
+        this.$emit('refresh-unread-updates', this.unreadUpdates);
         this.updateStorage();
       }
     },
@@ -190,6 +193,10 @@ export default Vue.extend({
 <style scoped>
   #markAllAsRead {
     cursor: pointer;
+    outline: none;
+    border: 0;
+    box-shadow: none;
+    background-color: transparent;
   }
   #markAllAsRead:hover {
     text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #e1bb34, 0 0 10px #e1bb34;
@@ -198,11 +205,16 @@ export default Vue.extend({
   .notification-header {
     margin-bottom: 10px;
     padding-bottom: 5px;
-    font-size: 16px;
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid;
     border-bottom-color: #EDCD90;
+  }
+  .notification-header > span {
+    text-align: center;
+    font-size: 1rem;
+    display: flex;
+    padding: 0.375rem 0.75rem;
   }
 
 </style>

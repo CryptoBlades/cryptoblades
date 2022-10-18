@@ -1540,6 +1540,7 @@
     }
   },
   "updates": {
-    "markAllAsRead": "Mark All As Read"
+    "markAllAsRead": "Mark All As Read",
+    "notifications": "Notifications"
   }
 }
