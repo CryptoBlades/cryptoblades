@@ -1,13 +1,13 @@
 <template>
-  <!-- TODO: need to rework class naming/etc... -->
-  <div class="top-nav-links" ref="updateNotifications" id="update-notifications" href=# tabindex="0">
-    <a class="nav-link" target="_blank">
+  <div class="top-notification-wrapper" ref="updateNotifications" id="update-notifications" href=# tabindex="0">
+    <a class="notification-wrapper" target="_blank">
       <div class="icon">
-        <img src="../assets/navbar-icons/updates.svg" class="ui-link-icon gold-icon" alt="Updates">
+        <img src="../assets/updates.svg" class="ui-notification-icon gold-icon"
+          :class="this.unreadNotifications ? 'ring' : ''" alt="Updates">
         <span v-if="this.unreadNotifications" class="icon__badge"/>
       </div>
       <b-popover custom-class="bg-dark h-50 overflow-auto" :target="() => $refs.updateNotifications"
-        placement="bottom" triggers="click blur"> <!-- triggers="click" -->
+        placement="bottom" triggers="click blur">
         <updates @refresh-update-popup="refreshUpdatePopup"/>
       </b-popover>
     </a>
@@ -44,8 +44,7 @@ export default Vue.extend({
     },
 
     /**
-     * TODO: need to add logic here to check if there are any new
-     * notifications yet. This will proc the indicator icon
+     * TODO: doc this
      */
     async checkNotifications() {
       const currentNotifications = this.getStorage() as INotification[];
@@ -110,9 +109,10 @@ export default Vue.extend({
   display: flex;
   justify-content: center;
   align-items: center;
+  animation: w3-alert-red 1.6s infinite;
 }
 
-#update-notifications > .nav-link {
+#update-notifications > .notification-wrapper {
   cursor: pointer;
 }
 
@@ -121,23 +121,53 @@ export default Vue.extend({
   display: flex;
 }
 
-.top-nav-links .nav-link {
+.top-notification-wrapper .notification-wrapper {
   padding: 0;
 }
 
-div .nav-link {
+div .notification-wrapper {
   text-transform: uppercase;
   font-weight: 500;
   text-align: center;
   display: revert;
 }
 
-div .nav-link .icon {
+div .notification-wrapper .icon {
   padding-bottom: 0.5rem;
 }
 
-.ui-link-icon {
+.ui-notification-icon {
   height: 1.5rem;
   margin-top: 5px;
 }
+
+.ring {
+  animation: ring 1.6s linear infinite;
+}
+
+@keyframes w3-alert-red {
+	0% {
+		-webkit-box-shadow: 0 0 0 0 rgba(254, 57, 5, 0.7);
+		-moz-box-shadow: 0 0 0 0 rgba(254, 57, 5, 0.7);
+		box-shadow: 0 0 0 0 rgba(254, 57, 5, 0.7)
+	}
+	100% {
+		-webkit-box-shadow: 0 0 0 15px rgba(254, 57, 5, 0);
+		-moz-box-shadow: 0 0 0 15px rgba(254, 57, 5, 0);
+		box-shadow: 0 0 0 15px rgba(254, 57, 5, 0)
+	}
+}
+
+@keyframes ring
+  {
+    0% { transform: rotate(0deg) }
+    5% { transform: rotate(0deg) }
+    15% { transform: rotate(0deg) }
+    25% { transform: rotate(20deg) }
+    35% { transform: rotate(-15deg) }
+    45% { transform: rotate(10deg) }
+    55% { transform: rotate(-5deg) }
+    60% { transform: rotate(0deg) }
+    100% { transform: rotate(0deg) }
+  }
 </style>
