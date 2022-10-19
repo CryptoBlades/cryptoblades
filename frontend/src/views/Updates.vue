@@ -20,18 +20,11 @@
 import { apiUrl } from '@/utils/common';
 import Vue from 'vue';
 import Update from '@/components/Update.vue';
+import { INotification } from '@/interfaces';
 
 interface Data {
-  updateNotifications: Notification[],
+  updateNotifications: INotification[],
   readAll: boolean,
-}
-
-export interface Notification {
-  hash: string;
-  title: string,
-  link: string,
-  timestamp: number,
-  isRead: boolean;
 }
 
 export default Vue.extend({
@@ -53,7 +46,7 @@ export default Vue.extend({
         this.updateNotifications.forEach((notification) => {
           notification.isRead = true;
         });
-        this.$emit('refresh-unread-updates');
+        this.$emit('refresh-update-popup');
         this.updateStorage();
       }
     },
@@ -62,15 +55,11 @@ export default Vue.extend({
      * Check if there are any elements that aren't currently read
      */
     isEveryUpdateRead() {
-      // const unreadUpdate = this.updateNotifications.find((notification) => !notification.isRead);
-      // if (!unreadUpdate) {
-      //   this.readAll = true;
-      // }
-      // if (this.unreadUpdates === 0) {
-      //   console.log('isEveryUpdateRead',this.unreadUpdates);
-      //   this.readAll = true;
-      // }
-      //return this.unreadUpdates === 0;
+      const unreadUpdate = this.updateNotifications.find((notification) => !notification.isRead);
+      if (!unreadUpdate) {
+        this.readAll = true;
+        this.$emit('refresh-update-popup');
+      }
     },
 
     /**
@@ -121,7 +110,7 @@ export default Vue.extend({
      */
     async getNotificationsFromAPI() {
       const response = await fetch(apiUrl('static/notifications'));
-      const notifications = await response.json() as Notification[];
+      const notifications = await response.json() as INotification[];
       const updatesOrderedByTimestamp = notifications.sort((a, b) => {
         return a.timestamp - b.timestamp;
       });
@@ -132,7 +121,7 @@ export default Vue.extend({
     /**
      * set the notifications from the API
      */
-    async setUpdateNotificationsFromAPI(notificationsFromAPI: Notification[]) {
+    async setUpdateNotificationsFromAPI(notificationsFromAPI: INotification[]) {
       this.updateNotifications = notificationsFromAPI;
       this.updateStorage();
     },
@@ -163,8 +152,6 @@ export default Vue.extend({
     refreshUpdatePopup() {
       this.updateStorage();
       this.isEveryUpdateRead();
-      //console.log(this.unreadUpdates, 'is unreadUpdates');
-      this.$emit('refresh-unread-updates');
     },
   },
   async created() {

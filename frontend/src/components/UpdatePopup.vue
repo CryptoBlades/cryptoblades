@@ -4,11 +4,11 @@
     <a class="nav-link" target="_blank">
       <div class="icon">
         <img src="../assets/navbar-icons/updates.svg" class="ui-link-icon gold-icon" alt="Updates">
-        <span v-if="this.unreadNotifications" class="icon__badge" @refresh-unread-updates="refreshUnreadUpdates"/>
+        <span v-if="this.unreadNotifications" class="icon__badge"/>
       </div>
       <b-popover custom-class="bg-dark h-50 overflow-auto" :target="() => $refs.updateNotifications"
         placement="bottom" triggers="click blur"> <!-- triggers="click" -->
-        <updates/>
+        <updates @refresh-update-popup="refreshUpdatePopup"/>
       </b-popover>
     </a>
   </div>
@@ -16,8 +16,9 @@
 
 <script lang='ts'>
 import Vue from 'vue';
-import Updates, { Notification } from '@/views/Updates.vue';
+import Updates from '@/views/Updates.vue';
 import { apiUrl } from '@/utils/common';
+import { INotification } from '@/interfaces';
 
 interface Data {
   unreadNotifications: boolean,
@@ -32,21 +33,23 @@ export default Vue.extend({
   components: {
     Updates,
   },
-  // computed: {
-  //   hasUnreadNotifications(): boolean {
-  //     return this.unreadNotifications;
-  //   }
-  // },
   // watch: {
   //   unreadNotifications(newVal) {
-  //     this.unreadNotifications = newVal;
+  //     return newVal;
   //   }
   // },
   methods: {
-    //likely handle updates to notification icon here?
-    refreshUnreadUpdates() {
-      //console.log('unreadUpdates: ', unreadUpdates, this.unreadUpdates);
-      //this.unreadUpdates = unreadUpdates;
+    /**
+     * refresh icon after reading all notifs
+     */
+    refreshUpdatePopup() {
+      if (this.unreadNotifications) {
+        this.unreadNotifications = false;
+      }
+      // this.updateStorage();
+      // this.isEveryUpdateRead();
+      //console.log(this.unreadUpdates, 'is unreadUpdates');
+      // this.$emit('refresh-unread-updates');
     },
 
     /**
@@ -55,19 +58,19 @@ export default Vue.extend({
      */
     async checkNotifications() {
       console.log('check notifications');
-      const currentNotifications = this.getStorage() as Notification[];
+      const currentNotifications = this.getStorage() as INotification[];
       console.log(currentNotifications);
       if (currentNotifications.length === 0 || currentNotifications.find((x) => x.isRead !== true)) {
         console.log('currentNotifications');
-        return true;
+        this.unreadNotifications =  true;
       }
       const apiNotifications = await this.getNotificationsFromAPI();
       if (apiNotifications[0].hash !== currentNotifications[0].hash) {
         console.log('api');
-        return true;
+        this.unreadNotifications =  true;
       }
       console.log('neither');
-      return false;
+      this.unreadNotifications =  false;
     },
 
     /**
@@ -86,7 +89,7 @@ export default Vue.extend({
      */
     async getNotificationsFromAPI() {
       const response = await fetch(apiUrl('static/notifications'));
-      const notifications = await response.json() as Notification[];
+      const notifications = await response.json() as INotification[];
       const updatesOrderedByTimestamp = notifications.sort((a, b) => {
         return a.timestamp - b.timestamp;
       });
@@ -95,7 +98,7 @@ export default Vue.extend({
     },
   },
   async created() {
-    this.unreadNotifications = await this.checkNotifications();
+    await this.checkNotifications();
   },
 });
 </script>

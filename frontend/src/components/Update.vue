@@ -1,22 +1,9 @@
 <template>
-<!-- if isRead, toggle classes read and isReadBadge? -->
-<!-- this.isRead ? 'read': 'unread' -->
   <b-link :key="`${this.hash}-${this.isRead}`" :class="{read: this.isRead, unread: !this.isRead}" :id="this.hash" :href="this.link"
     target="_blank" @click="updateIsRead">
-    <!-- this.isRead ? 'read__badge' : 'unread__badge' -->
     <span :class="{read__badge: this.isRead, unread__badge: !this.isRead}"></span>
     <span class="notification-title">{{this.title}}</span>
   </b-link>
-
-  <!-- <a :href="this.link" target="_blank" class="w-100 d-inline-flex mt-1 mb-1"> -->
-    <!-- <b-checkbox class="isRead" :id="'checkbox' + this.hash" :checked="this.isRead"
-      :disabled="isDisabled" :value="this.isRead" @change="updateIsRead($event)">
-    </b-checkbox> -->
-
-    <!-- <div class="update-title" @click="updateIsRead(true)">
-      <span>{{this.title}}</span>
-    </div>
-  </a> -->
 </template>
 
 <script lang="ts">
@@ -41,9 +28,6 @@ export default Vue.extend({
     return {};
   },
   computed: {
-    // isDisabled(): boolean {
-    //   return !!this.isRead;
-    // }
   },
   methods: {
     /**
