@@ -33,11 +33,6 @@ export default Vue.extend({
   components: {
     Updates,
   },
-  // watch: {
-  //   unreadNotifications(newVal) {
-  //     return newVal;
-  //   }
-  // },
   methods: {
     /**
      * refresh icon after reading all notifs
@@ -46,10 +41,6 @@ export default Vue.extend({
       if (this.unreadNotifications) {
         this.unreadNotifications = false;
       }
-      // this.updateStorage();
-      // this.isEveryUpdateRead();
-      //console.log(this.unreadUpdates, 'is unreadUpdates');
-      // this.$emit('refresh-unread-updates');
     },
 
     /**
@@ -57,29 +48,28 @@ export default Vue.extend({
      * notifications yet. This will proc the indicator icon
      */
     async checkNotifications() {
-      console.log('check notifications');
       const currentNotifications = this.getStorage() as INotification[];
-      console.log(currentNotifications);
       if (currentNotifications.length === 0 || currentNotifications.find((x) => x.isRead !== true)) {
-        console.log('currentNotifications');
         this.unreadNotifications =  true;
+        return;
       }
       const apiNotifications = await this.getNotificationsFromAPI();
       if (apiNotifications[0].hash !== currentNotifications[0].hash) {
-        console.log('api');
         this.unreadNotifications =  true;
+        return;
       }
-      console.log('neither');
       this.unreadNotifications =  false;
     },
 
     /**
-     * get updateNotifications data from localStorage
+     * get updateNotifications property of locally saved data
+     * from localStorage, see getStorage() in Updates.vue
      */
     getStorage() {
-      const storageNotifications = localStorage.getItem('updateNotifications');
+      const storageNotifications = localStorage.getItem('updateNotifications') ?? '';
       if (storageNotifications) {
-        return JSON.parse(storageNotifications);
+        const {updateNotifications} = JSON.parse(storageNotifications);
+        return updateNotifications as INotification[];
       }
       return [];
     },
