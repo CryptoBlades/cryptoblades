@@ -14,7 +14,7 @@ module.exports = async function (deployer, network, accounts) {
   || network === 'avaxtestnet-fork'
   || network === 'auroratestnet'
   || network === 'kavatestnet'
-  || network === 'skaletestnet') {
+  || network === 'skaletestnet' || network === 'coinextestnet') {
     await upgradeProxy(PvpCore.address, PvpCore, { deployer });
   }
 };
