@@ -282,6 +282,32 @@ module.exports = {
       gasPrice: 0,
       timeoutBlocks: 200,
       skipDryRun: true
+    },
+    coinextestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.COINEX_TESTNET_PRIVATE_KEY,
+        process.env.COINEX_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.COINEX_TESTNET_RPC_URL || 'https://testnet-rpc.coinex.net'
+        }
+      )),
+      network_id: 53,
+      gasPrice: 0,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    coinexmainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.COINEX_MAINNET_PRIVATE_KEY,
+        process.env.COINEX_MAINNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.COINEX_MAINNET_RPC_URL || 'https://rpc.coinex.net'
+        }
+      )),
+      network_id: 52,
+      gasPrice: 0,
+      timeoutBlocks: 200,
+      skipDryRun: true
     }
     // Another network with more advanced options...
     // advanced: {

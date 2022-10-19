@@ -21,7 +21,7 @@ module.exports = async function (deployer, network) {
   || network === 'avaxmainnet'
   || network === 'avaxmainnet-fork'
   || network === 'auroramainnet'
-  || network === 'skalemainnet'
+  || network === 'skalemainnet' || network === 'coinexmainnet'
   || network === 'kavamainnet') {
     let storage = await upgradeProxy(NFTStorage.address, NFTStorage, { deployer });
     

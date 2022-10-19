@@ -14,7 +14,7 @@ module.exports = async function (deployer, network, accounts) {
     || network === 'avaxtestnet-fork'
     || network === 'auroratestnet'
     || network === 'kavatestnet'
-    || network === 'skaletestnet') {
+    || network === 'skaletestnet' || network === 'coinextestnet') {
         await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
         await upgradeProxy(TokensManager.address, TokensManager, { deployer });
     }
