@@ -2054,7 +2054,7 @@
     },
     "links": {},
     "address": "0x6A1d1803d4EDF5CF27EDb64ae95A22F81707eA38",
-    "transactionHash": "0xf26af82a5bf0e1572052ffabd9c99bd6de8274c20a300f8bb1b5b5a6f6aa3b3c"
+    "transactionHash": "0xba098e767c3203eb90ff68c1df1cf7630c0d8796ab07d93f4d7c0f9f30fc4fd8"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -2136,7 +2136,7 @@
     },
     "links": {},
     "address": "0x0f8663c2EbEf2dE5D6f19175E8fB8193B496fFAB",
-    "transactionHash": "0x1b1053f54a3ad0c85b67ccc77bcfcc12843fedb7271fbd2e3f634986ad8678cd"
+    "transactionHash": "0xc57622e7811505c8fe8ab201668315e18d4bcd4f7dd5658a6dde8b453bad51dc"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {
@@ -3301,7 +3301,7 @@
     "events": {},
     "links": {},
     "address": "0x7f25686b5a211280C2555c08B7e6d2930e7e87e6",
-    "transactionHash": "0x3dae6819a20fa369479dc6555bfc8101ea40cffbaab38857a6e0e8cac4c136db"
+    "transactionHash": "0x2746ad458f328be27c427f050f3c6f43de31bd2c2da23cffcb951985008c58c9"
   },
   "build/contracts/PartnerGiveaways.json": {
     "events": {},
