@@ -173,8 +173,7 @@ export default Vue.extend({
     padding-bottom: 5px;
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid;
-    border-bottom-color: #EDCD90;
+    border-bottom: 1px solid #EDCD90;
   }
   .notification-header > span {
     text-align: center;
