@@ -823,6 +823,14 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         return _matchableCharactersByTier[tier].length();   
     }
 
+    function getMatchablePlayerCountByTier(uint8 tier) external view returns (uint) {
+        return _matchableCharactersByTier[tier].length();
+    }
+
+    function isCharacterMatchableByTier(uint256 characterID, uint8 tier) external view returns (bool) {
+        return _matchableCharactersByTier[tier].contains(characterID);
+    }
+
     function _getPVPTraitBonusAgainst(
         uint8 characterTrait,
         uint8 weaponTrait,
