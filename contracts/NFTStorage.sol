@@ -153,6 +153,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     // Is NFT bridged or only stored
     mapping(address => mapping(uint256 => bool)) public isNftBridged;
     mapping(address => uint256) public withdrawFromStorageNativeFee;
+    mapping(address => uint256) public requestBridgeNativeFee;
 
     event NFTStored(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
     event NFTWithdrawn(address indexed owner, IERC721 indexed nftAddress, uint256 indexed nftID);
@@ -161,6 +162,12 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
     event NFTTransferUpdate(uint256 indexed requestId, uint8 status, bool forced);
     event TransferedIn(address indexed receiver, uint8 nftType, uint256 sourceChain, uint256 indexed sourceId);
     event NFTWithdrawnFromBridge(address indexed receiver, uint256 indexed bridgedId, uint8 nftType, uint256 indexed mintedId);
+    
+    // Copied from promos.sol, to avoid paying 5k gas to query a constant.
+    uint256 private constant BIT_FIRST_CHARACTER = 1;
+    // Copied from characters.sol, to avoid paying 5k gas to query a constant.
+    uint256 public constant NFTVAR_NON_GENESIS_VERSION = 3;
+    bool giveawayGen2Enabled;
 
     function initialize(address _weaponsAddress, address _charactersAddress, WeaponRenameTagConsumables _weaponRenameTagConsumables, CharacterRenameTagConsumables _characterRenameTagConsumables,
      WeaponCosmetics _weaponCosmetics, CharacterCosmetics _characterCosmetics, NFTMarket _nftMarket)
@@ -386,7 +393,12 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         if(isNftBridged[address(_tokenAddress)][_id]) {
             require(msg.value == withdrawFromStorageNativeFee[address(_tokenAddress)], 'Bad fee amount');
             delete isNftBridged[address(_tokenAddress)][_id];
+            if(address(_tokenAddress) == address(characters) && giveawayGen2Enabled && characters.getNftVar(_id, NFTVAR_NON_GENESIS_VERSION) == 0 && !promos.getBit(msg.sender, BIT_FIRST_CHARACTER)) {
+                uint256 seed = uint256(keccak256(abi.encodePacked(now, msg.sender)));
+                characters.mint(msg.sender, seed);
+            }
         }
+
         storedItems[msg.sender][address(_tokenAddress)].remove(_id);
         allStoredItems[address(_tokenAddress)].remove(_id);
         delete storedItemsOwners[address(_tokenAddress)][_id];
@@ -466,6 +478,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         uint256 targetChain
     )
         public
+        payable
         tokenNotBanned(_tokenAddress)
         isStored(_tokenAddress, _id)
         isOwner(_tokenAddress, _id) // isStored built in but why not
@@ -474,6 +487,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         noPendingBridge()
         canStore()
     {
+        require(msg.value == requestBridgeNativeFee[address(_tokenAddress)], 'Bad fee amount');
         game.payContractTokenOnly(msg.sender, _bridgeFee);
         transferOuts[++_transfersOutCount] = TransferOut(msg.sender, address(_tokenAddress), block.number, 0, _id, targetChain, 1);
         transferOutOfPlayers[msg.sender] = _transfersOutCount;
@@ -598,7 +612,7 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
         require(forced ||
         (transferOut.status == TRANSFER_OUT_STATUS_PENDING && status == TRANSFER_OUT_STATUS_PROCESSING)
         || (transferOut.status == TRANSFER_OUT_STATUS_PROCESSING && status == TRANSFER_OUT_STATUS_DONE)
-        || status == TRANSFER_OUT_STATUS_ERROR, 'Invalid status change');
+        || status == TRANSFER_OUT_STATUS_ERROR, 'ISC');
         transferOut.status = status;
         transferOut.lastUpdateBlock = block.number;
 
@@ -687,6 +701,14 @@ contract NFTStorage is IERC721ReceiverUpgradeable, Initializable, AccessControlU
 
     function setWithdrawFromStorageNativeFee(address nftAddress, uint256 newFee) external restricted {
         withdrawFromStorageNativeFee[nftAddress] = newFee;
+    }
+
+    function setGiveawayGen2Enabled(bool _enabled) external restricted {
+        giveawayGen2Enabled = _enabled;
+    }
+
+    function setRequestBridgeNativeFee(address nftAddress, uint256 newFee) external restricted {
+        requestBridgeNativeFee[nftAddress] = newFee;
     }
 
     function recoverFees(address receiver, uint256 amount) external gameAdminRestricted {
