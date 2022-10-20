@@ -9,7 +9,7 @@
     </div>
     <div v-for="update in updateNotifications" :key="update.hash">
       <Update :hash="update.hash" :link="update.link" :title="update.title"
-        v-bind:isRead.sync="update.isRead"
+        :timestamp="update.timestamp" v-bind:isRead.sync="update.isRead"
         @refresh-update-popup="refreshUpdatePopup"/>
     </div>
   </div>

@@ -3,10 +3,12 @@
     target="_blank" @click="updateIsRead">
     <span :class="{read__badge: this.isRead, unread__badge: !this.isRead}"></span>
     <span class="notification-title">{{this.title}}</span>
+    <span>{{this.getDate}}</span>
   </b-link>
 </template>
 
 <script lang="ts">
+import { secondsToDDHHMMSS } from '@/utils/date-time';
 import Vue, { PropType } from 'vue';
 
 export default Vue.extend({
@@ -20,6 +22,9 @@ export default Vue.extend({
     link: {
       type: String as PropType<string>,
     },
+    timestamp: {
+      type: Number as PropType<number>,
+    },
     isRead: {
       type: Boolean as PropType<boolean | undefined>,
     }
@@ -28,6 +33,34 @@ export default Vue.extend({
     return {};
   },
   computed: {
+    getDate(): string {
+      const currentDate = new Date();
+      const dateDiff = secondsToDDHHMMSS(+currentDate/1000 - this.timestamp/1000);
+      const daysHoursMinutesSeconds = dateDiff.replace(/[\sdhms]+/g, ' ').trim().split(' ');
+      const [ days, hours, minutes, seconds ] = daysHoursMinutesSeconds;
+      if (+days > 31) {
+        return `${Math.floor(+days / 31)} months ago`;
+      }
+      if (+days > 1) {
+        return `${days} days ago`;
+      }
+      if (+days === 1) {
+        return `${days} day ago`;
+      }
+      if (+hours > 1) {
+        return `${hours} hours ago`;
+      }
+      if (+hours === 1) {
+        return `${hours} hour ago`;
+      }
+      if (+minutes > 1) {
+        return `${minutes} minutes ago`;
+      }
+      if (+minutes === 1) {
+        return `${minutes} minute ago`;
+      }
+      return `${seconds} seconds ago`;
+    }
   },
   methods: {
     /**
