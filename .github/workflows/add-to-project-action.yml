@@ -6,15 +6,15 @@ on:
   pull_request:
     types: [opened, labeled]
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GH_PAT_PROJECTS }}
 
 jobs:
   assign_one_project:
     runs-on: ubuntu-latest
     name: Assign to One Project
     steps:
-    - name: Assign NEW issues and NEW pull requests to project 2
+    - name: Assign NEW issues and NEW pull requests to project 4
       uses: srggrs/assign-one-project-github-action@1.2.1
       if: github.event.action == 'opened'
       with:
-        project: 'https://github.com/CryptoBlades/cryptoblades/projects/1'
+        project: 'https://github.com/CryptoBlades/cryptoblades/projects/4'
