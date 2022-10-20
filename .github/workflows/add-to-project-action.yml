@@ -1,20 +1,16 @@
-name: Auto Assign to Project(s)
+name: Add issues to project board
 
 on:
   issues:
-    types: [opened, labeled]
-  pull_request:
-    types: [opened, labeled]
-env:
-  MY_GITHUB_TOKEN: ${{ secrets.GH_PAT_PROJECTS }}
+    types:
+      - opened
 
 jobs:
-  assign_one_project:
+  add-to-project:
+    name: Add issue to project
     runs-on: ubuntu-latest
-    name: Assign to One Project
     steps:
-    - name: Assign NEW issues and NEW pull requests to project 4
-      uses: srggrs/assign-one-project-github-action@1.2.1
-      if: github.event.action == 'opened'
-      with:
-        project: 'https://github.com/orgs/CryptoBlades/projects/4'
+      - uses: actions/add-to-project@latest
+        with:
+          project-url: https://github.com/orgs/CryptoBlades/projects/4
+          github-token: ${{ secrets.GH_PAT_PROJECTS }}
