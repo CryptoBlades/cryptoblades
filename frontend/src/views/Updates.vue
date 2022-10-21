@@ -38,10 +38,6 @@ export default Vue.extend({
       type: Boolean as PropType<boolean | undefined>,
     },
   },
-  data() {
-    return {};
-  },
-  computed: {},
   methods: {
     /**
      * Mark all notifications as read
@@ -76,7 +72,6 @@ export default Vue.extend({
      */
     async checkForNotificationUpdatesFromAPI() {
       const notificationChanges = [];
-      console.log('checkfornotificationsfromapi ', this.updateNotifications);
 
       if (this.updateNotifications.length > 0) {
         let j = 0;
@@ -103,7 +98,6 @@ export default Vue.extend({
      * set the notifications from the API
      */
     async setUpdateNotificationsFromAPI(notificationsFromAPI: INotification[]) {
-      console.log('setUpdateNotifs ', notificationsFromAPI);
       this.$emit('update:updateNotifications', notificationsFromAPI);
       this.updateStorage();
     },
@@ -116,13 +110,12 @@ export default Vue.extend({
     updateStorage() {
       const storageData = {updateNotifications: this.updateNotifications, readAll: this.readAll};
       localStorage.setItem('updateNotifications', JSON.stringify(storageData));
-      console.log(localStorage.getItem('updateNotifications'));
     },
 
     /**
      * Update the storage and check if all
      * notifications are now marked as read.
-     * If so, change markAllAsRead checkbox to true,
+     * If so, update readAll as true,
      */
     refreshUpdatePopup() {
       this.updateStorage();

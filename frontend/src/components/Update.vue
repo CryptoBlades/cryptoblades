@@ -3,7 +3,7 @@
     target="_blank" @click="updateIsRead">
     <span :class="{read__badge: this.isRead, unread__badge: !this.isRead}"></span>
     <span class="notification-title">{{this.title}}</span>
-    <span class="notification-age">{{this.getDate}}</span>
+    <span class="notification-age">{{this.getUpdateAge}}</span>
   </b-link>
 </template>
 
@@ -29,14 +29,11 @@ export default Vue.extend({
       type: Boolean as PropType<boolean | undefined>,
     }
   },
-  data(){
-    return {};
-  },
   computed: {
     /**
      * get the computed age of this update relative to when the user sees it
      */
-    getDate(): string {
+    getUpdateAge(): string {
       const currentDate = new Date();
       const dateAge = secondsToRelativeAge(+currentDate/1000 - this.timestamp/1000);
       return dateAge + ' ago';
@@ -52,9 +49,6 @@ export default Vue.extend({
         this.$emit('refresh-update-popup');
       }
     }
-  },
-  components: {},
-  async created() {
   },
 });
 </script>

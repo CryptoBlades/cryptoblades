@@ -23,22 +23,19 @@ import { INotification } from '@/interfaces';
 
 interface Data {
   unreadNotifications: boolean,
+  readAll: boolean,
   apiNotifications: INotification[],
-  updateNotifications: INotification[],
-  readAll: boolean
+  updateNotifications: INotification[]
 }
 
 export default Vue.extend({
   data() {
     return {
       unreadNotifications: false,
+      readAll: false,
       apiNotifications: [],
-      updateNotifications: [],
-      readAll: false
+      updateNotifications: []
     } as Data;
-  },
-  components: {
-    Updates,
   },
   methods: {
     /**
@@ -51,14 +48,25 @@ export default Vue.extend({
     },
 
     /**
+     * get updateNotifications from localStorage
+     */
+    getUpdateStorage() {
+      const storageNotifications = localStorage.getItem('updateNotifications') ?? '';
+      if (storageNotifications) {
+        const {updateNotifications, readAll} = JSON.parse(storageNotifications);
+        this.updateNotifications = updateNotifications;
+        this.readAll = readAll;
+      }
+    },
+
+    /**
      * check if there are new notifications that need to be addressed
      * by the user. Notifications are loaded in Updates.vue
      */
     async checkNotifications() {
-      this.getStorage();
+      this.getUpdateStorage();
       if (this.updateNotifications.length === 0 || this.updateNotifications.find((x) => x.isRead !== true)) {
         this.unreadNotifications =  true;
-        console.log('checkNotifications');
         return;
       }
       if (this.apiNotifications[0].hash !== this.updateNotifications[0].hash) {
@@ -66,22 +74,6 @@ export default Vue.extend({
         return;
       }
       this.unreadNotifications =  false;
-    },
-
-    /**
-     * get updateNotifications from localStorage, see getStorage() in Updates.vue
-     */
-    getStorage() {
-      const storageNotifications = localStorage.getItem('updateNotifications') ?? '';
-      if (storageNotifications) {
-        const {updateNotifications, readAll} = JSON.parse(storageNotifications);
-        this.updateNotifications = updateNotifications;
-        this.readAll = readAll;
-      }
-      else {
-        this.updateNotifications = [];
-        this.readAll = false;
-      }
     },
 
     /**
@@ -96,10 +88,14 @@ export default Vue.extend({
       const topNotifications = updatesOrderedByTimestamp.slice(0, 10);
       return topNotifications;
     },
+
   },
   async created() {
     this.apiNotifications = await this.getNotificationsFromAPI();
     await this.checkNotifications();
+  },
+  components: {
+    Updates,
   },
 });
 </script>
