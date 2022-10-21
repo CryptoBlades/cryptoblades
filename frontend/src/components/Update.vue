@@ -34,8 +34,7 @@ export default Vue.extend({
   },
   computed: {
     /**
-     * get the date to print for the timestamp element (TODO: update this readme)
-     * TODO: remove leading 0's
+     * get the computed age of this update relative to when the user sees it
      */
     getDate(): string {
       const currentDate = new Date();
@@ -45,8 +44,7 @@ export default Vue.extend({
   },
   methods: {
     /**
-     * updates the checkbox for the notification
-     * checked if read/marked
+     * update the read status of this update
      */
     updateIsRead() {
       if (!this.isRead) {

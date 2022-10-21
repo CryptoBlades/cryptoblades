@@ -8,7 +8,8 @@
       </div>
       <b-popover custom-class="bg-dark h-50 overflow-auto" :target="() => $refs.updateNotifications"
         placement="bottom" triggers="click blur">
-        <updates @refresh-update-popup="refreshUpdatePopup"/>
+        <updates :readAll.sync="readAll" :updateNotifications.sync="updateNotifications"
+          :notificationsFromAPI="this.apiNotifications" @refresh-update-popup="refreshUpdatePopup"/>
       </b-popover>
     </a>
   </div>
@@ -22,12 +23,18 @@ import { INotification } from '@/interfaces';
 
 interface Data {
   unreadNotifications: boolean,
+  apiNotifications: INotification[],
+  updateNotifications: INotification[],
+  readAll: boolean
 }
 
 export default Vue.extend({
   data() {
     return {
       unreadNotifications: false,
+      apiNotifications: [],
+      updateNotifications: [],
+      readAll: false
     } as Data;
   },
   components: {
@@ -35,7 +42,7 @@ export default Vue.extend({
   },
   methods: {
     /**
-     * refresh icon after reading all notifs
+     * refresh notification bell icon on trigger
      */
     refreshUpdatePopup() {
       if (this.unreadNotifications) {
@@ -44,16 +51,17 @@ export default Vue.extend({
     },
 
     /**
-     * TODO: doc this
+     * check if there are new notifications that need to be addressed
+     * by the user. Notifications are loaded in Updates.vue
      */
     async checkNotifications() {
-      const currentNotifications = this.getStorage() as INotification[];
-      if (currentNotifications.length === 0 || currentNotifications.find((x) => x.isRead !== true)) {
+      this.getStorage();
+      if (this.updateNotifications.length === 0 || this.updateNotifications.find((x) => x.isRead !== true)) {
         this.unreadNotifications =  true;
+        console.log('checkNotifications');
         return;
       }
-      const apiNotifications = await this.getNotificationsFromAPI();
-      if (apiNotifications[0].hash !== currentNotifications[0].hash) {
+      if (this.apiNotifications[0].hash !== this.updateNotifications[0].hash) {
         this.unreadNotifications =  true;
         return;
       }
@@ -61,16 +69,19 @@ export default Vue.extend({
     },
 
     /**
-     * get updateNotifications property of locally saved data
-     * from localStorage, see getStorage() in Updates.vue
+     * get updateNotifications from localStorage, see getStorage() in Updates.vue
      */
     getStorage() {
       const storageNotifications = localStorage.getItem('updateNotifications') ?? '';
       if (storageNotifications) {
-        const {updateNotifications} = JSON.parse(storageNotifications);
-        return updateNotifications as INotification[];
+        const {updateNotifications, readAll} = JSON.parse(storageNotifications);
+        this.updateNotifications = updateNotifications;
+        this.readAll = readAll;
       }
-      return [];
+      else {
+        this.updateNotifications = [];
+        this.readAll = false;
+      }
     },
 
     /**
@@ -80,13 +91,14 @@ export default Vue.extend({
       const response = await fetch(apiUrl('static/notifications'));
       const notifications = await response.json() as INotification[];
       const updatesOrderedByTimestamp = notifications.sort((a, b) => {
-        return a.timestamp - b.timestamp;
+        return b.timestamp - a.timestamp;
       });
       const topNotifications = updatesOrderedByTimestamp.slice(0, 10);
       return topNotifications;
     },
   },
   async created() {
+    this.apiNotifications = await this.getNotificationsFromAPI();
     await this.checkNotifications();
   },
 });

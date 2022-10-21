@@ -16,22 +16,30 @@
 </template>
 
 <script lang='ts'>
-import { apiUrl } from '@/utils/common';
-import Vue from 'vue';
+import Vue, { PropType } from 'vue';
 import Update from '@/components/Update.vue';
 import { INotification } from '@/interfaces';
 
-interface Data {
-  updateNotifications: INotification[],
-  readAll: boolean,
-}
-
 export default Vue.extend({
+  props: {
+    notificationsFromAPI: {
+      type: Array as PropType<INotification[]>,
+      default() {
+        return [];
+      },
+    },
+    updateNotifications: {
+      type: Array as PropType<INotification[]>,
+      default() {
+        return [];
+      },
+    },
+    readAll: {
+      type: Boolean as PropType<boolean | undefined>,
+    },
+  },
   data() {
-    return {
-      updateNotifications: [],
-      readAll: false,
-    } as Data;
+    return {};
   },
   computed: {},
   methods: {
@@ -41,7 +49,7 @@ export default Vue.extend({
     setAllAsRead() {
       if (!this.readAll)
       {
-        this.readAll = true;
+        this.$emit('update:readAll', true);
         this.updateNotifications.forEach((notification) => {
           notification.isRead = true;
         });
@@ -56,7 +64,7 @@ export default Vue.extend({
     isEveryUpdateRead() {
       const unreadUpdate = this.updateNotifications.find((notification) => !notification.isRead);
       if (!unreadUpdate) {
-        this.readAll = true;
+        this.$emit('update:readAll', true);
         this.$emit('refresh-update-popup');
       }
     },
@@ -67,15 +75,14 @@ export default Vue.extend({
      * If this is the user's first time, we add fresh API data to localStorage.
      */
     async checkForNotificationUpdatesFromAPI() {
-      const notificationsFromAPI = await this.getNotificationsFromAPI();
-      this.getStorage();
       const notificationChanges = [];
+      console.log('checkfornotificationsfromapi ', this.updateNotifications);
 
       if (this.updateNotifications.length > 0) {
         let j = 0;
-        for(let i = 0; i < notificationsFromAPI.length; i++) {
-          if (notificationsFromAPI[i].hash !== this.updateNotifications[i + j].hash) {
-            notificationChanges.push(notificationsFromAPI[i]);
+        for(let i = 0; i < this.notificationsFromAPI.length; i++) {
+          if (this.notificationsFromAPI[i].hash !== this.updateNotifications[i + j].hash) {
+            notificationChanges.push(this.notificationsFromAPI[i]);
             j++;
           }
           else {
@@ -88,28 +95,16 @@ export default Vue.extend({
         }
       }
       else {
-        this.setUpdateNotificationsFromAPI(notificationsFromAPI);
+        this.setUpdateNotificationsFromAPI(this.notificationsFromAPI);
       }
-    },
-
-    /**
-     * Get up to the 10 most recent notifications from the API
-     */
-    async getNotificationsFromAPI() {
-      const response = await fetch(apiUrl('static/notifications'));
-      const notifications = await response.json() as INotification[];
-      const updatesOrderedByTimestamp = notifications.sort((a, b) => {
-        return a.timestamp - b.timestamp;
-      });
-      const topNotifications = updatesOrderedByTimestamp.slice(0, 10);
-      return topNotifications;
     },
 
     /**
      * set the notifications from the API
      */
     async setUpdateNotificationsFromAPI(notificationsFromAPI: INotification[]) {
-      this.updateNotifications = notificationsFromAPI;
+      console.log('setUpdateNotifs ', notificationsFromAPI);
+      this.$emit('update:updateNotifications', notificationsFromAPI);
       this.updateStorage();
     },
 
@@ -122,19 +117,6 @@ export default Vue.extend({
       const storageData = {updateNotifications: this.updateNotifications, readAll: this.readAll};
       localStorage.setItem('updateNotifications', JSON.stringify(storageData));
       console.log(localStorage.getItem('updateNotifications'));
-    },
-
-    /**
-     * get localStorage data stored in the form
-     * {updateNotifications: INotification[], readAll: boolean}
-     */
-    getStorage() {
-      const storageNotifications = localStorage.getItem('updateNotifications');
-      if (storageNotifications) {
-        const {updateNotifications, readAll} = JSON.parse(storageNotifications);
-        this.updateNotifications = updateNotifications;
-        this.readAll = readAll;
-      }
     },
 
     /**
