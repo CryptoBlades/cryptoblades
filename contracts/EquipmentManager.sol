@@ -3,14 +3,53 @@ pragma solidity ^0.6.0;
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "./characters.sol";
+import "./weapons.sol";
+import "./shields.sol";
 import "./util.sol";
 
 contract EquipmentManager is Initializable, AccessControlUpgradeable {
 
     using ABDKMath64x64 for int128;
+    using EnumerableSet for EnumerableSet.UintSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    ////////////
+    // CONSTANTS
+    ////////////
+
+    // Permissions
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
+
+    // Contract Vars
+
+    uint256 public constant VAR_WEAPON_EQUIP_DURABILITY = 101;
+
+    // Contract links
+
+    uint256 public constant LINK_CHARACTERS = 1;
+    uint256 public constant LINK_WEAPONS = 2;
+    uint256 public constant LINK_SHIELDS = 3;
+
+    // User vars
+
+    uint256 public constant USERVAR_ = 10001;
+
+    // Misc
+
+    uint256 public constant SLOT_CHARACTER_WEAPON = 1;
+    uint256 public constant SLOT_CHARACTER_SHIELD = 2;
+
+    //////////
+    // GENERAL
+    //////////
+
+    event Equipped(address indexed onAddr, uint256 indexed onID, uint256 indexed slot, address itemAddr, uint256 itemID);
+    event Unequipped(address indexed onAddr, uint256 indexed onID, uint256 indexed slot, address itemAddr, uint256 itemID);
+    event Recalculated(address indexed onAddr, uint256 indexed onID, uint256 indexed calculationID);
 
     function initialize () public initializer {
         __AccessControl_init_unchained();
@@ -26,88 +65,125 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender), "NA");
     }
 
-    /*struct Item {
-        address link;
-        uint id;
-    }*/
 
+    //////////////////
     // STATE VARIABLES
+    //////////////////
 
-    //mapping(uint256 => Item) public itemDefinitions;
-    mapping(uint256 => address) public itemDefinitionsAddr;
-    mapping(uint256 => uint) public itemDefinitionsID;
-    /*mapping(address => mapping(uint => uint)) public itemDefinitionReverse; // only read from frontend!
-    mapping(address => mapping(uint256 => mapping(uint256 => Item))) public equippedItems;//nftaddr, nftid, slotid, item
-    mapping(address => mapping(uint256 => mapping(uint256 => address))) public equippedItems2;//nftaddr, nftid, slotid, item
-    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) public equippedItems3;//nftaddr, nftid, slotid, item
-    mapping(address => mapping(uint256 => uint256)) public equippedOnDefinition; //nftaddr, nftid, itemdef
-    mapping(address => mapping(uint256 => uint256)) public equippedOnID; //nftaddr, nftid, id*/
+    mapping(uint256 => uint256) public vars;
+    mapping(uint256 => address) public links;
+    mapping(address => mapping(uint256 => uint256)) public userVars;
 
+    // equipper address, ID, slot, equipped item address
+    mapping(address => mapping(uint256 => mapping(uint256 => address))) public equippedSlotAddress;
+    // equipper address, ID, slot, equipped item ID(/amount?)
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) public equippedSlotID;
+
+    // equipper address, calculation identifier (future use), proxy address (default = this)
+    mapping(address => mapping(uint256 => address)) calculatorProxy;
+    // equipper address, slot, set of addresses supported
+    mapping(address => mapping(uint256 => EnumerableSet.AddressSet)) private equippableInSlot;
+
+
+    ////////////
     // FUNCTIONS
+    ////////////
 
-    /*function setDef(uint defid, address addr, uint id) public {
-        itemDefinitions[defid] = Item(addr, id);
-    }*/
+    // Mutative
 
-    function setDef(uint defid, address addr, uint id) public {
-        itemDefinitionsAddr[defid] = addr;
-        itemDefinitionsID[defid] = id;
+    function equipNFT(address onAddr, uint256 onID, uint256 slot, address itemAddr, uint256 itemID) external {
+        require(isEquippable(onAddr, slot, itemAddr), "Invalid item");
+        require(IERC721(onAddr).ownerOf(onID) == msg.sender);//item owner check done on transfer
+
+        equippedSlotAddress[onAddr][onID][slot] = itemAddr;
+        equippedSlotID[onAddr][onID][slot] = itemID;
+        processEquippedItem(onAddr, onID, slot, itemAddr, itemID);
+        IERC721(itemAddr).safeTransferFrom(msg.sender, address(this), itemID);
+
+        recalculate(onAddr, onID);
     }
 
-    function seedTest1(uint num1, uint num2) public view returns (uint) {
-        return RandomUtil.combineSeeds(RandomUtil.combineSeeds(uint(GAME_ADMIN), num1), num2);
+    function unequipNFT(address onAddr, uint256 onID, uint256 slot) external {
+        require(IERC721(onAddr).ownerOf(onID) == msg.sender);//item owner check done on transfer
+
+        IERC721(equippedSlotAddress[onAddr][onID][slot])
+            .safeTransferFrom(address(this), msg.sender, equippedSlotID[onAddr][onID][slot]);
+
+        equippedSlotAddress[onAddr][onID][slot] = address(0);
+        equippedSlotID[onAddr][onID][slot] = 0;
+
+        recalculate(onAddr, onID);
     }
 
-    function seedTest2(uint num1, uint num2) public view returns (uint) {
-        return uint(keccak256(abi.encodePacked(uint(GAME_ADMIN), num1, num2)));
-    }
-    
-    function seedTest3(uint num1, uint num2) public view returns (uint) {
-        uint[] memory seeds = new uint[](3);
-        seeds[0] = uint(GAME_ADMIN);
-        seeds[1] = num1;
-        seeds[2] = num2;
-        return RandomUtil.combineSeeds(seeds);
-    }
-    /*function hasEquipment(address nft) public view returns(bool) {
-        
+    function recalculate(address onAddr, uint256 onID) public {
+        // will use proxy later, for now we assume all items use the manager directly for chars
+        if(onAddr == links[LINK_CHARACTERS])
+            calculateCharacterVars(onID);
+        else
+            revert("Not implemented");
     }
 
-    function setDef(uint256 defid, address link, uint id) public {
-        itemDefinitions[defid] = Item(link,id);
-        itemDefinitionReverse[link][id] = defid;
+    function processEquippedItem(address onAddr, uint256 onID, uint256 slot, address itemAddr, uint256 itemID) internal {
+        if(itemAddr == links[LINK_WEAPONS]) {
+            Weapons weapons = Weapons(links[LINK_WEAPONS]);
+            weapons.drainDurability(itemID, vars[VAR_WEAPON_EQUIP_DURABILITY], false);
+        }
     }
 
-// checking efficiency storing a struct vs storing multiple
-// 1: struct store direct
-// 2: data store separate
-    function set1(address addr, uint nftid, uint slot, address item, uint itemid) public {
-        equippedItems[addr][nftid][slot] = Item(item, itemid);
+    function calculateCharacterVars(uint256 onID) internal {
+        Characters characters = Characters(links[LINK_CHARACTERS]);
+        Weapons weapons = Weapons(links[LINK_WEAPONS]);
+        require(characters.getNftVar(characterID, 1) == 0, "Busy");
+
+        if(equippedSlotAddress[characters][onID][SLOT_CHARACTER_WEAPON] != 0) {
+            // assume weapon slot is using weapon address for now, will revert anyway if not
+            uint8 charTrait = charcters.getTrait(onID);
+            (int128 weaponMultTarget,
+                int128 weaponMultFight,
+                uint24 weaponBonusPower,
+                uint8 weaponTrait) = weapons.getFightData(equippedSlotID[characters][onID][SLOT_CHARACTER_WEAPON],
+                                        charTrait);
+            
+            uint256 basePower// WIP
+
+            characters.setNFTVars(
+                [4/*equipment version*/, ],
+                [characters.vars(1/*equip version*/), ]
+            );
+        }
+        else {
+            // no weapon equipped, we null out the equipment version
+            characters.setNFTVar(4/*nft equipment version*/, 0);
+        }
     }
 
-    function set2(address addr, uint nftid, uint slot, address item, uint itemid) public {
-        equippedItems2[addr][nftid][slot] = item;
-        equippedItems3[addr][nftid][slot] = itemid;
+    // Read-only
+
+    function isEquippable(address onAddr, uint256 slot, address itemAddr) public returns (bool) {
+        return equippableInSlot[onAddr][slot].contains(itemAddr);
     }
 
-    function get1(address addr, uint nftid, uint slot) public view returns (address item, uint id) {
-        Item memory i = equippedItems[addr][nftid][slot];
-        return (i.link, i.id);
+    // Admin
+
+    function setVar(uint256 varField, uint256 value) external restricted {
+        vars[varField] = value;
     }
 
-    function get2(address addr, uint nftid, uint slot) public view returns (address item, uint id) {
-        return (equippedItems2[addr][nftid][slot], equippedItems3[addr][nftid][slot]);
+    function setVars(uint256[] calldata varFields, uint256[] calldata values) external restricted {
+        for(uint i = 0; i < varFields.length; i++) {
+            vars[varFields[i]] = values[i];
+        }
     }
 
-//
-    function sete(address addr, uint nftid, uint defid, uint equipee) public {
-        equippedOnDefinition[addr][nftid] = defid;
-        equippedOnID[addr][nftid] = equipee;
+    function setLink(uint256 linkId, address linkAddress) external restricted {
+        links[linkId] = linkAddress;
     }
 
-    function gete(address addr, uint nftid) public view returns(address onaddr, uint onslot, uint onid) {
-        Item memory i = itemDefinitions[equippedOnDefinition[addr][nftid]];
-        return (i.link, i.id, equippedOnID[addr][nftid]);
-    }*/
+    function setEquippable(address onAddr, uint256 slot, address itemAddr, bool equippable) external restricted {
+        if(equippable)
+            equippableInSlot[onAddr][slot].add(itemAddr);
+        else
+            equippableInSlot[onAddr][slot].remove(itemAddr);
+    }
 
 }

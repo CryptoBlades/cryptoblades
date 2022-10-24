@@ -22,6 +22,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     // Copied from promos.sol, to avoid paying 5k gas to query a constant.
     uint256 private constant BIT_FIRST_CHARACTER = 1;
 
+    uint256 private constant VAR_EQUIPMENT_VERSION = 1; // assert nftvar of same name is equal
+
     function initialize () public initializer {
         __ERC721_init("CryptoBlades character", "CBC");
         __AccessControl_init_unchained();
@@ -114,8 +116,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     uint256 public constant NFTVAR_BONUS_POWER = 2;
     uint256 public constant NFTVAR_NON_GENESIS_VERSION = 3; // 0 = genesis, 1 = v2
+    uint256 public constant NFTVAR_EQUIPMENT_VERSION = 4; // 0 = no equipment/fresh
+    uint256 public constant NFTVAR_POWER = 5; // bits (24 per): vsFire, vsEarth, vsLightning, vsWater, base
 
     uint256 public secondsPerStamina;
+
+    mapping(uint256 => uint256) vars;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -404,6 +410,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         }
     }
 
+    function isEquipmentReady(uint256 id) public view returns (bool) {
+        return nftVars[NFTVAR_EQUIPMENT_VERSION] == vars[VAR_EQUIPMENT_VERSION];
+    }
+
     function getCharactersOwnedBy(address wallet) public view returns(uint256[] memory chars) {
         uint256 count = balanceOf(wallet);
         chars = new uint256[](count);
@@ -458,6 +468,16 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function setCharacterLimit(uint256 max) public restricted {
         characterLimit = max;
+    }
+
+    function setVar(uint256 varField, uint256 value) external restricted {
+        vars[varField] = value;
+    }
+
+    function setVars(uint256[] calldata varFields, uint256[] calldata values) external restricted {
+        for(uint i = 0; i < varFields.length; i++) {
+            vars[varFields[i]] = values[i];
+        }
     }
 
     function getNftVar(uint256 characterID, uint256 nftVar) public view returns(uint256) {
