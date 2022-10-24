@@ -1,5 +1,12 @@
 <template>
-  <div class="quest-wrapper">
+  <div class="position-relative quest-wrapper">
+    <!-- <div class="blind-background position-absolute w-100 h-100 opacity-75"></div> -->
+    <div class="quest-nav">
+      <QuestNav
+        :activeTab="activeTab"
+        @toggle="onChangeTab"
+      />
+    </div>
     <div class="d-flex flex-wrap quests-container gap-4">
       <div class="d-flex justify-content-between w-100 weekly-progress-container">
         <div class="d-flex flex-column justify-content-between gap-2">
@@ -131,6 +138,7 @@ import QuestsList from '@/components/smart/QuestsList.vue';
 import hourglass from '@/assets/hourglass.png';
 import {getTimeRemaining} from '@/utils/common';
 import {NftIdType} from '@/components/smart/NftList.vue';
+import QuestNav from '@/components/QuestNav.vue';
 
 export interface WeeklyReward {
   id: number;
@@ -289,10 +297,11 @@ interface Data {
   questTemplateType: QuestTemplateType;
   walletQuests: Quest[];
   walletQuestTier: Rarity;
+  activeTab: string;
 }
 
 export default Vue.extend({
-  components: {QuestRow, QuestComponentIcon, QuestReward, QuestsList},
+  components: {QuestRow, QuestComponentIcon, QuestReward, QuestsList, QuestNav},
 
   props: {
     showCosmetics: {
@@ -324,6 +333,7 @@ export default Vue.extend({
       questTemplateType: QuestTemplateType.QUEST,
       walletQuests:[],
       walletQuestTier: 0,
+      activeTab: 'wallet-quests',
     } as Data;
   },
 
@@ -366,6 +376,10 @@ export default Vue.extend({
       'isUsingPromoQuests',
       'getQuestTemplates'
     ]) as StoreMappedActions,
+
+    onChangeTab(tab: string) {
+      this.activeTab = tab;
+    },
 
     async claimWeekly() {
       if (!this.canClaimWeeklyReward) {
@@ -480,6 +494,33 @@ export default Vue.extend({
 
 <style scoped lang="scss">
 @import '../styles/character-cosmetics.css';
+.quest-nav{
+  div.menu-nav{
+    height: 60px;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #424A59;
+    background-color:#000E29;
+  }
+}
+
+@media (max-width: 600px) {
+  .quest-nav{
+    padding: 0px;
+
+    div.menu-nav{
+      padding-left: 0px;
+      padding-right: 0px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #424A59;
+      background-color:#000E29;
+    }
+  }
+}
+
 .quest-wrapper{
   background: transparent url("../../src/assets/questsBackground.png") 0 0 no-repeat padding-box;
   background-size: clamp(100%, 100%, 100%) auto;
