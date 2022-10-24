@@ -16,6 +16,7 @@ import "./util.sol";
 import "./common.sol";
 import "./Blacksmith.sol";
 import "./SpecialWeaponsManager.sol";
+import "./SafeRandoms.sol";
 
 contract CryptoBlades is Initializable, AccessControlUpgradeable {
     using ABDKMath64x64 for int128;
@@ -30,6 +31,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     bytes32 public constant GAME_ADMIN = keccak256("GAME_ADMIN");
+    bytes32 public constant WEAPON_SEED = keccak256("WEAPON_SEED");
 
     int128 public constant PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT =
         14757395258967641292; // 0.8 in fixed-point 64x64 format
@@ -63,11 +65,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_MIN_CHARACTER_FEE = 24;
     uint256 public constant VAR_WEAPON_MINT_TIMESTAMP = 25;
     uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 26;
+    uint256 public constant VAR_GAS_OFFSET_PER_FIGHT_MULTIPLIER = 27;
+    uint256 public constant VAR_FIGHT_FLAT_IGO_BONUS = 28;
 
+    uint256 public constant LINK_SAFE_RANDOMS = 1;
 
     // Mapped user variable(userVars[]) keys, one value per wallet
     uint256 public constant USERVAR_DAILY_CLAIMED_AMOUNT = 10001;
     uint256 public constant USERVAR_CLAIM_TIMESTAMP = 10002;
+    uint256 public constant USERVAR_CLAIM_WEAPON_DATA = 10003;
+    // RESERVED USERVAR: 10010
+    uint256 public constant USERVAR_GEN2_UNCLAIMED = 10011;
+    // RESERVED USERVARS: 10012-10019
 
     Characters public characters;
     Weapons public weapons;
@@ -225,6 +234,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     mapping(address => mapping(uint256 => uint256)) public userVars;
 
     SpecialWeaponsManager public specialWeaponsManager;
+    mapping(uint256 => address) public links;
 
     event FightOutcome(address indexed owner, uint256 indexed character, uint256 weapon, uint32 target, uint24 playerRoll, uint24 enemyRoll, uint16 xpGain, uint256 skillGain);
     event InGameOnlyFundsGiven(address indexed to, uint256 skillAmount);
@@ -257,24 +267,30 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return (_available, _needed);
     }
 
-    function getSkillToSubtract(uint256 _inGameOnlyFunds, uint256 _tokenRewards, uint256 _skillNeeded)
+    function getSkillToSubtract(uint256 _inGameOnlyFunds, uint256 _tokenRewards, uint256 _valorTokenRewards, uint256 _skillNeeded)
         public
         pure
-        returns (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromUserWallet) {
+        returns (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromValorTokenRewards, uint256 fromUserWallet) {
 
         if(_skillNeeded <= _inGameOnlyFunds) {
-            return (_skillNeeded, 0, 0);
+            return (_skillNeeded, 0, 0, 0);
         }
 
         _skillNeeded -= _inGameOnlyFunds;
 
         if(_skillNeeded <= _tokenRewards) {
-            return (_inGameOnlyFunds, _skillNeeded, 0);
+            return (_inGameOnlyFunds, _skillNeeded, 0, 0);
         }
 
         _skillNeeded -= _tokenRewards;
 
-        return (_inGameOnlyFunds, _tokenRewards, _skillNeeded);
+        if(_skillNeeded <= _valorTokenRewards) {
+            return (_inGameOnlyFunds, _tokenRewards, _skillNeeded, 0);
+        }
+
+        _skillNeeded -= _valorTokenRewards;
+
+        return (_inGameOnlyFunds, _tokenRewards, _valorTokenRewards, _skillNeeded);
     }
 
     function getSkillNeededFromUserWallet(address playerAddress, uint256 skillNeeded, bool allowInGameOnlyFunds)
@@ -286,22 +302,23 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         if (allowInGameOnlyFunds) {
             inGameOnlyFundsToUse = inGameOnlyFunds[playerAddress];
         }
-        (,, skillNeededFromUserWallet) = getSkillToSubtract(
+        (,,, skillNeededFromUserWallet) = getSkillToSubtract(
             inGameOnlyFundsToUse,
             tokenRewards[playerAddress],
+            userVars[playerAddress][USERVAR_GEN2_UNCLAIMED],
             skillNeeded
         );
     }
 
-    function unpackFightData(uint96 playerData)
-        public pure returns (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) {
+    function unpackFightData(uint104 playerData)
+        public pure returns (uint16 charTraitAndVersion, uint24 basePowerLevel, uint64 timestamp) {
 
-        charTrait = uint8(playerData & 0xFF);
-        basePowerLevel = uint24((playerData >> 8) & 0xFFFFFF);
-        timestamp = uint64((playerData >> 32) & 0xFFFFFFFFFFFFFFFF);
+        charTraitAndVersion = uint16(playerData & 0xFFFF);
+        basePowerLevel = uint24((playerData >> 16) & 0xFFFFFF);
+        timestamp = uint64((playerData >> 40) & 0xFFFFFFFFFFFFFFFF);
     }
 
-    function _getFightDataAndDrainStaminaUnpacked(address fighter, uint256 char, uint8 fightMultiplier) private returns(uint8, uint24, uint64) {
+    function _getFightDataAndDrainStaminaUnpacked(address fighter, uint256 char, uint8 fightMultiplier) private returns(uint16, uint24, uint64) {
         return unpackFightData(characters.getFightDataAndDrainStamina(fighter,
             char, staminaCostFight * fightMultiplier, false, 0));
     }
@@ -316,13 +333,13 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
 
-        (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) =
+        (uint16 charTraitAndVersion, uint24 basePowerLevel, uint64 timestamp) =
             _getFightDataAndDrainStaminaUnpacked(fighter, char, fightMultiplier);
-        
+
         (int128 weaponMultTarget,
             int128 weaponMultFight,
             uint24 weaponBonusPower,
-            uint8 weaponTrait) = _getFightDataAndDrainDurability(fighter, wep, charTrait, fightMultiplier);
+            uint8 weaponTrait) = _getFightDataAndDrainDurability(fighter, wep, uint8(charTraitAndVersion & 0xFF), fightMultiplier);
 
         // dirty variable reuse to avoid stack limits
         target = grabTarget(
@@ -331,10 +348,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             target,
             now / 1 hours
         );
-    
+
         FightData memory data = FightData(
             Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
-            uint24(charTrait | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
+            uint24(uint8(charTraitAndVersion & 0xFF) | (uint24(weaponTrait) << 8) | (target & 0xFF000000) >> 8),
             uint24(target & 0xFFFFFF)
         );
 
@@ -343,7 +360,8 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             char,
             wep,
             data,
-            fightMultiplier
+            fightMultiplier,
+            uint8((charTraitAndVersion >> 8) & 0xFF )
         );
     }
 
@@ -352,36 +370,34 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint256 char,
         uint256 wep,
         FightData memory data,
-        uint8 fightMultiplier
+        uint8 fightMultiplier,
+        uint8 characterVersion
     ) private returns (uint256 tokens, uint256 expectedTokens) {
         uint256 seed = uint256(keccak256(abi.encodePacked(now, fighter)));
         uint24 playerRoll = getPlayerPowerRoll(data.playerFightPower,data.traitsCWE,seed);
         uint24 monsterRoll = getMonsterPowerRoll(data.targetPower, RandomUtil.combineSeeds(seed,1));
 
-        updateHourlyPayouts(); // maybe only check in trackIncome? (or do via bot)
-
         uint16 xp = getXpGainForFight(data.playerFightPower, data.targetPower) * fightMultiplier;
-        tokens = getTokenGainForFight(data.targetPower, true) * fightMultiplier;
+        tokens = getTokenGainForFight(data.targetPower) * fightMultiplier;
         expectedTokens = tokens;
-
-        if(tokenRewards[fighter] == 0 && tokens > 0) {
-            _rewardsClaimTaxTimerStart[fighter] = block.timestamp;
-        }
 
         if (playerRoll < monsterRoll) {
             tokens = 0;
             xp = 0;
         }
+        //TEMP FOR EVENT
+        else {
+            _giveInGameOnlyFundsFromContractBalance(fighter, vars[VAR_FIGHT_FLAT_IGO_BONUS] * fightMultiplier);
+        }
+        //^ TEMP
 
-        // this may seem dumb but we want to avoid guessing the outcome based on gas estimates!
-        tokenRewards[fighter] += tokens;
-        vars[VAR_UNCLAIMED_SKILL] += tokens;
-        vars[VAR_HOURLY_DISTRIBUTION] -= tokens;
+        if(characterVersion > 0) {
+            userVars[fighter][USERVAR_GEN2_UNCLAIMED] += tokens;
+        }
+        else {
+            tokenRewards[fighter] += tokens;
+        }
         xpRewards[char] += xp;
-
-
-        vars[VAR_HOURLY_FIGHTS] += fightMultiplier;
-        vars[VAR_HOURLY_POWER_SUM] += data.playerFightPower * fightMultiplier;
 
         emit FightOutcome(fighter, char, wep, (data.targetPower | ((uint32(data.traitsCWE) << 8) & 0xFF000000)), playerRoll, monsterRoll, xp, tokens);
     }
@@ -390,20 +406,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         return uint24(target & 0xFFFFFF);
     }
 
-    function getTokenGainForFight(uint24 monsterPower, bool applyLimit) public view returns (uint256) {
-        // monsterPower / avgPower * payPerFight * powerMultiplier
-        uint256 amount = ABDKMath64x64.divu(monsterPower, vars[VAR_HOURLY_POWER_AVERAGE])
-            .mulu(vars[VAR_HOURLY_PAY_PER_FIGHT]);
-
-        if(amount > vars[VAR_PARAM_MAX_FIGHT_PAYOUT])
-            amount = vars[VAR_PARAM_MAX_FIGHT_PAYOUT];
-        if(vars[VAR_HOURLY_DISTRIBUTION] < amount * 5 && applyLimit) // the * 5 is a temp measure until we can sync frontend on main
-            amount = 0;
-        return amount;
+    function getTokenGainForFight(uint24 monsterPower) public view returns (uint256) {
+        // monsterPower / avgPower * payPerFight * powerMultiplier + gasoffset
+        return monsterPower * vars[VAR_HOURLY_PAY_PER_FIGHT] / vars[VAR_HOURLY_POWER_AVERAGE]
+            + vars[VAR_GAS_OFFSET_PER_FIGHT_MULTIPLIER];
     }
-
+    
     function getXpGainForFight(uint24 playerPower, uint24 monsterPower) internal view returns (uint16) {
-        return uint16(ABDKMath64x64.divu(monsterPower, playerPower).mulu(fightXpGain));
+        return uint16(monsterPower * fightXpGain / playerPower);
     }
 
     function getPlayerPowerRoll(
@@ -495,19 +505,27 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function mintCharacter() public onlyNonContract oncePerBlock(msg.sender) {
 
         uint256 skillAmount = usdToSkill(mintCharacterFee);
-        (,, uint256 fromUserWallet) =
+        (,,, uint256 fromUserWallet) =
             getSkillToSubtract(
                 0,
-                tokenRewards[msg.sender],
+                0,
+                0,
                 skillAmount
             );
         require(skillToken.balanceOf(msg.sender) >= fromUserWallet && promos.getBit(msg.sender, 4) == false);
 
         uint256 convertedAmount = usdToSkill(getMintCharacterFee());
-        _payContractTokenOnly(msg.sender, convertedAmount);
+        _deductPlayerSkillStandard(msg.sender, 0, 0, 0, convertedAmount, true);
 
         uint256 seed = randoms.getRandomSeed(msg.sender);
-        characters.mint(msg.sender, seed);
+        uint256 id = characters.mint(msg.sender, seed);
+        xpRewards[id] = 1;
+        if(userVars[msg.sender][USERVAR_GEN2_UNCLAIMED] == 0) {
+            userVars[msg.sender][USERVAR_GEN2_UNCLAIMED] = 1;
+        }
+        if(inGameOnlyFunds[msg.sender] == 0) {
+            inGameOnlyFunds[msg.sender] = 1;
+        }
 
         // first weapon free with a character mint, max 1 star
         if(weapons.balanceOf(msg.sender) == 0) {
@@ -517,65 +535,56 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         _updateCharacterMintFee();
     }
 
-    function mintWeaponN(uint32 num, uint8 chosenElement, uint256 eventId)
-        external
-        onlyNonContract
-        oncePerBlock(msg.sender)
-    {
+    function generateWeaponSeed(uint32 quantity, uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
+        require(quantity > 0 && quantity <= 10);
+        require(userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] == 0);
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(getMintWeaponFee() * num * chosenElementFee));
-        _mintWeaponNLogic(num, chosenElement, eventId);
+        int128 mintWeaponFee =
+            getMintWeaponFee()
+                .mul(ABDKMath64x64.fromUInt(quantity))
+                .mul(ABDKMath64x64.fromUInt(chosenElementFee));
+        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(mintWeaponFee));
+        _updateWeaponMintFee(quantity);
+        if (eventId > 0) {
+            specialWeaponsManager.addShards(msg.sender, eventId, quantity);
+        }
+        SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement));
+        userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] = uint256(uint256(chosenElement) | (uint256(quantity) << 32));
     }
 
-    function mintWeapon(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
-        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        _payContractConvertedSupportingStaked(msg.sender, usdToSkill(getMintWeaponFee() * chosenElementFee));
-        _mintWeaponLogic(chosenElement, eventId);
-    }
-
-    function mintWeaponNUsingStakedSkill(uint32 num, uint8 chosenElement, uint256 eventId)
-        external
-        onlyNonContract
-        oncePerBlock(msg.sender)
-    {
+    function generateWeaponSeedUsingStakedSkill(uint32 quantity, uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
+        require(quantity > 0 && quantity <= 10);
+        require(userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] == 0);
         uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
         int128 discountedMintWeaponFee =
             getMintWeaponFee()
                 .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
-                .mul(ABDKMath64x64.fromUInt(num))
+                .mul(ABDKMath64x64.fromUInt(quantity))
                 .mul(ABDKMath64x64.fromUInt(chosenElementFee));
         _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
-
-        _mintWeaponNLogic(num, chosenElement, eventId);
-    }
-
-    function mintWeaponUsingStakedSkill(uint8 chosenElement, uint256 eventId) external onlyNonContract oncePerBlock(msg.sender) {
-        uint8 chosenElementFee = chosenElement == 100 ? 1 : 2;
-        int128 discountedMintWeaponFee =
-            getMintWeaponFee()
-                .mul(PAYMENT_USING_STAKED_SKILL_COST_AFTER_DISCOUNT)
-                .mul(ABDKMath64x64.fromUInt(chosenElementFee));
-        _payContractStakedOnly(msg.sender, usdToSkill(discountedMintWeaponFee));
-
-        _mintWeaponLogic(chosenElement, eventId);
-    }
-
-    function _mintWeaponNLogic(uint32 num, uint8 chosenElement, uint256 eventId) internal {
-        require(num > 0 && num <= 10);
-        if(eventId > 0) {
-            specialWeaponsManager.addShards(msg.sender, eventId, num);
+        _updateWeaponMintFee(quantity);
+        if (eventId > 0) {
+            specialWeaponsManager.addShards(msg.sender, eventId, quantity);
         }
-        _updateWeaponMintFee(num);
-        weapons.mintN(msg.sender, num, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
+        SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement));
+        userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] = uint256(uint256(chosenElement) | (uint256(quantity) << 32));
     }
 
-    function _mintWeaponLogic(uint8 chosenElement, uint256 eventId) internal {
-        //uint256 seed = randoms.getRandomSeed(msg.sender);
-        if(eventId > 0) {
-            specialWeaponsManager.addShards(msg.sender, eventId, 1);
-        }
-        _updateWeaponMintFee(1);
-        weapons.mint(msg.sender, uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender))), chosenElement);
+    function mintWeapon() external onlyNonContract oncePerBlock(msg.sender) {
+        uint8 chosenElement = uint8((userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA]) & 0xFF);
+        uint32 quantity = uint32((userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] >> 32) & 0xFFFFFFFF);
+        require(quantity > 0);
+        userVars[msg.sender][USERVAR_CLAIM_WEAPON_DATA] = 0;
+        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(uint(WEAPON_SEED), quantity, chosenElement), true, false);
+        weapons.mintN(msg.sender, quantity, seed, chosenElement);
+    }
+
+    function getSeed(uint seedId, uint quantity, uint element) internal pure returns (uint256 seed) {
+        uint[] memory seeds = new uint[](3);
+        seeds[0] = seedId;
+        seeds[1] = quantity;
+        seeds[2] = element;
+        seed = RandomUtil.combineSeeds(seeds);
     }
 
     function _updateWeaponMintFee(uint256 num) internal {
@@ -667,14 +676,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _payContractTokenOnly(address playerAddress, uint256 convertedAmount, bool track) internal {
-        (, uint256 fromTokenRewards, uint256 fromUserWallet) =
+        (, uint256 fromTokenRewards, uint256 fromValorTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
                 0,
                 tokenRewards[playerAddress],
+                userVars[playerAddress][USERVAR_GEN2_UNCLAIMED],
                 convertedAmount
             );
 
-        _deductPlayerSkillStandard(playerAddress, 0, fromTokenRewards, fromUserWallet, track);
+        _deductPlayerSkillStandard(playerAddress, 0, fromTokenRewards, fromValorTokenRewards, fromUserWallet, track);
     }
 
     function _payContract(address playerAddress, int128 usdAmount) internal
@@ -686,17 +696,18 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     function _payContractConverted(address playerAddress, uint256 convertedAmount) internal
         returns (uint256 _fromInGameOnlyFunds, uint256 _fromTokenRewards, uint256 _fromUserWallet) {
 
-        (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromUserWallet) =
+        (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromValorTokenRewards, uint256 fromUserWallet) =
             getSkillToSubtract(
                 inGameOnlyFunds[playerAddress],
                 tokenRewards[playerAddress],
+                userVars[playerAddress][USERVAR_GEN2_UNCLAIMED],
                 convertedAmount
             );
 
         require(skillToken.balanceOf(playerAddress) >= fromUserWallet,
             string(abi.encodePacked("Not enough SKILL! Need ",RandomUtil.uint2str(convertedAmount))));
 
-        _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
+        _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromValorTokenRewards, fromUserWallet);
 
         return (fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
     }
@@ -719,10 +730,11 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             uint256 _fromStaked
         ) {
 
-        (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 _remainder) =
+        (uint256 fromInGameOnlyFunds, uint256 fromTokenRewards, uint256 fromValorTokenRewards, uint256 _remainder) =
             getSkillToSubtract(
                 inGameOnlyFunds[playerAddress],
                 tokenRewards[playerAddress],
+                userVars[playerAddress][USERVAR_GEN2_UNCLAIMED],
                 convertedAmount
             );
 
@@ -732,7 +744,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
                 skillToken.balanceOf(playerAddress)
             );
 
-        _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromUserWallet);
+        _deductPlayerSkillStandard(playerAddress, fromInGameOnlyFunds, fromTokenRewards, fromValorTokenRewards, fromUserWallet);
 
         if(fromStaked > 0) {
             stakeFromGameImpl.unstakeToGame(playerAddress, fromStaked);
@@ -755,12 +767,14 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         address playerAddress,
         uint256 fromInGameOnlyFunds,
         uint256 fromTokenRewards,
+        uint256 fromValorTokenRewards,
         uint256 fromUserWallet
     ) internal {
         _deductPlayerSkillStandard(
             playerAddress,
             fromInGameOnlyFunds,
             fromTokenRewards,
+            fromValorTokenRewards,
             fromUserWallet,
             true
         );
@@ -770,16 +784,22 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         address playerAddress,
         uint256 fromInGameOnlyFunds,
         uint256 fromTokenRewards,
+        uint256 fromValorTokenRewards,
         uint256 fromUserWallet,
         bool trackInflow
     ) internal {
         if(fromInGameOnlyFunds > 0) {
-            totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
+            if(totalInGameOnlyFunds >= fromInGameOnlyFunds) // might revert otherwise due to .sub
+                totalInGameOnlyFunds = totalInGameOnlyFunds.sub(fromInGameOnlyFunds);
             inGameOnlyFunds[playerAddress] = inGameOnlyFunds[playerAddress].sub(fromInGameOnlyFunds);
         }
 
         if(fromTokenRewards > 0) {
             tokenRewards[playerAddress] = tokenRewards[playerAddress].sub(fromTokenRewards);
+        }
+
+        if(fromValorTokenRewards > 0) {
+            userVars[playerAddress][USERVAR_GEN2_UNCLAIMED] = userVars[playerAddress][USERVAR_GEN2_UNCLAIMED].sub(fromValorTokenRewards);
         }
 
         if(fromUserWallet > 0) {
@@ -793,6 +813,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         tokenRewards[player] = tokenRewards[player].sub(amount);
         vars[VAR_UNCLAIMED_SKILL] -= amount;
         _trackIncome(amount);
+    }
+
+    function deductValor(uint256 amount, address player) external restricted {
+        userVars[player][USERVAR_GEN2_UNCLAIMED] = userVars[player][USERVAR_GEN2_UNCLAIMED].sub(amount);
     }
 
     function trackIncome(uint256 income) public restricted {
@@ -878,6 +902,10 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         }
     }
 
+    function setLink(uint256 linkId, address linkAddress) external restricted {
+        links[linkId] = linkAddress;
+    }
+
     function giveInGameOnlyFunds(address to, uint256 skillAmount) external restricted {
         totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
         inGameOnlyFunds[to] = inGameOnlyFunds[to].add(skillAmount);
@@ -888,7 +916,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     }
 
     function _giveInGameOnlyFundsFromContractBalance(address to, uint256 skillAmount) internal {
-        totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
+        //totalInGameOnlyFunds = totalInGameOnlyFunds.add(skillAmount);
         inGameOnlyFunds[to] = inGameOnlyFunds[to].add(skillAmount);
 
         emit InGameOnlyFundsGiven(to, skillAmount);
@@ -900,88 +928,6 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function usdToSkill(int128 usdAmount) public view returns (uint256) {
         return usdAmount.mulu(priceOracleSkillPerUsd.currentPrice());
-    }
-
-    function claimTokenRewards() public {
-        claimTokenRewards(getRemainingTokenClaimAmountPreTax());
-    }
-
-    function claimTokenRewards(uint256 _claimingAmount) public {
-
-        trackDailyClaim(_claimingAmount);
-
-        uint256 _tokenRewardsToPayOut = _claimingAmount.sub(
-            _getRewardsClaimTax(msg.sender).mulu(_claimingAmount)
-        );
-
-        // Tax goes to game contract itself, which would mean
-        // transferring from the game contract to ...itself.
-        // So we don't need to do anything with the tax part of the rewards.
-        if(promos.getBit(msg.sender, 4) == false) {
-            _payPlayerConverted(msg.sender, _tokenRewardsToPayOut);
-            if(_tokenRewardsToPayOut <= vars[VAR_UNCLAIMED_SKILL])
-                vars[VAR_UNCLAIMED_SKILL] -= _tokenRewardsToPayOut;
-        }
-    }
-
-    function trackDailyClaim(uint256 _claimingAmount) internal {
-
-        if(isDailyTokenClaimAmountExpired()) {
-            userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] = now;
-            userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] = 0;
-        }
-        require(_claimingAmount <= getRemainingTokenClaimAmountPreTax() && _claimingAmount > 0);
-        // safemath throws error on negative
-        tokenRewards[msg.sender] = tokenRewards[msg.sender].sub(_claimingAmount);
-        userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT] += _claimingAmount;
-    }
-
-    function isDailyTokenClaimAmountExpired() public view returns (bool) {
-        return userVars[msg.sender][USERVAR_CLAIM_TIMESTAMP] <= now - 1 days;
-    }
-
-    function getClaimedTokensToday() public view returns (uint256) {
-        // if claim timestamp is older than a day, it's reset to 0
-        return isDailyTokenClaimAmountExpired() ? 0 : userVars[msg.sender][USERVAR_DAILY_CLAIMED_AMOUNT];
-    }
-
-    function getRemainingTokenClaimAmountPreTax() public view returns (uint256) {
-        // used to get how much can be withdrawn until the daily withdraw timer expires
-        uint256 max = getMaxTokenClaimAmountPreTax();
-        uint256 claimed = getClaimedTokensToday();
-        if(claimed >= max)
-            return 0; // all tapped out for today
-        uint256 remainingOfMax = max-claimed;
-        return tokenRewards[msg.sender] >= remainingOfMax ? remainingOfMax : tokenRewards[msg.sender];
-    }
-
-    function getMaxTokenClaimAmountPreTax() public view returns(uint256) {
-        // if tokenRewards is above VAR_CLAIM_DEPOSIT_AMOUNT, we let them withdraw more
-        // this function does not account for amount already withdrawn today
-        if(tokenRewards[msg.sender] >= vars[VAR_CLAIM_DEPOSIT_AMOUNT]) { // deposit bonus active
-            // max is either 10% of amount above deposit, or 2x the regular limit, whichever is higher
-            uint256 aboveDepositAdjusted = ABDKMath64x64.divu(vars[VAR_PARAM_DAILY_CLAIM_DEPOSIT_PERCENT],100)
-                .mulu(tokenRewards[msg.sender]-vars[VAR_CLAIM_DEPOSIT_AMOUNT]); // 10% above deposit
-            if(aboveDepositAdjusted > vars[VAR_DAILY_MAX_CLAIM] * 2) {
-                return aboveDepositAdjusted;
-            }
-            return vars[VAR_DAILY_MAX_CLAIM] * 2;
-        }
-        return vars[VAR_DAILY_MAX_CLAIM];
-    }
-
-    function stakeUnclaimedRewards() public {
-        stakeUnclaimedRewards(getRemainingTokenClaimAmountPreTax());
-    }
-
-    function stakeUnclaimedRewards(uint256 amount) public {
-
-        trackDailyClaim(amount);
-
-        if(promos.getBit(msg.sender, 4) == false) {
-            skillToken.approve(address(stakeFromGameImpl), amount);
-            stakeFromGameImpl.stakeFromGame(msg.sender, amount);
-        }
     }
 
     function claimXpRewards() public {

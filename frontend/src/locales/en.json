@@ -7,6 +7,7 @@
     "adventure": "Adventure",
     "raid": "Raid",
     "bazaar": "Bazaar",
+    "drawbridge": "Drawbridge",
     "arena" : "Arena",
     "stake": "Stake",
     "pvp": "PvP",
@@ -18,7 +19,8 @@
     "nftbridge": "NFT Bridge",
     "wiki": "Wiki",
     "nftDisplay": "NFT Display",
-    "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality."
+    "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality.",
+    "DrawbridgeNotSupportedTooltip": "Drawbridge is only available for SKALE and BSC chains."
   },
   "sideBar": {
     "fightingArena": "Fighting in the arena",
@@ -47,15 +49,17 @@
     "characterName": "Character Name",
     "unclaimedExp": "Unclaimed EXP",
     "unclaimed": "UNCLAIMED SKILL",
+    "unclaimedValor": "UNCLAIMED VALOR",
     "widthraw": "WITHDRAW",
     "claimRewards": "Claim Rewards",
     "payoutCurrency": "Payout Currency",
     "partnerTokenClaimed": "This partner tokens have been claimed already.",
     "slippage": "Slippage",
     "skillAmount": "Skill Amount",
+    "valorAmount": "Valor Amount",
     "multiplierAtZero": "Multiplier is at x0, try again later...",
     "lowMultiplier": "Current multiplier is low, you will receive only {currentMultiplier} of claimed tokens.",
-    "realWithdrawValueClaimable": "Currently you'll receive approximately {actualAmount} {tokenSymbol} for withdrawing {skillAmount} SKILL."
+    "realWithdrawValueClaimable": "Currently you'll receive approximately {actualAmount} {tokenSymbol} for withdrawing {skillAmount} {token}."
   },
   "Character": {
     "cancelledTransaction": "You cancelled the transaction.",
@@ -122,12 +126,14 @@
     "won": "You won the fight!",
     "lost": "You lost the fight!",
     "earned": "You earned:",
-    "hint": "SKILL earned is based on gas costs of the network plus a factor of your power",
+    "hint": "SKILL/VALOR earned is based on gas costs of the network plus a factor of your power",
     "gasFee": "You spent {bnbGasUsed} {gasToken} on gas fees ",
     "youRolled": "You rolled:",
     "enemyRolled": "Enemy rolled:",
     "earnedSkill": "<b>{noIGO}</b> <small>UNCLAIMED SKILL</small> <b>{inUSD}</b> ",
-    "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> "
+    "earnedValor": "<b>{noIGO}</b> <small>UNCLAIMED VALOR</small> ",
+    "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> ",
+    "gasOffset": "<br/> <small>INCLUDING</small> <b>{offset}</b> <small>GAS OFFSET</small> <b>{inUSD}</b> "
   },
   "homePage":{
     "level": "Level",
@@ -170,10 +176,12 @@
     "earningsCalculator": "Earnings Calculator",
     "milestoneBonus": "Earn {0} more per battle at",
     "currentPrices": "Current prices",
+    "currentBestMultiplier": "Current Best Multiplier",
     "earnings": "Earnings",
     "winsPerDay": "Wins # per day",
     "dailyProfit": "Daily profit",
-    "monthlyProfit": "Monthly profit"
+    "monthlyProfit": "Monthly profit",
+    "earningsHint": "Earnings are based on the best available multiplier in Treasury, which varies based on players claiming."
   },
   "plaza": {
     "welcome": "Start earning today!",
@@ -334,6 +342,8 @@
     "forgeNew": "Forge a new weapon",
     "forge10New": "Forge 10 new weapons",
     "forge": "Forge",
+    "claimForged": "Claim forged",
+    "claimWeaponsPaidFor": "Claim weapons paid for",
     "reforge": "Reforge",
     "coolingForge": "Cooling forge ...",
     "notEnoughStakedSkill": "Not enough staked SKILL!",
@@ -584,6 +594,7 @@
     "nextRaid" : "Next Raid",
     "finishesOn": "Finishes on",
     "raidStatus": "Raid status",
+    "raidOver": "Next raid starting soon",
     "claimRewards": "Claim rewards",
     "raidRewardsSelector": "Raid rewards selector",
     "selectRaid": "Select a raid to claim rewards from",
@@ -778,7 +789,8 @@
       "DUST": "Dust",
       "EXPERIENCE": "Experience",
       "SOUL": "Soul",
-      "EXTERNAL": "External"
+      "EXTERNAL": "External",
+      "CHARACTER": "Character"
     },
     "questItemType": {
       "NONE": "None",
@@ -793,7 +805,8 @@
       "EXTERNAL": "External",
       "EXTERNAL_HOLD": "External Hold",
       "EXPERIENCE": "Experience",
-      "REPUTATION": "Reputation"
+      "REPUTATION": "Reputation",
+      "CHARACTER": "Character"
     },
     "reputationTier": {
       "PEASANT": "Peasant",
@@ -902,6 +915,7 @@
       "quests": "Quests",
       "cbkLand": "CBK Land",
       "weapons": "Weapons",
+      "shields": "Shields",
       "burningManager": "Burning Manager",
       "partnerVault": "Partner Vault",
       "treasury": "Treasury",
@@ -952,6 +966,25 @@
       "multiplier": "Multiplier",
       "setBurnPointMultiplier": "Set burn point multiplier"
     },
+    "shields": {
+      "playerAddress": "Player address",
+      "mintGiveawayShield": "Mint giveaway shield",
+      "pleaseSelectStars": "Please select stars",
+      "pleaseSelectShieldType": "Please select shield type",
+      "mintShield": "Mint shield",
+      "rarities": {
+        "COMMON": "1 star",
+        "UNCOMMON": "2 stars",
+        "RARE": "3 stars",
+        "EPIC": "4 stars ",
+        "LEGENDARY": "5 stars"
+      },
+      "types" : {
+        "NON_SERIES": "Non-series",
+        "FOUNDERS": "Founders",
+        "LEGENDARY": "Legendary"
+      }
+    },
     "burningManager": {
       "playerAddress": "Player address",
       "mintGiveawaySoul": "Mint giveaway soul",
@@ -982,6 +1015,7 @@
       "details": "Details",
       "websiteUrl": "Website URL",
       "noteOptional": "Note (optional)",
+      "isValor":"Is Valor",
       "findActivePartnerProjects": "Find active partner projects",
       "name": "Name",
       "symbol": "Symbol",
@@ -1097,6 +1131,9 @@
   },
   "stake": {
     "staking": "Staking",
+    "octobladesStakings": "OctoBlades Stakings",
+    "landStakings": "Land Stakings",
+    "normalStakings": "Normal Stakings",
     "unknownStakeType": "Unknown stake type, please try again.",
     "rewardsAvailable": "Rewards are available!",
     "have": "You have:",
@@ -1412,6 +1449,13 @@
           "inst3": "3. If you need to bridge NFTs to or from other networks, use our bridge: <a target=_blank href=https://www.youtube.com/watch?v=eNqh7b7hJwE&t=66s> Watch Video </a>",
           "inst4": "4. That's it! If you have any questions, please join our Discord: <a target=_blank href=https://discord.gg/cryptoblades> Join Discord </a>"
         },
+        "SKALE":{
+          "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and SFUEL for gas.",
+          "inst1": "1. Go to the <a target=_blank href=https://sfuel.mylilius.com/> SFUEL Faucet </a> to claim your SFUEL for free!",
+          "inst2": "2. You can transfer your SKILL from BNB to SKALE with our <a target=_blank href=https://drawbridge.cryptoblades.io/> Drawbridge </a>",
+          "inst3": "3. That's it! If you have any questions, check our <a target=_blank href=https://cryptoblades.gitbook.io/wiki/> Wiki </a> or <a target=_blank href=https://discord.gg/cryptoblades> join our Discord </a> !",
+          "inst4": ""
+        },
         "hideWalletWarning": "You have hidden the wallet warning and it would now be displayed. If you are trying to play, please disable the option and follow the instructions, otherwise close and ignore.",
         "happyEarning": "Happy Earning!",
         "newCharacter": "New character",
@@ -1486,5 +1530,12 @@
     "more": "More",
     "less": "Less",
     "unclaimed": "Unclaimed"
+  },
+  "banner": {
+    "linkText": "Join the Event",
+    "octoblades": {
+      "octoblades": "The OctoBlades Event is Live on BNB Chain! Over 5x Rewards, Weekly PvP Tournaments, and SO MUCH MORE!!",
+      "link": "https://app.cryptoblades.io/#/?chain=BNB"
+    }
   }
 }

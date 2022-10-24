@@ -10,9 +10,9 @@
           v-if="questItemTypeSupportsTimesValue(quest.requirementType) && !isCurrency">x</span> <span
           v-if="questItemTypeSupportsStars(quest.requirementType)">{{
             Array(quest.requirementRarity + 1).fill('★').join('')
-          }} </span>{{ requirementName }} <i
+          }} </span>{{ requirementName }} <b-icon-question-circle
           v-if="quest.requirementType === RequirementType.EXTERNAL || quest.requirementType === RequirementType.EXTERNAL_HOLD"
-          :id="`external-hint-${quest.id}-${index}`" class="far fa-question-circle hint"/></span>
+          :id="`external-hint-${quest.id}-${index}`"/></span>
         <b-tooltip
           v-if="quest.requirementType === RequirementType.EXTERNAL || quest.requirementType === RequirementType.EXTERNAL_HOLD"
           :target="`external-hint-${quest.id}-${index}`">

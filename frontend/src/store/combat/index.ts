@@ -68,6 +68,15 @@ const combat = {
     async fetchIgoRewardsPerFight({ rootState }: {rootState: IState}) {
       const { CryptoBlades } = rootState.contracts();
       if(!CryptoBlades || !rootState.defaultAccount) return;
+      const IGO = 28;
+      return await CryptoBlades.methods
+        .vars(IGO)
+        .call(defaultCallOptions(rootState));
+    },
+
+    async fetchGasOffsetPerFight({ rootState }: {rootState: IState}) {
+      const { CryptoBlades } = rootState.contracts();
+      if(!CryptoBlades || !rootState.defaultAccount) return;
 
       return await CryptoBlades.methods
         .vars(27)
@@ -113,13 +122,10 @@ const combat = {
     },
 
     async fetchExpectedPayoutForMonsterPower(
-      { rootState }: {rootState: IState}, { power, isCalculator = false }: {power: string | number, isCalculator: boolean}) {
+      { rootState }: {rootState: IState}, { power }: {power: string | number}) {
       const { CryptoBlades } = rootState.contracts();
       if(!CryptoBlades) return;
-      if(isCalculator) {
-        return await CryptoBlades.methods.getTokenGainForFight(power, false).call(defaultCallOptions(rootState));
-      }
-      return await CryptoBlades.methods.getTokenGainForFight(power, true).call(defaultCallOptions(rootState));
+      return await CryptoBlades.methods.getTokenGainForFight(power).call(defaultCallOptions(rootState));
     },
 
     async getNativeTokenPriceInUsd({ rootState }: {rootState: IState}) {
@@ -150,7 +156,7 @@ const combat = {
           targetString,
           fightMultiplier
         )
-        .send({ from: rootState.defaultAccount, gasPrice: getGasPrice(), gas: '300000', value: (+offsetCost ? +offsetCost : 1)*fightMultiplier });
+        .send({ from: rootState.defaultAccount, gasPrice: getGasPrice(), gas: '300000', value: +offsetCost * fightMultiplier });
 
       let playerRoll = '';
       let enemyRoll = '';
@@ -173,8 +179,10 @@ const combat = {
       const {gasPrice} = await rootState.web3.eth.getTransaction(res.transactionHash);
 
       const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
-      await dispatch('combat/fetchTargets', { characterId, weaponId });
-      await dispatch('fetchWeaponDurability', weaponId);
+      await Promise.all([
+        dispatch('combat/fetchTargets', {characterId, weaponId}),
+        dispatch('fetchWeaponDurability', weaponId),
+      ]);
 
       return {
         isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
@@ -212,6 +220,26 @@ const combat = {
       ]);
 
       return skillRewards;
+    },
+
+    async fetchFightRewardValor({ rootState, commit }: {rootState: IState, commit: Commit}) {
+      const { CryptoBlades } = rootState.contracts();
+      const defaultAccount = rootState.defaultAccount;
+      if(!CryptoBlades || !defaultAccount) return;
+
+      const [valorRewards] = await Promise.all([
+        (async () => {
+          const valorRewards = await CryptoBlades.methods
+            .userVars(defaultAccount, 10011)
+            .call(defaultCallOptions(rootState));
+
+          commit('updateValorRewards', { valorRewards }, { root: true });
+
+          return valorRewards;
+        })()
+      ]);
+
+      return valorRewards;
     },
 
     async fetchFightRewardXp({ rootState, commit }: {rootState: IState, commit: Commit}) {

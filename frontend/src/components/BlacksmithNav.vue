@@ -1,6 +1,6 @@
 <template>
-    <div class="d-flex flex-column flex-md-row menu-nav justify-content-between">
-        <div class="d-flex flex-column flex-md-row mr-3">
+    <div class="blacksmith-nav d-flex flex-column flex-sm-row menu-nav">
+        <div class="d-flex flex-column flex-sm-row mr-3 justify-content-center">
           <div role="button" class="nav-char none-mobile" :class="['d-flex gap-3 align-items-center link',
             (activeTab === 'forge') ? 'active' : '']" @click="$emit('toggle', 'forge')">
             <div class="img-nav">
@@ -8,9 +8,8 @@
             </div>
             <span class="main-font text-muted fs-5">{{$t('blacksmith.forge')}}</span>
           </div>
-          <div class="w-100 d-block d-md-none none-mobile"></div>
-          <div class="separator d-none d-md-block mx-3 none-mobile"></div>
-          <div role="button" class="none-mobile" :class="['d-flex gap-3 align-items-center link mt-4 mt-md-0',
+          <div class="separator d-none d-sm-block mx-3 none-mobile"></div>
+          <div role="button" class="none-mobile" :class="['d-flex gap-3 align-items-center link mt-sm-0',
             (activeTab === 'salvage') ? 'active' : '']" @click="$emit('toggle', 'salvage')">
             <div class="img-nav">
               <img src="../assets/blacksmith/salvage.png"/>
@@ -18,40 +17,52 @@
             <span  class="main-font text-muted fs-5">{{$t('blacksmith.salvage')}}</span>
           </div>
         </div>
-        <div class="d-flex flex-column flex-md-row justify-contenct-center" v-if="activeTab === 'forge'" >
-          <cb-button v-if="reforgeWeaponId !== null && ownWeapons.length > 0" class="custom-cb-btn custom-reforge-btn" tagname="weapon_special_forge"
-            :title="$t('blacksmith.reforgeWithDust')"
-            @clickEvent="$emit('displayDustReforge')"
-            :toolTip="$t('blacksmith.useDust')"
-          />
-          <cb-button class="custom-cb-btn custom-special-forge-btn" tagname="weapon_special_forge" :title="$t('blacksmith.specialForge')"
-            @clickEvent="$emit('onClickSpecialForge')"
-            :toolTip="$t('blacksmith.specialForgeTooltip')"
-          />
-          <cb-button class="custom-cb-btn custom-forge-btn gtag-link-others" tagname="weapon_forge_single"
-            :title="`${disableForge ? $t('blacksmith.coolingForge') : $t('blacksmith.forge')} x1 <br/>`"
-            :isLoading="isLoading"
-            :subTitle="`(${forgeCost === '0' ? '0.0000' : forgeCost} SKILL)`" @clickEvent="$emit('onClickForge', 0)" :toolTip="$t('blacksmith.forgeNew')"
-            :isDisabled="disableForge"
-          />
-          <cb-button class="custom-cb-btn custom-forge-btn gtag-link-others" tagname="weapon_forge_multiple"
-            :title="`${disableForge ? $t('blacksmith.coolingForge') : $t('blacksmith.forge')} x10 <br/>`"
-            :isLoading="isLoading"
-            :subTitle="`(${forgeCost === '0' ? '0.0000' : forgeCost} SKILL)`" @clickEvent="$emit('onClickForge', 1)"
-            :isDisabled="disableX10Forge || disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
-            :toolTip="(disableX10Forge) ? $t('blacksmith.disableDynamicMintingForge') : $t('blacksmith.forge10New')"
-            :style="disableX10Forge ? 'opacity: 0.5' : ''"
-          />
-          <b-checkbox
-            class="custom-staking-checkbox"
-            :disabled="disableUseStakedForForge"
-            @change="$emit('setStakedForForgeValue', $event)">
-            <span v-if="disableUseStakedForForge"> <b>{{$t('blacksmith.notEnoughStakedSkill')}}<br></b></span>
-            <span v-html="$t('blacksmith.spendStakedFunds')"></span>
-          </b-checkbox>
-          <div class="tooltip-container">
-            <b-icon-question-circle class="centered-icon" scale="1.5"
-              v-on:click="$emit('onShowForgeDetails')" v-tooltip.bottom="$t('blacksmith.clickForForgePercentages')"/>
+        <div class="d-flex flex-column flex-sm-row justify-content-center flex-wrap" v-if="activeTab === 'forge'" >
+          <div class="forge-buttons d-flex flex-column flex-sm-row justify-content-center flex-nowrap">
+            <cb-button v-if="reforgeWeaponId !== null && ownWeapons.length > 0" class="custom-cb-btn custom-reforge-btn" tagname="weapon_special_forge"
+              :title="$t('blacksmith.reforgeWithDust')"
+              @clickEvent="$emit('displayDustReforge')"
+              :toolTip="$t('blacksmith.useDust')"
+            />
+            <cb-button class="custom-cb-btn custom-special-forge-btn" tagname="weapon_special_forge" :title="$t('blacksmith.specialForge')"
+              @clickEvent="$emit('onClickSpecialForge')"
+              :toolTip="$t('blacksmith.specialForgeTooltip')"
+            />
+            <cb-button v-if="!canClaim" class="custom-cb-btn custom-forge-btn gtag-link-others" tagname="weapon_forge_single"
+              :title="`${disableForge ? $t('blacksmith.coolingForge') : $t('blacksmith.forge')} x1 <br/>`"
+              :isLoading="isLoading"
+              :isDisabled="disableForge"
+              :subTitle="`(${forgeCost === '0' ? '0.0000' : forgeCost} SKILL)`" @clickEvent="$emit('onClickForge', 0)"
+              :toolTip="$t('blacksmith.forgeNew')"
+            />
+            <cb-button v-if="!canClaim" class="custom-cb-btn custom-forge-btn gtag-link-others" tagname="weapon_forge_multiple"
+              :title="`${disableForge ? $t('blacksmith.coolingForge') : $t('blacksmith.forge')} x10 <br/>`"
+              :isLoading="isLoading"
+              :subTitle="`(${forgeCost === '0' ? '0.0000' : (forgeCost*10).toFixed(4)} SKILL)`" @clickEvent="$emit('onClickForge', 1)"
+              :isDisabled="disableX10Forge || disableForge || (disableX10ForgeWithStaked && useStakedForForge)"
+              :toolTip="(disableX10Forge) ? $t('blacksmith.disableDynamicMintingForge') : $t('blacksmith.forge10New')"
+              :style="disableX10Forge ? 'opacity: 0.5' : ''"
+            />
+            <cb-button v-if="canClaim" class="custom-cb-btn custom-special-forge-btn" tagname="weapon_claim"
+              :title="`${disableForge ? $t('blacksmith.coolingForge') : $t('blacksmith.claimForged')} <br/>`"
+              :isLoading="isLoading"
+              @clickEvent="$emit('onClickClaim')"
+              :isDisabled="disableForge"
+              :toolTip="$t('blacksmith.claimWeaponsPaidFor')"
+            />
+          </div>
+          <div class="d-flex flex-column flex-sm-row justify-content-center flex-wrap">
+            <b-checkbox
+              class="custom-staking-checkbox"
+              :disabled="disableUseStakedForForge"
+              @change="$emit('setStakedForForgeValue', $event)">
+              <span v-if="disableUseStakedForForge"> <b>{{$t('blacksmith.notEnoughStakedSkill')}}<br></b></span>
+              <span v-html="$t('blacksmith.spendStakedFunds')"></span>
+            </b-checkbox>
+            <div class="tooltip-container">
+              <b-icon-question-circle class="centered-icon" scale="1.5"
+                v-on:click="$emit('onShowForgeDetails')" v-tooltip.bottom="$t('blacksmith.clickForForgePercentages')"/>
+            </div>
           </div>
       </div>
     </div>
@@ -99,6 +110,11 @@ export default Vue.extend({
       required: false,
       default: false
     },
+    canClaim: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
     ownWeapons: {
       type: Array,
       required: true,
@@ -117,6 +133,21 @@ export default Vue.extend({
 *{
   z-index: 1;
 }
+
+.blacksmith-nav{
+  justify-content: space-between;
+}
+
+@media (max-width: 1185px) {
+  .blacksmith-nav{
+    justify-content: center !important;
+  }
+
+  .forge-buttons{
+    margin: 5px 0px 5px 0px;
+  }
+}
+
 .custom-reforge-btn{
   margin-right: -5px !important;
 }
@@ -127,7 +158,6 @@ export default Vue.extend({
   font-size: 14px;
   margin-right: 15px;
 }
-
 .custom-cb-btn{
   height: 120% !important;
   font-weight: normal !important;

@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Web3 from 'web3';
 import _ from 'lodash';
-import {bnMinimum, currentChainSupportsPvP, currentChainSupportsQuests, toBN} from '@/utils/common';
+import {bnMinimum, currentChainSupportsDrawbridge, currentChainSupportsPvP, currentChainSupportsQuests, toBN} from '@/utils/common';
 
 import {getConfigValue, setUpContracts} from '@/contracts';
 
@@ -16,6 +16,7 @@ import {burningManager as featureFlagBurningManager} from '@/feature-flags';
 import {ERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
 import {stakeTypeThatCanHaveUnclaimedRewardsStakedTo} from '@/stake-types';
 import {Nft} from '@/interfaces/Nft';
+import {Element} from '@/enums/Element';
 import {getWeaponNameFromSeed} from '@/weapon-name';
 import axios from 'axios';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';
@@ -79,7 +80,9 @@ export default new Vuex.Store<IState>({
     skillPriceInUsd: 0,
 
     skillBalance: '0',
+    balance: '0',
     skillRewards: '0',
+    valorRewards: '0',
     maxRewardsClaimTax: '0',
     rewardsClaimTax: '0',
     xpRewards: {},
@@ -97,6 +100,7 @@ export default new Vuex.Store<IState>({
     ownedDust: [],
     currentChainSupportsPvP: false,
     currentChainSupportsQuests: false,
+    currentChainSupportsDrawbridge: false,
     hasAdminAccess: false,
     hasMinterAccess: false,
 
@@ -215,6 +219,12 @@ export default new Vuex.Store<IState>({
     getExchangeUrl() {
       return getConfigValue('exchangeUrl');
     },
+    getBalanceUrl() {
+      return getConfigValue('balanceUrl');
+    },
+    getCurrencySymbol() {
+      return getConfigValue('currencySymbol');
+    },
     getExchangeTransakUrl() {
       const currencyNetwork = getConfigValue('currencyNetwork') || 'BNB';
       const currencyDefault = getConfigValue('currency') || 'BNB';
@@ -276,6 +286,10 @@ export default new Vuex.Store<IState>({
 
     getCurrentChainSupportsQuests(state) {
       return state.currentChainSupportsQuests;
+    },
+
+    getCurrentChainSupportsDrawbridge(state) {
+      return state.currentChainSupportsDrawbridge;
     },
 
     getHasAdminAccess(state) {
@@ -465,12 +479,20 @@ export default new Vuex.Store<IState>({
       state.skillBalance = skillBalance;
     },
 
+    updateBalance(state: IState, { balance }) {
+      state.balance = balance;
+    },
+
     updateDustBalance(state: IState, { dustBalance }) {
       state.ownedDust = dustBalance;
     },
 
     updateSkillRewards(state: IState, { skillRewards }: { skillRewards: string }) {
       state.skillRewards = skillRewards;
+    },
+
+    updateValorRewards(state: IState, { valorRewards }: { valorRewards: string }) {
+      state.valorRewards = valorRewards;
     },
 
     updateRewardsClaimTax(
@@ -552,6 +574,10 @@ export default new Vuex.Store<IState>({
 
     updateCurrentChainSupportsQuests(state: IState) {
       state.currentChainSupportsQuests = currentChainSupportsQuests();
+    },
+
+    updateCurrentChainSupportsDrawbridge(state: IState) {
+      state.currentChainSupportsDrawbridge = currentChainSupportsDrawbridge();
     },
 
     updateHasAdminAccess(state: IState, hasAdminAccess: boolean) {
@@ -732,9 +758,9 @@ export default new Vuex.Store<IState>({
       subscriptions.push(
         Characters.events.NewCharacter(
           { filter: { minter: state.defaultAccount } },
-          async (err: Error, data: any) => {
-            if (err) {
-              console.error(err, data);
+          async (error: Error, data: any) => {
+            if (error) {
+              console.error(error, data);
               return;
             }
 
@@ -746,6 +772,7 @@ export default new Vuex.Store<IState>({
               dispatch('fetchCharacter', { characterId }),
               dispatch('fetchSkillBalance'),
               dispatch('combat/fetchFightRewardSkill'),
+              dispatch('combat/fetchFightRewardValor'),
               dispatch('combat/fetchFightRewardXp'),
               dispatch('fetchDustBalance')
             ]);
@@ -755,9 +782,9 @@ export default new Vuex.Store<IState>({
       subscriptions.push(
         Garrison.events.CharacterReceived(
           { filter: { minter: state.defaultAccount } },
-          async (err: Error, data: any) => {
-            if (err) {
-              console.error(err, data);
+          async (error: Error, data: any) => {
+            if (error) {
+              console.error(error, data);
               return;
             }
 
@@ -778,9 +805,9 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        Weapons.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
-          if (err) {
-            console.error(err, data);
+        Weapons.events.NewWeapon({ filter: { minter: state.defaultAccount } }, async (error: Error, data: any) => {
+          if (error) {
+            console.error(error, data);
             return;
           }
 
@@ -796,9 +823,9 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        Shields.events.NewShield({ filter: { minter: state.defaultAccount } }, async (err: Error, data: any) => {
-          if (err) {
-            console.error(err, data);
+        Shields.events.NewShield({ filter: { minter: state.defaultAccount } }, async (error: Error, data: any) => {
+          if (error) {
+            console.error(error, data);
             return;
           }
 
@@ -815,9 +842,9 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        CryptoBlades.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (err: Error, data: any) => {
-          if (err) {
-            console.error(err, data);
+        CryptoBlades.events.FightOutcome({ filter: { owner: state.defaultAccount } }, async (error: Error, data: any) => {
+          if (error) {
+            console.error(error, data);
             return;
           }
 
@@ -829,9 +856,9 @@ export default new Vuex.Store<IState>({
       );
 
       subscriptions.push(
-        CryptoBlades.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (err: Error, data: any) => {
-          if (err) {
-            console.error(err, data);
+        CryptoBlades.events.InGameOnlyFundsGiven({ filter: { to: state.defaultAccount } }, async (error: Error, data: any) => {
+          if (error) {
+            console.error(error, data);
             return;
           }
 
@@ -845,9 +872,9 @@ export default new Vuex.Store<IState>({
         if(!StakingRewards) return;
 
         subscriptions.push(
-          StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (err: Error, data: any) => {
-            if (err) {
-              console.error(err, data);
+          StakingRewards.events.RewardPaid({ filter: { user: state.defaultAccount } }, async (error: Error, data: any) => {
+            if (error) {
+              console.error(error, data);
               return;
             }
 
@@ -856,9 +883,9 @@ export default new Vuex.Store<IState>({
         );
 
         subscriptions.push(
-          StakingRewards.events.RewardAdded(async (err: Error, data: any) => {
-            if (err) {
-              console.error(err, data);
+          StakingRewards.events.RewardAdded(async (error: Error, data: any) => {
+            if (error) {
+              console.error(error, data);
               return;
             }
 
@@ -867,9 +894,9 @@ export default new Vuex.Store<IState>({
         );
 
         subscriptions.push(
-          StakingRewards.events.RewardsDurationUpdated(async (err: Error, data: any) => {
-            if (err) {
-              console.error(err, data);
+          StakingRewards.events.RewardsDurationUpdated(async (error: Error, data: any) => {
+            if (error) {
+              console.error(error, data);
               return;
             }
 
@@ -894,17 +921,14 @@ export default new Vuex.Store<IState>({
       commit('setContracts', () => contracts);
     },
 
-    async fetchUserDetails({ dispatch }) {
-      const promises = [
+    async fetchUserDetails({dispatch}) {
+      await Promise.all([
         dispatch('fetchSkillBalance'),
         dispatch('fetchWaxBridgeDetails'),
         dispatch('fetchDustBalance'),
-        dispatch('specialWeaponsManager/fetchShardsSupply')
-      ];
-
-      promises.push(dispatch('fetchUserGameDetails'));
-
-      await Promise.all([promises]);
+        dispatch('specialWeaponsManager/fetchShardsSupply'),
+        dispatch('fetchUserGameDetails')
+      ]);
     },
 
     async fetchUserGameDetails({ state, dispatch, commit }) {
@@ -951,6 +975,7 @@ export default new Vuex.Store<IState>({
         dispatch('fetchJunks', ownedJunkIds),
         dispatch('fetchKeyLootboxes', ownedKeyLootboxIds),
         dispatch('combat/fetchFightRewardSkill'),
+        dispatch('combat/fetchFightRewardValor'),
         dispatch('combat/fetchFightRewardXp'),
         dispatch('fetchGarrisonCharactersXp'),
         dispatch('combat/fetchFightGasOffset'),
@@ -1030,8 +1055,17 @@ export default new Vuex.Store<IState>({
           }
         })(),
         dispatch('fetchInGameOnlyFunds'),
+        dispatch('fetchBalance'),
         dispatch('staking/fetchStakeDetails', { stakeType: stakeTypeThatCanHaveUnclaimedRewardsStakedTo })
       ]);
+    },
+
+    async fetchBalance({ state, commit }) {
+      const { defaultAccount } = state;
+      if(!defaultAccount) return;
+
+      const balance = await state.web3.eth.getBalance(defaultAccount);
+      commit('updateBalance', { balance });
     },
 
     async fetchDustBalance({ state, commit }) {
@@ -1048,10 +1082,16 @@ export default new Vuex.Store<IState>({
       ]);
     },
 
-    async fetchSoulBalance({ state }) {
+    async fetchGenesisSoulBalance({ state }) {
       const { BurningManager } = state.contracts();
       if(!BurningManager || !state.defaultAccount) return;
       return await BurningManager.methods.userVars(state.defaultAccount, 1).call(defaultCallOptions(state));
+    },
+
+    async fetchNonGenesisSoulBalance({ state }) {
+      const { BurningManager } = state.contracts();
+      if(!BurningManager || !state.defaultAccount) return;
+      return await BurningManager.methods.userVars(state.defaultAccount, 2).call(defaultCallOptions(state));
     },
 
     async fetchInGameOnlyFunds({ state, commit }) {
@@ -1093,6 +1133,7 @@ export default new Vuex.Store<IState>({
             characterId,
             await Characters.methods.get('' + characterId).call(defaultCallOptions(state))
           );
+          character.version = +await dispatch('fetchCharacterVersion', characterId);
           await dispatch('fetchCharacterPower', characterId);
           await dispatch('getIsCharacterInArena', characterId);
 
@@ -1118,6 +1159,13 @@ export default new Vuex.Store<IState>({
         const power = await Characters.methods.getTotalPower(characterId).call(defaultCallOptions(state));
         commit('updateCharacterPower', { characterId, power });
       }
+    },
+
+    async fetchCharacterVersion({state}, characterId) {
+      const { Characters } = state.contracts();
+      if(!Characters || !state.defaultAccount) return;
+      const NFTVAR_NON_GENESIS_VERSION = 3;
+      return await Characters.methods.nftVars(characterId, NFTVAR_NON_GENESIS_VERSION).call(defaultCallOptions(state));
     },
 
     async fetchWeapons({ dispatch }, weaponIds: (string | number)[]) {
@@ -1350,52 +1398,52 @@ export default new Vuex.Store<IState>({
       if(!state.defaultAccount) return;
       const slippageMultiplier = approveMintSlippage ? 1.05 : 1;
 
-      await approveFee(
+      await approveFeeDynamic(
+        state.contracts().CryptoBlades!,
         state.contracts().CryptoBlades!,
         state.contracts().SkillToken,
         state.defaultAccount,
-        state.skillRewards,
+        '0',
         defaultCallOptions(state),
         defaultCallOptions(state),
         cryptoBladesMethods => cryptoBladesMethods.getMintCharacterFee(),
-        { feeMultiplier: slippageMultiplier, allowInGameOnlyFunds: false }
+        { feeMultiplier: slippageMultiplier, allowInGameOnlyFunds: false, allowSkillRewards: false }
       );
 
       await state.contracts().CryptoBlades!.methods.mintCharacter().send(defaultCallOptions(state));
 
       await Promise.all([
+        dispatch('updateCharacterIds'),
         dispatch('combat/fetchFightRewardSkill'),
         dispatch('combat/fetchFightRewardXp'),
         dispatch('setupCharacterStaminas')
       ]);
     },
 
-    async mintWeaponN({ state, dispatch }, { num, useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
-    { num: any, useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
-      const { CryptoBlades, SkillToken, Weapons } = state.contracts();
-      if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
-      const chosenElementFee = chosenElement === 100 ? 1 : 2;
-      const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
+    async hasWeaponsToClaim({ state }) {
+      const {CryptoBlades} = state.contracts();
+      if (!CryptoBlades || !state.defaultAccount) return;
 
-      if(useStakedSkillOnly) {
-        await CryptoBlades.methods
-          .mintWeaponNUsingStakedSkill(num, chosenElement, eventId)
-          .send({ from: state.defaultAccount, gas: '5000000', gasPrice: getGasPrice(), });
-      }
-      else {
-        await approveFee(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
-          { feeMultiplier: num * 4 * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
-        );
+      const USERVAR_CLAIM_WEAPON_DATA = await CryptoBlades.methods.USERVAR_CLAIM_WEAPON_DATA().call(defaultCallOptions(state));
 
-        await CryptoBlades.methods.mintWeaponN(num, chosenElement, eventId).send({ from: state.defaultAccount, gas: '5000000', gasPrice: getGasPrice(), });
-      }
+      return !!+await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
+    },
+
+    async quantityOfWeaponsToClaim({ state }) {
+      const {CryptoBlades} = state.contracts();
+      if (!CryptoBlades || !state.defaultAccount) return;
+
+      const USERVAR_CLAIM_WEAPON_DATA = await CryptoBlades.methods.USERVAR_CLAIM_WEAPON_DATA().call(defaultCallOptions(state));
+
+      const claimWeaponData = +await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
+      return Number(BigInt(claimWeaponData) >> BigInt(32));
+    },
+
+    async claimWeapons({ state, dispatch }) {
+      const {CryptoBlades} = state.contracts();
+      if (!CryptoBlades || !state.defaultAccount) return;
+
+      await CryptoBlades.methods.mintWeapon().send({from: state.defaultAccount, gasPrice: getGasPrice()});
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
@@ -1406,32 +1454,38 @@ export default new Vuex.Store<IState>({
       ]);
     },
 
-    async mintWeapon({ state, dispatch }, { useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved }:
-    { useStakedSkillOnly?: boolean, chosenElement: any, eventId: any, mintSlippageApproved: boolean }) {
-      const { CryptoBlades, SkillToken, Weapons } = state.contracts();
-      if(!CryptoBlades || !SkillToken || !Weapons || !state.defaultAccount) return;
+    async mintWeapons({state, dispatch}, {quantity = 1, useStakedSkillOnly, chosenElement, eventId = 0, mintSlippageApproved}:
+    { quantity: any, useStakedSkillOnly?: boolean, chosenElement: Element, eventId: any, mintSlippageApproved: boolean }) {
+      const {CryptoBlades, SkillToken} = state.contracts();
+      if (!CryptoBlades || !SkillToken || !state.defaultAccount) return;
       const chosenElementFee = chosenElement === 100 ? 1 : 2;
       const slippageMultiplier = mintSlippageApproved ? 1.05 : 1;
 
-      if(useStakedSkillOnly) {
-        await CryptoBlades.methods
-          .mintWeaponUsingStakedSkill(chosenElement, eventId)
-          .send({ from: state.defaultAccount, gasPrice: getGasPrice(), });
-      }
-      else {
-        await approveFee(
-          CryptoBlades,
-          SkillToken,
-          state.defaultAccount,
-          state.skillRewards,
-          defaultCallOptions(state),
-          defaultCallOptions(state),
-          cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
-          { feeMultiplier: chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true }
-        );
+      const USERVAR_CLAIM_WEAPON_DATA = await CryptoBlades.methods.USERVAR_CLAIM_WEAPON_DATA().call(defaultCallOptions(state));
 
-        await CryptoBlades.methods.mintWeapon(chosenElement, eventId).send({ from: state.defaultAccount, gasPrice: getGasPrice(), });
+      const hasWeaponsToClaim = !!+await CryptoBlades.methods.userVars(state.defaultAccount, USERVAR_CLAIM_WEAPON_DATA).call(defaultCallOptions(state));
+
+      if (!hasWeaponsToClaim) {
+        if (useStakedSkillOnly) {
+          await CryptoBlades.methods
+            .generateWeaponSeedUsingStakedSkill(quantity, chosenElement, eventId)
+            .send({from: state.defaultAccount, gasPrice: getGasPrice(),});
+        } else {
+          await approveFee(
+            CryptoBlades,
+            SkillToken,
+            state.defaultAccount,
+            state.skillRewards,
+            defaultCallOptions(state),
+            defaultCallOptions(state),
+            cryptoBladesMethods => cryptoBladesMethods.getMintWeaponFee(),
+            {feeMultiplier: quantity * chosenElementFee * slippageMultiplier, allowInGameOnlyFunds: true}
+          );
+          await CryptoBlades.methods.generateWeaponSeed(quantity, chosenElement, eventId).send(defaultCallOptions(state));
+        }
       }
+
+      await CryptoBlades.methods.mintWeapon().send({from: state.defaultAccount, gasPrice: getGasPrice(),});
 
       await Promise.all([
         dispatch('fetchSkillBalance'),
@@ -1616,13 +1670,6 @@ export default new Vuex.Store<IState>({
       return await BurningManager.methods.burnWeaponFee().call({ from: state.defaultAccount });
     },
 
-    async fetchRemainingTokenClaimAmountPreTax({ state }) {
-      if(!_.isFunction(state.contracts)) return;
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-      return await CryptoBlades.methods.getRemainingTokenClaimAmountPreTax().call(defaultCallOptions(state));
-    },
-
     async fetchIsLandSaleAllowed({state}) {
       const CBKLandSale = state.contracts().CBKLandSale!;
 
@@ -1753,6 +1800,13 @@ export default new Vuex.Store<IState>({
       if(!state.defaultAccount || !Weapons) return;
 
       return await Weapons.methods.mintGiveawayWeapon(to, stars, chosenElement).send({from: state.defaultAccount, gasPrice: getGasPrice()});
+    },
+
+    async mintGiveawayShield({state}, {to, stars, type}) {
+      const {Shields} = state.contracts();
+      if(!state.defaultAccount || !Shields) return;
+
+      return await Shields.methods.mintGiveawayShield(to, stars, type).send({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
     async giveAwaySoul({state}, {user, soulAmount}) {
@@ -1960,6 +2014,7 @@ export default new Vuex.Store<IState>({
       const {SimpleQuests,
         CBKLand,
         Weapons,
+        Shields,
         BurningManager,
         PartnerVault,
         Treasury,
@@ -1969,6 +2024,7 @@ export default new Vuex.Store<IState>({
       if (!SimpleQuests
         || !CBKLand
         || !Weapons
+        || !Shields
         || !BurningManager
         || !PartnerVault
         || !Treasury
@@ -1979,6 +2035,7 @@ export default new Vuex.Store<IState>({
       const simpleQuestsAdminRole = await SimpleQuests.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const cbkLandAdminRole = await CBKLand.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const weaponsAdminRole = await Weapons.methods.GAME_ADMIN().call(defaultCallOptions(state));
+      const shieldsAdminRole = await Shields.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const burningManagerAdminRole = await BurningManager.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const partnerVaultAdminRole = await PartnerVault.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const treasuryAdminRole = await Treasury.methods.GAME_ADMIN().call(defaultCallOptions(state));
@@ -1989,6 +2046,7 @@ export default new Vuex.Store<IState>({
         SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         CBKLand.methods.hasRole(cbkLandAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         Weapons.methods.hasRole(weaponsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+        Shields.methods.hasRole(shieldsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         BurningManager.methods.hasRole(burningManagerAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         PartnerVault.methods.hasRole(partnerVaultAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         Treasury.methods.hasRole(treasuryAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
@@ -2033,21 +2091,6 @@ export default new Vuex.Store<IState>({
       const totalSkill = +unclaimedSkill + +walletSkill;
 
       return totalSkill >= payingAmount;
-    },
-
-    async claimTokenRewards({ state, dispatch }) {
-      const { CryptoBlades } = state.contracts();
-      if(!CryptoBlades) return;
-
-      await CryptoBlades.methods.claimTokenRewards().send({
-        from: state.defaultAccount,
-        gasPrice: getGasPrice()
-      });
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('combat/fetchFightRewardSkill')
-      ]);
     },
 
     async claimXpRewards({ state, dispatch }) {
@@ -2441,8 +2484,8 @@ export default new Vuex.Store<IState>({
               },
             ],
           });
-        } catch (addError) {
-          console.error(addError);
+        } catch (error) {
+          console.error(error);
           return;
         }
       }
@@ -2642,11 +2685,26 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchCharacterPower', charId);
     },
 
+    async upgradeNonGenesisCharacterWithSoul({ state, dispatch }, {charId, soulAmount}) {
+      const { BurningManager } = state.contracts();
+      if(!BurningManager || !state.defaultAccount) return;
+
+      await BurningManager.methods.upgradeNonGenesisCharacterWithSoul(charId, soulAmount).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
+      await dispatch('fetchCharacterPower', charId);
+    },
+
     async transferSoul({ state }, {targetAddress, soulAmount}) {
       const { BurningManager } = state.contracts();
       if(!BurningManager || !state.defaultAccount) return;
 
       await BurningManager.methods.transferSoul(targetAddress, soulAmount).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
+    },
+
+    async transferNonGenesisSoul({ state }, {targetAddress, soulAmount}) {
+      const { BurningManager } = state.contracts();
+      if(!BurningManager || !state.defaultAccount) return;
+
+      await BurningManager.methods.transferNonGenesisSoul(targetAddress, soulAmount).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
     },
 
     async fetchCharactersBurnCost({ state }, burnIds) {

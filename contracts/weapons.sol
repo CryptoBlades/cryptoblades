@@ -107,8 +107,8 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     // UNUSED; KEPT FOR UPGRADEABILITY PROXY COMPATIBILITY
     mapping(uint256 => uint256) public lastTransferTimestamp;
 
-    uint256 private lastMintedBlock;
-    uint256 private firstMintedOfLastBlock;
+    uint256 private lastMintedBlock; // DEPRECATED
+    uint256 private firstMintedOfLastBlock; // DEPRECATED
 
     mapping(uint256 => uint64) durabilityTimestamp;
 
@@ -148,15 +148,6 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender), "NR");
     }
 
-    modifier noFreshLookup(uint256 id) {
-        _noFreshLookup(id);
-        _;
-    }
-
-    function _noFreshLookup(uint256 id) internal view {
-        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "NFL");
-    }
-
     function getStats(uint256 id) internal view
         returns (uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level) {
 
@@ -164,8 +155,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return (w.properties, w.stat1, w.stat2, w.stat3, w.level);
     }
 
-    function getCosmetics(uint256 id) internal view
-        returns (uint8 _blade, uint8 _crossguard, uint8 _grip, uint8 _pommel) {
+    function getCosmetics(uint256 id) internal view returns (uint8 _blade, uint8 _crossguard, uint8 _grip, uint8 _pommel) {
 
         WeaponCosmetics memory wc = cosmetics[id];
         _blade = getRandomCosmetic(wc.seed, 1, 24);
@@ -174,14 +164,13 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         _pommel = getRandomCosmetic(wc.seed, 4, 24);
     }
 
-    function getCosmeticsSeed(uint256 id) public view noFreshLookup(id)
-        returns (uint256) {
+    function getCosmeticsSeed(uint256 id) public view returns (uint256) {
 
         WeaponCosmetics memory wc = cosmetics[id];
         return wc.seed;
     }
 
-    function get(uint256 id) public view noFreshLookup(id)
+    function get(uint256 id) public view
         returns (
             uint16 _properties, uint16 _stat1, uint16 _stat2, uint16 _stat3, uint8 _level,
             uint32 _cosmetics,
@@ -282,7 +271,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             stat3,
             RandomUtil.combineSeeds(seed,3)
         );
-    }    
+    }
 
     function performMintWeapon(address minter,
         uint256 weaponType,
@@ -290,13 +279,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         uint16 stat1, uint16 stat2, uint16 stat3,
         uint256 cosmeticSeed
     ) public minterOnly returns(uint256 tokenID) {
-
         tokenID = tokens.length;
-
-        if(block.number != lastMintedBlock)
-            firstMintedOfLastBlock = tokenID;
-        lastMintedBlock = block.number;
-
         tokens.push(Weapon(properties, stat1, stat2, stat3, 0));
         cosmetics.push(WeaponCosmetics(0, cosmeticSeed));
         _mint(minter, tokenID);
@@ -306,11 +289,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         emit NewWeapon(tokenID, minter, uint24(weaponType));
     }
 
-    function performMintWeaponDetailed(address minter,
-        uint256 metaData,
-        uint256 cosmeticSeed, uint256 tokenID
-    ) public minterOnly returns(uint256) {
-
+    function performMintWeaponDetailed(address minter, uint256 metaData, uint256 cosmeticSeed, uint256 tokenID) public minterOnly returns(uint256) {
         uint8 fiveStarBurnPoints = uint8(metaData & 0xFF);
         uint8 fourStarBurnPoints = uint8((metaData >> 8) & 0xFF);
         uint8 lowStarBurnPoints = uint8((metaData >> 16) & 0xFF);
@@ -416,11 +395,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint8(stars)-1;
     }
 
-    function getProperties(uint256 id) public view noFreshLookup(id) returns (uint16) {
+    function getProperties(uint256 id) public view returns (uint16) {
         return tokens[id].properties;
     }
 
-    function getStars(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getStars(uint256 id) public view returns (uint8) {
         return getStarsFromProperties(getProperties(id));
     }
 
@@ -428,7 +407,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint8(properties & 0x7); // first two bits for stars
     }
 
-    function getTrait(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getTrait(uint256 id) public view returns (uint8) {
         return getTraitFromProperties(getProperties(id));
     }
 
@@ -436,7 +415,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint8((properties >> 3) & 0x3); // two bits after star bits (3)
     }
 
-    function getStatPattern(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getStatPattern(uint256 id) public view returns (uint8) {
         return getStatPatternFromProperties(getProperties(id));
     }
 
@@ -456,23 +435,23 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         return uint8(SafeMath.div(statPattern, 25) % 5); // 0-3 regular traits, 4 = traitless (PWR)
     }
 
-    function getLevel(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getLevel(uint256 id) public view returns (uint8) {
         return tokens[id].level;
     }
 
-    function getStat1(uint256 id) public view noFreshLookup(id) returns (uint16) {
+    function getStat1(uint256 id) public view returns (uint16) {
         return tokens[id].stat1;
     }
 
-    function getStat2(uint256 id) public view noFreshLookup(id) returns (uint16) {
+    function getStat2(uint256 id) public view returns (uint16) {
         return tokens[id].stat2;
     }
 
-    function getStat3(uint256 id) public view noFreshLookup(id) returns (uint16) {
+    function getStat3(uint256 id) public view returns (uint16) {
         return tokens[id].stat3;
     }
 
-    function getPowerMultiplier(uint256 id) public view noFreshLookup(id) returns (int128) {
+    function getPowerMultiplier(uint256 id) public view returns (int128) {
         // returns a 64.64 fixed point number for power multiplier
         // this function does not account for traits
         // it is used to calculate base enemy powers for targeting
@@ -679,11 +658,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
             wbp.fiveStarBurnPoints = 10;
     }
 
-    function getWeaponType(uint256 id) public view noFreshLookup(id) returns(uint24) {
+    function getWeaponType(uint256 id) public view returns(uint24) {
         return uint24(nftVars[id][NFTVAR_WEAPON_TYPE]);
     }
 
-    function getBonusPower(uint256 id) public view noFreshLookup(id) returns (uint24) {
+    function getBonusPower(uint256 id) public view returns (uint24) {
         return getBonusPowerForFight(id, tokens[id].level);
     }
 
@@ -696,7 +675,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function getFightData(uint256 id, uint8 charTrait) public view noFreshLookup(id) returns (int128, int128, uint24, uint8) {
+    function getFightData(uint256 id, uint8 charTrait) public view returns (int128, int128, uint24, uint8) {
         Weapon storage wep = tokens[id];
         return (
             oneFrac.add(powerMultPerPointBasic.mul(
@@ -710,12 +689,16 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function getFightDataAndDrainDurability(address fighter,
-        uint256 id, uint8 charTrait, uint8 drainAmount, bool allowNegativeDurability, uint256 busyFlag) public
-        restricted
-    returns (int128, int128, uint24, uint8) {
-        require(fighter == ownerOf(id) && nftVars[id][NFTVAR_BUSY] == 0);
-        nftVars[id][NFTVAR_BUSY] |= busyFlag;
+    function getFightDataAndDrainDurability(
+        address fighter,
+        uint256 id,
+        uint8 charTrait,
+        uint8 drainAmount,
+        bool allowNegativeDurability,
+        uint256 busyFlag
+    ) public restricted returns (int128, int128, uint24, uint8) {
+        require(fighter == ownerOf(id)/* && nftVars[id][NFTVAR_BUSY] == 0*/);
+        //nftVars[id][NFTVAR_BUSY] |= busyFlag;
         drainDurability(id, drainAmount, allowNegativeDurability);
         Weapon storage wep = tokens[id];
         return (

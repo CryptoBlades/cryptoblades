@@ -183,7 +183,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
                 "This character is already participating");
         }
 
-        (uint8 charTrait, uint24 basePowerLevel, /*uint64 timestamp*/) =
+        (uint16 charTraitAndVersion, uint24 basePowerLevel, /*uint64 timestamp*/) =
             unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
                                     characterID,
                                     uint8(staminaCost),
@@ -195,11 +195,11 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
             int128 weaponMultFight,
             uint24 weaponBonusPower,
             /*uint8 weaponTrait*/) = weapons.getFightDataAndDrainDurability(msg.sender,
-                weaponID, charTrait, uint8(durabilityCost), true, 0); // no busy flag for raids for now
+                weaponID, uint8(charTraitAndVersion & 0xFF), uint8(durabilityCost), true, 0); // no busy flag for raids for now
 
         uint24 power = getPlayerFinalPower(
             Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
-            charTrait,
+            uint8(charTraitAndVersion & 0xFF),
             raidBossTrait[raidIndex]
         );
         raidPlayerPower[raidIndex] += power;
@@ -281,12 +281,12 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function unpackFightData(uint96 playerData)
-        public pure returns (uint8 charTrait, uint24 basePowerLevel, uint64 timestamp) {
+    function unpackFightData(uint104 playerData)
+        public pure returns (uint16 charTraitAndVersion, uint24 basePowerLevel, uint64 timestamp) {
 
-        charTrait = uint8(playerData & 0xFF);
-        basePowerLevel = uint24((playerData >> 8) & 0xFFFFFF);
-        timestamp = uint64((playerData >> 32) & 0xFFFFFFFFFFFFFFFF);
+        charTraitAndVersion = uint16(playerData & 0xFFFF);
+        basePowerLevel = uint24((playerData >> 16) & 0xFFFFFF);
+        timestamp = uint64((playerData >> 40) & 0xFFFFFFFFFFFFFFFF);
     }
 
     function getPlayerFinalPower(uint24 playerPower, uint8 charTrait, uint8 bossTrait) public pure returns(uint24) {

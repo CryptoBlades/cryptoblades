@@ -49,7 +49,7 @@
           <img :src="getCharacterElementSrc" alt="element" />
         </div>
         <div class="characterImageWrapper">
-          <pvp-character :characterTrait="characterInformation.element" />
+          <pvp-character :characterTrait="characterInformation.element" :characterVersion="characterInformation.version" />
         </div>
         <div v-if="characterInformation" class="info">
           <h1 class="characterName">{{ characterInformation.name }}</h1>
@@ -134,7 +134,7 @@
           <img v-if="opponentInformation.id" :src="getOpponentElementSrc" alt="opponent element" />
         </div>
         <div v-if="opponentInformation.id" class="characterImageWrapper">
-          <pvp-character :characterTrait="opponentInformation.element" />
+          <pvp-character :characterTrait="opponentInformation.element" :characterVersion="characterInformation.version" />
         </div>
         <div v-if="opponentInformation.id" class="info">
           <h1 class="characterName">{{ opponentInformation.name }}</h1>
@@ -457,19 +457,16 @@ export default {
 
     async leaveArena() {
       this.loading = true;
-
       try {
         await this.withdrawFromArena(this.currentCharacterId);
-
         this.$emit('leaveArena');
-      } catch (err) {
-        console.log('leave arena error: ', err.message);
-
-        this.handleErrorMessage(err.message, 'N', i18n.t('pvp.charNotInArena'));
-        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.duelInProcess'));
+      } catch (error) {
+        console.error('leave arena error: ', error.message);
+        this.handleErrorMessage(error.message, 'N', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(error.message, 'Q', i18n.t('pvp.duelInProcess'));
+      } finally {
+        this.loading = false;
       }
-
-      this.loading = false;
     },
 
     async findMatch() {
@@ -482,13 +479,13 @@ export default {
 
       try {
         await this.findOpponent(this.currentCharacterId);
-      } catch (err) {
-        console.log('find match error: ', err.message);
+      } catch (error) {
+        console.error('find match error: ', error.message);
 
-        this.handleErrorMessage(err.message, 'E', i18n.t('pvp.noEnemyFound'));
-        this.handleErrorMessage(err.message, 'M', i18n.t('pvp.alreadyInMatch'));
-        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.charDueling'));
-        this.handleErrorMessage(err.message, 'N', i18n.t('pvp.charNotInArena'));
+        this.handleErrorMessage(error.message, 'E', i18n.t('pvp.noEnemyFound'));
+        this.handleErrorMessage(error.message, 'M', i18n.t('pvp.alreadyInMatch'));
+        this.handleErrorMessage(error.message, 'Q', i18n.t('pvp.charDueling'));
+        this.handleErrorMessage(error.message, 'N', i18n.t('pvp.charNotInArena'));
 
         this.loading = false;
         return;
@@ -513,12 +510,12 @@ export default {
         }
 
         await this.reRollOpponent(this.currentCharacterId);
-      } catch (err) {
-        console.log('reroll opponent error: ', err.message);
+      } catch (error) {
+        console.error('reroll opponent error: ', error.message);
 
-        this.handleErrorMessage(err.message, 'E', i18n.t('pvp.noEnemyFound'));
-        this.handleErrorMessage(err.message, 'M', i18n.t('pvp.notInMatch'));
-        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.charDueling'));
+        this.handleErrorMessage(error.message, 'E', i18n.t('pvp.noEnemyFound'));
+        this.handleErrorMessage(error.message, 'M', i18n.t('pvp.notInMatch'));
+        this.handleErrorMessage(error.message, 'Q', i18n.t('pvp.charDueling'));
 
         this.loading = false;
 
@@ -564,7 +561,7 @@ export default {
             if (!error) {
               console.log(result);
             } else {
-              console.log(error);
+              console.error(error);
             }
           });
         }
@@ -577,12 +574,12 @@ export default {
         await this.listenForDuel(await this.getPvpCoreContract());
 
         await this.prepareDuel({characterId: this.currentCharacterId, duelOffsetCost: this.duelOffsetCost});
-      } catch (err) {
-        console.log('prepare perform duel error: ', err.message);
+      } catch (error) {
+        console.error('prepare perform duel error: ', error.message);
 
-        this.handleErrorMessage(err.message, 'D', i18n.t('pvp.decisionTimeExpired'));
-        this.handleErrorMessage(err.message, 'Q', i18n.t('pvp.charDueling'));
-        this.handleErrorMessage(err.message, 'M', i18n.t('pvp.notInMatch'));
+        this.handleErrorMessage(error.message, 'D', i18n.t('pvp.decisionTimeExpired'));
+        this.handleErrorMessage(error.message, 'Q', i18n.t('pvp.charDueling'));
+        this.handleErrorMessage(error.message, 'M', i18n.t('pvp.notInMatch'));
 
         this.loading = false;
 

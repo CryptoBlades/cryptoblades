@@ -68,6 +68,7 @@ const treasury = {
         partnerProject.details,
         partnerProject.website,
         partnerProject.note,
+        partnerProject.isValor
       ).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
     },
 
@@ -119,6 +120,13 @@ const treasury = {
       await Treasury.methods.setIsActive(id, isActive).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
     },
 
+    async setPartnerProjectIsValor({ rootState }: {rootState: IState}, {id, isValor}: {id: number | string, isValor: boolean}) {
+      const { Treasury } = rootState.contracts();
+      if(!Treasury || !rootState.defaultAccount) return;
+
+      await Treasury.methods.setIsValor(id, isValor).send({from: rootState.defaultAccount, gasPrice: getGasPrice()});
+    },
+
     async fetchPartnerProjects({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
@@ -135,8 +143,15 @@ const treasury = {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
       const partnerProjectRaw = await Treasury.methods.partneredProjects(id).call(defaultCallOptions(rootState));
-      const tokensClaimed = await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(rootState));
-      const data = await Treasury.methods.getProjectData(id).call(defaultCallOptions(rootState));
+      const [
+        isValor,
+        tokensClaimed,
+        data
+      ] = await Promise.all([
+        await Treasury.methods.projectIsValor(id).call(defaultCallOptions(rootState)),
+        await Treasury.methods.tokensClaimed(id).call(defaultCallOptions(rootState)),
+        await Treasury.methods.getProjectData(id).call(defaultCallOptions(rootState))
+      ]);
 
       const partnerProject = {
         id: +partnerProjectRaw[0],
@@ -147,6 +162,7 @@ const treasury = {
         tokensClaimed: +tokensClaimed,
         tokenPrice: +partnerProjectRaw[5],
         isActive: partnerProjectRaw[6],
+        isValor,
         logo: data[0],
         details: data[1],
         website: data[2],
@@ -199,6 +215,22 @@ const treasury = {
       return ratio;
     },
 
+    async getCurrentBestMultiplier({ rootState }: {rootState: IState}) {
+      const { Treasury } = rootState.contracts();
+      if(!Treasury || !rootState.defaultAccount) return;
+
+      const ids = await Treasury.methods.getActivePartnerProjectsIds().call(defaultCallOptions(rootState));
+      let bestMultiplier = 0;
+      for(const id of ids) {
+        const mul = +await Treasury.methods.getProjectMultiplier(id).call(defaultCallOptions(rootState));
+        if(mul > bestMultiplier) {
+          bestMultiplier = mul;
+        }
+      }
+
+      return bestMultiplier;
+    },
+
     async claimPartnerToken({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch},
                             { id, skillAmount, currentMultiplier, slippage }:
                             {id: number, skillAmount: string, currentMultiplier: string, slippage: string}) {
@@ -211,8 +243,9 @@ const treasury = {
       });
 
       await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('combat/fetchFightRewardSkill'),
+        dispatch('fetchSkillBalance', '', { root: true }),
+        dispatch('combat/fetchFightRewardSkill', '', { root: true }),
+        dispatch('combat/fetchFightRewardValor', '', { root: true }),
         dispatch('fetchPartnerProject', id)
       ]);
     },

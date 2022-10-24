@@ -45,7 +45,7 @@ contract JunkBridgeProxyContract is Initializable, AccessControlUpgradeable, IBr
 
     // for future use, bot will probe the returned value to know if the proxy contract has proper signature behavior
     function sigVersion() external view override returns (uint256) {
-        return 1;
+        return 3;
     }
 
     function isEnabled() external view override returns (bool) {
@@ -56,7 +56,7 @@ contract JunkBridgeProxyContract is Initializable, AccessControlUpgradeable, IBr
         enabled = _enabled;
     }
 
-    function mintOrUpdate(uint256 tokenId, uint256[] calldata uintVars, string calldata stringVar) external restricted override returns (uint256) {
+    function mintOrUpdate(address /*receiver*/, uint256 tokenId, uint256[] calldata uintVars, string calldata stringVar) external restricted override returns (uint256) {
         require(enabled, "not enabled");
 
          tokenId = 
@@ -67,5 +67,9 @@ contract JunkBridgeProxyContract is Initializable, AccessControlUpgradeable, IBr
 
     function _packJunkData(uint8 stars) public pure returns (uint256) {
         return  uint256(stars);
+    }
+
+    function canBridge(address wallet, uint256 tokenId, uint256 targetChain) external view override returns (bool) {
+        return true;
     }
 }

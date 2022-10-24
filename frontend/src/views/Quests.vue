@@ -71,35 +71,32 @@
             :toolTip="!canClaimWeeklyReward ? $t('quests.cannotClaimWeeklyTooltip') : ''" :title="$t('quests.claimWeeklyReward')"></cb-button>
         </div>
       </div>
-
-      <!-- Wallet Quests -->
-      <span v-if="walletQuests.length" class="quests-title-2">Wallet Quests</span>
+      <span v-if="walletQuests && walletQuests.length" class="quests-title-2">Wallet Quests</span>
       <!-- TODO: This will come back when we add additional tiers to Wallet Quests -->
-<!--      <div class="form-control-wrapper">-->
-<!--        <select class="form-control" v-model="walletQuestTier" >-->
-<!--              <option :value="undefined">Select a Rarity</option>-->
-<!--          <option v-for="x in rarities" :value="x" :key="x">{{$t(`quests.rarityType.${Rarity[x]}`)}}</option>-->
-<!--        </select>-->
-<!--      </div>-->
+      <!--      <div class="form-control-wrapper">-->
+      <!--        <select class="form-control" v-model="walletQuestTier" >-->
+      <!--              <option :value="undefined">Select a Rarity</option>-->
+      <!--          <option v-for="x in rarities" :value="x" :key="x">{{$t(`quests.rarityType.${Rarity[x]}`)}}</option>-->
+      <!--        </select>-->
+      <!--      </div>-->
       <div v-if="isLoadingWalletQuests">
         <i class="fas fa-spinner fa-spin"/>
         {{ $t('quests.loading') }}
       </div>
-
       <div v-else v-for="quest in walletQuests" :key="quest.id" class="d-flex w-100">
-        <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET" :reputationLevelRequirements="reputationLevelRequirements"
+        <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
+                  :reputationLevelRequirements="reputationLevelRequirements"
                   @refresh-quest-data="onRefreshQuestData"/>
       </div>
-
-        <!-- Character Quests -->
-        <span class="quests-title-2">Character Quests</span>
-        <div v-if="isLoading">
-          <i class="fas fa-spinner fa-spin"/>
-          {{ $t('quests.loading') }}
-        </div>
-        <div v-if="characters.length !== 0 && !isLoading" class="d-flex flex-column w-100">
+      <span class="quests-title-2">Character Quests</span>
+      <div v-if="isLoading">
+        <i class="fas fa-spinner fa-spin"/>
+        {{ $t('quests.loading') }}
+      </div>
+      <div v-if="characters.length !== 0 && !isLoading" class="d-flex flex-column w-100">
         <div v-for="character in characters" :key="character.id" class="w-100 my-3">
-          <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id" :reputationLevelRequirements="reputationLevelRequirements"
+          <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id"
+                    :reputationLevelRequirements="reputationLevelRequirements"
                     @refresh-quest-data="onRefreshQuestData"/>
         </div>
         <br>
@@ -108,9 +105,10 @@
             <i class="fas fa-spinner fa-spin"/>
             {{ $t('quests.loading') }}
           </div>
-          <QuestReward v-else :type="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity" :rewards="weeklyRewards"
-                      :amount="weeklyReward.rewardAmount" :reputationAmount="weeklyReward.reputationAmount"
-                      :externalAddress="weeklyReward.rewardExternalAddress"/>
+          <QuestReward v-else :type="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
+                       :rewards="weeklyRewards"
+                       :amount="weeklyReward.rewardAmount" :reputationAmount="weeklyReward.reputationAmount"
+                       :externalAddress="weeklyReward.rewardExternalAddress"/>
         </b-modal>
       </div>
       <div v-else class="m-4 font-weight-bold w-100">
@@ -205,6 +203,7 @@ export enum QuestItemType {
   EXPERIENCE,
   EXTERNAL,
   EXTERNAL_HOLD,
+  CHARACTER,
   REPUTATION = 99
 }
 
@@ -289,7 +288,7 @@ interface Data {
   usePromoQuests: boolean;
   questTemplateType: QuestTemplateType;
   walletQuests: Quest[];
-  walletQuestTier: Rarity | undefined;
+  walletQuestTier: Rarity;
 }
 
 export default Vue.extend({
@@ -395,23 +394,35 @@ export default Vue.extend({
 
     async refreshQuestData() {
       try {
-        console.log('refreshing quest data');
         this.isLoading = true;
-        if(this.walletQuestTier !== undefined){
-          this.isLoadingWalletQuests = true;
-          this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
-          this.isLoadingWalletQuests = false;
-        }
-        this.usePromoQuests = await this.isUsingPromoQuests();
-        this.currentWeeklyCompletions = +await this.getWeeklyCompletions();
-        this.weeklyReward = await this.getWeeklyReward({timestamp: Date.now()});
-        this.weeklyClaimed = await this.hasClaimedWeeklyReward();
-        await this.getNextWeekResetTime();
-        this.reputationLevelRequirements = await this.getReputationLevelRequirements();
-        this.characters = await Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {
-          character.quest = await this.getCharacterQuestData({characterId: character.id});
-          return character;
-        }));
+        this.isLoadingWalletQuests = true;
+        this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier + 30});
+        this.isLoadingWalletQuests = false;
+        const [
+          usePromoQuests,
+          currentWeeklyCompletions,
+          weeklyReward,
+          weeklyClaimed,
+          reputationLevelRequirements,
+          characters,
+        ] = await Promise.all([
+          this.isUsingPromoQuests(),
+          this.getWeeklyCompletions(),
+          this.getWeeklyReward({timestamp: Date.now()}),
+          this.hasClaimedWeeklyReward(),
+          this.getReputationLevelRequirements(),
+          Promise.all(this.charactersWithIds(this.ownedCharacterIds).filter(Boolean).map(async (character) => {
+            character.quest = await this.getCharacterQuestData({characterId: character.id});
+            return character;
+          })),
+          this.getNextWeekResetTime(),
+        ]);
+        this.usePromoQuests = usePromoQuests;
+        this.currentWeeklyCompletions = +currentWeeklyCompletions;
+        this.weeklyReward = weeklyReward;
+        this.weeklyClaimed = weeklyClaimed;
+        this.reputationLevelRequirements = reputationLevelRequirements;
+        this.characters = characters;
       } finally {
         this.isLoading = false;
       }
@@ -459,11 +470,9 @@ export default Vue.extend({
     },
     async walletQuestTier() {
       this.walletQuests = [];
-      if(this.walletQuestTier !== undefined){
-        this.isLoadingWalletQuests = true;
-        this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
-        this.isLoadingWalletQuests = false;
-      }
+      this.isLoadingWalletQuests = true;
+      this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
+      this.isLoadingWalletQuests = false;
     },
   },
 });
@@ -473,20 +482,16 @@ export default Vue.extend({
 @import '../styles/character-cosmetics.css';
 .quest-wrapper{
   background: transparent url("../../src/assets/questsBackground.png") 0 0 no-repeat padding-box;
-}
-.quests-container {
-  width: clamp(600px, 80%, 1200px);
-  margin: 0 auto;
-  padding: 50px 0;
+  background-size: clamp(100%, 100%, 100%) auto;
 }
 .top-button{
-  margin: 10px 0px !important;
+  margin: 10px 0 !important;
   height: 75px !important; /* :'( */
 }
 .quests-container-wrapper{
   background-image: url('../../src/assets/questsBackground.png');
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
   background-position: center;
   min-height: 95vh;
   min-width: 100%;
@@ -496,6 +501,7 @@ export default Vue.extend({
 .quests-container{
   width: clamp(200px, 75vw, 1200px);
   margin: 0 auto;
+  padding: 50px 0;
 }
 
 .quests-title {

@@ -9,7 +9,7 @@
     <span v-else-if="afterDeadline" class="text-center">
       {{ $t('quests.questDeadlineOverCannotBeCompleted') }}
     </span>
-    <b-button v-if="character && character.quest.id === 0" :disabled="isLoading" variant="primary custom-action-btn" @click="request">
+    <b-button v-if="character && character.quest.id === 0" :disabled="isLoading" variant="primary" class="request-quest custom-action-btn" @click="request">
       <span> {{ pickable ? $t('quests.chooseSpecialQuest')  : $t('quests.requestQuest') }} </span>
     </b-button>
     <b-button v-else-if="questCanBeCompleted && !afterDeadline && !deletable" :disabled="isLoading" variant="primary"
@@ -327,14 +327,12 @@ export default Vue.extend({
         let rewards;
         let rewardType: any;
         if(this.questTemplateType === QuestTemplateType.QUEST || this.questTemplateType === QuestTemplateType.PROMO) {
-          console.log('complete quest');
           rewards = await this.completeQuest({characterID: this.character.id, pickedQuestID: 0});
           rewardType = this.quest.rewardType;
           await this.refreshSkipQuestData();
         }
         else if(this.questTemplateType === QuestTemplateType.WALLET){
           rewards = await this.completeWalletQuest({questID: this.quest.id});
-          console.log(rewards);
           rewardType = this.quest.rewardType;
         }
         if (!rewardType || rewardType === RewardType.EXPERIENCE || rewardType === RewardType.DUST || rewardType === RewardType.SOUL) {
@@ -370,10 +368,8 @@ export default Vue.extend({
     },
 
     async handlePick(questID: number) {
-      console.log(this.actionAfterPick);
       try {
         this.isLoading = true;
-        console.log(this.actionAfterPick);
         if(this.actionAfterPick === ActionAfterPick.COMPLETE){
           await this.completeQuest({characterID: this.character.id, pickedQuestID: questID});
         }
@@ -498,6 +494,12 @@ export default Vue.extend({
   width: 100%;
   max-height: 50px;
 }
+
+.custom-action-btn.request-quest {
+  min-height: 50px;
+  max-height: 63px;
+}
+
 .custom-action-btn:disabled {
   border-color: #FFF !important;
 }

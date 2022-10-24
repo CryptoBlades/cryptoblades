@@ -43,22 +43,26 @@ const quests = {
 
       if(questTemplatesIds.length === 0) return questTemplates;
 
-      for (const questID of questTemplatesIds) {
-        const quest = await SimpleQuests.methods.quests(questID).call(defaultCallOptions(rootState)) as unknown as {
-          progress: string | number;
-          id: string;
-          tier: string;
-          requirementType: string;
-          requirementRarity: string;
-          requirementAmount: string;
-          requirementExternalAddress: string;
-          rewardType: string;
-          rewardRarity: string;
-          rewardAmount: string;
-          rewardExternalAddress: string;
-          reputationAmount: string;
-        };
-        if(tier >= 30 && tier < 40){
+      interface QuestTemplate {
+        progress: string | number;
+        id: string;
+        tier: string;
+        requirementType: string;
+        requirementRarity: string;
+        requirementAmount: string;
+        requirementExternalAddress: string;
+        rewardType: string;
+        rewardRarity: string;
+        rewardAmount: string;
+        rewardExternalAddress: string;
+        reputationAmount: string;
+      }
+
+      const quests = await Promise.all<QuestTemplate>(questTemplatesIds.map(questID =>
+        SimpleQuests.methods.quests(questID).call(defaultCallOptions(rootState)) as unknown as QuestTemplate));
+
+      for (const quest of quests) {
+        if (tier >= 30 && tier < 40) {
           quest.progress = await dispatch('getWalletQuestProgress', {questID: +quest.id});
         }
         const emptyAccount = '0x0000000000000000000000000000000000000000';
@@ -369,14 +373,22 @@ const quests = {
       return await SimpleQuests.methods.weeklyRewardClaimed(rootState.defaultAccount, currentWeek).call(defaultCallOptions(rootState));
     },
 
-    async getReputationLevelRequirements({ rootState }: {rootState: IState}) {
+    async getReputationLevelRequirements({rootState}: { rootState: IState }) {
       const {SimpleQuests} = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;
 
-      const VAR_REPUTATION_LEVEL_2 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_2().call(defaultCallOptions(rootState));
-      const VAR_REPUTATION_LEVEL_3 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_3().call(defaultCallOptions(rootState));
-      const VAR_REPUTATION_LEVEL_4 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_4().call(defaultCallOptions(rootState));
-      const VAR_REPUTATION_LEVEL_5 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_5().call(defaultCallOptions(rootState));
+      const [
+        VAR_REPUTATION_LEVEL_2,
+        VAR_REPUTATION_LEVEL_3,
+        VAR_REPUTATION_LEVEL_4,
+        VAR_REPUTATION_LEVEL_5,
+      ] = await Promise.all([
+        SimpleQuests.methods.VAR_REPUTATION_LEVEL_2().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_REPUTATION_LEVEL_3().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_REPUTATION_LEVEL_4().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_REPUTATION_LEVEL_5().call(defaultCallOptions(rootState)),
+      ]);
+
 
       const requirementsRaw = await SimpleQuests.methods.getVars([
         VAR_REPUTATION_LEVEL_2,
@@ -396,10 +408,17 @@ const quests = {
       const {SimpleQuests} = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;
 
-      const VAR_REPUTATION_LEVEL_2 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_2().call(defaultCallOptions(rootState));
-      const VAR_REPUTATION_LEVEL_3 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_3().call(defaultCallOptions(rootState));
-      const VAR_REPUTATION_LEVEL_4 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_4().call(defaultCallOptions(rootState));
-      const VAR_REPUTATION_LEVEL_5 = await SimpleQuests.methods.VAR_REPUTATION_LEVEL_5().call(defaultCallOptions(rootState));
+      const [
+        VAR_REPUTATION_LEVEL_2,
+        VAR_REPUTATION_LEVEL_3,
+        VAR_REPUTATION_LEVEL_4,
+        VAR_REPUTATION_LEVEL_5,
+      ] = await Promise.all([
+        SimpleQuests.methods.VAR_REPUTATION_LEVEL_2().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_REPUTATION_LEVEL_3().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_REPUTATION_LEVEL_4().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_REPUTATION_LEVEL_5().call(defaultCallOptions(rootState)),
+      ]);
 
       return await SimpleQuests.methods.setVars([
         VAR_REPUTATION_LEVEL_2,
@@ -409,15 +428,23 @@ const quests = {
       ], requirements).send(defaultCallOptions(rootState));
     },
 
-    async isUsingPromoQuests({ rootState }: {rootState: IState}) {
+    async isUsingPromoQuests({rootState}: { rootState: IState }) {
       const {SimpleQuests} = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;
 
-      const VAR_COMMON_TIER = await SimpleQuests.methods.VAR_COMMON_TIER().call(defaultCallOptions(rootState));
-      const VAR_UNCOMMON_TIER = await SimpleQuests.methods.VAR_UNCOMMON_TIER().call(defaultCallOptions(rootState));
-      const VAR_RARE_TIER = await SimpleQuests.methods.VAR_RARE_TIER().call(defaultCallOptions(rootState));
-      const VAR_EPIC_TIER = await SimpleQuests.methods.VAR_EPIC_TIER().call(defaultCallOptions(rootState));
-      const VAR_LEGENDARY_TIER = await SimpleQuests.methods.VAR_LEGENDARY_TIER().call(defaultCallOptions(rootState));
+      const [
+        VAR_COMMON_TIER,
+        VAR_UNCOMMON_TIER,
+        VAR_RARE_TIER,
+        VAR_EPIC_TIER,
+        VAR_LEGENDARY_TIER,
+      ] = await Promise.all([
+        SimpleQuests.methods.VAR_COMMON_TIER().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_UNCOMMON_TIER().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_RARE_TIER().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_EPIC_TIER().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_LEGENDARY_TIER().call(defaultCallOptions(rootState)),
+      ]);
 
       const tiersRaw = await SimpleQuests.methods.getVars([
         VAR_COMMON_TIER,
@@ -434,11 +461,19 @@ const quests = {
       const {SimpleQuests} = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;
 
-      const VAR_COMMON_TIER = await SimpleQuests.methods.VAR_COMMON_TIER().call(defaultCallOptions(rootState));
-      const VAR_UNCOMMON_TIER = await SimpleQuests.methods.VAR_UNCOMMON_TIER().call(defaultCallOptions(rootState));
-      const VAR_RARE_TIER = await SimpleQuests.methods.VAR_RARE_TIER().call(defaultCallOptions(rootState));
-      const VAR_EPIC_TIER = await SimpleQuests.methods.VAR_EPIC_TIER().call(defaultCallOptions(rootState));
-      const VAR_LEGENDARY_TIER = await SimpleQuests.methods.VAR_LEGENDARY_TIER().call(defaultCallOptions(rootState));
+      const [
+        VAR_COMMON_TIER,
+        VAR_UNCOMMON_TIER,
+        VAR_RARE_TIER,
+        VAR_EPIC_TIER,
+        VAR_LEGENDARY_TIER,
+      ] = await Promise.all([
+        SimpleQuests.methods.VAR_COMMON_TIER().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_UNCOMMON_TIER().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_RARE_TIER().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_EPIC_TIER().call(defaultCallOptions(rootState)),
+        SimpleQuests.methods.VAR_LEGENDARY_TIER().call(defaultCallOptions(rootState)),
+      ]);
 
       const tiersRaw = await SimpleQuests.methods.getVars([
         VAR_COMMON_TIER,
@@ -511,7 +546,6 @@ const quests = {
       {characterID, pickedQuestID}: {characterID: number, pickedQuestID: number}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
-      console.log('skipQuest', characterID, pickedQuestID);
       await SimpleQuests.methods.skipQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
       await dispatch('combat/fetchCharacterStamina', characterID);
     },
@@ -525,7 +559,6 @@ const quests = {
       if (!await SimpleQuests.methods.hasRandomQuestRewardSeedRequested(characterID).call(defaultCallOptions(rootState))) {
         await SimpleQuests.methods.generateRewardQuestSeed(characterID).send(defaultCallOptions(rootState));
       }
-      console.log('completeQuest', pickedQuestID);
       const result = await SimpleQuests.methods.completeQuest(characterID, pickedQuestID).send(defaultCallOptions(rootState));
 
       const questRewards = result.events.QuestRewarded.returnValues.rewards;
@@ -538,7 +571,8 @@ const quests = {
         dispatch('updateKeyLootboxIds'),
         dispatch('fetchDustBalance'),
         dispatch('combat/fetchCharacterStamina', characterID),
-        dispatch('fetchSoulBalance', characterID),
+        dispatch('fetchGenesisSoulBalance'),
+        dispatch('updateCharacterIds'),
       ]);
       return questRewards;
     },
@@ -576,7 +610,7 @@ const quests = {
       await SimpleQuests.methods.submitProgressAmount(characterID, amount).send(defaultCallOptions(rootState));
       await Promise.all([
         dispatch('combat/fetchCharacterStamina', characterID),
-        dispatch('fetchSoulBalance', characterID),
+        dispatch('fetchGenesisSoulBalance', characterID),
         dispatch('fetchDustBalance'),
       ]);
     },
@@ -685,16 +719,28 @@ const quests = {
 
       return await SimpleQuests.methods.submitWalletProgressAmount(questID, amountTimesDecimals.toString()).send(defaultCallOptions(rootState));
     },
-    async completeWalletQuest({ rootState }: {rootState: IState}, {questID}: {questID: number}) {
+    async completeWalletQuest({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, {questID}: {questID: number}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
 
-      return await SimpleQuests.methods.completeWalletQuest(questID).send(defaultCallOptions(rootState));
+      const result = await SimpleQuests.methods.completeWalletQuest(questID).send(defaultCallOptions(rootState));
+
+      const questRewards = result.events.WalletQuestRewarded.returnValues.rewards;
+      await Promise.all([
+        dispatch('updateWeaponIds'),
+        dispatch('updateShieldIds'),
+        dispatch('updateTrinketIds'),
+        dispatch('updateJunkIds'),
+        dispatch('updateKeyLootboxIds'),
+        dispatch('fetchDustBalance'),
+        dispatch('fetchGenesisSoulBalance'),
+        dispatch('updateCharacterIds'),
+      ]);
+      return questRewards;
     },
     async requestPickableQuest({ rootState }: {rootState: IState}, {characterID, questID}: {characterID: number, questID: number}) {
       const { SimpleQuests } = rootState.contracts();
       if(!SimpleQuests || !rootState.defaultAccount) return;
-      console.log(characterID, questID);
       return await SimpleQuests.methods.requestPickableQuest(characterID, questID).send(defaultCallOptions(rootState));
     }
   },

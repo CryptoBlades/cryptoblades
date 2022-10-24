@@ -104,7 +104,8 @@ h5{
 .main-font{
   background-image: url('../assets/combat-bg.png');
   background-position: 0 0;
-  background-size: cover;
+  background-size: clamp(100%, 100%, 100%) auto;
+  background-repeat: no-repeat;
   height: 90vh;
 }
 
@@ -146,23 +147,24 @@ h5{
   justify-content: center;
   text-align: center;
   background-image: linear-gradient(to top, rgb(0, 0, 0),rgba(0, 0, 0, 0.692), rgba(0, 0, 0, 0.042));
-  padding: 200px 50px 40px 50px;
+  padding: 10% 20% 12% 20%;
 }
 
 .play-to-earn > .navs > div > p{
   font-family: Roboto;
   color: #fff;
-  font-size: 15px;
+  font-size: clamp(5px, 1.5vw, 15px);
 }
 
 .play-to-earn > .navs > div > h4{
   font-family: Trajan;
   font-weight: 500;
   color:#9e8a57;
+  font-size: clamp(.5rem, 2.5vw, 1.5rem);
 }
 
 .play-to-earn > .navs > div > .btn-join{
-  width: 160px;
+  width: clamp(90px, 19vw, 160px);
   background-image: url('../assets/btn-join.png') ;
   background-size: contain;
   background-position: center;
@@ -220,16 +222,23 @@ h5{
   cursor: pointer;
 }
 
-
 @keyframes animateBorder {
   0%{}
   100%{}
 }
 
-
-
-
 @media all and (max-width: 600px) {
+  .play-to-earn > .navs > div > p{
+    font-size: 15px;
+  }
+
+  .play-to-earn > .navs > div > h4{
+    font-size: 1.5rem;
+  }
+
+  .play-to-earn > .navs > div > .btn-join{
+    width: 160px;
+  }
 
   .play-to-earn > .navs{
     font-family: Roboto;
@@ -242,7 +251,7 @@ h5{
   }
 
   .play-to-earn{
-    height: 70vh;
+    height: 100%;
     display: flex;
     justify-content: space-around;
     flex-grow: 1;
@@ -251,6 +260,7 @@ h5{
     gap: 30px;
     margin-top: 0px;
     overflow-x: auto;
+    overflow-y: clip;
   }
 }
 

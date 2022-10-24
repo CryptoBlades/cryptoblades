@@ -27,6 +27,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         __AccessControl_init_unchained();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        secondsPerStamina = 300;
     }
 
     function migrateTo_1ee400a(uint256[255] memory _experienceTable) public {
@@ -84,7 +85,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     CharacterCosmetics[] private cosmetics;
 
     uint256 public constant maxStamina = 200;
-    uint256 public constant secondsPerStamina = 300; //5 * 60
 
     uint256[256] private experienceTable; // fastest lookup in the west
 
@@ -93,8 +93,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     Promos public promos;
 
-    uint256 private lastMintedBlock;
-    uint256 private firstMintedOfLastBlock;
+    uint256 private lastMintedBlock; // DEPRECATED
+    uint256 private firstMintedOfLastBlock; // DEPRECATED
 
     uint256 public characterLimit;
 
@@ -113,6 +113,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     Garrison public garrison;
 
     uint256 public constant NFTVAR_BONUS_POWER = 2;
+    uint256 public constant NFTVAR_NON_GENESIS_VERSION = 3; // 0 = genesis, 1 = v2
+
+    uint256 public secondsPerStamina;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -127,11 +130,6 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         require(hasRole(GAME_ADMIN, msg.sender), "NA");
     }
 
-    modifier noFreshLookup(uint256 id) {
-        _noFreshLookup(id);
-        _;
-    }
-
     modifier minterOnly() {
         _minterOnly();
         _;
@@ -141,11 +139,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         require(hasRole(GAME_ADMIN, msg.sender) || hasRole(MINTER_ROLE, msg.sender), 'no access');
     }
 
-    function _noFreshLookup(uint256 id) internal view {
-        require(id < firstMintedOfLastBlock || lastMintedBlock < block.number, "Too fresh for lookup");
-    }
-
-    function get(uint256 id) public view noFreshLookup(id) returns (uint16, uint8, uint8, uint64, uint16, uint16, uint16, uint16, uint16, uint16) {
+    function get(uint256 id) public view returns (uint16, uint8, uint8, uint64, uint16, uint16, uint16, uint16, uint16, uint16) {
         Character memory c = tokens[id];
         CharacterCosmetics memory cc = cosmetics[id];
         return (c.xp, c.level, c.trait, c.staminaTimestamp,
@@ -162,26 +156,25 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint16(RandomUtil.randomSeededMinMax(0, limit, RandomUtil.combineSeeds(seed, seed2)));
     }
 
-    function getCosmeticsSeed(uint256 id) public view noFreshLookup(id) returns (uint256) {
+    function getCosmeticsSeed(uint256 id) public view returns (uint256) {
         CharacterCosmetics memory cc = cosmetics[id];
         return cc.seed;
     }
 
-    function getSoulForBurns(uint256[] calldata burnIds) external view returns (uint256) {
-        uint256 soulAmount = 0;
+    function getSoulForBurns(uint256[] calldata burnIds) external view returns (uint256 genesisSoulAmount, uint256 nonGenesisSoulAmount) {
         for(uint i = 0; i < burnIds.length; i++) {
-            soulAmount += getTotalPower(burnIds[i]).div(10);
+            uint256 power = getTotalPower(burnIds[i]).div(10);
+            if(nftVars[burnIds[i]][NFTVAR_NON_GENESIS_VERSION] == 0) {
+                genesisSoulAmount += power;
+            }
+            else {
+                nonGenesisSoulAmount += power;
+            }
         }
-        return soulAmount;
     }
 
-    function mint(address minter, uint256 seed) public restricted {
-        uint256 tokenID = tokens.length;
-
-        if(block.number != lastMintedBlock)
-            firstMintedOfLastBlock = tokenID;
-        lastMintedBlock = block.number;
-
+    function mint(address minter, uint256 seed) public restricted returns (uint256 tokenID) {
+        tokenID = tokens.length;
         uint16 xp = 0;
         uint8 level = 0; // 1
         uint8 trait = uint8(RandomUtil.randomSeededMinMax(0,3,seed));
@@ -198,19 +191,16 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         else {
             _mint(minter, tokenID);
         }
+        nftVars[tokenID][NFTVAR_NON_GENESIS_VERSION] = 1;
+
         emit NewCharacter(tokenID, receiver);
     }
 
-    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID, uint24 bonusPower, uint16 reputation) minterOnly public returns (uint256) {
+    function customMint(address minter, uint16 xp, uint8 level, uint8 trait, uint256 seed, uint256 tokenID, uint24 bonusPower, uint16 reputation, uint8 version) minterOnly public returns (uint256) {
         uint64 staminaTimestamp = uint64(now); // 0 on purpose to avoid chain jumping abuse
 
         if(tokenID == 0){
             tokenID = tokens.length;
-
-            if(block.number != lastMintedBlock)
-                firstMintedOfLastBlock = tokenID;
-            lastMintedBlock = block.number;
-
             tokens.push(Character(xp, level, trait, staminaTimestamp));
             cosmetics.push(CharacterCosmetics(0, RandomUtil.combineSeeds(seed, 1)));
             address receiver = minter;
@@ -237,6 +227,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
         nftVars[tokenID][NFTVAR_BONUS_POWER] = bonusPower;
         nftVars[tokenID][NFTVAR_REPUTATION] = reputation;
+        nftVars[tokenID][NFTVAR_NON_GENESIS_VERSION] = version;
 
         return tokenID;
     }
@@ -244,6 +235,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     function burnIntoCharacter(uint256[] calldata burnIds, uint256 targetCharId, uint256 burnPowerMultiplier) external restricted {
         uint256 burnPower = 0;
         for(uint i = 0; i < burnIds.length; i++) {
+            require(nftVars[burnIds[i]][NFTVAR_NON_GENESIS_VERSION] == nftVars[targetCharId][NFTVAR_NON_GENESIS_VERSION], "Character version mismatch");
             burnPower += nftVars[burnIds[i]][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[burnIds[i]].level));
             address burnOwner = ownerOf(burnIds[i]);
             if(burnOwner == address(garrison)) {
@@ -277,13 +269,19 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         }
     }
 
-    function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount) external restricted {
+    function upgradeWithSoul(uint256 targetCharId, uint256 soulAmount, bool isCharacterGenesis) external restricted {
+        if(isCharacterGenesis) {
+            require(nftVars[targetCharId][NFTVAR_NON_GENESIS_VERSION] == 0);
+        }
+        else {
+            require(nftVars[targetCharId][NFTVAR_NON_GENESIS_VERSION] > 0);
+        }
         uint256 burnPower = soulAmount.mul(10);
         require(uint(4).mul(getPowerAtLevel(tokens[targetCharId].level)) >= getTotalPower(targetCharId).add(burnPower), "Power limit");
         nftVars[targetCharId][NFTVAR_BONUS_POWER] = burnPower.add(nftVars[targetCharId][NFTVAR_BONUS_POWER]);
     }
 
-    function getLevel(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getLevel(uint256 id) public view returns (uint8) {
         return tokens[id].level; // this is used by dataminers and it benefits us
     }
 
@@ -291,11 +289,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint16(experienceTable[currentLevel]); // this is helpful to users as the array is private
     }
 
-    function getPower(uint256 id) public view noFreshLookup(id) returns (uint24) {
+    function getPower(uint256 id) public view returns (uint24) {
         return getPowerAtLevel(tokens[id].level);
     }
 
-    function getTotalPower(uint256 id) public view noFreshLookup(id) returns (uint256) {
+    function getTotalPower(uint256 id) public view returns (uint256) {
         return nftVars[id][NFTVAR_BONUS_POWER].add(getPowerAtLevel(tokens[id].level));
     }
 
@@ -303,7 +301,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return Common.getPowerAtLevel(level);
     }
 
-    function getTrait(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getTrait(uint256 id) public view returns (uint8) {
         return tokens[id].trait;
     }
 
@@ -311,7 +309,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         tokens[id].trait = trait;
     }
 
-    function getXp(uint256 id) public view noFreshLookup(id) returns (uint32) {
+    function getXp(uint256 id) public view returns (uint32) {
         return tokens[id].xp;
     }
 
@@ -341,7 +339,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             _gainXp(chars[i], xps[i]);
     }
 
-    function getStaminaTimestamp(uint256 id) public view noFreshLookup(id) returns (uint64) {
+    function getStaminaTimestamp(uint256 id) public view returns (uint64) {
         return tokens[id].staminaTimestamp;
     }
 
@@ -349,7 +347,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         tokens[id].staminaTimestamp = timestamp;
     }
 
-    function getStaminaPoints(uint256 id) public view noFreshLookup(id) returns (uint8) {
+    function getStaminaPoints(uint256 id) public view returns (uint8) {
         return getStaminaPointsFromTimestamp(tokens[id].staminaTimestamp);
     }
 
@@ -364,18 +362,18 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         return uint8(points);
     }
 
-    function isStaminaFull(uint256 id) public view noFreshLookup(id) returns (bool) {
+    function isStaminaFull(uint256 id) public view returns (bool) {
         return getStaminaPoints(id) >= maxStamina;
     }
 
-    function getStaminaMaxWait() public pure returns (uint64) {
+    function getStaminaMaxWait() public view returns (uint64) {
         return uint64(maxStamina * secondsPerStamina);
     }
 
     function getFightDataAndDrainStamina(address fighter,
-        uint256 id, uint8 amount, bool allowNegativeStamina, uint256 busyFlag) public restricted returns(uint96) {
-        require(fighter == ownerOf(id) && nftVars[id][NFTVAR_BUSY] == 0);
-        nftVars[id][NFTVAR_BUSY] |= busyFlag;
+        uint256 id, uint8 amount, bool allowNegativeStamina, uint256 busyFlag) public restricted returns(uint104) {
+        require(fighter == ownerOf(id)/* && nftVars[id][NFTVAR_BUSY] == 0*/);
+        //nftVars[id][NFTVAR_BUSY] |= busyFlag;
 
         Character storage char = tokens[id];
         uint8 staminaPoints = getStaminaPointsFromTimestamp(char.staminaTimestamp);
@@ -391,7 +389,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
         }
         // bitwise magic to avoid stacking limitations later on
-        return uint96(char.trait | (getTotalPower(id) << 8) | (preTimestamp << 32));
+        return uint104(char.trait | (nftVars[id][NFTVAR_NON_GENESIS_VERSION] << 8) | (getTotalPower(id) << 16) | (uint104(preTimestamp) << 40));
     }
 
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {
@@ -471,5 +469,9 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function setBaseURI(string memory baseUri) public restricted {
         _setBaseURI(baseUri);
+    }
+
+    function setSecondsPerStamina(uint256 _secondsPerStamina) external restricted {
+        secondsPerStamina = _secondsPerStamina;
     }
 }

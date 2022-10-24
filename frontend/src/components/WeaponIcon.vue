@@ -2,59 +2,73 @@
   <div
     class="weapon-icon"
     v-bind:class="[(getWeaponDurability(weapon.id) === 0 ? 'no-durability' : '')]"
-    v-tooltip="{ content: tooltipHtml , trigger: (isMobile() ? 'click' : 'hover') }"
     @mouseover="hover = !isMobile() || true"
     @mouseleave="hover = !isMobile()"
   >
-
     <div class="loading-container" v-if="!allLoaded">
       <i class="fas fa-spinner fa-spin"></i>
     </div>
 
-    <div class="glow-container" ref="el" :class="['glow-' + (weapon.stars || 0)]">
-      <!-- below use of weapon.id is for test purpose, should be replaced with getWeaponCosmetic(weapon.id) -->
+    <div class="glow-container" ref="el" :class="selected ? 'selected-border' : ['glow-' + (weapon.stars || 0)]">
       <div class="animation" v-bind:class="showCosmetics ? 'weapon-animation-applied-' + getWeaponCosmetic(weapon.id) : ''"/>
       <img v-if="showPlaceholder" v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
-           class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)" />
+        class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)"/>
 
-      <div class="trait">
-        <span :class="weapon.element.toLowerCase() + '-icon'"></span>
-        <b-icon v-if="favorite" class="favorite-star" icon="star-fill" variant="warning" />
+      <div class="d-flex flex-column align-items-end stars-flex" :class="!hasNftOptions ? 'stars-flex-extend' : ''">
+        <div>
+          <b-icon v-for="s in weapon.stars+1"  :key="s" class="star-stat" icon="star-fill" variant="warning" />
+        </div>
+        <div v-if="selected">
+          <span class="rounded-check"></span>
+        </div>
       </div>
 
-      <div class="name">
-        {{ getCleanWeaponName(weapon.id, weapon.stars) }}
+      <div class="favorite">
+        <span v-if="favorite" class="favorite-weapon"></span>
       </div>
+      <div class="weapon-details" :style="weapon.lowStarBurnPoints > 0
+        || weapon.fourStarBurnPoints > 0
+        || weapon.fiveStarBurnPoints > 0
+        ? 'margin-top: -20px' : 'margin-top: 0px'">
 
-      <div class="bonus-power">
-        <div v-if="weapon.lowStarBurnPoints > 0"><span>{{ weapon.lowStarBurnPoints }} LB</span></div>
-        <div v-if="weapon.fourStarBurnPoints > 0"><span>{{ weapon.fourStarBurnPoints }} 4B</span></div>
-        <div v-if="weapon.fiveStarBurnPoints > 0"><span>{{ weapon.fiveStarBurnPoints }} 5B</span></div>
+        <div class="name">
+          <div>
+            <div class="id-number">{{$t('weaponIcon.id')}}: #{{ weapon.id }}</div>
+            <span span>{{ getCleanWeaponName(weapon.id, weapon.stars).toUpperCase() }}</span>
+          </div>
+          <span class="icon-trait" :class="weapon.element.toLowerCase() + '-icon'"></span>
+          <span class="battle-p">Battle Power: {{weapon.stat1Value + weapon.stat2Value + weapon.stat3Value}}</span>
+        </div>
+        <div>
+          <div class="small-durability-bar"
+            :style="`--durabilityReady: ${(getWeaponDurability(weapon.id)/maxDurability)*100}%;`"
+            v-tooltip.bottom="`
+              ${$t('weaponIcon.durability')} ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
+              ${getWeaponDurability(weapon.id) === maxDurability ?
+              $t('weaponIcon.durabilityTooltipFull') : `${$t('weaponIcon.durabilityTooltip')} ${timeUntilWeaponHasMaxDurability(weapon.id)}` }
+              `">
+          </div>
+        </div>
+        <div class="bonus-pows">
+          <div v-if="weapon.lowStarBurnPoints > 0">LB: {{ weapon.lowStarBurnPoints }}</div>
+          <div v-if="weapon.fourStarBurnPoints > 0">4B: {{ weapon.fourStarBurnPoints }}</div>
+          <div v-if="weapon.fiveStarBurnPoints > 0">5B: {{ weapon.fiveStarBurnPoints }}</div>
+        </div>
       </div>
-
-      <div>
-        <div class="small-durability-bar"
-        :style="`--durabilityReady: ${(getWeaponDurability(weapon.id)/maxDurability)*100}%;`"
-        v-tooltip.bottom="`${$t('weaponIcon.durability')} ${getWeaponDurability(weapon.id)}/${maxDurability}<br>
-          ${$t('weaponIcon.durabilityTooltip')} ${timeUntilWeaponHasMaxDurability(weapon.id)}`"></div>
-      </div>
-
     </div>
-
-    <div class="id">{{$t('weaponIcon.id')}} {{ weapon.id }}</div>
-
+    <div class="rarity-label" :class="['rarity-' + (weapon.stars || 0)]">{{setRarity(weapon.stars)}}</div>
     <div class="stats">
       <div v-if="weapon.stat1Value">
         <span :class="weapon.stat1.toLowerCase() + '-icon'" class="mr-1 icon"></span>
-        <span :class="weapon.stat1.toLowerCase()">{{ weapon.stat1 }} +{{ weapon.stat1Value }}</span>
+        <span :class="weapon.stat1.toLowerCase()">{{ weapon.stat1Value }}</span>
       </div>
       <div v-if="weapon.stat2Value">
         <span :class="weapon.stat2.toLowerCase() + '-icon'" class="mr-1 icon"></span>
-        <span :class="weapon.stat2.toLowerCase()">{{ weapon.stat2 }} +{{ weapon.stat2Value }}</span>
+        <span :class="weapon.stat2.toLowerCase()">{{ weapon.stat2Value }}</span>
       </div>
       <div v-if="weapon.stat3Value">
         <span :class="weapon.stat3.toLowerCase() + '-icon'" class="mr-1 icon"></span>
-        <span :class="weapon.stat3.toLowerCase()">{{ weapon.stat3 }} +{{ weapon.stat3Value }}</span>
+        <span :class="weapon.stat3.toLowerCase()">{{ weapon.stat3Value }}</span>
       </div>
     </div>
 
@@ -98,12 +112,9 @@ function transformModel(model, y) {
 }
 
 export default {
-  props: ['weapon', 'favorite'],
-
+  props: ['weapon', 'favorite', 'selected', 'hasNftOptions'],
   computed: {
-    ...mapState([
-      'maxDurability',
-    ]),
+    ...mapState(['maxDurability']),
     ...mapState('specialWeaponsManager',
       ([
         'specialWeaponArts',
@@ -335,7 +346,7 @@ export default {
         this.loadingProgress();
 
       }, undefined, function ( error ) {
-        console.error( error );
+        console.error(error);
       } );
 
       modelLoader.load('models/crossguards/CrossGuard_' + crossGuard + '.FBX', model => {
@@ -346,7 +357,7 @@ export default {
         this.loadingProgress();
 
       }, undefined, function ( error ) {
-        console.error( error );
+        console.error(error);
       } );
 
       modelLoader.load('models/grips/Grip_' + grip + '.FBX', model => {
@@ -357,7 +368,7 @@ export default {
         this.loadingProgress();
 
       }, undefined, function ( error ) {
-        console.error( error );
+        console.error(error);
       } );
 
       modelLoader.load('models/pommels/Pommel_' + pommel + '.FBX', model => {
@@ -368,7 +379,7 @@ export default {
         this.loadingProgress();
 
       }, undefined, function ( error ) {
-        console.error( error );
+        console.error(error);
       } );
 
       this.allLoadStarted = true;
@@ -396,6 +407,14 @@ export default {
       if(++this.loadCount >= this.loadCountTotal && this.allLoadStarted) {
         this.loadingFinished();
       }
+    },
+
+    setRarity(rarity){
+      if(rarity === 0) return 'Normal';
+      if(rarity === 1) return 'Rare';
+      if(rarity === 2) return 'Unique';
+      if(rarity === 3) return 'Legendary';
+      if(rarity === 4) return 'Mythical';
     },
     loadingFinished() {
 
@@ -454,7 +473,7 @@ export default {
   mounted() {
     this.checkStorage();
     Events.$on('setting:showCosmetics', () => this.checkStorage());
-    if (localStorage.getItem('useGraphics') === 'false') {
+    if(localStorage.getItem('useGraphics') === 'false') {
       this.allLoaded = true;
       this.showPlaceholder = true;
       return;
@@ -469,14 +488,23 @@ export default {
 
 <style scoped>
 @import '../styles/weapon-cosmetics.css';
+.rounded-check{
+  content: url('../assets/check-round.svg');
+  height: 1.5em;
+  width: 1.5em;
+  z-index: 3;
+  right: -3px;
+  top: 25px;
+  position: absolute;
+}
+
 .small-durability-bar {
   position: relative;
   top: -5px;
-  height: 10px;
-  width: 80%;
+  height: 4px;
+  width: 100%;
   margin: 0 auto;
   border-radius: 2px;
-  border: 0.5px solid rgb(216, 215, 215);
   background : linear-gradient(to right, rgb(236, 75, 75) var(--durabilityReady), rgba(255, 255, 255, 0.1) 0);
 }
 
@@ -484,17 +512,30 @@ export default {
   height: 100%;
   width: 100%;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.stats > div{
+  font-size: 13px;
+  font-family: Roboto;
+}
+
+.stats > div > span:nth-child(2){
+  color: rgba(255, 255, 255, 0.719);
+  font-family: Roboto;
 }
 
 .glow-container {
   height: 100%;
   width: 100%;
-}
-
-.glow-container {
   border-radius: 5px;
   z-index: 540;
+  padding: 5px 25px;
+  background: rgb(0, 14, 41);
+}
+
+.glow-container > img{
+  margin-top: 10px;
 }
 
 .loading-container {
@@ -511,6 +552,83 @@ export default {
   position: absolute;
 }
 
+.rarity-label{
+  color: #fff;
+  padding: 2px 15px;
+  position: absolute;
+  left: 15px;
+  top: 10px !important;
+  font-size: 12px;
+  border-radius: 3px;
+  font-family: Roboto;
+}
+
+.stars-flex{
+  position: absolute;
+  top:27px;
+  right: 20px;
+}
+.stars-flex-extend{
+  top: 9px;
+}
+
+.battle-p{
+  font-family: Roboto;
+  font-size: 12px;
+  color: #ffffffc7;
+}
+
+.icon-trait{
+  font-size: 15px;
+  margin-right: 5px;
+}
+
+.bonus-pows{
+ display: flex;
+ justify-content: space-between;
+ margin-top: 8px;
+}
+
+.bonus-pows > div{
+  font-family: Roboto;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.548);
+  border: 1px solid rgba(255, 255, 255, 0.384);
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+
+.name > div{
+  display: flex;
+  flex-direction: column;
+}
+
+.name > div > div{
+  font-family: Roboto;
+}
+
+.name > div > span{
+  font-family: Oswald;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow:ellipsis;
+  font-size: 0.87vw;
+}
+
+.name{
+  margin-bottom: 10px;
+}
+
+.selected-border{
+  border: 1px solid rgb(237, 205, 144);
+}
+
+.star-stat{
+  height: 11px;
+  width: 11px;
+  margin-left: 2px;
+}
+
 .trait {
   top: 10px;
   left: 10px;
@@ -523,13 +641,13 @@ export default {
 
 .id {
   top: 8px;
-  left: 30px;
+  left: 15px;
   font-style: italic;
 }
 
 .stats {
-  top: 35px;
-  left: 10px;
+  top: 40px;
+  left: 15px;
 }
 
 .icon {
@@ -546,33 +664,71 @@ export default {
   transform: scale(0.7);
 }
 
-.name {
+.weapon-details{
+  display: flex;
+  padding: 0px 15px;
+  flex-direction: column;
+  margin-top: -20px;
+}
+
+.favorite-weapon{
+  content: url('../assets/blacksmith/favorite_icon.svg');
+  height: 25px;
+  width: 25px;
   position: absolute;
-  bottom: 15px;
+  right: -10px;
+  top: -10px;
+}
+
+.name {
+  bottom: 20px;
   left: 12%;
   right: 12%;
-  font-size: 0.9em;
-  text-align: center;
+  font-size: 0.6vw;
+  color: #fff;
+  font-family: Roboto;
+  text-align: left;
 }
 
 .glow-0 {
   animation: none;
+  border: 1px solid rgba(245, 245, 245, 0.116);
 }
 
 .glow-1 {
-  box-shadow: inset 0 0 15px rgba(0, 162, 255, 0.5);
+  border: 1px solid rgba(0, 162, 255);
 }
 
 .glow-2 {
-  box-shadow: inset 0 0 20px rgba(125, 0, 125, 0.5);
+  border: 1px solid rgba(125, 0, 125);
 }
 
 .glow-3 {
-  box-shadow: inset 0 0 25px rgba(255, 102, 0, 0.3);
+  border: 1px solid rgba(255, 102, 0);
 }
 
 .glow-4 {
-  box-shadow: inset 0 0 30px rgba(125, 0, 0, 0.5);
+  border: 1px solid rgba(125, 0, 0);
+}
+
+.rarity-0 {
+  background-color: rgb(85, 85, 85);
+}
+
+.rarity-1 {
+  background-color: rgba(0, 162, 255);
+}
+
+.rarity-2 {
+  background-color: rgba(125, 0, 125);
+}
+
+.rarity-3 {
+  background-color: rgba(255, 102, 0);
+}
+
+.rarity-4 {
+  background-color: rgba(125, 0, 0);
 }
 
 
@@ -587,4 +743,22 @@ export default {
   font-size: 0.6em;
   text-align: right;
 }
+
+@media (max-width: 576px) {
+  .name > div > span{
+    font-family: Oswald;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    font-size: 7em;
+  }
+
+  .name > div > div{
+    font-size: 5em;
+    color: rgba(255, 255, 255, 0.445);
+  }
+
+}
+
+
 </style>

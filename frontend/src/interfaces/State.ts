@@ -4,8 +4,14 @@ import { Contracts } from './Contracts';
 import { Nft } from './Nft';
 import { IShield } from './Shield';
 import Web3 from 'web3';
-export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'king' | 'skill90' | 'skill180' | 'king90' | 'king180';
-export const allStakeTypes: StakeType[] = ['skill', 'skill2', 'lp', 'lp2', 'king', 'skill90', 'skill180', 'king90', 'king180'];
+export type StakeType = 'skill' | 'skill2' | 'lp' | 'lp2' | 'lpValor' | 'lpValor2' | 'king' |
+'skill60' |'skill90' | 'skill180' | 'king90' | 'king180' | 'valor';
+export const allStakeTypes: StakeType[] =
+[
+  'skill', 'skill2', 'lp', 'lp2', 'lpValor',
+  'lpValor2', 'king', 'skill60', 'skill90',
+  'skill180', 'king90', 'king180', 'valor'
+];
 export type NftStakeType = 'cbkLandT1' | 'cbkLandT2' | 'cbkLandT3';
 export const allNftStakeTypes: NftStakeType[] = ['cbkLandT1', 'cbkLandT2', 'cbkLandT3'];
 
@@ -76,7 +82,9 @@ export interface IState {
   skillPriceInUsd: number;
 
   skillBalance: string;
+  balance: string;
   skillRewards: string;
+  valorRewards: string;
   maxRewardsClaimTax: string;
   rewardsClaimTax: string;
   xpRewards: Record<string, string>;
@@ -93,6 +101,7 @@ export interface IState {
   ownedDust: string[];
   currentChainSupportsPvP: boolean;
   currentChainSupportsQuests: boolean;
+  currentChainSupportsDrawbridge: boolean;
   hasAdminAccess: boolean;
   hasMinterAccess: boolean;
 

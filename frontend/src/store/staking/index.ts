@@ -83,28 +83,36 @@ const staking = {
       skill2: { ...defaultStakeState },
       lp: { ...defaultStakeState },
       lp2: { ...defaultStakeState },
+      lpValor: { ...defaultStakeState },
+      lpValor2: { ...defaultStakeState },
       king: { ...defaultStakeState },
       king90: { ...defaultStakeState },
       king180: { ...defaultStakeState },
+      skill60: { ...defaultStakeState },
       skill90: { ...defaultStakeState },
       skill180: { ...defaultStakeState },
       cbkLandT1: { ...defaultStakeState },
       cbkLandT2: { ...defaultStakeState },
-      cbkLandT3: { ...defaultStakeState }
+      cbkLandT3: { ...defaultStakeState },
+      valor: { ...defaultStakeState }
     },
     stakeOverviews: {
       skill: { ...defaultStakeOverviewState },
       skill2: { ...defaultStakeOverviewState },
       lp: { ...defaultStakeOverviewState },
       lp2: { ...defaultStakeOverviewState },
+      lpValor: { ...defaultStakeOverviewState },
+      lpValor2: { ...defaultStakeOverviewState },
       king: { ...defaultStakeOverviewState },
       king90: { ...defaultStakeOverviewState },
       king180: { ...defaultStakeOverviewState },
+      skill60: { ...defaultStakeOverviewState },
       skill90: { ...defaultStakeOverviewState },
       skill180: { ...defaultStakeOverviewState },
       cbkLandT1: { ...defaultStakeOverviewState },
       cbkLandT2: { ...defaultStakeOverviewState },
-      cbkLandT3: { ...defaultStakeOverviewState }
+      cbkLandT3: { ...defaultStakeOverviewState },
+      valor: { ...defaultStakeOverviewState }
     },
   } as IStake,
   getters: {
@@ -350,23 +358,6 @@ const staking = {
       });
 
       await dispatch('fetchStakeDetails', { stakeType: 'king' });
-    },
-
-    async stakeUnclaimedRewards({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, { stakeType }: { stakeType: StakeType }) {
-      if(stakeType !== stakeTypeThatCanHaveUnclaimedRewardsStakedTo) return;
-
-      const { CryptoBlades } = rootState.contracts();
-      if(!CryptoBlades) return;
-
-      await CryptoBlades.methods
-        .stakeUnclaimedRewards()
-        .send(defaultCallOptions(rootState));
-
-      await Promise.all([
-        dispatch('fetchSkillBalance'),
-        dispatch('fetchStakeDetails', { stakeType }),
-        dispatch('combat/fetchFightRewardSkill'),
-      ]);
     },
 
     async claimReward({ rootState, dispatch }: {rootState: IState, dispatch: Dispatch}, { stakeType }: { stakeType: StakeType }) {

@@ -123,7 +123,6 @@ interface StoreMappedState {
 }
 
 interface StoreMappedActions {
-  claimTokenRewards(): Promise<void>;
   setUpContracts(): Promise<void>;
   initialize(): Promise<void>;
   configureMetaMask(networkId: number): Promise<void>;
@@ -258,7 +257,6 @@ export default Vue.extend({
       ]
     ) as StoreMappedActions),
     ...(mapActions([
-      'claimTokenRewards',
       'setUpContracts',
       'initialize',
       'configureMetaMask']
@@ -267,6 +265,7 @@ export default Vue.extend({
       'setNetworkId',
       'updateCurrentChainSupportsPvP',
       'updateCurrentChainSupportsQuests',
+      'updateCurrentChainSupportsDrawbridge',
       'setWeb3',
     ]),
     ...mapMutations('treasury', [
@@ -293,11 +292,6 @@ export default Vue.extend({
       else localStorage.setItem('hideAdvanced', 'false');
 
       Events.$emit('setting:hideAdvanced', { value: this.hideAdvanced });
-    },
-    async onClaimTokens() {
-      if (this.canClaimTokens) {
-        await this.claimTokenRewards();
-      }
     },
     async claimSkill(stage: ClaimStage) {
       if (stage === ClaimStage.WaxBridge) {
@@ -346,6 +340,7 @@ export default Vue.extend({
       localStorage.setItem('currentChain', this.currentChain);
       this.updateCurrentChainSupportsPvP();
       this.updateCurrentChainSupportsQuests();
+      this.updateCurrentChainSupportsDrawbridge();
       Events.$emit('setting:currentChain', { value: this.currentChain });
       addChainToRouter(this.currentChain);
       if(!this.connectingWalletConnect) await this.configureMetaMask(+getConfigValue('VUE_APP_NETWORK_ID'));

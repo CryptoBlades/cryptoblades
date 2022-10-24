@@ -127,6 +127,7 @@ export default {
         untieredFullPower: null,
         rank: null,
         element: null,
+        version: null
       },
       availableWeaponIds: [],
       availableShieldIds: [],
@@ -169,7 +170,7 @@ export default {
 
   computed: {
     ...mapState(['currentCharacterId', 'contracts', 'defaultAccount', 'ownedWeaponIds', 'ownedShieldIds', 'web3']),
-    ...mapGetters(['getCharacterName'])
+    ...mapGetters(['getCharacterName', 'currentCharacter'])
   },
 
   methods: {
@@ -432,8 +433,8 @@ export default {
         await this.withdrawFromOldArena(this.currentCharacterId);
 
         this.isCharacterInOldArena = false;
-      } catch (err) {
-        console.log('leave old arena error: ', err.message);
+      } catch (error) {
+        console.error('leave old arena error: ', error.message);
       } finally {
         this.loading = false;
       }
@@ -452,6 +453,8 @@ export default {
       const rename = await this.getRename(this.currentCharacterId);
 
       this.characterInformation.name = rename ? rename : this.getCharacterName(this.currentCharacterId);
+
+      this.characterInformation.version = this.currentCharacter.version;
 
       this.characterInformation.tier = await this.getArenaTier(this.currentCharacterId);
 
@@ -602,6 +605,8 @@ export default {
 
       if (value !== null) {
         this.characterInformation.name = this.getCharacterName(value);
+
+        this.characterInformation.version = this.currentCharacter.version;
 
         this.characterInformation.tier = await this.getArenaTier(value);
 

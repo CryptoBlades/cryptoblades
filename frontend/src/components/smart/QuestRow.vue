@@ -7,13 +7,13 @@
     <QuestRequirements v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
                        :progress="character.quest.progress" :index="characterId"/>
     <QuestRewards v-if="character.quest && character.quest.id !== 0" :quest="character.quest"/>
-    <QuestActions :character="character" :quest="character.quest" :key="character.quest.id"
+    <QuestActions :character="character" :quest="character.quest" :key="character.quest.id" showSupply
                   @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
   <div v-if="questTemplateType === QuestTemplateType.WALLET && quest" class="quest-row-wallet">
     <QuestRequirements :quest="quest" :progress="quest.progress"/>
     <QuestRewards v-if="quest && quest.id !== 0" :quest="quest"/>
-    <QuestActions :quest="quest" :key="quest.id"
+    <QuestActions :quest="quest" :key="quest.id" showSupply
                   @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
 </div>
@@ -132,11 +132,16 @@ export default Vue.extend({
 
 .quest-row-wallet {
   height: clamp(150px, 10vh, 200px);
+  height: auto;
+}
+
+.quest-row {
+  height: auto;
 }
 
 /* Character */
 .quest-row > div:nth-child(1) {
-  width: clamp(250px, 20vw, 550px);
+  width: clamp(352px, 20vw, 550px);
 }
 
 /* QuestActions */
@@ -146,7 +151,7 @@ export default Vue.extend({
 }
 /* QuestRequirements for Wallet Quests */
 .quest-row-wallet > div:nth-child(1) {
-  width: clamp(550px, 20vw, 700px);
+  width: clamp(350px, 20vw, 700px);
 }
 
 .busy-quest-row {

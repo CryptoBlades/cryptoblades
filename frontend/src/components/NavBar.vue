@@ -1,7 +1,7 @@
 <template>
   <div class="main-nav-div">
-    <b-navbar class="main-nav bg-dark border-bottom border-gray" toggleable="lg">
-      <div class="nav-logo col-xl-2 col-lg-3 col-md-3 col-sm-2 cols-1">
+    <b-navbar class="main-nav bg-dark border-bottom border-gray" toggleable="md">
+      <div class="nav-logo col-xl-2 col-lg-3 col-md-4 col-sm-4 cols-1">
         <router-link :to="{ name: 'dashboard' }" exact class="game-ui-logo">
           <img
             src="../assets/cb-logo.png"
@@ -10,17 +10,17 @@
           />
         </router-link>
       </div>
-      <b-collapse id="navbar-toggle-collapse" class="none-mobile" is-nav>
-        <view-links class="view-links"></view-links>
+      <b-collapse id="navbar-toggle-collapse" is-nav>
+        <view-links class="view-links d-none d-xl-flex"></view-links>
       </b-collapse>
 
       <skill-balance-display class="ml-auto d-none d-sm-flex none-mobile"/>
-      <options class="d-none d-sm-flex none-mobile"/>
+      <options class="options-dispay d-none d-sm-flex none-mobile"/>
 
       <!-- Render only on mobile view -->
         <options class="options-display-mobile d-sm-none"/>
     </b-navbar>
-    <skill-balance-display class="skill-display-mobile d-sm-none"/>
+    <skill-balance-display class="skill-display-mobile"/>
   </div>
 </template>
 
@@ -99,18 +99,10 @@ a.router-link-active {
   padding-bottom: 0;
 }
 
-.dropdown-menu {
-  background: rgb(20, 20, 20);
-  background: linear-gradient(
-    45deg,
-    rgba(20, 20, 20, 1) 0%,
-    rgba(36, 39, 32, 1) 100%
-  );
-  border: none;
-}
-
-.dropdown-menu li a:hover {
-  background: transparent;
+@media (max-width: 1415px){
+  #navbar-toggle-collapse {
+    display: none !important;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -120,9 +112,19 @@ a.router-link-active {
   }
 }
 
-@media (max-width: 576px) {
+@media (min-width: 820px) {
+  .custom-skill-balance-mobile.skill-display-mobile {
+    display: none !important;
+  }
+}
+
+@media (max-width: 820px) {
   .main-nav > .navbar-brand {
     align-self: center;
+  }
+
+  .options-dispay {
+    margin-left: auto;
   }
 
   .main-nav > .navbar-nav {

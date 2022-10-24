@@ -18,6 +18,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
     /* ========== CONSTANTS ========== */
 
     bytes32 public constant GAME = keccak256("GAME");
+    bytes32 public constant SHIELD_SEED = keccak256("SHIELD_SEED");
 
     uint256 public constant ITEM_WEAPON_RENAME = 1;
     uint256 public constant ITEM_CHARACTER_RENAME = 2;
@@ -34,6 +35,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     uint256 public constant LINK_SKILL_ORACLE_2 = 1; // technically second skill oracle (it's separate)
     uint256 public constant LINK_KING_ORACLE = 2;
+    uint256 public constant LINK_SAFE_RANDOMS = 3;
 
     uint256 public constant CURRENCY_SKILL = 0;
     //uint256 public constant CURRENCY_KING = 1; // not referenced atm
@@ -129,17 +131,33 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
         IERC20(tokenAddress).safeTransfer(msg.sender, amount);
     }
 
-    function purchaseShield() public {
-        require(itemFlatPrices[ITEM_SHIELD] > 0);
+    function getSeed(uint seedId, uint shieldType) internal pure returns (uint256 seed) {
+        uint[] memory seeds = new uint[](3);
+        seeds[0] = seedId;
+        seeds[1] = uint(1);
+        seeds[2] = shieldType;
+        seed = RandomUtil.combineSeeds(seeds);
+    }
 
+    function hasSeed(uint seedId, uint shieldType) public view returns (bool) {
+        return SafeRandoms(links[LINK_SAFE_RANDOMS]).hasSingleSeedRequest(msg.sender, getSeed(seedId, shieldType));
+    }
+
+    function generateShieldSeed() external {
+        require(itemFlatPrices[ITEM_SHIELD] > 0);
+        uint256 shieldType = numberParameters[VAR_PURCHASE_SHIELD_TYPE];
+        payCurrency(msg.sender, itemFlatPrices[ITEM_SHIELD], CURRENCY_SKILL);
+        SafeRandoms(links[LINK_SAFE_RANDOMS]).requestSingleSeed(msg.sender, getSeed(uint(SHIELD_SEED), shieldType));
+    }
+
+    function claimShield() external {
         uint256 shieldType = numberParameters[VAR_PURCHASE_SHIELD_TYPE];
         if(shieldType != 0) {
             require(numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] > 0);
             numberParameters[VAR_PURCHASE_SHIELD_SUPPLY] -= 1;
         }
-        payCurrency(msg.sender, itemFlatPrices[ITEM_SHIELD], CURRENCY_SKILL);
-        shields.mint(msg.sender, shieldType,
-            uint256(keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1)))));
+        uint256 seed = SafeRandoms(links[LINK_SAFE_RANDOMS]).popSingleSeed(msg.sender, getSeed(uint(SHIELD_SEED), shieldType), true, false);
+        shields.mint(msg.sender, shieldType, seed);
     }
 
     /* ========== MODIFIERS ========== */
@@ -153,7 +171,7 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
          _isAdmin();
         _;
     }
-    
+
     function _isAdmin() internal view {
          require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Not admin");
     }
@@ -174,10 +192,6 @@ contract Blacksmith is Initializable, AccessControlUpgradeable {
 
     function getCurrency(uint256 currency) public view returns (address) {
         return currencies[currency];
-    }
-
-    function getLink(uint256 linkId) public view returns (address) {
-        return links[linkId];
     }
 
     function vars(uint256 varField) public view returns (uint256) {

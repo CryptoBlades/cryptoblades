@@ -14,9 +14,13 @@
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
                    showGivenWeaponIds @chooseweapon="addBurnToken"
                    :starsOptions="getRequiredStarsAndHigher" :canFavorite="false"
-                   :chosenStarsOption="getRequiredStars"/>
+                   :chosenStarsOption="getRequiredStars"
+                   :selectable="'multiple'"
+                   />
       <weapon-grid :weaponIds="tokensToBurn" showGivenWeaponIds @chooseweapon="removeBurnToken"
-                   :canFavorite="false" :chosenStarsOption="''"/>
+                   :canFavorite="false" :chosenStarsOption="''"
+                   :selectable="'multiple'"
+                   />
     </div>
     <div v-else-if="quest.requirementType === RequirementType.DUST
       || quest.requirementType === RequirementType.STAMINA
@@ -85,7 +89,7 @@ interface StoreMappedActions {
 
   isExternalCurrency(payload: { currencyAddress: string }): Promise<boolean>;
 
-  fetchSoulBalance(): Promise<number>;
+  fetchGenesisSoulBalance(): Promise<number>;
 }
 
 interface Data {
@@ -185,7 +189,7 @@ export default Vue.extend({
       'submitWalletExternalProgress',
       'submitExternalProgressAmount',
       'submitWalletExternalProgressAmount',
-      'fetchSoulBalance',
+      'fetchGenesisSoulBalance',
       'isExternalCurrency',
     ]) as StoreMappedActions,
 
@@ -208,9 +212,6 @@ export default Vue.extend({
       } else if (this.quest.requirementType === RequirementType.DUST) {
         if (this.quest.requirementRarity === Rarity.COMMON) {
           this.amountToBurn = remainingAmount > this.getLesserDust() ? this.getLesserDust() : remainingAmount;
-          console.log(this.getLesserDust());
-          console.log(remainingAmount);
-          console.log(this.amountToBurn);
         } else if (this.quest.requirementRarity === Rarity.UNCOMMON) {
           this.amountToBurn = remainingAmount > this.getGreaterDust() ? this.getGreaterDust() : remainingAmount;
         } else if (this.quest.requirementRarity === Rarity.RARE) {
@@ -375,7 +376,7 @@ export default Vue.extend({
           this.ownedTokens = this.ownedShieldIds;
           this.ownedShieldIds?.forEach((id: string) => this.ownedNftIdTypes.push({id, type: 'shield'}));
         } else if (this.quest.requirementType === RequirementType.SOUL) {
-          this.soulBalance = await this.fetchSoulBalance();
+          this.soulBalance = await this.fetchGenesisSoulBalance();
         } else if (this.quest.requirementType === RequirementType.EXTERNAL
           || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
           await this.isExternalCurrencyAddress();
@@ -391,7 +392,7 @@ export default Vue.extend({
   width: 40%;
 }
 
-/deep/ .modal-footer-margin {
+::v-deep .modal-footer-margin {
   margin-bottom: 3rem;
 }
 
