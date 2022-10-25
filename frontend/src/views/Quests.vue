@@ -11,7 +11,7 @@
       <div class="d-flex justify-content-between w-100 weekly-progress-container">
         <div class="d-flex flex-column justify-content-between gap-2">
           <span class="quests-title">{{ $t('quests.quest') }}</span>
-          <cb-button class="top-button" :title="$t('quests.availableQuests')" @clickEvent="showQuestsListModal = true"></cb-button>
+          <!-- <cb-button class="top-button" :title="$t('quests.availableQuests')" @clickEvent="showQuestsListModal = true"></cb-button>
           <b-modal v-model="showQuestsListModal" :title="$t('quests.availableQuests')" hide-footer
                   @hide="showQuestsListModal = false; tier = undefined" size="xl">
             <div class="d-flex justify-content-center align-items-center gap-3">
@@ -39,7 +39,7 @@
               </b-form-select>
             </div>
             <QuestsList v-if="tier !== undefined" :tier="tier + tierOffset"/>
-          </b-modal>
+          </b-modal> -->
         </div>
         <div v-if="weeklyReward && weeklyReward.id && currentWeeklyCompletions !== undefined && weeklyReward.completionsGoal"
             class="d-flex flex-column justify-content-between gap-2 align-items-end">
@@ -78,50 +78,56 @@
             :toolTip="!canClaimWeeklyReward ? $t('quests.cannotClaimWeeklyTooltip') : ''" :title="$t('quests.claimWeeklyReward')"></cb-button>
         </div>
       </div>
-      <span v-if="walletQuests && walletQuests.length" class="quests-title-2">Wallet Quests</span>
-      <!-- TODO: This will come back when we add additional tiers to Wallet Quests -->
-      <!--      <div class="form-control-wrapper">-->
-      <!--        <select class="form-control" v-model="walletQuestTier" >-->
-      <!--              <option :value="undefined">Select a Rarity</option>-->
-      <!--          <option v-for="x in rarities" :value="x" :key="x">{{$t(`quests.rarityType.${Rarity[x]}`)}}</option>-->
-      <!--        </select>-->
-      <!--      </div>-->
-      <div v-if="isLoadingWalletQuests">
-        <i class="fas fa-spinner fa-spin"/>
-        {{ $t('quests.loading') }}
-      </div>
-      <div v-else v-for="quest in walletQuests" :key="quest.id" class="d-flex w-100">
-        <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
-                  :reputationLevelRequirements="reputationLevelRequirements"
-                  @refresh-quest-data="onRefreshQuestData"/>
-      </div>
-      <span class="quests-title-2">Character Quests</span>
-      <div v-if="isLoading">
-        <i class="fas fa-spinner fa-spin"/>
-        {{ $t('quests.loading') }}
-      </div>
-      <div v-if="characters.length !== 0 && !isLoading" class="d-flex flex-column w-100">
-        <div v-for="character in characters" :key="character.id" class="w-100 my-3">
-          <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id"
+      <div v-if="activeTab === 'wallet-quests'" class="wallet-quests-content">
+        <span v-if="walletQuests && walletQuests.length" class="quests-title-2">Wallet Quests</span>
+        <!-- TODO: This will come back when we add additional tiers to Wallet Quests -->
+        <!--      <div class="form-control-wrapper">-->
+        <!--        <select class="form-control" v-model="walletQuestTier" >-->
+        <!--              <option :value="undefined">Select a Rarity</option>-->
+        <!--          <option v-for="x in rarities" :value="x" :key="x">{{$t(`quests.rarityType.${Rarity[x]}`)}}</option>-->
+        <!--        </select>-->
+        <!--      </div>-->
+        <div v-if="isLoadingWalletQuests">
+          <i class="fas fa-spinner fa-spin"/>
+          {{ $t('quests.loading') }}
+        </div>
+        <div v-else v-for="quest in walletQuests" :key="quest.id" class="d-flex w-100">
+          <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
                     :reputationLevelRequirements="reputationLevelRequirements"
                     @refresh-quest-data="onRefreshQuestData"/>
         </div>
-        <br>
-        <b-modal v-model="showWeeklyClaimedModal" ok-only class="centered-modal" :title="$t('quests.weeklyReward')">
-          <div v-if="isLoading">
-            <i class="fas fa-spinner fa-spin"/>
-            {{ $t('quests.loading') }}
+      </div>
+
+      <div v-if="activeTab === 'pickable-quests'" class="pickable-quests-content">
+        <span class="quests-title-2">Character Quests</span>
+        <div v-if="isLoading">
+          <i class="fas fa-spinner fa-spin"/>
+          {{ $t('quests.loading') }}
+        </div>
+        <div v-if="characters.length !== 0 && !isLoading" class="d-flex flex-column w-100">
+          <div v-for="character in characters" :key="character.id" class="w-100 my-3">
+            <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id"
+                      :reputationLevelRequirements="reputationLevelRequirements"
+                      @refresh-quest-data="onRefreshQuestData"/>
           </div>
-          <QuestReward v-else :type="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
-                       :rewards="weeklyRewards"
-                       :amount="weeklyReward.rewardAmount" :reputationAmount="weeklyReward.reputationAmount"
-                       :externalAddress="weeklyReward.rewardExternalAddress"/>
-        </b-modal>
+          <br>
+          <b-modal v-model="showWeeklyClaimedModal" ok-only class="centered-modal" :title="$t('quests.weeklyReward')">
+            <div v-if="isLoading">
+              <i class="fas fa-spinner fa-spin"/>
+              {{ $t('quests.loading') }}
+            </div>
+            <QuestReward v-else :type="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
+                        :rewards="weeklyRewards"
+                        :amount="weeklyReward.rewardAmount" :reputationAmount="weeklyReward.reputationAmount"
+                        :externalAddress="weeklyReward.rewardExternalAddress"/>
+          </b-modal>
+        </div>
+        <div v-else class="m-4 font-weight-bold w-100">
+        {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}.<br>
+        {{ $t('combat.recruitAtPlaza') }}
+        </div>
       </div>
-      <div v-else class="m-4 font-weight-bold w-100">
-      {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}.<br>
-      {{ $t('combat.recruitAtPlaza') }}
-      </div>
+
     </div>
   </div>
 </template>
@@ -134,7 +140,7 @@ import {Accessors} from 'vue/types/options';
 import QuestRow from '@/components/smart/QuestRow.vue';
 import QuestComponentIcon from '@/components/smart/QuestComponentIcon.vue';
 import QuestReward from '@/components/smart/QuestReward.vue';
-import QuestsList from '@/components/smart/QuestsList.vue';
+// import QuestsList from '@/components/smart/QuestsList.vue';
 import hourglass from '@/assets/hourglass.png';
 import {getTimeRemaining} from '@/utils/common';
 import {NftIdType} from '@/components/smart/NftList.vue';
@@ -301,7 +307,7 @@ interface Data {
 }
 
 export default Vue.extend({
-  components: {QuestRow, QuestComponentIcon, QuestReward, QuestsList, QuestNav},
+  components: {QuestRow, QuestComponentIcon, QuestReward, QuestNav},
 
   props: {
     showCosmetics: {
