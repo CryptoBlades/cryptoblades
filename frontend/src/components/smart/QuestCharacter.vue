@@ -71,12 +71,17 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Rarity, RewardType} from '@/views/Quests.vue';
 import {Nft, NftStatus} from '../../interfaces/Nft';
 import {getCharacterArt} from '@/character-arts-placeholder';
 import {mapActions, mapGetters} from 'vuex';
 import {getCleanName} from '@/rename-censor';
-import {Quest, ReputationLevelRequirements, ReputationTier, TierChances} from '../../views/Quests.vue';
+import {
+  Rarity,
+  RewardType,
+  Quest,
+  ReputationLevelRequirements,
+  ReputationTier,
+  TierChances } from '@/interfaces';
 
 interface StoreMappedActions {
   getQuestTierChances(payload: { tier: number }): Promise<TierChances>;

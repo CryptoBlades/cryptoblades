@@ -31,7 +31,13 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest, QuestItemsInfo, Rarity, RequirementType, RewardType, DustRarity} from '@/views/Quests.vue';
+import {
+  Quest,
+  QuestItemsInfo,
+  Rarity,
+  RequirementType,
+  RewardType,
+  DustRarity } from '@/interfaces';
 import QuestComponentIcon from './QuestComponentIcon.vue';
 import {questItemTypeSupportsStars, questItemTypeSupportsTimesValue} from '@/utils/common';
 import {mapActions} from 'vuex';

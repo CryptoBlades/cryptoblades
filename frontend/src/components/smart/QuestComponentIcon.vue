@@ -13,7 +13,10 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {DustRarity, QuestItemsInfo, QuestItemType, Rarity} from '@/views/Quests.vue';
+import { DustRarity,
+  QuestItemsInfo,
+  QuestItemType,
+  Rarity } from '@/interfaces';
 import lesserDust from '@/assets/dusts/lesserDust.png';
 import greaterDust from '@/assets/dusts/greaterDust.png';
 import powerfulDust from '@/assets/dusts/powerfulDust.png';

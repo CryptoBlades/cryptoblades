@@ -1,4 +1,4 @@
-import {Quest} from '@/views/Quests.vue';
+import { Quest } from '@/interfaces';
 
 
 export interface Nft {

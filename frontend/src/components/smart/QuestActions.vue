@@ -37,9 +37,9 @@
         $t('quests.freeSkipResetsIn', {time: nextFreeSkipTime})
       }}
     </span>
-    <b-form-checkbox size="lg" :checked="pickable" @change="pickable=!pickable" switch v-if="showPickableSwitch">
+    <!-- <b-form-checkbox size="lg" :checked="pickable" @change="pickable=!pickable" switch v-if="showPickableSwitch">
       <b class="float-left">{{ pickable ? 'Special' : 'Random' }}</b>
-    </b-form-checkbox>
+    </b-form-checkbox> -->
     <!-- ADD TOOLTIP HERE -->
     <QuestSubmissionModal v-if="character||quest" :quest="quest" :questTemplateType="questTemplateType" :showModal="showSubmissionModal" :character="character"
                           @close-submission-modal="onCloseSubmissionModal"/>
@@ -54,7 +54,7 @@
                    :amount="quest.rewardAmount" :reputationAmount="quest.reputationAmount"
                    :externalAddress="quest.rewardExternalAddress"/>
     </b-modal>
-    <b-modal v-model="showPickableQuestModal" ok-only class="centered-modal" size="xl" title="Pick your Quest">
+    <!-- <b-modal v-model="showPickableQuestModal" ok-only class="centered-modal" size="xl" title="Pick your Quest">
       <div v-if="isLoading">
         <i class="fas fa-spinner fa-spin"/>
         {{ $t('quests.loading') }}
@@ -89,20 +89,25 @@
             </div>
           </div>
       </div>
-    </b-modal>
+    </b-modal> -->
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest, Rarity, RequirementType, RewardType, QuestTemplateType} from '@/views/Quests.vue';
+import {
+  Quest,
+  Rarity,
+  RequirementType,
+  RewardType,
+  QuestTemplateType } from '@/interfaces';
 import {Nft} from '../../interfaces/Nft';
 import Hint from '@/components/Hint.vue';
 import QuestSubmissionModal from '@/components/smart/QuestSubmissionModal.vue';
 import QuestReward from '@/components/smart/QuestReward.vue';
-import QuestRequirements from '@/components/smart/QuestRequirements.vue';
-import QuestRewards from '@/components/smart/QuestRewards.vue';
+// import QuestRequirements from '@/components/smart/QuestRequirements.vue';
+// import QuestRewards from '@/components/smart/QuestRewards.vue';
 import {mapActions} from 'vuex';
 import {NftIdType} from '@/components/smart/NftList.vue';
 import {getTimeRemaining} from '@/utils/common';
@@ -130,8 +135,8 @@ interface Data {
   isLimited: boolean;
   isInitialized: boolean;
   supply: number;
-  showPickableQuestModal: boolean;
-  pickableQuestTier?: Rarity;
+  // showPickableQuestModal: boolean;
+  // pickableQuestTier?: Rarity;
   quests: Quest[];
   pickedQuestId?: number;
 }
@@ -141,8 +146,8 @@ export default Vue.extend({
     Hint,
     QuestSubmissionModal,
     QuestReward,
-    QuestRequirements,
-    QuestRewards,
+    // QuestRequirements,
+    // QuestRewards,
   },
   props: {
     character: {
@@ -206,9 +211,9 @@ export default Vue.extend({
       RewardType,
       Rarity,
       QuestTemplateType,
-      showPickableQuestModal: false,
+      // showPickableQuestModal: false,
       tiers: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
-      pickableQuestTier: undefined,
+      // pickableQuestTier: undefined,
       quests: [],
       pickedQuestId: undefined,
       ActionAfterPick,
@@ -234,9 +239,9 @@ export default Vue.extend({
     hasIncomingDeadline(): boolean {
       return this.isLimited && !!this.deadlineTime;
     },
-    showPickableSwitch(): boolean {
-      return (this.questCanBeCompleted || this.questCanBeSkipped || this.quest !== null) && this.questTemplateType !== QuestTemplateType.WALLET;
-    },
+    // showPickableSwitch(): boolean {
+    //   return (this.questCanBeCompleted || this.questCanBeSkipped || this.quest !== null) && this.questTemplateType !== QuestTemplateType.WALLET;
+    // },
     actionAfterPick(): ActionAfterPick {
       if(this.questCanBeCompleted) {
         return ActionAfterPick.COMPLETE;
@@ -261,11 +266,11 @@ export default Vue.extend({
       }
     },
   },
-  watch: {
-    pickableQuestTier(): void {
-      this.fetchPickableQuests();
-    },
-  },
+  // watch: {
+  //   pickableQuestTier(): void {
+  //     this.fetchPickableQuests();
+  //   },
+  // },
   methods: {
     ...mapActions([
       'skipQuest',
@@ -282,14 +287,14 @@ export default Vue.extend({
       'deleteQuest',
       'getQuestTemplates',
     ]),
-    async fetchPickableQuests() {
-      try {
-        this.isLoading = true;
-        this.quests = await this.getQuestTemplates({tier: this.pickableQuestTier! + 20});
-      } finally {
-        this.isLoading = false;
-      }
-    },
+    // async fetchPickableQuests() {
+    //   try {
+    //     this.isLoading = true;
+    //     this.quests = await this.getQuestTemplates({tier: this.pickableQuestTier! + 20});
+    //   } finally {
+    //     this.isLoading = false;
+    //   }
+    // },
     submit() {
       this.isLoading = true;
       this.showSubmissionModal = true;
@@ -308,7 +313,7 @@ export default Vue.extend({
     },
 
     async skip() {
-      if(this.pickable) return this.showPickableQuestModal = true;
+      //if(this.pickable) return this.showPickableQuestModal = true;
       try {
         await this.skipQuest({characterID: this.character.id, pickedQuestID: 0});
         this.isLoading = true;
@@ -321,7 +326,7 @@ export default Vue.extend({
     },
 
     async complete() {
-      if (this.pickable) return this.showPickableQuestModal = true;
+      //if (this.pickable) return this.showPickableQuestModal = true;
       try {
         this.isLoading = true;
         let rewards;
@@ -351,22 +356,31 @@ export default Vue.extend({
     },
 
     async request() {
-      if(this.pickable){
-        this.showPickableQuestModal = true;
-        return;
+      try {
+        this.isLoading = true;
+        await this.requestQuest({characterID: this.character.id});
+        this.$emit('refresh-quest-data');
+      } finally {
+        this.isLoading = false;
+        this.$forceUpdate();
       }
-      else{
-        try {
-          this.isLoading = true;
-          await this.requestQuest({characterID: this.character.id});
-          this.$emit('refresh-quest-data');
-        } finally {
-          this.isLoading = false;
-          this.$forceUpdate();
-        }
-      }
+      // if(this.pickable){
+      //   this.showPickableQuestModal = true;
+      //   return;
+      // }
+      // else{
+      //   try {
+      //     this.isLoading = true;
+      //     await this.requestQuest({characterID: this.character.id});
+      //     this.$emit('refresh-quest-data');
+      //   } finally {
+      //     this.isLoading = false;
+      //     this.$forceUpdate();
+      //   }
+      // }
     },
 
+    // TODO: need to hit this to complete anything
     async handlePick(questID: number) {
       try {
         this.isLoading = true;

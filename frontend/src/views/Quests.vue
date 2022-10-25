@@ -11,6 +11,53 @@
       <div class="d-flex justify-content-between w-100 weekly-progress-container">
         <div class="d-flex flex-column justify-content-between gap-2">
           <span class="quests-title">{{ $t('quests.quest') }}</span>
+          <div v-if="activeTab === 'character-quests'">
+            <div>
+              <span class="quests-title-2">Next Quest Type</span>
+            </div>
+            <b-form-checkbox size="lg" :checked="pickable" @change="pickable=!pickable" switch>
+              <b class="float-left">{{ pickable ? 'Special' : 'Random' }}</b>
+            </b-form-checkbox>
+          </div>
+          <!-- THIS IS THE OLD MODAL FROM QUEST ACTIONS -->
+          <b-modal v-model="pickable" ok-only class="centered-modal" size="xl" title="Pick your Quest">
+            <div v-if="isLoading">
+              <i class="fas fa-spinner fa-spin"/>
+              {{ $t('quests.loading') }}
+            </div>
+            <div>
+              <b-form inline>
+                <label class="mr-sm-2">Special Quest Tier</label>
+                <b-form-select class="mt-2 mb-2" v-model="pickableQuestTier">
+                  <b-form-select-option :value="undefined" disabled>
+                    {{ $t('quests.pleaseSelectQuestTier') }}
+                  </b-form-select-option>
+                  <b-form-select-option v-for="tier in tiers" :key="tier" :value="tier">
+                    {{ $t(`quests.rarityType.${Rarity[tier]}`) }}
+                  </b-form-select-option>
+                </b-form-select>
+              </b-form>
+                <div v-if="isLoading">
+                  <i class="fas fa-spinner fa-spin"/>
+                  {{ $t('quests.loading') }}
+                </div>
+                <h3 v-else-if="quests.length === 0">
+                  {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
+                <div v-else class="d-flex flex-column gap-3">
+                  <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row p-3 gap-5">
+                    <QuestRequirements :quest="quest" :index="index"/>
+                    <QuestRewards :quest="quest"/>
+                    <div class="pickBtn-wrapper">
+                    <b-button class="flex-1 custom-action-btn" variant="primary" @click="handlePick(quest.id)">
+                      {{pickButtonLabel}}
+                    </b-button>
+                    </div>
+                  </div>
+                </div>
+            </div>
+          </b-modal>
+        <!-- THIS IS THE OLD MODAL FROM QUEST ACTIONS -->
+
           <!-- <cb-button class="top-button" :title="$t('quests.availableQuests')" @clickEvent="showQuestsListModal = true"></cb-button>
           <b-modal v-model="showQuestsListModal" :title="$t('quests.availableQuests')" hide-footer
                   @hide="showQuestsListModal = false; tier = undefined" size="xl">
@@ -98,7 +145,7 @@
         </div>
       </div>
 
-      <div v-if="activeTab === 'pickable-quests'" class="pickable-quests-content">
+      <div v-if="activeTab === 'character-quests'" class="character-quests-content">
         <span class="quests-title-2">Character Quests</span>
         <div v-if="isLoading">
           <i class="fas fa-spinner fa-spin"/>
@@ -108,7 +155,7 @@
           <div v-for="character in characters" :key="character.id" class="w-100 my-3">
             <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id"
                       :reputationLevelRequirements="reputationLevelRequirements"
-                      @refresh-quest-data="onRefreshQuestData"/>
+                      :pickable="pickable" @refresh-quest-data="onRefreshQuestData"/>
           </div>
           <br>
           <b-modal v-model="showWeeklyClaimedModal" ok-only class="centered-modal" :title="$t('quests.weeklyReward')">
@@ -145,118 +192,126 @@ import hourglass from '@/assets/hourglass.png';
 import {getTimeRemaining} from '@/utils/common';
 import {NftIdType} from '@/components/smart/NftList.vue';
 import QuestNav from '@/components/QuestNav.vue';
+import {
+  Quest,
+  QuestTemplateType,
+  Rarity,
+  ReputationLevelRequirements,
+  WeeklyReward,
+  QuestItemType,
+  RewardType } from '@/interfaces';
 
-export interface WeeklyReward {
-  id: number;
-  rewardType: RewardType;
-  rewardRarity: Rarity;
-  rewardAmount: number;
-  rewardExternalAddress?: string;
-  reputationAmount: number;
-  completionsGoal: number;
-  weekNumber: number;
-}
+// export interface WeeklyReward {
+//   id: number;
+//   rewardType: RewardType;
+//   rewardRarity: Rarity;
+//   rewardAmount: number;
+//   rewardExternalAddress?: string;
+//   reputationAmount: number;
+//   completionsGoal: number;
+//   weekNumber: number;
+// }
 
-export interface Quest {
-  progress: number;
-  type?: QuestTemplateType;
-  reputation: number;
-  id: number;
-  tier?: Rarity;
-  requirementType?: RequirementType;
-  requirementRarity?: Rarity;
-  requirementAmount: number;
-  requirementExternalAddress?: string;
-  rewardType?: RewardType;
-  rewardRarity?: Rarity;
-  rewardAmount: number;
-  rewardExternalAddress?: string;
-  reputationAmount: number;
-  deadline?: number;
-  supply?: number;
-}
+// export interface Quest {
+//   progress: number;
+//   type?: QuestTemplateType;
+//   reputation: number;
+//   id: number;
+//   tier?: Rarity;
+//   requirementType?: RequirementType;
+//   requirementRarity?: Rarity;
+//   requirementAmount: number;
+//   requirementExternalAddress?: string;
+//   rewardType?: RewardType;
+//   rewardRarity?: Rarity;
+//   rewardAmount: number;
+//   rewardExternalAddress?: string;
+//   reputationAmount: number;
+//   deadline?: number;
+//   supply?: number;
+// }
 
-export enum RequirementType {
-  NONE,
-  WEAPON,
-  JUNK,
-  DUST,
-  TRINKET,
-  SHIELD,
-  STAMINA,
-  SOUL,
-  RAID,
-  EXTERNAL = 10,
-  EXTERNAL_HOLD = 11,
-}
+// export enum RequirementType {
+//   NONE,
+//   WEAPON,
+//   JUNK,
+//   DUST,
+//   TRINKET,
+//   SHIELD,
+//   STAMINA,
+//   SOUL,
+//   RAID,
+//   EXTERNAL = 10,
+//   EXTERNAL_HOLD = 11,
+// }
 
-export enum RewardType {
-  NONE,
-  WEAPON,
-  JUNK,
-  DUST,
-  TRINKET,
-  SHIELD,
-  EXPERIENCE = 9,
-  SOUL = 7,
-  CHARACTER = 12,
-  EXTERNAL = 10,
-}
+// export enum RewardType {
+//   NONE,
+//   WEAPON,
+//   JUNK,
+//   DUST,
+//   TRINKET,
+//   SHIELD,
+//   EXPERIENCE = 9,
+//   SOUL = 7,
+//   CHARACTER = 12,
+//   EXTERNAL = 10,
+// }
 
-// NOTE: Numbers should represent ItemType in SimpleQuests.sol
-export enum QuestItemType {
-  NONE,
-  WEAPON,
-  JUNK,
-  DUST,
-  TRINKET,
-  SHIELD,
-  STAMINA,
-  SOUL,
-  RAID,
-  EXPERIENCE,
-  EXTERNAL,
-  EXTERNAL_HOLD,
-  CHARACTER,
-  REPUTATION = 99
-}
+// // NOTE: Numbers should represent ItemType in SimpleQuests.sol
+// export enum QuestItemType {
+//   NONE,
+//   WEAPON,
+//   JUNK,
+//   DUST,
+//   TRINKET,
+//   SHIELD,
+//   STAMINA,
+//   SOUL,
+//   RAID,
+//   EXPERIENCE,
+//   EXTERNAL,
+//   EXTERNAL_HOLD,
+//   CHARACTER,
+//   REPUTATION = 99
+// }
 
-export enum Rarity {
-  COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
-}
+// export enum Rarity {
+//   COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
+// }
 
-export enum DustRarity {
-  LESSER, GREATER, POWERFUL
-}
+// export enum DustRarity {
+//   LESSER, GREATER, POWERFUL
+// }
 
-export enum ReputationTier {
-  PEASANT, TRADESMAN, NOBLE, KNIGHT, KING
-}
+// export enum ReputationTier {
+//   PEASANT, TRADESMAN, NOBLE, KNIGHT, KING
+// }
 
-export enum QuestTemplateType {
-  QUEST=0,
-  PROMO=10,
-  WALLET=30,
-  PICKABLE=20
-}
-export interface ReputationLevelRequirements {
-  level2: number;
-  level3: number;
-  level4: number;
-  level5: number;
-}
+// export enum QuestTemplateType {
+//   QUEST=0,
+//   PROMO=10,
+//   WALLET=30,
+//   PICKABLE=20
+// }
+// export interface ReputationLevelRequirements {
+//   level2: number;
+//   level3: number;
+//   level4: number;
+//   level5: number;
+// }
 
-export interface TierChances {
-  common: number;
-  uncommon: number;
-  rare: number;
-  epic: number;
-  legendary: number;
-}
+// export interface TierChances {
+//   common: number;
+//   uncommon: number;
+//   rare: number;
+//   epic: number;
+//   legendary: number;
+// }
 
-export interface QuestItemsInfo {
-  questItems: Record<string, Record<string, any>>;
-}
+// export interface QuestItemsInfo {
+//   questItems: Record<string, Record<string, any>>;
+// }
 
 interface StoreMappedActions {
   fetchCharacters(characterIds: (string | number)[]): Promise<void>;
@@ -304,6 +359,8 @@ interface Data {
   walletQuests: Quest[];
   walletQuestTier: Rarity;
   activeTab: string;
+  pickableQuestTier?: Rarity;
+  quests: Quest[];
 }
 
 export default Vue.extend({
@@ -313,6 +370,10 @@ export default Vue.extend({
     showCosmetics: {
       type: Boolean,
       default: true
+    },
+    pickable: {
+      type: Boolean,
+      default: false
     },
   },
 
@@ -340,6 +401,8 @@ export default Vue.extend({
       walletQuests:[],
       walletQuestTier: 0,
       activeTab: 'wallet-quests',
+      pickableQuestTier: undefined,
+      quests: [],
     } as Data;
   },
 
@@ -366,7 +429,7 @@ export default Vue.extend({
       case QuestTemplateType.WALLET:
         return 30;
       }
-    }
+    },
   },
 
   methods: {
@@ -386,6 +449,35 @@ export default Vue.extend({
     onChangeTab(tab: string) {
       this.activeTab = tab;
     },
+
+    async fetchPickableQuests() {
+      try {
+        this.isLoading = true;
+        this.quests = await this.getQuestTemplates({tier: this.pickableQuestTier! + 20});
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    // async handlePick(questID: number) {
+    //   try {
+    //     this.isLoading = true;
+    //     //this.pickedQuestID: questID
+    //     // if(this.actionAfterPick === ActionAfterPick.COMPLETE){
+    //     //   await this.completeQuest({characterID: this.character.id, pickedQuestID: questID});
+    //     // }
+    //     // else if(this.actionAfterPick === ActionAfterPick.SKIP){
+    //     //   await this.skipQuest({characterID: this.character.id, pickedQuestID: questID});
+    //     // }
+    //     // else if(this.actionAfterPick === ActionAfterPick.REQUEST){
+    //     //   await this.requestPickableQuest({characterID: this.character.id, questID});
+    //     // }
+    //     //this.$emit('refresh-quest-data');
+    //   } finally {
+    //     this.isLoading = false;
+    //     // this.$forceUpdate();
+    //   }
+    // },
 
     async claimWeekly() {
       if (!this.canClaimWeeklyReward) {
@@ -493,6 +585,9 @@ export default Vue.extend({
       this.isLoadingWalletQuests = true;
       this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier+30});
       this.isLoadingWalletQuests = false;
+    },
+    pickableQuestTier(): void {
+      this.fetchPickableQuests();
     },
   },
 });

@@ -2,7 +2,15 @@ import {
   IState,
   Contract,
 } from '@/interfaces';
-import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances, WeeklyReward, QuestTemplateType} from '@/views/Quests.vue';
+import {
+  Quest,
+  Rarity,
+  ReputationLevelRequirements,
+  RequirementType,
+  RewardType,
+  TierChances,
+  WeeklyReward,
+  QuestTemplateType } from '@/interfaces';
 import BigNumber from 'bignumber.js';
 // import Web3 from 'web3';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';

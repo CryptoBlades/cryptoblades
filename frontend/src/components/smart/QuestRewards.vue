@@ -12,7 +12,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest, QuestItemType} from '@/views/Quests.vue';
+import { Quest, QuestItemType } from '@/interfaces';
 import QuestComponentIcon from './QuestComponentIcon.vue';
 
 export default Vue.extend({

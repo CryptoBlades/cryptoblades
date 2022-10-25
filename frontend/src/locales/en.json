@@ -825,7 +825,8 @@
       "QUEST": "Quest",
       "PROMO": "Promo Quest",
       "WALLET": "Wallet Quest",
-      "PICKABLE": "Pickable Quest"
+      "PICKABLE": "Pickable Quest",
+      "CHARACTER": "Character Quest"
     },
     "tier": "Tier",
     "level": "Level {level}",

@@ -334,7 +334,7 @@ import {
   RequirementType,
   RewardType,
   TierChances
-} from '../../../views/Quests.vue';
+} from '@/interfaces';
 import QuestTemplatesDisplay from '../QuestTemplatesDisplay.vue';
 import QuestRequirements from '../QuestRequirements.vue';
 import QuestRewards from '../QuestRewards.vue';

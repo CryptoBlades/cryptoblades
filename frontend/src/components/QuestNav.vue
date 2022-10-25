@@ -4,8 +4,8 @@
       <span :class="activeTab === 'wallet-quests' ? 'active' : ''" @click="$emit('toggle', 'wallet-quests')">
         <span id="wallet-quests"></span> {{$t('quests.questTemplateType.WALLET')}}
       </span>
-      <span :class="activeTab === 'pickable-quests' ? 'active' : ''" @click="$emit('toggle', 'pickable-quests')">
-        <span id="pickable-quests"></span> {{$t('quests.questTemplateType.PICKABLE')}}
+      <span :class="activeTab === 'character-quests' ? 'active' : ''" @click="$emit('toggle', 'character-quests')">
+        <span id="character-quests"></span> {{$t('quests.questTemplateType.CHARACTER')}}
       </span>
     </div>
     <div class="d-flex flex-column flex-md-row">
@@ -20,12 +20,12 @@
       <div class="w-100 d-block d-md-none none-mobile"></div>
       <div class="separator d-none d-md-block mx-3 none-mobile"></div>
       <div role="button" class="nav-quest none-mobile" :class="['d-flex gap-3 align-items-center link',
-        activeTab === 'pickable-quests' ? 'active' : '']" @click="$emit('toggle', 'pickable-quests')">
+        activeTab === 'character-quests' ? 'active' : '']" @click="$emit('toggle', 'character-quests')">
         <div class="img-nav">
           <div class="img-frame"></div>
-          <img src="../assets/navbar-icons/quests-icon.png"/>
+          <img src="../assets/navbar-icons/plaza-icon.png"/>
         </div>
-        <span class="main-font text-white fs-5">{{$t('quests.questTemplateType.PICKABLE')}}</span>
+        <span class="main-font text-white fs-5">{{$t('quests.questTemplateType.CHARACTER')}}</span>
       </div>
     </div>
   </div>
@@ -137,8 +137,8 @@ export default Vue.extend({
   margin-right: 1em;
 }
 
-#pickable-quests {
-  content: url('../assets/navbar-icons/quests-icon.png');
+#character-quests {
+  content: url('../assets/navbar-icons/plaza-icon.png');
   height: 1.1em;
   margin-right: 1em;
 }

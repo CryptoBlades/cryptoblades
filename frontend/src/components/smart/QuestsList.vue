@@ -21,7 +21,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest, QuestTemplateType} from '@/views/Quests.vue';
+import { Quest, QuestTemplateType } from '@/interfaces';
 import QuestRequirements from '@/components/smart/QuestRequirements.vue';
 import QuestRewards from '@/components/smart/QuestRewards.vue';
 import QuestActions from '@/components/smart/QuestActions.vue';
