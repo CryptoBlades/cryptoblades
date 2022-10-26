@@ -138,7 +138,7 @@ interface Data {
   // showPickableQuestModal: boolean;
   // pickableQuestTier?: Rarity;
   quests: Quest[];
-  pickedQuestId?: number;
+  //pickedQuestId?: number;
 }
 
 export default Vue.extend({
@@ -189,6 +189,10 @@ export default Vue.extend({
       type: Number as PropType<QuestTemplateType>,
       required: true,
     },
+    pickedQuestId: {
+      type: Number as PropType<number>,
+      default: 0,
+    },
   },
 
   data() {
@@ -212,10 +216,10 @@ export default Vue.extend({
       Rarity,
       QuestTemplateType,
       // showPickableQuestModal: false,
-      tiers: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
+      // tiers: [Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY],
       // pickableQuestTier: undefined,
       quests: [],
-      pickedQuestId: undefined,
+      //pickedQuestId: undefined,
       ActionAfterPick,
     } as Data;
   },
@@ -315,7 +319,7 @@ export default Vue.extend({
     async skip() {
       //if(this.pickable) return this.showPickableQuestModal = true;
       try {
-        await this.skipQuest({characterID: this.character.id, pickedQuestID: 0});
+        await this.skipQuest({characterID: this.character.id, pickedQuestID: this.pickedQuestId});
         this.isLoading = true;
         await this.refreshSkipQuestData();
         this.$emit('refresh-quest-data');
@@ -332,7 +336,7 @@ export default Vue.extend({
         let rewards;
         let rewardType: any;
         if(this.questTemplateType === QuestTemplateType.QUEST || this.questTemplateType === QuestTemplateType.PROMO) {
-          rewards = await this.completeQuest({characterID: this.character.id, pickedQuestID: 0});
+          rewards = await this.completeQuest({characterID: this.character.id, pickedQuestID: this.pickedQuestId});
           rewardType = this.quest.rewardType;
           await this.refreshSkipQuestData();
         }
@@ -381,24 +385,24 @@ export default Vue.extend({
     },
 
     // TODO: need to hit this to complete anything
-    async handlePick(questID: number) {
-      try {
-        this.isLoading = true;
-        if(this.actionAfterPick === ActionAfterPick.COMPLETE){
-          await this.completeQuest({characterID: this.character.id, pickedQuestID: questID});
-        }
-        else if(this.actionAfterPick === ActionAfterPick.SKIP){
-          await this.skipQuest({characterID: this.character.id, pickedQuestID: questID});
-        }
-        else if(this.actionAfterPick === ActionAfterPick.REQUEST){
-          await this.requestPickableQuest({characterID: this.character.id, questID});
-        }
-        this.$emit('refresh-quest-data');
-      } finally {
-        this.isLoading = false;
-        this.$forceUpdate();
-      }
-    },
+    // async handlePick(questID: number) {
+    //   try {
+    //     this.isLoading = true;
+    //     if(this.actionAfterPick === ActionAfterPick.COMPLETE){
+    //       await this.completeQuest({characterID: this.character.id, pickedQuestID: questID});
+    //     }
+    //     else if(this.actionAfterPick === ActionAfterPick.SKIP){
+    //       await this.skipQuest({characterID: this.character.id, pickedQuestID: questID});
+    //     }
+    //     else if(this.actionAfterPick === ActionAfterPick.REQUEST){
+    //       await this.requestPickableQuest({characterID: this.character.id, questID});
+    //     }
+    //     this.$emit('refresh-quest-data');
+    //   } finally {
+    //     this.isLoading = false;
+    //     this.$forceUpdate();
+    //   }
+    // },
     async deleteQuestTemplate() {
       try {
         this.isLoading = true;

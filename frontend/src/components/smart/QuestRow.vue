@@ -8,7 +8,7 @@
                        :progress="character.quest.progress" :index="characterId"/>
     <QuestRewards v-if="character.quest && character.quest.id !== 0" :quest="character.quest"/>
     <QuestActions :character="character" :quest="character.quest" :pickable="pickable" :key="character.quest.id" showSupply
-                  @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
+                  :pickedQuestId="pickedQuestId" @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
   <div v-if="questTemplateType === QuestTemplateType.WALLET && quest" class="quest-row-wallet">
     <QuestRequirements :quest="quest" :progress="quest.progress"/>
@@ -68,6 +68,10 @@ export default Vue.extend({
     pickable: {
       type: Boolean,
       default: false
+    },
+    pickedQuestId: {
+      type: Number as PropType<number>,
+      default: 0,
     },
   },
 

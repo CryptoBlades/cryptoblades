@@ -1,6 +1,5 @@
 <template>
   <div class="position-relative quest-wrapper">
-    <!-- <div class="blind-background position-absolute w-100 h-100 opacity-75"></div> -->
     <div class="quest-nav">
       <QuestNav
         :activeTab="activeTab"
@@ -20,7 +19,7 @@
             </b-form-checkbox>
           </div>
           <!-- THIS IS THE OLD MODAL FROM QUEST ACTIONS -->
-          <b-modal v-model="pickable" ok-only class="centered-modal" size="xl" title="Pick your Quest">
+          <div v-if="pickable" ok-only class="centered-modal" size="xl" title="Pick your Quest">
             <div v-if="isLoading">
               <i class="fas fa-spinner fa-spin"/>
               {{ $t('quests.loading') }}
@@ -28,11 +27,11 @@
             <div>
               <b-form inline>
                 <label class="mr-sm-2">Special Quest Tier</label>
-                <b-form-select class="mt-2 mb-2" v-model="pickableQuestTier">
-                  <b-form-select-option :value="undefined" disabled>
+                <b-form-select class="mt-2 mb-2"  v-model="pickableQuestTier">
+                  <!-- <b-form-select-option :value="undefined" disabled>
                     {{ $t('quests.pleaseSelectQuestTier') }}
-                  </b-form-select-option>
-                  <b-form-select-option v-for="tier in tiers" :key="tier" :value="tier">
+                  </b-form-select-option> -->
+                  <b-form-select-option v-for="tier in rarities" :key="tier" :value="tier">
                     {{ $t(`quests.rarityType.${Rarity[tier]}`) }}
                   </b-form-select-option>
                 </b-form-select>
@@ -45,48 +44,21 @@
                   {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
                 <div v-else class="d-flex flex-column gap-3">
                   <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row p-3 gap-5">
+                    <b-form-radio v-model="pickedQuestId" :value="quest.id">{{ $t('quests.setAsNextQuest') }}</b-form-radio>
                     <QuestRequirements :quest="quest" :index="index"/>
                     <QuestRewards :quest="quest"/>
-                    <div class="pickBtn-wrapper">
-                    <b-button class="flex-1 custom-action-btn" variant="primary" @click="handlePick(quest.id)">
-                      {{pickButtonLabel}}
-                    </b-button>
-                    </div>
+                    <!-- <div class="pickBtn-wrapper">
+                      <b-button class="flex-1 custom-action-btn" variant="primary">
+                        @click="handlePick(quest.id)"
+                        {{pickButtonLabel}}
+                      </b-button>
+                    </div> -->
                   </div>
                 </div>
             </div>
-          </b-modal>
+          </div>
         <!-- THIS IS THE OLD MODAL FROM QUEST ACTIONS -->
 
-          <!-- <cb-button class="top-button" :title="$t('quests.availableQuests')" @clickEvent="showQuestsListModal = true"></cb-button>
-          <b-modal v-model="showQuestsListModal" :title="$t('quests.availableQuests')" hide-footer
-                  @hide="showQuestsListModal = false; tier = undefined" size="xl">
-            <div class="d-flex justify-content-center align-items-center gap-3">
-              <b-form-group class="m-3">
-                <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.QUEST">
-                  {{ $t('quests.questsTitle') }}
-                </b-form-radio>
-                <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.PROMO">
-                  {{ $t('quests.questTemplateType.PROMO') }}
-                </b-form-radio>
-                <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.WALLET">
-                  {{ $t('quests.questTemplateType.WALLET') }}
-                </b-form-radio>
-                <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.PICKABLE">
-                  {{ $t('quests.questTemplateType.PICKABLE') }}
-                </b-form-radio>
-              </b-form-group>
-              <b-form-select class="mt-2 mb-2" v-model="tier">
-                <b-form-select-option :value="undefined" disabled>
-                  {{ $t('quests.pleaseSelectQuestTier') }}
-                </b-form-select-option>
-                <b-form-select-option v-for="rarity in rarities" :key="rarity" :value="rarity">
-                  {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
-                </b-form-select-option>
-              </b-form-select>
-            </div>
-            <QuestsList v-if="tier !== undefined" :tier="tier + tierOffset"/>
-          </b-modal> -->
         </div>
         <div v-if="weeklyReward && weeklyReward.id && currentWeeklyCompletions !== undefined && weeklyReward.completionsGoal"
             class="d-flex flex-column justify-content-between gap-2 align-items-end">
@@ -155,7 +127,7 @@
           <div v-for="character in characters" :key="character.id" class="w-100 my-3">
             <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id"
                       :reputationLevelRequirements="reputationLevelRequirements"
-                      :pickable="pickable" @refresh-quest-data="onRefreshQuestData"/>
+                      :pickable="pickable" :pickedQuestId="pickedQuestId" @refresh-quest-data="onRefreshQuestData"/>
           </div>
           <br>
           <b-modal v-model="showWeeklyClaimedModal" ok-only class="centered-modal" :title="$t('quests.weeklyReward')">
@@ -188,6 +160,8 @@ import QuestRow from '@/components/smart/QuestRow.vue';
 import QuestComponentIcon from '@/components/smart/QuestComponentIcon.vue';
 import QuestReward from '@/components/smart/QuestReward.vue';
 // import QuestsList from '@/components/smart/QuestsList.vue';
+import QuestRequirements from '@/components/smart/QuestRequirements.vue';
+import QuestRewards from '@/components/smart/QuestRewards.vue';
 import hourglass from '@/assets/hourglass.png';
 import {getTimeRemaining} from '@/utils/common';
 import {NftIdType} from '@/components/smart/NftList.vue';
@@ -200,118 +174,6 @@ import {
   WeeklyReward,
   QuestItemType,
   RewardType } from '@/interfaces';
-
-// export interface WeeklyReward {
-//   id: number;
-//   rewardType: RewardType;
-//   rewardRarity: Rarity;
-//   rewardAmount: number;
-//   rewardExternalAddress?: string;
-//   reputationAmount: number;
-//   completionsGoal: number;
-//   weekNumber: number;
-// }
-
-// export interface Quest {
-//   progress: number;
-//   type?: QuestTemplateType;
-//   reputation: number;
-//   id: number;
-//   tier?: Rarity;
-//   requirementType?: RequirementType;
-//   requirementRarity?: Rarity;
-//   requirementAmount: number;
-//   requirementExternalAddress?: string;
-//   rewardType?: RewardType;
-//   rewardRarity?: Rarity;
-//   rewardAmount: number;
-//   rewardExternalAddress?: string;
-//   reputationAmount: number;
-//   deadline?: number;
-//   supply?: number;
-// }
-
-// export enum RequirementType {
-//   NONE,
-//   WEAPON,
-//   JUNK,
-//   DUST,
-//   TRINKET,
-//   SHIELD,
-//   STAMINA,
-//   SOUL,
-//   RAID,
-//   EXTERNAL = 10,
-//   EXTERNAL_HOLD = 11,
-// }
-
-// export enum RewardType {
-//   NONE,
-//   WEAPON,
-//   JUNK,
-//   DUST,
-//   TRINKET,
-//   SHIELD,
-//   EXPERIENCE = 9,
-//   SOUL = 7,
-//   CHARACTER = 12,
-//   EXTERNAL = 10,
-// }
-
-// // NOTE: Numbers should represent ItemType in SimpleQuests.sol
-// export enum QuestItemType {
-//   NONE,
-//   WEAPON,
-//   JUNK,
-//   DUST,
-//   TRINKET,
-//   SHIELD,
-//   STAMINA,
-//   SOUL,
-//   RAID,
-//   EXPERIENCE,
-//   EXTERNAL,
-//   EXTERNAL_HOLD,
-//   CHARACTER,
-//   REPUTATION = 99
-// }
-
-// export enum Rarity {
-//   COMMON, UNCOMMON, RARE, EPIC, LEGENDARY
-// }
-
-// export enum DustRarity {
-//   LESSER, GREATER, POWERFUL
-// }
-
-// export enum ReputationTier {
-//   PEASANT, TRADESMAN, NOBLE, KNIGHT, KING
-// }
-
-// export enum QuestTemplateType {
-//   QUEST=0,
-//   PROMO=10,
-//   WALLET=30,
-//   PICKABLE=20
-// }
-// export interface ReputationLevelRequirements {
-//   level2: number;
-//   level3: number;
-//   level4: number;
-//   level5: number;
-// }
-
-// export interface TierChances {
-//   common: number;
-//   uncommon: number;
-//   rare: number;
-//   epic: number;
-//   legendary: number;
-// }
-
-// export interface QuestItemsInfo {
-//   questItems: Record<string, Record<string, any>>;
-// }
 
 interface StoreMappedActions {
   fetchCharacters(characterIds: (string | number)[]): Promise<void>;
@@ -361,19 +223,24 @@ interface Data {
   activeTab: string;
   pickableQuestTier?: Rarity;
   quests: Quest[];
+  pickable: boolean;
+  pickedQuestId: number;
 }
 
 export default Vue.extend({
-  components: {QuestRow, QuestComponentIcon, QuestReward, QuestNav},
+  components: {
+    QuestRow,
+    QuestComponentIcon,
+    QuestReward,
+    QuestNav,
+    QuestRequirements,
+    QuestRewards,
+  },
 
   props: {
     showCosmetics: {
       type: Boolean,
       default: true
-    },
-    pickable: {
-      type: Boolean,
-      default: false
     },
   },
 
@@ -401,8 +268,10 @@ export default Vue.extend({
       walletQuests:[],
       walletQuestTier: 0,
       activeTab: 'wallet-quests',
-      pickableQuestTier: undefined,
+      pickableQuestTier: Rarity.COMMON,
       quests: [],
+      pickable: false,
+      pickedQuestId: 0,
     } as Data;
   },
 
@@ -588,6 +457,16 @@ export default Vue.extend({
     },
     pickableQuestTier(): void {
       this.fetchPickableQuests();
+    },
+    pickable(isPickable) {
+      if (!isPickable) {
+        this.pickedQuestId = 0;
+      }
+    },
+    activeTab(currentTab, previousTab) {
+      if (currentTab !== 'character-quests' && previousTab && this.pickable) {
+        this.pickable = false;
+      }
     },
   },
 });
