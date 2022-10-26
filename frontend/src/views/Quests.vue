@@ -18,46 +18,7 @@
               <b class="float-left">{{ pickable ? 'Special' : 'Random' }}</b>
             </b-form-checkbox>
           </div>
-          <!-- THIS IS THE OLD MODAL FROM QUEST ACTIONS -->
-          <div v-if="pickable" ok-only class="centered-modal" size="xl" title="Pick your Quest">
-            <div v-if="isLoading">
-              <i class="fas fa-spinner fa-spin"/>
-              {{ $t('quests.loading') }}
-            </div>
-            <div>
-              <b-form inline>
-                <label class="mr-sm-2">Special Quest Tier</label>
-                <b-form-select class="mt-2 mb-2"  v-model="pickableQuestTier">
-                  <!-- <b-form-select-option :value="undefined" disabled>
-                    {{ $t('quests.pleaseSelectQuestTier') }}
-                  </b-form-select-option> -->
-                  <b-form-select-option v-for="tier in rarities" :key="tier" :value="tier">
-                    {{ $t(`quests.rarityType.${Rarity[tier]}`) }}
-                  </b-form-select-option>
-                </b-form-select>
-              </b-form>
-                <div v-if="isLoading">
-                  <i class="fas fa-spinner fa-spin"/>
-                  {{ $t('quests.loading') }}
-                </div>
-                <h3 v-else-if="quests.length === 0">
-                  {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
-                <div v-else class="d-flex flex-column gap-3">
-                  <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row p-3 gap-5">
-                    <b-form-radio v-model="pickedQuestId" :value="quest.id">{{ $t('quests.setAsNextQuest') }}</b-form-radio>
-                    <QuestRequirements :quest="quest" :index="index"/>
-                    <QuestRewards :quest="quest"/>
-                    <!-- <div class="pickBtn-wrapper">
-                      <b-button class="flex-1 custom-action-btn" variant="primary">
-                        @click="handlePick(quest.id)"
-                        {{pickButtonLabel}}
-                      </b-button>
-                    </div> -->
-                  </div>
-                </div>
-            </div>
-          </div>
-        <!-- THIS IS THE OLD MODAL FROM QUEST ACTIONS -->
+
 
         </div>
         <div v-if="weeklyReward && weeklyReward.id && currentWeeklyCompletions !== undefined && weeklyReward.completionsGoal"
@@ -97,6 +58,46 @@
             :toolTip="!canClaimWeeklyReward ? $t('quests.cannotClaimWeeklyTooltip') : ''" :title="$t('quests.claimWeeklyReward')"></cb-button>
         </div>
       </div>
+      <!-- THIS IS THE OLD MODAL FROM QUEST ACTIONS -->
+      <div v-if="pickable" ok-only class="centered-modal flex-wrap" size="xl" title="Pick your Quest">
+        <div v-if="isLoading">
+          <i class="fas fa-spinner fa-spin"/>
+          {{ $t('quests.loading') }}
+        </div>
+        <div>
+          <b-form inline>
+            <label class="mr-sm-2">Special Quest Tier</label>
+            <b-form-select class="mt-2 mb-2" v-model="pickableQuestTier">
+              <!-- <b-form-select-option :value="undefined" disabled>
+                {{ $t('quests.pleaseSelectQuestTier') }}
+              </b-form-select-option> -->
+              <b-form-select-option v-for="tier in rarities" :key="tier" :value="tier">
+                {{ $t(`quests.rarityType.${Rarity[tier]}`) }}
+              </b-form-select-option>
+            </b-form-select>
+          </b-form>
+            <div v-if="isLoading">
+              <i class="fas fa-spinner fa-spin"/>
+              {{ $t('quests.loading') }}
+            </div>
+            <h3 v-else-if="quests.length === 0">
+              {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
+            <div v-else class="d-flex flex-column gap-3">
+              <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row p-3 gap-5">
+                <b-form-radio class="flex-1 custom-action-btn" v-model="pickedQuestId" :value="quest.id">{{ $t('quests.setAsNextQuest') }}</b-form-radio>
+                <QuestRequirements :quest="quest" :index="index"/>
+                <QuestRewards :quest="quest"/>
+                <!-- <div class="pickBtn-wrapper">
+                  <b-button class="flex-1 custom-action-btn" variant="primary">
+                    @click="handlePick(quest.id)"
+                    {{pickButtonLabel}}
+                  </b-button>
+                </div> -->
+              </div>
+            </div>
+        </div>
+      </div>
+      <!-- THIS IS THE OLD MODAL FROM QUEST ACTIONS -->
       <div v-if="activeTab === 'wallet-quests'" class="wallet-quests-content">
         <span v-if="walletQuests && walletQuests.length" class="quests-title-2">Wallet Quests</span>
         <!-- TODO: This will come back when we add additional tiers to Wallet Quests -->
@@ -462,6 +463,9 @@ export default Vue.extend({
       if (!isPickable) {
         this.pickedQuestId = 0;
       }
+      else {
+        this.fetchPickableQuests();
+      }
     },
     activeTab(currentTab, previousTab) {
       if (currentTab !== 'character-quests' && previousTab && this.pickable) {
@@ -484,6 +488,15 @@ export default Vue.extend({
     border-bottom: 1px solid #424A59;
     background-color:#000E29;
   }
+}
+
+.custom-action-btn{
+  font-family: Roboto;
+  background: transparent !important;
+  border: #EDCD90 1px solid !important;
+  color: #FFF !important;
+  width: 100%;
+  max-height: 50px;
 }
 
 @media (max-width: 600px) {
@@ -623,6 +636,28 @@ export default Vue.extend({
   transform: rotate(15deg);
   font-weight: bold;
   text-shadow: 0 0 5px #333, 0 0 10px #333, 0 0 15px #333, 0 0 10px #333;
+}
+
+.quest-row {
+  display: flex;
+  width: 100%;
+  background: rgba(0, 9, 26, 0.65);
+  border: 1px solid #404857;
+  border-radius: 10px;
+  align-items: center;
+  font-family: Roboto;
+  height: clamp(200px, 20vh, 250px);
+  justify-content: space-between;
+  margin: 10px 0;
+  padding: 10px 30px;
+}
+
+@media (max-width: 576px) {
+  .quest-row {
+    flex-direction: column;
+    height: auto;
+    gap: 1rem;
+  }
 }
 
 .quest-row-wrapper{
