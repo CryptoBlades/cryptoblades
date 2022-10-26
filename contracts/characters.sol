@@ -117,11 +117,19 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     uint256 public constant NFTVAR_BONUS_POWER = 2;
     uint256 public constant NFTVAR_NON_GENESIS_VERSION = 3; // 0 = genesis, 1 = v2
     uint256 public constant NFTVAR_EQUIPMENT_VERSION = 4; // 0 = no equipment/fresh
-    uint256 public constant NFTVAR_POWER = 5; // bits (24 per): vsFire, vsEarth, vsLightning, vsWater, base
+    /* POWER DATA:
+        pve power 24b each: vs Fire, vs Earth, vs Lightning, vs Water, base
+        pvp power 14b each tiered: vs Fire, vs Earth, vs Lightning, vs Water
+        pvp power 14b each FFA: vs Fire, vs Earth, vs Lightning, vs Water
+        traits 2b each: character, weapon, shield
+        level 8b
+        //246 bits so far
+    */
+    uint256 public constant NFTVAR_POWER_DATA = 5;
 
     uint256 public secondsPerStamina;
 
-    mapping(uint256 => uint256) vars;
+    mapping(uint256 => uint256) public vars;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -411,7 +419,12 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function isEquipmentReady(uint256 id) public view returns (bool) {
-        return nftVars[NFTVAR_EQUIPMENT_VERSION] == vars[VAR_EQUIPMENT_VERSION];
+        return nftVars[id][NFTVAR_EQUIPMENT_VERSION] == vars[VAR_EQUIPMENT_VERSION] && vars[VAR_EQUIPMENT_VERSION] != 0;
+    }
+
+    function isEquipmentReady2(uint256 id) public view returns (bool) {
+        uint ev = vars[VAR_EQUIPMENT_VERSION];
+        return nftVars[id][NFTVAR_EQUIPMENT_VERSION] == ev && ev != 0;
     }
 
     function getCharactersOwnedBy(address wallet) public view returns(uint256[] memory chars) {
