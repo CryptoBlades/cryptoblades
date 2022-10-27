@@ -30,9 +30,6 @@ export default Vue.extend({
     }
   },
   computed: {
-    /**
-     * get the computed age of this update relative to when the user sees it
-     */
     getUpdateAge(): string {
       const currentDate = new Date();
       const dateAge = secondsToRelativeAge(+currentDate/1000 - this.timestamp/1000);
@@ -40,9 +37,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    /**
-     * update the read status of this update
-     */
     updateIsRead() {
       if (!this.isRead) {
         this.$emit('update:isRead', true);
@@ -100,22 +94,21 @@ export default Vue.extend({
   transform: rotate(45deg);
 }
 
-.read__badge:before {
+.read__badge:before, .read__badge:after {
   content: "";
   position: absolute;
   width:3px;
-  height:9px;
   background-color:#ccc;
+}
+
+.read__badge:before {
+  height:9px;
   left:5px;
   top:1px;
 }
 
 .read__badge:after {
-  content:"";
-  position: absolute;
-  width:3px;
   height:3px;
-  background-color:#ccc;
   left:2px;
   top:7px;
 }

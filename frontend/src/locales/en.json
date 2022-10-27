@@ -1542,5 +1542,19 @@
   "updates": {
     "markAllAsRead": "Mark All As Read",
     "notifications": "Notifications"
+  },
+  "dateTime": {
+    "month": "month",
+    "months": "months",
+    "day": "day",
+    "days": "days",
+    "year": "year",
+    "years": "years",
+    "hour": "hour",
+    "hours": "hours",
+    "minute": "minute",
+    "minutes": "minutes",
+    "second": "second",
+    "seconds": "seconds"
   }
 }

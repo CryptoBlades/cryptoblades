@@ -4,7 +4,7 @@
       <span>{{$t("updates.notifications")}}</span>
       <b-button id="markAllAsRead"
         v-bind:readAll.sync="this.readAll"
-        @click="setAllAsRead">{{$t("updates.markAllAsRead")}}
+        @click="setAllUpdateNotificationsAsRead">{{$t("updates.markAllAsRead")}}
       </b-button>
     </div>
     <div v-for="update in updateNotifications" :key="update.hash">
@@ -39,10 +39,7 @@ export default Vue.extend({
     },
   },
   methods: {
-    /**
-     * Mark all notifications as read
-     */
-    setAllAsRead() {
+    setAllUpdateNotificationsAsRead() {
       if (!this.readAll)
       {
         this.$emit('update:readAll', true);
@@ -50,13 +47,10 @@ export default Vue.extend({
           notification.isRead = true;
         });
         this.$emit('refresh-update-popup');
-        this.updateStorage();
+        this.updateStorageOfUpdateNotifications();
       }
     },
 
-    /**
-     * Check if there are any elements that aren't currently read
-     */
     isEveryUpdateRead() {
       const unreadUpdate = this.updateNotifications.find((notification) => !notification.isRead);
       if (!unreadUpdate) {
@@ -66,8 +60,8 @@ export default Vue.extend({
     },
 
     /**
-     * Check for updates from API. If there are new notifications from the API
-     * then we add them to the front of the user's notifications on localStorage.
+     * If there are new notifications from the API then we add them
+     * to the front of the user's notifications on localStorage.
      * If this is the user's first time, we add fresh API data to localStorage.
      */
     async checkForNotificationUpdatesFromAPI() {
@@ -94,12 +88,9 @@ export default Vue.extend({
       }
     },
 
-    /**
-     * set the notifications from the API
-     */
     async setUpdateNotificationsFromAPI(notificationsFromAPI: INotification[]) {
       this.$emit('update:updateNotifications', notificationsFromAPI);
-      this.updateStorage();
+      this.updateStorageOfUpdateNotifications();
     },
 
     /**
@@ -107,18 +98,13 @@ export default Vue.extend({
      * stored data is of the form
      * {updateNotifications: INotification[], readAll: boolean}
      */
-    updateStorage() {
+    updateStorageOfUpdateNotifications() {
       const storageData = {updateNotifications: this.updateNotifications, readAll: this.readAll};
       localStorage.setItem('updateNotifications', JSON.stringify(storageData));
     },
 
-    /**
-     * Update the storage and check if all
-     * notifications are now marked as read.
-     * If so, update readAll as true,
-     */
     refreshUpdatePopup() {
-      this.updateStorage();
+      this.updateStorageOfUpdateNotifications();
       this.isEveryUpdateRead();
     },
   },

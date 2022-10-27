@@ -1,3 +1,6 @@
+import i18n from '@/i18n';
+import { TranslateResult } from 'vue-i18n';
+
 const SECONDS_IN_MINUTE = 60;
 const SECONDS_IN_HOUR = 60 * SECONDS_IN_MINUTE;
 const SECONDS_IN_DAY = 24 * SECONDS_IN_HOUR;
@@ -62,40 +65,40 @@ export function secondsToDDHHMMSS (sec: number) {
  * @returns string in format of `${value} ${span-of-time}`.
  * ex: '4 months' or '8 days'
  */
-export function secondsToRelativeAge (sec: number) {
+export function secondsToRelativeAge (sec: number): TranslateResult {
   const {days, hours, minutes, seconds} = daysHoursMonthsSeconds(sec);
 
   if (days > DAYS_IN_TWO_YEARS) {
-    return `${Math.floor(days / DAYS_IN_YEAR)} years`;
+    return `${Math.floor(days / DAYS_IN_YEAR)} ${i18n.t('dateTime.years')}`;
   }
   if (days > DAYS_IN_YEAR) {
-    return '1 year';
+    return `1 ${i18n.t('dateTime.year')}`;
   }
   if (days > MAX_DAYS_IN_TWO_MONTHS) {
-    return `${Math.floor(days / MAX_DAYS_IN_MONTH)} months`;
+    return `${Math.floor(days / MAX_DAYS_IN_MONTH)} ${i18n.t('dateTime.months')}`;
   }
   if (days > MAX_DAYS_IN_MONTH) {
-    return '1 month';
+    return `1 ${i18n.t('dateTime.month')}`;
   }
   if (days > 1) {
-    return `${days.toFixed(0)} days`;
+    return `${days.toFixed(0)} ${i18n.t('dateTime.days')}`;
   }
   if (days === 1) {
-    return `${days} day`;
+    return `${days} ${i18n.t('dateTime.day')}`;
   }
   if (hours > 1) {
-    return `${hours.toFixed(0)} hours`;
+    return `${hours.toFixed(0)} ${i18n.t('dateTime.hours')}`;
   }
   if (hours === 1) {
-    return `${hours} hour`;
+    return `${hours} ${i18n.t('dateTime.hour')}`;
   }
   if (minutes > 1) {
-    return `${minutes.toFixed(0)} minutes`;
+    return `${minutes.toFixed(0)} ${i18n.t('dateTime.minutes')}`;
   }
   if (minutes === 1) {
-    return `${minutes} minute`;
+    return `${minutes} ${i18n.t('dateTime.minute')}`;
   }
-  return `${seconds.toFixed(0)} seconds`;
+  return `${seconds.toFixed(0)} ${i18n.t('dateTime.seconds')}`;
 }
 
 export function staminaToMinutes(stamina: number) {

@@ -38,19 +38,13 @@ export default Vue.extend({
     } as Data;
   },
   methods: {
-    /**
-     * refresh notification bell icon on trigger
-     */
     refreshUpdatePopup() {
       if (this.unreadNotifications) {
         this.unreadNotifications = false;
       }
     },
 
-    /**
-     * get updateNotifications from localStorage
-     */
-    getUpdateStorage() {
+    getUpdateNotificationsFromStorage() {
       const storageNotifications = localStorage.getItem('updateNotifications') ?? '';
       if (storageNotifications) {
         const {updateNotifications, readAll} = JSON.parse(storageNotifications);
@@ -59,12 +53,8 @@ export default Vue.extend({
       }
     },
 
-    /**
-     * check if there are new notifications that need to be addressed
-     * by the user. Notifications are loaded in Updates.vue
-     */
-    async checkNotifications() {
-      this.getUpdateStorage();
+    async checkForNewUpdateNotifications() {
+      this.getUpdateNotificationsFromStorage();
       if (this.updateNotifications.length === 0 || this.updateNotifications.find((x) => x.isRead !== true)) {
         this.unreadNotifications =  true;
         return;
@@ -76,10 +66,7 @@ export default Vue.extend({
       this.unreadNotifications =  false;
     },
 
-    /**
-     * Get up to the 10 most recent notifications from the API
-     */
-    async getNotificationsFromAPI() {
+    async getUpdateNotificationsFromAPI() {
       const response = await fetch(apiUrl('static/notifications'));
       const notifications = await response.json() as INotification[];
       const updatesOrderedByTimestamp = notifications.sort((a, b) => {
@@ -91,8 +78,8 @@ export default Vue.extend({
 
   },
   async created() {
-    this.apiNotifications = await this.getNotificationsFromAPI();
-    await this.checkNotifications();
+    this.apiNotifications = await this.getUpdateNotificationsFromAPI();
+    await this.checkForNewUpdateNotifications();
   },
   components: {
     Updates,
@@ -166,16 +153,15 @@ div .notification-wrapper .icon {
 	}
 }
 
-@keyframes ring
-  {
-    0% { transform: rotate(0deg) }
-    5% { transform: rotate(0deg) }
-    15% { transform: rotate(0deg) }
-    25% { transform: rotate(20deg) }
-    35% { transform: rotate(-15deg) }
-    45% { transform: rotate(10deg) }
-    55% { transform: rotate(-5deg) }
-    60% { transform: rotate(0deg) }
-    100% { transform: rotate(0deg) }
-  }
+@keyframes ring {
+  0% { transform: rotate(0deg) }
+  5% { transform: rotate(0deg) }
+  15% { transform: rotate(0deg) }
+  25% { transform: rotate(20deg) }
+  35% { transform: rotate(-15deg) }
+  45% { transform: rotate(10deg) }
+  55% { transform: rotate(-5deg) }
+  60% { transform: rotate(0deg) }
+  100% { transform: rotate(0deg) }
+}
 </style>
