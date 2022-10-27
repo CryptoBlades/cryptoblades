@@ -51,7 +51,7 @@ export default Vue.extend({
   display: none;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 767px) {
    .mobile-menu{
     display: flex;
     justify-content: space-evenly;

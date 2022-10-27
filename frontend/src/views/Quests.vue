@@ -10,16 +10,6 @@
       <div class="d-flex justify-content-between w-100 weekly-progress-container">
         <div class="d-flex flex-column justify-content-between gap-2">
           <span class="quests-title">{{ $t('quests.quest') }}</span>
-          <div v-if="activeTab === 'character-quests'">
-            <div>
-              <span class="quests-title-2">Next Quest Type</span>
-            </div>
-            <b-form-checkbox size="lg" :checked="pickable" @change="pickable=!pickable" switch>
-              <b class="float-left">{{ pickable ? 'Special' : 'Random' }}</b>
-            </b-form-checkbox>
-          </div>
-
-
         </div>
         <div v-if="weeklyReward && weeklyReward.id && currentWeeklyCompletions !== undefined && weeklyReward.completionsGoal"
             class="d-flex flex-column justify-content-between gap-2 align-items-end">
@@ -58,46 +48,83 @@
             :toolTip="!canClaimWeeklyReward ? $t('quests.cannotClaimWeeklyTooltip') : ''" :title="$t('quests.claimWeeklyReward')"></cb-button>
         </div>
       </div>
-      <!-- THIS IS THE OLD MODAL FROM QUEST ACTIONS -->
-      <div v-if="pickable" ok-only class="centered-modal flex-wrap" size="xl" title="Pick your Quest">
-        <div v-if="isLoading">
-          <i class="fas fa-spinner fa-spin"/>
-          {{ $t('quests.loading') }}
+      <div class="character-quests-container">
+        <div v-if="activeTab === 'character-quests'">
+          <div>
+            <span class="quests-title-2">Next Quest Type</span>
+          </div>
+          <b-form-checkbox size="lg" :checked="pickable" @change="pickable=!pickable" switch>
+            <b class="float-left">{{ pickable ? 'Special' : 'Random' }}</b>
+          </b-form-checkbox>
         </div>
-        <div>
-          <b-form inline>
-            <label class="mr-sm-2">Special Quest Tier</label>
-            <b-form-select class="mt-2 mb-2" v-model="pickableQuestTier">
-              <!-- <b-form-select-option :value="undefined" disabled>
-                {{ $t('quests.pleaseSelectQuestTier') }}
-              </b-form-select-option> -->
-              <b-form-select-option v-for="tier in rarities" :key="tier" :value="tier">
-                {{ $t(`quests.rarityType.${Rarity[tier]}`) }}
-              </b-form-select-option>
-            </b-form-select>
-          </b-form>
-            <div v-if="isLoading">
-              <i class="fas fa-spinner fa-spin"/>
-              {{ $t('quests.loading') }}
-            </div>
-            <h3 v-else-if="quests.length === 0">
-              {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
-            <div v-else class="d-flex flex-column gap-3">
-              <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row p-3 gap-5">
-                <b-form-radio class="flex-1 custom-action-btn" v-model="pickedQuestId" :value="quest.id">{{ $t('quests.setAsNextQuest') }}</b-form-radio>
-                <QuestRequirements :quest="quest" :index="index"/>
-                <QuestRewards :quest="quest"/>
-                <!-- <div class="pickBtn-wrapper">
-                  <b-button class="flex-1 custom-action-btn" variant="primary">
-                    @click="handlePick(quest.id)"
-                    {{pickButtonLabel}}
-                  </b-button>
-                </div> -->
+        <div v-if="pickable" ok-only class="centered-modal flex-wrap" size="xl" title="Pick your Quest">
+          <div v-if="isLoading">
+            <i class="fas fa-spinner fa-spin"/>
+            {{ $t('quests.loading') }}
+          </div>
+          <div>
+            <b-form inline>
+              <label class="mr-sm-2">Special Quest Tier</label>
+              <b-form-select class="mt-2 mb-2" v-model="pickableQuestTier">
+                <!-- <b-form-select-option :value="undefined" disabled>
+                  {{ $t('quests.pleaseSelectQuestTier') }}
+                </b-form-select-option> -->
+                <b-form-select-option v-for="tier in rarities" :key="tier" :value="tier">
+                  {{ $t(`quests.rarityType.${Rarity[tier]}`) }}
+                </b-form-select-option>
+              </b-form-select>
+            </b-form>
+              <div v-if="isLoading">
+                <i class="fas fa-spinner fa-spin"/>
+                {{ $t('quests.loading') }}
               </div>
+              <h3 v-else-if="quests.length === 0">
+                {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
+              <div v-else class="d-flex flex-column gap-3">
+                <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row p-3 gap-5">
+                  <b-form-radio class="flex-1 custom-action-btn" v-model="pickedQuestId" :value="quest.id">{{ $t('quests.setAsNextQuest') }}</b-form-radio>
+                  <QuestRequirements :quest="quest" :index="index"/>
+                  <QuestRewards :quest="quest"/>
+                  <!-- <div class="pickBtn-wrapper">
+                    <b-button class="flex-1 custom-action-btn" variant="primary">
+                      @click="handlePick(quest.id)"
+                      {{pickButtonLabel}}
+                    </b-button>
+                  </div> -->
+                </div>
+              </div>
+          </div>
+        </div>
+        <div v-if="activeTab === 'character-quests'" class="character-quests-content">
+          <span class="quests-title-2">Character Quests</span>
+          <div v-if="isLoading">
+            <i class="fas fa-spinner fa-spin"/>
+            {{ $t('quests.loading') }}
+          </div>
+          <div v-if="characters.length !== 0 && !isLoading" class="d-flex flex-column w-100">
+            <div v-for="character in characters" :key="character.id" class="w-100 my-3">
+              <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id"
+                        :reputationLevelRequirements="reputationLevelRequirements"
+                        :pickable="pickable" :pickedQuestId="pickedQuestId" @refresh-quest-data="onRefreshQuestData"/>
             </div>
+            <br>
+            <b-modal v-model="showWeeklyClaimedModal" ok-only class="centered-modal" :title="$t('quests.weeklyReward')">
+              <div v-if="isLoading">
+                <i class="fas fa-spinner fa-spin"/>
+                {{ $t('quests.loading') }}
+              </div>
+              <QuestReward v-else :type="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
+                          :rewards="weeklyRewards"
+                          :amount="weeklyReward.rewardAmount" :reputationAmount="weeklyReward.reputationAmount"
+                          :externalAddress="weeklyReward.rewardExternalAddress"/>
+            </b-modal>
+          </div>
+          <div v-else class="m-4 font-weight-bold w-100">
+          {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}.<br>
+          {{ $t('combat.recruitAtPlaza') }}
+          </div>
         </div>
       </div>
-      <!-- THIS IS THE OLD MODAL FROM QUEST ACTIONS -->
       <div v-if="activeTab === 'wallet-quests'" class="wallet-quests-content">
         <span v-if="walletQuests && walletQuests.length" class="quests-title-2">Wallet Quests</span>
         <!-- TODO: This will come back when we add additional tiers to Wallet Quests -->
@@ -115,36 +142,6 @@
           <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
                     :reputationLevelRequirements="reputationLevelRequirements"
                     @refresh-quest-data="onRefreshQuestData"/>
-        </div>
-      </div>
-
-      <div v-if="activeTab === 'character-quests'" class="character-quests-content">
-        <span class="quests-title-2">Character Quests</span>
-        <div v-if="isLoading">
-          <i class="fas fa-spinner fa-spin"/>
-          {{ $t('quests.loading') }}
-        </div>
-        <div v-if="characters.length !== 0 && !isLoading" class="d-flex flex-column w-100">
-          <div v-for="character in characters" :key="character.id" class="w-100 my-3">
-            <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id"
-                      :reputationLevelRequirements="reputationLevelRequirements"
-                      :pickable="pickable" :pickedQuestId="pickedQuestId" @refresh-quest-data="onRefreshQuestData"/>
-          </div>
-          <br>
-          <b-modal v-model="showWeeklyClaimedModal" ok-only class="centered-modal" :title="$t('quests.weeklyReward')">
-            <div v-if="isLoading">
-              <i class="fas fa-spinner fa-spin"/>
-              {{ $t('quests.loading') }}
-            </div>
-            <QuestReward v-else :type="weeklyReward.rewardType" :rarity="weeklyReward.rewardRarity"
-                        :rewards="weeklyRewards"
-                        :amount="weeklyReward.rewardAmount" :reputationAmount="weeklyReward.reputationAmount"
-                        :externalAddress="weeklyReward.rewardExternalAddress"/>
-          </b-modal>
-        </div>
-        <div v-else class="m-4 font-weight-bold w-100">
-        {{ $t('quests.youNeedToHaveAtLeastOneCharacter') }}.<br>
-        {{ $t('combat.recruitAtPlaza') }}
         </div>
       </div>
 
