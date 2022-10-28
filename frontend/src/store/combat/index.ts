@@ -108,7 +108,7 @@ const combat = {
       }
 
       const targets = await rootState.contracts().CryptoBlades!.methods
-        .getTargets(characterId, weaponId)
+        .getTargets(characterId)
         .call(defaultCallOptions(rootState));
 
       commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
@@ -152,7 +152,6 @@ const combat = {
       const res = await TokensManager.methods
         .fight(
           characterId,
-          weaponId,
           targetString,
           fightMultiplier
         )

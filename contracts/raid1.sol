@@ -170,38 +170,23 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         emit RaidStarted(raidIndex, bossTrait, bossPower, endTime);
     }
 
-    function joinRaid(uint256 characterID, uint256 weaponID) public {
+    function joinRaid(uint256 characterID) public {
         // owner and stamina/durability checks in the fightdata functions
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
 
         uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
         for(uint i = 0; i < raiderIndices.length; i++) {
-            require(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID,
-                "This weapon is already used in the raid");
+            /*require(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID,
+                "This weapon is already used in the raid");*/
             require(raidParticipants[raidIndex][raiderIndices[i]].charID != characterID,
                 "This character is already participating");
         }
 
-        (uint16 charTraitAndVersion, uint24 basePowerLevel, /*uint64 timestamp*/) =
-            unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
-                                    characterID,
-                                    uint8(staminaCost),
-                                    true,
-                                    0) // no busy flag for raids for now
-                                );
-
-        (/*int128 weaponMultTarget*/,
-            int128 weaponMultFight,
-            uint24 weaponBonusPower,
-            /*uint8 weaponTrait*/) = weapons.getFightDataAndDrainDurability(msg.sender,
-                weaponID, uint8(charTraitAndVersion & 0xFF), uint8(durabilityCost), true, 0); // no busy flag for raids for now
-
-        uint24 power = getPlayerFinalPower(
-            Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
-            uint8(charTraitAndVersion & 0xFF),
-            raidBossTrait[raidIndex]
-        );
+        (/*uint72 miscData*/, uint256 powerData) = characters.getFightDataAndDrainStamina(msg.sender,
+            characterID, uint8(staminaCost), true, 0);
+        
+        uint24 power = uint24(powerData >> raidBossTrait[raidIndex]);
         raidPlayerPower[raidIndex] += power;
 
         //uint8 wepStatPattern = weapons.getStatPattern(weaponID);
@@ -209,7 +194,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         raidParticipants[raidIndex].push(Raider(
             msg.sender,
             characterID,
-            weaponID,
+            0/*weaponID*/,
             power,
             0//uint24(charTrait) | (uint24(weaponTrait) << 8) | ((uint24(wepStatPattern)) << 16)//traitCWS
         ));
@@ -222,7 +207,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         emit RaidJoined(raidIndex,
             msg.sender,
             characterID,
-            weaponID,
+            0/*weaponID*/,
             joinCostPaid);
     }
 
@@ -281,7 +266,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function unpackFightData(uint104 playerData)
+    function unpackFightData(uint192 playerData)
         public pure returns (uint16 charTraitAndVersion, uint24 basePowerLevel, uint64 timestamp) {
 
         charTraitAndVersion = uint16(playerData & 0xFFFF);

@@ -5,30 +5,50 @@ const CryptoBlades = artifacts.require("CryptoBlades");
 const Characters = artifacts.require("Characters");
 const Weapons = artifacts.require("Weapons");
 const Shields = artifacts.require("Shields");
+const TokensManager = artifacts.require("TokensManager");
+const CharactersBridgeProxyContract = artifacts.require("CharactersBridgeProxyContract");
+const Raid1 = artifacts.require("Raid1");
+const PvpCore = artifacts.require("PvpCore");
 
 module.exports = async function (deployer, network, accounts) {
   
-    let equip = await deployProxy(EquipmentManager, [], { deployer });
-	const GAME_ADMIN = await equip.GAME_ADMIN();
-	await equip.grantRole(GAME_ADMIN, accounts[0]);
+    const equip = await deployProxy(EquipmentManager, [], { deployer });
+	let EQUIP_GAME_ADMIN = await equip.GAME_ADMIN();
+	await equip.grantRole(EQUIP_GAME_ADMIN, accounts[0]);
+	let VAR_WEAPON_EQUIP_DURABILITY = await equip.VAR_WEAPON_EQUIP_DURABILITY();
+	await equip.setVar(VAR_WEAPON_EQUIP_DURABILITY, 5);
+	
+	const charactersBridgeProxy = await upgradeProxy(CharactersBridgeProxyContract.address, CharactersBridgeProxyContract, { deployer }); 
+	await charactersBridgeProxy.migrate_TBD(equip.address);
 
 	await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
+	await upgradeProxy(Raid1.address, Raid1, { deployer });
+	await upgradeProxy(TokensManager.address, TokensManager, { deployer });
 
     const characters = await upgradeProxy(Characters.address, Characters, { deployer });
 	let CHARACTERS_VAR_EQUIPMENT_VERSION = await characters.VAR_EQUIPMENT_VERSION();
 	await characters.setVar(CHARACTERS_VAR_EQUIPMENT_VERSION, 1);
 	let LINK_CHARACTERS = await equip.LINK_CHARACTERS();
 	await equip.setLink(LINK_CHARACTERS, characters.address);
+	let CHARACTERS_GAME_ADMIN = await characters.GAME_ADMIN();
+	await characters.grantRole(CHARACTERS_GAME_ADMIN, equip.address);
 
     const weapons = await upgradeProxy(Weapons.address, Weapons, { deployer });
-	let WEAPONS_VAR_EQUIPMENT_VERSION = await weapons.VAR_EQUIPMENT_VERSION();
-	await weapons.setVar(WEAPONS_VAR_EQUIPMENT_VERSION, 1);
 	let LINK_WEAPONS = await equip.LINK_WEAPONS();
 	await equip.setLink(LINK_WEAPONS, weapons.address);
+	let WEAPONS_GAME_ADMIN = await weapons.GAME_ADMIN();
+	await weapons.grantRole(WEAPONS_GAME_ADMIN, equip.address);
 
 	const shields = await upgradeProxy(Shields.address, Shields, { deployer });
-	let SHIELDS_VAR_EQUIPMENT_VERSION = await shields.VAR_EQUIPMENT_VERSION();
-	await shields.setVar(SHIELDS_VAR_EQUIPMENT_VERSION, 1);
 	let LINK_SHIELDS = await equip.LINK_SHIELDS();
 	await equip.setLink(LINK_SHIELDS, shields.address);
+
+    const pvpCore = await upgradeProxy(PvpCore.address, PvpCore, { deployer });
+	let LINK_EQUIPMENT_MANAGER = await pvpCore.LINK_EQUIPMENT_MANAGER();
+	await pvpCore.setLink(LINK_EQUIPMENT_MANAGER, equip.address);
+
+	let SLOT_CHARACTER_WEAPON = equip.SLOT_CHARACTER_WEAPON();
+	await equip.setEquippable(characters.address, SLOT_CHARACTER_WEAPON, weapons.address, true);
+	let SLOT_CHARACTER_SHIELD = equip.SLOT_CHARACTER_SHIELD();
+	await equip.setEquippable(characters.address, SLOT_CHARACTER_SHIELD, shields.address, true);
 };

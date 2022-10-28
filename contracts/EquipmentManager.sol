@@ -36,7 +36,11 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
 
     // User vars
 
-    uint256 public constant USERVAR_ = 10001;
+    //uint256 public constant USERVAR_ = 10001;
+
+    // NFT vars
+
+    uint256 public constant NFTVAR_EQUIPPED_SLOTS = 1;//each bit corresponding to its slot
 
     // Misc
 
@@ -47,9 +51,23 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
     //////////
     // GENERAL
     //////////
+    struct PowerData {
+        uint256 onID;
+        uint256 souledPower;
+        uint256 pvpPower;
+        uint256 ffaPower;
+        int128 weaponMultBase;
+        int128 weaponMultFight;
+        uint24 souledBasePower;
+        uint24 weaponBonusPower;
+        uint8 level;
+        uint8 charTrait;
+        uint8 weaponTrait;
+        uint8 shieldTrait;
+    }
 
     event Equipped(address indexed onAddr, uint256 indexed onID, uint256 indexed slot, address itemAddr, uint256 itemID);
-    event Unequipped(address indexed onAddr, uint256 indexed onID, uint256 indexed slot, address itemAddr, uint256 itemID);
+    event Unequipped(address indexed onAddr, uint256 indexed onID, uint256 indexed slot);
     event Recalculated(address indexed onAddr, uint256 indexed onID, uint256 indexed calculationID);
 
     function initialize () public initializer {
@@ -74,6 +92,7 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public vars;
     mapping(uint256 => address) public links;
     mapping(address => mapping(uint256 => uint256)) public userVars;
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) public nftVars;//contract>id>field>value
 
     // equipper address, ID, slot, equipped item address
     mapping(address => mapping(uint256 => mapping(uint256 => address))) public equippedSlotAddress;
@@ -95,25 +114,31 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
     function equipNFT(address onAddr, uint256 onID, uint256 slot, address itemAddr, uint256 itemID) external {
         require(isEquippable(onAddr, slot, itemAddr), "Invalid item");
         require(IERC721(onAddr).ownerOf(onID) == msg.sender);//item owner check done on transfer
+        require(equippedSlotAddress[onAddr][onID][slot] != address(0), "Slot taken");
 
         equippedSlotAddress[onAddr][onID][slot] = itemAddr;
         equippedSlotID[onAddr][onID][slot] = itemID;
+        nftVars[onAddr][onID][NFTVAR_EQUIPPED_SLOTS] |= (0x1 << slot);//turn slot bit on
+
         processEquippedItem(onAddr, onID, slot, itemAddr, itemID);
-        IERC721(itemAddr).safeTransferFrom(msg.sender, address(this), itemID);
+        IERC721(itemAddr).transferFrom(msg.sender, address(this), itemID);
 
         recalculate(onAddr, onID);
+        emit Equipped(onAddr, onID, slot, itemAddr, itemID);
     }
 
     function unequipNFT(address onAddr, uint256 onID, uint256 slot) external {
-        require(IERC721(onAddr).ownerOf(onID) == msg.sender);//item owner check done on transfer
+        require(IERC721(onAddr).ownerOf(onID) == msg.sender);
 
         IERC721(equippedSlotAddress[onAddr][onID][slot])
-            .safeTransferFrom(address(this), msg.sender, equippedSlotID[onAddr][onID][slot]);
+            .transferFrom(address(this), msg.sender, equippedSlotID[onAddr][onID][slot]);
 
         equippedSlotAddress[onAddr][onID][slot] = address(0);
         equippedSlotID[onAddr][onID][slot] = 0;
+        nftVars[onAddr][onID][NFTVAR_EQUIPPED_SLOTS] &= ~(0x1 << slot);//turns the slot bit off
 
         recalculate(onAddr, onID);
+        emit Unequipped(onAddr, onID, slot);
     }
 
     function recalculate(address onAddr, uint256 onID) public {
@@ -122,31 +147,31 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
             calculateCharacterVars(onID);
         else
             revert("Not implemented");
+        emit Recalculated(onAddr, onID, 0);
     }
 
     function processEquippedItem(address onAddr, uint256 onID, uint256 slot, address itemAddr, uint256 itemID) internal {
         if(itemAddr == links[LINK_WEAPONS]) {
             Weapons weapons = Weapons(links[LINK_WEAPONS]);
+            // Limit sharing by draining durability on equip
             weapons.drainDurability(itemID, uint8(vars[VAR_WEAPON_EQUIP_DURABILITY]), false);
         }
     }
 
+    // Would-be proxy functions
+
     function calculateCharacterVars(uint256 onID) internal {
         Characters characters = Characters(links[LINK_CHARACTERS]);
-        require(characters.getNftVar(onID, 1) == 0, "Busy");
+        require(characters.getNftVar(onID, 1) == 0, "Busy");//don't let them switcharoo while in arena etc
 
         // equipped weapon is required for anything to be calculated
-        if(hasSlotEquipped(LINK_CHARACTERS, onID, SLOT_CHARACTER_WEAPON)) {
-            // assume weapon slot is using weapon address for now, will revert anyway if not
-            
-            uint256 powerData = getPowerData(onID);
-
+        if(_hasSlotEquipped(LINK_CHARACTERS, onID, SLOT_CHARACTER_WEAPON)) {
             uint256[] memory fields = new uint256[](2);
             fields[0] = 4;
             fields[1] = 5;
             uint256[] memory values = new uint256[](2);
             values[0] = characters.vars(1/*equip version*/);
-            values[1] = powerData;
+            values[1] = getPowerData(onID);
         
             characters.setNFTVars(onID, fields, values );
         }
@@ -156,63 +181,85 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function getPowerData(uint256 onID) internal view returns (uint256) {
+    function getPowerData(uint256 onID) public view returns (uint256) {
+        // May be called from frontend to check if a refresh is required/advised
+        // Compare with characters.getNftVar(NFTVAR_POWER_DATA)
+
         Characters characters = Characters(links[LINK_CHARACTERS]);
-        uint8 charTrait = characters.getTrait(onID);
+        // Some values are set later
+        PowerData memory pd = PowerData(
+            onID,
+            0,0,0,0,0,//souledPower,pvpPower,ffaPower,weaponMultBase,weaponMultFight
+            uint24(characters.getTotalPower(onID)),//souledBasePower
+            0,//weaponBonusPower
+            characters.getLevel(onID),
+            characters.getTrait(onID),
+            0,0//weaponTrait, shieldTrait
+        );
+
+        // assume weapon slot is using weapon address for now, will revert anyway if not
         (int128 weaponMultBase, // does not contain stat trait benefits
             int128 weaponMultFight, // contains stat benefits (not wep-char trait match yet though!)
             uint24 weaponBonusPower,
             uint8 weaponTrait) = Weapons(links[LINK_WEAPONS])
                 .getFightData(equippedSlotID[links[LINK_CHARACTERS]][onID][SLOT_CHARACTER_WEAPON],
-                                    charTrait);
-        
-        uint24 souledBasePower = uint24(characters.getTotalPower(onID));
-        uint256 souledPower = Common.getPlayerPower(souledBasePower, weaponMultFight, weaponBonusPower);
-        // pve, 24 bits each
-        return (getPveTraitBonus(charTrait, weaponTrait, 0).mulu(souledPower))//v fire
-            | (getPveTraitBonus(charTrait, weaponTrait, 1).mulu(souledPower) << 24)//v earth
-            | (getPveTraitBonus(charTrait, weaponTrait, 2).mulu(souledPower) << 48)//v lightning
-            | (getPveTraitBonus(charTrait, weaponTrait, 3).mulu(souledPower) << 72)//v water
-            | (Common.getPlayerPower(souledBasePower, weaponMultBase, weaponBonusPower) << 96)//base(target)
+                                    pd.charTrait);
+        pd.weaponMultBase = weaponMultBase;
+        pd.weaponMultFight = weaponMultFight;
+        pd.weaponBonusPower = weaponBonusPower;
+        pd.weaponTrait = weaponTrait;
+        pd.souledPower = Common.getPlayerPower(pd.souledBasePower, pd.weaponMultFight, pd.weaponBonusPower);
+        cachePvpData(pd);
+        return getPvePowerData(pd) | getPvpPowerData(pd);
+    }
 
-            | getPvpPowerData(onID, charTrait, weaponTrait, weaponMultFight, weaponBonusPower)
-            
-            //extra info in case the calling feature uses them (lvl, traits)
-            | (uint256(charTrait) << 240)
-            | (uint256(weaponTrait) << 242)
+    function getPvePowerData(PowerData memory pd) internal pure returns(uint256) {
+        // pve, 24 bits each
+        return (getPveTraitBonus(pd.charTrait, pd.weaponTrait, 0).mulu(pd.souledPower) & 0xFFFFFF)//v fire
+            | ((getPveTraitBonus(pd.charTrait, pd.weaponTrait, 1).mulu(pd.souledPower) & 0xFFFFFF) << 24)//v earth
+            | ((getPveTraitBonus(pd.charTrait, pd.weaponTrait, 2).mulu(pd.souledPower) & 0xFFFFFF) << 48)//v lightning
+            | ((getPveTraitBonus(pd.charTrait, pd.weaponTrait, 3).mulu(pd.souledPower) & 0xFFFFFF) << 72)//v water
+            | (uint256(Common.getPlayerPower(pd.souledBasePower, pd.weaponMultBase, pd.weaponBonusPower)) << 96)//base(target)
+            // some extra info to save on calls, if necessary
+            | (uint256(pd.level) << 232)
+            | (uint256(pd.charTrait) << 240)
+            | (uint256(pd.weaponTrait) << 242)
         ;
     }
 
-    function getPvpPowerData(uint256 onID, uint8 charTrait, uint8 weaponTrait,
-        int128 weaponMultFight, uint24 weaponBonusPower
-    ) internal view returns (uint256) {
-        Characters characters = Characters(links[LINK_CHARACTERS]);
+    function cachePvpData(PowerData memory pd) internal view returns (PowerData memory) {
         Shields shields = Shields(links[LINK_SHIELDS]);
         int128 shieldMult = 0;
         uint8 shieldTrait = 4; // signifies no shield
-        if(hasSlotEquipped(LINK_CHARACTERS, onID, SLOT_CHARACTER_SHIELD)) {
-            shieldMult = shields.getDefenseMultiplierForTrait(equippedSlotID[links[LINK_CHARACTERS]][onID][SLOT_CHARACTER_SHIELD], charTrait)
+        if(_hasSlotEquipped(LINK_CHARACTERS, pd.onID, SLOT_CHARACTER_SHIELD)) {
+            shieldMult = shields.getDefenseMultiplierForTrait(
+                equippedSlotID[links[LINK_CHARACTERS]][pd.onID][SLOT_CHARACTER_SHIELD],
+                pd.charTrait)
                 .sub(mathOneFrac()).mul(2).div(10); // 20% multiplier contribution vs weapons
-            shieldTrait = shields.getTrait(equippedSlotID[links[LINK_CHARACTERS]][onID][SLOT_CHARACTER_SHIELD]);
+            shieldTrait = shields.getTrait(equippedSlotID[links[LINK_CHARACTERS]][pd.onID][SLOT_CHARACTER_SHIELD]);
         }
 
-        uint8 level = characters.getLevel(onID);
-        uint256 pvpPower = Common.getPlayerPowerBase100(characters.getPowerAtLevel(level), weaponMultFight, weaponBonusPower);
-        uint256 ffaPower = Common.getPlayerPowerBase100(characters.getPowerAtLevel(34), weaponMultFight, weaponBonusPower);
+        pd.pvpPower = Common.getPlayerPowerBase100(Common.getPowerAtLevel(pd.level),
+            pd.weaponMultFight.add(shieldMult), pd.weaponBonusPower);
+        pd.ffaPower = Common.getPlayerPowerBase100(Common.getPowerAtLevel(34),
+            pd.weaponMultFight.add(shieldMult), pd.weaponBonusPower);
+        pd.shieldTrait = shieldTrait == 4 ? 0 : shieldTrait;
+        return pd;
+    }
 
+    function getPvpPowerData(PowerData memory pd) internal pure returns (uint256) {
         //pvp, 14 bits each, tiered
-        return (getPvpTraitBonus(charTrait, weaponTrait, shieldTrait, 0).mulu(pvpPower) << 120)//v fire
-            | (getPvpTraitBonus(charTrait, weaponTrait, shieldTrait, 1).mulu(pvpPower) << 134)//v earth
-            | (getPvpTraitBonus(charTrait, weaponTrait, shieldTrait, 2).mulu(pvpPower) << 148)//v lightning
-            | (getPvpTraitBonus(charTrait, weaponTrait, shieldTrait, 3).mulu(pvpPower) << 162)//v water
+        return ((getPvpTraitBonus(pd.charTrait, pd.weaponTrait, pd.shieldTrait, 0).mulu(pd.pvpPower) & 0x3FFF) << 120)//v fire
+            | ((getPvpTraitBonus(pd.charTrait, pd.weaponTrait, pd.shieldTrait, 1).mulu(pd.pvpPower) & 0x3FFF) << 134)//v earth
+            | ((getPvpTraitBonus(pd.charTrait, pd.weaponTrait, pd.shieldTrait, 2).mulu(pd.pvpPower) & 0x3FFF) << 148)//v lightning
+            | ((getPvpTraitBonus(pd.charTrait, pd.weaponTrait, pd.shieldTrait, 3).mulu(pd.pvpPower) & 0x3FFF) << 162)//v water
             // pvp, 14 bits each, ffa
-            | (getPvpTraitBonus(charTrait, weaponTrait, shieldTrait, 0).mulu(ffaPower) << 176)//v fire
-            | (getPvpTraitBonus(charTrait, weaponTrait, shieldTrait, 1).mulu(ffaPower) << 190)//v earth
-            | (getPvpTraitBonus(charTrait, weaponTrait, shieldTrait, 2).mulu(ffaPower) << 204)//v lightning
-            | (getPvpTraitBonus(charTrait, weaponTrait, shieldTrait, 3).mulu(ffaPower) << 218)//v water
+            | ((getPvpTraitBonus(pd.charTrait, pd.weaponTrait, pd.shieldTrait, 0).mulu(pd.ffaPower) & 0x3FFF) << 176)//v fire
+            | ((getPvpTraitBonus(pd.charTrait, pd.weaponTrait, pd.shieldTrait, 1).mulu(pd.ffaPower) & 0x3FFF) << 190)//v earth
+            | ((getPvpTraitBonus(pd.charTrait, pd.weaponTrait, pd.shieldTrait, 2).mulu(pd.ffaPower) & 0x3FFF) << 204)//v lightning
+            | ((getPvpTraitBonus(pd.charTrait, pd.weaponTrait, pd.shieldTrait, 3).mulu(pd.ffaPower) & 0x3FFF) << 218)//v water
             
-            | (uint256(level) << 232)
-            | (uint256(shieldTrait) << 244);
+            | (uint256(pd.shieldTrait) << 244);
     }
 
     function getPveTraitBonus(uint8 char, uint8 wep, uint8 enemy) internal pure returns (int128) {
@@ -246,66 +293,43 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
 
     function getPowerDataDebug(uint256 charID) external view returns (
         uint24[5] memory pvePower,
-        /*uint24 firePower,
-        uint24 earthPower,
-        uint24 lightningPower,
-        uint24 waterPower,
-        uint24 basePower,*/
-
         uint16[4] memory pvpTierPower,
-        /*uint16 fireTierPower,
-        uint16 earthTierPower,
-        uint16 lightningTierPower,
-        uint16 waterTierPower,*/
-
         uint16[4] memory pvpFfaPower,
-        /*uint16 fireFFAPower,
-        uint16 earthFFAPower,
-        uint16 lightningFFAPower,
-        uint16 waterFFAPower,*/
-
         uint8 level,
         uint8 charTrait,
         uint8 wepTrait,
-        uint8 shieldTrait
+        uint8 shieldTrait,
+        uint256 powerData
         ) {
-        uint256 powerData = Characters(links[LINK_CHARACTERS]).getNftVar(charID, 5);
-        //pvePower = new uint24[](5);
+        powerData = Characters(links[LINK_CHARACTERS]).getNftVar(charID, 5);
+
         pvePower[0] = uint24(powerData & 0xFFFFFF);
         pvePower[1] = uint24((powerData >> 24) & 0xFFFFFF);
         pvePower[2] = uint24((powerData >> 48) & 0xFFFFFF);
         pvePower[3] = uint24((powerData >> 72) & 0xFFFFFF);
         pvePower[4] = uint24((powerData >> 96) & 0xFFFFFF);
-        /*firePower = uint24(powerData & 0xFFFFFF);
-        earthPower = uint24((powerData >> 24) & 0xFFFFFF);
-        lightningPower = uint24((powerData >> 48) & 0xFFFFFF);
-        waterPower = uint24((powerData >> 72) & 0xFFFFFF);
-        basePower = uint24((powerData >> 96) & 0xFFFFFF);*/
 
-        //pvpTierPower = new uint16[](4);
-        pvpTierPower[0] = uint16((powerData >> 120) & 0xFFFF);
-        pvpTierPower[1] = uint16((powerData >> 134) & 0xFFFF);
-        pvpTierPower[2] = uint16((powerData >> 148) & 0xFFFF);
-        pvpTierPower[3] = uint16((powerData >> 162) & 0xFFFF);
-        /*fireTierPower = uint16((powerData >> 120) & 0xFFFF);
-        earthTierPower = uint16((powerData >> 134) & 0xFFFF);
-        lightningTierPower = uint16((powerData >> 148) & 0xFFFF);
-        waterTierPower = uint16((powerData >> 162) & 0xFFFF);*/
+        pvpTierPower[0] = uint16((powerData >> 120) & 0x3FFF);
+        pvpTierPower[1] = uint16((powerData >> 134) & 0x3FFF);
+        pvpTierPower[2] = uint16((powerData >> 148) & 0x3FFF);
+        pvpTierPower[3] = uint16((powerData >> 162) & 0x3FFF);
         
-        //pvpFfaPower = new uint16[](4);
-        pvpFfaPower[0] = uint16((powerData >> 176) & 0xFFFF);
-        pvpFfaPower[1] = uint16((powerData >> 190) & 0xFFFF);
-        pvpFfaPower[2] = uint16((powerData >> 204) & 0xFFFF);
-        pvpFfaPower[3] = uint16((powerData >> 218) & 0xFFFF);
-        /*fireFFAPower = uint16((powerData >> 176) & 0xFFFF);
-        earthFFAPower = uint16((powerData >> 190) & 0xFFFF);
-        lightningFFAPower = uint16((powerData >> 204) & 0xFFFF);
-        waterFFAPower = uint16((powerData >> 218) & 0xFFFF);*/
+        pvpFfaPower[0] = uint16((powerData >> 176) & 0x3FFF);
+        pvpFfaPower[1] = uint16((powerData >> 190) & 0x3FFF);
+        pvpFfaPower[2] = uint16((powerData >> 204) & 0x3FFF);
+        pvpFfaPower[3] = uint16((powerData >> 218) & 0x3FFF);
 
         level = uint8((powerData >> 232) & 0xFF);
         charTrait = uint8((powerData >> 240) & 0x3);
         wepTrait = uint8((powerData >> 242) & 0x3);
         shieldTrait = uint8((powerData >> 244) & 0x3);
+    }
+
+    function getPowerDataBytes(uint charID) external view returns (uint8[32] memory data) {
+        uint256 powerData = Characters(links[LINK_CHARACTERS]).getNftVar(charID, 5);
+        for(uint i = 0; i < 32; i++) {
+            data[i] = uint8(powerData >> i*8);
+        }
     }
 
     // Read-only
@@ -314,8 +338,16 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
         return equippableInSlot[onAddr][slot].contains(itemAddr);
     }
 
-    function hasSlotEquipped(uint256 link, uint256 onID, uint256 slot) public view returns (bool) {
+    function getEquippedItem(address onAddr, uint256 slot) public view returns(address, uint256) {
+        return (equippedSlotAddress[onAddr][onID][slot], equippedSlotID[onAddr][onID][slot]);
+    }
+
+    function _hasSlotEquipped(uint256 link, uint256 onID, uint256 slot) internal view returns (bool) {
         return equippedSlotAddress[links[link]][onID][slot] != address(0);
+    }
+
+    function hasSlotEquipped(address onAddr, uint256 onID, uint256 slot) public view returns (bool) {
+        return equippedSlotAddress[onAddr][onID][slot] != address(0);
     }
 
     function mathOneFrac() internal pure returns (int128) {
@@ -336,6 +368,13 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
         for(uint i = 0; i < varFields.length; i++) {
             vars[varFields[i]] = values[i];
         }
+    }
+
+    function getNftVar(address onAddr, uint256 onID, uint256 nftVar) public view returns(uint256) {
+        return nftVars[onAddr][onID][nftVar];
+    }
+    function setNftVar(address onAddr, uint256 onID, uint256 nftVar, uint256 value) public restricted {
+        nftVars[onAddr][onID][nftVar] = value;
     }
 
     function setLink(uint256 linkId, address linkAddress) external restricted {

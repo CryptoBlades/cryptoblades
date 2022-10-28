@@ -67,7 +67,7 @@ const raid = {
       );
 
       await Raid1!.methods
-        .joinRaid(characterId, weaponId)
+        .joinRaid(characterId)
         .send(defaultCallOptions(rootState));
 
       await Promise.all([

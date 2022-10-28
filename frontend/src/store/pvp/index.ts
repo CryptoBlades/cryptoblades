@@ -267,7 +267,7 @@ const pvp = {
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const res = await PvpCore.methods.enterArena(characterId, weaponId, shieldId, useShield, tierless).send({
+      const res = await PvpCore.methods.enterArena(characterId, tierless).send({
         from: rootState.defaultAccount,
         gasPrice: getGasPrice()
       });
