@@ -914,7 +914,7 @@
     "readyToClaim": "Recompensas prontas para reivindicar!",
     "realWithdrawValueClaimable": "Atualmente, você receberá aproximadamente {actualAmount} {tokenSymbol} por retirar {skillAmount} {token}.",
     "rewards": "Recompensas",
-    "skillAmount": "Quantidade de Skill",
+    "skillAmount": "Quantidade de Skull",
     "slippage": "Deslizamento",
     "timeSince": "Tempo desde a última retirada: n/a"
   },
