@@ -37,7 +37,7 @@
             @mouseover="hover = !isMobile() || true"
             @mouseleave="hover = !isMobile()"
           >{{ formattedTotalSkillBalance }} <b-icon-gift-fill scale="1" v-if="hasInGameSkill" variant="success"/></span>
-          <span> SKILL</span>
+          <span> SKULL</span>
         </div>
         <div class="mx-2 mb-1">
           <span class="border-line-custom"> | </span>
