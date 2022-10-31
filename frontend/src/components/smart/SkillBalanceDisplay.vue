@@ -56,6 +56,10 @@
       </div>
     </div>
     <div class="d-flex justify-content-end align-items-center animate-slide" v-if="!isMobile() || (isMobile() && isToggled)">
+      <update-popup class="px-2"/>
+      <div class="deposit-withdraw border-line-custom px-2">
+        <span>|</span>
+      </div>
       <div class="deposit-withdraw px-2">
         <span id="claim-xp-popover" @click="onClaimXp" :class="!canClaimXp ? 'no-claimable' : ''">{{$t('ClaimRewardsBar.claim').toUpperCase()}} EXP</span>
         <b-popover target="claim-xp-popover" custom-class="claim-exp-popover" triggers="hover" placement="bottom">
@@ -169,6 +173,7 @@ import { getCleanName } from '@/rename-censor';
 import ElementTrait from '@/components/smart/ElementTrait.vue';
 import { SupportedProject } from '@/views/Treasury.vue';
 import PartneredProject from '../PartneredProject.vue';
+import UpdatePopup from '../UpdatePopup.vue';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -495,6 +500,7 @@ export default Vue.extend({
     BModal,
     ElementTrait,
     PartneredProject,
+    UpdatePopup,
   }
 });
 </script>
@@ -528,8 +534,8 @@ export default Vue.extend({
     color: #949494;
   }
 
-  .deposit-withdraw:nth-child(1),
-  .deposit-withdraw:nth-child(3){
+  .deposit-withdraw:nth-child(3),
+  .deposit-withdraw:nth-child(5){
     border: 1px solid #bfa76565;
     border-radius: 5px;
     padding-top: 3px;
