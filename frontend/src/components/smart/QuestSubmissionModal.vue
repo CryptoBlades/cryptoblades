@@ -401,9 +401,10 @@ export default Vue.extend({
   margin-bottom: 3rem;
 }
 
-@media (max-width: 576px) {
-  .single-dust-display {
+.single-dust-display {
     width: 100%;
   }
-}
+/* @media (max-width: 576px) {
+
+} */
 </style>

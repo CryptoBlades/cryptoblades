@@ -80,11 +80,13 @@
               </div>
               <h3 v-else-if="quests.length === 0">
                 {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
-              <div v-else class="d-flex flex-column gap-3">
-                <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row p-3 gap-5">
-                  <b-form-radio class="flex-1 custom-action-btn" v-model="pickedQuestId" :value="quest.id">{{ $t('quests.setAsNextQuest') }}</b-form-radio>
+                <!-- TEST -->
+              <div v-else class="d-flex flex-row flex-wrap gap-3">
+                <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row quest-row-special p-3 gap-5">
                   <QuestRequirements :quest="quest" :index="index"/>
                   <QuestRewards :quest="quest"/>
+                  <b-form-radio class="flex-1 custom-action-btn gap-2 p-2"
+                    v-model="pickedQuestId" :value="quest.id">{{ $t('quests.setAsNextQuest') }}</b-form-radio>
                   <!-- <div class="pickBtn-wrapper">
                     <b-button class="flex-1 custom-action-btn" variant="primary">
                       @click="handlePick(quest.id)"
@@ -93,6 +95,7 @@
                   </div> -->
                 </div>
               </div>
+              <!-- TEST -->
           </div>
         </div>
         <div v-if="activeTab === 'character-quests'" class="character-quests-content">
@@ -101,8 +104,8 @@
             <i class="fas fa-spinner fa-spin"/>
             {{ $t('quests.loading') }}
           </div>
-          <div v-if="characters.length !== 0 && !isLoading" class="d-flex flex-column w-100">
-            <div v-for="character in characters" :key="character.id" class="w-100 my-3">
+          <div v-if="characters.length !== 0 && !isLoading" class="d-flex flex-wrap flex-row w-100">
+            <div v-for="character in characters" :key="character.id" class="my-3 mr-3">
               <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id"
                         :reputationLevelRequirements="reputationLevelRequirements"
                         :pickable="pickable" :pickedQuestId="pickedQuestId" @refresh-quest-data="onRefreshQuestData"/>
@@ -138,10 +141,12 @@
           <i class="fas fa-spinner fa-spin"/>
           {{ $t('quests.loading') }}
         </div>
-        <div v-else v-for="quest in walletQuests" :key="quest.id" class="d-flex w-100">
-          <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
-                    :reputationLevelRequirements="reputationLevelRequirements"
-                    @refresh-quest-data="onRefreshQuestData"/>
+        <div v-else class="d-flex flex-wrap">
+          <div v-for="quest in walletQuests" :key="quest.id" class="d-flex my-3 mr-3">
+            <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
+                      :reputationLevelRequirements="reputationLevelRequirements"
+                      @refresh-quest-data="onRefreshQuestData"/>
+          </div>
         </div>
       </div>
 
@@ -492,9 +497,15 @@ export default Vue.extend({
   background: transparent !important;
   border: #EDCD90 1px solid !important;
   color: #FFF !important;
-  width: 100%;
+  width: clamp(200px, 10vw, 250px);
   max-height: 50px;
+  display: flex;
+  justify-content: center;
 }
+
+// .character-quests-content > div:nth-child(2) {
+//   flex-wrap: wrap;
+// }
 
 @media (max-width: 600px) {
   .quest-nav{
@@ -530,7 +541,7 @@ export default Vue.extend({
   padding-top: 50px;
 }
 .quests-container{
-  width: clamp(200px, 75vw, 1200px);
+  width: clamp(200px, 75vw, 2000px);
   margin: 0 auto;
   padding: 50px 0;
 }
@@ -666,6 +677,13 @@ export default Vue.extend({
 .quest-row-wrapper > div{
   margin: 20px 0;
 }
+
+.quest-row-special {
+    flex-direction: column;
+    height: auto;
+    gap: 1rem;
+    width: initial;
+  }
 
 @media (max-width: 576px) {
   .quests-container {

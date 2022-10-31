@@ -545,11 +545,12 @@ export default Vue.extend({
   padding: 10px 30px;
 }
 
-@media (max-width: 576px) {
-  .quest-row {
+.quest-row {
     flex-direction: column;
     height: auto;
     gap: 1rem;
   }
-}
+/* @media (max-width: 576px) {
+
+} */
 </style>

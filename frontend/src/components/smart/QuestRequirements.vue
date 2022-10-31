@@ -169,8 +169,7 @@ export default Vue.extend({
   color: #B4B0A7;
 }
 
-@media screen and (max-width: 576px) {
-  .requirement-text {
+.requirement-text {
     white-space: normal;
   }
   .quest-requirement-display {
@@ -183,6 +182,8 @@ export default Vue.extend({
     margin-top: 5px;
     width: 100%;
   }
-}
+/* @media screen and (max-width: 576px) {
+
+} */
 
 </style>

@@ -172,13 +172,14 @@ export default Vue.extend({
   pointer-events: none;
 }
 
-@media (max-width: 576px) {
-  .quest-row,
-  .quest-row-wallet {
+.quest-row, .quest-row-wallet {
     flex-direction: column;
     height: auto;
     gap: 1rem;
   }
-}
+/*
+@media (max-width: 576px) {
+
+} */
 
 </style>

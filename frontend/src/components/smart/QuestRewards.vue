@@ -43,10 +43,11 @@ export default Vue.extend({
   color: #B4B0A7;
 }
 
-@media screen and (max-width: 576px) {
-  .quest-reward-display {
+.quest-reward-display {
     align-items: center;
   }
-}
+/* @media screen and (max-width: 576px) {
+
+} */
 
 </style>

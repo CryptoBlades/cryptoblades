@@ -254,13 +254,14 @@ export default Vue.extend({
   margin-right: 25px;
 }
 
-@media (max-width: 576px) {
-  .quest-character-display {
+.quest-character-display {
     flex-direction: column;
     border: none;
   }
   .character-info-container{
     margin: 0;
   }
-}
+/* @media (max-width: 576px) {
+
+} */
 </style>
