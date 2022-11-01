@@ -12,7 +12,7 @@
   </div>
   <div v-if="questTemplateType === QuestTemplateType.WALLET && quest" class="quest-row-wallet">
     <QuestRequirements :quest="quest" :progress="quest.progress"/>
-    <QuestRewards v-if="quest && quest.id !== 0" :quest="quest"/>
+    <QuestRewards v-if="quest && quest.id !== 0" :quest="quest" :questTemplateType="questTemplateType"/>
     <QuestActions :quest="quest" :key="quest.id" showSupply
                   @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
