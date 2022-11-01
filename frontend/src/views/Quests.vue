@@ -104,7 +104,7 @@
             {{ $t('quests.loading') }}
           </div>
           <div v-if="characters.length !== 0 && !isLoading" class="d-flex flex-wrap flex-row w-100">
-            <div v-for="character in characters" :key="character.id" class="my-3 mr-3">
+            <div v-for="character in characters" :key="character.id" class="character-quest-row my-3 mr-3">
               <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id"
                         :reputationLevelRequirements="reputationLevelRequirements"
                         :pickable="pickable" :pickedQuestId="pickedQuestId" @refresh-quest-data="onRefreshQuestData"/>
@@ -141,7 +141,7 @@
           {{ $t('quests.loading') }}
         </div>
         <div v-else class="d-flex flex-wrap">
-          <div v-for="quest in walletQuests" :key="quest.id" class="d-flex my-3 mr-3">
+          <div v-for="quest in walletQuests" :key="quest.id" class="wallet-quest-row d-flex my-3 mr-3">
             <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
                       :reputationLevelRequirements="reputationLevelRequirements"
                       @refresh-quest-data="onRefreshQuestData"/>
@@ -542,7 +542,7 @@ export default Vue.extend({
   padding-top: 50px;
 }
 .quests-container{
-  width: clamp(200px, 75vw, 2000px);
+  width: clamp(200px, 75vw, 1200px);
   margin: 0 auto;
   padding: 50px 0;
 }
@@ -690,7 +690,6 @@ export default Vue.extend({
   .quests-container {
     padding: 1rem;
     margin-bottom: 3rem;
-    width: 100%;
   }
 
   .weekly-progress{
@@ -700,6 +699,15 @@ export default Vue.extend({
   .weekly-progress-container {
     flex-direction: column;
     gap: 2rem;
+  }
+
+  .quests-container,
+  .character-quest-row,
+  .wallet-quest-row,
+  .character-quests-container,
+  .wallet-quests-content,
+  .quest-row-special {
+    width: 100%;
   }
 }
 </style>
