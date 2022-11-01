@@ -66,9 +66,6 @@
             <b-form inline>
               <label class="mr-sm-2">Special Quest Tier</label>
               <b-form-select class="mt-2 mb-2" v-model="pickableQuestTier">
-                <!-- <b-form-select-option :value="undefined" disabled>
-                  {{ $t('quests.pleaseSelectQuestTier') }}
-                </b-form-select-option> -->
                 <b-form-select-option v-for="tier in rarities" :key="tier" :value="tier">
                   {{ $t(`quests.rarityType.${Rarity[tier]}`) }}
                 </b-form-select-option>

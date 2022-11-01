@@ -111,14 +111,14 @@ import QuestReward from '@/components/smart/QuestReward.vue';
 import {mapActions} from 'vuex';
 import {NftIdType} from '@/components/smart/NftList.vue';
 import {getTimeRemaining} from '@/utils/common';
-import { TranslateResult } from 'vue-i18n';
-import i18n from '@/i18n';
+// import { TranslateResult } from 'vue-i18n';
+// import i18n from '@/i18n';
 
-enum ActionAfterPick {
-  COMPLETE,
-  SKIP,
-  REQUEST
-}
+// enum ActionAfterPick {
+//   COMPLETE,
+//   SKIP,
+//   REQUEST
+// }
 
 interface Data {
   hasStaminaToSkip: boolean;
@@ -220,7 +220,7 @@ export default Vue.extend({
       // pickableQuestTier: undefined,
       quests: [],
       //pickedQuestId: undefined,
-      ActionAfterPick,
+      //ActionAfterPick,
     } as Data;
   },
 
@@ -246,29 +246,29 @@ export default Vue.extend({
     // showPickableSwitch(): boolean {
     //   return (this.questCanBeCompleted || this.questCanBeSkipped || this.quest !== null) && this.questTemplateType !== QuestTemplateType.WALLET;
     // },
-    actionAfterPick(): ActionAfterPick {
-      if(this.questCanBeCompleted) {
-        return ActionAfterPick.COMPLETE;
-      } else if(this.questCanBeSkipped) {
-        return ActionAfterPick.SKIP;
-      } else {
-        return ActionAfterPick.REQUEST;
-      }
-    },
+    // actionAfterPick(): ActionAfterPick {
+    //   if(this.questCanBeCompleted) {
+    //     return ActionAfterPick.COMPLETE;
+    //   } else if(this.questCanBeSkipped) {
+    //     return ActionAfterPick.SKIP;
+    //   } else {
+    //     return ActionAfterPick.REQUEST;
+    //   }
+    // },
     //TO DO: Maybe as tooltip? Review after merge ui
-    pickButtonLabel(): TranslateResult {
-      switch(this.actionAfterPick) {
-      case ActionAfterPick.COMPLETE:
-        return 'Set as next Quest and complete current Quest';
-      case ActionAfterPick.SKIP:
-        return 'Set as next Quest and skip current Quest';
-      case ActionAfterPick.REQUEST:
-        return 'Set as next Quest';
-        // return i18n.t('quests.requestQuest');
-      default:
-        return i18n.t('');
-      }
-    },
+    // pickButtonLabel(): TranslateResult {
+    //   switch(this.actionAfterPick) {
+    //   case ActionAfterPick.COMPLETE:
+    //     return 'Set as next Quest and complete current Quest';
+    //   case ActionAfterPick.SKIP:
+    //     return 'Set as next Quest and skip current Quest';
+    //   case ActionAfterPick.REQUEST:
+    //     return 'Set as next Quest';
+    //     // return i18n.t('quests.requestQuest');
+    //   default:
+    //     return i18n.t('');
+    //   }
+    // },
   },
   // watch: {
   //   pickableQuestTier(): void {
@@ -335,14 +335,14 @@ export default Vue.extend({
         this.isLoading = true;
         let rewards;
         let rewardType: any;
-        if(this.questTemplateType === QuestTemplateType.QUEST || this.questTemplateType === QuestTemplateType.PROMO) {
+        if(this.questTemplateType === QuestTemplateType.WALLET) {
+          rewards = await this.completeWalletQuest({questID: this.quest.id});
+          rewardType = this.quest.rewardType;
+        }
+        else {
           rewards = await this.completeQuest({characterID: this.character.id, pickedQuestID: this.pickedQuestId});
           rewardType = this.quest.rewardType;
           await this.refreshSkipQuestData();
-        }
-        else if(this.questTemplateType === QuestTemplateType.WALLET){
-          rewards = await this.completeWalletQuest({questID: this.quest.id});
-          rewardType = this.quest.rewardType;
         }
         if (!rewardType || rewardType === RewardType.EXPERIENCE || rewardType === RewardType.DUST || rewardType === RewardType.SOUL) {
           this.showQuestCompleteModal = true;
