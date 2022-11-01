@@ -51,7 +51,9 @@
       <div class="character-quests-container">
         <div v-if="activeTab === 'character-quests'">
           <div>
-            <span class="quests-title-2">Next Quest Type</span>
+            <span class="quests-title-2">Next Quest Type
+              <hint v-if="pickable" class="hint" :text="$t('quests.specialQuestTooltip')"/>
+            </span>
           </div>
           <b-form-checkbox size="lg" :checked="pickable" @change="pickable=!pickable" switch>
             <b class="float-left">{{ pickable ? 'Special' : 'Random' }}</b>
@@ -166,6 +168,7 @@ import hourglass from '@/assets/hourglass.png';
 import {getTimeRemaining} from '@/utils/common';
 import {NftIdType} from '@/components/smart/NftList.vue';
 import QuestNav from '@/components/QuestNav.vue';
+import Hint from '@/components/Hint.vue';
 import {
   Quest,
   QuestTemplateType,
@@ -235,6 +238,7 @@ export default Vue.extend({
     QuestNav,
     QuestRequirements,
     QuestRewards,
+    Hint,
   },
 
   props: {

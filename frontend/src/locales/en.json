@@ -911,7 +911,8 @@
     "updateForLevel": "Update for level {level}",
     "youNeedToHaveAtLeastOneCharacter": "You need to have at least one character to do Quests",
     "youNeedToHaveAtLeastOneCharacterRaid": "You need to have at least one character to join the Raid.",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "specialQuestTooltip": "Special Quest will default to Random if no Special Quest is selected"
   },
   "admin": {
     "tabs": {

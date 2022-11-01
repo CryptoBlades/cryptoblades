@@ -747,8 +747,11 @@ const quests = {
       return questRewards;
     },
     async requestPickableQuest({ rootState }: {rootState: IState}, {characterID, questID}: {characterID: number, questID: number}) {
+      console.log('requestPickable Index');
       const { SimpleQuests } = rootState.contracts();
+      console.log('simpleQuests: ', SimpleQuests, 'rootState.defaultAccount: ', rootState.defaultAccount);
       if(!SimpleQuests || !rootState.defaultAccount) return;
+      console.log('charId and questId: ', characterID, questID);
       return await SimpleQuests.methods.requestPickableQuest(characterID, questID).send(defaultCallOptions(rootState));
     }
   },

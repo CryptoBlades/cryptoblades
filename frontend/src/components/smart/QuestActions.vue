@@ -362,7 +362,15 @@ export default Vue.extend({
     async request() {
       try {
         this.isLoading = true;
-        await this.requestQuest({characterID: this.character.id});
+        console.log('request');
+        if (this.pickedQuestId) {
+          console.log('pickedQuestId', this.pickedQuestId);
+          await this.requestPickableQuest({characterID: this.character.id, questID: this.pickedQuestId});
+          console.log('finished request');
+        }
+        else {
+          await this.requestQuest({characterID: this.character.id});
+        }
         this.$emit('refresh-quest-data');
       } finally {
         this.isLoading = false;
