@@ -578,7 +578,7 @@ export default Vue.extend({
 
     formattedSkill(skill: stringOrNumber) {
       const skillBalance = fromWeiEther(skill.toString());
-      return `${toBN(skillBalance).toFixed(6)} ${this.isGenesisCharacter ? 'SKULL' : 'VALOR'}`;
+      return `${toBN(skillBalance).toFixed(6)} ${this.isGenesisCharacter ? 'SKILL' : 'VALOR'}`;
     },
 
     getPotentialXp(targetToFight: ITarget) {

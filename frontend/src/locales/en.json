@@ -49,7 +49,7 @@
     "claim": "Claim",
     "characterName": "Character Name",
     "unclaimedExp": "Unclaimed EXP",
-    "unclaimed": "UNCLAIMED SKULL",
+    "unclaimed": "UNCLAIMED SKILL",
     "unclaimedValor": "UNCLAIMED VALOR",
     "widthraw": "WITHDRAW",
     "claimRewards": "Claim Rewards",
@@ -131,9 +131,9 @@
     "gasFee": "You spent {bnbGasUsed} {gasToken} on gas fees ",
     "youRolled": "You rolled:",
     "enemyRolled": "Enemy rolled:",
-    "earnedSkill": "<b>{noIGO}</b> <small>UNCLAIMED SKULL</small> <b>{inUSD}</b> ",
+    "earnedSkill": "<b>{noIGO}</b> <small>UNCLAIMED SKILL</small> <b>{inUSD}</b> ",
     "earnedValor": "<b>{noIGO}</b> <small>UNCLAIMED VALOR</small> ",
-    "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKULL</small> <b>{inUSD}</b> ",
+    "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> ",
     "gasOffset": "<br/> <small>INCLUDING</small> <b>{offset}</b> <small>GAS OFFSET</small> <b>{inUSD}</b> "
   },
   "homePage":{
