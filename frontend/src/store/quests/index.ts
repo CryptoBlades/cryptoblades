@@ -626,16 +626,16 @@ const quests = {
       const isApprovedForAll = await tokenContract.methods.isApprovedForAll(rootState.defaultAccount, SimpleQuests.options.address)
         .call(defaultCallOptions(rootState));
 
-      if(tokenIds.length === 1 && !isApprovedForAll) {
-        await tokenContract.methods.approve(PartnerVault.options.address, tokenIds[0]).send({
-          from: rootState.defaultAccount,
-          gasPrice: getGasPrice()
-        });
-      } else if (!isApprovedForAll) {
-        await tokenContract.methods.setApprovalForAll(PartnerVault.options.address, true).send({
-          from: rootState.defaultAccount,
-          gasPrice: getGasPrice()
-        });
+      if (!isApprovedForAll) {
+        for (const tokenId of tokenIds) {
+          const approved = await tokenContract.methods.getApproved(tokenId).call(defaultCallOptions(rootState));
+          if (approved !== PartnerVault.options.address) {
+            await tokenContract.methods.approve(PartnerVault.options.address, tokenId).send({
+              from: rootState.defaultAccount,
+              gasPrice: getGasPrice()
+            });
+          }
+        }
       }
 
       return await SimpleQuests.methods.submitProgress(characterID, tokenIds).send(defaultCallOptions(rootState));
@@ -672,7 +672,8 @@ const quests = {
     },
 
     async submitWalletExternalProgress(
-      { rootState }: {rootState: IState}, {questID, tokenIds, tokenAddress}: {questID: number, tokenIds: string[], tokenAddress: string}) {
+      { rootState }: {rootState: IState},
+      {questID, tokenIds, tokenAddress}: {questID: number, tokenIds: string[], tokenAddress: string}) {
       const {SimpleQuests, PartnerVault} = rootState.contracts();
       if (!SimpleQuests || !PartnerVault || !rootState.defaultAccount) return;
 
@@ -681,16 +682,16 @@ const quests = {
       const isApprovedForAll = await tokenContract.methods.isApprovedForAll(rootState.defaultAccount, SimpleQuests.options.address)
         .call(defaultCallOptions(rootState));
 
-      if(tokenIds.length === 1 && !isApprovedForAll) {
-        await tokenContract.methods.approve(PartnerVault.options.address, tokenIds[0]).send({
-          from: rootState.defaultAccount,
-          gasPrice: getGasPrice()
-        });
-      } else if (!isApprovedForAll) {
-        await tokenContract.methods.setApprovalForAll(PartnerVault.options.address, true).send({
-          from: rootState.defaultAccount,
-          gasPrice: getGasPrice()
-        });
+      if (!isApprovedForAll) {
+        for (const tokenId of tokenIds) {
+          const approved = await tokenContract.methods.getApproved(tokenId).call(defaultCallOptions(rootState));
+          if (approved !== PartnerVault.options.address) {
+            await tokenContract.methods.approve(PartnerVault.options.address, tokenId).send({
+              from: rootState.defaultAccount,
+              gasPrice: getGasPrice()
+            });
+          }
+        }
       }
 
       return await SimpleQuests.methods.submitWalletProgress(questID, tokenIds).send(defaultCallOptions(rootState));
