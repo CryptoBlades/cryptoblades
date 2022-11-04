@@ -5196,7 +5196,8 @@
   "build/contracts/SkillStakingRewardsUpgradeable60.json": {
     "events": {},
     "links": {},
-    "address": "0x4B4BaEb52C1A2679e13D9D6D9680b03308216244"
+    "address": "0x4B4BaEb52C1A2679e13D9D6D9680b03308216244",
+    "transactionHash": "0x316380e1397d2a42b1faeb517674fdeec63c39266de63bba3bb87135c2e442d6"
   },
   "build/contracts/SkillStakingRewardsUpgradeable90.json": {
     "events": {

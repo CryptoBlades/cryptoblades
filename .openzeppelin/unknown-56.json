@@ -62838,7 +62838,7 @@
             "contract": "RewardsDistributionRecipientUpgradeable",
             "label": "rewardsDistribution",
             "type": "t_address",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\RewardsDistributionRecipientUpgradeable.sol:9"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\RewardsDistributionRecipientUpgradeable.sol:9"
           },
           {
             "contract": "ReentrancyGuardUpgradeable",
@@ -62856,7 +62856,7 @@
             "contract": "FailsafeUpgradeable",
             "label": "failsafeModeActive",
             "type": "t_bool",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\FailsafeUpgradeable.sol:7"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\FailsafeUpgradeable.sol:7"
           },
           {
             "contract": "PausableUpgradeable",
@@ -62873,105 +62873,105 @@
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "rewardsToken",
-            "type": "t_contract(IERC20)51455",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:31"
+            "type": "t_contract(IERC20)65113",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:31"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "stakingToken",
-            "type": "t_contract(IERC20)51455",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:32"
+            "type": "t_contract(IERC20)65113",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:32"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "periodFinish",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:33"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:33"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "rewardRate",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:34"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:34"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "rewardsDuration",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:35"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:35"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "minimumStakeTime",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:36"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:36"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "lastUpdateTime",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:37"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:37"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "rewardPerTokenStored",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:38"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:38"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "userRewardPerTokenPaid",
             "type": "t_mapping(t_address,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:40"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:40"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "rewards",
             "type": "t_mapping(t_address,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:41"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:41"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "_totalSupply",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:43"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:43"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "_balances",
             "type": "t_mapping(t_address,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:44"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:44"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "_stakeTimestamp",
             "type": "t_mapping(t_address,t_uint256)",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:45"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:45"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "__game",
-            "type": "t_contract(CryptoBlades)32256",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:48"
+            "type": "t_contract(CryptoBlades)44670",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:48"
           },
           {
             "contract": "StakingRewardsUpgradeable",
             "label": "minimumStakeAmount",
             "type": "t_uint256",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:50"
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:50"
           },
           {
             "contract": "SkillStakingRewardsUpgradeable",
             "label": "specialWeaponsManager",
-            "type": "t_contract(SpecialWeaponsManager)24864",
-            "src": "..\\..\\..\\..\\..\\C\\Users\\Karola\\repo\\cryptoblades\\contracts\\SkillStakingRewardsUpgradeable.sol:12"
+            "type": "t_contract(SpecialWeaponsManager)35979",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SkillStakingRewardsUpgradeable.sol:12"
           }
         ],
         "types": {
-          "t_contract(SpecialWeaponsManager)24864": {
+          "t_contract(SpecialWeaponsManager)35979": {
             "label": "contract SpecialWeaponsManager"
           },
-          "t_contract(IERC20)51455": {
+          "t_contract(IERC20)65113": {
             "label": "contract IERC20"
           },
           "t_uint256": {
@@ -62983,7 +62983,7 @@
           "t_address": {
             "label": "address"
           },
-          "t_contract(CryptoBlades)32256": {
+          "t_contract(CryptoBlades)44670": {
             "label": "contract CryptoBlades"
           },
           "t_bool": {
@@ -93438,6 +93438,205 @@
             "label": "address"
           },
           "t_contract(CryptoBlades)44645": {
+            "label": "contract CryptoBlades"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "268db9337bea2a1c8016a8dc7a1341a46e15b2ecb98c2e975ea11f7f43bb050b": {
+      "address": "0x3cAF1C5F8be3889fc37bA7f7da0480BE534C7bb9",
+      "txHash": "0x316380e1397d2a42b1faeb517674fdeec63c39266de63bba3bb87135c2e442d6",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:20"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:74"
+          },
+          {
+            "contract": "RewardsDistributionRecipientUpgradeable",
+            "label": "rewardsDistribution",
+            "type": "t_address",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\RewardsDistributionRecipientUpgradeable.sol:9"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "_status",
+            "type": "t_uint256",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ReentrancyGuardUpgradeable.sol:37"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ReentrancyGuardUpgradeable.sol:67"
+          },
+          {
+            "contract": "FailsafeUpgradeable",
+            "label": "failsafeModeActive",
+            "type": "t_bool",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\FailsafeUpgradeable.sol:7"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "_paused",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:28"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\PausableUpgradeable.sol:96"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "rewardsToken",
+            "type": "t_contract(IERC20)65113",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:31"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "stakingToken",
+            "type": "t_contract(IERC20)65113",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:32"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "periodFinish",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:33"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "rewardRate",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:34"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "rewardsDuration",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:35"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "minimumStakeTime",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:36"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "lastUpdateTime",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:37"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "rewardPerTokenStored",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:38"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "userRewardPerTokenPaid",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:40"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "rewards",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:41"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "_totalSupply",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:43"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "_balances",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:44"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "_stakeTimestamp",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:45"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "__game",
+            "type": "t_contract(CryptoBlades)44670",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:48"
+          },
+          {
+            "contract": "StakingRewardsUpgradeable",
+            "label": "minimumStakeAmount",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\staking\\StakingRewardsUpgradeable.sol:50"
+          },
+          {
+            "contract": "SkillStakingRewardsUpgradeable",
+            "label": "specialWeaponsManager",
+            "type": "t_contract(SpecialWeaponsManager)35979",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Users\\Kacper\\repo\\forked\\cryptoblades\\contracts\\SkillStakingRewardsUpgradeable.sol:12"
+          }
+        ],
+        "types": {
+          "t_contract(SpecialWeaponsManager)35979": {
+            "label": "contract SpecialWeaponsManager"
+          },
+          "t_contract(IERC20)65113": {
+            "label": "contract IERC20"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_contract(CryptoBlades)44670": {
             "label": "contract CryptoBlades"
           },
           "t_bool": {
