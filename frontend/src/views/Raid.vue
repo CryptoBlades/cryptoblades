@@ -118,30 +118,6 @@
                         </div>
                       </div>
                   </div>
-                  <div class="col-lg-12 col-md-5 col-sm-9 drops">
-                     <span>{{$t('raid.weapon')}}</span>
-                     <div class="weapon-info" v-if="selectedWeapon">
-                       <div>
-                          <weapon-inventory class="weapon-icon" :weapon="selectedWeapon" :displayType="'raid'"/>
-                       </div>
-                       <div @click="changeEquipedWeapon()">
-                          <img src="../assets/swithc-wep.png" alt="">
-                       </div>
-                     </div>
-                     <div class="weapon-info" v-else>
-                       <div class="outline-box">
-                          <div>
-                            <div @click="changeEquipedWeapon()">
-                              <img src="../assets/swithc-wep.png" alt="">
-                            </div>
-                          </div>
-                          <div>
-                            <p>{{$t('raid.noWeapon')}}</p>
-                            <span>{{$t('raid.clickToEquip')}}</span>
-                          </div>
-                       </div>
-                     </div>
-                  </div>
                 </div>
               </div>
               <div class="col-lg-8">
@@ -205,7 +181,6 @@
                     <div class="d-inline-block">
                       <p>{{$t('raid.joiningCost')}}</p>
                       <span>{{ staminaCost }} {{$t('raid.stamina')}}</span>|
-                      <span>{{ durabilityCost }} {{$t('raid.durability')}}</span> |
                       <span>
                         <CurrencyConverter
                         :skill="convertWeiToSkill(joinCost)"
@@ -304,30 +279,6 @@
                         </div>
                       </div>
                   </div>
-                  <div class="col-lg-12 drops text-left">
-                     <span>{{$t('raid.weapon')}}</span>
-                     <div class="weapon-info" v-if="selectedWeapon">
-                       <div>
-                          <weapon-inventory class="weapon-icon" :weapon="selectedWeapon" :displayType="'raid'"/>
-                       </div>
-                       <div @click="changeEquipedWeapon()">
-                          <img src="../assets/swithc-wep.png" alt="">
-                       </div>
-                     </div>
-                     <div class="weapon-info" v-else>
-                       <div class="outline-box">
-                          <div>
-                            <div @click="changeEquipedWeapon()">
-                              <img src="../assets/swithc-wep.png" alt="">
-                            </div>
-                          </div>
-                          <div>
-                            <p>{{$t('raid.noWeapon')}}</p>
-                            <span>{{$t('raid.clickToEquip')}}</span>
-                          </div>
-                       </div>
-                     </div>
-                  </div>
                   <div class="d-flex justify-content-center w-100">
                     <button class="btn-raid btn-modal"  v-tooltip="generateTooltip()" @click="joinRaidMethod()">
                       {{$t('raid.joinRaid')}}
@@ -425,9 +376,8 @@ import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import { getCharacterArt } from '../character-arts-placeholder';
 import NftIcon from '@/components/NftIcon.vue';
 import NftList, {NftIdType} from '@/components/smart/NftList.vue';
-import WeaponInventory from '../components/WeaponInvetory.vue';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
-import {GetTotalMultiplierForTrait, IWeapon} from '@/interfaces/Weapon';
+//import {GetTotalMultiplierForTrait, IWeapon} from '@/interfaces/Weapon';
 import {IRaidState, IState} from '@/interfaces';
 import {getBossArt, getBossName} from '@/raid-boss-art-placeholder';
 import {traitNumberToName} from '@/contract-models';
@@ -435,20 +385,19 @@ import {fromWeiEther, toBN} from '@/utils/common';
 import {staminaToHours} from '@/utils/date-time';
 import {BonusXp, Dust4b, Dust5b, DustLb, Junk, Keybox, RaidRewards, Weapon} from '@/interfaces/RaidRewards';
 import i18n from '@/i18n';
-import Events from '../events';
 import { getCleanName } from '../rename-censor';
 import BigNumber from 'bignumber.js';
 
 interface RaidMappedActions {
   fetchRaidState(): Promise<void>;
-  joinRaid(payload: { characterId: string, weaponId: string}): Promise<void>;
+  joinRaid(payload: { characterId: string }): Promise<void>;
   fetchRaidRewards(payload: {startIndex: number, endIndex: string }): Promise<string[]>;
   claimRaidRewards(payload: { rewardIndex: string }): Promise<RaidRewards>;
   fetchRaidingCharacters(): Promise<string[]>;
   fetchRaidingWeapons(): Promise<string[]>;
   fetchIsRaidStarted(): Promise<boolean>;
   canUserAfford(payload: { payingAmount: BigNumber }): Promise<boolean>;
-  fetchHaveEnoughEnergy(payload: { characterID: string, weaponID: string }): Promise<boolean>;
+  fetchHaveEnoughEnergy(payload: { characterID: string }): Promise<boolean>;
   fetchIsCharacterRaiding(payload: { characterID: string }): Promise<boolean>;
   fetchIsWeaponRaiding(payload: { weaponID: string }): Promise<boolean>;
   fetchCharacters(payload: { characterIds: (string | number)[]}): Promise<void>;
@@ -467,8 +416,6 @@ let interval: number;
 export default Vue.extend({
   data() {
     return {
-      selectedWeaponId: '',
-      selectedWeapon: null,
       raidIndex: '',
       bossName: '',
       raiderCount: 0,
@@ -519,10 +466,11 @@ export default Vue.extend({
     ]),
 
     currentMultiplier(): string {
-      if(!this.selectedWeaponId) return '0';
+      return '0';
+      /*if(!this.selectedWeaponId) return '0';
       const currentWeapon = this.ownWeapons.find((weapon: IWeapon) => weapon.id === +this.selectedWeaponId);
       if(!currentWeapon) return '0';
-      return GetTotalMultiplierForTrait(currentWeapon, this.currentCharacter.trait).toFixed(2);
+      return GetTotalMultiplierForTrait(currentWeapon, this.currentCharacter.trait).toFixed(2);*/
     },
 
     currentCharacterPower(): number {
@@ -560,26 +508,18 @@ export default Vue.extend({
     ]) as RaidMappedGetters),
     getCharacterArt,
 
-    changeEquipedWeapon(){
-      Events.$emit('weapon-inventory', true);
-    },
-
     noRewards(){
       return this.rewardIndexes === null || this.rewardIndexes.length === 0;
     },
 
     raidStart(){
-      return !this.raidStarted || !this.selectedWeaponId;
+      return !this.raidStarted;
     },
 
     generateTooltip(){
       const staminaHrs = this.formatStaminaHours;
       if(this.raidStarted){
-        if(!this.selectedWeaponId){
-          return (i18n.t('raid.errors.selection').toString());
-        }else{
-          return (i18n.t('raid.joiningCostStamina', {staminaHrs}).toString());
-        }
+        return (i18n.t('raid.joiningCostStamina', {staminaHrs}).toString());
       }else{
         return (i18n.t('raid.errors.raidNotStarted').toString());
       }
@@ -637,7 +577,7 @@ export default Vue.extend({
         return;
       }
 
-      if (!this.selectedWeaponId || (this.currentCharacterId < 0)) {
+      if (this.currentCharacterId < 0) {
         (this as any).$bvModal.show('warningModal');
         this.notifyError = (i18n.t('raid.errors.selection').toString());
         return;
@@ -655,13 +595,13 @@ export default Vue.extend({
         this.notifyError = (i18n.t('raid.errors.lockedChar').toString());
         return;
       }
-      const isWeaponRaiding = await this.isWeaponAlreadyRaiding(this.selectedWeaponId);
+      /*const isWeaponRaiding = await this.isWeaponAlreadyRaiding(this.selectedWeaponId);
       if(isWeaponRaiding) {
         (this as any).$bvModal.show('warningModal');
         this.notifyError = (i18n.t('raid.errors.lockedWeapon').toString());
         return;
-      }
-      const haveEnoughEnergy = await this.haveEnoughEnergy(this.currentCharacterId, this.selectedWeaponId);
+      }*/
+      const haveEnoughEnergy = await this.haveEnoughEnergy(this.currentCharacterId);
       if(!haveEnoughEnergy) {
         (this as any).$bvModal.show('warningModal');
         this.notifyError = (i18n.t('raid.errors.notEnough').toString());
@@ -671,9 +611,7 @@ export default Vue.extend({
       try {
         this.isJoiningRaid = true;
         this.isLoading = true;
-        await this.joinRaid({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId});
-        this.selectedWeaponId = '';
-        this.selectedWeapon = null;
+        await this.joinRaid({ characterId: this.currentCharacterId});
       } catch (error) {
         console.error(error);
         (this as any).$dialog.notify.error(i18n.t('raid.errors.whoops'));
@@ -714,10 +652,9 @@ export default Vue.extend({
       return await this.fetchIsRaidStarted();
     },
 
-    async haveEnoughEnergy(characterID: string, weaponID: string) {
+    async haveEnoughEnergy(characterID: string) {
       return await this.fetchHaveEnoughEnergy({
-        characterID,
-        weaponID
+        characterID
       });
     },
 
@@ -851,11 +788,6 @@ export default Vue.extend({
     interval = window.setInterval(async () => {
       await refreshRaidData();
     }, 3000);
-
-    Events.$on('setActiveWeapon', (weapon: any) =>{
-      this.selectedWeapon = weapon;
-      this.selectedWeaponId = weapon.id;
-    });
   },
 
 
@@ -865,7 +797,6 @@ export default Vue.extend({
 
   components: {
     CurrencyConverter,
-    WeaponInventory,
     NftIcon,
     NftList,
   },

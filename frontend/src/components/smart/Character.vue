@@ -88,6 +88,31 @@
           </b-progress>
         </div>
       </div>
+      <!-- Equipment -->
+      <div class="col-lg-12 col-md-5 col-sm-9 drops">
+        <span>{{$t('raid.weapon')}}</span>
+        <div class="weapon-info" v-if="equippedWeapon">
+          <div>
+            <weapon-inventory class="weapon-icon" :weapon="equippedWeapon" :displayType="'raid'"/>
+          </div>
+          <div @click="changeEquipedWeapon()">
+            <img src="assets/swithc-wep.png" alt="">
+          </div>
+        </div>
+        <div class="weapon-info" v-else>
+          <div class="outline-box">
+            <div>
+              <div @click="changeEquipedWeapon()">
+                <img src="../../assets/swithc-wep.png" alt="">
+              </div>
+            </div>
+            <div>
+              <p>{{$t('raid.noWeapon')}}</p>
+              <span>{{$t('raid.clickToEquip')}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- Character Tabs -->
       <div>
         <b-tabs pills fill nav-wrapper-class="mt-5 mb-4" >
@@ -257,6 +282,7 @@ import { getCharacterArt } from '@/character-arts-placeholder';
 import { Quest, ReputationLevelRequirements, ReputationTier } from '@/views/Quests.vue';
 import { CharacterTrait, ICharacter, RequiredXp } from '@/interfaces';
 import { isValidWeb3Address } from '@/utils/common';
+import Events from '@/events';
 
 
 interface Skin {
@@ -286,6 +312,7 @@ interface Data {
   newName: string;
   isTransferringNonGenesis: boolean;
   soulAmountToTransfer: number;
+  equippedWeapon: any;
 }
 
 interface StoreMappedActions {
@@ -313,6 +340,10 @@ interface StoreMappedActions {
   sendToGarrison(id: string): Promise<void>;
   transferSoul(payload: {targetAddress: string, soulAmount: number}): Promise<void>;
   transferNonGenesisSoul(payload: {targetAddress: string, soulAmount: number}): Promise<void>;
+  equipWeapon(payload: {equipperId: string, itemId: number}): Promise<void>;
+  equipShield(payload: {equipperId: string, itemId: number}): Promise<void>;
+  unequipWeapon(payload: {equipperId: string}): Promise<void>;
+  unequipShield(payload: {equipperId: string}): Promise<void>;
 }
 
 export default Vue.extend({
@@ -341,6 +372,7 @@ export default Vue.extend({
       newName: '',
       isTransferringNonGenesis: false,
       soulAmountToTransfer: 0,
+      equippedWeapon: null,
     };
   },
   computed: {
@@ -451,7 +483,11 @@ export default Vue.extend({
       'fetchOwnedCharacterCosmetics',
       'fetchTotalRenameTags',
       'transferSoul',
-      'transferNonGenesisSoul'
+      'transferNonGenesisSoul',
+      'equipWeapon',
+      'equipShield',
+      'unequipWeapon',
+      'unequipShield'
     ]) as StoreMappedActions,
     getCharacterArt,
     RequiredXp,
@@ -526,6 +562,9 @@ export default Vue.extend({
     timestampToStamina(timestamp: number): number {
       if(timestamp > Math.floor(Date.now()/1000)) return 0;
       return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
+    },
+    changeEquipedWeapon(){
+      Events.$emit('weapon-inventory', true);
     },
     async refreshData(){
       this.reputationLevelRequirements =  await this.getReputationLevelRequirements();
@@ -632,6 +671,9 @@ export default Vue.extend({
     await this.refreshData();
     await this.fetchCharacterQuestData();
     await this.loadConsumablesCount();
+    Events.$on('chooseweapon', (id: number) => {
+      this.equipWeapon({equipperId: this.currentCharacterId, itemId: id});
+    });
   },
 });
 </script>
@@ -709,6 +751,94 @@ export default Vue.extend({
   transform: none;
 }
 
+.weapon-icon-wrapper {
+  background: rgba(255, 255, 255, 0.1);
+  width: 12em;
+  height: 12em;
+  margin: 0 auto;
+}
+
+.weapon-info{
+  display: flex;
+  justify-content: space-between;
+}
+
+.weapon-info > div > p{
+  color: #fff;
+  margin: 0px;
+}
+
+.weapon-info > div > span{
+  /* color: #fff; */
+}
+
+.weapon-info > div > img{
+  width: 30px;
+  cursor: pointer;
+}
+
+.drops {
+  margin-top: 1em;
+}
+
+.drops-icons {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 0;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  /* border: 0.5px solid #1f1f1f; */
+  /* height: 161px; */
+}
+
+.drops-icons >>> ul {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.outline-box{
+  display: flex;
+  align-items: center;
+  opacity: 0.5;
+}
+
+.outline-box > div:nth-child(1){
+  height: 70px;
+  width: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: #ccae4f dashed 2px;
+  border-radius: 5px;
+}
+
+.outline-box > div:nth-child(2) {
+  padding-left: 20px;
+}
+
+.outline-box > div > p{
+  margin: 0px;
+  font-size: 15px;
+  font-family: Roboto;
+}
+
+.outline-box > div > span{
+  margin: 0px;
+  font-size: 13px;
+  font-family: Roboto;
+}
+
+.outline-box > div > div {
+  cursor: pointer;
+}
+
+
+.outline-box > div > div > img{
+  width: 30px;
+}
 
 .title {
   text-transform: uppercase;

@@ -6,7 +6,7 @@ import {bnMinimum, currentChainSupportsDrawbridge, currentChainSupportsPvP, curr
 
 import {getConfigValue, setUpContracts} from '@/contracts';
 
-import {characterFromContract, junkFromContract, shieldFromContract, trinketFromContract, weaponFromContract} from '@/contract-models';
+import {characterFromContract, powerDataFromContract, junkFromContract, shieldFromContract, trinketFromContract, weaponFromContract} from '@/contract-models';
 
 import {CharacterPower, Contract, isStakeType, IState, IWeb3EventSubscription, StakeType} from '@/interfaces';
 import {getCharacterNameFromSeed} from '@/character-name';
@@ -108,9 +108,12 @@ export default new Vuex.Store<IState>({
     garrisonCharacters: {},
     characterStaminas: {},
     characterPowers: {},
+    powerDatas: {},
     characterIsInArena: {},
     characterRenames: {},
     characterCosmetics: {},
+    characterWeapons: {},
+    characterShields: {},
     weapons: {},
     currentWeaponId: null,
     currentNftType: null,
@@ -161,6 +164,12 @@ export default new Vuex.Store<IState>({
     getCharacterPower(state: IState) {
       return (characterId: number) => {
         return state.characterPowers[characterId];
+      };
+    },
+
+    getPowerData(state: IState) {
+      return (characterId: number) => {
+        return state.powerDatas[characterId];
       };
     },
 
@@ -653,6 +662,15 @@ export default new Vuex.Store<IState>({
     updateCharacterPower(state: IState, { characterId, power }) {
       Vue.set(state.characterPowers, characterId, +power);
     },
+    updatePowerData(state: IState, { characterId, powerData }) {
+      Vue.set(state.powerDatas, characterId, powerData);
+    },
+    updateCharacterWeapon(state: IState, { characterId, weapon }) {
+      Vue.set(state.characterWeapons, characterId, weapon);
+    },
+    updateCharacterShield(state: IState, { characterId, shield }) {
+      Vue.set(state.characterShields, characterId, shield);
+    },
     updateCharacterInArena(state: IState, { characterId, isCharacterInArena }) {
       Vue.set(state.characterIsInArena, characterId, isCharacterInArena);
     },
@@ -1135,6 +1153,7 @@ export default new Vuex.Store<IState>({
           );
           character.version = +await dispatch('fetchCharacterVersion', characterId);
           await dispatch('fetchCharacterPower', characterId);
+          await dispatch('fetchPowerData', characterId);
           await dispatch('getIsCharacterInArena', characterId);
 
           if(!inGarrison) {
@@ -1159,6 +1178,14 @@ export default new Vuex.Store<IState>({
         const power = await Characters.methods.getTotalPower(characterId).call(defaultCallOptions(state));
         commit('updateCharacterPower', { characterId, power });
       }
+    },
+
+    async fetchPowerData( {state, commit}, characterId) {
+      const { EquipmentManager } = state.contracts();
+      if(!EquipmentManager || !state.defaultAccount) return;
+      const powerDataResponse = await EquipmentManager.methods.getStoredPowerData(characterId).call(defaultCallOptions(state));
+      const powerData = powerDataFromContract(powerDataResponse);
+      commit('updatePowerData', { characterId, powerData });
     },
 
     async fetchCharacterVersion({state}, characterId) {
@@ -2596,6 +2623,37 @@ export default new Vuex.Store<IState>({
       await dispatch('updateCharacterIds');
     },
 
+    async equipNFT({ state }, {equipperAddress, equipperId, slot, itemAddress, itemId}) {
+      const { EquipmentManager, Weapons, Shields } = state.contracts();
+      if(!EquipmentManager || !Weapons || !Shields || !state.defaultAccount) return;
+      await EquipmentManager.methods.equipNFT(equipperAddress, equipperId, slot, itemAddress, itemId).send(defaultCallOptions(state));
+    },
+
+    async equipWeapon({ state, dispatch }, {equipperId, itemId}) {
+      const { EquipmentManager, Weapons, Characters } = state.contracts();
+      if(!EquipmentManager || !Weapons || !Characters || !state.defaultAccount) return;
+
+      const approved = await Weapons.methods.getApproved(itemId).call(defaultCallOptions(state));
+      if (approved !== EquipmentManager.options.address)
+        await Weapons.methods.approve(EquipmentManager.options.address, itemId).send(defaultCallOptions(state));
+
+      await EquipmentManager.methods.equipNFT(Characters.options.address, equipperId, 1, Weapons.options.address, itemId).send(defaultCallOptions(state));
+      await dispatch('updateCharacterWeapons');
+    },
+
+    async equipShield({ state, dispatch }, {equipperId, itemId}) {
+      const { EquipmentManager, Shields, Characters } = state.contracts();
+      if(!EquipmentManager || !Shields || !Characters || !state.defaultAccount) return;
+      await EquipmentManager.methods.equipNFT(Characters.options.address, equipperId, 2, Shields.options.address, itemId).send(defaultCallOptions(state));
+      await dispatch('updateCharacterShields');
+    },
+
+    async unqeuipNFT({ state }, {equipperAddress, equipperId, slot}) {
+      const { EquipmentManager } = state.contracts();
+      if(!EquipmentManager || !state.defaultAccount) return;
+      await EquipmentManager.methods.unequipNFT(equipperAddress, equipperId, slot).send(defaultCallOptions(state));
+    },
+
     async getWeapon({ state }, weaponId) {
       const { Weapons } = state.contracts();
       if (!Weapons || !state.defaultAccount) return;
@@ -2615,6 +2673,12 @@ export default new Vuex.Store<IState>({
       if (!Characters || !state.defaultAccount) return;
 
       return await Characters.methods.get(`${characterId}`).call({from: state.defaultAccount, gasPrice: getGasPrice()});
+    },
+
+    async getEquippedItem({ state }, {equipperAddress, equipperId, slot}) {
+      const { EquipmentManager } = state.contracts();
+      if(!EquipmentManager || !state.defaultAccount) return;
+      return await EquipmentManager.methods.getEquippedItem(equipperAddress, equipperId, slot).call({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
     async getRename({state}, characterId){

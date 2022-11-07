@@ -52,6 +52,7 @@ import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/Pv
 import { abi as pvpCoreAbi, networks as pvpCoreNetworks } from '../../build/contracts/PvpCore.json';
 import { abi as pvpRankingsAbi, networks as pvpRankingsNetworks } from '../../build/contracts/PvpRankings.json';
 import { abi as tokensManagerAbi, networks as tokensManagerNetworks } from '../../build/contracts/TokensManager.json';
+import { abi as equipmentManagerAbi, networks as equipmentManagerNetworks } from '../../build/contracts/EquipmentManager.json';
 import { abi as weaponCosmeticsAbi, networks as weaponCosmeticsNetworks } from '../../build/contracts/WeaponCosmetics.json';
 import { abi as characterCosmeticsAbi, networks as characterCosmeticsNetworks } from '../../build/contracts/CharacterCosmetics.json';
 import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
@@ -272,6 +273,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const charactersAddr = (charactersNetworks as Networks)[networkId]!.address;
   const weaponsAddr = (weaponsNetworks as Networks)[networkId]!.address;
   const blacksmithAddr = (blacksmithNetworks as Networks)[networkId]!.address;
+  const equipmentManagerAddr = (equipmentManagerNetworks as Networks)[networkId]!.address;
 
 
   const Randoms = new web3.eth.Contract(randomsAbi as Abi, randomsAddr);
@@ -285,6 +287,8 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
       getConfigValue('VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS') || (tokensManagerNetworks as Networks)[networkId]!.address;
     TokensManager = new web3.eth.Contract(tokensManagerAbi as Abi, tokensManagerContractAddr);
   }
+  const EquipmentManager = new web3.eth.Contract(equipmentManagerAbi as Abi, equipmentManagerAddr);
+
   const specialWeaponsManagerAddr = (specialWeaponsManagerNetworks as Networks)[networkId]!.address;
   const SpecialWeaponsManager = new web3.eth.Contract(specialWeaponsManagerAbi as Abi, specialWeaponsManagerAddr);
 
@@ -424,6 +428,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     WeaponCosmetics, CharacterCosmetics,
     NFTStorage, CBKLandSale, CBKLand, Promos,
     TokensManager,
+    EquipmentManager,
     ...raidContracts,
     ...pvpContracts,
     ...marketContracts,

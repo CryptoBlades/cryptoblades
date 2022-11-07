@@ -15,6 +15,15 @@ export interface ICharacter {
   version: number;
 }
 
+export interface IPowerData {
+  pvePower: number[];
+  pvpTierPower: number[];
+  pvpFfaPower: number[];
+  charTrait: number;
+  wepTrait: number;
+  shieldTrait: number;
+}
+
 export enum CharacterTrait {
   Fire = 0,
   Earth = 1,

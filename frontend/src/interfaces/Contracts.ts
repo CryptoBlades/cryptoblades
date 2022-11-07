@@ -6,7 +6,7 @@ import type {
   WeaponRenameTagConsumables, CharacterFireTraitChangeConsumables, CharacterEarthTraitChangeConsumables,
   CharacterWaterTraitChangeConsumables, CharacterLightningTraitChangeConsumables, Raid1, RaidTrinket, Junk, KeyLootbox, PvpArena,
   WeaponCosmetics, CharacterCosmetics, NFTStorage, CBKLandSale, CBKLand, Treasury, Promos, BurningManager, SimpleQuests,
-  PartnerVault, SpecialWeaponsManager, PvpCore, PvpRankings, TokensManager
+  PartnerVault, SpecialWeaponsManager, PvpCore, PvpRankings, TokensManager, EquipmentManager
 } from '../../../build/abi-interfaces';
 import { StakeType, NftStakeType } from './State';
 
@@ -55,6 +55,7 @@ export interface Contracts {
   PvpCore?: Contract<PvpCore>;
   PvpRankings?: Contract<PvpRankings>;
   TokensManager?: Contract<TokensManager>;
+  EquipmentManager?: Contract<EquipmentManager>;
   WeaponCosmetics?: Contract<WeaponCosmetics>;
   CharacterCosmetics?: Contract<CharacterCosmetics>;
   NFTStorage?: Contract<NFTStorage>;

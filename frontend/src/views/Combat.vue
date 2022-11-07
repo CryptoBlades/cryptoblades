@@ -1,6 +1,6 @@
 <template>
   <div style="display: inline-flex" class="body main-font pl-3">
-    <div v-if="ownWeapons.length > 0 && ownCharacters.length > 0">
+    <div v-if="ownCharacters.length > 0">
       <div v-if="error !== null">
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
       </div>
@@ -59,89 +59,66 @@
       <div>
         <div class="col">
         <div class="mb-3" :style="'align-self: baseline; width: 20vw'">
-          <span class="isMobile label-title">{{!selectedWeaponId ? $t('combat.selectStaminaStepOne') : $t('combat.selectStamina')}}</span>
+          <span class="isMobile label-title">{{$t('combat.selectStamina')}}</span>
           <b-form-select
           class="mt-3 custom-select" v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
         </div>
           <div  v-if="currentCharacterStamina >= staminaPerFight" class="combat-enemy-container">
-              <!-- selected weapon for combat details -->
-              <div class="weapon-selection mb-4">
-                <div class="header-row justify-content-between">
-                  <div class="selectedWeaponDetails">
-                    <div class="select-weapons" v-if="!selectedWeaponId || !weaponHasDurability(selectedWeaponId)">
-                      <span class="isMobile label-title">{{$t('combat.selectAWeapon')}}</span>
-                      <weapon-grid :showNftOptions="true" :ownWeapons="ownWeapons.length"
-                      :gridStyling="gridStyling" :noTitle="true" titleType="combat" v-model="selectedWeaponId" />
-                    </div>
-                    <!-- selected weapon for combat details -->
-                    <div v-if="selectedWeaponId && weaponHasDurability(selectedWeaponId)" class="mr-3">
-                      <weapon-inventory class="weapon-icon" :weapon="selectedWeapon" :displayType="'adventure'"/>
-                      <button v-tooltip="'Change Weapon'" class="ml-3 btn ct-btn mb-3 hideMobile"
-                        @click="changeEquipedWeapon()">
-                        <img src="../assets/swithc-wep.png">
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
             <!-- ------------------------------------------- -->
-
-              <transition-group
+            <transition-group
                 appear @before-enter="beforeEnter" @enter="enter"
-                :key="index"
+                :key="2"
                 class="row mb-3 enemy-container" v-if="targets.length > 0">
-              <div class="col-12 col-md-6 col-lg-6 col-sm-6 col-xl-3 encounter" v-for="(e, i) in targets" :key="e.original" :data-index="i">
-                <div class="encounter-container">
-                    <div class="enemy-character" @mouseover="activeCard = i" :disabled="(timeMinutes === 59 && timeSeconds >= 30) ||
-                          waitingResults || !weaponHasDurability(selectedWeaponId) || !charHasStamina()"
-                          @click="onClickEncounter(e,i)"
-                          v-if="weaponHasDurability(selectedWeaponId) || timeMinutes === 59 && timeSeconds >= 30">
+            <div class="col-12 col-md-6 col-lg-6 col-sm-6 col-xl-3 encounter" v-for="(e, i) in targets" :key="e.original" :data-index="i">
+              <div class="encounter-container">
+                  <div class="enemy-character" @mouseover="activeCard = i" :disabled="(timeMinutes === 59 && timeSeconds >= 30) ||
+                        waitingResults || !charHasStamina()"
+                        @click="onClickEncounter(e,i)">
 
-                        <!-- frame -->
-                        <div class="frame-line" v-if="activeCard === i">
-                          <img style="width: 20rem; height: 35rem;" src="../assets/frame-line-3.png" alt="">
-                        </div>
+                      <!-- frame -->
+                      <div class="frame-line" v-if="activeCard === i">
+                        <img style="width: 20rem; height: 35rem;" src="../assets/frame-line-3.png" alt="">
+                      </div>
 
-                       <!-- winning chance -->
-                        <div class="fight-btn" v-if="activeCard === i">
-                          <img src="../assets/fight.png" alt="">
-                        </div>
+                      <!-- winning chance -->
+                      <div class="fight-btn" v-if="activeCard === i">
+                        <img src="../assets/fight.png" alt="">
+                      </div>
 
-                         <!-- winning chance -->
-                        <div class="chance-winning" :style="changeColorChange(getWinChance(e.power, e.trait))">
-                          {{ getWinChance(e.power, e.trait).toUpperCase() }}
-                          {{$t('combat.victory').toUpperCase()}}
-                        </div>
+                        <!-- winning chance -->
+                      <div class="chance-winning" :style="changeColorChange(getWinChance(e.power, e.trait))">
+                        {{ getWinChance(e.power, e.trait).toUpperCase() }}
+                        {{$t('combat.victory').toUpperCase()}}
+                      </div>
 
-                        <!-- image -->
-                        <div class="text-center">
-                          <img class="mx-auto enemy-img" :src="getEnemyArt(e.power)" :alt="$t('combat.enemy')" />
-                        </div>
+                      <!-- image -->
+                      <div class="text-center">
+                        <img class="mx-auto enemy-img" :src="getEnemyArt(e.power)" :alt="$t('combat.enemy')" />
+                      </div>
 
-                        <!-- trait -->
-                        <div class="encounter-element">
-                          <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
-                          <span class="icon-border" style="margin-left: -31.5px" :style="activeCard === i ? 'border:2px solid #9e8a57': ''">.</span>
-                        </div>
+                      <!-- trait -->
+                      <div class="encounter-element">
+                        <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
+                        <span class="icon-border" style="margin-left: -31.5px" :style="activeCard === i ? 'border:2px solid #9e8a57': ''">.</span>
+                      </div>
 
-                        <!-- power -->
-                        <div class="encounter-power pt-2">
-                           {{$t('combat.power').toUpperCase()}} : {{ e.power.toLocaleString() }}
-                        </div>
+                      <!-- power -->
+                      <div class="encounter-power pt-2">
+                          {{$t('combat.power').toUpperCase()}} : {{ e.power.toLocaleString() }}
+                      </div>
 
-                        <div class="xp-gain">
-                          +{{getPotentialXp(e)}} {{$t('combat.xp')}}
-                        </div>
+                      <div class="xp-gain">
+                        +{{getPotentialXp(e)}} {{$t('combat.xp')}}
+                      </div>
 
-                        <div class="skill-gain mb-1">
-                          + ~{{formattedSkill(targetExpectedPayouts[i] * fightMultiplier)}}
-                        </div>
-                    </div>
-                <p v-if="isLoadingTargets">{{$t('loading')}}</p>
-                </div>
+                      <div class="skill-gain mb-1">
+                        + ~{{formattedSkill(targetExpectedPayouts[i] * fightMultiplier)}}
+                      </div>
+                  </div>
+              <p v-if="isLoadingTargets">{{$t('loading')}}</p>
               </div>
-              </transition-group>
+            </div>
+            </transition-group>
           </div>
         </div>
       </div>
@@ -154,7 +131,6 @@
               <div class="message-box flex-column" v-if="currentCharacter && currentCharacterStamina < staminaPerFight">
                 {{$t('combat.needStamina', {staminaPerFight })}}
               </div>
-              <div class="message-box" v-if="selectedWeaponId && !weaponHasDurability(selectedWeaponId)">{{$t('combat.errors.notEnoughDurability')}}</div>
               <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">{{$t('combat.errors.lastSeconds')}}</div>
             </div>
           </div>
@@ -172,8 +148,7 @@
         {{$t('combat.youWill3')}} <b> {{lastAllowanceSkill}} </b>  {{$t('combat.youWill4')}}
       </span>
     </b-modal>
-    <div class="blank-slate" v-if="ownWeapons.length === 0 || ownCharacters.length === 0">
-      <div v-if="ownWeapons.length === 0">{{$t('combat.noWeapons')}}</div>
+    <div class="blank-slate" v-if="ownCharacters.length === 0">
       <div v-if="ownCharacters.length === 0">{{$t('combat.noCharacters')}}</div>
     </div>
   </div>
@@ -182,13 +157,10 @@
 <script lang="ts">
 import Vue from 'vue';
 import {getEnemyArt} from '../enemy-art';
-import {CharacterTrait, GetTotalMultiplierForTrait, ICharacter, ITarget, IWeapon, WeaponElement} from '../interfaces';
+import {CharacterTrait, ICharacter, IPowerData, ITarget} from '../interfaces';
 import Hint from '../components/Hint.vue';
-import Events from '../events';
 import {fromWeiEther, toBN} from '../utils/common';
 import BigNumber from 'bignumber.js';
-import WeaponInventory from '../components/WeaponInvetory.vue';
-import WeaponGrid from '../components/smart/WeaponGrid.vue';
 import ModalContainer from '../components/modals/ModalContainer.vue';
 import {mapActions, mapGetters, mapMutations, mapState} from 'vuex';
 import gasp from 'gsap';
@@ -198,16 +170,14 @@ import { Accessors } from 'vue/types/options';
 interface StoreMappedCombatActions {
   fetchCharacterStamina(characterId: number): Promise<void>;
   fetchTargets(
-    { characterId, weaponId }:
-    { characterId: number, weaponId: number }): Promise<void>;
+    { characterId }:
+    { characterId: number }): Promise<void>;
   doEncounterPayNative(
     { characterId,
-      weaponId,
       targetString,
       fightMultiplier,
       offsetCost }:
     { characterId: number,
-      weaponId: number,
       targetString: number,
       fightMultiplier: number,
       offsetCost: BigNumber
@@ -236,16 +206,13 @@ interface StoreMappedCombatActions {
 
 interface StoreMappedState {
   currentCharacterId: number,
-  currentWeaponId: number,
 }
 
 interface StoreMappedGetters {
   ownCharacters: ICharacter[],
-  ownWeapons: IWeapon[],
   currentCharacter: ICharacter,
   currentCharacterStamina: number,
-  getCharacterPower(characterId: number): number,
-  getWeaponDurability(weaponId: number): number,
+  getPowerData(characterId: number): IPowerData,
 }
 
 interface StoreMappedCombatMutations {
@@ -253,7 +220,7 @@ interface StoreMappedCombatMutations {
 }
 
 interface StoreMappedCombatGetters {
-  getTargetsByCharacterIdAndWeaponId(currentCharacterId: number, selectedWeaponId: number): ITarget | any[],
+  getTargetsByCharacterId(currentCharacterId: number): ITarget | any[],
   fightGasOffset: string,
   fightBaseline: string,
 }
@@ -263,7 +230,7 @@ type numberOrNull = number | null;
 type stringOrNumber = string | number;
 
 interface ICombatData {
-  selectedWeaponId: numberOrNull;
+  powerData: IPowerData;
   error: stringOrNull;
   waitingResults: boolean;
   resultsAvailable: boolean;
@@ -273,7 +240,6 @@ interface ICombatData {
   timeSeconds: any;
   timeMinutes: any;
   fightXpGain: number;
-  selectedWeapon: any;
   fightMultiplier: number;
   staminaPerFight: number;
   targetExpectedPayouts: string[];
@@ -288,14 +254,13 @@ interface ICombatData {
   activeCard: any;
   isToggled: boolean;
   gridStyling: string;
-  index: number;
   counterInterval: any;
 }
 
 export default Vue.extend({
   data() {
     return {
-      selectedWeaponId: null,
+      powerData: {},
       error: null,
       waitingResults: false,
       resultsAvailable: false,
@@ -305,7 +270,6 @@ export default Vue.extend({
       timeSeconds: null,
       timeMinutes: null,
       fightXpGain: 32,
-      selectedWeapon: null,
       fightMultiplier: Number(localStorage.getItem('fightMultiplier')),
       staminaPerFight: 40,
       targetExpectedPayouts: new Array(4),
@@ -320,17 +284,15 @@ export default Vue.extend({
       activeCard: null,
       isToggled: false,
       gridStyling:'justify-content:flex-start; gap:2.5vw',
-      index: 1,
       counterInterval: null,
     } as ICombatData;
   },
   async mounted() {
-    this.selectedWeaponId = this.currentWeaponId;
+    this.powerData = this.getPowerData(this.currentCharacterId);
     this.fightXpGain = await this.getFightXpGain();
-    Events.$on('chooseweapon', (id: number) => {
-      this.selectedWeaponId = id;
-      this.index++;
-    });
+    if(this.currentCharacterId !== null && this.currentCharacterId !== undefined) {
+      await this.fetchTargets({ characterId: this.currentCharacterId });
+    }
   },
   created() {
     this.intervalSeconds = setInterval(() => (this.timeSeconds = new Date().getSeconds()), 5000);
@@ -347,32 +309,30 @@ export default Vue.extend({
     clearInterval(this.counterInterval);
   },
   computed: {
-    ...(mapState(['currentCharacterId', 'currentWeaponId']) as Accessors<StoreMappedState>),
+    ...(mapState(['currentCharacterId']) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'ownCharacters',
-      'ownWeapons',
       'currentCharacter',
       'currentCharacterStamina',
-      'getCharacterPower',
-      'getWeaponDurability',
+      'getPowerData',
     ]) as Accessors<StoreMappedGetters>),
     ...(mapGetters('combat', [
-      'getTargetsByCharacterIdAndWeaponId',
+      'getTargetsByCharacterId',
       'fightGasOffset',
       'fightBaseline',
     ]) as Accessors<StoreMappedCombatGetters>),
 
     targets(): any[] | ITarget {
-      return this.getTargetsByCharacterIdAndWeaponId(this.currentCharacterId, this.selectedWeaponId as number);
+      return this.getTargetsByCharacterId(this.currentCharacterId);
     },
 
     isLoadingTargets(): boolean {
       const targets = this.targets as any[];
-      return targets.length === 0 && !!this.currentCharacterId && !!this.selectedWeaponId;
+      return targets.length === 0 && !!this.currentCharacterId;
     },
 
     selections(): any[] {
-      return [this.currentCharacterId, this.selectedWeaponId];
+      return [this.currentCharacterId];
     },
 
     updateResults(): any[] {
@@ -385,11 +345,11 @@ export default Vue.extend({
   },
 
   watch: {
-    async selections([characterId, weaponId]) {
-      if (!this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === weaponId)) {
-        this.selectedWeaponId = null;
+    async selections([characterId]) {
+      this.powerData = this.getPowerData(characterId);
+      if(this.powerData) {
+        await this.fetchTargets({ characterId });
       }
-      await this.fetchTargets({ characterId, weaponId });
     },
 
     async targets() {
@@ -424,9 +384,6 @@ export default Vue.extend({
       ]) as StoreMappedCombatActions),
     ...(mapMutations('combat', ['setIsInCombat']) as StoreMappedCombatMutations),
     getEnemyArt,
-    weaponHasDurability(id: number) {
-      return this.getWeaponDurability(id) >= this.fightMultiplier;
-    },
     charHasStamina(){
       return this.currentCharacterStamina >= this.staminaPerFight;
     },
@@ -434,17 +391,9 @@ export default Vue.extend({
       return CharacterTrait[trait];
     },
     getWinChance(enemyPower: number, enemyElement: number) {
-      const characterPower = this.getCharacterPower(this.currentCharacter.id);
-      const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === this.selectedWeaponId) as IWeapon;
-      this.selectedWeapon = selectedWeapon;
-      const element: WeaponElement = WeaponElement[selectedWeapon.element as keyof typeof WeaponElement];
-      const weaponElement = parseInt(WeaponElement[element], 10);
-      const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
-      const totalPower = characterPower * weaponMultiplier + selectedWeapon.bonusPower;
-      const totalMultiplier = 1 + 0.075 * (weaponElement === playerElement ? 1 : 0) + 0.075 * this.getElementAdvantage(playerElement, enemyElement);
-      const playerMin = totalPower * totalMultiplier * 0.9;
-      const playerMax = totalPower * totalMultiplier * 1.1;
+      const totalMultipliedPower = this.powerData.pvePower[enemyElement];
+      const playerMin = totalMultipliedPower * 0.9;
+      const playerMax = totalMultipliedPower * 1.1;
       const playerRange = playerMax - playerMin;
       const enemyMin = enemyPower * 0.9;
       const enemyMax = enemyPower * 1.1;
@@ -526,13 +475,13 @@ export default Vue.extend({
     },
 
     async fightTarget(targetToFight: ITarget, targetIndex: number){
-      if (this.selectedWeaponId === null || this.currentCharacterId === null) {
+      if (this.currentCharacterId === null) {
         return;
       }
       this.waitingResults = true;
 
       // Force a quick refresh of targets
-      await this.fetchTargets({ characterId: this.currentCharacterId, weaponId: this.selectedWeaponId });
+      await this.fetchTargets({ characterId: this.currentCharacterId });
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
       const targets = this.targets as any[];
       if (targets[targetIndex].original !== targetToFight.original) {
@@ -557,7 +506,6 @@ export default Vue.extend({
 
         this.fightResults = await this.doEncounterPayNative({
           characterId: this.currentCharacterId,
-          weaponId: this.selectedWeaponId,
           targetString: targetIndex,
           fightMultiplier: this.fightMultiplier,
           offsetCost: offsetToPayInNativeToken
@@ -582,11 +530,7 @@ export default Vue.extend({
     },
 
     getPotentialXp(targetToFight: ITarget) {
-      const characterPower = this.getCharacterPower(this.currentCharacter.id);
-      const playerElement = parseInt(this.currentCharacter.trait, 10);
-      const selectedWeapon = this.ownWeapons.filter(Boolean).find((weapon: IWeapon) => weapon.id === this.selectedWeaponId) as IWeapon;
-      const weaponMultiplier = GetTotalMultiplierForTrait(selectedWeapon, playerElement);
-      const totalPower = characterPower * weaponMultiplier + selectedWeapon.bonusPower;
+      const totalPower = this.powerData.pvePower[targetToFight.trait];
       //Formula taken from getXpGainForFight funtion of cryptoblades.sol
       return Math.floor((targetToFight.power / totalPower) * this.fightXpGain) * this.fightMultiplier;
     },
@@ -647,10 +591,6 @@ export default Vue.extend({
       this.staminaPerFight = 40 * Number(localStorage.getItem('fightMultiplier'));
     },
 
-    changeEquipedWeapon(){
-      Events.$emit('weapon-inventory', true);
-    },
-
     changeColorChange(stat: string){
       let bgColor;
       if(stat.toUpperCase() === 'UNLIKELY'){
@@ -668,8 +608,6 @@ export default Vue.extend({
 
   components: {
     Hint,
-    WeaponInventory,
-    WeaponGrid,
     ModalContainer
   },
 });
@@ -729,10 +667,6 @@ h5{
 .encounter img {
   width: 13rem;
   transition: 1s all;
-}
-
-.weapon-header > b {
-  font-size: 1.8em;
 }
 
 .payout-info {
@@ -833,13 +767,6 @@ div.encounter.text-center {
   flex-basis: auto !important;
 }
 
-.weapon-icon-wrapper {
-  background: rgba(255, 255, 255, 0.1);
-  width: 12em;
-  height: 12em;
-  margin: 0 auto;
-}
-
 .encounter-container {
   position: relative;
 }
@@ -931,15 +858,6 @@ div.encounter.text-center {
   font-size: 1rem;
 }
 
-.selectedWeaponDetails > div >  button > img{
-  width: 30px;
-}
-
-.selectedWeaponDetails > div {
-  display: flex;
-  align-items: flex-start;
-}
-
 .victory-chance {
   left: 0;
   right: 0;
@@ -973,13 +891,6 @@ div.encounter.text-center {
   flex-wrap: wrap;
   padding-left: 30px;
   padding-right: 30px;
-}
-
-
-.weapon-header {
-  justify-content: center;
-  margin-bottom: 20px;
-  margin-top: 20px;
 }
 
 .enemy-energy {
@@ -1037,32 +948,10 @@ h1 {
 
 }
 
-.selectedWeaponDetails > button  > img{
-  width: 30px;
-}
-
 .message-box  .ct-btn > img{
   width: 30px;
   margin-left: 20px;
 }
-
-.select-weapons .ct-btn > img{
-  width: 30px;
-  margin-left: 20px;
-}
-
-.select-weapons > div{
-  width: 100%;
-}
-
-.select-weapons > div > ul{
-  justify-content: flex-start;
-}
-
-.select-weapons .ct-btn{
-  background-color: rgba(0, 0, 0, 0);
-}
-
 
 
 .message-box  .ct-btn{
@@ -1083,13 +972,6 @@ h1 {
   display: none;
 }
 
-.select-weapons{
-  margin-top: 1em;
-  align-self: right;
-  display: flex;
-  flex-direction: column;
-}
-
 
 @media all and (max-width: 600px) {
   .combat-hints > div > .fire-icon,
@@ -1100,10 +982,6 @@ h1 {
     max-width: 20px !important;
     width: auto;
     height: auto;
-  }
-
-  .weapon-selection {
-    align-self: flex-start;
   }
 
   .hideMobile{
@@ -1118,16 +996,6 @@ h1 {
     display: none;
   }
 
-  .select-weapons{
-    align-self: left;
-    margin-right: 20px;
-  }
-
-  .select-weapons > div{
-    width: 100%;
-  }
-
-
   .combat-hints > div > .icon-border{
     height: 21px !important;
     width: 21px !important;
@@ -1137,19 +1005,6 @@ h1 {
     display: inline;
     font-family: Roboto;
     font-size: 11px;
-  }
-
-  .selectedWeaponDetails > button  > img{
-    width: 20px;
-    margin-right: 15px;
-  }
-
-  .selectedWeaponDetails > div{
-    align-items: center;
-  }
-
-  .displayed-weapon{
-    margin-right: 10px;
   }
 
   .adventure{
@@ -1197,16 +1052,6 @@ h1 {
   .showMenu{
     margin-bottom: 0px;
     transition: all 1s ease-in-out;
-  }
-
-  .selectedWeaponMoble{
-    padding:20px;
-    background-color: rgba(20, 20, 20, 1);
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    border-top: 1px solid rgba(255, 255, 255, 0.309);
-    overflow-x: visible ;
   }
 
   .btn-trigger{
@@ -1266,9 +1111,6 @@ h1 {
     flex-direction: column;
     align-items: center;
   }
-  .weapon-selection {
-    border-right: none;
-  }
   .results-panel {
     width: 100%;
   }
@@ -1306,16 +1148,6 @@ h1 {
 #expectedSkillHint{
   margin:0;
   font-size: 1em;
-}
-
-/* for change weapon compnent */
-.change-weapon{
-  position: fixed;
-  right: 0;
-  height: 100vh;
-  width: 30%;
-  z-index: 5;
-  background-color: #212529;
 }
 
 .cw-content h4{

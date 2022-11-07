@@ -47,7 +47,7 @@ const raid = {
     },
   },
   actions: {
-    async joinRaid({rootState, dispatch}: { rootState: IState, dispatch: Dispatch }, {characterId, weaponId}: { characterId: string, weaponId: string }) {
+    async joinRaid({rootState, dispatch}: { rootState: IState, dispatch: Dispatch }, {characterId}: { characterId: string }) {
       const {CryptoBlades, SkillToken, Raid1} = rootState.contracts();
       if (!Raid1 || !CryptoBlades || !SkillToken || !rootState.defaultAccount) {
         return;
@@ -73,7 +73,6 @@ const raid = {
       await Promise.all([
         dispatch('fetchSkillBalance'),
         dispatch('fetchCharacterStamina', characterId),
-        dispatch('fetchWeaponDurability', weaponId),
       ]);
     },
 
@@ -117,11 +116,11 @@ const raid = {
         .call(defaultCallOptions(rootState));
     },
 
-    async fetchRaidJoinEligibility({ rootState }: {rootState: IState}, { characterID, weaponID }: {characterID: string, weaponID: string}) {
+    async fetchRaidJoinEligibility({ rootState }: {rootState: IState}, { characterID }: {characterID: string}) {
       const Raid1 = rootState.contracts().Raid1!;
 
       return await Raid1.methods
-        .canJoinRaid(characterID, weaponID)
+        .canJoinRaid(characterID)
         .call(defaultCallOptions(rootState));
     },
 
@@ -133,11 +132,11 @@ const raid = {
         .call(defaultCallOptions(rootState));
     },
 
-    async fetchHaveEnoughEnergy({ rootState }: {rootState: IState}, { characterID, weaponID }: { characterID: string, weaponID: string }) {
+    async fetchHaveEnoughEnergy({ rootState }: {rootState: IState}, { characterID }: { characterID: string }) {
       const Raid1 = rootState.contracts().Raid1!;
 
       return await Raid1.methods
-        .haveEnoughEnergy(characterID, weaponID)
+        .haveEnoughEnergy(characterID)
         .call(defaultCallOptions(rootState));
     },
 

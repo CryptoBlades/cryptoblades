@@ -11,110 +11,6 @@
           {{$t('pvp.enterAndWin')}}($SKILL).
         </p>
         <div>
-          <div class="top">
-            <div class="circle">
-              <img :src="getIconSource" />
-            </div>
-            <p>
-              {{$t('pvp.equipSwordAndShield')}}
-            </p>
-          </div>
-          <div class="bottomWeapons">
-            <pvp-separator dark vertical />
-            <div class="weaponsWrapper">
-              <div v-if="!selectedWeaponId" :class="{ disabledStyles: ownedWeaponsWithInformation.length === 0 }" class="weaponButtonWrapper">
-                <a tabindex="0" class="selectWeaponButton" id="weapon-popover">
-                  <div class="placeholderImageWrapper">
-                    <img src="../../assets/swordPlaceholder.svg" alt="sword" />
-                  </div>
-                  <b-popover ref="popover" target="weapon-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
-                    <p class="popoverTitle">{{$t('pvp.weapons')}}</p>
-                    <select v-model="weaponStarFilter" v-if="ownedWeaponsWithInformation.length !== 0" class="selectFilter">
-                      <option v-for="weaponStarOption in weaponStarOptions" :value="weaponStarOption.value" :key="weaponStarOption.value">
-                        {{ weaponStarOption.text }}
-                      </option>
-                    </select>
-                    <select v-model="weaponElementFilter" v-if="ownedWeaponsWithInformation.length !== 0" class="selectFilter">
-                      <option v-for="weaponElementOption in weaponElementOptions" :value="weaponElementOption.value" :key="weaponElementOption.value">
-                        {{ weaponElementOption.text }}
-                      </option>
-                    </select>
-                    <button v-if="weaponStarFilter || weaponElementFilter" @click="handleClearWeaponFilters()" class="clearFiltersButton">Clear</button>
-                    <div v-if="ownedWeaponsWithInformation.length !== 0" class="popoverGrid">
-                      <pvp-weapon
-                        v-for="weapon in filteredWeaponsWithInformation"
-                        :key="weapon.weaponId"
-                        :weapon="weapon.information"
-                        :weaponId="weapon.weaponId"
-                        :class="{'disabled': ownedWeaponIds.includes(weapon.weaponId) && !availableWeaponIds.includes(weapon.weaponId)}"
-                        @click="handleWeaponClick(weapon.weaponId, weapon.information)"
-                        :disabled="ownedWeaponIds.includes(weapon.weaponId) && !availableWeaponIds.includes(weapon.weaponId)"
-                      />
-                    </div>
-                    <div v-else class="noWeaponsOrShields">
-                      {{$t('pvp.noWeapons')}}
-                    </div>
-                  </b-popover>
-                </a>
-              </div>
-              <div v-else class="weaponButtonWrapper">
-                <pvp-weapon
-                  :weapon="selectedWeapon"
-                  :weaponId="selectedWeaponId"
-                  class="weaponPlaceholder"
-                />
-                <button @click="handleClearWeapon()" class="clearWeaponButton">
-                  {{$t('pvp.clear')}}
-                </button>
-              </div>
-              <div v-if="!selectedShieldId" :class="{ disabledStyles: ownedShieldsWithInformation.length === 0 }" class="shieldButtonWrapper">
-                <a tabindex="0" class="selectWeaponButton" id="shield-popover">
-                  <div class="placeholderImageWrapper">
-                    <img src="../../assets/shieldPlaceholder.svg" alt="shield" />
-                  </div>
-                   <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
-                    <p class="popoverTitle">{{$t('pvp.shields')}}</p>
-                    <select v-model="shieldStarFilter" v-if="ownedShieldsWithInformation.length !== 0" class="selectFilter">
-                      <option v-for="shieldStarOption in shieldStarOptions" :value="shieldStarOption.value" :key="shieldStarOption.value">
-                        {{ shieldStarOption.text }}
-                      </option>
-                    </select>
-                    <select v-model="shieldElementFilter" v-if="ownedShieldsWithInformation.length !== 0" class="selectFilter">
-                      <option v-for="shieldElementOption in shieldElementOptions" :value="shieldElementOption.value" :key="shieldElementOption.value">
-                        {{ shieldElementOption.text }}
-                      </option>
-                    </select>
-                    <button v-if="shieldStarFilter || shieldElementFilter" @click="handleClearShieldFilters()" class="clearFiltersButton">Clear</button>
-                    <div v-if="ownedShieldsWithInformation.length !== 0" class="popoverGrid">
-                      <pvp-shield
-                        v-for="shield in filteredShieldsWithInformation"
-                        :key="shield.shieldId"
-                        :shield="shield.information"
-                        :shieldId="shield.shieldId"
-                        :class="{'disabled': ownedShieldIds.includes(shield.shieldId) && !availableShieldIds.includes(shield.shieldId)}"
-                        @click="handleShieldClick(shield.shieldId, shield.information)"
-                        :disabled="ownedShieldIds.includes(shield.shieldId) && !availableShieldIds.includes(shield.shieldId)"
-                      />
-                    </div>
-                    <div v-else class="noWeaponsOrShields">
-                      {{$t('pvp.noShields')}}
-                    </div>
-                  </b-popover>
-                </a>
-              </div>
-              <div v-else class="shieldButtonWrapper">
-                <pvp-shield
-                  :shield="selectedShield"
-                  :shieldId="selectedShieldId"
-                />
-                <button @click="handleClearShield" class="clearShieldButton">
-                  {{$t('pvp.clear')}}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
         <div class="top">
           <div class="circle">
             <img :src="getIconSource" />
@@ -197,9 +93,6 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import BN from 'bignumber.js';
-import { BPopover } from 'bootstrap-vue';
-import PvPWeapon from './PvPWeapon.vue';
-import PvPShield from './PvPShield.vue';
 import PvPCharacter from './PvPCharacter.vue';
 import PvPSeparator from './PvPSeparator.vue';
 import checkIcon from '../../assets/checkImage.svg';
@@ -226,11 +119,8 @@ const defaultElementOptions = [
 
 export default {
   components: {
-    'pvp-weapon': PvPWeapon,
-    'pvp-shield': PvPShield,
     'pvp-separator': PvPSeparator,
     'pvp-character': PvPCharacter,
-    'b-popover': BPopover,
     'pvp-arena-information': PvPArenaInfo,
   },
 
