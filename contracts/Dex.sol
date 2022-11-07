@@ -28,7 +28,6 @@ contract Dex is Initializable, AccessControlUpgradeable {
     event TokenPairAdded(uint id, address indexed token1, address indexed token2);
     event LiquidityAdded(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
 
-
     function initialize() virtual public initializer {
         __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
@@ -59,7 +58,7 @@ contract Dex is Initializable, AccessControlUpgradeable {
             pair.token1Amount -= amountB;
             pair.token2Amount += amountA;
         }
-        tokenPairs[getTokenPairId(tokenA, tokenB)] = pair;
+        tokenPairs[id] = pair;
         IERC20(tokenA).transferFrom(msg.sender, address(this), amountA);
         IERC20(tokenB).transfer(msg.sender, amountB - amountB.mul(vars[VAR_FEE]).div(FEE_DENOMINATOR));
         emit TokenPairSwapped(tokenA, amountA, tokenB, amountB);

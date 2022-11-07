@@ -923,7 +923,8 @@
       "cryptoblades": "CryptoBlades",
       "blacksmith": "Blacksmith",
       "raid": "Raid",
-      "specialWeaponsManager": "Special Weapons"
+      "specialWeaponsManager": "Special Weapons",
+      "dex": "Dex"
     },
     "cbkLand": {
       "minter": "Minter",
@@ -1118,6 +1119,16 @@
       "incrementEventCount": "Increment event count",
       "areYouSure": "Are you sure?",
       "eventIncrementationIrreversibleInfo": "Event incrementation is irreversible. Are you sure you know what you're doing?"
+    },
+    "dex": {
+      "setFeePercentageCurrentDefault0_3": "Set fee percentage (current: {feePercentage}%, default: 0.3%)",
+      "setFeePercentage": "Set fee percentage",
+      "dexFeePercentage": "DEX fee percentage",
+      "addNewTokenPair": "Add new token pair",
+      "firstTokenAddress": "First token address",
+      "firstTokenAmount": "First token amount",
+      "secondTokenAddress": "Second token address",
+      "secondTokenAmount": "Second token amount"
     },
     "identifiers": "Identifiers",
     "amount": "Amount",
