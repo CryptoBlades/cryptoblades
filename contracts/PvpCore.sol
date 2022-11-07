@@ -12,6 +12,7 @@ import "./weapons.sol";
 import "./shields.sol";
 import "./common.sol";
 import "./PvpRankings.sol";
+import "./EquipmentManager.sol";
 
 contract PvpCore is Initializable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;

@@ -7,6 +7,7 @@ import "./CharacterRenameTagConsumables.sol";
 import "./characters.sol";
 import "./interfaces/IBridgeProxy.sol";
 import "./Promos.sol";
+import "./EquipmentManager.sol";
 
 
 contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeable, IBridgeProxy {

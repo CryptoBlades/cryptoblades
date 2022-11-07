@@ -291,7 +291,7 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
         return traitBonus;
     }
 
-    function getPowerData(uint256 charID) external view returns (
+    function getStoredPowerData(uint256 charID) external view returns (
         uint24[5] memory pvePower,
         uint16[4] memory pvpTierPower,
         uint16[4] memory pvpFfaPower,
@@ -338,7 +338,7 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
         return equippableInSlot[onAddr][slot].contains(itemAddr);
     }
 
-    function getEquippedItem(address onAddr, uint256 slot) public view returns(address, uint256) {
+    function getEquippedItem(address onAddr, uint256 onID, uint256 slot) public view returns(address, uint256) {
         return (equippedSlotAddress[onAddr][onID][slot], equippedSlotID[onAddr][onID][slot]);
     }
 

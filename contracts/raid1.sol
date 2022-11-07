@@ -11,6 +11,7 @@ import "./items/RaidTrinket.sol";
 import "./items/KeyLootbox.sol";
 import "./items/Junk.sol";
 import "./common.sol";
+import "./EquipmentManager.sol";
 
 
 contract Raid1 is Initializable, AccessControlUpgradeable {
