@@ -26,7 +26,7 @@ module.exports = async function (deployer, network, accounts) {
 	
 	const raid = await upgradeProxy(Raid1.address, Raid1, { deployer });
 	let RAID_LINK_EQUIPMENT_MANAGER = await raid.LINK_EQUIPMENT_MANAGER();
-	await raid.setLink(RAID_LINK_EQUIPMENT_MANAGER, equip.address);
+	await raid.registerLink(equip.address, RAID_LINK_EQUIPMENT_MANAGER); //reverse param order vs setLink
 
     const characters = await upgradeProxy(Characters.address, Characters, { deployer });
 	let CHARACTERS_VAR_EQUIPMENT_VERSION = await characters.VAR_EQUIPMENT_VERSION();
@@ -50,8 +50,8 @@ module.exports = async function (deployer, network, accounts) {
 	let PVP_LINK_EQUIPMENT_MANAGER = await pvpCore.LINK_EQUIPMENT_MANAGER();
 	await pvpCore.setLink(PVP_LINK_EQUIPMENT_MANAGER, equip.address);
 
-	let SLOT_CHARACTER_WEAPON = equip.SLOT_CHARACTER_WEAPON();
+	let SLOT_CHARACTER_WEAPON = await equip.SLOT_CHARACTER_WEAPON();
 	await equip.setEquippable(characters.address, SLOT_CHARACTER_WEAPON, weapons.address, true);
-	let SLOT_CHARACTER_SHIELD = equip.SLOT_CHARACTER_SHIELD();
+	let SLOT_CHARACTER_SHIELD = await equip.SLOT_CHARACTER_SHIELD();
 	await equip.setEquippable(characters.address, SLOT_CHARACTER_SHIELD, shields.address, true);
 };
