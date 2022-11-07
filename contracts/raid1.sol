@@ -556,15 +556,16 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         return totalAccountPower;
     }
 
-    function canJoinRaid(uint256 characterID, uint256 weaponID) public view returns(bool) {
+    function canJoinRaid(uint256 characterID) public view returns(bool) {
+        uint256 weaponID = EquipmentManager(links[LINK_EQUIPMENT_MANAGER]).equippedSlotID(address(characters), characterID, 1);
         return isRaidStarted()
-            && haveEnoughEnergy(characterID, weaponID)
+            && haveEnoughEnergy(characterID)
             && !isCharacterRaiding(characterID)
             && !isWeaponRaiding(weaponID);
     }
 
-    function haveEnoughEnergy(uint256 characterID, uint256 weaponID) public view returns(bool) {
-        return characters.getStaminaPoints(characterID) > 0 && weapons.getDurabilityPoints(weaponID) > 0;
+    function haveEnoughEnergy(uint256 characterID) public view returns(bool) {
+        return characters.getStaminaPoints(characterID) > 0;
     }
 
     function isRaidStarted() public view returns(bool) {

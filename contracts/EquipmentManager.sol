@@ -114,7 +114,7 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
     function equipNFT(address onAddr, uint256 onID, uint256 slot, address itemAddr, uint256 itemID) external {
         require(isEquippable(onAddr, slot, itemAddr), "Invalid item");
         require(IERC721(onAddr).ownerOf(onID) == msg.sender);//item owner check done on transfer
-        require(equippedSlotAddress[onAddr][onID][slot] != address(0), "Slot taken");
+        require(equippedSlotAddress[onAddr][onID][slot] == address(0), "Slot taken");
 
         equippedSlotAddress[onAddr][onID][slot] = itemAddr;
         equippedSlotID[onAddr][onID][slot] = itemID;
