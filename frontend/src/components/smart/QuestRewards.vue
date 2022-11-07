@@ -48,8 +48,5 @@ export default Vue.extend({
 .quest-reward-display {
     align-items: center;
   }
-/* @media screen and (max-width: 576px) {
-
-} */
 
 </style>

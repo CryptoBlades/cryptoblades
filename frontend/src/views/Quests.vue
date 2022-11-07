@@ -108,22 +108,14 @@
               </div>
               <h3 v-else-if="quests.length === 0">
                 {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
-                <!-- TEST -->
               <div v-else class="d-flex flex-row flex-wrap gap-3">
                 <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row quest-row-special p-3 gap-5">
                   <QuestRequirements :quest="quest" :index="index"/>
                   <QuestRewards :quest="quest"/>
                   <b-form-radio class="flex-1 custom-action-btn gap-2 p-2"
                     v-model="pickedQuestId" :value="quest.id">{{ $t('quests.setAsNextQuest') }}</b-form-radio>
-                  <!-- <div class="pickBtn-wrapper">
-                    <b-button class="flex-1 custom-action-btn" variant="primary">
-                      @click="handlePick(quest.id)"
-                      {{pickButtonLabel}}
-                    </b-button>
-                  </div> -->
                 </div>
               </div>
-              <!-- TEST -->
           </div>
         </div>
         <div v-if="activeTab === 'character-quests'" class="character-quests-content">
@@ -158,13 +150,6 @@
       </div>
       <div v-if="activeTab === 'wallet-quests'" class="wallet-quests-content">
         <span v-if="walletQuests && walletQuests.length" class="quests-title-2">Wallet Quests</span>
-        <!-- TODO: This will come back when we add additional tiers to Wallet Quests -->
-        <!--      <div class="form-control-wrapper">-->
-        <!--        <select class="form-control" v-model="walletQuestTier" >-->
-        <!--              <option :value="undefined">Select a Rarity</option>-->
-        <!--          <option v-for="x in rarities" :value="x" :key="x">{{$t(`quests.rarityType.${Rarity[x]}`)}}</option>-->
-        <!--        </select>-->
-        <!--      </div>-->
         <div v-if="isLoadingWalletQuests">
           <i class="fas fa-spinner fa-spin"/>
           {{ $t('quests.loading') }}
@@ -363,26 +348,6 @@ export default Vue.extend({
       }
     },
 
-    // async handlePick(questID: number) {
-    //   try {
-    //     this.isLoading = true;
-    //     //this.pickedQuestID: questID
-    //     // if(this.actionAfterPick === ActionAfterPick.COMPLETE){
-    //     //   await this.completeQuest({characterID: this.character.id, pickedQuestID: questID});
-    //     // }
-    //     // else if(this.actionAfterPick === ActionAfterPick.SKIP){
-    //     //   await this.skipQuest({characterID: this.character.id, pickedQuestID: questID});
-    //     // }
-    //     // else if(this.actionAfterPick === ActionAfterPick.REQUEST){
-    //     //   await this.requestPickableQuest({characterID: this.character.id, questID});
-    //     // }
-    //     //this.$emit('refresh-quest-data');
-    //   } finally {
-    //     this.isLoading = false;
-    //     // this.$forceUpdate();
-    //   }
-    // },
-
     async claimWeekly() {
       if (!this.canClaimWeeklyReward) {
         return;
@@ -534,10 +499,6 @@ export default Vue.extend({
   display: flex;
   justify-content: center;
 }
-
-// .character-quests-content > div:nth-child(2) {
-//   flex-wrap: wrap;
-// }
 
 @media (max-width: 600px) {
   .quest-nav{

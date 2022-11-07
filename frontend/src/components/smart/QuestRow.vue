@@ -176,9 +176,5 @@ export default Vue.extend({
     height: auto;
     gap: 1rem;
   }
-/*
-@media (max-width: 576px) {
-
-} */
 
 </style>

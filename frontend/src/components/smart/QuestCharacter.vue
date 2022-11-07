@@ -259,7 +259,4 @@ export default Vue.extend({
   .character-info-container{
     margin: 0;
   }
-/* @media (max-width: 576px) {
-
-} */
 </style>

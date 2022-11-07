@@ -403,7 +403,4 @@ export default Vue.extend({
 .single-dust-display {
     width: 100%;
   }
-/* @media (max-width: 576px) {
-
-} */
 </style>
