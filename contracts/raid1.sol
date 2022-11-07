@@ -42,6 +42,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     uint256 public constant LINK_TRINKET = 1;
     uint256 public constant LINK_KEYBOX = 2;
     uint256 public constant LINK_JUNK = 3;
+    uint256 public constant LINK_EQUIPMENT_MANAGER = 4;
 
     uint256 public constant NUMBERPARAMETER_AUTO_DURATION = 1;
     uint256 public constant NUMBERPARAMETER_AUTO_BOSSPOWER_PERCENT = uint256(keccak256("BOSSPOWER_PERCENT"));
@@ -175,10 +176,12 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
 
+        uint256 weaponID = EquipmentManager(links[LINK_EQUIPMENT_MANAGER]).equippedSlotID(address(characters), characterID, 1);
+
         uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
         for(uint i = 0; i < raiderIndices.length; i++) {
-            /*require(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID,
-                "This weapon is already used in the raid");*/
+            require(raidParticipants[raidIndex][raiderIndices[i]].wepID != weaponID,
+                "This weapon is already used in the raid");
             require(raidParticipants[raidIndex][raiderIndices[i]].charID != characterID,
                 "This character is already participating");
         }
@@ -194,7 +197,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         raidParticipants[raidIndex].push(Raider(
             msg.sender,
             characterID,
-            0/*weaponID*/,
+            weaponID,
             power,
             0//uint24(charTrait) | (uint24(weaponTrait) << 8) | ((uint24(wepStatPattern)) << 16)//traitCWS
         ));
@@ -207,7 +210,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         emit RaidJoined(raidIndex,
             msg.sender,
             characterID,
-            0/*weaponID*/,
+            weaponID,
             joinCostPaid);
     }
 

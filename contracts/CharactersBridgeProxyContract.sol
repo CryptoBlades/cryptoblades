@@ -52,7 +52,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
         promos = _newPromos;
     }
 
-    function migrate_TBD(EquipmentManager _equipmentManager) external {
+    function migrate_68c6936(EquipmentManager _equipmentManager) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
         equipmentManager = _equipmentManager;
     }

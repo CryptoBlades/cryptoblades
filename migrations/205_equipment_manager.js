@@ -19,11 +19,14 @@ module.exports = async function (deployer, network, accounts) {
 	await equip.setVar(VAR_WEAPON_EQUIP_DURABILITY, 5);
 	
 	const charactersBridgeProxy = await upgradeProxy(CharactersBridgeProxyContract.address, CharactersBridgeProxyContract, { deployer }); 
-	await charactersBridgeProxy.migrate_TBD(equip.address);
+	await charactersBridgeProxy.migrate_68c6936(equip.address);
 
 	await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
-	await upgradeProxy(Raid1.address, Raid1, { deployer });
 	await upgradeProxy(TokensManager.address, TokensManager, { deployer });
+	
+	const raid = await upgradeProxy(Raid1.address, Raid1, { deployer });
+	let RAID_LINK_EQUIPMENT_MANAGER = await raid.LINK_EQUIPMENT_MANAGER();
+	await raid.setLink(RAID_LINK_EQUIPMENT_MANAGER, equip.address);
 
     const characters = await upgradeProxy(Characters.address, Characters, { deployer });
 	let CHARACTERS_VAR_EQUIPMENT_VERSION = await characters.VAR_EQUIPMENT_VERSION();
@@ -44,8 +47,8 @@ module.exports = async function (deployer, network, accounts) {
 	await equip.setLink(LINK_SHIELDS, shields.address);
 
     const pvpCore = await upgradeProxy(PvpCore.address, PvpCore, { deployer });
-	let LINK_EQUIPMENT_MANAGER = await pvpCore.LINK_EQUIPMENT_MANAGER();
-	await pvpCore.setLink(LINK_EQUIPMENT_MANAGER, equip.address);
+	let PVP_LINK_EQUIPMENT_MANAGER = await pvpCore.LINK_EQUIPMENT_MANAGER();
+	await pvpCore.setLink(PVP_LINK_EQUIPMENT_MANAGER, equip.address);
 
 	let SLOT_CHARACTER_WEAPON = equip.SLOT_CHARACTER_WEAPON();
 	await equip.setEquippable(characters.address, SLOT_CHARACTER_WEAPON, weapons.address, true);

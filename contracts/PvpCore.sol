@@ -218,6 +218,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
         require(characters.ownerOf(characterID) == msg.sender
             && characters.getNftVar(characterID, 1) == 0);
+        require(characters.isEquipmentReady(characterID));
 
         require((arenaAccess & 1) == 1, "L");
 

@@ -291,7 +291,7 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
         return traitBonus;
     }
 
-    function getPowerDataDebug(uint256 charID) external view returns (
+    function getPowerData(uint256 charID) external view returns (
         uint24[5] memory pvePower,
         uint16[4] memory pvpTierPower,
         uint16[4] memory pvpFfaPower,
