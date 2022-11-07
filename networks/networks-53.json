@@ -3254,7 +3254,7 @@
     "events": {},
     "links": {},
     "address": "0xD9C5449EfB3f99952F73e824688724aAFB81dE6E",
-    "transactionHash": "0xdef566c1cbe785c971a8f74377139aa83ab894f8004d79fd1c3137bcfc5c0795"
+    "transactionHash": "0x6f1643b3032aba3a1adb045013695b508e1c65341234345bf150018d35de5b10"
   },
   "build/contracts/Merchandise.json": {
     "events": {
@@ -4179,7 +4179,7 @@
     },
     "links": {},
     "address": "0xBd0d476A7e18555A5096fAc5347f3C5EADF3EDFf",
-    "transactionHash": "0xbba3477d69c9fb713d1228d8ad242e418939215117640f52e5ced428299968aa"
+    "transactionHash": "0xb3b2fc7cf4a6d35696f8590e64f166a086a0d303b14e485c04aa1cadea5acd40"
   },
   "build/contracts/PvpRankings.json": {
     "events": {

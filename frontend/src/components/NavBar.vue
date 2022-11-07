@@ -13,9 +13,8 @@
       <b-collapse id="navbar-toggle-collapse" is-nav>
         <view-links class="view-links d-none d-xl-flex"></view-links>
       </b-collapse>
-
       <skill-balance-display class="ml-auto d-none d-sm-flex none-mobile"/>
-      <options class="options-dispay d-none d-sm-flex none-mobile"/>
+      <options class="options-display d-none d-sm-flex none-mobile"/>
 
       <!-- Render only on mobile view -->
         <options class="options-display-mobile d-sm-none"/>
@@ -123,7 +122,7 @@ a.router-link-active {
     align-self: center;
   }
 
-  .options-dispay {
+  .options-display {
     margin-left: auto;
   }
 
