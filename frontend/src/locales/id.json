@@ -66,7 +66,7 @@
     "readyToClaim": "Hadiah siap untuk di klaim!",
     "realWithdrawValueClaimable": "Saat ini kamu akan mendapatkan kira-kira {actualAmount} {tokenSymbol} untuk pengambilan {skillAmount} {token}.",
     "rewards": "Hadiah",
-    "skillAmount": "Jumlah Skull",
+    "skillAmount": "Jumlah Skill",
     "slippage": "Slippage",
     "timeSince": "Waktu sejak terakhir pengambilan: n/a",
     "unclaimed": "SKILL yang belum di klaim",
@@ -643,7 +643,7 @@
   "combatResults": {
     "earned": "Kamu Mendapatkan:",
     "earnedIGOSkill": "",
-    "earnedSkill": "<b>{noIGO}</b> <small>SKULL YANG BELUM DIAMBIL</small> <b>{inUSD}</b> ",
+    "earnedSkill": "<b>{noIGO}</b> <small>SKILL YANG BELUM DIAMBIL</small> <b>{inUSD}</b> ",
     "enemyRolled": "Lawan mengeroll:",
     "gasFee": "Kamu menghabiskan {bnbGasUsed} {gasToken} untuk gas fee",
     "hint": "SKILL yang didapat berdasarkan dari biaya gas dari chain ini ditambah dari faktor power mu.",
