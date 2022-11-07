@@ -23,6 +23,19 @@
         {{ $t('admin.dex.addNewTokenPair') }}
       </b-button>
     </div>
+    <h2 class="mt-3">{{ $t('admin.dex.addLiquidity') }}</h2>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <b-form-input v-model="newLiquidity.tokenA" :placeholder="$t('admin.dex.firstTokenAddress')"/>
+      <b-form-input v-model="newLiquidity.amountA" type="number" number min="0"
+                    :placeholder="$t('admin.dex.firstTokenAmount')"/>
+      <b-form-input v-model="newLiquidity.tokenB" :placeholder="$t('admin.dex.secondTokenAddress')"/>
+      <b-form-input v-model="newLiquidity.amountB" type="number" number min="0"
+                    :placeholder="$t('admin.dex.secondTokenAmount')"/>
+      <b-button @click="addNewLiquidity()" :disabled="addNewLiquidityButtonDisabled"
+                variant="info" class="text-nowrap">
+        {{ $t('admin.dex.addLiquidity') }}
+      </b-button>
+    </div>
   </div>
 </template>
 
@@ -37,6 +50,8 @@ interface StoreMappedActions {
   setDexFeePercentage(payload: { fee: number }): Promise<void>;
 
   addDexTokenPair(payload: { tokenPair: TokenPair }): Promise<void>;
+
+  addDexLiquidity(payload: { tokenPair: TokenPair }): Promise<void>;
 }
 
 export interface TokenPair {
@@ -50,6 +65,7 @@ interface Data {
   newDexFeePercentage?: number;
   currentDexFeePercentage?: number;
   newTokenPair: TokenPair;
+  newLiquidity: TokenPair;
   isLoading: boolean;
 }
 
@@ -59,10 +75,16 @@ export default Vue.extend({
       newDexFeePercentage: undefined,
       currentDexFeePercentage: undefined,
       newTokenPair: {
-        tokenA: '0x202EBc03dD7DA07D31a1fa84f51cce81301796B6',
-        amountA: 10,
-        tokenB: '0x397F7Dc64dCCb715c7e588d88F48d8D23461B22E',
-        amountB: 100,
+        tokenA: '',
+        amountA: undefined,
+        tokenB: '',
+        amountB: undefined,
+      },
+      newLiquidity: {
+        tokenA: '',
+        amountA: undefined,
+        tokenB: '',
+        amountB: undefined,
       },
       isLoading: false,
     } as Data;
@@ -80,6 +102,13 @@ export default Vue.extend({
         || this.newTokenPair.amountB === undefined
         || this.isLoading;
     },
+    addNewLiquidityButtonDisabled(): boolean {
+      return !isValidWeb3Address(this.newLiquidity.tokenA)
+        || this.newLiquidity.amountA === undefined
+        || !isValidWeb3Address(this.newLiquidity.tokenB)
+        || this.newLiquidity.amountB === undefined
+        || this.isLoading;
+    },
   },
 
   methods: {
@@ -87,6 +116,7 @@ export default Vue.extend({
       'getDexFeePercentage',
       'setDexFeePercentage',
       'addDexTokenPair',
+      'addDexLiquidity',
     ]) as StoreMappedActions,
 
     async setNewDexFeePercentage() {
@@ -125,7 +155,24 @@ export default Vue.extend({
       } finally {
         this.isLoading = false;
       }
-    }
+    },
+
+    async addNewLiquidity() {
+      if (!isValidWeb3Address(this.newLiquidity.tokenA) || this.newLiquidity.amountA === undefined
+        || !isValidWeb3Address(this.newLiquidity.tokenB) || this.newLiquidity.amountB === undefined) return;
+      try {
+        this.isLoading = true;
+        await this.addDexLiquidity(this.newLiquidity);
+        this.newLiquidity = {
+          tokenA: '',
+          amountA: undefined,
+          tokenB: '',
+          amountB: undefined,
+        };
+      } finally {
+        this.isLoading = false;
+      }
+    },
   },
 
   async mounted() {

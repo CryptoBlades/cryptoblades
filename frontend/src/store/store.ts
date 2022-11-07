@@ -2242,6 +2242,38 @@ export default new Vuex.Store<IState>({
       });
     },
 
+    async addDexLiquidity({state}, tokenPair: TokenPair) {
+      const {Dex} = state.contracts();
+      if (!Dex) return;
+
+      const tokenAContract = new state.web3.eth.Contract(erc20Abi as any[], tokenPair.tokenA) as Contract<ERC20>;
+      const tokenADecimals = +await tokenAContract.methods.decimals().call(defaultCallOptions(state));
+      const tokenAAmountTimesDecimals = new BigNumber(tokenPair.amountA).multipliedBy(new BigNumber(10 ** tokenADecimals));
+      const tokenAApprovedAmount = await tokenAContract.methods.allowance(state.defaultAccount, Dex.options.address).call(defaultCallOptions(state));
+      if (tokenAAmountTimesDecimals.gt(tokenAApprovedAmount)) {
+        await tokenAContract.methods.approve(Dex.options.address, tokenAAmountTimesDecimals.toString()).send({
+          from: state.defaultAccount,
+          gasPrice: getGasPrice(),
+        });
+      }
+
+      const tokenBContract = new state.web3.eth.Contract(erc20Abi as any[], tokenPair.tokenB) as Contract<ERC20>;
+      const tokenBDecimals = +await tokenBContract.methods.decimals().call(defaultCallOptions(state));
+      const tokenBAmountTimesDecimals = new BigNumber(tokenPair.amountB).multipliedBy(new BigNumber(10 ** tokenBDecimals));
+      const tokenBApprovedAmount = await tokenBContract.methods.allowance(state.defaultAccount, Dex.options.address).call(defaultCallOptions(state));
+      if (tokenBAmountTimesDecimals.gt(tokenBApprovedAmount)) {
+        await tokenBContract.methods.approve(Dex.options.address, tokenBAmountTimesDecimals.toString()).send({
+          from: state.defaultAccount,
+          gasPrice: getGasPrice(),
+        });
+      }
+
+      await Dex.methods.addLiquidity(tokenPair.tokenA, tokenAAmountTimesDecimals.toString(), tokenPair.tokenB, tokenBAmountTimesDecimals.toString()).send({
+        from: state.defaultAccount,
+        gasPrice: getGasPrice(),
+      });
+    },
+
     async setFlatPriceOfItem({state}, {itemIndex, price}) {
       const {Blacksmith} = state.contracts();
       if (!Blacksmith) return;

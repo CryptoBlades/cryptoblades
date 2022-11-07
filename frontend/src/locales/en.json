@@ -1128,7 +1128,8 @@
       "firstTokenAddress": "First token address",
       "firstTokenAmount": "First token amount",
       "secondTokenAddress": "Second token address",
-      "secondTokenAmount": "Second token amount"
+      "secondTokenAmount": "Second token amount",
+      "addLiquidity": "Add liquidity"
     },
     "identifiers": "Identifiers",
     "amount": "Amount",
