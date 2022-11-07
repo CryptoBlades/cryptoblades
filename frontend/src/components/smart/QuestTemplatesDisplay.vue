@@ -33,7 +33,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import { Quest, Rarity, QuestTemplateType } from '@/interfaces';
+import { Quest } from '@/interfaces';
+import { Rarity, QuestTemplateType } from '@/enums/Quest';
 import QuestsList from './QuestsList.vue';
 
 interface StoreMappedActions {

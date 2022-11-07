@@ -76,7 +76,8 @@ import legs from '../assets/characterWardrobe_legs.json';
 import boots from '../assets/characterWardrobe_boots.json';
 import { CharacterTrait, RequiredXp } from '../interfaces';
 import { getCleanName } from '../rename-censor';
-import { CharacterPower, ReputationTier } from '@/interfaces';
+import { CharacterPower } from '@/interfaces';
+import { ReputationTier } from '@/enums/Quest';
 import { burningManager } from './../feature-flags';
 import { mapState, mapGetters, mapActions } from 'vuex';
 

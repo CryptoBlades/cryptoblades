@@ -4,7 +4,8 @@
     <div class="d-flex align-items-center gap-2 flex-wrap" :key="quest.id">
       <QuestComponentIcon :questItemType="quest.rewardType" :amount="quest.rewardAmount"
                           :rarity="quest.rewardRarity" :externalAddress="quest.rewardExternalAddress"/>
-      <QuestComponentIcon v-if="questTemplateType !== QuestTemplateType.WALLET" :questItemType="QuestItemType.REPUTATION" :amount="quest.reputationAmount"/>
+      <QuestComponentIcon v-if="quest.reputationAmount > 0"
+        :questItemType="QuestItemType.REPUTATION" :amount="quest.reputationAmount"/>
     </div>
   </div>
 </template>
@@ -12,7 +13,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import { Quest, QuestItemType, QuestTemplateType } from '@/interfaces';
+import { Quest } from '@/interfaces';
+import { QuestItemType } from '@/enums/Quest';
 import QuestComponentIcon from './QuestComponentIcon.vue';
 
 export default Vue.extend({
@@ -22,16 +24,11 @@ export default Vue.extend({
       type: Object as PropType<Quest>,
       required: true,
     },
-    questTemplateType: {
-      type: Number as PropType<QuestTemplateType | number>,
-      required: false,
-    },
   },
 
   data() {
     return {
       QuestItemType,
-      QuestTemplateType,
     };
   },
 });

@@ -254,7 +254,8 @@ import SkinsTab from '@/components/smart/CharacterTabs/SkinsTab.vue';
 import OptionsTab from '@/components/smart/CharacterTabs/OptionsTab.vue';
 import UpgradeTab from '@/components/smart/CharacterTabs/UpgradeTab.vue';
 import { getCharacterArt } from '@/character-arts-placeholder';
-import { Quest, ReputationLevelRequirements, ReputationTier } from '@/interfaces';
+import { Quest, ReputationLevelRequirements } from '@/interfaces';
+import { ReputationTier } from '@/enums/Quest';
 import { CharacterTrait, ICharacter, RequiredXp } from '@/interfaces';
 import { isValidWeb3Address } from '@/utils/common';
 

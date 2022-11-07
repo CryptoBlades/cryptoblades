@@ -12,7 +12,7 @@
   </div>
   <div v-if="questTemplateType === QuestTemplateType.WALLET && quest" class="quest-row-wallet">
     <QuestRequirements :quest="quest" :progress="quest.progress"/>
-    <QuestRewards v-if="quest && quest.id !== 0" :quest="quest" :questTemplateType="questTemplateType"/>
+    <QuestRewards v-if="quest && quest.id !== 0" :quest="quest"/>
     <QuestActions :quest="quest" :key="quest.id" showSupply
                   @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
@@ -29,9 +29,8 @@ import QuestActions from '@/components/smart/QuestActions.vue';
 import {
   Quest,
   ReputationLevelRequirements,
-  Rarity,
-  RewardType,
-  QuestTemplateType } from '@/interfaces';
+  RewardType } from '@/interfaces';
+import { Rarity, QuestTemplateType } from '@/enums/Quest';
 import {mapActions, mapGetters} from 'vuex';
 import {Nft, NftStatus} from '@/interfaces/Nft';
 

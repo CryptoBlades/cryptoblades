@@ -12,7 +12,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import { QuestItemType, Rarity } from '@/interfaces';
+import { QuestItemType, Rarity } from '@/enums/Quest';
 import NftList, {NftIdType} from '@/components/smart/NftList.vue';
 import QuestComponentIcon from '@/components/smart/QuestComponentIcon.vue';
 import {questItemTypeSupportsStars, questItemTypeSupportsTimesValue} from '../../utils/common';

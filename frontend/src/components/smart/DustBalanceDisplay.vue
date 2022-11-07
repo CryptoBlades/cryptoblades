@@ -21,7 +21,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapGetters} from 'vuex';
-import { DustRarity } from '@/interfaces';
+import { DustRarity } from '@/enums/Quest';
 import lesserDust from '@/assets/dusts/lesserDust.png';
 import greaterDust from '@/assets/dusts/greaterDust.png';
 import powerfulDust from '@/assets/dusts/powerfulDust.png';

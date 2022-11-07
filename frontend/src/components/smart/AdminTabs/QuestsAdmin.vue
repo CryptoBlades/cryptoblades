@@ -325,16 +325,17 @@
 import Vue from 'vue';
 import {mapActions} from 'vuex';
 import {
-  DustRarity,
   Quest,
-  QuestItemType,
-  QuestTemplateType,
-  Rarity,
   ReputationLevelRequirements,
-  RequirementType,
   RewardType,
   TierChances
 } from '@/interfaces';
+import {
+  DustRarity,
+  QuestItemType,
+  QuestTemplateType,
+  Rarity,
+  RequirementType } from '@/enums/Quest';
 import QuestTemplatesDisplay from '../QuestTemplatesDisplay.vue';
 import QuestRequirements from '../QuestRequirements.vue';
 import QuestRewards from '../QuestRewards.vue';

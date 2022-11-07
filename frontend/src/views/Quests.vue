@@ -10,6 +10,35 @@
       <div class="d-flex justify-content-between w-100 weekly-progress-container">
         <div class="d-flex flex-column justify-content-between gap-2">
           <span class="quests-title">{{ $t('quests.quest') }}</span>
+          <cb-button class="top-button" :title="$t('quests.availableQuests')" @clickEvent="showQuestsListModal = true"></cb-button>
+          <b-modal v-model="showQuestsListModal" :title="$t('quests.availableQuests')" hide-footer
+            @hide="showQuestsListModal = false; tier = undefined" size="xl">
+            <div class="d-flex justify-content-center align-items-center gap-3">
+              <b-form-group class="m-3">
+                <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.QUEST">
+                  {{ $t('quests.questsTitle') }}
+                </b-form-radio>
+                <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.PROMO">
+                  {{ $t('quests.questTemplateType.PROMO') }}
+                </b-form-radio>
+                <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.WALLET">
+                  {{ $t('quests.questTemplateType.WALLET') }}
+                </b-form-radio>
+                <b-form-radio v-model="questTemplateType" :value="QuestTemplateType.PICKABLE">
+                  {{ $t('quests.questTemplateType.PICKABLE') }}
+                </b-form-radio>
+              </b-form-group>
+              <b-form-select class="mt-2 mb-2" v-model="tier">
+                <b-form-select-option :value="undefined" disabled>
+                  {{ $t('quests.pleaseSelectQuestTier') }}
+                </b-form-select-option>
+                <b-form-select-option v-for="rarity in rarities" :key="rarity" :value="rarity">
+                  {{ $t(`quests.rarityType.${Rarity[rarity]}`) }}
+                </b-form-select-option>
+              </b-form-select>
+            </div>
+            <QuestsList v-if="tier !== undefined" :tier="tier + tierOffset"/>
+          </b-modal>
         </div>
         <div v-if="weeklyReward && weeklyReward.id && currentWeeklyCompletions !== undefined && weeklyReward.completionsGoal"
             class="d-flex flex-column justify-content-between gap-2 align-items-end">
@@ -161,7 +190,7 @@ import {Accessors} from 'vue/types/options';
 import QuestRow from '@/components/smart/QuestRow.vue';
 import QuestComponentIcon from '@/components/smart/QuestComponentIcon.vue';
 import QuestReward from '@/components/smart/QuestReward.vue';
-// import QuestsList from '@/components/smart/QuestsList.vue';
+import QuestsList from '@/components/smart/QuestsList.vue';
 import QuestRequirements from '@/components/smart/QuestRequirements.vue';
 import QuestRewards from '@/components/smart/QuestRewards.vue';
 import hourglass from '@/assets/hourglass.png';
@@ -171,12 +200,13 @@ import QuestNav from '@/components/QuestNav.vue';
 import Hint from '@/components/Hint.vue';
 import {
   Quest,
-  QuestTemplateType,
-  Rarity,
   ReputationLevelRequirements,
   WeeklyReward,
-  QuestItemType,
   RewardType } from '@/interfaces';
+import {
+  Rarity,
+  QuestTemplateType,
+  QuestItemType } from '@/enums/Quest';
 
 interface StoreMappedActions {
   fetchCharacters(characterIds: (string | number)[]): Promise<void>;
@@ -238,6 +268,7 @@ export default Vue.extend({
     QuestNav,
     QuestRequirements,
     QuestRewards,
+    QuestsList,
     Hint,
   },
 

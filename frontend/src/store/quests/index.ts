@@ -4,13 +4,14 @@ import {
 } from '@/interfaces';
 import {
   Quest,
-  Rarity,
   ReputationLevelRequirements,
-  RequirementType,
   RewardType,
   TierChances,
-  WeeklyReward,
-  QuestTemplateType } from '@/interfaces';
+  WeeklyReward } from '@/interfaces';
+import {
+  Rarity,
+  RequirementType,
+  QuestTemplateType } from '@/enums/Quest';
 import BigNumber from 'bignumber.js';
 // import Web3 from 'web3';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';
@@ -748,11 +749,8 @@ const quests = {
       return questRewards;
     },
     async requestPickableQuest({ rootState }: {rootState: IState}, {characterID, questID}: {characterID: number, questID: number}) {
-      console.log('requestPickable Index');
       const { SimpleQuests } = rootState.contracts();
-      console.log('simpleQuests: ', SimpleQuests, 'rootState.defaultAccount: ', rootState.defaultAccount);
-      if(!SimpleQuests || !rootState.defaultAccount) return;
-      console.log('charId and questId: ', characterID, questID);
+      if (!SimpleQuests || !rootState.defaultAccount) return;
       return await SimpleQuests.methods.requestPickableQuest(characterID, questID).send(defaultCallOptions(rootState));
     }
   },

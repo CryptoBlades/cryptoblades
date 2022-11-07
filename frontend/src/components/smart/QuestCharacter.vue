@@ -76,13 +76,11 @@ import {getCharacterArt} from '@/character-arts-placeholder';
 import {mapActions, mapGetters} from 'vuex';
 import {getCleanName} from '@/rename-censor';
 import {
-  Rarity,
   RewardType,
   Quest,
   ReputationLevelRequirements,
-  ReputationTier,
   TierChances } from '@/interfaces';
-
+import { Rarity, ReputationTier } from '@/enums/Quest';
 interface StoreMappedActions {
   getQuestTierChances(payload: { tier: number }): Promise<TierChances>;
 }

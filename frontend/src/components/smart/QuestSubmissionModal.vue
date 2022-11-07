@@ -64,12 +64,11 @@ import Vue from 'vue';
 import WeaponGrid from '@/components/smart/WeaponGrid.vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import NftList, {NftIdType} from '@/components/smart/NftList.vue';
+import { Quest, RewardType } from '@/interfaces';
 import {
-  Quest,
-  QuestTemplateType,
   Rarity,
   RequirementType,
-  RewardType } from '@/interfaces';
+  QuestTemplateType } from '@/enums/Quest';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 import NftIcon from '@/components/NftIcon.vue';
 import {PropType} from 'vue/types/options';

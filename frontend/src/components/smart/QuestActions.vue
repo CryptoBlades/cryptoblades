@@ -96,12 +96,11 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
+import { Quest, RewardType } from '@/interfaces';
 import {
-  Quest,
   Rarity,
   RequirementType,
-  RewardType,
-  QuestTemplateType } from '@/interfaces';
+  QuestTemplateType } from '@/enums/Quest';
 import {Nft} from '../../interfaces/Nft';
 import Hint from '@/components/Hint.vue';
 import QuestSubmissionModal from '@/components/smart/QuestSubmissionModal.vue';
