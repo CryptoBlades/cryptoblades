@@ -3464,7 +3464,7 @@
     "events": {},
     "links": {},
     "address": "0x66eb98A303Eb58c0f153e3B47d31d3B28550F1Aa",
-    "transactionHash": "0x886bdf8e2d1f918ab0972cd3c10f02f3d139df7395cd87809e0006a34d899813"
+    "transactionHash": "0x9550076f027b864ef3f5b931d5dcada34544aa3257501f1dd6bfa819d4b2e423"
   },
   "build/contracts/PartnerGiveaways.json": {
     "events": {},
@@ -3959,7 +3959,7 @@
     },
     "links": {},
     "address": "0x9D38BF3ca5E9B9B725348DDBB82866D2e7093c86",
-    "transactionHash": "0x24b90bec4c0c88cffc68ee21dcd9c7406effd9bc65f7698de1acbd8d757bed75"
+    "transactionHash": "0x2f637eaae7c380f73460448457e3aa6b093bb9bd9532a3f741d89ef675cd9a7f"
   },
   "build/contracts/PvpRankings.json": {
     "events": {

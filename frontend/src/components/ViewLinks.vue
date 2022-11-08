@@ -47,17 +47,22 @@
         <div class="link-text">{{ $t("viewLink.admin") }}</div>
       </router-link>
     </li>
-
   </b-navbar-nav>
 </template>
 
-<script>
+<script lang="ts">
 import {portal, pvp, quests, raid} from '@/feature-flags';
 import {mapGetters, mapState} from 'vuex';
 import Vue from 'vue';
 
-import Hint from '@/components/Hint';
+import Hint from '@/components/Hint.vue';
 
+interface Data {
+  raid: boolean,
+  portal: boolean,
+  pvp: boolean,
+  quests: boolean,
+}
 
 export default Vue.extend({
   data() {
@@ -66,7 +71,7 @@ export default Vue.extend({
       portal,
       pvp,
       quests,
-    };
+    } as Data;
   },
 
   computed: {
@@ -77,13 +82,13 @@ export default Vue.extend({
       'getHasAdminAccess',
       'getHasMinterAccess',
     ]),
-    supportsPvP() {
+    supportsPvP(): boolean {
       return this.getCurrentChainSupportsPvP;
     },
-    supportsQuests() {
+    supportsQuests(): boolean {
       return this.getCurrentChainSupportsQuests;
     },
-    hasAdminAccess() {
+    hasAdminAccess(): boolean {
       return this.getHasAdminAccess || this.getHasMinterAccess;
     },
   },
@@ -93,8 +98,8 @@ export default Vue.extend({
   methods: {
     BazaarLink() {
       return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
-    }
-  }
+    },
+  },
 });
 </script>
 

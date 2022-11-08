@@ -548,7 +548,7 @@
     },
     "links": {},
     "address": "0x95f1AD7d60dC5857637Bca4651c547B6203c11Ec",
-    "transactionHash": "0x85d280ca92b08e00923154e6e60cde132f302c7e26e836336cafb54ab8a88bc2"
+    "transactionHash": "0x32339803f80591d3394e684be60f535c46b4a48f11f2db7ccf65c2514286cb19"
   },
   "build/contracts/CBKLandSale.json": {
     "events": {
@@ -2024,7 +2024,7 @@
     },
     "links": {},
     "address": "0xc6f252c2CdD4087e30608A35c022ce490B58179b",
-    "transactionHash": "0xbc4040bad3b498b63133c97506e3319d4876e92473a2facde1082bd0fbcb993d"
+    "transactionHash": "0x28cc6b854767344ddc34bcd1c3d8a1641c46b89d78f8f0505fecc8ec41da8806"
   },
   "build/contracts/CharactersBridgeProxyContract.json": {
     "events": {
@@ -2106,7 +2106,7 @@
     },
     "links": {},
     "address": "0xa53735eFc648b2185631965a37Bc1E48041Dec06",
-    "transactionHash": "0x59e4b47fd80d994ca6cb6d3097a54ee340a94b3dbaea9852c8828d09e4acba87"
+    "transactionHash": "0x587a029850bc3ed0ece145e24df69a876e9fbcabc635d7c0f53b3e3212890da0"
   },
   "build/contracts/CharacterWaterTraitChangeConsumables.json": {
     "events": {},
@@ -3187,7 +3187,7 @@
     "events": {},
     "links": {},
     "address": "0x39e0D6D95E035e2F8a2392788e0c53b7BA7d9B83",
-    "transactionHash": "0xb994553f5e8c77940c9af746bd56493f521045790dfbc8f87b2a26080e4b176d"
+    "transactionHash": "0x66a5d328eb5afcf2548da0846d8adc67f1432ac8068a9181be86978977c64127"
   },
   "build/contracts/LPStakingRewardsUpgradeableValor.json": {
     "events": {},
@@ -3530,7 +3530,7 @@
     "events": {},
     "links": {},
     "address": "0x32Abf3872b1399E8C17FCA1c574A02096B339e3F",
-    "transactionHash": "0x4e16165b2080ec672e9194783895271343b34d408c3c840c6d255305042f9d62"
+    "transactionHash": "0x52a3ffa9ab2f2ed58bdcf40fa72ef3ebb1b4b29c4c45fb9c3182d6579d992ca2"
   },
   "build/contracts/PartnerGiveaways.json": {
     "events": {},
@@ -4025,7 +4025,7 @@
     },
     "links": {},
     "address": "0x386088468D67333d393594C8427f15A64fa8896c",
-    "transactionHash": "0xc9b1cff11312f78992851aa6c14b4253f7cd7c77ea06e7b2738badfd13938f6f"
+    "transactionHash": "0xb62f4f338dec3a887f90bd24538a01eca269c448fb0e0c1b5dab93a442a616e2"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -5196,7 +5196,8 @@
   "build/contracts/SkillStakingRewardsUpgradeable60.json": {
     "events": {},
     "links": {},
-    "address": "0x4B4BaEb52C1A2679e13D9D6D9680b03308216244"
+    "address": "0x4B4BaEb52C1A2679e13D9D6D9680b03308216244",
+    "transactionHash": "0x316380e1397d2a42b1faeb517674fdeec63c39266de63bba3bb87135c2e442d6"
   },
   "build/contracts/SkillStakingRewardsUpgradeable90.json": {
     "events": {

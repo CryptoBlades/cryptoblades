@@ -13,7 +13,11 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {DustRarity, QuestItemsInfo, QuestItemType, Rarity} from '@/views/Quests.vue';
+import { QuestItemsInfo } from '@/interfaces';
+import {
+  DustRarity,
+  QuestItemType,
+  Rarity } from '@/enums/Quest';
 import lesserDust from '@/assets/dusts/lesserDust.png';
 import greaterDust from '@/assets/dusts/greaterDust.png';
 import powerfulDust from '@/assets/dusts/powerfulDust.png';
@@ -25,6 +29,7 @@ import stamina from '@/assets/stamina.png';
 import raid from '@/assets/raid.png';
 import experience from '@/assets/experience.png';
 import shield from '@/assets/shield2.png';
+import character from '@/assets/characters/Archer.png';
 import trinket from '@/assets/trinkets/trinket1.png';
 import questItemsInfo from '@/data/questItems.json';
 import {questItemTypeSupportsStars} from '@/utils/common';
@@ -112,6 +117,8 @@ export default Vue.extend({
       this.icon = soul;
     } else if (this.questItemType === QuestItemType.RAID) {
       this.icon = raid;
+    } else if (this.questItemType === QuestItemType.CHARACTER) {
+      this.icon = character;
     } else if (this.questItemType === QuestItemType.EXTERNAL || this.questItemType === QuestItemType.EXTERNAL_HOLD) {
       const fileName = (questItemsInfo as QuestItemsInfo).questItems[this.externalAddress]?.image;
       if (fileName) {

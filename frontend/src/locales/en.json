@@ -19,6 +19,7 @@
     "nftbridge": "NFT Bridge",
     "wiki": "Wiki",
     "nftDisplay": "NFT Display",
+    "updates": "Updates",
     "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality.",
     "DrawbridgeNotSupportedTooltip": "Drawbridge is only available for SKALE and BSC chains."
   },
@@ -805,7 +806,8 @@
       "EXTERNAL": "External",
       "EXTERNAL_HOLD": "External Hold",
       "EXPERIENCE": "Experience",
-      "REPUTATION": "Reputation"
+      "REPUTATION": "Reputation",
+      "CHARACTER": "Character"
     },
     "reputationTier": {
       "PEASANT": "Peasant",
@@ -824,7 +826,8 @@
       "QUEST": "Quest",
       "PROMO": "Promo Quest",
       "WALLET": "Wallet Quest",
-      "PICKABLE": "Pickable Quest"
+      "PICKABLE": "Pickable Quest",
+      "CHARACTER": "Character Quest"
     },
     "tier": "Tier",
     "level": "Level {level}",
@@ -867,6 +870,7 @@
     "nextReputationTierOn": "Next reputation tier on",
     "do": "Do",
     "requestQuest": "Request Quest",
+    "setAsNextQuest": "Set As Next Quest",
     "chooseSpecialQuest": "Choose Special Quest",
     "turnIn": "Turn in",
     "howMuchToTurnIn": "How much to turn in?",
@@ -907,7 +911,8 @@
     "updateForLevel": "Update for level {level}",
     "youNeedToHaveAtLeastOneCharacter": "You need to have at least one character to do Quests",
     "youNeedToHaveAtLeastOneCharacterRaid": "You need to have at least one character to join the Raid.",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "specialQuestTooltip": "Special Quest will default to Random if no Special Quest is selected"
   },
   "admin": {
     "tabs": {
@@ -1536,5 +1541,23 @@
       "octoblades": "The OctoBlades Event is Live on BNB Chain! Over 5x Rewards, Weekly PvP Tournaments, and SO MUCH MORE!!",
       "link": "https://app.cryptoblades.io/#/?chain=BNB"
     }
+  },
+  "updates": {
+    "markAllAsRead": "Mark All As Read",
+    "notifications": "Notifications"
+  },
+  "dateTime": {
+    "month": "month",
+    "months": "months",
+    "day": "day",
+    "days": "days",
+    "year": "year",
+    "years": "years",
+    "hour": "hour",
+    "hours": "hours",
+    "minute": "minute",
+    "minutes": "minutes",
+    "second": "second",
+    "seconds": "seconds"
   }
 }

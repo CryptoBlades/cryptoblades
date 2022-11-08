@@ -69,11 +69,18 @@ const bridge = {
       const { NFTStorage, Weapons, Characters, Shields } = rootState.contracts();
       if(!NFTStorage || !Weapons || !Characters || !Shields || !rootState.defaultAccount) return;
 
+      let withdrawFee = '0';
+      const isNftBridged = await dispatch('fetchIsNftBridged', { tokenAddress: nftContractAddr, tokenId });
+      if(isNftBridged) {
+        withdrawFee = await dispatch('fetchBridgeWithdrawFee', { tokenAddress: nftContractAddr });
+      }
+
       await NFTStorage.methods
         .withdrawFromStorage(nftContractAddr, tokenId)
         .send({
           from: rootState.defaultAccount,
           gasPrice: getGasPrice(),
+          value: withdrawFee
         });
 
       if(nftContractAddr === Weapons.options.address)
@@ -96,11 +103,15 @@ const bridge = {
         defaultCallOptions(rootState),
         new BigNumber(bridgeFee)
       );
+
+      const bridgeNativeFee = await dispatch('fetchBridgeRequestNativeFee', { tokenAddress: nftContractAddr });
+
       await NFTStorage.methods
         .bridgeItem(nftContractAddr, tokenId, targetChain)
         .send({
           from: rootState.defaultAccount,
           gasPrice: getGasPrice(),
+          value: bridgeNativeFee
         });
       await dispatch('fetchSkillBalance');
     },
@@ -135,16 +146,6 @@ const bridge = {
         chainId: +nft[5],
         status: +nft[6],
       }as NftTransfer;
-    },
-    async withdrawFromBridge({ rootState }: {rootState: IState, dispatch: Dispatch}, {tokenId}: {tokenId: number}) {
-      const { NFTStorage } = rootState.contracts();
-      if(!NFTStorage || !rootState.defaultAccount) return;
-      await NFTStorage.methods
-        .withdrawFromBridge(tokenId)
-        .send({
-          from: rootState.defaultAccount,
-          gasPrice: getGasPrice(),
-        });
     },
     async cancelBridge({ rootState }: {rootState: IState, dispatch: Dispatch}) {
       const { NFTStorage } = rootState.contracts();
@@ -189,6 +190,25 @@ const bridge = {
       const { NFTStorage } = rootState.contracts();
       if(!NFTStorage || !rootState.defaultAccount) return;
       return await NFTStorage.methods.getBridgeFee().call({
+        from: rootState.defaultAccount,
+      });
+    },
+    async fetchBridgeWithdrawFee({ rootState }: {rootState: IState, dispatch: Dispatch}, {tokenAddress}: {tokenAddress: string}) {
+      const { NFTStorage } = rootState.contracts();
+      if(!NFTStorage || !rootState.defaultAccount) return;
+      return await NFTStorage.methods.withdrawFromStorageNativeFee(tokenAddress).call({
+        from: rootState.defaultAccount,
+      });
+    },
+    async fetchIsNftBridged({ rootState }: {rootState: IState }, { tokenAddress, tokenId }: { tokenAddress: string, tokenId: number }) {
+      const { NFTStorage } = rootState.contracts();
+      if(!NFTStorage || !rootState.defaultAccount) return;
+      return await NFTStorage.methods.isNftBridged(tokenAddress, tokenId).call(defaultCallOptions(rootState));
+    },
+    async fetchBridgeRequestNativeFee({ rootState }: {rootState: IState, dispatch: Dispatch}, {tokenAddress}: {tokenAddress: string}) {
+      const { NFTStorage } = rootState.contracts();
+      if(!NFTStorage || !rootState.defaultAccount) return;
+      return await NFTStorage.methods.requestBridgeNativeFee(tokenAddress).call({
         from: rootState.defaultAccount,
       });
     },
