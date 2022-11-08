@@ -4,7 +4,8 @@
     <div class="d-flex align-items-center gap-2 flex-wrap" :key="quest.id">
       <QuestComponentIcon :questItemType="quest.rewardType" :amount="quest.rewardAmount"
                           :rarity="quest.rewardRarity" :externalAddress="quest.rewardExternalAddress"/>
-      <QuestComponentIcon :questItemType="QuestItemType.REPUTATION" :amount="quest.reputationAmount"/>
+      <QuestComponentIcon v-if="quest.reputationAmount > 0"
+        :questItemType="QuestItemType.REPUTATION" :amount="quest.reputationAmount"/>
     </div>
   </div>
 </template>
@@ -12,7 +13,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest, QuestItemType} from '@/views/Quests.vue';
+import { Quest } from '@/interfaces';
+import { QuestItemType } from '@/enums/Quest';
 import QuestComponentIcon from './QuestComponentIcon.vue';
 
 export default Vue.extend({
@@ -43,10 +45,8 @@ export default Vue.extend({
   color: #B4B0A7;
 }
 
-@media screen and (max-width: 576px) {
-  .quest-reward-display {
+.quest-reward-display {
     align-items: center;
   }
-}
 
 </style>

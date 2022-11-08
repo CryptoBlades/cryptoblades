@@ -2,7 +2,7 @@
     <div class="d-flex flex-column flex-md-row menu-nav justify-content-between">
         <div class="mobile-menu">
           <span :class="activeTab === 'info' ? 'active' : ''" @click="$emit('toggle', 'info')">
-          <span id="plaza"></span> {{$t('Character.info').toUpperCase()}}</span>
+            <span id="plaza"></span> {{$t('Character.info').toUpperCase()}}</span>
           <span :class="activeTab === 'garrison' ? 'active' : ''" @click="$emit('toggle', 'garrison')">
             <span id="garisson"></span>{{$t('Character.garrison').toUpperCase()}}</span>
           <span :class="activeTab === 'burn' ? 'active' : ''" @click="$emit('toggle', 'burn')">
@@ -307,6 +307,7 @@ export default Vue.extend({
     color: rgba(255, 255, 255, 0.459);
     display: flex;
     align-items: center;
+    font-size: 0.8em;
   }
 
   .recruit-btn{
@@ -355,12 +356,6 @@ export default Vue.extend({
     font-size: 0.8em;
   }
 
-  .mobile-menu > span{
-    font-family: Trajan;
-    display: flex;
-    align-items: center;
-    font-size: 0.8em;
-  }
   .none-mobile{
     display: none !important;
   }

@@ -5,7 +5,7 @@
   </div>
   <h3 v-else-if="quests.length === 0">
     {{ $t('quests.noQuestTemplatesInSelectedTier') }} </h3>
-  <div v-else class="d-flex flex-column gap-3">
+  <div v-else class="available-quests-container d-flex flex-row gap-3 flex-wrap">
     <div v-for="(quest, index) in quests" :key="quest.id" class="quest-row p-3 gap-5">
       <QuestRequirements :quest="quest" :index="index"/>
       <QuestRewards :quest="quest"/>
@@ -21,7 +21,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest, QuestTemplateType} from '@/views/Quests.vue';
+import { Quest } from '@/interfaces';
+import { QuestTemplateType } from '@/enums/Quest';
 import QuestRequirements from '@/components/smart/QuestRequirements.vue';
 import QuestRewards from '@/components/smart/QuestRewards.vue';
 import QuestActions from '@/components/smart/QuestActions.vue';
@@ -92,16 +93,24 @@ export default Vue.extend({
 <style scoped>
 .quest-row {
   display: flex;
-  width: 100%;
+  width: 45%;
   background: #141414;
   border: 1px solid #60583E;
   border-radius: 10px;
   align-items: center;
 }
 
-@media (max-width: 576px) {
-  .quest-row {
+.available-quests-container {
+  width: fit-content;
+  justify-content: center;
+}
+
+.quest-row {
     flex-direction: column;
+  }
+@media (max-width: 992px) {
+  .quest-row {
+    width: 100%;
   }
 }
 </style>

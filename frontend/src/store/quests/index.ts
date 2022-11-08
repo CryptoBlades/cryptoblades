@@ -2,7 +2,16 @@ import {
   IState,
   Contract,
 } from '@/interfaces';
-import {Quest, Rarity, ReputationLevelRequirements, RequirementType, RewardType, TierChances, WeeklyReward, QuestTemplateType} from '@/views/Quests.vue';
+import {
+  Quest,
+  ReputationLevelRequirements,
+  RewardType,
+  TierChances,
+  WeeklyReward } from '@/interfaces';
+import {
+  Rarity,
+  RequirementType,
+  QuestTemplateType } from '@/enums/Quest';
 import BigNumber from 'bignumber.js';
 // import Web3 from 'web3';
 import {abi as erc20Abi} from '@/../../build/contracts/ERC20.json';
@@ -741,7 +750,7 @@ const quests = {
     },
     async requestPickableQuest({ rootState }: {rootState: IState}, {characterID, questID}: {characterID: number, questID: number}) {
       const { SimpleQuests } = rootState.contracts();
-      if(!SimpleQuests || !rootState.defaultAccount) return;
+      if (!SimpleQuests || !rootState.defaultAccount) return;
       return await SimpleQuests.methods.requestPickableQuest(characterID, questID).send(defaultCallOptions(rootState));
     }
   },

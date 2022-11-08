@@ -1,7 +1,7 @@
 <template>
   <div class="quest-requirement-display gap-3">
     <span class="quest-title">{{ $t('quests.quest') }}</span>
-    <div class="d-flex align-items-center gap-3 flex-wrap" :key="quest.id">
+    <div class="quest-requirement-content d-flex align-items-center gap-3 flex-wrap" :key="quest.id">
       <QuestComponentIcon :questItemType="quest.requirementType" :amount="quest.requirementAmount"
                           :rarity="quest.requirementRarity" :externalAddress="quest.requirementExternalAddress"/>
       <div class="d-flex flex-column requirement-text-container"><span class="requirement-text">{{
@@ -31,7 +31,14 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Quest, QuestItemsInfo, Rarity, RequirementType, RewardType, DustRarity} from '@/views/Quests.vue';
+import {
+  Quest,
+  QuestItemsInfo,
+  RewardType } from '@/interfaces';
+import {
+  Rarity,
+  RequirementType,
+  DustRarity } from '@/enums/Quest';
 import QuestComponentIcon from './QuestComponentIcon.vue';
 import {questItemTypeSupportsStars, questItemTypeSupportsTimesValue} from '@/utils/common';
 import {mapActions} from 'vuex';
@@ -163,8 +170,11 @@ export default Vue.extend({
   color: #B4B0A7;
 }
 
-@media screen and (max-width: 576px) {
-  .requirement-text {
+.quest-requirement-content {
+  justify-content: center;
+}
+
+.requirement-text {
     white-space: normal;
   }
   .quest-requirement-display {
@@ -177,6 +187,5 @@ export default Vue.extend({
     margin-top: 5px;
     width: 100%;
   }
-}
 
 </style>
