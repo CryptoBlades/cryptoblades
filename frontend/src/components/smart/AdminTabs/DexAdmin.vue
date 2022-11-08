@@ -42,16 +42,16 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import {isValidWeb3Address} from '../../../utils/common';
+import {isValidWeb3Address} from '@/utils/common';
 
 interface StoreMappedActions {
   getDexFeePercentage(): Promise<number>;
 
   setDexFeePercentage(payload: { fee: number }): Promise<void>;
 
-  addDexTokenPair(payload: { tokenPair: TokenPair }): Promise<void>;
+  addDexTokenPair(tokenPair: TokenPair): Promise<void>;
 
-  addDexLiquidity(payload: { tokenPair: TokenPair }): Promise<void>;
+  addDexLiquidity(tokenPair: TokenPair): Promise<void>;
 }
 
 export interface TokenPair {
