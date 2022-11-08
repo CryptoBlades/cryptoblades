@@ -2212,7 +2212,7 @@ export default new Vuex.Store<IState>({
 
     async addDexTokenPair({state}, tokenPair: TokenPair) {
       const {Dex} = state.contracts();
-      if (!Dex) return;
+      if (!Dex || !state.defaultAccount) return;
 
       const tokenAContract = new state.web3.eth.Contract(erc20Abi as any[], tokenPair.tokenA) as Contract<ERC20>;
       const tokenADecimals = +await tokenAContract.methods.decimals().call(defaultCallOptions(state));
@@ -2244,7 +2244,7 @@ export default new Vuex.Store<IState>({
 
     async addDexLiquidity({state}, tokenPair: TokenPair) {
       const {Dex} = state.contracts();
-      if (!Dex) return;
+      if (!Dex || !state.defaultAccount) return;
 
       const tokenAContract = new state.web3.eth.Contract(erc20Abi as any[], tokenPair.tokenA) as Contract<ERC20>;
       const tokenADecimals = +await tokenAContract.methods.decimals().call(defaultCallOptions(state));
