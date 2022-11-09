@@ -312,8 +312,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             char, staminaCostFight * fightMultiplier, false, 0);
         
         // dirty variable reuse to avoid stack limits (target is 0-3 atm)
+        uint24 playerBasePower = uint24(powerData >> 96);
         target = grabTarget(
-            uint24(powerData >> 96),//basePower
+            playerBasePower,
             uint64(miscData & 0xFFFFFFFFFFFFFFFF),//timestamp
             target,//passed as index (0-3)
             now / 1 hours
@@ -325,6 +326,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             fighter,
             char,
             uint24(powerData >> (targetTrait*24)),//playerFightPower
+            playerBasePower,//playerBasePower
             uint24(target),//targetPower
             fightMultiplier,
             uint8((miscData >> 64) & 0xFF)//characterVersion
@@ -335,6 +337,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         address fighter,
         uint256 char,
         uint24 playerFightPower,
+        uint24 playerBasePower,
         uint24 targetPower,
         uint8 fightMultiplier,
         uint8 characterVersion
@@ -343,7 +346,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 playerRoll = uint24(RandomUtil.plusMinus10PercentSeededFast(playerFightPower,now+char));
         uint24 monsterRoll = uint24(RandomUtil.plusMinus10PercentSeededFast(targetPower, now-char));
 
-        uint16 xp = getXpGainForFight(playerFightPower, targetPower) * fightMultiplier;
+        uint16 xp = getXpGainForFight(playerBasePower, targetPower) * fightMultiplier;
         tokens = getTokenGainForFight(targetPower) * fightMultiplier;
         expectedTokens = tokens;
 

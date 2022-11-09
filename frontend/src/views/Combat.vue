@@ -530,7 +530,7 @@ export default Vue.extend({
     },
 
     getPotentialXp(targetToFight: ITarget) {
-      const totalPower = this.powerData.pvePower[targetToFight.trait];
+      const totalPower = this.powerData.pvePower[4]; // using base power
       //Formula taken from getXpGainForFight funtion of cryptoblades.sol
       return Math.floor((targetToFight.power / totalPower) * this.fightXpGain) * this.fightMultiplier;
     },
