@@ -1091,7 +1091,7 @@ export default new Vuex.Store<IState>({
 
       const equipment = state.contracts().EquipmentManager!;
       const characters = state.contracts().Characters!;
-      characterId = 0;
+      characterId = 0; // TEMP
       const addr = await equipment.methods.equippedSlotAddress(characters.options.address, characterId, 1).call(defaultCallOptions(state));
 
       if(addr && addr !== '0x0000000000000000000000000000000000000000') {
@@ -1110,7 +1110,7 @@ export default new Vuex.Store<IState>({
 
       const equipment = state.contracts().EquipmentManager!;
       const characters = state.contracts().Characters!;
-      characterId = 0;
+      characterId = 0; // TEMP
       const addr = await equipment.methods.equippedSlotAddress(characters.options.address, characterId, 2).call(defaultCallOptions(state));
 
       if(addr && addr !== '0x0000000000000000000000000000000000000000') {
@@ -2732,24 +2732,29 @@ export default new Vuex.Store<IState>({
     async equipShield({ state, dispatch }, {equipperId, itemId}) {
       const { EquipmentManager, Shields, Characters } = state.contracts();
       if(!EquipmentManager || !Shields || !Characters || !state.defaultAccount) return;
+
+      const approved = await Shields.methods.getApproved(itemId).call(defaultCallOptions(state));
+      if (approved !== EquipmentManager.options.address)
+        await Shields.methods.approve(EquipmentManager.options.address, itemId).send(defaultCallOptions(state));
+
       await EquipmentManager.methods.equipNFT(Characters.options.address, equipperId, 2, Shields.options.address, itemId).send(defaultCallOptions(state));
       await dispatch('updateCharacterShields');
     },
 
-    async unqeuipNFT({ state }, {equipperAddress, equipperId, slot}) {
+    async unequipNFT({ state }, {equipperAddress, equipperId, slot}) {
       const { EquipmentManager } = state.contracts();
       if(!EquipmentManager || !state.defaultAccount) return;
       await EquipmentManager.methods.unequipNFT(equipperAddress, equipperId, slot).send(defaultCallOptions(state));
     },
 
-    async unqeuipWeapon({ state, dispatch }, {equipperId}) {
+    async unequipWeapon({ state, dispatch }, {equipperId}) {
       const { EquipmentManager, Characters } = state.contracts();
       if(!EquipmentManager || !Characters || !state.defaultAccount) return;
       await EquipmentManager.methods.unequipNFT(Characters.options.address, equipperId, 1).send(defaultCallOptions(state));
       await dispatch('updateCharacterWeapons');
     },
 
-    async unqeuipShield({ state, dispatch }, {equipperId}) {
+    async unequipShield({ state, dispatch }, {equipperId}) {
       const { EquipmentManager, Characters } = state.contracts();
       if(!EquipmentManager || !Characters || !state.defaultAccount) return;
       await EquipmentManager.methods.unequipNFT(Characters.options.address, equipperId, 2).send(defaultCallOptions(state));
@@ -2766,7 +2771,7 @@ export default new Vuex.Store<IState>({
     async getShield({ state }, shieldId) {
       const { Shields } = state.contracts();
       if (!Shields || !state.defaultAccount) return;
-
+      shieldId = 0; // TEMP
       return await Shields.methods.get(`${shieldId}`).call({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 

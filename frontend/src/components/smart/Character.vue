@@ -91,7 +91,7 @@
       <!-- Equipment -->
       <div class="col-lg-12 col-md-5 col-sm-9 drops">
         <span>{{$t('weapon')}}</span>
-        <div class="weapon-info" v-if="equippedWeaponId">
+        <div class="weapon-info" v-if="equippedWeaponId !== undefined && equippedWeaponId !== null">
           <div>
             {{equippedWeaponId}}
             <!--weapon-inventory class="weapon-icon" :weapon="equippedWeapon" :displayType="'raid'"/-->
@@ -121,7 +121,29 @@
 
       <div class="col-lg-12 col-md-5 col-sm-9 drops">
         <span>{{$t('Shield')}}</span>
-        <div class="weapon-info" v-if="equippedShieldId">
+        <div v-if="!equippedShieldId" class="shieldButtonWrapper">
+          <a tabindex="0" class="selectWeaponButton" id="shield-popover">
+            <div class="placeholderImageWrapper">
+              <img src="../../assets/shieldPlaceholder.svg" alt="shield" />
+            </div>
+              <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
+              <p class="popoverTitle">{{$t('pvp.shields')}}</p>
+              <div v-if="ownedShieldIds.length !== 0" class="popoverGrid">
+                <pvp-shield
+                  v-for="shield in ownedShieldsWithInformation"
+                  :key="shield.shieldId"
+                  :shield="shield.information"
+                  :shieldId="shield.shieldId"
+                  @click="selectShield(shield.shieldId)"
+                />
+              </div>
+              <div v-else class="noWeaponsOrShields">
+                {{$t('pvp.noShields')}}
+              </div>
+            </b-popover>
+          </a>
+        </div>
+        <div class="weapon-info" v-if="equippedShieldId !== undefined && equippedShieldId !== null">
           <div>
             {{equippedShieldId}}
             <!--pvp-shield
@@ -140,9 +162,9 @@
         <div class="weapon-info" v-else>
           <div class="outline-box">
             <div>
-              <div @click="selectShield()">
+              <!--div @click="selectShield()">
                 <img src="../../assets/swithc-wep.png" alt="">
-              </div>
+              </div-->
             </div>
             <div>
               <p>{{$t('equip.noShield')}}</p>
@@ -321,6 +343,8 @@ import { Quest, ReputationLevelRequirements, ReputationTier } from '@/views/Ques
 import { CharacterTrait, ICharacter, RequiredXp } from '@/interfaces';
 import { isValidWeb3Address } from '@/utils/common';
 import Events from '@/events';
+import PvPShield from './PvPShield.vue';
+import { shieldFromContract as formatShield } from '../../contract-models';
 
 
 interface Skin {
@@ -354,6 +378,7 @@ interface Data {
   equippedWeaponId: number | string;
   equippedShield: any;
   equippedShieldId: number | string;
+  ownedShieldsWithInformation: number[];
 }
 
 interface StoreMappedActions {
@@ -383,12 +408,13 @@ interface StoreMappedActions {
   transferNonGenesisSoul(payload: {targetAddress: string, soulAmount: number}): Promise<void>;
   fetchWeapon(payload: {weaponId: string | number}): Promise<void>;
   fetchShield(payload: {shieldId: string | number}): Promise<void>;
-  equipWeapon(payload: {equipperId: string, itemId: number}): Promise<void>;
-  equipShield(payload: {equipperId: string, itemId: number}): Promise<void>;
+  equipWeapon(payload: {equipperId: string, itemId: number | string}): Promise<void>;
+  equipShield(payload: {equipperId: string, itemId: number | string}): Promise<void>;
   unequipWeapon(payload: {equipperId: string}): Promise<void>;
   unequipShield(payload: {equipperId: string}): Promise<void>;
   fetchCharacterWeapon(payload: {characterId: string | number}): Promise<number>;
   fetchCharacterShield(payload: {characterId: string | number}): Promise<number>;
+  getShield(payload: {shieldId: string | number}): Promise<string[]>;
 }
 
 interface StoredMappedGetters {
@@ -397,7 +423,7 @@ interface StoredMappedGetters {
 }
 
 export default Vue.extend({
-  components: { UpgradeTab, OptionsTab, SkinsTab },
+  components: { UpgradeTab, OptionsTab, SkinsTab, 'pvp-shield': PvPShield },
   data(): Data{
     return {   ReputationTier,
       reputationLevelRequirements: undefined,
@@ -426,6 +452,7 @@ export default Vue.extend({
       equippedWeaponId: '',
       equippedShield: null,
       equippedShieldId: '',
+      ownedShieldsWithInformation: [],
     };
   },
   computed: {
@@ -435,6 +462,7 @@ export default Vue.extend({
       'characters',
       'characterStaminas',
       'ownedGarrisonCharacterIds',
+      'ownedShieldIds',
     ]),
     ...mapGetters([
       'getCharacterName',
@@ -544,7 +572,8 @@ export default Vue.extend({
       'unequipWeapon',
       'unequipShield',
       'fetchCharacterWeapon',
-      'fetchCharacterShield'
+      'fetchCharacterShield',
+      'getShield',
     ]) as StoreMappedActions,
     ...(mapGetters([
       'getEquippedWeapon',
@@ -624,18 +653,33 @@ export default Vue.extend({
       if(timestamp > Math.floor(Date.now()/1000)) return 0;
       return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
     },
+
+    async getShieldInformation(shieldId: number | string) {
+      return formatShield(`${shieldId}`, await this.getShield({shieldId}));
+    },
+
     selectWeapon() {
       Events.$emit('weapon-inventory', true);
     },
+
     async removeWeapon() {
-      await this.unequipWeapon(this.currentCharacterId);
+      await this.unequipWeapon({equipperId: this.currentCharacterId});
+      this.equippedWeaponId = await this.fetchCharacterWeapon({characterId: this.currentCharacterId});
+      //re-fetch weapon inventory
     },
-    selectShield() {
+
+    async selectShield(shieldId: number | string) {
       // todo
+      await this.equipShield({equipperId: this.currentCharacterId as string, itemId: shieldId});
+      //re-fetch shield inventory
     },
+
     async removeShield() {
-      await this.unequipShield(this.currentCharacterId);
+      await this.unequipShield({equipperId: this.currentCharacterId});
+      this.equippedShieldId = await this.fetchCharacterShield({characterId: this.currentCharacterId});
+      //re-fetch shield inventory
     },
+
     async refreshData(){
       this.reputationLevelRequirements =  await this.getReputationLevelRequirements();
       this.genesisSoulBalance = +(await this.fetchGenesisSoulBalance());
@@ -741,11 +785,19 @@ export default Vue.extend({
     await this.refreshData();
     await this.fetchCharacterQuestData();
     await this.loadConsumablesCount();
+
+    this.ownedShieldsWithInformation = await Promise.all(this.ownedShieldIds.map(async (shieldId: number | string) => {
+      return {
+        shieldId,
+        information: await this.getShieldInformation(shieldId)
+      };
+    }));
     Events.$on('chooseweapon', (id: number) => {
       this.equipWeapon({equipperId: this.currentCharacterId, itemId: id});
+      //re-fetch weapon inventory
     });
     this.equippedWeaponId = await this.fetchCharacterWeapon({characterId: this.currentCharacterId});
-    this.equippedShieldId = this.fetchCharacterShield({characterId: this.currentCharacterId});
+    this.equippedShieldId = await this.fetchCharacterShield({characterId: this.currentCharacterId});
   },
 });
 </script>
