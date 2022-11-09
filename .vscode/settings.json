@@ -1,5 +1,9 @@
 {
     "solidity.compileUsingRemoteVersion": "v0.6.5+commit.f956cc89",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "eslint.validate": ["javascript"]
     "eslint.workingDirectories": [
         "./frontend",
     ]

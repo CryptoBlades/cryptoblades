@@ -1396,6 +1396,15 @@
     "leaveOldArena": "Due to an improvement in the PvP Arena, you will be required to leave and re-enter. This is just a one time thing. All unclaimed rewards will still be claimable without time limit.",
     "untiered": "Free for All"
   },
+  "equip": {
+    "equipped": "Equipped",
+    "noWeapon": "No weapon (Required for fights, raid, pvp!)",
+    "equipWeapon": "Click the icon to equip a weapon",
+    "unequipWeapon": "Click the icon to unequip the weapon",
+    "noShield": "No shield (Optional, for pvp)",
+    "equipShield": "Click the icon to equip a shield",
+    "unequipShield": "Click the icon to unequip the shield"
+  },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
     "warning": {

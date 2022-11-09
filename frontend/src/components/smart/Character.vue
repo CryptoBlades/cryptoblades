@@ -90,25 +90,63 @@
       </div>
       <!-- Equipment -->
       <div class="col-lg-12 col-md-5 col-sm-9 drops">
-        <span>{{$t('raid.weapon')}}</span>
-        <div class="weapon-info" v-if="equippedWeapon">
+        <span>{{$t('weapon')}}</span>
+        <div class="weapon-info" v-if="equippedWeaponId">
           <div>
-            <weapon-inventory class="weapon-icon" :weapon="equippedWeapon" :displayType="'raid'"/>
+            {{equippedWeaponId}}
+            <!--weapon-inventory class="weapon-icon" :weapon="equippedWeapon" :displayType="'raid'"/-->
           </div>
-          <div @click="changeEquipedWeapon()">
-            <img src="assets/swithc-wep.png" alt="">
+          <div @click="removeWeapon()">
+            <img src="../../assets/swithc-wep.png" alt="">
+          </div>
+          <div>
+            <p>{{$t('equip.equipped')}}</p>
+            <span>{{$t('equip.unequipWeapon')}}</span>
           </div>
         </div>
         <div class="weapon-info" v-else>
           <div class="outline-box">
             <div>
-              <div @click="changeEquipedWeapon()">
+              <div @click="selectWeapon()">
                 <img src="../../assets/swithc-wep.png" alt="">
               </div>
             </div>
             <div>
-              <p>{{$t('raid.noWeapon')}}</p>
-              <span>{{$t('raid.clickToEquip')}}</span>
+              <p>{{$t('equip.noWeapon')}}</p>
+              <span>{{$t('equip.equipWeapon')}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-12 col-md-5 col-sm-9 drops">
+        <span>{{$t('Shield')}}</span>
+        <div class="weapon-info" v-if="equippedShieldId">
+          <div>
+            {{equippedShieldId}}
+            <!--pvp-shield
+              :shield="equippedShield"
+              :shieldId="equippedShield.id"
+            /-->
+          </div>
+          <div @click="removeShield()">
+            <img src="../../assets/swithc-wep.png" alt="">
+          </div>
+          <div>
+            <p>{{$t('equip.equipped')}}</p>
+            <span>{{$t('equip.unequipShield')}}</span>
+          </div>
+        </div>
+        <div class="weapon-info" v-else>
+          <div class="outline-box">
+            <div>
+              <div @click="selectShield()">
+                <img src="../../assets/swithc-wep.png" alt="">
+              </div>
+            </div>
+            <div>
+              <p>{{$t('equip.noShield')}}</p>
+              <span>{{$t('equip.equipShield')}}</span>
             </div>
           </div>
         </div>
@@ -313,6 +351,9 @@ interface Data {
   isTransferringNonGenesis: boolean;
   soulAmountToTransfer: number;
   equippedWeapon: any;
+  equippedWeaponId: number | string;
+  equippedShield: any;
+  equippedShieldId: number | string;
 }
 
 interface StoreMappedActions {
@@ -340,10 +381,19 @@ interface StoreMappedActions {
   sendToGarrison(id: string): Promise<void>;
   transferSoul(payload: {targetAddress: string, soulAmount: number}): Promise<void>;
   transferNonGenesisSoul(payload: {targetAddress: string, soulAmount: number}): Promise<void>;
+  fetchWeapon(payload: {weaponId: string | number}): Promise<void>;
+  fetchShield(payload: {shieldId: string | number}): Promise<void>;
   equipWeapon(payload: {equipperId: string, itemId: number}): Promise<void>;
   equipShield(payload: {equipperId: string, itemId: number}): Promise<void>;
   unequipWeapon(payload: {equipperId: string}): Promise<void>;
   unequipShield(payload: {equipperId: string}): Promise<void>;
+  fetchCharacterWeapon(payload: {characterId: string | number}): Promise<number>;
+  fetchCharacterShield(payload: {characterId: string | number}): Promise<number>;
+}
+
+interface StoredMappedGetters {
+  getEquippedWeapon(payload: {characterId: string | number}): number;
+  getEquippedShield(payload: {characterId: string | number}): number;
 }
 
 export default Vue.extend({
@@ -373,6 +423,9 @@ export default Vue.extend({
       isTransferringNonGenesis: false,
       soulAmountToTransfer: 0,
       equippedWeapon: null,
+      equippedWeaponId: '',
+      equippedShield: null,
+      equippedShieldId: '',
     };
   },
   computed: {
@@ -484,11 +537,19 @@ export default Vue.extend({
       'fetchTotalRenameTags',
       'transferSoul',
       'transferNonGenesisSoul',
+      'fetchWeapon',
+      'fetchShield',
       'equipWeapon',
       'equipShield',
       'unequipWeapon',
-      'unequipShield'
+      'unequipShield',
+      'fetchCharacterWeapon',
+      'fetchCharacterShield'
     ]) as StoreMappedActions,
+    ...(mapGetters([
+      'getEquippedWeapon',
+      'getEquippedShield',
+    ]) as StoredMappedGetters),
     getCharacterArt,
     RequiredXp,
     removeErrors(){
@@ -563,8 +624,17 @@ export default Vue.extend({
       if(timestamp > Math.floor(Date.now()/1000)) return 0;
       return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
     },
-    changeEquipedWeapon(){
+    selectWeapon() {
       Events.$emit('weapon-inventory', true);
+    },
+    async removeWeapon() {
+      await this.unequipWeapon(this.currentCharacterId);
+    },
+    selectShield() {
+      // todo
+    },
+    async removeShield() {
+      await this.unequipShield(this.currentCharacterId);
     },
     async refreshData(){
       this.reputationLevelRequirements =  await this.getReputationLevelRequirements();
@@ -674,6 +744,8 @@ export default Vue.extend({
     Events.$on('chooseweapon', (id: number) => {
       this.equipWeapon({equipperId: this.currentCharacterId, itemId: id});
     });
+    this.equippedWeaponId = await this.fetchCharacterWeapon({characterId: this.currentCharacterId});
+    this.equippedShieldId = this.fetchCharacterShield({characterId: this.currentCharacterId});
   },
 });
 </script>

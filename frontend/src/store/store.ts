@@ -313,6 +313,14 @@ export default new Vuex.Store<IState>({
       return getters.weaponsWithIds(state.ownedWeaponIds);
     },
 
+    getEquippedWeapon(state, characterId: number) {
+      return state.characterWeapons[characterId];
+    },
+
+    getEquippedShield(state, characterId: number) {
+      return state.characterShields[characterId];
+    },
+
     weaponsWithIds(state) {
       return (weaponIds: (string | number)[]) => {
         const weapons = weaponIds.map(id => state.weapons[+id]);
@@ -1058,6 +1066,84 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchKeyLootboxes', ownedKeyLootboxIds);
     },
 
+    async updateCharacterWeapons({ state }) {
+      if(!state.defaultAccount) return;
+
+      const equipment = state.contracts().EquipmentManager!;
+      const characters = state.contracts().Characters!;
+      for(let i = 0; i < state.ownedCharacterIds.length; i++) {
+        const charId = state.ownedCharacterIds[i];
+        const addr = await equipment.methods.equippedSlotAddress(characters.options.address, charId, 1).call(defaultCallOptions(state));
+        if(addr && addr !== '0x0000000000000000000000000000000000000000') {
+          const equippedWeapon = await equipment.methods.equippedSlotID(characters.options.address, charId, 1).call(defaultCallOptions(state));
+          Vue.set(state.characterWeapons, charId, equippedWeapon);
+          console.log('got weapon: '+equippedWeapon);
+        }
+        else {
+          console.log('no weapon');
+          Vue.set(state.characterWeapons, charId, undefined);
+        }
+      }
+    },
+
+    async fetchCharacterWeapon({ state }, characterId: string | number) {
+      if(!state.defaultAccount) return;
+
+      const equipment = state.contracts().EquipmentManager!;
+      const characters = state.contracts().Characters!;
+      characterId = 0;
+      const addr = await equipment.methods.equippedSlotAddress(characters.options.address, characterId, 1).call(defaultCallOptions(state));
+
+      if(addr && addr !== '0x0000000000000000000000000000000000000000') {
+        const equippedWeapon = await equipment.methods.equippedSlotID(characters.options.address, characterId, 1).call(defaultCallOptions(state));
+        console.log('got weapon: '+equippedWeapon);
+        return parseInt(equippedWeapon, 10);
+      }
+      else {
+        console.log('no weapon');
+        return undefined;
+      }
+    },
+
+    async fetchCharacterShield({ state }, characterId: string | number) {
+      if(!state.defaultAccount) return;
+
+      const equipment = state.contracts().EquipmentManager!;
+      const characters = state.contracts().Characters!;
+      characterId = 0;
+      const addr = await equipment.methods.equippedSlotAddress(characters.options.address, characterId, 2).call(defaultCallOptions(state));
+
+      if(addr && addr !== '0x0000000000000000000000000000000000000000') {
+        const equippedShield = await equipment.methods.equippedSlotID(characters.options.address, characterId, 2).call(defaultCallOptions(state));
+        console.log('got shield: '+equippedShield);
+        return parseInt(equippedShield, 10);
+      }
+      else {
+        console.log('no shield');
+        return undefined;
+      }
+    },
+
+    async updateCharacterShields({ state }) {
+      if(!state.defaultAccount) return;
+
+      const equipment = state.contracts().EquipmentManager!;
+      const characters = state.contracts().Characters!;
+      for(let i = 0; i < state.ownedCharacterIds.length; i++) {
+        const charId = state.ownedCharacterIds[i];
+        const addr = await equipment.methods.equippedSlotAddress(characters.options.address, charId, 2).call(defaultCallOptions(state));
+        if(!addr && addr !== '0x0000000000000000000000000000000000000000') {
+          const equippedShield = await equipment.methods.equippedSlotID(characters.options.address, charId, 2).call(defaultCallOptions(state));
+          Vue.set(state.characterShields, charId, equippedShield);
+          console.log('got shield: '+equippedShield);
+        }
+        else {
+          console.log('no shield');
+          Vue.set(state.characterShields, charId, undefined);
+        }
+      }
+    },
+
     async fetchSkillBalance({ state, commit, dispatch }) {
       const { defaultAccount } = state;
       if(!defaultAccount) return;
@@ -1158,6 +1244,8 @@ export default new Vuex.Store<IState>({
 
           if(!inGarrison) {
             commit('updateCharacter', { characterId, character });
+            dispatch('updateCharacterWeapons');
+            dispatch('updateCharacterShields');
           }
           else {
             commit('updateGarrisonCharacter', { characterId, character });
@@ -2652,6 +2740,20 @@ export default new Vuex.Store<IState>({
       const { EquipmentManager } = state.contracts();
       if(!EquipmentManager || !state.defaultAccount) return;
       await EquipmentManager.methods.unequipNFT(equipperAddress, equipperId, slot).send(defaultCallOptions(state));
+    },
+
+    async unqeuipWeapon({ state, dispatch }, {equipperId}) {
+      const { EquipmentManager, Characters } = state.contracts();
+      if(!EquipmentManager || !Characters || !state.defaultAccount) return;
+      await EquipmentManager.methods.unequipNFT(Characters.options.address, equipperId, 1).send(defaultCallOptions(state));
+      await dispatch('updateCharacterWeapons');
+    },
+
+    async unqeuipShield({ state, dispatch }, {equipperId}) {
+      const { EquipmentManager, Characters } = state.contracts();
+      if(!EquipmentManager || !Characters || !state.defaultAccount) return;
+      await EquipmentManager.methods.unequipNFT(Characters.options.address, equipperId, 2).send(defaultCallOptions(state));
+      await dispatch('updateCharacterShields');
     },
 
     async getWeapon({ state }, weaponId) {
