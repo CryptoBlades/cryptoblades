@@ -4,3 +4,5 @@ export * from './State';
 export * from './Target';
 export * from './Weapon';
 export * from './Contracts';
+export * from './Quest';
+export * from './Notification';

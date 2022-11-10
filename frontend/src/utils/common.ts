@@ -6,7 +6,7 @@ import {router} from '@/main';
 import {getConfigValue, Networks} from '@/contracts';
 import {networks as pvpNetworks} from '../../../build/contracts/PvpArena.json';
 import {networks as simpleQuestsNetworks} from '../../../build/contracts/SimpleQuests.json';
-import {QuestItemType} from '@/views/Quests.vue';
+import { QuestItemType } from '@/enums/Quest';
 import {abi as erc20Abi} from '../../../build/contracts/ERC20.json';
 import store from '@/store/store';
 
