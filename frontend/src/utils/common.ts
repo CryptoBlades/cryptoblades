@@ -136,7 +136,7 @@ export const currentChainSupportsQuests = () => {
 
 export const currentChainSupportsDrawbridge = () => {
   const currentChain = localStorage.getItem('currentChain') ?? '';
-  return currentChain === 'SKALE' || currentChain === 'BSC';
+  return currentChain === 'SKALE' || currentChain === 'BNB';
 };
 
 export const getTimeRemaining = (end: string) => {
