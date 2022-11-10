@@ -446,7 +446,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         } else if (quest.requirementType == ItemType.EXTERNAL) {
             partnerVault.storeNfts(IERC721(quest.requirementExternalAddress), tokenIds);
         } else if (quest.requirementType == ItemType.EXTERNAL_HOLD) {
-            partnerVault.showHeldNfts(IERC721(quest.requirementExternalAddress), tokenIds, msg.sender);
+            partnerVault.showHeldNfts(IERC721(quest.requirementExternalAddress), tokenIds, msg.sender, questID);
         } else {
             revert("Unknown requirement type");
         }
