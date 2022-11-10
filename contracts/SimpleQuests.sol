@@ -615,7 +615,6 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     }
 
     function deleteQuestTemplate(uint256 tier, uint256 questID) public restricted {
-        require(questID == questTemplates[tier][questIndexes[questID]], "Wrong questIndex for given tier");
         _deleteQuestTemplate(tier, questID);
     }
 
