@@ -5,7 +5,9 @@
       <QuestComponentIcon :questItemType="quest.requirementType" :amount="quest.requirementAmount"
                           :rarity="quest.requirementRarity" :externalAddress="quest.requirementExternalAddress"/>
       <div class="d-flex flex-column requirement-text-container"><span class="requirement-text">{{
-          quest.requirementType === RequirementType.RAID ? $t('quests.do') : $t('quests.submit')
+          quest.requirementType === RequirementType.RAID ?
+            $t('quests.do') : (quest.requirementType === RequirementType.EXTERNAL_HOLD ?
+              $t('quests.show') : $t('quests.submit'))
         }} {{ quest.requirementAmount }}<span
           v-if="questItemTypeSupportsTimesValue(quest.requirementType) && !isCurrency">x</span> <span
           v-if="questItemTypeSupportsStars(quest.requirementType)">{{
