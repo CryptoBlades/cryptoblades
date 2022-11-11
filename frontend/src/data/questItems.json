@@ -65,6 +65,18 @@
       "description": "Cake Monster is a ultra-deflationary, automated dividend yield, and meme token. It offers a multitude of unique DeFi features aimed at building a flexible and multifaceted reward system for all participants without compromising the sustainability or security of the protocol ecosystem.",
       "image": "cakemonster.png",
       "website": "https://cake.monster/"
+    },
+    "0x8986C7033a8F89E0383f5fe51265A92015feAb79": {
+      "name": "Glory Pass",
+      "description": "Glory Pass is an NFT specially designed by BNB Chain for our Football Fiesta campaign. Holders can use it to participate in the match predictions and access benefits provided by our ecosystem partners and even redeem their NFT/game vouchers to play games.",
+      "image": "glorypass.png",
+      "website": "https://galxe.com/bnbchain/campaign/GCRTUUwuVg"
+    },
+    "0xa23b58EA2eE75A30075B3D071444Da35d4947Cc9": {
+      "name": "Glory Pass",
+      "description": "Glory Pass is an NFT specially designed by BNB Chain for our Football Fiesta campaign. Holders can use it to participate in the match predictions and access benefits provided by our ecosystem partners and even redeem their NFT/game vouchers to play games.",
+      "image": "glorypass.png",
+      "website": "https://galxe.com/bnbchain/campaign/GCRTUUwuVg"
     }
   }
 }
