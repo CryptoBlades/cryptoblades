@@ -25,7 +25,7 @@
       v-if="canSubmit"
       :disabled="isLoading" variant="primary"
       class="flex-1 custom-action-btn" @click="submit">
-      {{ $t('quests.submit') }}
+      {{ quest.requirementType === RequirementType.EXTERNAL_HOLD ? $t('quests.show') : $t('quests.submit') }}
     </b-button>
     <b-button v-if="character && isOnQuest && (!questCanBeCompleted || afterDeadline)" variant="primary" class="flex-1 custom-action-btn" @click="skip"
               :disabled="!questCanBeSkipped || isLoading">
