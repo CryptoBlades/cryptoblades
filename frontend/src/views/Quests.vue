@@ -449,9 +449,11 @@ export default Vue.extend({
     async defaultAccount(){
       await this.refreshQuestData();
     },
-    async ownedCharacterIds(characterIds) {
-      await this.fetchCharacters(characterIds);
-      await this.refreshQuestData();
+    async ownedCharacterIds(currentcharacterIds, previousCharacterIds) {
+      await this.fetchCharacters(currentcharacterIds);
+      if (JSON.stringify(currentcharacterIds) !== JSON.stringify(previousCharacterIds)) {
+        await this.refreshQuestData();
+      }
     },
     async walletQuestTier() {
       this.walletQuests = [];
@@ -470,9 +472,12 @@ export default Vue.extend({
         this.fetchPickableQuests();
       }
     },
-    activeTab(currentTab, previousTab) {
+    async activeTab(currentTab, previousTab) {
       if (currentTab !== 'character-quests' && previousTab && this.pickable) {
         this.pickable = false;
+      }
+      else {
+        await this.refreshQuestData();
       }
     },
   },
