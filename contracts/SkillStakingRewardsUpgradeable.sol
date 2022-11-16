@@ -100,6 +100,16 @@ contract SkillStakingRewardsUpgradeable is
         }
     }
 
+    function recoverERC20(address tokenAddress, uint256 tokenAmount)
+      external
+      virtual
+      override
+      onlyOwner
+    {
+        IERC20(tokenAddress).safeTransfer(owner(), tokenAmount);
+        emit Recovered(tokenAddress, tokenAmount);
+    }
+
     /* ========== MODIFIERS ========== */
 
     modifier onlyGame() {

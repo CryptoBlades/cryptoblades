@@ -7,8 +7,8 @@
     <QuestRequirements v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
                        :progress="character.quest.progress" :index="characterId"/>
     <QuestRewards v-if="character.quest && character.quest.id !== 0" :quest="character.quest"/>
-    <QuestActions :character="character" :quest="character.quest" :key="character.quest.id" showSupply
-                  @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
+    <QuestActions :character="character" :quest="character.quest" :pickable="pickable" :key="character.quest.id" showSupply
+                  :pickedQuestId="pickedQuestId" @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
   <div v-if="questTemplateType === QuestTemplateType.WALLET && quest" class="quest-row-wallet">
     <QuestRequirements :quest="quest" :progress="quest.progress"/>
@@ -26,7 +26,11 @@ import QuestCharacter from '@/components/smart/QuestCharacter.vue';
 import QuestRequirements from '@/components/smart/QuestRequirements.vue';
 import QuestRewards from '@/components/smart/QuestRewards.vue';
 import QuestActions from '@/components/smart/QuestActions.vue';
-import {Quest, ReputationLevelRequirements, Rarity, RewardType, QuestTemplateType} from '@/views/Quests.vue';
+import {
+  Quest,
+  ReputationLevelRequirements,
+  RewardType } from '@/interfaces';
+import { Rarity, QuestTemplateType } from '@/enums/Quest';
 import {mapActions, mapGetters} from 'vuex';
 import {Nft, NftStatus} from '@/interfaces/Nft';
 
@@ -59,6 +63,14 @@ export default Vue.extend({
     },
     questTemplateType: {
       type: Number as PropType<QuestTemplateType>,
+    },
+    pickable: {
+      type: Boolean,
+      default: false
+    },
+    pickedQuestId: {
+      type: Number as PropType<number>,
+      default: 0,
     },
   },
 
@@ -159,13 +171,10 @@ export default Vue.extend({
   pointer-events: none;
 }
 
-@media (max-width: 576px) {
-  .quest-row,
-  .quest-row-wallet {
+.quest-row, .quest-row-wallet {
     flex-direction: column;
     height: auto;
     gap: 1rem;
   }
-}
 
 </style>

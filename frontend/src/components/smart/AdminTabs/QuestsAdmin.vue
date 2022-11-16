@@ -324,17 +324,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import {mapActions} from 'vuex';
-import {
-  DustRarity,
-  Quest,
-  QuestItemType,
-  QuestTemplateType,
-  Rarity,
-  ReputationLevelRequirements,
-  RequirementType,
-  RewardType,
-  TierChances
-} from '../../../views/Quests.vue';
+import {Quest, ReputationLevelRequirements, RewardType, TierChances} from '@/interfaces';
+import {DustRarity, QuestItemType, QuestTemplateType, Rarity, RequirementType} from '@/enums/Quest';
 import QuestTemplatesDisplay from '../QuestTemplatesDisplay.vue';
 import QuestRequirements from '../QuestRequirements.vue';
 import QuestRewards from '../QuestRewards.vue';
@@ -428,7 +419,7 @@ export default Vue.extend({
         RequirementType.DUST, RequirementType.TRINKET,
         RequirementType.SHIELD, RequirementType.STAMINA,
         RequirementType.SOUL, RequirementType.RAID,
-        RequirementType.EXTERNAL],
+        RequirementType.EXTERNAL, RequirementType.EXTERNAL_HOLD],
       rewardTypes: [RewardType.WEAPON, RewardType.JUNK,
         RewardType.DUST, RewardType.TRINKET,
         RewardType.SHIELD, RewardType.EXPERIENCE,
