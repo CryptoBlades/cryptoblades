@@ -36,6 +36,23 @@
         {{ $t('admin.dex.addLiquidity') }}
       </b-button>
     </div>
+    <h2 class="mt-3">{{ $t('admin.dex.getCollectedFees') }}</h2>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <b-form-input v-model="collectedFeesAddress" :placeholder="$t('admin.dex.tokenAddress')"/>
+      <b-button @click="collectedFeesForAddress()" :disabled="collectedFeesForAddressButtonDisabled"
+                variant="info" class="text-nowrap">
+        {{ $t('admin.dex.getCollectedFees') }}
+      </b-button>
+      <span v-if="collectedFeesAmount !== undefined">{{`${collectedFeesAmount} ${collectedFeesSymbol}`}}</span>
+    </div>
+    <h2 class="mt-3">{{ $t('admin.dex.collectFees') }}</h2>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <b-form-input v-model="collectFeesAddress" :placeholder="$t('admin.dex.tokenAddress')"/>
+      <b-button @click="collectFeesForAddress()" :disabled="collectFeesForAddressButtonDisabled"
+                variant="info" class="text-nowrap">
+        {{ $t('admin.dex.collectFees') }}
+      </b-button>
+    </div>
   </div>
 </template>
 
@@ -52,6 +69,12 @@ interface StoreMappedActions {
   addDexTokenPair(tokenPair: TokenPair): Promise<void>;
 
   addDexLiquidity(tokenPair: TokenPair): Promise<void>;
+
+  getCollectedFees(tokenAddress: string): Promise<number>;
+
+  getTokenSymbol(tokenAddress: string): Promise<string>;
+
+  collectFees(tokenAddress: string): Promise<void>;
 }
 
 export interface TokenPair {
@@ -66,6 +89,10 @@ interface Data {
   currentDexFeePercentage?: number;
   newTokenPair: TokenPair;
   newLiquidity: TokenPair;
+  collectedFeesAddress: string;
+  collectFeesAddress: string;
+  collectedFeesAmount?: number;
+  collectedFeesSymbol: string;
   isLoading: boolean;
 }
 
@@ -86,6 +113,10 @@ export default Vue.extend({
         tokenB: '',
         amountB: undefined,
       },
+      collectedFeesAddress: '',
+      collectFeesAddress: '',
+      collectedFeesAmount: undefined,
+      collectedFeesSymbol: '',
       isLoading: false,
     } as Data;
   },
@@ -109,6 +140,14 @@ export default Vue.extend({
         || this.newLiquidity.amountB === undefined
         || this.isLoading;
     },
+    collectedFeesForAddressButtonDisabled(): boolean {
+      return !isValidWeb3Address(this.collectedFeesAddress)
+        || this.isLoading;
+    },
+    collectFeesForAddressButtonDisabled(): boolean {
+      return !isValidWeb3Address(this.collectFeesAddress)
+        || this.isLoading;
+    },
   },
 
   methods: {
@@ -117,6 +156,9 @@ export default Vue.extend({
       'setDexFeePercentage',
       'addDexTokenPair',
       'addDexLiquidity',
+      'getCollectedFees',
+      'getTokenSymbol',
+      'collectFees',
     ]) as StoreMappedActions,
 
     async setNewDexFeePercentage() {
@@ -169,6 +211,27 @@ export default Vue.extend({
           tokenB: '',
           amountB: undefined,
         };
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async collectedFeesForAddress() {
+      if (!isValidWeb3Address(this.collectedFeesAddress)) return;
+      try {
+        this.isLoading = true;
+        this.collectedFeesAmount = await this.getCollectedFees(this.collectedFeesAddress);
+        this.collectedFeesSymbol = await this.getTokenSymbol(this.collectedFeesAddress);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async collectFeesForAddress() {
+      if (!isValidWeb3Address(this.collectFeesAddress)) return;
+      try {
+        this.isLoading = true;
+        await this.collectFees(this.collectFeesAddress);
       } finally {
         this.isLoading = false;
       }

@@ -1136,7 +1136,10 @@
       "firstTokenAmount": "First token amount",
       "secondTokenAddress": "Second token address",
       "secondTokenAmount": "Second token amount",
-      "addLiquidity": "Add liquidity"
+      "addLiquidity": "Add liquidity",
+      "getCollectedFees": "Get collected fees",
+      "collectFees": "Collect fees",
+      "tokenAddress": "Token address"
     },
     "identifiers": "Identifiers",
     "amount": "Amount",

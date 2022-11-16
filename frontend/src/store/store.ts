@@ -2274,6 +2274,31 @@ export default new Vuex.Store<IState>({
       });
     },
 
+    async getCollectedFees({state}, tokenAddress: string) {
+      const {Dex} = state.contracts();
+      if (!Dex) return;
+
+      const tokenContract = new state.web3.eth.Contract(erc20Abi as any[], tokenAddress) as Contract<ERC20>;
+      const decimals = +await tokenContract.methods.decimals().call(defaultCallOptions(state));
+      const collectedFees = await Dex.methods.collectedFees(tokenAddress).call(defaultCallOptions(state));
+      return new BigNumber(collectedFees).dividedBy(new BigNumber(10 ** decimals)).toString();
+    },
+
+    async getTokenSymbol({state}, tokenAddress: string) {
+      const tokenContract = new state.web3.eth.Contract(erc20Abi as any[], tokenAddress) as Contract<ERC20>;
+      return await tokenContract.methods.symbol().call(defaultCallOptions(state));
+    },
+
+    async collectFees({state}, tokenAddress: string) {
+      const {Dex} = state.contracts();
+      if (!Dex) return;
+
+      await Dex.methods.collectFees(tokenAddress).send({
+        from: state.defaultAccount,
+        gasPrice: getGasPrice(),
+      });
+    },
+
     async setFlatPriceOfItem({state}, {itemIndex, price}) {
       const {Blacksmith} = state.contracts();
       if (!Blacksmith) return;

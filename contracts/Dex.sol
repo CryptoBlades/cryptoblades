@@ -5,6 +5,9 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+import "./common.sol";
 
 contract Dex is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
@@ -124,7 +127,7 @@ contract Dex is Initializable, AccessControlUpgradeable {
         emit LiquidityAdded(token1, amount1, token2, amount2);
     }
 
-    function collectFee(address token) external restricted {
+    function collectFees(address token) external restricted {
         uint fee = collectedFees[token];
         IERC20(token).transfer(msg.sender, Common.adjustDecimals(fee, ERC20(token).decimals()));
         collectedFees[token] = 0;
