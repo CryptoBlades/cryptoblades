@@ -22,6 +22,7 @@ contract Dex is Initializable, AccessControlUpgradeable {
     }
 
     mapping(uint => TokenPair) public tokenPairs;
+    mapping(address => uint) public collectedFees;
     mapping(uint256 => uint256) public vars;
 
     event TokenPairSwapped(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
@@ -59,8 +60,10 @@ contract Dex is Initializable, AccessControlUpgradeable {
             pair.token2Amount += amountA;
         }
         tokenPairs[id] = pair;
-        IERC20(tokenA).transferFrom(msg.sender, address(this), amountA);
-        IERC20(tokenB).transfer(msg.sender, amountB - amountB.mul(vars[VAR_FEE]).div(FEE_DENOMINATOR));
+        IERC20(tokenA).transferFrom(msg.sender, address(this), Common.adjustDecimals(amountA, ERC20(tokenA).decimals()));
+        uint fee = amountB.mul(vars[VAR_FEE]).div(FEE_DENOMINATOR);
+        collectedFees[tokenB] = collectedFees[tokenB].add(fee);
+        IERC20(tokenB).transfer(msg.sender, Common.adjustDecimals(amountB - fee, ERC20(tokenB).decimals()));
         emit TokenPairSwapped(tokenA, amountA, tokenB, amountB);
     }
 
@@ -101,8 +104,8 @@ contract Dex is Initializable, AccessControlUpgradeable {
         uint id = getTokenPairId(token1, token2);
         require(tokenPairs[id].token1 == address(0) && tokenPairs[id].token2 == address(0), "Pair already exists");
         tokenPairs[id] = TokenPair(token1, amount1, token2, amount2);
-        IERC20(token1).transferFrom(msg.sender, address(this), amount1);
-        IERC20(token2).transferFrom(msg.sender, address(this), amount2);
+        IERC20(token1).transferFrom(msg.sender, address(this), Common.adjustDecimals(amount1, ERC20(token1).decimals()));
+        IERC20(token2).transferFrom(msg.sender, address(this), Common.adjustDecimals(amount2, ERC20(token2).decimals()));
         emit TokenPairAdded(id, token1, token2);
     }
 
@@ -116,8 +119,15 @@ contract Dex is Initializable, AccessControlUpgradeable {
         pair.token1Amount += amount1;
         pair.token2Amount += amount2;
         tokenPairs[id] = pair;
-        IERC20(token1).transferFrom(msg.sender, address(this), amount1);
-        IERC20(token2).transferFrom(msg.sender, address(this), amount2);
+        IERC20(token1).transferFrom(msg.sender, address(this), Common.adjustDecimals(amount1, ERC20(token1).decimals()));
+        IERC20(token2).transferFrom(msg.sender, address(this), Common.adjustDecimals(amount2, ERC20(token2).decimals()));
         emit LiquidityAdded(token1, amount1, token2, amount2);
     }
+
+    function collectFee(address token) external restricted {
+        uint fee = collectedFees[token];
+        IERC20(token).transfer(msg.sender, Common.adjustDecimals(fee, ERC20(token).decimals()));
+        collectedFees[token] = 0;
+    }
+
 }
