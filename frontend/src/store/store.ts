@@ -11,6 +11,7 @@ import {characterFromContract, junkFromContract, shieldFromContract, trinketFrom
 import {CharacterPower, Contract, isStakeType, IState, IWeb3EventSubscription, StakeType} from '@/interfaces';
 import {getCharacterNameFromSeed} from '@/character-name';
 import {approveFee, approveFeeDynamic, approveFeeFixed} from '@/contract-call-utils';
+import {TokenPair} from '@/components/smart/AdminTabs/DexAdmin.vue';
 
 import {burningManager as featureFlagBurningManager} from '@/feature-flags';
 import {ERC20, IERC721, INftStakingRewards, IStakingRewards} from '@/../../build/abi-interfaces';
@@ -1919,11 +1920,15 @@ export default new Vuex.Store<IState>({
       const currencyContract = new state.web3.eth.Contract(erc20Abi as any[], currencyAddress) as Contract<ERC20>;
       const currencyDecimals = +await currencyContract.methods.decimals().call(defaultCallOptions(state));
       const amountTimesDecimals = new BigNumber(amount).multipliedBy(new BigNumber(10 ** currencyDecimals));
+      const approvedAmount = await currencyContract.methods.allowance(state.defaultAccount, PartnerVault.options.address)
+        .call(defaultCallOptions(state));
 
-      await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toString()).send({
-        from: state.defaultAccount,
-        gasPrice: getGasPrice()
-      });
+      if (amountTimesDecimals.gt(approvedAmount)) {
+        await currencyContract.methods.approve(PartnerVault.options.address, amountTimesDecimals.toFixed()).send({
+          from: state.defaultAccount,
+          gasPrice: getGasPrice()
+        });
+      }
 
       return await PartnerVault.methods.storeCurrency(currencyAddress, amountTimesDecimals.toString()).send({
         from: state.defaultAccount,
@@ -2020,6 +2025,9 @@ export default new Vuex.Store<IState>({
         Treasury,
         CryptoBlades,
         Blacksmith,
+        Raid1,
+        SpecialWeaponsManager,
+        Dex,
       } = state.contracts();
       if (!SimpleQuests
         || !CBKLand
@@ -2030,6 +2038,9 @@ export default new Vuex.Store<IState>({
         || !Treasury
         || !CryptoBlades
         || !Blacksmith
+        || !Raid1
+        || !SpecialWeaponsManager
+        || !Dex
         || !state.defaultAccount) return;
 
       const simpleQuestsAdminRole = await SimpleQuests.methods.GAME_ADMIN().call(defaultCallOptions(state));
@@ -2041,6 +2052,9 @@ export default new Vuex.Store<IState>({
       const treasuryAdminRole = await Treasury.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const cryptoBladesAdminRole = await CryptoBlades.methods.GAME_ADMIN().call(defaultCallOptions(state));
       const blacksmithAdminRole = await Blacksmith.methods.DEFAULT_ADMIN_ROLE().call(defaultCallOptions(state));
+      const raid1AdminRole = await Raid1.methods.GAME_ADMIN().call(defaultCallOptions(state));
+      const specialWeaponsManagerAdminRole = await SpecialWeaponsManager.methods.GAME_ADMIN().call(defaultCallOptions(state));
+      const dexAdminRole = await Dex.methods.GAME_ADMIN().call(defaultCallOptions(state));
 
       const promises: Promise<boolean>[] = [
         SimpleQuests.methods.hasRole(simpleQuestsAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
@@ -2052,6 +2066,9 @@ export default new Vuex.Store<IState>({
         Treasury.methods.hasRole(treasuryAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         CryptoBlades.methods.hasRole(cryptoBladesAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
         Blacksmith.methods.hasRole(blacksmithAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+        Raid1.methods.hasRole(raid1AdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+        SpecialWeaponsManager.methods.hasRole(specialWeaponsManagerAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
+        Dex.methods.hasRole(dexAdminRole, state.defaultAccount).call(defaultCallOptions(state)),
       ];
 
       for (const promise of promises) {
@@ -2166,6 +2183,117 @@ export default new Vuex.Store<IState>({
       if (!Raid1) return;
 
       await Raid1.methods.setXpReward(xp).send({
+        from: state.defaultAccount,
+        gasPrice: getGasPrice(),
+      });
+    },
+
+    async getDexFeePercentage({state}) {
+      const {Dex} = state.contracts();
+      if (!Dex) return;
+
+      const VAR_FEE = await Dex.methods.VAR_FEE().call(defaultCallOptions(state));
+
+      const fee = +await Dex.methods.vars(VAR_FEE).call(defaultCallOptions(state));
+      return fee / 100;
+    },
+
+    async setDexFeePercentage({state}, {fee}) {
+      const {Dex} = state.contracts();
+      if (!Dex) return;
+
+      const VAR_FEE = await Dex.methods.VAR_FEE().call(defaultCallOptions(state));
+
+      await Dex.methods.setVar(VAR_FEE, fee * 100).send({
+        from: state.defaultAccount,
+        gasPrice: getGasPrice(),
+      });
+    },
+
+    async addDexTokenPair({state}, tokenPair: TokenPair) {
+      const {Dex} = state.contracts();
+      if (!Dex || !state.defaultAccount || !tokenPair.amountA || !tokenPair.amountB) return;
+
+      const tokenAContract = new state.web3.eth.Contract(erc20Abi as any[], tokenPair.tokenA) as Contract<ERC20>;
+      const tokenADecimals = +await tokenAContract.methods.decimals().call(defaultCallOptions(state));
+      const tokenAAmountTimesDecimals = new BigNumber(tokenPair.amountA).multipliedBy(new BigNumber(10 ** tokenADecimals));
+      const tokenAApprovedAmount = await tokenAContract.methods.allowance(state.defaultAccount, Dex.options.address).call(defaultCallOptions(state));
+      if (tokenAAmountTimesDecimals.gt(tokenAApprovedAmount)) {
+        await tokenAContract.methods.approve(Dex.options.address, tokenAAmountTimesDecimals.toString()).send({
+          from: state.defaultAccount,
+          gasPrice: getGasPrice(),
+        });
+      }
+
+      const tokenBContract = new state.web3.eth.Contract(erc20Abi as any[], tokenPair.tokenB) as Contract<ERC20>;
+      const tokenBDecimals = +await tokenBContract.methods.decimals().call(defaultCallOptions(state));
+      const tokenBAmountTimesDecimals = new BigNumber(tokenPair.amountB).multipliedBy(new BigNumber(10 ** tokenBDecimals));
+      const tokenBApprovedAmount = await tokenBContract.methods.allowance(state.defaultAccount, Dex.options.address).call(defaultCallOptions(state));
+      if (tokenBAmountTimesDecimals.gt(tokenBApprovedAmount)) {
+        await tokenBContract.methods.approve(Dex.options.address, tokenBAmountTimesDecimals.toString()).send({
+          from: state.defaultAccount,
+          gasPrice: getGasPrice(),
+        });
+      }
+
+      await Dex.methods.addPair(tokenPair.tokenA, tokenAAmountTimesDecimals.toString(), tokenPair.tokenB, tokenBAmountTimesDecimals.toString()).send({
+        from: state.defaultAccount,
+        gasPrice: getGasPrice(),
+      });
+    },
+
+    async addDexLiquidity({state}, tokenPair: TokenPair) {
+      const {Dex} = state.contracts();
+      if (!Dex || !state.defaultAccount || !tokenPair.amountA || !tokenPair.amountB) return;
+
+      const tokenAContract = new state.web3.eth.Contract(erc20Abi as any[], tokenPair.tokenA) as Contract<ERC20>;
+      const tokenADecimals = +await tokenAContract.methods.decimals().call(defaultCallOptions(state));
+      const tokenAAmountTimesDecimals = new BigNumber(tokenPair.amountA).multipliedBy(new BigNumber(10 ** tokenADecimals));
+      const tokenAApprovedAmount = await tokenAContract.methods.allowance(state.defaultAccount, Dex.options.address).call(defaultCallOptions(state));
+      if (tokenAAmountTimesDecimals.gt(tokenAApprovedAmount)) {
+        await tokenAContract.methods.approve(Dex.options.address, tokenAAmountTimesDecimals.toString()).send({
+          from: state.defaultAccount,
+          gasPrice: getGasPrice(),
+        });
+      }
+
+      const tokenBContract = new state.web3.eth.Contract(erc20Abi as any[], tokenPair.tokenB) as Contract<ERC20>;
+      const tokenBDecimals = +await tokenBContract.methods.decimals().call(defaultCallOptions(state));
+      const tokenBAmountTimesDecimals = new BigNumber(tokenPair.amountB).multipliedBy(new BigNumber(10 ** tokenBDecimals));
+      const tokenBApprovedAmount = await tokenBContract.methods.allowance(state.defaultAccount, Dex.options.address).call(defaultCallOptions(state));
+      if (tokenBAmountTimesDecimals.gt(tokenBApprovedAmount)) {
+        await tokenBContract.methods.approve(Dex.options.address, tokenBAmountTimesDecimals.toString()).send({
+          from: state.defaultAccount,
+          gasPrice: getGasPrice(),
+        });
+      }
+
+      await Dex.methods.addLiquidity(tokenPair.tokenA, tokenAAmountTimesDecimals.toString(), tokenPair.tokenB, tokenBAmountTimesDecimals.toString()).send({
+        from: state.defaultAccount,
+        gasPrice: getGasPrice(),
+      });
+    },
+
+    async getCollectedFees({state}, tokenAddress: string) {
+      const {Dex} = state.contracts();
+      if (!Dex) return;
+
+      const tokenContract = new state.web3.eth.Contract(erc20Abi as any[], tokenAddress) as Contract<ERC20>;
+      const decimals = +await tokenContract.methods.decimals().call(defaultCallOptions(state));
+      const collectedFees = await Dex.methods.collectedFees(tokenAddress).call(defaultCallOptions(state));
+      return new BigNumber(collectedFees).dividedBy(new BigNumber(10 ** decimals)).toString();
+    },
+
+    async getTokenSymbol({state}, tokenAddress: string) {
+      const tokenContract = new state.web3.eth.Contract(erc20Abi as any[], tokenAddress) as Contract<ERC20>;
+      return await tokenContract.methods.symbol().call(defaultCallOptions(state));
+    },
+
+    async collectFees({state}, tokenAddress: string) {
+      const {Dex} = state.contracts();
+      if (!Dex) return;
+
+      await Dex.methods.collectFees(tokenAddress).send({
         from: state.defaultAccount,
         gasPrice: getGasPrice(),
       });
