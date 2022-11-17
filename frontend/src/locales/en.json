@@ -1541,10 +1541,8 @@
   },
   "banner": {
     "linkText": "Join the Event",
-    "octoblades": {
-      "octoblades": "The OctoBlades Event is Live on BNB Chain! Over 5x Rewards, Weekly PvP Tournaments, and SO MUCH MORE!!",
-      "link": "https://app.cryptoblades.io/#/?chain=BNB"
-    }
+    "text": "BLADESGIVING IS LIVE ON BNB CHAIN! INCREASED REWARDS, EXCLUSIVE DAILY QUESTS, 3X GAME XP, AND MUCH MUCH MORE!!",
+    "link": "https://app.cryptoblades.io/?utm_source=sitebanner&utm_medium=navban&utm_campaign=bnb#%2F%3Fchain=BSC"
   },
   "updates": {
     "markAllAsRead": "Mark All As Read",
