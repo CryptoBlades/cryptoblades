@@ -45,20 +45,21 @@ export default {
 
 <style scoped>
 .banner path, .banner rect {
-  fill: #000;
+  fill: #FFFFFF;
 }
 .banner{
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #F5E095;
+    background-color: #1168D0;
     z-index: 1999;
-    height: 50px;
+    min-height: 50px;
     width: 100%;
+    padding: 10px 10px;
 }
 .button{
-    border: 1px solid #000;
-    color: #000;
+    border: 1px solid #FFFFFF;
+    color: #FFFFFF;
     border-radius: 5px;
     opacity: 1;
     background: none;
@@ -66,27 +67,27 @@ export default {
     padding: 5px 25px;
 }
 .button:hover{
-    background-color: hsl(47, 77%, 53%);
-    border: 1px solid #000;
+    background-color: #1167d09e;
+    border: 1px solid #ffffff95;
 }
 .button:focus{
     outline:none;
 }
 .text{
     font: bold 16px Roboto;
-    color: #000;
+    color: #FFFFFF;
     text-transform: uppercase;
 }
 .link{
     text-align: center;
     font: normal 16px Roboto;
-    color: #000;
+    color: #FFFFFF;
     text-decoration: none;
     white-space: nowrap;
 }
 .link:hover{
     text-decoration: none;
-    color: #000;
+    color: #FFFFFF;
 }
 .closeBtn{
     cursor: pointer;

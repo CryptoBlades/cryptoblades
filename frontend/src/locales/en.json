@@ -930,7 +930,8 @@
       "cryptoblades": "CryptoBlades",
       "blacksmith": "Blacksmith",
       "raid": "Raid",
-      "specialWeaponsManager": "Special Weapons"
+      "specialWeaponsManager": "Special Weapons",
+      "dex": "Dex"
     },
     "cbkLand": {
       "minter": "Minter",
@@ -1125,6 +1126,20 @@
       "incrementEventCount": "Increment event count",
       "areYouSure": "Are you sure?",
       "eventIncrementationIrreversibleInfo": "Event incrementation is irreversible. Are you sure you know what you're doing?"
+    },
+    "dex": {
+      "setFeePercentageCurrentDefault0_3": "Set fee percentage (current: {feePercentage}%, default: 0.3%)",
+      "setFeePercentage": "Set fee percentage",
+      "dexFeePercentage": "DEX fee percentage",
+      "addNewTokenPair": "Add new token pair",
+      "firstTokenAddress": "First token address",
+      "firstTokenAmount": "First token amount",
+      "secondTokenAddress": "Second token address",
+      "secondTokenAmount": "Second token amount",
+      "addLiquidity": "Add liquidity",
+      "getCollectedFees": "Get collected fees",
+      "collectFees": "Collect fees",
+      "tokenAddress": "Token address"
     },
     "identifiers": "Identifiers",
     "amount": "Amount",
@@ -1541,10 +1556,8 @@
   },
   "banner": {
     "linkText": "Join the Event",
-    "octoblades": {
-      "octoblades": "The OctoBlades Event is Live on BNB Chain! Over 5x Rewards, Weekly PvP Tournaments, and SO MUCH MORE!!",
-      "link": "https://app.cryptoblades.io/#/?chain=BNB"
-    }
+    "text": "BLADESGIVING IS LIVE ON BNB CHAIN! INCREASED REWARDS, EXCLUSIVE DAILY QUESTS, 3X GAME XP, AND MUCH MUCH MORE!!",
+    "link": "https://app.cryptoblades.io/?utm_source=sitebanner&utm_medium=navban&utm_campaign=bnb#%2F%3Fchain=BSC"
   },
   "updates": {
     "markAllAsRead": "Mark All As Read",

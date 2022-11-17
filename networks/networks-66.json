@@ -3389,7 +3389,7 @@
     },
     "links": {},
     "address": "0xb1b74eC1B0655A777b6268a63a30bE5Ad5C179cD",
-    "transactionHash": "0xe89a1ee6802897333810cf84cf20627d3f56b8d551dbdb02b9bdb9d6f4a0a04c"
+    "transactionHash": "0xac859536cdbb7264d482923543bd3898d30106442e62f34d39a48ef7605feb8c"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -4760,7 +4760,7 @@
     },
     "links": {},
     "address": "0x47a3c3e3925624beBf5193717d80EF494Bc9B8A7",
-    "transactionHash": "0xe435ae269a143422ced2ede4e9418759981067fb44bb46b4db6f380c1ddd6f0e"
+    "transactionHash": "0xdd520edeb64f6a2e7efd45380c2a62ecf862ff1fa434828346ef500bfadda1be"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},
@@ -4778,7 +4778,7 @@
     "events": {},
     "links": {},
     "address": "0x105A0Aa801080A89465bA1f8b6696971FD5F3a6D",
-    "transactionHash": "0x3ddebd02182ad734c57b2af5377668e3405a5cdfeff9d9f4403cdc3b815d5951"
+    "transactionHash": "0x5be112e07c9fd5d54e6491cb156ee2402e0811a90d89b94988949bfa1f525013"
   },
   "build/contracts/SkillToken.json": {
     "events": {},

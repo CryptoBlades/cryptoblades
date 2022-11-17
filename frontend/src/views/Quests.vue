@@ -128,6 +128,7 @@
             <div v-for="character in characters" :key="character.id" class="character-quest-row my-3 mr-3">
               <QuestRow :questTemplateType="QuestTemplateType.QUEST" :characterId="character.id"
                         :reputationLevelRequirements="reputationLevelRequirements"
+                        :currentNetworkIdProp="currentNetworkId" :defaultAccountProp="defaultAccount"
                         :pickable="pickable" :pickedQuestId="pickedQuestId" @refresh-quest-data="onRefreshQuestData"/>
             </div>
             <br>
@@ -158,6 +159,9 @@
           <div v-for="quest in walletQuests" :key="quest.id" class="wallet-quest-row d-flex my-3 mr-3">
             <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
                       :reputationLevelRequirements="reputationLevelRequirements"
+                      :currentNetworkIdProp="currentNetworkId"
+                      :defaultAccountProp="defaultAccount"
+                      :walletQuestTier="walletQuestTier"
                       @refresh-quest-data="onRefreshQuestData"/>
           </div>
         </div>
@@ -296,7 +300,7 @@ export default Vue.extend({
   },
 
   computed: {
-    ...mapState(['ownedCharacterIds']),
+    ...mapState(['ownedCharacterIds', 'defaultAccount', 'currentNetworkId']),
     ...mapGetters(['charactersWithIds', 'getCharacterCosmetic']) as Accessors<StoreMappedGetters>,
 
     canClaimWeeklyReward(): boolean {
@@ -445,9 +449,11 @@ export default Vue.extend({
     async defaultAccount(){
       await this.refreshQuestData();
     },
-    async ownedCharacterIds(characterIds) {
-      await this.fetchCharacters(characterIds);
-      await this.refreshQuestData();
+    async ownedCharacterIds(currentcharacterIds, previousCharacterIds) {
+      await this.fetchCharacters(currentcharacterIds);
+      if (JSON.stringify(currentcharacterIds) !== JSON.stringify(previousCharacterIds)) {
+        await this.refreshQuestData();
+      }
     },
     async walletQuestTier() {
       this.walletQuests = [];
@@ -466,9 +472,12 @@ export default Vue.extend({
         this.fetchPickableQuests();
       }
     },
-    activeTab(currentTab, previousTab) {
+    async activeTab(currentTab, previousTab) {
       if (currentTab !== 'character-quests' && previousTab && this.pickable) {
         this.pickable = false;
+      }
+      else {
+        await this.refreshQuestData();
       }
     },
   },
