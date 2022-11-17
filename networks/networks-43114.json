@@ -2524,7 +2524,7 @@
     },
     "links": {},
     "address": "0x46419526a59ec1d73b72620ae16da091bE8486bd",
-    "transactionHash": "0x05ee47e06880d49b690cfcff4c43e78689c0326b77597240c3745cca249f2a31"
+    "transactionHash": "0xa65c0df9ab1b47db415fcddd3d586fe4a5c53a6b6266e34190847914c2106bfa"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
@@ -3552,7 +3552,7 @@
     },
     "links": {},
     "address": "0xE05661982155d0615521b4dE88F641F03fEb3E14",
-    "transactionHash": "0xe1087492531ec4d8763d7964a917aa3c2813a4098460d5d255599949bccb62e1"
+    "transactionHash": "0xeb82dc956c709f5bf3ef590fe3e8cb24b47760ab96257dfd29140f8732bb35f2"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -3959,7 +3959,7 @@
     },
     "links": {},
     "address": "0x9D38BF3ca5E9B9B725348DDBB82866D2e7093c86",
-    "transactionHash": "0x24b90bec4c0c88cffc68ee21dcd9c7406effd9bc65f7698de1acbd8d757bed75"
+    "transactionHash": "0x2f637eaae7c380f73460448457e3aa6b093bb9bd9532a3f741d89ef675cd9a7f"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -4923,7 +4923,7 @@
     },
     "links": {},
     "address": "0x443424799fDF95e20aAB84d348d53A585fD2f442",
-    "transactionHash": "0x99a3e8e2a3d9c3af11dd81f8c81d87fa1f3e4c17d761afdb0d90d078b49c03fb"
+    "transactionHash": "0xb9e4b286f6460240af3d5a1134352a8c954de7f4491fc49a622ff5d393981cc9"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},
@@ -4941,7 +4941,7 @@
     "events": {},
     "links": {},
     "address": "0xE8f14F0a5a5f059ae060664e0f165B7e5A52e4e5",
-    "transactionHash": "0x5c947809913405b62ac2bb0e12e04170322cae431278316aaa536b8245ec49b3"
+    "transactionHash": "0xa3c0b17017d862bf6aeb59b1717c83714aead7bf6b174c6c441b574ce2b93419"
   },
   "build/contracts/SkillToken.json": {
     "events": {},

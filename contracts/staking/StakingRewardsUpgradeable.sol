@@ -266,6 +266,7 @@ contract StakingRewardsUpgradeable is
     // Added to support recovering LP Rewards from other systems such as BAL to be distributed to holders
     function recoverERC20(address tokenAddress, uint256 tokenAmount)
         external
+        virtual
         onlyOwner
     {
         require(

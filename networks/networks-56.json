@@ -2306,7 +2306,7 @@
     },
     "links": {},
     "address": "0x39Bea96e13453Ed52A734B6ACEeD4c41F57B2271",
-    "transactionHash": "0x0415514b8d51df18a40a72121dc5fc7e5702a42c6af74a3fd54505329aa77b6f"
+    "transactionHash": "0x4278252b05d3610c27682315feec56b11ac7d935bb38859384aaccfb432ae159"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
@@ -3187,7 +3187,7 @@
     "events": {},
     "links": {},
     "address": "0x39e0D6D95E035e2F8a2392788e0c53b7BA7d9B83",
-    "transactionHash": "0xb994553f5e8c77940c9af746bd56493f521045790dfbc8f87b2a26080e4b176d"
+    "transactionHash": "0x66a5d328eb5afcf2548da0846d8adc67f1432ac8068a9181be86978977c64127"
   },
   "build/contracts/LPStakingRewardsUpgradeableValor.json": {
     "events": {},
@@ -3618,7 +3618,7 @@
     },
     "links": {},
     "address": "0x08C536d43cE3d8FBc89444D729F7cD04332A4cdE",
-    "transactionHash": "0x2984245795b62180a7af65cb82910dcdc07a2cd7abbe2069adc3b8c1f4371f4f"
+    "transactionHash": "0x86932896e6c7cde09a62214480b7f8964a111a635165f0ba6de103473354cc44"
   },
   "build/contracts/Promos.json": {
     "events": {
@@ -4025,7 +4025,7 @@
     },
     "links": {},
     "address": "0x386088468D67333d393594C8427f15A64fa8896c",
-    "transactionHash": "0xc9b1cff11312f78992851aa6c14b4253f7cd7c77ea06e7b2738badfd13938f6f"
+    "transactionHash": "0xb62f4f338dec3a887f90bd24538a01eca269c448fb0e0c1b5dab93a442a616e2"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -4989,7 +4989,7 @@
     },
     "links": {},
     "address": "0xD6CDf4072EB6bcF10ef1b715aaA0fDF755B52327",
-    "transactionHash": "0x1761911281c87a5f260c9bf82c4d53b672f8ee84cd1832edfb3b933fccd91a0b"
+    "transactionHash": "0x2defe0206e6c129903d27f32e6505d7fd362cfc70378ea9769a25a96e1677332"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},
@@ -5196,7 +5196,8 @@
   "build/contracts/SkillStakingRewardsUpgradeable60.json": {
     "events": {},
     "links": {},
-    "address": "0x4B4BaEb52C1A2679e13D9D6D9680b03308216244"
+    "address": "0x4B4BaEb52C1A2679e13D9D6D9680b03308216244",
+    "transactionHash": "0x316380e1397d2a42b1faeb517674fdeec63c39266de63bba3bb87135c2e442d6"
   },
   "build/contracts/SkillStakingRewardsUpgradeable90.json": {
     "events": {

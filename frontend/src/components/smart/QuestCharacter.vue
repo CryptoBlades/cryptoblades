@@ -71,13 +71,16 @@
 <script lang="ts">
 import Vue from 'vue';
 import {PropType} from 'vue/types/options';
-import {Rarity, RewardType} from '@/views/Quests.vue';
 import {Nft, NftStatus} from '../../interfaces/Nft';
 import {getCharacterArt} from '@/character-arts-placeholder';
 import {mapActions, mapGetters} from 'vuex';
 import {getCleanName} from '@/rename-censor';
-import {Quest, ReputationLevelRequirements, ReputationTier, TierChances} from '../../views/Quests.vue';
-
+import {
+  RewardType,
+  Quest,
+  ReputationLevelRequirements,
+  TierChances } from '@/interfaces';
+import { Rarity, ReputationTier } from '@/enums/Quest';
 interface StoreMappedActions {
   getQuestTierChances(payload: { tier: number }): Promise<TierChances>;
 }
@@ -249,13 +252,11 @@ export default Vue.extend({
   margin-right: 25px;
 }
 
-@media (max-width: 576px) {
-  .quest-character-display {
+.quest-character-display {
     flex-direction: column;
     border: none;
   }
   .character-info-container{
     margin: 0;
   }
-}
 </style>

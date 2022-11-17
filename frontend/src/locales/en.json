@@ -19,6 +19,7 @@
     "nftbridge": "NFT Bridge",
     "wiki": "Wiki",
     "nftDisplay": "NFT Display",
+    "updates": "Updates",
     "functionalityNotSupportedTooltip": "Currently selected chain does not support this functionality.",
     "DrawbridgeNotSupportedTooltip": "Drawbridge is only available for SKALE and BSC chains."
   },
@@ -825,7 +826,8 @@
       "QUEST": "Quest",
       "PROMO": "Promo Quest",
       "WALLET": "Wallet Quest",
-      "PICKABLE": "Pickable Quest"
+      "PICKABLE": "Pickable Quest",
+      "CHARACTER": "Character Quest"
     },
     "tier": "Tier",
     "level": "Level {level}",
@@ -868,10 +870,15 @@
     "nextReputationTierOn": "Next reputation tier on",
     "do": "Do",
     "requestQuest": "Request Quest",
+    "setAsNextQuest": "Set As Next Quest",
     "chooseSpecialQuest": "Choose Special Quest",
     "turnIn": "Turn in",
+    "show": "Show",
     "howMuchToTurnIn": "How much to turn in?",
     "whatIdsToTurnIn": "What IDs to turn in?",
+    "whatIdsToShow": "What IDs to show?",
+    "availableIds": "Available IDs",
+    "noNftsAvailableInUsersWallet": "No NFTs available in user's wallet",
     "setRequiredAmount": "Set required amount",
     "createNewQuest": "Create new",
     "addNewWeeklyReward": "Add new weekly reward",
@@ -908,7 +915,8 @@
     "updateForLevel": "Update for level {level}",
     "youNeedToHaveAtLeastOneCharacter": "You need to have at least one character to do Quests",
     "youNeedToHaveAtLeastOneCharacterRaid": "You need to have at least one character to join the Raid.",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "specialQuestTooltip": "Special Quest will default to Random if no Special Quest is selected"
   },
   "admin": {
     "tabs": {
@@ -922,7 +930,8 @@
       "cryptoblades": "CryptoBlades",
       "blacksmith": "Blacksmith",
       "raid": "Raid",
-      "specialWeaponsManager": "Special Weapons"
+      "specialWeaponsManager": "Special Weapons",
+      "dex": "Dex"
     },
     "cbkLand": {
       "minter": "Minter",
@@ -1117,6 +1126,20 @@
       "incrementEventCount": "Increment event count",
       "areYouSure": "Are you sure?",
       "eventIncrementationIrreversibleInfo": "Event incrementation is irreversible. Are you sure you know what you're doing?"
+    },
+    "dex": {
+      "setFeePercentageCurrentDefault0_3": "Set fee percentage (current: {feePercentage}%, default: 0.3%)",
+      "setFeePercentage": "Set fee percentage",
+      "dexFeePercentage": "DEX fee percentage",
+      "addNewTokenPair": "Add new token pair",
+      "firstTokenAddress": "First token address",
+      "firstTokenAmount": "First token amount",
+      "secondTokenAddress": "Second token address",
+      "secondTokenAmount": "Second token amount",
+      "addLiquidity": "Add liquidity",
+      "getCollectedFees": "Get collected fees",
+      "collectFees": "Collect fees",
+      "tokenAddress": "Token address"
     },
     "identifiers": "Identifiers",
     "amount": "Amount",
@@ -1533,9 +1556,25 @@
   },
   "banner": {
     "linkText": "Join the Event",
-    "octoblades": {
-      "octoblades": "The OctoBlades Event is Live on BNB Chain! Over 5x Rewards, Weekly PvP Tournaments, and SO MUCH MORE!!",
-      "link": "https://app.cryptoblades.io/#/?chain=BNB"
-    }
+    "text": "BLADESGIVING IS LIVE ON BNB CHAIN! INCREASED REWARDS, EXCLUSIVE DAILY QUESTS, 3X GAME XP, AND MUCH MUCH MORE!!",
+    "link": "https://app.cryptoblades.io/?utm_source=sitebanner&utm_medium=navban&utm_campaign=bnb#%2F%3Fchain=BSC"
+  },
+  "updates": {
+    "markAllAsRead": "Mark All As Read",
+    "notifications": "Notifications"
+  },
+  "dateTime": {
+    "month": "month",
+    "months": "months",
+    "day": "day",
+    "days": "days",
+    "year": "year",
+    "years": "years",
+    "hour": "hour",
+    "hours": "hours",
+    "minute": "minute",
+    "minutes": "minutes",
+    "second": "second",
+    "seconds": "seconds"
   }
 }

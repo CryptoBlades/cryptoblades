@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <banner v-if="!isBNB"
-      :text="$t('banner.octoblades.octoblades')" :linkText="$t('banner.linkText')" :link="$t('banner.octoblades.link')" />
+      :text="$t('banner.text')" :linkText="$t('banner.linkText')" :link="$t('banner.link')" />
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content bg-dark">
       <b-row>
@@ -97,7 +97,6 @@ import SmallButton from './components/SmallButton.vue';
 import NavBar from './components/NavBar.vue';
 import CharacterBar from './components/CharacterBar.vue';
 import WeaponRowGrid from './components/smart/WeaponRowGrid.vue';
-import { apiUrl } from './utils/common';
 import i18n from './i18n';
 import { getConfigValue } from './contracts';
 import '@/mixins/general';
@@ -169,12 +168,6 @@ interface StoreMappedMutations {
   updateCurrentChainSupportsPvP: () => void,
   updateCurrentChainSupportsQuests: () => void,
   updateCurrentChainSupportsDrawbridge: () => void,
-}
-
-interface Notification {
-  hash: string,
-  title: string,
-  link: string,
 }
 
 export default Vue.extend({
@@ -387,35 +380,6 @@ export default Vue.extend({
       return toDisplay;
     },
 
-    async checkNotifications() {
-      const response = await fetch(apiUrl('static/notifications'));
-      const notifications = await response.json();
-
-      const lastHash = localStorage.getItem('lastnotification');
-      let shouldContinue = true;
-
-      notifications.forEach((notification: Notification) => {
-        if (!shouldContinue) return;
-
-        if (lastHash === notification.hash) {
-          shouldContinue = false;
-          return;
-        }
-
-        (this as any).$dialog.notify.warning(
-          `${notification.title}
-          <br>
-          <a href="${notification.link}" target="_blank">Check it out!</a>
-          `,
-          {
-            timeout: 300000,
-          },
-        );
-      });
-
-      localStorage.setItem('lastnotification', notifications[0].hash);
-    },
-
     initializeSettings(){
       if (!localStorage.getItem('useGraphics')) localStorage.setItem('useGraphics', 'false');
       if (!localStorage.getItem('hideRewards')) localStorage.setItem('hideRewards', 'false');
@@ -525,7 +489,6 @@ export default Vue.extend({
 
     pollAccounts();
 
-    this.checkNotifications();
     this.initializeRecruitCost();
   },
 
