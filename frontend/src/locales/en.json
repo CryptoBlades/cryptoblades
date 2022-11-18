@@ -1154,7 +1154,7 @@
   },
   "stake": {
     "staking": "Staking",
-    "octobladesStakings": "OctoBlades Stakings",
+    "stakingSubHeader": "Revenue Share and VALOR Staking",
     "landStakings": "Land Stakings",
     "normalStakings": "Normal Stakings",
     "unknownStakeType": "Unknown stake type, please try again.",
