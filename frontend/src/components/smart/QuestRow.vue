@@ -1,16 +1,17 @@
 <template>
 <div class="w-100">
   <div v-if="(questTemplateType === QuestTemplateType.QUEST || questTemplateType === QuestTemplateType.PICKABLE) && character" class="quest-row"
-       :class="character.status !== undefined && (character.status !== NftStatus.AVAILABLE) ? 'busy-quest-row' : ''">
+        :class="character.status !== undefined && (character.status !== NftStatus.AVAILABLE) ? 'busy-quest-row' : ''"
+        :key="`${componentKey}-${character.quest.id}`">
     <QuestCharacter :character="character" :quest="character.quest"
                     :reputationLevelRequirements="reputationLevelRequirements"/>
     <QuestRequirements v-if="character.quest && character.quest.id !== 0" :quest="character.quest"
                        :progress="character.quest.progress" :index="characterId"/>
     <QuestRewards v-if="character.quest && character.quest.id !== 0" :quest="character.quest"/>
-    <QuestActions :character="character" :quest="character.quest" :key="character.quest.id" showSupply
-                  @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
+    <QuestActions :character="character" :quest="character.quest" :pickable="pickable" :key="character.quest.id" showSupply
+                  :pickedQuestId="pickedQuestId" @refresh-quest-data="onRefreshQuestData" :questTemplateType="questTemplateType"/>
   </div>
-  <div v-if="questTemplateType === QuestTemplateType.WALLET && quest" class="quest-row-wallet">
+  <div v-if="questTemplateType === QuestTemplateType.WALLET && quest" class="quest-row-wallet" :key="`${componentKey}-${quest.id}`">
     <QuestRequirements :quest="quest" :progress="quest.progress"/>
     <QuestRewards v-if="quest && quest.id !== 0" :quest="quest"/>
     <QuestActions :quest="quest" :key="quest.id" showSupply
@@ -26,14 +27,20 @@ import QuestCharacter from '@/components/smart/QuestCharacter.vue';
 import QuestRequirements from '@/components/smart/QuestRequirements.vue';
 import QuestRewards from '@/components/smart/QuestRewards.vue';
 import QuestActions from '@/components/smart/QuestActions.vue';
-import {Quest, ReputationLevelRequirements, Rarity, RewardType, QuestTemplateType} from '@/views/Quests.vue';
-import {mapActions, mapGetters} from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
+import {
+  Quest,
+  ReputationLevelRequirements,
+  RewardType } from '@/interfaces';
+import { Rarity, QuestTemplateType } from '@/enums/Quest';
 import {Nft, NftStatus} from '@/interfaces/Nft';
 
 interface StoreMappedActions {
   getCharacterQuestData(payload: { characterId: string | number }): Promise<Quest>;
 
   getCharacterBusyStatus(payload: { characterId: string | number }): Promise<number>;
+
+  getQuestTemplates(payload: { tier: number }): Promise<Quest[]>;
 }
 
 interface StoreMappedGetters {
@@ -43,6 +50,7 @@ interface StoreMappedGetters {
 interface Data {
   isLoading: boolean;
   character?: Nft;
+  componentKey: number;
 }
 
 export default Vue.extend({
@@ -60,6 +68,25 @@ export default Vue.extend({
     questTemplateType: {
       type: Number as PropType<QuestTemplateType>,
     },
+    walletQuestTier: {
+      type: Number as PropType<number>,
+    },
+    defaultAccountProp: {
+      type: String as PropType<string>,
+      required: true,
+    },
+    currentNetworkIdProp: {
+      type: Number as PropType<number>,
+      required: true,
+    },
+    pickable: {
+      type: Boolean,
+      default: false
+    },
+    pickedQuestId: {
+      type: Number as PropType<number>,
+      default: 0,
+    },
   },
 
   data() {
@@ -69,32 +96,53 @@ export default Vue.extend({
       RewardType,
       Rarity,
       NftStatus,
-      QuestTemplateType
+      QuestTemplateType,
+      componentKey: 0,
     } as Data;
   },
 
   computed: {
+    ...mapState(['defaultAccount', 'currentNetworkId']),
     ...mapGetters(['charactersWithIds']) as Accessors<StoreMappedGetters>,
+
+    /**
+     * detect if the defaultAccount/networkId have changed.
+     */
+    hasStateChanged(): boolean {
+      return this.defaultAccount + this.currentNetworkId !== this.defaultAccountProp + this.currentNetworkIdProp;
+    },
   },
 
   methods: {
     ...mapActions([
       'getCharacterQuestData',
       'getCharacterBusyStatus',
+      'getQuestTemplates',
     ]) as StoreMappedActions,
     async onRefreshQuestData() {
-      this.$emit('refresh-quest-data');
-      await this.refreshQuestData();
+      // if state has changed, trigger full page reload.
+      if (this.hasStateChanged) {
+        this.$emit('refresh-quest-data');
+      }
+      // change key of current row to triggering automatic, efficient content update
+      else {
+        await this.refreshQuestData();
+        this.componentKey += 1;
+      }
     },
 
     async refreshQuestData() {
-      if (!this.character) return;
       try {
         this.isLoading = true;
-        if(this.questTemplateType === QuestTemplateType.QUEST){
+        //update row character-quest
+        if(this.character && this.questTemplateType === QuestTemplateType.QUEST){
           this.character.quest = await this.getCharacterQuestData({characterId: this.characterId});
         }
-        this.$forceUpdate();
+        //update row wallet-quest
+        else if(!this.character && this.questTemplateType === QuestTemplateType.WALLET){
+          const questUpdate = (await this.getQuestTemplates({tier: this.walletQuestTier + 30})).find((x) => x.id === this.quest.id) as Quest;
+          this.quest.progress = questUpdate.progress;
+        }
       } finally {
         this.isLoading = false;
       }
@@ -104,12 +152,11 @@ export default Vue.extend({
 
   async mounted() {
     if(this.questTemplateType === QuestTemplateType.QUEST){
-      this.character = await this.charactersWithIds([this.characterId]).filter(Boolean)[0];
+      this.character = this.charactersWithIds([this.characterId]).filter(Boolean)[0];
       this.character.status = +await this.getCharacterBusyStatus({characterId: this.characterId});
     }
     await this.refreshQuestData();
   },
-
 })
 ;
 </script>
@@ -159,13 +206,10 @@ export default Vue.extend({
   pointer-events: none;
 }
 
-@media (max-width: 576px) {
-  .quest-row,
-  .quest-row-wallet {
+.quest-row, .quest-row-wallet {
     flex-direction: column;
     height: auto;
     gap: 1rem;
   }
-}
 
 </style>

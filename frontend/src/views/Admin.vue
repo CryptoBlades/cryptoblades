@@ -95,6 +95,11 @@ export default Vue.extend({
       contract: this.contracts.SpecialWeaponsManager,
       component: 'SpecialWeaponsManagerAdmin',
     });
+    this.tabs.push({
+      title: 'dex',
+      contract: this.contracts.Dex,
+      component: 'DexAdmin',
+    });
   },
 });
 </script>

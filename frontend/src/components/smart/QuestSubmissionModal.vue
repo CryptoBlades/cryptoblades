@@ -1,6 +1,6 @@
 <template>
   <b-modal v-if="quest" :visible="showModal" button-size="lg" no-close-on-backdrop scrollable
-           :title="$t('quests.turnIn')" size="xl" @close.prevent="resetTokens"
+           :title="quest.requirementType === RequirementType.EXTERNAL_HOLD ? $t('quests.show') : $t('quests.turnIn')" size="xl" @close.prevent="resetTokens"
            @cancel.prevent="resetTokens" content-class="modal-footer-margin"
            :ok-title="$t('quests.submit')" :busy="isLoading"
            :ok-disabled="isSubmitDisabled()"
@@ -9,7 +9,7 @@
            || quest.requirementType === RequirementType.SOUL
            || isCurrency ?
             submitAmount() : submit()">
-    <h5 class="text-center">{{ $t('quests.submitDisclaimer') }}</h5>
+    <h5 v-if="quest.requirementType !== RequirementType.EXTERNAL_HOLD" class="text-center">{{ $t('quests.submitDisclaimer') }}</h5>
     <div v-if="quest.requirementType === RequirementType.WEAPON" class="d-flex">
       <weapon-grid v-model="selectedToken" :weaponIds="ownedTokens" :ignore="tokensToBurn"
                    showGivenWeaponIds @chooseweapon="addBurnToken"
@@ -33,8 +33,7 @@
       <b-form-input type="number" number v-model="amountToBurn" class="w-50" :min="0" :max="maxAmount"/>
       <b-button class="m-3" variant="primary" @click="setRequiredAmount">{{ $t('quests.setRequiredAmount') }}</b-button>
     </div>
-    <div v-else-if="quest.requirementType === RequirementType.EXTERNAL
-      || quest.requirementType === RequirementType.EXTERNAL_HOLD">
+    <div v-else-if="quest.requirementType === RequirementType.EXTERNAL">
       <div v-if="isCurrency" class="d-flex align-items-center flex-column">
         <h2>{{ $t('quests.howMuchToTurnIn') }}</h2>
         <b-form-input type="number" number v-model="amountToBurn" class="w-50" :min="0" :max="maxAmount"/>
@@ -45,6 +44,17 @@
       </div>
       <div v-else class="d-flex align-items-center flex-column">
         <h2>{{ $t('quests.whatIdsToTurnIn') }}</h2>
+        <b-form-input v-model="externalsToBurn" class="w-50" :placeholder="$t('admin.identifiers')"/>
+      </div>
+    </div>
+    <div v-else-if="quest.requirementType === RequirementType.EXTERNAL_HOLD">
+      <div class="d-flex align-items-center flex-column">
+        <h2>{{ $t('quests.availableIds') }}</h2>
+        <h4 v-if="!availableIds">{{ $t('quests.noNftsAvailableInUsersWallet') }}</h4>
+        <h4 v-else>{{availableIds}}</h4>
+      </div>
+      <div class="d-flex align-items-center flex-column">
+        <h2>{{ $t('quests.whatIdsToShow') }}</h2>
         <b-form-input v-model="externalsToBurn" class="w-50" :placeholder="$t('admin.identifiers')"/>
       </div>
     </div>
@@ -64,7 +74,11 @@ import Vue from 'vue';
 import WeaponGrid from '@/components/smart/WeaponGrid.vue';
 import {mapActions, mapGetters, mapState} from 'vuex';
 import NftList, {NftIdType} from '@/components/smart/NftList.vue';
-import {Quest, QuestTemplateType, Rarity, RequirementType, RewardType} from '@/views/Quests.vue';
+import { Quest, RewardType } from '@/interfaces';
+import {
+  Rarity,
+  RequirementType,
+  QuestTemplateType } from '@/enums/Quest';
 import DustBalanceDisplay from '@/components/smart/DustBalanceDisplay.vue';
 import NftIcon from '@/components/NftIcon.vue';
 import {PropType} from 'vue/types/options';
@@ -73,7 +87,8 @@ import {Nft} from '../../interfaces/Nft';
 interface StoreMappedActions {
   submitProgress(payload: { characterID: string | number, tokenIds: (string | number)[] }): Promise<void>;
 
-  submitExternalProgress(payload: { characterID: string | number, tokenIds: (string | number)[], tokenAddress: string }): Promise<void>;
+  submitExternalProgress(payload: {
+    characterID: string | number, tokenIds: (string | number)[], tokenAddress: string, questRequirementType: RequirementType }): Promise<void>;
 
   submitProgressAmount(payload: { characterID: string | number, amount: number }): Promise<void>;
 
@@ -81,7 +96,8 @@ interface StoreMappedActions {
 
   submitWalletProgress(payload: { questID: number, tokenIds: (string | number)[] }): Promise<void>;
 
-  submitWalletExternalProgress(payload: { questID: number, tokenIds: (string | number)[], tokenAddress: string }): Promise<void>;
+  submitWalletExternalProgress(payload: {
+    questID: number, tokenIds: (string | number)[], tokenAddress: string, questRequirementType: RequirementType }): Promise<void>;
 
   submitExternalProgressAmount(payload: { characterID: string | number, amount: number, currencyAddress: string }): Promise<void>;
 
@@ -90,6 +106,8 @@ interface StoreMappedActions {
   isExternalCurrency(payload: { currencyAddress: string }): Promise<boolean>;
 
   fetchGenesisSoulBalance(): Promise<number>;
+
+  fetchExternalAvailableIds(payload: { tokenAddress: string, questId: number }): Promise<string[]>;
 }
 
 interface Data {
@@ -99,6 +117,7 @@ interface Data {
   ownedTokens: string[];
   tokensToBurn: (string | number)[];
   externalsToBurn?: string;
+  availableIds?: string;
   ownedNftIdTypes: NftIdType[];
   nftIdTypesToBurn: NftIdType[];
   amountToBurn: number;
@@ -134,6 +153,7 @@ export default Vue.extend({
       ownedTokens: [],
       tokensToBurn: [],
       externalsToBurn: undefined,
+      availableIds: undefined,
       ownedNftIdTypes: [],
       nftIdTypesToBurn: [],
       amountToBurn: 0,
@@ -190,6 +210,7 @@ export default Vue.extend({
       'submitExternalProgressAmount',
       'submitWalletExternalProgressAmount',
       'fetchGenesisSoulBalance',
+      'fetchExternalAvailableIds',
       'isExternalCurrency',
     ]) as StoreMappedActions,
 
@@ -260,6 +281,7 @@ export default Vue.extend({
               characterID: this.characterId,
               tokenIds: this.externalsToBurn.split(',').map(id => +id),
               tokenAddress: this.quest.requirementExternalAddress,
+              questRequirementType: this.quest.requirementType,
             });
           } else {
             await this.submitProgress({
@@ -275,6 +297,7 @@ export default Vue.extend({
               questID: this.quest.id,
               tokenIds: this.externalsToBurn.split(',').map(id => +id),
               tokenAddress: this.quest.requirementExternalAddress,
+              questRequirementType: this.quest.requirementType,
             });
           } else {
             await this.submitWalletProgress({
@@ -377,9 +400,13 @@ export default Vue.extend({
           this.ownedShieldIds?.forEach((id: string) => this.ownedNftIdTypes.push({id, type: 'shield'}));
         } else if (this.quest.requirementType === RequirementType.SOUL) {
           this.soulBalance = await this.fetchGenesisSoulBalance();
-        } else if (this.quest.requirementType === RequirementType.EXTERNAL
-          || this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
+        } else if (this.quest.requirementType === RequirementType.EXTERNAL) {
           await this.isExternalCurrencyAddress();
+        } else if (this.quest.requirementType === RequirementType.EXTERNAL_HOLD) {
+          this.availableIds = String(await this.fetchExternalAvailableIds({
+            tokenAddress: this.quest.requirementExternalAddress!,
+            questId: this.quest.id
+          }));
         }
       }
     }
@@ -396,9 +423,7 @@ export default Vue.extend({
   margin-bottom: 3rem;
 }
 
-@media (max-width: 576px) {
-  .single-dust-display {
+.single-dust-display {
     width: 100%;
   }
-}
 </style>

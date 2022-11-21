@@ -1,83 +1,94 @@
-import { abi as erc20Abi } from '../../build/contracts/IERC20.json';
-import { abi as erc721Abi } from '../../build/contracts/IERC721.json';
+import {abi as erc20Abi} from '../../build/contracts/IERC20.json';
+import {abi as erc721Abi} from '../../build/contracts/IERC721.json';
 
-import { networks as skillStakingRewardsNetworks } from '../../build/contracts/SkillStakingRewardsUpgradeable.json';
-import { networks as skillStakingRewards60Networks } from '../../build/contracts/SkillStakingRewardsUpgradeable60.json';
-import { networks as skillStakingRewards90Networks } from '../../build/contracts/SkillStakingRewardsUpgradeable90.json';
-import { networks as skillStakingRewards180Networks } from '../../build/contracts/SkillStakingRewardsUpgradeable180.json';
-import { networks as lpStakingRewardsNetworks } from '../../build/contracts/LPStakingRewardsUpgradeable.json';
-import { networks as lp2StakingRewardsNetworks } from '../../build/contracts/LP2StakingRewardsUpgradeable.json';
-import { networks as lpStakingRewardsValorNetworks } from '../../build/contracts/LPStakingRewardsUpgradeableValor.json';
-import { networks as lp2StakingRewardsValorNetworks } from '../../build/contracts/LP2StakingRewardsUpgradeableValor.json';
-import { networks as valorStakingRewardsNetworks } from '../../build/contracts/ValorStakingRewardsUpgradeable.json';
-import { networks as skillTokenNetworks } from '../../build/contracts/SkillToken.json';
-import { networks as lpTokenNetworks } from '../../build/contracts/ExperimentToken.json';
-import { networks as lp2TokenNetworks } from '../../build/contracts/ExperimentToken2.json';
-import { networks as valorTokenNetworks } from '../../build/contracts/ExperimentToken.json';
-import { networks as cbkLandT1StakingRewardsNetworks } from '../../build/contracts/CBKLandT1StakingRewardsUpgradeable.json';
-import { networks as cbkLandT2StakingRewardsNetworks } from '../../build/contracts/CBKLandT2StakingRewardsUpgradeable.json';
-import { networks as cbkLandT3StakingRewardsNetworks } from '../../build/contracts/CBKLandT3StakingRewardsUpgradeable.json';
-import { abi as stakingRewardsAbi } from '../../build/contracts/IStakingRewards.json';
-import { abi as nftStakingRewardsAbi } from '../../build/contracts/INftStakingRewards.json';
+import {networks as skillStakingRewardsNetworks} from '../../build/contracts/SkillStakingRewardsUpgradeable.json';
+import {networks as skillStakingRewards60Networks} from '../../build/contracts/SkillStakingRewardsUpgradeable60.json';
+import {networks as skillStakingRewards90Networks} from '../../build/contracts/SkillStakingRewardsUpgradeable90.json';
+import {networks as skillStakingRewards180Networks} from '../../build/contracts/SkillStakingRewardsUpgradeable180.json';
+import {networks as lpStakingRewardsNetworks} from '../../build/contracts/LPStakingRewardsUpgradeable.json';
+import {networks as lp2StakingRewardsNetworks} from '../../build/contracts/LP2StakingRewardsUpgradeable.json';
+import {networks as lpStakingRewardsValorNetworks} from '../../build/contracts/LPStakingRewardsUpgradeableValor.json';
+import {networks as lp2StakingRewardsValorNetworks} from '../../build/contracts/LP2StakingRewardsUpgradeableValor.json';
+import {networks as valorStakingRewardsNetworks} from '../../build/contracts/ValorStakingRewardsUpgradeable.json';
+import {networks as skillTokenNetworks} from '../../build/contracts/SkillToken.json';
+import {networks as lpTokenNetworks, networks as valorTokenNetworks} from '../../build/contracts/ExperimentToken.json';
+import {networks as lp2TokenNetworks} from '../../build/contracts/ExperimentToken2.json';
+import {networks as cbkLandT1StakingRewardsNetworks} from '../../build/contracts/CBKLandT1StakingRewardsUpgradeable.json';
+import {networks as cbkLandT2StakingRewardsNetworks} from '../../build/contracts/CBKLandT2StakingRewardsUpgradeable.json';
+import {networks as cbkLandT3StakingRewardsNetworks} from '../../build/contracts/CBKLandT3StakingRewardsUpgradeable.json';
+import {abi as stakingRewardsAbi} from '../../build/contracts/IStakingRewards.json';
+import {abi as nftStakingRewardsAbi} from '../../build/contracts/INftStakingRewards.json';
 
-import { abi as cryptoBladesAbi, networks as cryptoBladesNetworks } from '../../build/contracts/CryptoBlades.json';
-import { abi as raidAbi, networks as raidNetworks } from '../../build/contracts/Raid1.json';
-import { abi as charactersAbi, networks as charactersNetworks } from '../../build/contracts/Characters.json';
-import { abi as weaponsAbi, networks as weaponsNetworks } from '../../build/contracts/Weapons.json';
-import { abi as blacksmithAbi, networks as blacksmithNetworks } from '../../build/contracts/Blacksmith.json';
-import { abi as shieldsAbi, networks as shieldsNetworks } from '../../build/contracts/Shields.json';
-import { abi as garrisonAbi, networks as garrisonNetworks } from '../../build/contracts/Garrison.json';
-import { abi as cbkLandSaleAbi, networks as cbkLandSaleNetworks } from '../../build/contracts/CBKLandSale.json';
-import { abi as promosAbi, networks as promosNetworks } from '../../build/contracts/Promos.json';
-import { abi as cbkLandAbi, networks as cbkLandNetworks } from '../../build/contracts/CBKLand.json';
-import { abi as weaponRenameTagConsumablesAbi, networks as weaponRenameTagConsumablesNetworks } from '../../build/contracts/WeaponRenameTagConsumables.json';
-import { abi as characterRenameTagConsumablesAbi, networks as characterRenameTagConsumables } from '../../build/contracts/CharacterRenameTagConsumables.json';
-import { abi as characterFireTraitChangeConsumablesAbi, networks as characterFireTraitChangeConsumablesNetworks }
-  from '../../build/contracts/CharacterFireTraitChangeConsumables.json';
-import { abi as characterEarthTraitChangeConsumablesAbi, networks as characterEarthTraitChangeConsumablesNetworks }
-  from '../../build/contracts/CharacterEarthTraitChangeConsumables.json';
-import { abi as characterWaterTraitChangeConsumablesAbi, networks as characterWaterTraitChangeConsumablesNetworks }
-  from '../../build/contracts/CharacterWaterTraitChangeConsumables.json';
-import { abi as characterLightningTraitChangeConsumablesAbi, networks as characterLightningTraitChangeConsumablesNetworks }
-  from '../../build/contracts/CharacterLightningTraitChangeConsumables.json';
-import { abi as raidTrinketAbi, networks as raidTrinketNetworks } from '../../build/contracts/RaidTrinket.json';
-import { abi as keyboxAbi, networks as keyboxNetworks } from '../../build/contracts/KeyLootbox.json';
-import { abi as junkAbi, networks as junkNetworks } from '../../build/contracts/Junk.json';
-import { abi as randomsAbi } from '../../build/contracts/IRandoms.json';
-import { abi as marketAbi, networks as marketNetworks } from '../../build/contracts/NFTMarket.json';
-import { abi as simpleQuestsAbi, networks as simpleQuestsNetworks } from '../../build/contracts/SimpleQuests.json';
-import { abi as partnerVaultAbi, networks as partnerVaultNetworks} from '../../build/contracts/PartnerVault.json';
-import { abi as waxBridgeAbi, networks as waxBridgeNetworks } from '../../build/contracts/WaxBridge.json';
-import { abi as pvpAbi, networks as pvpNetworks } from '../../build/contracts/PvpArena.json';
-import { abi as pvpCoreAbi, networks as pvpCoreNetworks } from '../../build/contracts/PvpCore.json';
-import { abi as pvpRankingsAbi, networks as pvpRankingsNetworks } from '../../build/contracts/PvpRankings.json';
-import { abi as tokensManagerAbi, networks as tokensManagerNetworks } from '../../build/contracts/TokensManager.json';
+import {abi as cryptoBladesAbi, networks as cryptoBladesNetworks} from '../../build/contracts/CryptoBlades.json';
+import {abi as raidAbi, networks as raidNetworks} from '../../build/contracts/Raid1.json';
+import {abi as charactersAbi, networks as charactersNetworks} from '../../build/contracts/Characters.json';
+import {abi as weaponsAbi, networks as weaponsNetworks} from '../../build/contracts/Weapons.json';
+import {abi as blacksmithAbi, networks as blacksmithNetworks} from '../../build/contracts/Blacksmith.json';
+import {abi as shieldsAbi, networks as shieldsNetworks} from '../../build/contracts/Shields.json';
+import {abi as garrisonAbi, networks as garrisonNetworks} from '../../build/contracts/Garrison.json';
+import {abi as cbkLandSaleAbi, networks as cbkLandSaleNetworks} from '../../build/contracts/CBKLandSale.json';
+import {abi as promosAbi, networks as promosNetworks} from '../../build/contracts/Promos.json';
+import {abi as cbkLandAbi, networks as cbkLandNetworks} from '../../build/contracts/CBKLand.json';
+import {abi as weaponRenameTagConsumablesAbi, networks as weaponRenameTagConsumablesNetworks} from '../../build/contracts/WeaponRenameTagConsumables.json';
+import {abi as characterRenameTagConsumablesAbi, networks as characterRenameTagConsumables} from '../../build/contracts/CharacterRenameTagConsumables.json';
+import {
+  abi as characterFireTraitChangeConsumablesAbi,
+  networks as characterFireTraitChangeConsumablesNetworks
+} from '../../build/contracts/CharacterFireTraitChangeConsumables.json';
+import {
+  abi as characterEarthTraitChangeConsumablesAbi,
+  networks as characterEarthTraitChangeConsumablesNetworks
+} from '../../build/contracts/CharacterEarthTraitChangeConsumables.json';
+import {
+  abi as characterWaterTraitChangeConsumablesAbi,
+  networks as characterWaterTraitChangeConsumablesNetworks
+} from '../../build/contracts/CharacterWaterTraitChangeConsumables.json';
+import {
+  abi as characterLightningTraitChangeConsumablesAbi,
+  networks as characterLightningTraitChangeConsumablesNetworks
+} from '../../build/contracts/CharacterLightningTraitChangeConsumables.json';
+import {abi as raidTrinketAbi, networks as raidTrinketNetworks} from '../../build/contracts/RaidTrinket.json';
+import {abi as keyboxAbi, networks as keyboxNetworks} from '../../build/contracts/KeyLootbox.json';
+import {abi as junkAbi, networks as junkNetworks} from '../../build/contracts/Junk.json';
+import {abi as randomsAbi} from '../../build/contracts/IRandoms.json';
+import {abi as marketAbi, networks as marketNetworks} from '../../build/contracts/NFTMarket.json';
+import {abi as simpleQuestsAbi, networks as simpleQuestsNetworks} from '../../build/contracts/SimpleQuests.json';
+import {abi as partnerVaultAbi, networks as partnerVaultNetworks} from '../../build/contracts/PartnerVault.json';
+import {abi as waxBridgeAbi, networks as waxBridgeNetworks} from '../../build/contracts/WaxBridge.json';
+import {abi as pvpAbi, networks as pvpNetworks} from '../../build/contracts/PvpArena.json';
+import {abi as pvpCoreAbi, networks as pvpCoreNetworks} from '../../build/contracts/PvpCore.json';
+import {abi as pvpRankingsAbi, networks as pvpRankingsNetworks} from '../../build/contracts/PvpRankings.json';
+import {abi as tokensManagerAbi, networks as tokensManagerNetworks} from '../../build/contracts/TokensManager.json';
+import {abi as weaponCosmeticsAbi, networks as weaponCosmeticsNetworks} from '../../build/contracts/WeaponCosmetics.json';
+import {abi as characterCosmeticsAbi, networks as characterCosmeticsNetworks} from '../../build/contracts/CharacterCosmetics.json';
+import {abi as nftStorageAbi, networks as nftStorageNetworks} from '../../build/contracts/NFTStorage.json';
+import {abi as treasuryAbi, networks as treasuryNetworks} from '../../build/contracts/Treasury.json';
+import {abi as burningManagerAbi, networks as burningManagerNetworks} from '../../build/contracts/BurningManager.json';
+import {
+  abi as kingStakingRewardsUpgradeableAbi,
+  networks as kingStakingRewardsUpgradeableNetworks
+} from '../../build/contracts/KingStakingRewardsUpgradeable.json';
+import {
+  abi as kingStakingRewardsUpgradeable90Abi,
+  networks as kingStakingRewardsUpgradeable90Networks
+} from '../../build/contracts/KingStakingRewardsUpgradeable90.json';
+import {
+  abi as kingStakingRewardsUpgradeable180Abi,
+  networks as kingStakingRewardsUpgradeable180Networks
+} from '../../build/contracts/KingStakingRewardsUpgradeable180.json';
+import {abi as specialWeaponsManagerAbi, networks as specialWeaponsManagerNetworks} from '../../build/contracts/SpecialWeaponsManager.json';
+import {abi as dexAbi, networks as dexNetworks} from '../../build/contracts/Dex.json';
 import { abi as equipmentManagerAbi, networks as equipmentManagerNetworks } from '../../build/contracts/EquipmentManager.json';
-import { abi as weaponCosmeticsAbi, networks as weaponCosmeticsNetworks } from '../../build/contracts/WeaponCosmetics.json';
-import { abi as characterCosmeticsAbi, networks as characterCosmeticsNetworks } from '../../build/contracts/CharacterCosmetics.json';
-import { abi as nftStorageAbi, networks as nftStorageNetworks } from '../../build/contracts/NFTStorage.json';
-import { abi as treasuryAbi, networks as treasuryNetworks } from '../../build/contracts/Treasury.json';
-import { abi as burningManagerAbi, networks as burningManagerNetworks } from '../../build/contracts/BurningManager.json';
-import { abi as kingStakingRewardsUpgradeableAbi,
-  networks as kingStakingRewardsUpgradeableNetworks }
-  from '../../build/contracts/KingStakingRewardsUpgradeable.json';
-import { abi as kingStakingRewardsUpgradeable90Abi,
-  networks as kingStakingRewardsUpgradeable90Networks }
-  from '../../build/contracts/KingStakingRewardsUpgradeable90.json';
-import { abi as kingStakingRewardsUpgradeable180Abi,
-  networks as kingStakingRewardsUpgradeable180Networks }
-  from '../../build/contracts/KingStakingRewardsUpgradeable180.json';
-import { abi as specialWeaponsManagerAbi, networks as specialWeaponsManagerNetworks } from '../../build/contracts/SpecialWeaponsManager.json';
 import config from '../app-config.json';
 
 
 import Web3 from 'web3';
-import { Contracts, isStakeType, isNftStakeType, StakeType, NftStakeType, StakingContracts, NftStakingContracts } from './interfaces';
+import {Contracts, isNftStakeType, isStakeType, NftStakeType, NftStakingContracts, StakeType, StakingContracts} from './interfaces';
 
-import { StakingContractEntry, stakingContractsInfo, nftStakingContractsInfo } from './stake-types';
+import {nftStakingContractsInfo, StakingContractEntry, stakingContractsInfo} from './stake-types';
 
-import {raid, pvp, quests, burningManager} from './feature-flags';
-import {currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
+import {burningManager, pvp, quests, raid} from './feature-flags';
+import {currentChainSupportsDex, currentChainSupportsPvP, currentChainSupportsQuests} from '@/utils/common';
 
 interface RaidContracts {
   Raid1?: Contracts['Raid1'];
@@ -342,8 +353,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   if(raid) {
     const raidContractAddr = getConfigValue('VUE_APP_RAID_CONTRACT_ADDRESS') || (raidNetworks as Networks)[networkId]!.address;
 
-    const Raid1 = new web3.eth.Contract(raidAbi as Abi, raidContractAddr);
-    raidContracts.Raid1 = Raid1;
+    raidContracts.Raid1 = new web3.eth.Contract(raidAbi as Abi, raidContractAddr);
 
     raidTrinketAddress = (raidTrinketNetworks as Networks)[networkId]!.address;
     keyboxAddress = (keyboxNetworks as Networks)[networkId]!.address;
@@ -360,13 +370,18 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
 
   marketContracts.NFTMarket = new web3.eth.Contract(marketAbi as Abi, marketContractAddr);
 
+  let Dex;
+
+  if(currentChainSupportsDex()) {
+    const dexContractAddr = getConfigValue('VUE_APP_DEX_CONTRACT_ADDRESS') || (dexNetworks as Networks)[networkId]!.address;
+    Dex = new web3.eth.Contract(dexAbi as Abi, dexContractAddr);
+  }
 
   const questsContracts: QuestsContracts = {};
   if(quests && currentChainSupportsQuests()) {
     const simpleQuestsContractAddr = getConfigValue('VUE_APP_SIMPLE_QUESTS_CONTRACT_ADDRESS') || (simpleQuestsNetworks as Networks)[networkId]!.address;
 
-    const simpleQuests = new web3.eth.Contract(simpleQuestsAbi as Abi, simpleQuestsContractAddr);
-    questsContracts.SimpleQuests = simpleQuests;
+    questsContracts.SimpleQuests = new web3.eth.Contract(simpleQuestsAbi as Abi, simpleQuestsContractAddr);
 
     const partnerVaultContractAddr = (partnerVaultNetworks as Networks)[networkId]!.address;
     questsContracts.PartnerVault = new web3.eth.Contract(partnerVaultAbi as Abi, partnerVaultContractAddr);
@@ -439,6 +454,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     KingStakingRewardsUpgradeable,
     KingStakingRewardsUpgradeable90,
     KingStakingRewardsUpgradeable180,
-    SpecialWeaponsManager
+    SpecialWeaponsManager,
+    Dex,
   };
 }

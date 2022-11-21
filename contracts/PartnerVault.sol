@@ -20,7 +20,8 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
 
     mapping(address => uint256[]) public nfts;
     mapping(address => uint256) public currencies;
-    mapping(address => EnumerableSet.UintSet) private shownNfts; // ID confirmed held by a user (private due to limitation)
+    mapping(address => EnumerableSet.UintSet) private shownNfts; // DEPRECATED
+    mapping(address => mapping(uint => EnumerableSet.UintSet)) private shownQuestNfts; // tokenAddress -> questId -> ID confirmed held by a user (private due to limitation)
 
     function initialize() public initializer {
         __AccessControl_init_unchained();
@@ -61,11 +62,11 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
         }
     }
 
-    function showHeldNfts(IERC721 tokenAddress, uint256[] calldata tokenIds, address holder) external restricted isValidERC721(tokenAddress) {
+    function showHeldNfts(IERC721 tokenAddress, uint256[] calldata tokenIds, address holder, uint questId) external restricted isValidERC721(tokenAddress) {
         for (uint i = 0; i < tokenIds.length; i++) {
             require(tokenAddress.ownerOf(tokenIds[i]) == holder, "Not holder");
-            require(shownNfts[address(tokenAddress)].contains(tokenIds[i]) == false, "NFT already shown");
-            shownNfts[address(tokenAddress)].add(tokenIds[i]);
+            require(shownQuestNfts[address(tokenAddress)][questId].contains(tokenIds[i]) == false, "NFT already shown for this quest");
+            shownQuestNfts[address(tokenAddress)][questId].add(tokenIds[i]);
         }
     }
 
@@ -76,7 +77,7 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
 
     function transferReward(address tokenAddress, address to, uint256 amount, uint256 seed) external restricted {
         require(amount <= nfts[tokenAddress].length || amount <= currencies[tokenAddress], "Not enough NFTs or currency");
-        if (amount < currencies[tokenAddress]) {
+        if (amount <= currencies[tokenAddress]) {
             IERC20 currency = IERC20(tokenAddress);
             currency.transfer(to, amount);
             currencies[tokenAddress] = currencies[tokenAddress].sub(amount);
@@ -105,10 +106,10 @@ contract PartnerVault is Initializable, AccessControlUpgradeable, IERC721Receive
         return nfts[tokenAddress];
     }
 
-    function haveNftsBeenShown(address tokenAddress, uint256[] memory tokenIds) public view returns (bool[] memory result) {
+    function haveNftsBeenShown(address tokenAddress, uint questId, uint256[] memory tokenIds) public view returns (bool[] memory result) {
         result = new bool[](tokenIds.length);
         for(uint i = 0; i < tokenIds.length; i++) {
-            result[i] = shownNfts[tokenAddress].contains(tokenIds[i]);
+            result[i] = shownQuestNfts[tokenAddress][questId].contains(tokenIds[i]);
         }
     }
 }
