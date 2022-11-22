@@ -158,7 +158,7 @@
 
             <a
               class="menu-icon"
-              href="https://cryptoblades.gitbook.io/wiki/"
+              href="https://cryptoblades.zendesk.com/hc/en-us"
               target="_blank"
             >
               <img src="../assets/navbar-icons/wiki-icon.png" alt="Wiki"/>
