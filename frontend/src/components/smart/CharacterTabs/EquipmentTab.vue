@@ -218,6 +218,10 @@ export default Vue.extend({
       await this.refreshData();
       //re-fetch weapon inventory
     });
+  },
+
+  beforeDestroy() {
+    Events.$off('chooseweapon');
   }
 });
 </script>
