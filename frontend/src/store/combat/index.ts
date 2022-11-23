@@ -149,13 +149,26 @@ const combat = {
       const { TokensManager, CryptoBlades } = rootState.contracts();
       if (!TokensManager || !CryptoBlades || !rootState.defaultAccount) return;
 
-      const res = await TokensManager.methods
-        .fight(
-          characterId,
-          targetString,
-          fightMultiplier
-        )
-        .send({ from: rootState.defaultAccount, gasPrice: getGasPrice(), gas: '300000', value: +offsetCost * fightMultiplier });
+      const VAR_FIGHT_UNTAXED = await CryptoBlades.methods.VAR_FIGHT_UNTAXED().call(defaultCallOptions(rootState));
+      const untaxedFight = await CryptoBlades.methods.vars(VAR_FIGHT_UNTAXED).call(defaultCallOptions(rootState));
+      let res;
+      if(!untaxedFight || untaxedFight === '0') {
+        res = await TokensManager.methods
+          .fight(
+            characterId,
+            targetString,
+            fightMultiplier
+          )
+          .send({ from: rootState.defaultAccount, gasPrice: getGasPrice(), gas: '200000', value: +offsetCost * fightMultiplier });
+      }
+      else {
+        res = await CryptoBlades.methods
+          .untaxedFight(
+            characterId,
+            targetString,
+            fightMultiplier)
+          .send({ from: rootState.defaultAccount, gasPrice: getGasPrice(), gas: '200000'});
+      }
 
       let playerRoll = '';
       let enemyRoll = '';

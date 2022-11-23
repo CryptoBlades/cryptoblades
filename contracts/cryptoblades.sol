@@ -61,6 +61,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 26;
     uint256 public constant VAR_GAS_OFFSET_PER_FIGHT_MULTIPLIER = 27;
     uint256 public constant VAR_FIGHT_FLAT_IGO_BONUS = 28;
+    uint256 public constant VAR_FIGHT_UNTAXED = 29; // 0 = yes tax, 1 = no tax
 
     uint256 public constant LINK_SAFE_RANDOMS = 1;
 
@@ -306,6 +307,17 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
 
     function fight(address fighter, uint256 char, uint32 target, uint8 fightMultiplier) external
         restricted returns (uint256, uint256) {
+        return _fight(fighter, char, target, fightMultiplier);
+    }
+
+    function untaxedFight(uint256 char, uint32 target, uint8 fightMultiplier) external
+        returns (uint256, uint256) {
+        require(vars[VAR_FIGHT_UNTAXED] == 1);
+        return _fight(msg.sender, char, target, fightMultiplier);
+    }
+
+    function _fight(address fighter, uint256 char, uint32 target, uint8 fightMultiplier) internal
+        returns (uint256, uint256) {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint72 miscData, uint256 powerData) = characters.getFightDataAndDrainStamina(fighter,
