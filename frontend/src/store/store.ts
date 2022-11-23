@@ -1089,10 +1089,10 @@ export default new Vuex.Store<IState>({
 
     async fetchCharacterWeapon({ state }, characterId: string | number) {
       if(!state.defaultAccount) return;
+      console.log('fetching weapon for character: ', characterId);
 
       const equipment = state.contracts().EquipmentManager!;
       const characters = state.contracts().Characters!;
-      characterId = 0; // TEMP
       const addr = await equipment.methods.equippedSlotAddress(characters.options.address, characterId, 1).call(defaultCallOptions(state));
 
       if(addr && addr !== '0x0000000000000000000000000000000000000000') {
@@ -1530,6 +1530,7 @@ export default new Vuex.Store<IState>({
 
       await Promise.all([
         dispatch('updateCharacterIds'),
+        dispatch('updateWeaponIds'),
         dispatch('combat/fetchFightRewardSkill'),
         dispatch('combat/fetchFightRewardXp'),
         dispatch('setupCharacterStaminas')

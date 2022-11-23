@@ -88,99 +88,14 @@
           </b-progress>
         </div>
       </div>
-      <!-- Equipment -->
-      <div class="col-lg-12 col-md-5 col-sm-9 drops">
-        <span>{{$t('weapon')}}</span>
-        <div class="weapon-info" v-if="equippedWeaponId !== undefined && equippedWeaponId !== null">
-          <div>
-            {{equippedWeaponId}}
-            <!--weapon-inventory class="weapon-icon" :weapon="equippedWeapon" :displayType="'raid'"/-->
-          </div>
-          <div @click="removeWeapon()">
-            <img src="../../assets/swithc-wep.png" alt="">
-          </div>
-          <div>
-            <p>{{$t('equip.equipped')}}</p>
-            <span>{{$t('equip.unequipWeapon')}}</span>
-          </div>
-        </div>
-        <div class="weapon-info" v-else>
-          <div class="outline-box">
-            <div>
-              <div @click="selectWeapon()">
-                <img src="../../assets/swithc-wep.png" alt="">
-              </div>
-            </div>
-            <div>
-              <p>{{$t('equip.noWeapon')}}</p>
-              <span>{{$t('equip.equipWeapon')}}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-12 col-md-5 col-sm-9 drops">
-        <span>{{$t('Shield')}}</span>
-        <div v-if="!equippedShieldId" class="shieldButtonWrapper">
-          <a tabindex="0" class="selectWeaponButton" id="shield-popover">
-            <div class="placeholderImageWrapper">
-              <img src="../../assets/shieldPlaceholder.svg" alt="shield" />
-            </div>
-              <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
-              <p class="popoverTitle">{{$t('pvp.shields')}}</p>
-              <div v-if="ownedShieldIds.length !== 0" class="popoverGrid">
-                <pvp-shield
-                  v-for="shield in ownedShieldsWithInformation"
-                  :key="shield.shieldId"
-                  :shield="shield.information"
-                  :shieldId="shield.shieldId"
-                  @click="selectShield(shield.shieldId)"
-                />
-              </div>
-              <div v-else class="noWeaponsOrShields">
-                {{$t('pvp.noShields')}}
-              </div>
-            </b-popover>
-          </a>
-        </div>
-        <div class="weapon-info" v-if="equippedShieldId !== undefined && equippedShieldId !== null">
-          <div>
-            {{equippedShieldId}}
-            <!--pvp-shield
-              :shield="equippedShield"
-              :shieldId="equippedShield.id"
-            /-->
-          </div>
-          <div @click="removeShield()">
-            <img src="../../assets/swithc-wep.png" alt="">
-          </div>
-          <div>
-            <p>{{$t('equip.equipped')}}</p>
-            <span>{{$t('equip.unequipShield')}}</span>
-          </div>
-        </div>
-        <div class="weapon-info" v-else>
-          <div class="outline-box">
-            <div>
-              <!--div @click="selectShield()">
-                <img src="../../assets/swithc-wep.png" alt="">
-              </div-->
-            </div>
-            <div>
-              <p>{{$t('equip.noShield')}}</p>
-              <span>{{$t('equip.equipShield')}}</span>
-            </div>
-          </div>
-        </div>
-      </div>
       <!-- Character Tabs -->
       <div>
         <b-tabs pills fill nav-wrapper-class="mt-5 mb-4" >
+          <equipment-tab :soulBalance="isGenesisCharacter ? genesisSoulBalance : nonGenesisSoulBalance" @fetchSoulBalance="refreshData" />
           <upgrade-tab :soulBalance="isGenesisCharacter ? genesisSoulBalance : nonGenesisSoulBalance" @fetchSoulBalance="refreshData" />
           <skins-tab :availableSkins="availableSkins" @loadCosmeticsCount="loadCosmeticsCount" />
           <options-tab @openTransferModal="openTransferModal" @onSendToGarrison="onSendToGarrison" @openChangeTrait="openChangeTrait"
           @openTransferSoulModal="openTransferSoulModal" />
-          <b-tab  disabled title-item-class="character-wrapper" title-link-class="character-tab">{{" "}}</b-tab>
         </b-tabs>
       </div>
     </div>
@@ -338,14 +253,12 @@ import { BModal } from 'bootstrap-vue';
 import SkinsTab from '@/components/smart/CharacterTabs/SkinsTab.vue';
 import OptionsTab from '@/components/smart/CharacterTabs/OptionsTab.vue';
 import UpgradeTab from '@/components/smart/CharacterTabs/UpgradeTab.vue';
+import EquipmentTab from '@/components/smart/CharacterTabs/EquipmentTab.vue';
 import { getCharacterArt } from '@/character-arts-placeholder';
 import { Quest, ReputationLevelRequirements } from '@/interfaces';
 import { ReputationTier } from '@/enums/Quest';
 import { CharacterTrait, ICharacter, RequiredXp } from '@/interfaces';
 import { isValidWeb3Address } from '@/utils/common';
-import Events from '@/events';
-import PvPShield from './PvPShield.vue';
-import { shieldFromContract as formatShield } from '../../contract-models';
 
 
 interface Skin {
@@ -375,11 +288,6 @@ interface Data {
   newName: string;
   isTransferringNonGenesis: boolean;
   soulAmountToTransfer: number;
-  equippedWeapon: any;
-  equippedWeaponId: number | string;
-  equippedShield: any;
-  equippedShieldId: number | string;
-  ownedShieldsWithInformation: number[];
 }
 
 interface StoreMappedActions {
@@ -407,24 +315,10 @@ interface StoreMappedActions {
   sendToGarrison(id: string): Promise<void>;
   transferSoul(payload: {targetAddress: string, soulAmount: number}): Promise<void>;
   transferNonGenesisSoul(payload: {targetAddress: string, soulAmount: number}): Promise<void>;
-  fetchWeapon(payload: {weaponId: string | number}): Promise<void>;
-  fetchShield(payload: {shieldId: string | number}): Promise<void>;
-  equipWeapon(payload: {equipperId: string, itemId: number | string}): Promise<void>;
-  equipShield(payload: {equipperId: string, itemId: number | string}): Promise<void>;
-  unequipWeapon(payload: {equipperId: string}): Promise<void>;
-  unequipShield(payload: {equipperId: string}): Promise<void>;
-  fetchCharacterWeapon(payload: {characterId: string | number}): Promise<number>;
-  fetchCharacterShield(payload: {characterId: string | number}): Promise<number>;
-  getShield(payload: {shieldId: string | number}): Promise<string[]>;
-}
-
-interface StoredMappedGetters {
-  getEquippedWeapon(payload: {characterId: string | number}): number;
-  getEquippedShield(payload: {characterId: string | number}): number;
 }
 
 export default Vue.extend({
-  components: { UpgradeTab, OptionsTab, SkinsTab, 'pvp-shield': PvPShield },
+  components: {EquipmentTab, UpgradeTab, OptionsTab, SkinsTab },
   data(): Data{
     return {   ReputationTier,
       reputationLevelRequirements: undefined,
@@ -449,11 +343,6 @@ export default Vue.extend({
       newName: '',
       isTransferringNonGenesis: false,
       soulAmountToTransfer: 0,
-      equippedWeapon: null,
-      equippedWeaponId: '',
-      equippedShield: null,
-      equippedShieldId: '',
-      ownedShieldsWithInformation: [],
     };
   },
   computed: {
@@ -566,20 +455,7 @@ export default Vue.extend({
       'fetchTotalRenameTags',
       'transferSoul',
       'transferNonGenesisSoul',
-      'fetchWeapon',
-      'fetchShield',
-      'equipWeapon',
-      'equipShield',
-      'unequipWeapon',
-      'unequipShield',
-      'fetchCharacterWeapon',
-      'fetchCharacterShield',
-      'getShield',
     ]) as StoreMappedActions,
-    ...(mapGetters([
-      'getEquippedWeapon',
-      'getEquippedShield',
-    ]) as StoredMappedGetters),
     getCharacterArt,
     RequiredXp,
     removeErrors(){
@@ -653,32 +529,6 @@ export default Vue.extend({
     timestampToStamina(timestamp: number): number {
       if(timestamp > Math.floor(Date.now()/1000)) return 0;
       return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
-    },
-
-    async getShieldInformation(shieldId: number | string) {
-      return formatShield(`${shieldId}`, await this.getShield({shieldId}));
-    },
-
-    selectWeapon() {
-      Events.$emit('weapon-inventory', true);
-    },
-
-    async removeWeapon() {
-      await this.unequipWeapon({equipperId: this.currentCharacterId});
-      this.equippedWeaponId = await this.fetchCharacterWeapon({characterId: this.currentCharacterId});
-      //re-fetch weapon inventory
-    },
-
-    async selectShield(shieldId: number | string) {
-      // todo
-      await this.equipShield({equipperId: this.currentCharacterId as string, itemId: shieldId});
-      //re-fetch shield inventory
-    },
-
-    async removeShield() {
-      await this.unequipShield({equipperId: this.currentCharacterId});
-      this.equippedShieldId = await this.fetchCharacterShield({characterId: this.currentCharacterId});
-      //re-fetch shield inventory
     },
 
     async refreshData(){
@@ -786,19 +636,6 @@ export default Vue.extend({
     await this.refreshData();
     await this.fetchCharacterQuestData();
     await this.loadConsumablesCount();
-
-    this.ownedShieldsWithInformation = await Promise.all(this.ownedShieldIds.map(async (shieldId: number | string) => {
-      return {
-        shieldId,
-        information: await this.getShieldInformation(shieldId)
-      };
-    }));
-    Events.$on('chooseweapon', (id: number) => {
-      this.equipWeapon({equipperId: this.currentCharacterId, itemId: id});
-      //re-fetch weapon inventory
-    });
-    this.equippedWeaponId = await this.fetchCharacterWeapon({characterId: this.currentCharacterId});
-    this.equippedShieldId = await this.fetchCharacterShield({characterId: this.currentCharacterId});
   },
 });
 </script>
