@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <banner v-if="!isBNB"
-      :text="$t('banner.octoblades.octoblades')" :linkText="$t('banner.linkText')" :link="$t('banner.octoblades.link')" />
+      :text="$t('banner.text')" :linkText="$t('banner.linkText')" :link="$t('banner.link')" />
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content bg-dark">
       <b-row>

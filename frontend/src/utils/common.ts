@@ -6,6 +6,7 @@ import {router} from '@/main';
 import {getConfigValue, Networks} from '@/contracts';
 import {networks as pvpNetworks} from '../../../build/contracts/PvpArena.json';
 import {networks as simpleQuestsNetworks} from '../../../build/contracts/SimpleQuests.json';
+import {networks as dexNetworks} from '../../../build/contracts/Dex.json';
 import { QuestItemType } from '@/enums/Quest';
 import {abi as erc20Abi} from '../../../build/contracts/ERC20.json';
 import store from '@/store/store';
@@ -134,9 +135,16 @@ export const currentChainSupportsQuests = () => {
   return !!contractAddress;
 };
 
+export const currentChainSupportsDex = () => {
+  const networkId = getConfigValue('VUE_APP_NETWORK_ID') || '5777';
+  const contractAddress = process.env.VUE_APP_DEX_CONTRACT_ADDRESS ||
+    getConfigValue('VUE_APP_DEX_CONTRACT_ADDRESS') || (dexNetworks as Networks)[networkId]?.address;
+  return !!contractAddress;
+};
+
 export const currentChainSupportsDrawbridge = () => {
   const currentChain = localStorage.getItem('currentChain') ?? '';
-  return currentChain === 'SKALE' || currentChain === 'BSC';
+  return currentChain === 'SKALE' || currentChain === 'BNB';
 };
 
 export const getTimeRemaining = (end: string) => {

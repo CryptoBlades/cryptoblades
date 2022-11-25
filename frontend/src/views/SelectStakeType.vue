@@ -8,7 +8,7 @@
         <img class="vb-banner" src="../assets/desktop-vb-banner.png" alt="Village Builder banner">
       </picture>
     </a>
-    <h2 class="text-center text-uppercase white-space-break-spaces mt-2">{{ $t('stake.octobladesStakings') }}</h2>
+    <h2 class="text-center text-uppercase white-space-break-spaces mt-2">{{ $t('stake.stakingSubHeader') }}</h2>
     <ul class="stake-select-list">
       <li class="stake-select-item" v-for="e in eventEntries" :key="e.stakeType">
         <stake-selector-item
