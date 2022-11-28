@@ -1,5 +1,5 @@
 <template>
-<div class="w-100" v-if="questAvailable">
+<div class="w-100" v-if="questAvailable || questCanBeCompleted">
   <div v-if="(questTemplateType === QuestTemplateType.QUEST || questTemplateType === QuestTemplateType.PICKABLE) && character" class="quest-row"
         :class="character.status !== undefined && (character.status !== NftStatus.AVAILABLE) ? 'busy-quest-row' : ''"
         :key="`${componentKey}-${character.quest.id}`">
@@ -114,6 +114,9 @@ export default Vue.extend({
      */
     hasStateChanged(): boolean {
       return this.defaultAccount + this.currentNetworkId !== this.defaultAccountProp + this.currentNetworkIdProp;
+    },
+    questCanBeCompleted(): boolean {
+      return this.quest.progress >= this.quest.requirementAmount && this.quest.requirementAmount !== 0;
     },
   },
 
