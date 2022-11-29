@@ -2,6 +2,7 @@
   <div class="app">
     <banner v-if="!isBNB"
       :text="$t('banner.text')" :linkText="$t('banner.linkText')" :link="$t('banner.link')" />
+    <BannerQuest />
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content bg-dark">
       <b-row>
@@ -107,6 +108,7 @@ import WalletConnectProvider from '@walletconnect/web3-provider';
 import { Contracts, ICharacter } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
 import Banner from './components/Banner.vue';
+import BannerQuest from './components/BannerQuest.vue';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -172,6 +174,7 @@ interface StoreMappedMutations {
 
 export default Vue.extend({
   components: {
+    BannerQuest,
     Banner,
     NavBar,
     CharacterBar,
