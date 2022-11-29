@@ -141,6 +141,28 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
         emit Unequipped(onAddr, onID, slot);
     }
 
+    function swapNFT(address onAddr, uint256 onID, uint256 slot, address itemAddr, uint256 itemID) external {
+        // Unequip first
+        require(IERC721(onAddr).ownerOf(onID) == msg.sender);
+
+        IERC721(equippedSlotAddress[onAddr][onID][slot])
+            .transferFrom(address(this), msg.sender, equippedSlotID[onAddr][onID][slot]);
+
+        emit Unequipped(onAddr, onID, slot);
+
+        // Now equip
+        require(isEquippable(onAddr, slot, itemAddr), "Invalid item");
+
+        equippedSlotAddress[onAddr][onID][slot] = itemAddr;
+        equippedSlotID[onAddr][onID][slot] = itemID;
+
+        processEquippedItem(onAddr, onID, slot, itemAddr, itemID);
+        IERC721(itemAddr).transferFrom(msg.sender, address(this), itemID);
+
+        recalculate(onAddr, onID);
+        emit Equipped(onAddr, onID, slot, itemAddr, itemID);
+    }
+
     function recalculate(address onAddr, uint256 onID) public {
         // will use proxy later, for now we assume all items use the manager directly for chars
         if(onAddr == links[LINK_CHARACTERS])
