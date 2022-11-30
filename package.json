@@ -98,7 +98,8 @@
     "backup-networks-to-file": "node scripts/manage-networks.js backupToFile",
     "restore-networks": "node scripts/manage-networks.js restore",
     "restore-networks-from-file": "node scripts/manage-networks.js restoreFromFile",
-    "verify-contracts": "node scripts/verify-contracts.js"
+    "verify-contracts": "node scripts/verify-contracts.js",
+    "validate-migrations": "node scripts/validate-migrations.js"
   },
   "keywords": [],
   "author": "",

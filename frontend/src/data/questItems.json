@@ -1,5 +1,11 @@
 {
   "questItems": {
+    "0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab": {
+      "name": "SKILL",
+      "description": "SKILL is the native token of the CryptoBlades ecosystem, used for crafting character and weapon NFTs, trading on our NFT marketplace, utilizing our Bridge, or even purchasing merchandise. As CryptoBlades continues to grow in product offerings, SKILL token will grow with it!",
+      "image": "SKILL.png",
+      "website": "https://www.cryptoblades.io/"
+    },
     "0x4a5f6447A96ebC76E0D1628e3FfB2153a62D3dB8": {
       "name": "SKILL",
       "description": "SKILL is the native token of the CryptoBlades ecosystem, used for crafting character and weapon NFTs, trading on our NFT marketplace, utilizing our Bridge, or even purchasing merchandise. As CryptoBlades continues to grow in product offerings, SKILL token will grow with it!",
@@ -14,7 +20,7 @@
     },
     "0xc6f252c2CdD4087e30608A35c022ce490B58179b": {
       "name": "CryptoBlades Character",
-      "description": "CryptoBlades Characters on 61 lvl with maxed out soul power. CryptoBlades Characters (CBC) are the titular heroes & utility NFTs of the longest standing sustainable play-to-earn game, CryptoBlades. These NFTs, along with the swords they wield, are the core component of earning in CB.",
+      "description": "CryptoBlades Characters (CBC) are the titular heroes & utility NFTs of the longest standing sustainable play-to-earn game, CryptoBlades. These NFTs, along with the swords they wield, are the core component of earning in CB.",
       "image": "character.png",
       "website": "https://www.cryptoblades.io/"
     },
