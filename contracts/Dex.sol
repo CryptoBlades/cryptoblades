@@ -16,6 +16,7 @@ contract Dex is Initializable, AccessControlUpgradeable {
     uint public constant FEE_DENOMINATOR = 10000;
 
     uint8 public constant VAR_FEE = 0;
+    uint8 public constant VAR_CONTRACT_ENABLED = 1;
 
     struct TokenPair {
         address token1;
@@ -47,9 +48,18 @@ contract Dex is Initializable, AccessControlUpgradeable {
         require(hasRole(GAME_ADMIN, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NA");
     }
 
+    modifier contractEnabled() {
+        _contractEnabled();
+        _;
+    }
+
+    function _contractEnabled() internal view {
+        require(vars[VAR_CONTRACT_ENABLED] == 1, "Contract disabled");
+    }
+
     // FUNCTIONS
 
-    function swap(address tokenA, address tokenB, uint amountA) external {
+    function swap(address tokenA, address tokenB, uint amountA) external contractEnabled {
         uint id = getTokenPairId(tokenA, tokenB);
         TokenPair memory pair = tokenPairs[id];
         require((pair.token1 == tokenA && pair.token2 == tokenB) || (pair.token2 == tokenA && pair.token1 == tokenB), "Invalid pair");
