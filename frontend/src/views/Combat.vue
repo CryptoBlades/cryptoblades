@@ -211,6 +211,7 @@ interface StoreMappedActions{
 
 interface StoreMappedState {
   currentCharacterId: number,
+  characters: ICharacter[],
 }
 
 interface StoreMappedGetters {

@@ -452,7 +452,7 @@ export default Vue.extend({
       raidStarted: false,
       isClaimingRewards: false,
       isJoiningRaid: false,
-      equippedWeaponId: '',
+      equippedWeaponId: '' as number,
     };
   },
 
