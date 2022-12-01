@@ -416,6 +416,43 @@ interface RaidMappedGetters {
 
 let interval: number;
 
+interface Data {
+  raidIndex: string;
+  bossName: string;
+  raiderCount: number;
+  totalPower: number;
+  expectedFinishTime: Date;
+  xpReward: string;
+  staminaCost: string;
+  durabilityCost: string;
+  joinCost: string;
+  raidStatus: string;
+  bossPower: number;
+  bossTrait: string;
+  accountPower: string;
+  rewardsRaidId: string;
+  rewardIndexes: string[];
+  rewards: NftIdType[];
+  spin: boolean;
+  participatingCharacters: string[];
+  participatingWeapons: string[];
+  bonuxXpCharacterNames: string[];
+  bonuxXpAmounts: string[];
+  remainingTime: {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  },
+  traits: string;
+  notifyError: string;
+  isLoading: boolean;
+  raidStarted: boolean;
+  isClaimingRewards: boolean;
+  isJoiningRaid: boolean;
+  equippedWeaponId: string | number;
+}
+
 export default Vue.extend({
   data() {
     return {
@@ -433,13 +470,13 @@ export default Vue.extend({
       bossTrait: '',
       accountPower: '',
       rewardsRaidId: '',
-      rewardIndexes: [] as string[],
-      rewards: [] as NftIdType[],
+      rewardIndexes: [],
+      rewards: [] ,
       spin: false,
-      participatingCharacters: [] as string[],
-      participatingWeapons: [] as string[],
-      bonuxXpCharacterNames: [] as string[],
-      bonuxXpAmounts: [] as string[],
+      participatingCharacters: [],
+      participatingWeapons: [],
+      bonuxXpCharacterNames: [],
+      bonuxXpAmounts: [],
       remainingTime: {
         days: 0,
         hours: 0,
@@ -452,8 +489,8 @@ export default Vue.extend({
       raidStarted: false,
       isClaimingRewards: false,
       isJoiningRaid: false,
-      equippedWeaponId: '' as number,
-    };
+      equippedWeaponId: '',
+    } as Data;
   },
 
   computed: {
