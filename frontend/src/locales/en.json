@@ -66,7 +66,7 @@
     "cancelledTransaction": "You cancelled the transaction.",
     "changeTraitError": "Error while changing the character trait.",
     "upgradeText": "Upgrading is the process of spending SKILL tokens to upgrade a character's power using souls. The target character receives bonus power, and the souls used will disappear.",
-    "equipmentText": "Lorem ipsum Equipment is the process of spending SKILL tokens to equip a character with a weapon or armor. The target character receives bonus power, and the equipment used will disappear.",
+    "equipmentText": "Equipment is needed for Raid/PvP/Combat activities. You need to equip a weapon to participate in them. Shield is an optional asset for PvP combat.",
     "level": "Level",
     "power": "Power",
     "element": "Element",
@@ -519,7 +519,8 @@
     "errors": {
       "needToSelectChar": "You need to select a character to do battle.",
       "notEnoughDurability": "This weapon does not have enough durability.",
-      "lastSeconds": "You cannot do battle during the last 30 seconds of the hour. Stand fast!"
+      "lastSeconds": "You cannot do battle during the last 30 seconds of the hour. Stand fast!",
+      "youNeedToHaveWeaponEquippedToCombatYouCanEquipInPlaza": "You need to have weapon equipped to combat! You can equip in Plaza."
     },
     "needStamina": "You need {staminaPerFight} stamina to do battle.",
     "costStamina": "Stamina Cost Per Fight",
@@ -617,7 +618,8 @@
       "lockedChar": "Selected character is locked in the raid already...",
       "lockedWeapon": "Selected weapon is locked in the raid already...",
       "notEnough": "Not enough stamina or durability...",
-      "whoops": "Whoops..."
+      "whoops": "Whoops...",
+      "youNeedToHaveWeaponEquippedToJoinYouCanEquipInPlaza": "You need to have weapon equipped to join! You can equip in Plaza."
     }
   },
   "market": {
@@ -1326,6 +1328,7 @@
     }
   },
   "pvp": {
+    "youNeedToHaveWeaponEquippedToEnterYouCanEquipInPlaza": "You need to have weapon equipped to enter! You can equip in Plaza.",
     "lastDefeated": "You were last defeated by: ",
     "kicked": "You were kicked from the arena!",
     "atLeastOneChar": "You need at least one character to enter PvP!",

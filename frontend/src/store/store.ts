@@ -1111,7 +1111,6 @@ export default new Vuex.Store<IState>({
 
       const equipment = state.contracts().EquipmentManager!;
       const characters = state.contracts().Characters!;
-      characterId = 0; // TEMP
       const addr = await equipment.methods.equippedSlotAddress(characters.options.address, characterId, 2).call(defaultCallOptions(state));
 
       if(addr && addr !== '0x0000000000000000000000000000000000000000') {

@@ -6,8 +6,18 @@
         <span>{{$t('weapon')}}</span>
         <div class="weapon-info" v-if="equippedWeaponId !== undefined && equippedWeaponId !== null">
           <div>
-            {{equippedWeaponId}}
-            <!--weapon-inventory class="weapon-icon" :weapon="equippedWeapon" :displayType="'raid'"/-->
+            <weapon-grid
+              class="weapon-grid"
+              :weaponIds="[equippedWeaponId]"
+              :showGivenWeaponIds="true"
+              :showReforgedToggle="false"
+              :showReforgedWeaponsDefVal="false"
+              :showFavoriteToggle="false"
+              :showFavoriteWeaponsDefVal="false"
+              :canFavorite="false"
+              :newWeapon="true"
+              :noPagination="true"
+            />
           </div>
           <div @click="removeWeapon()">
             <img src="@/assets/swithc-wep.png" alt="">
@@ -34,36 +44,13 @@
 
       <div class="col-lg-12 col-md-5 col-sm-9 drops">
         <span>{{$t('Shield')}}</span>
-        <div v-if="!equippedShieldId" class="shieldButtonWrapper">
-          <a tabindex="0" class="selectWeaponButton" id="shield-popover">
-            <div class="placeholderImageWrapper">
-              <img src="@/assets/shieldPlaceholder.svg" alt="shield" />
-            </div>
-            <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
-              <p class="popoverTitle">{{$t('pvp.shields')}}</p>
-              <div v-if="ownedShieldIds.length !== 0" class="popoverGrid">
-                <pvp-shield
-                  v-for="shield in ownedShieldsWithInformation"
-                  :key="shield.shieldId"
-                  :shield="shield.information"
-                  :shieldId="shield.shieldId"
-                  @click="selectShield(shield.shieldId)"
-                />
-              </div>
-              <div v-else class="noWeaponsOrShields">
-                {{$t('pvp.noShields')}}
-              </div>
-            </b-popover>
-          </a>
-        </div>
         <div class="weapon-info" v-if="equippedShieldId !== undefined && equippedShieldId !== null">
-          <div>
-            {{equippedShieldId}}
-            <!--pvp-shield
-              :shield="equippedShield"
-              :shieldId="equippedShield.id"
-            /-->
-          </div>
+          <nft-list
+            class="nft-list"
+            :nftIdTypes="[{ id: equippedShieldId, type: 'shield' }]"
+            :showGivenNftIdTypes="true"
+            :isReward="true"
+          />
           <div @click="removeShield()">
             <img src="@/assets/swithc-wep.png" alt="">
           </div>
@@ -72,12 +59,29 @@
             <span>{{$t('equip.unequipShield')}}</span>
           </div>
         </div>
-        <div class="weapon-info" v-else>
+        <div class="shieldButtonWrapper" v-else>
           <div class="outline-box">
             <div>
-              <!--div @click="selectShield()">
-                <img src="../../assets/swithc-wep.png" alt="">
-              </div-->
+              <a tabindex="0" class="selectWeaponButton" id="shield-popover">
+                <div class="placeholderImageWrapper">
+                  <img src="@/assets/shieldPlaceholder.svg" alt="shield" />
+                </div>
+                <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
+                  <p class="popoverTitle">{{$t('pvp.shields')}}</p>
+                  <div v-if="ownedShieldIds.length !== 0" class="popoverGrid">
+                    <pvp-shield
+                      v-for="shield in ownedShieldsWithInformation"
+                      :key="shield.shieldId"
+                      :shield="shield.information"
+                      :shieldId="shield.shieldId"
+                      @click="selectShield(shield.shieldId)"
+                    />
+                  </div>
+                  <div v-else class="noWeaponsOrShields">
+                    {{$t('pvp.noShields')}}
+                  </div>
+                </b-popover>
+              </a>
             </div>
             <div>
               <p>{{$t('equip.noShield')}}</p>
@@ -93,8 +97,10 @@
 import Vue from 'vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import Events from '@/events';
-import { shieldFromContract as formatShield } from '../../../contract-models';
-import PvPShield from './../PvPShield.vue';
+import { shieldFromContract as formatShield } from '@/contract-models';
+import PvPShield from '@/components/smart/PvPShield.vue';
+import WeaponGrid from '@/components/smart/WeaponGrid.vue';
+import NftList from '@/components/smart/NftList.vue';
 import {ICharacter} from '@/interfaces';
 
 
@@ -125,7 +131,7 @@ interface StoredMappedGetters {
 
 
 export default Vue.extend({
-  components: { 'pvp-shield': PvPShield },
+  components: { 'pvp-shield': PvPShield, WeaponGrid, NftList },
   props: {
     soulBalance: {
       type: Number,
@@ -336,6 +342,47 @@ export default Vue.extend({
   -moz-appearance: textfield;
 }
 
-
+@media (max-width: 992px) {
+  .weapon-info{
+    flex-direction: column;
+    align-items: center;
+    > div > div {
+      padding: 0px 10px;
+    }
+  }
+}
+p, li, span {
+  font-family: 'Roboto';
+}
+.popoverWrapper {
+  height: 450px;
+  overflow-y: auto;
+  min-width: max-content;
+  padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+  background-color: black;
+  border: 1px solid #cec198;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  .popoverTitle {
+    color: #cec198;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  .popoverGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    grid-column-gap: 1rem;
+    grid-row-gap: 2rem;
+    margin-top: 1rem;
+  }
+}
+.noWeaponsOrShields {
+  display: flex;
+  margin: 0 auto;
+  font-family: 'Roboto';
+  color: #b4b0a7;
+  font-size: 0.75rem;
+  margin-top: 1rem;
+}
 
 </style>
