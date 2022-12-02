@@ -2568,6 +2568,11 @@
     "address": "0xDCd800389F9f696261E6bcde228AE137550E5425",
     "transactionHash": "0x4e54a66f089d4ba49b3eaf5c0294ebabe33c26d6a58c1406045a99340f22bde3"
   },
+  "build/contracts/Dex.json": {
+    "events": {},
+    "links": {},
+    "address": "0x862325490F6f34Db9d1cC5Ecf57dDCc704Ffe4F3"
+  },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
     "links": {},
