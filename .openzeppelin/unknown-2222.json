@@ -259,6 +259,11 @@
       "address": "0xE6Abc36f99A0efD536321ffC710E6F03596B5113",
       "txHash": "0xd0decbac6231dde45a5b8c32a315bd62ba870ad2f753df4c20cb2ad905d78f23",
       "kind": "transparent"
+    },
+    {
+      "address": "0x21db8Bf00689d44c225f22b668a24d71ead04D4d",
+      "txHash": "0x9976c44ac6ca3d0286cb93b933148140d563b052fe54df2fde2c62751e0dabc6",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -26579,6 +26584,574 @@
           },
           "t_bool": {
             "label": "bool"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "90984cfc805a51367c7eee95107f34ac605c1349a40f086f90e76913233598c4": {
+      "address": "0x1DCb19641a27Fe55Bc26C9FD0Fb50f2d52B9a68E",
+      "txHash": "0x11ae3694e44adccb4f22c8d115fab717c0349e74f1e76550fb19fcf8d0e9a2d1",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)60157_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "Dex",
+            "label": "tokenPairs",
+            "type": "t_mapping(t_uint256,t_struct(TokenPair)9783_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\Dex.sol:28"
+          },
+          {
+            "contract": "Dex",
+            "label": "collectedFees",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\Dex.sol:29"
+          },
+          {
+            "contract": "Dex",
+            "label": "vars",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\Dex.sol:30"
+          }
+        ],
+        "types": {
+          "t_mapping(t_uint256,t_struct(TokenPair)9783_storage)": {
+            "label": "mapping(uint256 => struct Dex.TokenPair)"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_struct(TokenPair)9783_storage": {
+            "label": "struct Dex.TokenPair",
+            "members": [
+              {
+                "label": "token1",
+                "type": "t_address"
+              },
+              {
+                "label": "token1Amount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "token2",
+                "type": "t_address"
+              },
+              {
+                "label": "token2Amount",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)60157_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(RoleData)60157_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)63960_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)63960_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)63695_storage"
+              }
+            ]
+          },
+          "t_struct(Set)63695_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "12e22f159bd8a49ed7b967f31ab569f4417a6ff750f97f00d2baa6e4280600ff": {
+      "address": "0x0eb78Cb95B725f067944C6F54d8550D114DD2f1b",
+      "txHash": "0x6cf6536ad79955a93b6f1709e361226d416f2b95afa8e6d33707a2d81a5e7386",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)60157_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "characters",
+            "type": "t_contract(Characters)41580",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:41"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "weapons",
+            "type": "t_contract(Weapons)59710",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:42"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "junk",
+            "type": "t_contract(Junk)46104",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:43"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "trinket",
+            "type": "t_contract(RaidTrinket)46721",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:44"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "shields",
+            "type": "t_contract(Shields)52153",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:45"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "burningManager",
+            "type": "t_contract(BurningManager)2926",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:46"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "safeRandoms",
+            "type": "t_contract(SafeRandoms)31074",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:47"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "partnerVault",
+            "type": "t_contract(PartnerVault)22278",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:48"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "nextQuestID",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:92"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "nextRewardID",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:93"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "questTemplates",
+            "type": "t_mapping(t_uint256,t_array(t_uint256)dyn_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:95"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "quests",
+            "type": "t_mapping(t_uint256,t_struct(Quest)31525_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:96"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "questSupplies",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:97"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "questDeadlines",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:98"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "questIndexes",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:99"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "characterQuest",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:100"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "tierChances",
+            "type": "t_mapping(t_uint256,t_array(t_uint256)4_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:101"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "vars",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:102"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "lastFreeSkipUsage",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:103"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "weeklyCompletions",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:104"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "weeklyRewardClaimed",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_bool))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:105"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "rewards",
+            "type": "t_mapping(t_uint256,t_struct(Reward)31538_storage)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:106"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "weeklyRewards",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:107"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "weeklyCompletionsGoal",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:108"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "walletQuestProgress",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:109"
+          },
+          {
+            "contract": "SimpleQuests",
+            "label": "questCompletions",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+            "src": "..\\..\\..\\..\\..\\..\\C\\Work\\Projects\\Binance Projects\\Kryptoknights\\kryptoknights\\contracts\\SimpleQuests.sol:110"
+          }
+        ],
+        "types": {
+          "t_contract(Characters)41580": {
+            "label": "contract Characters"
+          },
+          "t_contract(Weapons)59710": {
+            "label": "contract Weapons"
+          },
+          "t_contract(Junk)46104": {
+            "label": "contract Junk"
+          },
+          "t_contract(RaidTrinket)46721": {
+            "label": "contract RaidTrinket"
+          },
+          "t_contract(Shields)52153": {
+            "label": "contract Shields"
+          },
+          "t_contract(BurningManager)2926": {
+            "label": "contract BurningManager"
+          },
+          "t_contract(SafeRandoms)31074": {
+            "label": "contract SafeRandoms"
+          },
+          "t_contract(PartnerVault)22278": {
+            "label": "contract PartnerVault"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_uint256,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(uint256 => uint256[])"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]"
+          },
+          "t_mapping(t_uint256,t_struct(Quest)31525_storage)": {
+            "label": "mapping(uint256 => struct SimpleQuests.Quest)"
+          },
+          "t_struct(Quest)31525_storage": {
+            "label": "struct SimpleQuests.Quest",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256"
+              },
+              {
+                "label": "tier",
+                "type": "t_enum(Rarity)31558"
+              },
+              {
+                "label": "requirementType",
+                "type": "t_enum(ItemType)31552"
+              },
+              {
+                "label": "requirementRarity",
+                "type": "t_uint256"
+              },
+              {
+                "label": "requirementAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "requirementExternalAddress",
+                "type": "t_address"
+              },
+              {
+                "label": "rewardType",
+                "type": "t_enum(ItemType)31552"
+              },
+              {
+                "label": "rewardRarity",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardExternalAddress",
+                "type": "t_address"
+              },
+              {
+                "label": "reputationAmount",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_enum(Rarity)31558": {
+            "label": "enum SimpleQuests.Rarity",
+            "members": [
+              "COMMON",
+              "UNCOMMON",
+              "RARE",
+              "EPIC",
+              "LEGENDARY"
+            ]
+          },
+          "t_enum(ItemType)31552": {
+            "label": "enum SimpleQuests.ItemType",
+            "members": [
+              "NONE",
+              "WEAPON",
+              "JUNK",
+              "DUST",
+              "TRINKET",
+              "SHIELD",
+              "STAMINA",
+              "SOUL",
+              "RAID",
+              "EXPERIENCE",
+              "EXTERNAL",
+              "EXTERNAL_HOLD",
+              "CHARACTER"
+            ]
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_mapping(t_uint256,t_array(t_uint256)4_storage)": {
+            "label": "mapping(uint256 => uint256[4])"
+          },
+          "t_array(t_uint256)4_storage": {
+            "label": "uint256[4]"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_bool))": {
+            "label": "mapping(address => mapping(uint256 => bool))"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_uint256,t_struct(Reward)31538_storage)": {
+            "label": "mapping(uint256 => struct SimpleQuests.Reward)"
+          },
+          "t_struct(Reward)31538_storage": {
+            "label": "struct SimpleQuests.Reward",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardType",
+                "type": "t_enum(ItemType)31552"
+              },
+              {
+                "label": "rewardRarity",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardExternalAddress",
+                "type": "t_address"
+              },
+              {
+                "label": "reputationAmount",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)60157_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(RoleData)60157_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)63960_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)63960_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)63695_storage"
+              }
+            ]
+          },
+          "t_struct(Set)63695_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
           },
           "t_array(t_uint256)49_storage": {
             "label": "uint256[49]"
