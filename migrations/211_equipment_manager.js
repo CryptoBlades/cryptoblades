@@ -9,6 +9,7 @@ const TokensManager = artifacts.require("TokensManager");
 const CharactersBridgeProxyContract = artifacts.require("CharactersBridgeProxyContract");
 const Raid1 = artifacts.require("Raid1");
 const PvpCore = artifacts.require("PvpCore");
+const BurningManager = artifacts.require("BurningManager");
 
 module.exports = async function (deployer, network, accounts) {
   
@@ -49,6 +50,10 @@ module.exports = async function (deployer, network, accounts) {
     const pvpCore = await upgradeProxy(PvpCore.address, PvpCore, { deployer });
 	let PVP_LINK_EQUIPMENT_MANAGER = await pvpCore.LINK_EQUIPMENT_MANAGER();
 	await pvpCore.setLink(PVP_LINK_EQUIPMENT_MANAGER, equip.address);
+
+	const burnManager = await upgradeProxy(BurningManager.address, BurningManager, { deployer });
+	let BM_LINK_EQUIPMENT_MANAGER = await burnManager.LINK_EQUIPMENT_MANAGER();
+	await burnManager.setLink(BM_LINK_EQUIPMENT_MANAGER, equip.address);
 
 	let SLOT_CHARACTER_WEAPON = await equip.SLOT_CHARACTER_WEAPON();
 	await equip.setEquippable(characters.address, SLOT_CHARACTER_WEAPON, weapons.address, true);

@@ -350,6 +350,18 @@ contract EquipmentManager is Initializable, AccessControlUpgradeable {
         return equippedSlotAddress[onAddr][onID][slot] != address(0);
     }
 
+    function hasNothingEquipped(address onAddr, uint256 onID) public view returns (bool) {
+        return nftVars[onAddr][onID][NFTVAR_EQUIPPED_SLOTS] == 0;
+    }
+
+    function haveNothingEquipped(address onAddr, uint256[] memory onIDs) public view returns (bool) {
+        for(uint i = 0; i < onIDs.length; i++) {
+            if(!hasNothingEquipped(onAddr, onIDs[i]))
+                return false;
+        }
+        return true;
+    }
+
     function mathOneFrac() internal pure returns (int128) {
         return ABDKMath64x64.fromUInt(1);
     }
