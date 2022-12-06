@@ -1,5 +1,5 @@
 <template>
-    <b-tab active :title="$t('Character.upgrade')" title-item-class="character-wrapper" title-link-class="character-tab" >
+    <b-tab :title="$t('Character.upgrade')" title-item-class="character-wrapper" title-link-class="character-tab" >
       <b-card-text class="character-text mb-4">{{$t(`Character.upgradeText`)}}</b-card-text>
       <div class="row w-100 justify-content-between">
         <div class="col col-md-3 d-flex flex-row">

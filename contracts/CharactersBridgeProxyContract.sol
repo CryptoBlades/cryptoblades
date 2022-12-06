@@ -7,6 +7,7 @@ import "./CharacterRenameTagConsumables.sol";
 import "./characters.sol";
 import "./interfaces/IBridgeProxy.sol";
 import "./Promos.sol";
+import "./EquipmentManager.sol";
 
 
 contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeable, IBridgeProxy {
@@ -24,6 +25,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
     uint8 public constant UINT_NFT_VAR_SEED3DCOSMETIC = 1;
 
     Promos promos;
+    EquipmentManager equipmentManager;
 
 
     modifier restricted() {
@@ -49,6 +51,11 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
     function migrate_c906001(Promos _newPromos) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
         promos = _newPromos;
+    }
+
+    function migrate_68c6936(EquipmentManager _equipmentManager) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
+        equipmentManager = _equipmentManager;
     }
 
  
@@ -124,6 +131,7 @@ contract CharactersBridgeProxyContract is Initializable, AccessControlUpgradeabl
     }
 
     function canBridge(address wallet, uint256 tokenId, uint256 targetChain) external view override returns (bool) {
-        return characters.getNftVar(tokenId, 3) == 0; // Only gen 1 is allowed
+        return characters.getNftVar(tokenId, 3) == 0 // Only gen 1 is allowed
+        && equipmentManager.getNftVar(address(characters), tokenId, 1) == 0; // Nothing equipped
     }
 }
