@@ -1568,11 +1568,6 @@
     "less": "Less",
     "unclaimed": "Unclaimed"
   },
-  "banner": {
-    "linkText": "Join the Event",
-    "text": "BLADESGIVING IS LIVE ON BNB CHAIN! INCREASED REWARDS, EXCLUSIVE DAILY QUESTS, 3X GAME XP, AND MUCH MUCH MORE!!",
-    "link": "https://app.cryptoblades.io/?utm_source=sitebanner&utm_medium=navban&utm_campaign=bnb#%2F%3Fchain=BSC"
-  },
   "updates": {
     "markAllAsRead": "Mark All As Read",
     "notifications": "Notifications"
