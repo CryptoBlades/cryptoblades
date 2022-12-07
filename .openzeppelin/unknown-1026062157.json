@@ -1,8 +1,8 @@
 {
   "manifestVersion": "3.2",
   "admin": {
-    "address": "0x5f5557476fb05DE26636404067ADD9a1083b119c",
-    "txHash": "0x2c7590616f33f814aa8edabb03c0909733591a5c4bc87d2fb042dab028382a4e"
+    "address": "0x7B6D33F224Fe801f04B855b90efb4a50f02F0E56",
+    "txHash": "0x1ae083f3399b1ef4bb31d625e32096bbbc4f7f67b8760dde18da9a0a1f493bd7"
   },
   "proxies": [
     {
@@ -253,11 +253,6 @@
     {
       "address": "0xd6d69A155E997b0748aE883fC75B54A4906E4f57",
       "txHash": "0x179118382c8d4e3328ffdecc8a1895319131830bf362af1a307a3b31aae2fcee",
-      "kind": "transparent"
-    },
-    {
-      "address": "0x862325490F6f34Db9d1cC5Ecf57dDCc704Ffe4F3",
-      "txHash": "0xef160f2e59b65c5eddc3ff13c55a4c8358d72c0e303cc04b7efb0e84c2c0843e",
       "kind": "transparent"
     }
   ],
@@ -26589,9 +26584,9 @@
         }
       }
     },
-    "90984cfc805a51367c7eee95107f34ac605c1349a40f086f90e76913233598c4": {
-      "address": "0x7825D5dA2Ce0dcA8733e40685a01Bd2eD90FC800",
-      "txHash": "0xb776ab1e52143cdbf8d3e1dfd32378238c4959f9b4181048acd77777bb51cad8",
+    "a87d42fb871e52dafc439a8c424544b9ac3f245b1430e2d44dd6d50a53a7eb6e": {
+      "address": "0xb90688309Bd71aA3D8BE9D8e3Be87D2AA9EAf62E",
+      "txHash": "0x452cd81c4e7908d0573226bcce7cd42c8b52ba4e1f4db3394bc35d02be3a2963",
       "layout": {
         "storage": [
           {
@@ -26615,7 +26610,7 @@
           {
             "contract": "AccessControlUpgradeable",
             "label": "_roles",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)60157_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)60177_storage)",
             "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
           },
           {
@@ -26680,18 +26675,18 @@
           "t_mapping(t_uint256,t_uint256)": {
             "label": "mapping(uint256 => uint256)"
           },
-          "t_mapping(t_bytes32,t_struct(RoleData)60157_storage)": {
+          "t_mapping(t_bytes32,t_struct(RoleData)60177_storage)": {
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
           },
           "t_bytes32": {
             "label": "bytes32"
           },
-          "t_struct(RoleData)60157_storage": {
+          "t_struct(RoleData)60177_storage": {
             "label": "struct AccessControlUpgradeable.RoleData",
             "members": [
               {
                 "label": "members",
-                "type": "t_struct(AddressSet)63960_storage"
+                "type": "t_struct(AddressSet)63980_storage"
               },
               {
                 "label": "adminRole",
@@ -26699,16 +26694,16 @@
               }
             ]
           },
-          "t_struct(AddressSet)63960_storage": {
+          "t_struct(AddressSet)63980_storage": {
             "label": "struct EnumerableSetUpgradeable.AddressSet",
             "members": [
               {
                 "label": "_inner",
-                "type": "t_struct(Set)63695_storage"
+                "type": "t_struct(Set)63715_storage"
               }
             ]
           },
-          "t_struct(Set)63695_storage": {
+          "t_struct(Set)63715_storage": {
             "label": "struct EnumerableSetUpgradeable.Set",
             "members": [
               {

@@ -1,7 +1,5 @@
 <template>
   <div class="app">
-    <banner v-if="!isBNB"
-      :text="$t('banner.text')" :linkText="$t('banner.linkText')" :link="$t('banner.link')" />
     <nav-bar :isToggled="toggleSideBar"/>
     <div class="content bg-dark">
       <b-row>
@@ -106,7 +104,6 @@ import Web3 from 'web3';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import { Contracts, ICharacter } from '@/interfaces';
 import { Accessors } from 'vue/types/options';
-import Banner from './components/Banner.vue';
 
 Vue.directive('visible', (el, bind) => {
   el.style.visibility = bind.value ? 'visible' : 'hidden';
@@ -130,8 +127,7 @@ interface Data {
   showMetamaskWarning: boolean,
   pollCharacterStaminaIntervalId: ReturnType<typeof setInterval> | null,
   slowPollIntervalId: ReturnType<typeof setInterval> | null,
-  doPollAccounts: boolean,
-  isBNB: boolean,
+  doPollAccounts: boolean
 }
 
 interface StoreMappedState {
@@ -172,7 +168,6 @@ interface StoreMappedMutations {
 
 export default Vue.extend({
   components: {
-    Banner,
     NavBar,
     CharacterBar,
     BigButton,
@@ -196,8 +191,7 @@ export default Vue.extend({
       showMetamaskWarning: false,
       pollCharacterStaminaIntervalId: null,
       slowPollIntervalId: null,
-      doPollAccounts: false,
-      isBNB: false,
+      doPollAccounts: false
     } as Data;
   },
 
@@ -219,11 +213,7 @@ export default Vue.extend({
 
     isOptions(): boolean {
       return (this as any).$route.path === '/options';
-    },
-
-    checkIsBNB(): boolean {
-      return this.currentChain === 'BNB';
-    },
+    }
   },
 
   watch: {
@@ -312,10 +302,6 @@ export default Vue.extend({
     },
     async configureMetamask() {
       await this.configureMetaMask();
-    },
-
-    setIsBNB() {
-      this.isBNB = this.checkIsBNB;
     },
 
     async connectMetamask() {
@@ -419,9 +405,6 @@ export default Vue.extend({
     //     },
     //   );
     // });
-    Events.$on('setting:currentChain', (chain: {value: string}) => {
-      this.isBNB = chain.value === 'BNB';
-    });
     Events.$on('weapon-inventory', (bol: boolean) =>{
       this.showWeapon = bol;
     });
@@ -442,7 +425,6 @@ export default Vue.extend({
     this.initializeSettings();
     this.checkChainAndParams();
     this.checkStorage();
-    this.setIsBNB();
 
     if(!this.isWalletConnect){
       await this.connectMetamask();

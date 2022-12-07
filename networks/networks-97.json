@@ -3100,7 +3100,7 @@
     "events": {},
     "links": {},
     "address": "0x0577d46FE5799F9890FA04B6Df563fEA5F7B2663",
-    "transactionHash": "0x359823f31cccf8ca1d2faffcb012089968e97b05ceba5f8e8090e68583dbc230"
+    "transactionHash": "0x2834150907f2087734ceefa54cc9b5cef9950cc0d0152e33255ab3c3509bc9e2"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},

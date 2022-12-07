@@ -78,6 +78,7 @@ import {
 } from '../../build/contracts/KingStakingRewardsUpgradeable180.json';
 import {abi as specialWeaponsManagerAbi, networks as specialWeaponsManagerNetworks} from '../../build/contracts/SpecialWeaponsManager.json';
 import {abi as dexAbi, networks as dexNetworks} from '../../build/contracts/Dex.json';
+import { abi as equipmentManagerAbi, networks as equipmentManagerNetworks } from '../../build/contracts/EquipmentManager.json';
 import config from '../app-config.json';
 
 
@@ -283,6 +284,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
   const charactersAddr = (charactersNetworks as Networks)[networkId]!.address;
   const weaponsAddr = (weaponsNetworks as Networks)[networkId]!.address;
   const blacksmithAddr = (blacksmithNetworks as Networks)[networkId]!.address;
+  const equipmentManagerAddr = (equipmentManagerNetworks as Networks)[networkId]!.address;
 
 
   const Randoms = new web3.eth.Contract(randomsAbi as Abi, randomsAddr);
@@ -296,6 +298,8 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
       getConfigValue('VUE_APP_TOKENS_MANAGER_CONTRACT_ADDRESS') || (tokensManagerNetworks as Networks)[networkId]!.address;
     TokensManager = new web3.eth.Contract(tokensManagerAbi as Abi, tokensManagerContractAddr);
   }
+  const EquipmentManager = new web3.eth.Contract(equipmentManagerAbi as Abi, equipmentManagerAddr);
+
   const specialWeaponsManagerAddr = (specialWeaponsManagerNetworks as Networks)[networkId]!.address;
   const SpecialWeaponsManager = new web3.eth.Contract(specialWeaponsManagerAbi as Abi, specialWeaponsManagerAddr);
 
@@ -439,6 +443,7 @@ export async function setUpContracts(web3: Web3): Promise<Contracts> {
     WeaponCosmetics, CharacterCosmetics,
     NFTStorage, CBKLandSale, CBKLand, Promos,
     TokensManager,
+    EquipmentManager,
     ...raidContracts,
     ...pvpContracts,
     ...marketContracts,

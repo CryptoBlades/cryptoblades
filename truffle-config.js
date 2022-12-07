@@ -107,7 +107,7 @@ module.exports = {
         process.env.HECO_MAINNET_WALLET_PRIVATE_KEY,
         process.env.HECO_MAINNET_WALLET_MNEMONIC,
         {
-          providerOrUrl: process.env.HECO_MAINNET_RPC_URL || 'https://http-mainnet-node.huobichain.com'
+          providerOrUrl: process.env.HECO_MAINNET_RPC_URL || 'https://http-mainnet.hecochain.com'
         }
       )),
       network_id: 0x80,

@@ -262,12 +262,12 @@ const pvp = {
 
     async enterArena(
       { rootState, dispatch }: {rootState: IState, dispatch: Dispatch},
-      {characterId, weaponId, shieldId, useShield, tierless}:
-      {characterId: number, weaponId: number, shieldId: number, useShield: boolean, tierless: boolean}){
+      {characterId, tierless}:
+      {characterId: number, tierless: boolean}){
       const { PvpCore } = rootState.contracts();
       if (!PvpCore || !rootState.defaultAccount) return;
 
-      const res = await PvpCore.methods.enterArena(characterId, weaponId, shieldId, useShield, tierless).send({
+      const res = await PvpCore.methods.enterArena(characterId, tierless).send({
         from: rootState.defaultAccount,
         gasPrice: getGasPrice()
       });
