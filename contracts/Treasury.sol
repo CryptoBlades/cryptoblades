@@ -201,6 +201,9 @@ contract Treasury is Initializable, AccessControlUpgradeable {
             game.deductAfterPartnerClaim(tokensToDeduct, msg.sender);
         }
         tokensClaimed[partnerId] += partnerTokenAmount;
+        if(getRemainingPartnerTokenSupply(partnerId) == 0) {
+            partneredProjects[partnerId].isActive = false;
+        }
 
         uint256 partnerTokenDecimals = ERC20(partneredProjects[partnerId].tokenAddress).decimals();
         IERC20(partneredProjects[partnerId].tokenAddress).safeTransfer(msg.sender, getAmountWithAdjustedDecimals(partnerTokenAmount, partnerTokenDecimals));
