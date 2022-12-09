@@ -16,6 +16,27 @@ library RandomUtil {
         return randomVar;
     }
 
+    function randomSeededMinMaxFast(uint min, uint max, uint seed) internal pure returns (uint) {
+        // inclusive,inclusive (don't use absolute min and max values of uint256)
+        // deterministic based on seed provided
+        // NOTE: doesn't revert from under/overflow or division by zero!
+        uint diff = max - min + 1;
+        uint randomVar = uint(keccak256(abi.encodePacked(seed))) % diff;
+        randomVar = randomVar + min;
+        return randomVar;
+    }
+
+    function randomSeededMinMaxPrehashed(uint min, uint max, uint hashedSeed) internal pure returns (uint) {
+        // inclusive,inclusive (don't use absolute min and max values of uint256)
+        // deterministic based on seed provided
+        // NOTE: doesn't revert from under/overflow or division by zero!
+        // NOTE: the passed seed has to have already been keccak256'd!
+        uint diff = max - min + 1;
+        uint randomVar = hashedSeed % diff;
+        randomVar = randomVar + min;
+        return randomVar;
+    }
+
     function combineSeeds(uint seed1, uint seed2) internal pure returns (uint) {
         return uint(keccak256(abi.encodePacked(seed1, seed2)));
     }
@@ -27,6 +48,16 @@ library RandomUtil {
     function plusMinus10PercentSeeded(uint256 num, uint256 seed) internal pure returns (uint256) {
         uint256 tenPercent = num.div(10);
         return num.sub(tenPercent).add(randomSeededMinMax(0, tenPercent.mul(2), seed));
+    }
+
+    function plusMinus10PercentSeededFast(uint256 num, uint256 seed) internal pure returns (uint256) {
+        uint256 tenPercent = num/10;
+        return num - tenPercent + randomSeededMinMaxFast(0, tenPercent*2, seed);
+    }
+
+    function plusMinus10PercentSeededPrehashed(uint256 num, uint256 hashedSeed) internal pure returns (uint256) {
+        uint256 tenPercent = num/10;
+        return num - tenPercent + randomSeededMinMaxPrehashed(0, tenPercent*2, hashedSeed);
     }
 
     function plusMinus30PercentSeeded(uint256 num, uint256 seed) internal pure returns (uint256) {

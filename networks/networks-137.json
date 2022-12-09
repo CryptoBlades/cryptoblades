@@ -2568,6 +2568,175 @@
     "address": "0x070b1A95898B927A900A1F9F42b114154648E51A",
     "transactionHash": "0x8db964e592c984f6fb6061fd68fb64b3a7470af9d31c9b73116b877e15da0f36"
   },
+  "build/contracts/Dex.json": {
+    "events": {
+      "0xc18aa71171b358b706fe3dd345299685ba21a5316c66ffa9e319268b033c44b0": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token1",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "token1Amount",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token2",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "token2Amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "LiquidityAdded",
+        "type": "event"
+      },
+      "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "previousAdminRole",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "newAdminRole",
+            "type": "bytes32"
+          }
+        ],
+        "name": "RoleAdminChanged",
+        "type": "event"
+      },
+      "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleGranted",
+        "type": "event"
+      },
+      "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "role",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
+        ],
+        "name": "RoleRevoked",
+        "type": "event"
+      },
+      "0x410708e5e5968a72576471687bfc3f0e3a2571454b9532e5fe5080434d2f8202": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token1",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token2",
+            "type": "address"
+          }
+        ],
+        "name": "TokenPairAdded",
+        "type": "event"
+      },
+      "0x7b3ca7703170ecc2bcd426d43e1cb2076261fac5cb99fc2d28b1ce28ea75a794": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token1",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "token1Amount",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token2",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "token2Amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "TokenPairSwapped",
+        "type": "event"
+      }
+    },
+    "links": {},
+    "address": "0x089fFbb8B1e8233433b304d13ed190cD5E71Ee50",
+    "transactionHash": "0x96a3c89e5b877b010061094c05cbc4b92db669ea9ebb8e6b2dfbc6e4335300af"
+  },
   "build/contracts/ERC20Bridge.json": {
     "events": {
       "0xc08d2dd931624985405b9682adb057bb2e8f5a4d7b6ca7c30d5dc27a3e56d3f2": {
@@ -6543,7 +6712,7 @@
     },
     "links": {},
     "address": "0xc97011880a37139BD5eEEAE7A2cf683a82D615e0",
-    "transactionHash": "0xf8fb1cbfe4fddc95b50cdf963769942cdfa96449c905c61f7b8c78f80c19cebf"
+    "transactionHash": "0x63ff0964d2f7ca8e3f684f34c498d9ecc3b3b4602548375bd6feb005da52d262"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},
