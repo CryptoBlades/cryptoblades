@@ -62,7 +62,7 @@ module.exports = {
         process.env.BINANCE_WALLET_PRIVATE_KEY,
         process.env.BINANCE_WALLET_MNEMONIC,
         {
-          providerOrUrl: process.env.BINANCE_TESTNET_RPC_URL || 'https://data-seed-prebsc-2-s2.binance.org:8545/'
+          providerOrUrl: process.env.BINANCE_TESTNET_RPC_URL || 'https://data-seed-prebsc-1-s1.binance.org:8545/'
         }
       )),
       network_id: 0x61,
