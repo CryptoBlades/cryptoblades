@@ -32,6 +32,7 @@ contract Dex is Initializable, AccessControlUpgradeable {
     event TokenPairSwapped(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
     event TokenPairAdded(uint id, address indexed token1, address indexed token2);
     event LiquidityAdded(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
+    event LiquidityRemoved(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
 
     function initialize() virtual public initializer {
         __AccessControl_init_unchained();
@@ -135,6 +136,21 @@ contract Dex is Initializable, AccessControlUpgradeable {
         pair.token2Amount += amount2;
         tokenPairs[id] = pair;
         emit LiquidityAdded(token1, amount1, token2, amount2);
+    }
+
+    function removeAllLiquidityOfPair(address tokenA, address tokenB) external restricted {
+        (address token1, address token2) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+        uint id = getTokenPairId(token1, token2);
+        TokenPair memory pair = tokenPairs[id];
+        require(pair.token1 == token1 && pair.token2 == token2, "Invalid pair");
+        uint amount1 = pair.token1Amount;
+        pair.token1Amount = 0;
+        IERC20(token1).transferFrom(address(this), msg.sender, amount1);
+        uint amount2 = pair.token2Amount;
+        pair.token2Amount = 0;
+        IERC20(token2).transferFrom(address(this), msg.sender, amount2);
+        tokenPairs[id] = pair;
+        emit LiquidityRemoved(token1, amount1, token2, amount2);
     }
 
     function collectFees(address token) external restricted {
