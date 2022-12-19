@@ -2568,6 +2568,11 @@
     "address": "0xDCd800389F9f696261E6bcde228AE137550E5425",
     "transactionHash": "0x4e54a66f089d4ba49b3eaf5c0294ebabe33c26d6a58c1406045a99340f22bde3"
   },
+  "build/contracts/Dex.json": {
+    "events": {},
+    "links": {},
+    "address": "0x862325490F6f34Db9d1cC5Ecf57dDCc704Ffe4F3"
+  },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
     "links": {},
@@ -5025,7 +5030,7 @@
     },
     "links": {},
     "address": "0xE8f14F0a5a5f059ae060664e0f165B7e5A52e4e5",
-    "transactionHash": "0x8e9b7dd72d1b2ed89f546e64c9e407910893eb227a6d2eb4f9de7f1761e88512"
+    "transactionHash": "0x2d0bd2e2352823bd06cc9879e9a89af5f06fa5f529fc2d4cc55f89f33573c9d6"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},

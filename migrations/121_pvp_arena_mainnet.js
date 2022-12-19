@@ -23,7 +23,7 @@ module.exports = async function (deployer, network, accounts) {
     || network === 'avaxmainnet'
     || network === 'avaxmainnet-fork'
     || network === 'auroramainnet'
-    || network === 'skalemainnet' || network === 'coinexmainnet'
+    || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet'
     || network === 'kavamainnet') {
         let randoms = await ChainlinkRandoms.deployed();
 

@@ -1,6 +1,6 @@
 <template>
   <div style="display: inline-flex" class="body main-font pl-3">
-    <div v-if="ownCharacters.length > 0">
+    <div v-if="ownCharacters.length > 0" :class="equippedWeaponId ? '' : 'combat-disabled'">
       <div v-if="error !== null">
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
       </div>
@@ -63,7 +63,7 @@
           <b-form-select
           class="mt-3 custom-select" v-model="fightMultiplier" :options='setStaminaSelectorValues()' @change="setFightMultiplier()"></b-form-select>
         </div>
-          <div  v-if="currentCharacterStamina >= staminaPerFight" class="combat-enemy-container">
+          <div  v-if="currentCharacterStamina >= staminaPerFight && equippedWeaponId" class="combat-enemy-container">
             <!-- ------------------------------------------- -->
             <transition-group
                 appear @before-enter="beforeEnter" @enter="enter"
@@ -132,6 +132,7 @@
                 {{$t('combat.needStamina', {staminaPerFight })}}
               </div>
               <div class="message-box" v-if="timeMinutes === 59 && timeSeconds >= 30">{{$t('combat.errors.lastSeconds')}}</div>
+              <div class="message-box" v-if="!equippedWeaponId">{{$t('combat.errors.youNeedToHaveWeaponEquippedToCombatYouCanEquipInPlaza')}}</div>
             </div>
           </div>
         </div>
@@ -204,8 +205,13 @@ interface StoreMappedCombatActions {
   getFightXpGain(): Promise<number>;
 }
 
+interface StoreMappedActions{
+  fetchCharacterWeapon(characterId: string | number): Promise<number>;
+}
+
 interface StoreMappedState {
   currentCharacterId: number,
+  characters: ICharacter[],
 }
 
 interface StoreMappedGetters {
@@ -255,6 +261,7 @@ interface ICombatData {
   isToggled: boolean;
   gridStyling: string;
   counterInterval: any;
+  equippedWeaponId: string | number;
 }
 
 export default Vue.extend({
@@ -285,11 +292,13 @@ export default Vue.extend({
       isToggled: false,
       gridStyling:'justify-content:flex-start; gap:2.5vw',
       counterInterval: null,
+      equippedWeaponId: '',
     } as ICombatData;
   },
   async mounted() {
     this.powerData = this.getPowerData(this.currentCharacterId);
     this.fightXpGain = await this.getFightXpGain();
+    this.equippedWeaponId = await this.fetchCharacterWeapon(this.currentCharacterId);
     if(this.currentCharacterId !== null && this.currentCharacterId !== undefined) {
       await this.fetchTargets({ characterId: this.currentCharacterId });
     }
@@ -309,7 +318,10 @@ export default Vue.extend({
     clearInterval(this.counterInterval);
   },
   computed: {
-    ...(mapState(['currentCharacterId']) as Accessors<StoreMappedState>),
+    ...(mapState([
+      'currentCharacterId',
+      'characters',
+    ]) as Accessors<StoreMappedState>),
     ...(mapGetters([
       'ownCharacters',
       'currentCharacter',
@@ -341,6 +353,10 @@ export default Vue.extend({
 
     isGenesisCharacter(): boolean {
       return this.currentCharacter.version === 0;
+    },
+
+    selectedCharacter(): ICharacter{
+      return this.characters[this.currentCharacterId];
     }
   },
 
@@ -361,6 +377,12 @@ export default Vue.extend({
       this.waitingResults = fightResults === null && error === null;
       this.setIsInCombat(this.waitingResults);
       if (this.resultsAvailable && error === null) (this as any).$bvModal.show('modal-info');
+    },
+
+    async selectedCharacter(newValue){
+      if (newValue) {
+        this.equippedWeaponId = await this.fetchCharacterWeapon(this.currentCharacterId);
+      }
     },
   },
 
@@ -383,6 +405,7 @@ export default Vue.extend({
         'getFightXpGain',
       ]) as StoreMappedCombatActions),
     ...(mapMutations('combat', ['setIsInCombat']) as StoreMappedCombatMutations),
+    ...mapActions(['fetchCharacterWeapon']) as StoreMappedActions,
     getEnemyArt,
     charHasStamina(){
       return this.currentCharacterStamina >= this.staminaPerFight;
@@ -1246,6 +1269,10 @@ h1 {
   transform: rotate(0deg) !important;
 }
 
+.combat-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
 
 @media (max-width: 575.98px) {
   .show-reforged {

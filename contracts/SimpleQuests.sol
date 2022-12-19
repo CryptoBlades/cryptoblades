@@ -107,6 +107,7 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) private weeklyRewards; //unused
     mapping(uint256 => uint256) public weeklyCompletionsGoal;
     mapping(address => mapping(uint256 => uint256)) public walletQuestProgress; // wallet, questID, progress
+    mapping(address => mapping(uint256 => uint256)) public questCompletions; // wallet, questID, timesCompleted
     uint constant maxWeeksInAYear = 53;
     uint constant pickableTier = 20;
     uint constant walletTier = 30;
@@ -489,18 +490,21 @@ contract SimpleQuests is Initializable, AccessControlUpgradeable {
         //.sub reverts on negatives
         if (quests[characterQuest[characterID]].requirementAmount.sub(totalProgress) == 0) {
             _generateRewardQuestSeed(characterID, true);
+            questCompletions[tx.origin][questID] += 1;
         }
     }
 
     function incrementWalletQuestProgress(uint256 questID, uint256 progress) private {
         require(progress > 0);
         require(questID == questTemplates[walletTier][questIndexes[questID]]); // wallet quest tier check
+        require(questCompletions[tx.origin][questID] == 0); // wallet quest completion check
         uint totalProgress = walletQuestProgress[msg.sender][questID] + progress;
         walletQuestProgress[msg.sender][questID] = totalProgress;
         emit WalletQuestProgressed(questID, msg.sender);
         //.sub reverts on negatives
         if (quests[questID].requirementAmount.sub(totalProgress) == 0) {
             _generateRewardWalletQuestSeed(questID, true);
+            questCompletions[tx.origin][questID] += 1;
         }
     }
 

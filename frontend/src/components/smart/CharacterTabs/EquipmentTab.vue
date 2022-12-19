@@ -1,21 +1,28 @@
 <template>
-    <b-tab active :title="$t('Character.equipment')" title-item-class="character-wrapper" title-link-class="character-tab" >
-      <b-card-text class="character-text mb-4">{{$t(`Character.equipmentText`)}}</b-card-text>
-      <!-- Equipment -->
-      <div class="col-lg-12 col-md-5 col-sm-9 drops">
-        <span>{{$t('weapon')}}</span>
+  <b-tab active :title="$t('Character.equipment')" title-item-class="character-wrapper"
+         title-link-class="character-tab">
+    <b-card-text class="character-text mb-4">{{ $t(`Character.equipmentText`) }}</b-card-text>
+    <!-- Equipment -->
+    <div class="equipment-wrapper">
+      <div class="drops">
+        <span>{{ $t('weapon') }}</span>
         <div class="weapon-info" v-if="equippedWeaponId !== undefined && equippedWeaponId !== null">
-          <div>
-            {{equippedWeaponId}}
-            <!--weapon-inventory class="weapon-icon" :weapon="equippedWeapon" :displayType="'raid'"/-->
-          </div>
+          <span class="unequip-tooltip">{{ $t('equip.unequipWeapon') }}</span>
           <div @click="removeWeapon()">
             <img src="@/assets/swithc-wep.png" alt="">
           </div>
-          <div>
-            <p>{{$t('equip.equipped')}}</p>
-            <span>{{$t('equip.unequipWeapon')}}</span>
-          </div>
+          <weapon-grid
+            class="weapon-grid"
+            :weaponIds="[equippedWeaponId]"
+            :showGivenWeaponIds="true"
+            :showReforgedToggle="false"
+            :showReforgedWeaponsDefVal="false"
+            :showFavoriteToggle="false"
+            :showFavoriteWeaponsDefVal="false"
+            :canFavorite="false"
+            :newWeapon="true"
+            :noPagination="true"
+          />
         </div>
         <div class="weapon-info" v-else>
           <div class="outline-box">
@@ -25,76 +32,70 @@
               </div>
             </div>
             <div>
-              <p>{{$t('equip.noWeapon')}}</p>
-              <span>{{$t('equip.equipWeapon')}}</span>
+              <p>{{ $t('equip.noWeapon') }}</p>
+              <span>{{ $t('equip.equipWeapon') }}</span>
             </div>
           </div>
         </div>
       </div>
-
-      <div class="col-lg-12 col-md-5 col-sm-9 drops">
-        <span>{{$t('Shield')}}</span>
-        <div v-if="!equippedShieldId" class="shieldButtonWrapper">
-          <a tabindex="0" class="selectWeaponButton" id="shield-popover">
-            <div class="placeholderImageWrapper">
-              <img src="@/assets/shieldPlaceholder.svg" alt="shield" />
-            </div>
-            <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right" custom-class="popoverWrapper">
-              <p class="popoverTitle">{{$t('pvp.shields')}}</p>
-              <div v-if="ownedShieldIds.length !== 0" class="popoverGrid">
-                <pvp-shield
-                  v-for="shield in ownedShieldsWithInformation"
-                  :key="shield.shieldId"
-                  :shield="shield.information"
-                  :shieldId="shield.shieldId"
-                  @click="selectShield(shield.shieldId)"
-                />
-              </div>
-              <div v-else class="noWeaponsOrShields">
-                {{$t('pvp.noShields')}}
-              </div>
-            </b-popover>
-          </a>
-        </div>
+      <div class="drops">
+        <span>{{ $t('Shield') }}</span>
         <div class="weapon-info" v-if="equippedShieldId !== undefined && equippedShieldId !== null">
-          <div>
-            {{equippedShieldId}}
-            <!--pvp-shield
-              :shield="equippedShield"
-              :shieldId="equippedShield.id"
-            /-->
-          </div>
+          <span class="unequip-tooltip">{{ $t('equip.unequipShield') }}</span>
           <div @click="removeShield()">
             <img src="@/assets/swithc-wep.png" alt="">
           </div>
-          <div>
-            <p>{{$t('equip.equipped')}}</p>
-            <span>{{$t('equip.unequipShield')}}</span>
-          </div>
+          <nft-list
+            class="nft-list"
+            :nftIdTypes="[{ id: equippedShieldId, type: 'shield' }]"
+            :showGivenNftIdTypes="true"
+            :isReward="true"
+          />
         </div>
-        <div class="weapon-info" v-else>
+        <div class="shieldButtonWrapper" v-else>
           <div class="outline-box">
             <div>
-              <!--div @click="selectShield()">
-                <img src="../../assets/swithc-wep.png" alt="">
-              </div-->
+              <a tabindex="0" class="selectWeaponButton" id="shield-popover">
+                <div class="placeholderImageWrapper">
+                  <img src="@/assets/shieldPlaceholder.svg" alt="shield"/>
+                </div>
+                <b-popover ref="popover" target="shield-popover" triggers="click blur" placement="right"
+                           custom-class="popoverWrapper">
+                  <p class="popoverTitle">{{ $t('pvp.shields') }}</p>
+                  <div v-if="ownedShieldIds.length !== 0" class="popoverGrid">
+                    <pvp-shield
+                      v-for="shield in ownedShieldsWithInformation"
+                      :key="shield.shieldId"
+                      :shield="shield.information"
+                      :shieldId="shield.shieldId"
+                      @click="selectShield(shield.shieldId)"
+                    />
+                  </div>
+                  <div v-else class="noWeaponsOrShields">
+                    {{ $t('pvp.noShields') }}
+                  </div>
+                </b-popover>
+              </a>
             </div>
             <div>
-              <p>{{$t('equip.noShield')}}</p>
-              <span>{{$t('equip.equipShield')}}</span>
+              <p>{{ $t('equip.noShield') }}</p>
+              <span>{{ $t('equip.equipShield') }}</span>
             </div>
           </div>
         </div>
       </div>
-    </b-tab>
+    </div>
+  </b-tab>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapActions, mapGetters, mapState } from 'vuex';
+import {mapActions, mapGetters, mapState} from 'vuex';
 import Events from '@/events';
-import { shieldFromContract as formatShield } from '../../../contract-models';
-import PvPShield from './../PvPShield.vue';
+import {shieldFromContract as formatShield} from '@/contract-models';
+import PvPShield from '@/components/smart/PvPShield.vue';
+import WeaponGrid from '@/components/smart/WeaponGrid.vue';
+import NftList from '@/components/smart/NftList.vue';
 import {ICharacter} from '@/interfaces';
 
 
@@ -107,32 +108,41 @@ interface Data {
 }
 
 interface StoreMappedActions {
-  fetchWeapon(payload: {weaponId: string | number}): Promise<void>;
-  fetchShield(payload: {shieldId: string | number}): Promise<void>;
-  equipWeapon(payload: {equipperId: string, itemId: number | string}): Promise<void>;
-  equipShield(payload: {equipperId: string, itemId: number | string}): Promise<void>;
-  unequipWeapon(payload: {equipperId: string}): Promise<void>;
-  unequipShield(payload: {equipperId: string}): Promise<void>;
+  fetchWeapon(payload: { weaponId: string | number }): Promise<void>;
+
+  fetchShield(payload: { shieldId: string | number }): Promise<void>;
+
+  equipWeapon(payload: { equipperId: string, itemId: number | string }): Promise<void>;
+
+  equipShield(payload: { equipperId: string, itemId: number | string }): Promise<void>;
+
+  unequipWeapon(payload: { equipperId: string }): Promise<void>;
+
+  unequipShield(payload: { equipperId: string }): Promise<void>;
+
   fetchCharacterWeapon(characterId: string | number): Promise<number>;
+
   fetchCharacterShield(characterId: string | number): Promise<number>;
-  getShield(payload: {shieldId: string | number}): Promise<string[]>;
+
+  getShield(payload: { shieldId: string | number }): Promise<string[]>;
 }
 
 interface StoredMappedGetters {
-  getEquippedWeapon(payload: {characterId: string | number}): number;
-  getEquippedShield(payload: {characterId: string | number}): number;
+  getEquippedWeapon(payload: { characterId: string | number }): number;
+
+  getEquippedShield(payload: { characterId: string | number }): number;
 }
 
 
 export default Vue.extend({
-  components: { 'pvp-shield': PvPShield },
+  components: {'pvp-shield': PvPShield, WeaponGrid, NftList},
   props: {
     soulBalance: {
       type: Number,
       default: 0
     }
   },
-  data(): Data{
+  data(): Data {
     return {
       equippedWeapon: null,
       equippedWeaponId: '',
@@ -141,7 +151,7 @@ export default Vue.extend({
       ownedShieldsWithInformation: [],
     };
   },
-  computed:{
+  computed: {
     ...mapState([
       'ownedShieldIds',
       'currentCharacterId',
@@ -150,7 +160,7 @@ export default Vue.extend({
     ...mapGetters([
       'getCharacterPower'
     ]),
-    selectedCharacter(): ICharacter{
+    selectedCharacter(): ICharacter {
       return this.characters[this.currentCharacterId];
     },
   },
@@ -204,7 +214,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    async selectedCharacter(newValue){
+    async selectedCharacter(newValue) {
       if (newValue) {
         await this.refreshData();
       }
@@ -233,24 +243,32 @@ export default Vue.extend({
   height: 12em;
   margin: 0 auto;
 }
-.weapon-info{
+
+.weapon-info {
   display: flex;
   justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
 }
-.weapon-info > div > p{
+
+.weapon-info > div > p {
   color: #fff;
   margin: 0px;
 }
-.weapon-info > div > span{
+
+.weapon-info > div > span {
   /* color: #fff; */
 }
-.weapon-info > div > img{
+
+.weapon-info > div > img {
   width: 30px;
   cursor: pointer;
 }
+
 .drops {
   margin-top: 1em;
 }
+
 .drops-icons {
   display: flex;
   flex-direction: row;
@@ -262,17 +280,20 @@ export default Vue.extend({
   /* border: 0.5px solid #1f1f1f; */
   /* height: 161px; */
 }
-.drops-icons >>> ul {
+
+.drops-icons > > > ul {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
 }
-.outline-box{
+
+.outline-box {
   display: flex;
   align-items: center;
   opacity: 0.5;
 }
-.outline-box > div:nth-child(1){
+
+.outline-box > div:nth-child(1) {
   height: 70px;
   width: 70px;
   display: flex;
@@ -281,27 +302,32 @@ export default Vue.extend({
   border: #ccae4f dashed 2px;
   border-radius: 5px;
 }
+
 .outline-box > div:nth-child(2) {
   padding-left: 20px;
 }
-.outline-box > div > p{
+
+.outline-box > div > p {
   margin: 0px;
   font-size: 15px;
   font-family: Roboto;
 }
-.outline-box > div > span{
+
+.outline-box > div > span {
   margin: 0px;
   font-size: 13px;
   font-family: Roboto;
 }
+
 .outline-box > div > div {
   cursor: pointer;
 }
-.outline-box > div > div > img{
+
+.outline-box > div > div > img {
   width: 30px;
 }
 
-.character-text{
+.character-text {
   color: #7F8693;
 }
 
@@ -323,6 +349,14 @@ export default Vue.extend({
   height: 32px;
 }
 
+.equipment-wrapper {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.selectWeaponButton {
+  cursor: pointer;
+}
 
 /* Chrome, Safari, Edge, Opera */
 .character-text input::-webkit-outer-spin-button,
@@ -336,6 +370,61 @@ export default Vue.extend({
   -moz-appearance: textfield;
 }
 
+@media (max-width: 992px) {
+  .weapon-info {
+    flex-direction: column;
+    align-items: center;
 
+    > div > div {
+      padding: 0 10px;
+    }
+  }
+
+  .equipment-wrapper {
+    flex-direction: column;
+  }
+}
+
+p, li, span {
+  font-family: 'Roboto';
+}
+
+.popoverWrapper {
+  height: 450px;
+  overflow-y: auto;
+  min-width: max-content;
+  padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+  background-color: black;
+  border: 1px solid #cec198;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  .popoverTitle {
+    color: #cec198;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .popoverGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    grid-column-gap: 1rem;
+    grid-row-gap: 2rem;
+    margin-top: 1rem;
+  }
+}
+
+.unequip-tooltip {
+  color: gray;
+}
+
+.noWeaponsOrShields {
+  display: flex;
+  margin: 0 auto;
+  font-family: 'Roboto';
+  color: #b4b0a7;
+  font-size: 0.75rem;
+  margin-top: 1rem;
+}
 
 </style>

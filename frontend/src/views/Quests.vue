@@ -381,6 +381,7 @@ export default Vue.extend({
       try {
         this.isLoading = true;
         this.isLoadingWalletQuests = true;
+        // TODO: Filter out unavailable wallet quests here
         this.walletQuests = await this.getQuestTemplates({tier: this.walletQuestTier + 30});
         this.isLoadingWalletQuests = false;
         const [

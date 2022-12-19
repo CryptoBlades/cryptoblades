@@ -118,6 +118,9 @@
                         </div>
                       </div>
                   </div>
+                  <div v-if="!equippedWeaponId" class="col-lg-12 col-md-6 col-sm-12 drops">
+                    {{$t('raid.errors.youNeedToHaveWeaponEquippedToJoinYouCanEquipInPlaza')}}
+                  </div>
                 </div>
               </div>
               <div class="col-lg-8">
@@ -170,7 +173,7 @@
                     </button>
                     <button v-if="!isMobile()" class="btn-raid"
                     @click="joinRaidMethod()"
-                    :disabled="isLoading || isJoiningRaid || raidStart()">
+                    :disabled="isLoading || isJoiningRaid || raidStart() || !equippedWeaponId">
                      <span v-tooltip="generateTooltip()">
                        {{isJoiningRaid ? $t('raid.joiningRaid').toUpperCase() : $t('raid.joinRaid')}}
                      </span>
@@ -377,8 +380,7 @@ import { getCharacterArt } from '../character-arts-placeholder';
 import NftIcon from '@/components/NftIcon.vue';
 import NftList, {NftIdType} from '@/components/smart/NftList.vue';
 import CurrencyConverter from '../components/CurrencyConverter.vue';
-//import {GetTotalMultiplierForTrait, IWeapon} from '@/interfaces/Weapon';
-import {IRaidState, IState} from '@/interfaces';
+import {ICharacter, IRaidState, IState} from '@/interfaces';
 import {getBossArt, getBossName} from '@/raid-boss-art-placeholder';
 import {traitNumberToName} from '@/contract-models';
 import {fromWeiEther, toBN} from '@/utils/common';
@@ -401,6 +403,7 @@ interface RaidMappedActions {
   fetchIsCharacterRaiding(payload: { characterID: string }): Promise<boolean>;
   fetchIsWeaponRaiding(payload: { weaponID: string }): Promise<boolean>;
   fetchCharacters(payload: { characterIds: (string | number)[]}): Promise<void>;
+  fetchCharacterWeapon(characterId: string | number): Promise<number>;
 }
 
 interface RaidMappedMutations {
@@ -412,6 +415,43 @@ interface RaidMappedGetters {
 }
 
 let interval: number;
+
+interface Data {
+  raidIndex: string;
+  bossName: string;
+  raiderCount: number;
+  totalPower: number;
+  expectedFinishTime: Date;
+  xpReward: string;
+  staminaCost: string;
+  durabilityCost: string;
+  joinCost: string;
+  raidStatus: string;
+  bossPower: number;
+  bossTrait: string;
+  accountPower: string;
+  rewardsRaidId: string;
+  rewardIndexes: string[];
+  rewards: NftIdType[];
+  spin: boolean;
+  participatingCharacters: string[];
+  participatingWeapons: string[];
+  bonuxXpCharacterNames: string[];
+  bonuxXpAmounts: string[];
+  remainingTime: {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  },
+  traits: string;
+  notifyError: string;
+  isLoading: boolean;
+  raidStarted: boolean;
+  isClaimingRewards: boolean;
+  isJoiningRaid: boolean;
+  equippedWeaponId: string | number;
+}
 
 export default Vue.extend({
   data() {
@@ -430,13 +470,13 @@ export default Vue.extend({
       bossTrait: '',
       accountPower: '',
       rewardsRaidId: '',
-      rewardIndexes: [] as string[],
-      rewards: [] as NftIdType[],
+      rewardIndexes: [],
+      rewards: [] ,
       spin: false,
-      participatingCharacters: [] as string[],
-      participatingWeapons: [] as string[],
-      bonuxXpCharacterNames: [] as string[],
-      bonuxXpAmounts: [] as string[],
+      participatingCharacters: [],
+      participatingWeapons: [],
+      bonuxXpCharacterNames: [],
+      bonuxXpAmounts: [],
       remainingTime: {
         days: 0,
         hours: 0,
@@ -448,8 +488,9 @@ export default Vue.extend({
       isLoading: false,
       raidStarted: false,
       isClaimingRewards: false,
-      isJoiningRaid: false
-    };
+      isJoiningRaid: false,
+      equippedWeaponId: '',
+    } as Data;
   },
 
   computed: {
@@ -481,6 +522,10 @@ export default Vue.extend({
     formatStaminaHours(): string {
       return staminaToHours(+this.staminaCost).toFixed(1);
     },
+
+    selectedCharacter(): ICharacter{
+      return this.characters[this.currentCharacterId];
+    },
   },
 
   methods: {
@@ -498,7 +543,8 @@ export default Vue.extend({
       'fetchIsCharacterRaiding',
       'fetchIsWeaponRaiding',
       'fetchCharacters',
-      'canUserAfford'
+      'canUserAfford',
+      'fetchCharacterWeapon',
     ]) as RaidMappedActions),
     ...(mapMutations([
       'setCurrentCharacter'
@@ -774,6 +820,7 @@ export default Vue.extend({
   },
 
   async mounted() {
+    this.equippedWeaponId = await this.fetchCharacterWeapon(this.currentCharacterId);
     this.getTimeRemaining();
     const refreshRaidData = async () => {
       await (this as any).getRewardIndexes();
@@ -793,6 +840,14 @@ export default Vue.extend({
 
   beforeDestroy() {
     clearInterval(interval);
+  },
+
+  watch: {
+    async selectedCharacter(newValue){
+      if (newValue) {
+        this.equippedWeaponId = await this.fetchCharacterWeapon(this.currentCharacterId);
+      }
+    },
   },
 
   components: {
@@ -1712,7 +1767,7 @@ hr.divider {
   padding-top: 40px;
 }
 
-.powers, .nav-raid, .drops, .join-raid{
+.powers, .nav-raid, .drops, .join-raid, .missing-weapon{
   padding-left: 50px;
 }
 

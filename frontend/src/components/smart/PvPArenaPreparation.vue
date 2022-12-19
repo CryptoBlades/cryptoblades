@@ -59,6 +59,9 @@
           </div>
         </div>
         </div>
+        <p v-if="!selectedWeaponId">
+          {{$t('pvp.youNeedToHaveWeaponEquippedToEnterYouCanEquipInPlaza')}}
+        </p>
         <div class="enterButtonsWrapper">
           <div class="enterArenaButtonWrapper">
             <cb-button class="custom-enter-arena-btn" :title="`${$t('pvp.enterArena')} <br/>`" :subTitle="$t('pvp.untiered')"
@@ -219,7 +222,9 @@ export default {
   methods: {
     ...mapActions([
       'approvePvpSkillSpending',
-      'enterArena'
+      'enterArena',
+      'fetchCharacterWeapon',
+      'fetchCharacterShield',
     ]),
 
     handleClearWeaponFilters() {
@@ -302,6 +307,11 @@ export default {
       }
       this.loading = false;
     },
+  },
+
+  async mounted() {
+    this.selectedWeaponId = await this.fetchCharacterWeapon(this.currentCharacterId);
+    this.selectedShieldId = await this.fetchCharacterShield(this.currentCharacterId);
   },
 
   watch: {
