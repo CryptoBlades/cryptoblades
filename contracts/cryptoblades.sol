@@ -61,6 +61,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
     uint256 public constant VAR_CHARACTER_MINT_TIMESTAMP = 26;
     uint256 public constant VAR_GAS_OFFSET_PER_FIGHT_MULTIPLIER = 27;
     uint256 public constant VAR_FIGHT_FLAT_IGO_BONUS = 28;
+    uint256 public constant VAR_FIGHT_REROLL_PENALTY_PERCENT = 29;
 
     uint256 public constant LINK_SAFE_RANDOMS = 1;
 
@@ -304,32 +305,31 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         );
     }
 
-    function fight(address fighter, uint256 char, uint32 target, uint8 fightMultiplier) external
+    function fight(address fighter, uint256 char, uint8 enemyIndex, uint8 fightMultiplier) external
         restricted returns (uint256, uint256) {
         require(fightMultiplier >= 1 && fightMultiplier <= 5);
 
         (uint72 miscData, uint256 powerData) = characters.getFightDataAndDrainStamina(fighter,
             char, staminaCostFight * fightMultiplier, false, 0);
         
-        // dirty variable reuse to avoid stack limits (target is 0-3 atm)
+        // enemyIndex is 0-3 + (rerolls*4) atm
         uint24 playerBasePower = uint24(powerData >> 96);
-        target = grabTarget(
+        uint32 target = grabTarget(
             playerBasePower,
             uint64(miscData & 0xFFFFFFFFFFFFFFFF),//timestamp
-            target,//passed as index (0-3)
+            enemyIndex,
             now / 1 hours
         );
-        // target is now using 24 bits for power and topmost 8bits for trait
-        uint8 targetTrait = uint8(target >> 24);
 
         return performFight(
             fighter,
             char,
-            uint24(powerData >> (targetTrait*24)),//playerFightPower
+            uint24(powerData >> (uint8(target >> 24)*24)),//playerFightPower, shifted by targetTrait
             playerBasePower,//playerBasePower
             uint24(target),//targetPower
             fightMultiplier,
-            uint8((miscData >> 64) & 0xFF)//characterVersion
+            uint8((miscData >> 64) & 0xFF),//characterVersion
+            enemyIndex
         );
     }
 
@@ -340,14 +340,15 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         uint24 playerBasePower,
         uint24 targetPower,
         uint8 fightMultiplier,
-        uint8 characterVersion
+        uint8 characterVersion,
+        uint8 enemyIndex
     ) private returns (uint256 tokens, uint256 expectedTokens) {
         //now+/-char is hashed within randomUtil
         uint24 playerRoll = uint24(RandomUtil.plusMinus10PercentSeededFast(playerFightPower,now+char));
         uint24 monsterRoll = uint24(RandomUtil.plusMinus10PercentSeededFast(targetPower, now-char));
 
         uint16 xp = getXpGainForFight(playerBasePower, targetPower) * fightMultiplier;
-        tokens = getTokenGainForFight(targetPower) * fightMultiplier;
+        tokens = getTokenGainForFight(targetPower, enemyIndex/4) * fightMultiplier;
         expectedTokens = tokens;
 
         if (playerRoll < monsterRoll) {
@@ -366,30 +367,35 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
         emit FightOutcome(fighter, char, 0/*wep*/, (targetPower /*| ((uint32(data.traitsCWE) << 8) & 0xFF000000)*/), playerRoll, monsterRoll, xp, tokens);
     }
 
-    function getTokenGainForFight(uint24 monsterPower) public view returns (uint256) {
+    function getTokenGainForFight(uint24 monsterPower, uint8 rerolls) public view returns (uint256) {
         // monsterPower / avgPower * payPerFight * powerMultiplier + gasoffset
-        return monsterPower * vars[VAR_HOURLY_PAY_PER_FIGHT] / vars[VAR_HOURLY_POWER_AVERAGE]
-            + vars[VAR_GAS_OFFSET_PER_FIGHT_MULTIPLIER];
+        uint256 baseGain = monsterPower * vars[VAR_HOURLY_PAY_PER_FIGHT] / vars[VAR_HOURLY_POWER_AVERAGE];
+        uint256 rerollLoss = baseGain * rerolls * vars[VAR_FIGHT_REROLL_PENALTY_PERCENT] / 100;
+        if(rerollLoss > baseGain)
+            rerollLoss = baseGain;
+        return baseGain.sub(rerollLoss) + vars[VAR_GAS_OFFSET_PER_FIGHT_MULTIPLIER];
     }
     
     function getXpGainForFight(uint24 playerPower, uint24 monsterPower) internal view returns (uint16) {
         return uint16(monsterPower * fightXpGain / playerPower);
     }
 
-    function getTargets(uint256 char) public view returns (uint32[4] memory) {
+    function getTargets(uint256 char, uint8 rerolls) public view returns (uint32[4] memory) {
         // this is a frontend function
         uint256 powerData = characters.getNftVar(char, characters.NFTVAR_POWER_DATA());
 
         return getTargetsInternal(
             uint24(powerData >> 96), // base power (target)
             characters.getStaminaTimestamp(char),
-            now / 1 hours
+            now / 1 hours,
+            rerolls * 4
         );
     }
 
     function getTargetsInternal(uint24 playerPower,
         uint64 staminaTimestamp,
-        uint256 currentHour
+        uint256 currentHour,
+        uint32 targetOffset
     ) private pure returns (uint32[4] memory) {
         // 4 targets, roll powers based on character + weapon power
         // trait bonuses not accounted for
@@ -402,7 +408,7 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             // for the sake of target picking it needs to be the same as in grabTarget(i)
             // even the exact type of "i" is important here
             uint256 indexSeed = uint256(keccak256(abi.encodePacked(
-                staminaTimestamp, currentHour, playerPower, i
+                staminaTimestamp, currentHour, playerPower, i + targetOffset
             )));
 
             targets[i] = uint32(
