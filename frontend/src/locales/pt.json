@@ -305,6 +305,7 @@
     "garrison": "Guarnição",
     "garrisonHint": "Seus personagens ociosos estão em Guarnição. Enquanto em Guarnição eles não podem lutar.",
     "noRefunds": "Reembolsos não serão dados por itens queimados acidentalmente!",
+    "cannotBurnedEquippedCharacters": "Characters equipped with a sword and/or shield cannot be burned without first being unequipped!",
     "noXpToClaim": "Sem EXP para reivindicar",
     "notEnoughSkill": "Você pode comprar mais SKILL de {0} ou",
     "notEnoughSkillLink": "aqui",

@@ -957,6 +957,7 @@
     "garrison": "Garnisun",
     "garrisonHint": "Karaktermu yang menganggur berada di Garnisun. selama di garnisun mereka tidak dapat bertarung.",
     "noRefunds": "Tidak ada pengembalian yang diberikan untuk barang yang dibakar secara tidak sengaja",
+    "cannotBurnedEquippedCharacters": "Characters equipped with a sword and/or shield cannot be burned without first being unequipped!",
     "noXpToClaim": "Tidak ada XP untuk di klaim",
     "notEnoughSkill": "Kamu dapat membeli SKILL lebih dari {0} atau",
     "notEnoughSkillLink": "sini",

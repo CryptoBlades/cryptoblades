@@ -214,6 +214,7 @@
     "soul": "Soul",
     "burnWarning": "Please confirm you want to burn {characterAmount} selected character(s).",
     "noRefunds": "No refunds will be given for accidentally burned items!",
+    "cannotBurnedEquippedCharacters": "Characters equipped with a sword and/or shield cannot be burned without first being unequipped!",
     "cantBeUndone": "This process cannot be undone!",
     "burnConfirmation": "Characters Burn Confirmation",
     "upgradeConfirmation": "Characters Upgrade Confirmation",
