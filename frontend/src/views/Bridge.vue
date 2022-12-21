@@ -40,9 +40,6 @@
             @click="nftType === 'character' ? $refs['character-warning-modal'].show() : transferToStorage()"
               class="gtag-link-others" tagname="click_transfer_bridge">{{$t('bridge.moveNftToStorage')}}</b-button>
           </div>
-          <b-button @click="$refs['character-warning-modal'].show()">
-            test
-          </b-button>
         </div>
 
         <div class="sell-grid" v-if="nftType === 'weapon'">
