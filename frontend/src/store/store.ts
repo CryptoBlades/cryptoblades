@@ -2899,7 +2899,6 @@ export default new Vuex.Store<IState>({
     async getShield({ state }, shieldId) {
       const { Shields } = state.contracts();
       if (!Shields || !state.defaultAccount) return;
-      shieldId = 0; // TEMP
       return await Shields.methods.get(`${shieldId}`).call({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
