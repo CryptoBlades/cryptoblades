@@ -110,6 +110,7 @@ export interface IState {
   garrisonCharacters: Record<number, ICharacter>;
   characterStaminas: Record<number, number>;
   characterPowers: Record<number, number>;
+  characterEquippedPowers: Record<number, number>;
   powerDatas: Record<number, IPowerData>;
   characterIsInArena: Record<number, boolean>;
   characterRenames: Record<number, string>;

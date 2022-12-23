@@ -190,16 +190,19 @@ export default Vue.extend({
     async removeWeapon() {
       await this.unequipWeapon({equipperId: this.currentCharacterId});
       this.equippedWeaponId = await this.fetchCharacterWeapon(this.currentCharacterId);
+      Events.$emit('weaponChanged', true);
       //re-fetch weapon inventory
     },
     async selectShield(shieldId: number | string) {
       // todo
       await this.equipShield({equipperId: this.currentCharacterId as string, itemId: shieldId});
+      Events.$emit('weaponChanged', true);
       //re-fetch shield inventory
     },
     async removeShield() {
       await this.unequipShield({equipperId: this.currentCharacterId});
       this.equippedShieldId = await this.fetchCharacterShield(this.currentCharacterId);
+      Events.$emit('weaponChanged', true);
       //re-fetch shield inventory
     },
     async refreshData() {
@@ -226,6 +229,7 @@ export default Vue.extend({
     Events.$on('chooseweapon', async (id: number) => {
       await this.equipWeapon({equipperId: this.currentCharacterId, itemId: id});
       await this.refreshData();
+      Events.$emit('weaponChanged', true);
       //re-fetch weapon inventory
     });
   },
