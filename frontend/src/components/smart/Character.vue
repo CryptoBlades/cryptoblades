@@ -604,7 +604,7 @@ export default Vue.extend({
 
       this.updateCharacterEquippedPower({
         characterId: this.currentCharacterId,
-        power: +powerStored.pvePower[4]
+        power: +powerStored[0][4]
       });
 
       this.updatedEquippedCharacterPower = +powerData;

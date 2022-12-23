@@ -2935,7 +2935,7 @@ export default new Vuex.Store<IState>({
       if (!EquipmentManager || !Characters || !state.defaultAccount) return;
 
       const storedPowerData = await EquipmentManager.methods.getStoredPowerData(characterId).call({from: state.defaultAccount, gasPrice: getGasPrice()});
-      return Number((BigInt(storedPowerData.powerData || 0) >> BigInt(96)) & BigInt(0xFFFFFF));
+      return Number((BigInt(storedPowerData[7] || 0) >> BigInt(96)) & BigInt(0xFFFFFF));
     },
     async getCharacterEquipmentCurrentVersion({state}, charID) {
       const { Characters } = state.contracts();
