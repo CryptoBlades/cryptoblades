@@ -124,7 +124,7 @@ interface StoreMappedActions {
 
   fetchCharacterShield(characterId: string | number): Promise<number>;
 
-  getShield(payload: { shieldId: string | number }): Promise<string[]>;
+  getShield(shieldId: string | number): Promise<string[]>;
 }
 
 interface StoredMappedGetters {
