@@ -54,24 +54,21 @@
                       @click="onClickRecalculate"
                       variant="primary"
                     >
-                      {{ $t(`recalculate`) }}: {{ updatedEquippedCharacterPower }}
+                      {{ $t(`Character.recalculate`) }}: {{ updatedEquippedCharacterPower }}
                     </b-button>
                   </div>
-                  <div v-if="characterEquipmentVersion === 0">
+                  <div class="text-dark" v-if="characterEquipmentVersion === 0">
                       {{ $t(`Character.invalidEquipment`) }}
                   </div>
-
-                  <b-button
-                    :disabled='isRecalculateEquipmentLoading'
-                    @click="onClickRecalculate"
-                    variant="primary"
-                  >
-                      {{ $t(`recalculate`) }}: {{ updatedEquippedCharacterPower }}
-                  </b-button>
                 </b-popover>
               </div>
             </span>
-          <span class="alt-text cell-value">{{ totalCharacterEquippedPower }}</span>
+          <span class="alt-text cell-value" v-if="characterEquipmentVersion > 0">
+            {{ totalCharacterEquippedPower }}
+          </span>
+          <span class="alt-text cell-value" v-if="characterEquipmentVersion === 0">
+            0
+          </span>
         </div>
         <div class="w-100 d-block d-md-none"></div>
         <div class="col cell" v-if="reputationLevelRequirements">
@@ -123,7 +120,7 @@
       <!-- Character Tabs -->
       <div>
         <b-tabs pills fill nav-wrapper-class="mt-5 mb-4" >
-          <equipment-tab :soulBalance="isGenesisCharacter ? genesisSoulBalance : nonGenesisSoulBalance" @fetchSoulBalance="refreshData" />
+          <equipment-tab :soulBalance="isGenesisCharacter ? genesisSoulBalance : nonGenesisSoulBalance" @fetchSoulBalance="refreshData"/>
           <upgrade-tab :soulBalance="isGenesisCharacter ? genesisSoulBalance : nonGenesisSoulBalance" @fetchSoulBalance="refreshData" />
           <skins-tab :availableSkins="availableSkins" @loadCosmeticsCount="loadCosmeticsCount" />
           <options-tab @openTransferModal="openTransferModal" @onSendToGarrison="onSendToGarrison" @openChangeTrait="openChangeTrait"
@@ -281,6 +278,7 @@
 import Vue from 'vue';
 import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 import { BModal } from 'bootstrap-vue';
+import Events from '@/events';
 
 import SkinsTab from '@/components/smart/CharacterTabs/SkinsTab.vue';
 import OptionsTab from '@/components/smart/CharacterTabs/OptionsTab.vue';
@@ -596,21 +594,21 @@ export default Vue.extend({
       const equipmentVersion = await this.getEquipmentCurrentVersion();
       const characterEquipmentVersion = await this.getCharacterEquipmentCurrentVersion(this.currentCharacterId);
 
-      this.characterEquipmentVersion = characterEquipmentVersion;
-      this.isCharacterEquipmentVersionMatch = equipmentVersion !== characterEquipmentVersion;
+      this.characterEquipmentVersion = +characterEquipmentVersion;
+      this.isCharacterEquipmentVersionMatch = +equipmentVersion === +characterEquipmentVersion;
     },
     async reCheckEquippedCharacterPowerData() {
       const powerData = await this.getEquippedCharacterPower(this.currentCharacterId);
       const powerStoredData = await this.getEquippedCharacterPowerStoredPowerData(this.currentCharacterId);
       const powerStored = await this.getEquippedCharacterPowerStoredData(this.currentCharacterId);
-      console.log(powerStored);
+
       this.updateCharacterEquippedPower({
         characterId: this.currentCharacterId,
         power: +powerStored.pvePower[4]
       });
 
-      this.updatedEquippedCharacterPower = powerData;
-      this.hasCharacterPowerDataChanged = powerData !== powerStoredData;
+      this.updatedEquippedCharacterPower = +powerData;
+      this.hasCharacterPowerDataChanged = +powerData !== +powerStoredData;
     },
     async refreshData(){
       this.reputationLevelRequirements =  await this.getReputationLevelRequirements();
@@ -714,6 +712,10 @@ export default Vue.extend({
 
         this.isRecalculateEquipmentLoading = false;
       }
+    },
+    async refreshCharacterEquipmentData() {
+      await this.reCheckEquippedCharacterPowerData();
+      await this.checkCharacterEquipmentVersion();
     }
   },
   watch: {
@@ -721,7 +723,7 @@ export default Vue.extend({
       if (newValue) {
         await this.fetchCharacterQuestData();
         await this.refreshData();
-        await this.reCheckEquippedCharacterPowerData();
+        await this.refreshCharacterEquipmentData();
       }
     },
   },
@@ -729,9 +731,12 @@ export default Vue.extend({
     await this.refreshData();
     await this.fetchCharacterQuestData();
     await this.loadConsumablesCount();
-    await this.reCheckEquippedCharacterPowerData();
+    await this.refreshCharacterEquipmentData();
 
-    await this.checkCharacterEquipmentVersion();
+    Events.$on('weaponChanged', async () => {
+      console.log('weaponChanged');
+      await this.refreshCharacterEquipmentData();
+    });
   },
 });
 </script>
