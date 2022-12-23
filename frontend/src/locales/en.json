@@ -247,6 +247,7 @@
     "moveNftToStorage": "Move NFT to Storage",
     "warning": "Warning",
     "unclaimedRemains": "When transferring your character to another chain, any unclaimed XP remains on this one!",
+    "cannotBridgeEquippedCharacters": "Characters equipped with a sword and/or shield cannot be bridged without first being unequipped!",
     "storage": "Storage",
     "withdrawFromStorage": "Withdraw from Storage",
     "requestTransfer": "Request Transfer",
