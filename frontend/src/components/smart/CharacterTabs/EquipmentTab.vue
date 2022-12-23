@@ -124,7 +124,7 @@ interface StoreMappedActions {
 
   fetchCharacterShield(characterId: string | number): Promise<number>;
 
-  getShield(payload: { shieldId: string | number }): Promise<string[]>;
+  getShield(shieldId: string | number): Promise<string[]>;
 }
 
 interface StoredMappedGetters {
@@ -182,7 +182,7 @@ export default Vue.extend({
     ]) as StoredMappedGetters),
 
     async getShieldInformation(shieldId: number | string) {
-      return formatShield(`${shieldId}`, await this.getShield({shieldId}));
+      return formatShield(`${shieldId}`, await this.getShield(shieldId));
     },
     selectWeapon() {
       Events.$emit('weapon-inventory', true);
@@ -406,7 +406,7 @@ p, li, span {
 
   .popoverGrid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(4, 1fr);
     grid-column-gap: 1rem;
     grid-row-gap: 2rem;
