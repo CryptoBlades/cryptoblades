@@ -86,6 +86,8 @@
     "changeName": "Change Name",
     "noTraits": "You have no traits left to pick.",
     "garrison": "Garrison",
+    "recalculate": "Recalculate",
+    "invalidEquipment": "invalid equipment, check the equipment tab, you may be missing a weapon",
     "info": "Info",
     "owned": "Owned",
     "filterCharacter": "Filter Character",
