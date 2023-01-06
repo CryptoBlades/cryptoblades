@@ -1494,7 +1494,7 @@
           "instructions": "Get started in no time! To recruit your first character you need {recruitCost} SKILL and SFUEL for gas.",
           "inst1": "1. Go to the <a target=_blank href=https://sfuel.mylilius.com/> SFUEL Faucet </a> to claim your SFUEL for free!",
           "inst2": "2. You can transfer your SKILL from BNB to SKALE with our <a target=_blank href=https://drawbridge.cryptoblades.io/> Drawbridge </a>",
-          "inst3": "3. That's it! If you have any questions, check our <a target=_blank href=https://cryptoblades.gitbook.io/wiki/> Wiki </a> or <a target=_blank href=https://discord.gg/cryptoblades> join our Discord </a> !",
+          "inst3": "3. That's it! If you have any questions, check our <a target=_blank href=https://cryptoblades.zendesk.com/hc/en-us> Wiki </a> or <a target=_blank href=https://discord.gg/cryptoblades> join our Discord </a> !",
           "inst4": ""
         },
         "hideWalletWarning": "You have hidden the wallet warning and it would now be displayed. If you are trying to play, please disable the option and follow the instructions, otherwise close and ignore.",
