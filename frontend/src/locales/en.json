@@ -66,6 +66,7 @@
     "cancelledTransaction": "You cancelled the transaction.",
     "changeTraitError": "Error while changing the character trait.",
     "upgradeText": "Upgrading is the process of spending SKILL tokens to upgrade a character's power using souls. The target character receives bonus power, and the souls used will disappear.",
+    "equipmentText": "Equipment is needed for Raid/PvP/Combat activities. You need to equip a weapon to participate in them. Shield is an optional asset for PvP combat.",
     "level": "Level",
     "power": "Power",
     "element": "Element",
@@ -85,6 +86,8 @@
     "changeName": "Change Name",
     "noTraits": "You have no traits left to pick.",
     "garrison": "Garrison",
+    "recalculate": "Recalculate",
+    "invalidEquipment": "invalid equipment, check the equipment tab, you may be missing a weapon",
     "info": "Info",
     "owned": "Owned",
     "filterCharacter": "Filter Character",
@@ -98,6 +101,7 @@
     "change": "Change",
     "send": "Send",
     "max": "Max",
+    "equipment": "Equipment",
     "upgrade": "Upgrade",
     "skins": "Skins",
     "options": "Options",
@@ -212,6 +216,7 @@
     "soul": "Soul",
     "burnWarning": "Please confirm you want to burn {characterAmount} selected character(s).",
     "noRefunds": "No refunds will be given for accidentally burned items!",
+    "cannotBurnedEquippedCharacters": "Characters equipped with a sword and/or shield cannot be burned without first being unequipped!",
     "cantBeUndone": "This process cannot be undone!",
     "burnConfirmation": "Characters Burn Confirmation",
     "upgradeConfirmation": "Characters Upgrade Confirmation",
@@ -244,6 +249,7 @@
     "moveNftToStorage": "Move NFT to Storage",
     "warning": "Warning",
     "unclaimedRemains": "When transferring your character to another chain, any unclaimed XP remains on this one!",
+    "cannotBridgeEquippedCharacters": "Characters equipped with a sword and/or shield cannot be bridged without first being unequipped!",
     "storage": "Storage",
     "withdrawFromStorage": "Withdraw from Storage",
     "requestTransfer": "Request Transfer",
@@ -517,7 +523,8 @@
     "errors": {
       "needToSelectChar": "You need to select a character to do battle.",
       "notEnoughDurability": "This weapon does not have enough durability.",
-      "lastSeconds": "You cannot do battle during the last 30 seconds of the hour. Stand fast!"
+      "lastSeconds": "You cannot do battle during the last 30 seconds of the hour. Stand fast!",
+      "youNeedToHaveWeaponEquippedToCombatYouCanEquipInPlaza": "You need to have weapon equipped to combat! You can equip in Plaza."
     },
     "needStamina": "You need {staminaPerFight} stamina to do battle.",
     "costStamina": "Stamina Cost Per Fight",
@@ -615,7 +622,8 @@
       "lockedChar": "Selected character is locked in the raid already...",
       "lockedWeapon": "Selected weapon is locked in the raid already...",
       "notEnough": "Not enough stamina or durability...",
-      "whoops": "Whoops..."
+      "whoops": "Whoops...",
+      "youNeedToHaveWeaponEquippedToJoinYouCanEquipInPlaza": "You need to have weapon equipped to join! You can equip in Plaza."
     }
   },
   "market": {
@@ -1324,6 +1332,7 @@
     }
   },
   "pvp": {
+    "youNeedToHaveWeaponEquippedToEnterYouCanEquipInPlaza": "You need to have weapon equipped to enter! You can equip in Plaza.",
     "lastDefeated": "You were last defeated by: ",
     "kicked": "You were kicked from the arena!",
     "atLeastOneChar": "You need at least one character to enter PvP!",
@@ -1417,6 +1426,15 @@
     "tiered": "Tiered",
     "leaveOldArena": "Due to an improvement in the PvP Arena, you will be required to leave and re-enter. This is just a one time thing. All unclaimed rewards will still be claimable without time limit.",
     "untiered": "Free for All"
+  },
+  "equip": {
+    "equipped": "Equipped",
+    "noWeapon": "No weapon (Required for fights, raid, pvp!)",
+    "equipWeapon": "Click the icon to equip a weapon",
+    "unequipWeapon": "Click the icon to unequip the weapon",
+    "noShield": "No shield (Optional, for pvp)",
+    "equipShield": "Click the icon to equip a shield",
+    "unequipShield": "Click the icon to unequip the shield"
   },
   "app": {
     "cantView": "You can't currently view the app right now. You can try clearing LocalStorage to reset your settings.",
@@ -1553,11 +1571,6 @@
     "more": "More",
     "less": "Less",
     "unclaimed": "Unclaimed"
-  },
-  "banner": {
-    "linkText": "Join the Event",
-    "text": "BLADESGIVING IS LIVE ON BNB CHAIN! INCREASED REWARDS, EXCLUSIVE DAILY QUESTS, 3X GAME XP, AND MUCH MUCH MORE!!",
-    "link": "https://app.cryptoblades.io/?utm_source=sitebanner&utm_medium=navban&utm_campaign=bnb#%2F%3Fchain=BSC"
   },
   "updates": {
     "markAllAsRead": "Mark All As Read",

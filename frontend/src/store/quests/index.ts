@@ -669,6 +669,13 @@ const quests = {
 
       return await SimpleQuests.methods.submitProgressAmount(characterID, amountTimesDecimals.toString()).send(defaultCallOptions(rootState));
     },
+
+    async isWalletQuestAvailable({ rootState }: {rootState: IState}, {questID}: {questID: number}) {
+      const {SimpleQuests} = rootState.contracts();
+      if (!SimpleQuests || !rootState.defaultAccount) return;
+
+      return !+await SimpleQuests.methods.questCompletions(rootState.defaultAccount, questID).call(defaultCallOptions(rootState));
+    },
     async getWalletQuestProgress({ rootState }: {rootState: IState}, {questID}: {questID: number}) {
       const { SimpleQuests } = rootState.contracts();
       if (!SimpleQuests || !rootState.defaultAccount) return;

@@ -1,6 +1,7 @@
 
 import {
   ICharacter,
+  IPowerData,
   ITarget,
   IWeapon,
   WeaponTrait,
@@ -44,6 +45,25 @@ export function characterFromContract(id: string | number, data: string[]): ICha
   const race = data[9];
   const version = 0;
   return { id: +id, xp, level, trait, traitName, staminaTimestamp, head, arms, torso, legs, boots, race, version};
+}
+
+export function powerDataFromContract(data: any[]): IPowerData {
+  const pvePower = [];
+  for(let i = 0; i < 5; i++)
+    pvePower[i] = parseInt(data[0][i], 10);
+
+  const pvpTierPower = [];
+  for(let i = 0; i < 4; i++)
+    pvpTierPower[i] = parseInt(data[1][i], 10);
+
+  const pvpFfaPower = [];
+  for(let i = 0; i < 4; i++)
+    pvpFfaPower[i] = parseInt(data[2][i], 10);
+
+  const charTrait = data[4];
+  const wepTrait = data[5];
+  const shieldTrait = data[6];
+  return { pvePower, pvpTierPower, pvpFfaPower, charTrait, wepTrait, shieldTrait };
 }
 
 export function getStatPatternFromProperties(properties: number): number {

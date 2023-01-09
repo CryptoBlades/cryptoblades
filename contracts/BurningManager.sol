@@ -6,6 +6,7 @@ import "./Promos.sol";
 import "./util.sol";
 import "./Garrison.sol";
 import "./cryptoblades.sol";
+import "./EquipmentManager.sol";
 
 contract BurningManager is Initializable, AccessControlUpgradeable {
     using SafeMath for uint256;
@@ -34,6 +35,9 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
 
     Weapons public weapons;
     IPriceOracle public priceOracleSkillPerUsd;
+
+    mapping(uint256 => address) public links;
+    uint256 public constant LINK_EQUIPMENT_MANAGER = 1;
 
     function initialize(Characters _characters, Garrison _garrison, CryptoBlades _game)
         public
@@ -131,6 +135,8 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     // Characters burning
     function burnCharacterFromMarket(uint256 burnId) external burningEnabled {
         require(hasRole(BURNER_ROLE, msg.sender), 'Not burner');
+        require(EquipmentManager(links[LINK_EQUIPMENT_MANAGER])
+            .hasNothingEquipped(address(characters), burnId), 'Has equips');
         game.payContractTokenOnly(tx.origin, burnCharacterFee(burnId));
         uint256[] memory burnIds = new uint256[](1);
         burnIds[0] = burnId;
@@ -141,11 +147,15 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
     }
 
     function burnCharactersIntoCharacter(uint256[] memory burnIds, uint256 targetId) public isCharactersOwner(burnIds) burningEnabled {
+        require(EquipmentManager(links[LINK_EQUIPMENT_MANAGER])
+            .haveNothingEquipped(address(characters), burnIds), 'Have equips');
         game.payContractTokenOnly(msg.sender, burnCharactersFee(burnIds));
         characters.burnIntoCharacter(burnIds, targetId, vars[VAR_BURN_POWER_MULTIPLIER]);
     }
 
     function burnCharactersIntoSoul(uint256[] memory burnIds) public isCharactersOwner(burnIds) burningEnabled {
+        require(EquipmentManager(links[LINK_EQUIPMENT_MANAGER])
+            .haveNothingEquipped(address(characters), burnIds), 'Have equips');
         game.payContractTokenOnly(msg.sender, burnCharactersFee(burnIds));
         (uint256 genesisSoul, uint256 nonGenesisSoul) = characters.getSoulForBurns(burnIds);
         userVars[msg.sender][USERVAR_SOUL_SUPPLY] += genesisSoul.mul(vars[VAR_BURN_POWER_MULTIPLIER]).div(1e18);
@@ -251,6 +261,10 @@ contract BurningManager is Initializable, AccessControlUpgradeable {
 
     function setVar(uint256 varField, uint256 value) external restricted {
         vars[varField] = value;
+    }
+
+    function setLink(uint256 linkId, address linkAddress) external restricted {
+        links[linkId] = linkAddress;
     }
 
     function setBurnWeaponValue(uint256 cents) public restricted {

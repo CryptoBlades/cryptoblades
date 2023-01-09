@@ -11,7 +11,7 @@ module.exports = async function (deployer, network) {
     || network === 'avaxmainnet'
     || network === 'avaxmainnet-fork'
     || network === 'auroramainnet'
-    || network === 'skalemainnet' || network === 'coinexmainnet'
+    || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet'
     || network === 'kavamainnet') {
     const game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
 

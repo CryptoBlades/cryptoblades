@@ -1,4 +1,4 @@
-import { ICharacter } from './Character';
+import { ICharacter, IPowerData } from './Character';
 import { IWeapon } from './Weapon';
 import { Contracts } from './Contracts';
 import { Nft } from './Nft';
@@ -110,9 +110,13 @@ export interface IState {
   garrisonCharacters: Record<number, ICharacter>;
   characterStaminas: Record<number, number>;
   characterPowers: Record<number, number>;
+  characterEquippedPowers: Record<number, number>;
+  powerDatas: Record<number, IPowerData>;
   characterIsInArena: Record<number, boolean>;
   characterRenames: Record<number, string>;
   characterCosmetics: Record<number, string>;
+  characterWeapons: Record<number, number>;
+  characterShields: Record<number, number>;
 
   currentWeaponId: number | null;
   weapons: Record<number, IWeapon>;

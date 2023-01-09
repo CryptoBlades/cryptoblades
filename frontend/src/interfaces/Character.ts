@@ -15,6 +15,34 @@ export interface ICharacter {
   version: number;
 }
 
+export interface IPowerData {
+  pvePower: number[];
+  pvpTierPower: number[];
+  pvpFfaPower: number[];
+  charTrait: number;
+  wepTrait: number;
+  shieldTrait: number;
+}
+
+export interface IStoredPowerData {
+  0: Array<string>,
+  1: Array<string>
+  2: Array<string>
+  3: string,
+  4: string,
+  5: string,
+  6: string,
+  7: string,
+  charTrait: string
+  level: string
+  powerData: string
+  pvePower: Array<string>
+  pvpFfaPower: Array<string>
+  pvpTierPower: Array<string>
+  shieldTrait: string
+  wepTrait: string
+}
+
 export enum CharacterTrait {
   Fire = 0,
   Earth = 1,

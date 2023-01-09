@@ -1,5 +1,5 @@
 <template>
-<div class="w-100">
+<div class="w-100" v-if="questAvailable || questCanBeCompleted">
   <div v-if="(questTemplateType === QuestTemplateType.QUEST || questTemplateType === QuestTemplateType.PICKABLE) && character" class="quest-row"
         :class="character.status !== undefined && (character.status !== NftStatus.AVAILABLE) ? 'busy-quest-row' : ''"
         :key="`${componentKey}-${character.quest.id}`">
@@ -41,6 +41,8 @@ interface StoreMappedActions {
   getCharacterBusyStatus(payload: { characterId: string | number }): Promise<number>;
 
   getQuestTemplates(payload: { tier: number }): Promise<Quest[]>;
+
+  isWalletQuestAvailable(payload: { questID: number }): Promise<boolean>;
 }
 
 interface StoreMappedGetters {
@@ -51,6 +53,7 @@ interface Data {
   isLoading: boolean;
   character?: Nft;
   componentKey: number;
+  questAvailable: boolean;
 }
 
 export default Vue.extend({
@@ -98,6 +101,7 @@ export default Vue.extend({
       NftStatus,
       QuestTemplateType,
       componentKey: 0,
+      questAvailable: false,
     } as Data;
   },
 
@@ -111,6 +115,9 @@ export default Vue.extend({
     hasStateChanged(): boolean {
       return this.defaultAccount + this.currentNetworkId !== this.defaultAccountProp + this.currentNetworkIdProp;
     },
+    questCanBeCompleted(): boolean {
+      return this.quest.progress >= this.quest.requirementAmount && this.quest.requirementAmount !== 0;
+    },
   },
 
   methods: {
@@ -118,6 +125,7 @@ export default Vue.extend({
       'getCharacterQuestData',
       'getCharacterBusyStatus',
       'getQuestTemplates',
+      'isWalletQuestAvailable',
     ]) as StoreMappedActions,
     async onRefreshQuestData() {
       // if state has changed, trigger full page reload.
@@ -137,9 +145,11 @@ export default Vue.extend({
         //update row character-quest
         if(this.character && this.questTemplateType === QuestTemplateType.QUEST){
           this.character.quest = await this.getCharacterQuestData({characterId: this.characterId});
+          this.questAvailable = true;
         }
         //update row wallet-quest
         else if(!this.character && this.questTemplateType === QuestTemplateType.WALLET){
+          this.questAvailable = await this.isWalletQuestAvailable({questID: this.quest.id});
           const questUpdate = (await this.getQuestTemplates({tier: this.walletQuestTier + 30})).find((x) => x.id === this.quest.id) as Quest;
           this.quest.progress = questUpdate.progress;
         }
