@@ -70,9 +70,16 @@
           <h3 class="confirmation-title">
              <b-icon class="mr-2" icon="exclamation-circle" variant="danger"/>{{$t('bridge.warning')}}
           </h3>
-          <span>{{$t('bridge.unclaimedRemains')}}</span>
+          <div class="text-center burn-content mt-3">
+            <b-icon icon="exclamation-circle" variant="warning" />
+            {{ $t('bridge.unclaimedRemains')}}
+          </div>
+          <div class="text-center burn-content">
+            <b-icon icon="exclamation-circle" variant="warning" />
+            {{ $t('bridge.cannotBridgeEquippedCharacters')}}
+          </div>
           <div class="footer-btn mb-4">
-            <button class="close-btn"   @click="transferToStorage()">{{$t('blacksmith.confirm')}}</button>
+            <button class="close-btn"  @click="transferToStorage()">{{$t('blacksmith.confirm')}}</button>
           </div>
           <div class="footer-close" @click="$refs['character-warning-modal'].hide()">
             <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
