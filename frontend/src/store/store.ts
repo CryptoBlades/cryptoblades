@@ -36,6 +36,9 @@ import combat from './combat';
 const transakAPIURL = process.env.VUE_APP_TRANSAK_API_URL || 'https://staging-global.transak.com';
 const transakAPIKey = process.env.VUE_APP_TRANSAK_API_KEY || '90167697-74a7-45f3-89da-c24d32b9606c';
 
+const NFTVAR_EQUIPMENT_VERSION = 4;
+const VAR_EQUIPMENT_VERSION= 1;
+
 const defaultCallOptions = (state: IState) => ({ from: state.defaultAccount });
 
 interface SetEventSubscriptionsPayload {
@@ -109,6 +112,7 @@ export default new Vuex.Store<IState>({
     garrisonCharacters: {},
     characterStaminas: {},
     characterPowers: {},
+    characterEquippedPowers: {},
     powerDatas: {},
     characterIsInArena: {},
     characterRenames: {},
@@ -165,6 +169,12 @@ export default new Vuex.Store<IState>({
     getCharacterPower(state: IState) {
       return (characterId: number) => {
         return state.characterPowers[characterId];
+      };
+    },
+
+    getCharacterEquippedPower(state: IState) {
+      return (characterId: number) => {
+        return state.characterEquippedPowers[characterId];
       };
     },
 
@@ -670,6 +680,9 @@ export default new Vuex.Store<IState>({
     },
     updateCharacterPower(state: IState, { characterId, power }) {
       Vue.set(state.characterPowers, characterId, +power);
+    },
+    updateCharacterEquippedPower(state: IState, { characterId, power }) {
+      Vue.set(state.characterEquippedPowers, characterId, +power);
     },
     updatePowerData(state: IState, { characterId, powerData }) {
       Vue.set(state.powerDatas, characterId, powerData);
@@ -2899,7 +2912,6 @@ export default new Vuex.Store<IState>({
     async getShield({ state }, shieldId) {
       const { Shields } = state.contracts();
       if (!Shields || !state.defaultAccount) return;
-      shieldId = 0; // TEMP
       return await Shields.methods.get(`${shieldId}`).call({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
 
@@ -2909,7 +2921,46 @@ export default new Vuex.Store<IState>({
 
       return await Characters.methods.get(`${characterId}`).call({from: state.defaultAccount, gasPrice: getGasPrice()});
     },
+    async getEquippedCharacterPower({state}, characterId) {
+      const { EquipmentManager } = state.contracts();
+      if (!EquipmentManager || !state.defaultAccount) return;
 
+      const powerData = await EquipmentManager.methods.getPowerData(characterId).call({from: state.defaultAccount, gasPrice: getGasPrice()});
+
+      return Number((BigInt(powerData || 0) >> BigInt(96)) & BigInt(0xFFFFFF));
+    },
+    async getEquippedCharacterPowerStoredPowerData({state}, characterId) {
+      const { EquipmentManager, Characters } = state.contracts();
+      if (!EquipmentManager || !Characters || !state.defaultAccount) return;
+
+      const storedPowerData = await EquipmentManager.methods.getStoredPowerData(characterId).call({from: state.defaultAccount, gasPrice: getGasPrice()});
+      return Number((BigInt(storedPowerData[7] || 0) >> BigInt(96)) & BigInt(0xFFFFFF));
+    },
+    async getCharacterEquipmentCurrentVersion({state}, charID) {
+      const { Characters } = state.contracts();
+      if (!Characters || !state.defaultAccount) return;
+
+      return await Characters.methods.nftVars(charID, NFTVAR_EQUIPMENT_VERSION).call({from: state.defaultAccount, gasPrice: getGasPrice()});
+    },
+    async getEquipmentCurrentVersion({state}) {
+      const { Characters } = state.contracts();
+      if (!Characters || !state.defaultAccount) return;
+
+      return await Characters.methods.vars(VAR_EQUIPMENT_VERSION).call({from: state.defaultAccount, gasPrice: getGasPrice()});
+    },
+    async getEquippedCharacterPowerStoredData({state}, characterId) {
+      const { EquipmentManager, Characters } = state.contracts();
+      if (!EquipmentManager || !Characters || !state.defaultAccount) return;
+
+      const storedPowerData = await EquipmentManager.methods.getStoredPowerData(characterId).call({from: state.defaultAccount, gasPrice: getGasPrice()});
+      return storedPowerData;
+    },
+    async recalculateCharacterEquipmentPower({state}, characterId) {
+      const { EquipmentManager, Characters } = state.contracts();
+      if (!EquipmentManager || !Characters || !state.defaultAccount) return;
+
+      return await EquipmentManager.methods.recalculate(Characters.options.address, characterId).send({from: state.defaultAccount, gasPrice: getGasPrice()});
+    },
     async getEquippedItem({ state }, {equipperAddress, equipperId, slot}) {
       const { EquipmentManager } = state.contracts();
       if(!EquipmentManager || !state.defaultAccount) return;
