@@ -142,6 +142,13 @@ const treasury = {
     async fetchPartnerProject({ rootState, commit }: {rootState: IState, commit: Commit}, id: number | string) {
       const { Treasury } = rootState.contracts();
       if(!Treasury || !rootState.defaultAccount) return;
+
+      //exclude outdated Polygon treasury
+      if(+id === 12 || +id === 13 || +id === 14) return;
+
+      //exclude outdated Aurora treasury
+      if(+id === 5 || +id === 6 || +id === 7) return;
+
       const partnerProjectRaw = await Treasury.methods.partneredProjects(id).call(defaultCallOptions(rootState));
       const [
         isValor,
