@@ -17,7 +17,7 @@ library Common {
         int128 weaponMultiplier,
         uint24 bonusPower
     ) internal pure returns(uint24) {
-        return uint24(weaponMultiplier.mulu(basePower).mulu(bonusPower.div(10000).add(1)));
+        return uint24(weaponMultiplier.mulu(basePower).mulu(bonusPower.divu(10000).add(1)));
     }
 
     function getBonusRankingPoints(uint256 weakerPower, uint256 strongerPower) internal pure returns (uint256) {
