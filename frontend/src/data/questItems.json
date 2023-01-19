@@ -83,6 +83,12 @@
       "description": "Glory Pass is an NFT specially designed by BNB Chain for our Football Fiesta campaign. Holders can use it to participate in the match predictions and access benefits provided by our ecosystem partners and even redeem their NFT/game vouchers to play games.",
       "image": "glorypass.png",
       "website": "https://galxe.com/bnbchain/campaign/GCRTUUwuVg"
+    },
+    "0x9FeF16c2Fe0dCB261cfD39e0B618c69A73feB3FE": {
+      "name": "Europa SKL",
+      "description": "The SKALE token (SKL) is a hybrid-use token representing the right to work in the network as a validator, stake as a delegator, or access a share of its resources as a developer by deploying and renting a SKALE chain for a set period.",
+      "image": "europa_skl.png",
+      "website": "https://skale.space/"
     }
   }
 }
