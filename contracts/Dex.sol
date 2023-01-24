@@ -31,7 +31,11 @@ contract Dex is Initializable, AccessControlUpgradeable {
 
     event TokenPairSwapped(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
     event TokenPairAdded(uint id, address indexed token1, address indexed token2);
+    event TokenPairRemoved(uint id, address indexed token1, address indexed token2);
     event LiquidityAdded(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
+    event LiquiditySet(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
+    event LiquidityTaken(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
+    event ERC20Withdrawal(address indexed token, uint amount);
 
     function initialize() virtual public initializer {
         __AccessControl_init_unchained();
@@ -122,6 +126,21 @@ contract Dex is Initializable, AccessControlUpgradeable {
         emit TokenPairAdded(id, token1, token2);
     }
 
+    function addPairWithoutLiquidity(address tokenA, address tokenB) external restricted {
+        (address token1, address token2) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+        uint id = getTokenPairId(token1, token2);
+        require(tokenPairs[id].token1 == address(0) && tokenPairs[id].token2 == address(0), "Pair already exists");
+        tokenPairs[id] = TokenPair(token1, 0, token2, 0);
+        emit TokenPairAdded(id, token1, token2);
+    }
+
+    function deletePair(address tokenA, address tokenB) external restricted {
+        (address token1, address token2) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+        uint id = getTokenPairId(token1, token2);
+        require(tokenPairs[id].token1 != address(0) && tokenPairs[id].token2 != address(0), "Pair doesn't exist");
+        delete tokenPairs[id];
+        emit TokenPairRemoved(id, token1, token2);
+    }
 
     function addLiquidity(address tokenA, uint amountA, address tokenB, uint amountB) external restricted {
         (address token1, uint amount1, address token2, uint amount2) = tokenA < tokenB ? (tokenA, amountA, tokenB, amountB) : (tokenB, amountB, tokenA, amountA);
@@ -135,6 +154,35 @@ contract Dex is Initializable, AccessControlUpgradeable {
         pair.token2Amount += amount2;
         tokenPairs[id] = pair;
         emit LiquidityAdded(token1, amount1, token2, amount2);
+    }
+
+    function setLiquidityInWei(address tokenA, uint amountA, address tokenB, uint amountB) external restricted {
+        (address token1, uint amount1, address token2, uint amount2) = tokenA < tokenB ? (tokenA, amountA, tokenB, amountB) : (tokenB, amountB, tokenA, amountA);
+        uint id = getTokenPairId(token1, token2);
+        TokenPair memory pair = tokenPairs[id];
+        require(pair.token1 == token1 && pair.token2 == token2, "Invalid pair");
+        pair.token1Amount = amount1;
+        pair.token2Amount = amount2;
+        tokenPairs[id] = pair;
+        emit LiquiditySet(token1, amount1, token2, amount2);
+    }
+
+    function takeLiquidityInWei(address tokenA, uint amountA, address tokenB, uint amountB) external restricted {
+        (address token1, uint amount1, address token2, uint amount2) = tokenA < tokenB ? (tokenA, amountA, tokenB, amountB) : (tokenB, amountB, tokenA, amountA);
+        uint id = getTokenPairId(token1, token2);
+        TokenPair memory pair = tokenPairs[id];
+        require(pair.token1 == token1 && pair.token2 == token2, "Invalid pair");
+        IERC20(token1).transfer(msg.sender, amount1);
+        IERC20(token2).transfer(msg.sender, amount2);
+        pair.token1Amount = pair.token1Amount.sub(amount1);
+        pair.token2Amount = pair.token2Amount.sub(amount2);
+        tokenPairs[id] = pair;
+        emit LiquidityTaken(token1, amount1, token2, amount2);
+    }
+
+    function withdrawERC20Wei(address token, uint256 amount) external restricted {
+        IERC20(token).transfer(msg.sender, amount);
+        emit ERC20Withdrawal(token, amount);
     }
 
     function collectFees(address token) external restricted {
