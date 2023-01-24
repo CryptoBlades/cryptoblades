@@ -3100,7 +3100,7 @@
     "events": {},
     "links": {},
     "address": "0x0577d46FE5799F9890FA04B6Df563fEA5F7B2663",
-    "transactionHash": "0x2834150907f2087734ceefa54cc9b5cef9950cc0d0152e33255ab3c3509bc9e2"
+    "transactionHash": "0x2b18563a3d9a30c563db91c7ad0ff1400c73cf704c876942c9cde75b5d903fe7"
   },
   "build/contracts/EquipmentManager.json": {
     "events": {
@@ -7593,7 +7593,7 @@
     "events": {},
     "links": {},
     "address": "0xe676452f2C650F80C3D282E723112aA67bE617c7",
-    "transactionHash": "0xf4de8ee09ee10bac17e59c714419e5fc9d10c6dab559cc888d7cd36b55231d88"
+    "transactionHash": "0xd2dd287793f677f6bf4ba420502a3910b3a99ff0ef25e779093c505859ea4221"
   },
   "build/contracts/ValorERC20BridgeProxyContract.json": {
     "events": {},
