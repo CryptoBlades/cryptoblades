@@ -46,6 +46,14 @@ contract('Characters', accounts => {
   });
 
   describe('gainXp', () => {
+
+    beforeEach(async () => {
+      await characters.mint(accounts[0], '123');
+
+      const events = await characters.getPastEvents();
+      assertEventEmitted(events, 'NewCharacter', 0);
+    });
+  
     it('should work', async () => {
       await characters.mint(accounts[0], '123');
 
@@ -60,6 +68,39 @@ contract('Characters', accounts => {
 
       assert.strictEqual(lv.toString(), '23');
       assert.strictEqual(xp.toString(), '22');
+    });
+
+    it('should level up from 1-55', async () => {
+      await characters.gainXp(0, 15000);
+
+      const [lv, xp] = await Promise.all([
+        characters.getLevel(0), characters.getXp(0)
+      ]);
+
+      assert.strictEqual(lv.toString(), '55');
+      assert.strictEqual(xp.toString(), '822');
+    });
+
+    it('should level up from 20-56', async () => {
+      await characters.gainXp(0, 15000);
+
+      const [lv, xp] = await Promise.all([
+        characters.getLevel(0), characters.getXp(0)
+      ]);
+
+      assert.strictEqual(lv.toString(), '56');
+      assert.strictEqual(xp.toString(), '606');
+    });
+
+    it('should level up from 1-255', async () => {
+      await characters.gainXp(0, 2347194);
+
+      const [lv, xp] = await Promise.all([
+        characters.getLevel(0), characters.getXp(0)
+      ]);
+
+      assert.strictEqual(lv.toString(), '255');
+      assert.strictEqual(xp.toString(), '0');
     });
   });
 
