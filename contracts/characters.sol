@@ -360,10 +360,10 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
         }
         
     }
-    function calculateCumSum(uint level, uint n, uint currentExp) internal view returns(uint256){
+    function calculateCumSum(uint level, uint n) internal view returns(uint256){
         uint innerPart = n > 28 ? 3*level*level + 935 + 3*level*(n - 28) + n*n - 42*n  : 3*level*level + 935 - 3*level*(28 - n) + n*n - 42*n ;
         uint cumSum = (n*innerPart)/6;
-        return cumSum + currentExp;
+        return cumSum;
     }
     
     function _mergeSearch(uint256 id, uint256 exp) public returns(uint16){
@@ -373,21 +373,22 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             uint16 upperBound = uint16(exp/(((level-19)*(level-19) + 11*(level-19) + 146)/2)); 
             uint16 n = upperBound;
             uint16 currentExp = char.xp;
-            uint256 cumSum = calculateCumSum(level, upperBound, currentExp);
-            while(cumSum > exp){
+            uint256 cumSum = calculateCumSum(level, upperBound);
+            while(cumSum > exp - currentExp){
                 n = n/2;
-                cumSum = calculateCumSum(level, n, currentExp);
+                cumSum = calculateCumSum(level, n);
             }
             uint16 i;
             for(i=n; i < upperBound; i++){
-                cumSum = calculateCumSum(level, i, currentExp);
-                if(cumSum > exp || level + i > 255){
+                cumSum = calculateCumSum(level, i);
+                if(cumSum > exp - currentExp || level + i > 255){
+                    console.log("It's TOO BIG");
                     i = i - 1;
                     break;
                 }
             }
-            cumSum = calculateCumSum(level, i, currentExp);
-            uint16 exceedingXp = uint16(exp - cumSum);
+            cumSum = calculateCumSum(level, i);
+            uint16 exceedingXp = uint16(exp - cumSum + currentExp);
             char.level += uint8(i);
             char.level == 255 ? char.xp = 0 : char.xp = exceedingXp;
             emit LevelUp(ownerOf(id), id, char.level);
