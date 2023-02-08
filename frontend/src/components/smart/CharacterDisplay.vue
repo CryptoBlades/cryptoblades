@@ -98,8 +98,8 @@ import {Accessors} from 'vue/types/options';
 interface Data {
   isLoading: boolean;
   character?: Nft;
-  charOnRaid: string [],
-  sideBarBlacksmith: []
+  charOnRaid: string[],
+  sideBarBlacksmith: string[]
 }
 
 interface RaidMappedActions {
@@ -127,8 +127,9 @@ export default Vue.extend({
   props: ['toggled', 'currentPath'],
   watch: {
     currentPath(newVal) {
-      if(newVal === '/blacksmith')
-        this.setActiveTab(this.sideBarBlacksmith.at(0));
+      if(newVal === '/blacksmith'){
+        this.setActiveTab(this.sideBarBlacksmith[0]);
+      }
     }
   },
   computed: {
@@ -269,10 +270,7 @@ export default Vue.extend({
     },
     setActiveTab(tab: any) {
       (this as any).$router.push({ path: 'blacksmith', query: { tab: tab.route } }).catch(() => {});
-      this.sideBarBlacksmith.forEach((sidebarTab: {
-        id: any;
-        status: string;
-      }) => {
+      this.sideBarBlacksmith.forEach((sidebarTab: any) => {
         if (sidebarTab.id === tab.id)
           sidebarTab.status = 'active';
         else
