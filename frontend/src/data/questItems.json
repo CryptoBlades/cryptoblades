@@ -95,6 +95,12 @@
       "description": "MTRG is the governance token of the Meter system. Holders of MTRG can stake MTRG tokens directly as a PoS validator or delegate to other PoS validators to approve transactions and earn MTR, earn various fees paid in MTR from the on-chain auction and on-chain/cross-chain transactions, stake MTRG tokens in future DeFi apps created by the Meter team, and participate in governance of the Meter system.",
       "image": "mtrg.png",
       "website": "https://meter.io/"
+    },
+    "0xAF495945c8d8D203675a1Bc7fd20EC0C0f1148d5": {
+      "name": "CryptoBlades Character",
+      "description": "CryptoBlades Characters (CBC) are the titular heroes & utility NFTs of the longest standing sustainable play-to-earn game, CryptoBlades. These NFTs, along with the swords they wield, are the core component of earning in CB.",
+      "image": "character.png",
+      "website": "https://www.cryptoblades.io/"
     }
   }
 }
