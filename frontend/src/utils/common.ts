@@ -144,7 +144,7 @@ export const currentChainSupportsDex = () => {
 
 export const currentChainSupportsDrawbridge = () => {
   const currentChain = localStorage.getItem('currentChain') ?? '';
-  return currentChain === 'SKALE' || currentChain === 'BNB';
+  return currentChain === 'SKALE' || currentChain === 'BNB' || currentChain === 'METER';
 };
 
 export const getTimeRemaining = (end: string) => {
