@@ -70,5 +70,14 @@ export default function createRouter() {
     router.addRoute(pvpRoute);
   }
 
+  router.beforeEach((to, from, next) => {
+    //preserve chain query params
+    if (from.query.chain && !to.query.chain) {
+      next({path: to.path, query: {...to.query, chain: from.query.chain}});
+    }
+
+    next();
+  });
+
   return router;
 }

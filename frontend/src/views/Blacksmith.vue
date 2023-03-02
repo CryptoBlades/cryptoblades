@@ -820,7 +820,6 @@ export default Vue.extend({
   },
 
   async mounted(){
-    (this as any).$router.push({ path: 'blacksmith', query: { tab: 'weapon' }}).catch(()=>{});
     Events.$on('forge-weapon', (id: number) =>{
       if(id === 0){
         this.onClickForge(id);

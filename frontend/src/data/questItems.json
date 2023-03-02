@@ -83,6 +83,24 @@
       "description": "Glory Pass is an NFT specially designed by BNB Chain for our Football Fiesta campaign. Holders can use it to participate in the match predictions and access benefits provided by our ecosystem partners and even redeem their NFT/game vouchers to play games.",
       "image": "glorypass.png",
       "website": "https://galxe.com/bnbchain/campaign/GCRTUUwuVg"
+    },
+    "0x9FeF16c2Fe0dCB261cfD39e0B618c69A73feB3FE": {
+      "name": "Europa SKL",
+      "description": "The SKALE token (SKL) is a hybrid-use token representing the right to work in the network as a validator, stake as a delegator, or access a share of its resources as a developer by deploying and renting a SKALE chain for a set period.",
+      "image": "europa_skl.png",
+      "website": "https://skale.space/"
+    },
+    "0x228ebbee999c6a7ad74a6130e81b12f9fe237ba3": {
+      "name": "MTRG",
+      "description": "MTRG is the governance token of the Meter system. Holders of MTRG can stake MTRG tokens directly as a PoS validator or delegate to other PoS validators to approve transactions and earn MTR, earn various fees paid in MTR from the on-chain auction and on-chain/cross-chain transactions, stake MTRG tokens in future DeFi apps created by the Meter team, and participate in governance of the Meter system.",
+      "image": "mtrg.png",
+      "website": "https://meter.io/"
+    },
+    "0xAF495945c8d8D203675a1Bc7fd20EC0C0f1148d5": {
+      "name": "CryptoBlades Character",
+      "description": "CryptoBlades Characters (CBC) are the titular heroes & utility NFTs of the longest standing sustainable play-to-earn game, CryptoBlades. These NFTs, along with the swords they wield, are the core component of earning in CB.",
+      "image": "character.png",
+      "website": "https://www.cryptoblades.io/"
     }
   }
 }

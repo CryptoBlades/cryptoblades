@@ -11,7 +11,7 @@ module.exports = async function (deployer, network, accounts) {
   || network === 'avaxmainnet'
   || network === 'avaxmainnet-fork'
   || network === 'auroramainnet'
-  || network === 'skalemainnet' || network === 'coinexmainnet'
+  || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet'
   || network === 'kavamainnet') {
       const game = await upgradeProxy(CryptoBlades.address, CryptoBlades, { deployer });
 
@@ -50,6 +50,9 @@ module.exports = async function (deployer, network, accounts) {
       }
       else if(network === 'kavamainnet') {
         await tokensManager.setTokenPrice(207);
+      }
+      else if(network === 'metermainnet') {
+        await tokensManager.setTokenPrice(66);
       }
 
       await tokensManager.setSkillTokenPrice(skillTokenPrice);
