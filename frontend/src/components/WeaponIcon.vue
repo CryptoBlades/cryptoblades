@@ -5,13 +5,10 @@
     @mouseover="hover = !isMobile() || true"
     @mouseleave="hover = !isMobile()"
   >
-    <div class="loading-container" v-if="!allLoaded">
-      <i class="fas fa-spinner fa-spin"></i>
-    </div>
 
     <div class="glow-container" ref="el" :class="selected ? 'selected-border' : ['glow-' + (weapon.stars || 0)]">
       <div class="animation" v-bind:class="showCosmetics ? 'weapon-animation-applied-' + getWeaponCosmetic(weapon.id) : ''"/>
-      <img v-if="showPlaceholder" v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
+      <img v-bind:class="showCosmetics ? 'weapon-cosmetic-applied-' + getWeaponCosmetic(weapon.id) : ''"
         class="placeholder" :src="weapon.weaponType > 0 ? specialWeaponArts[weapon.weaponType] : getWeaponArt(weapon)"/>
 
       <div class="d-flex flex-column align-items-end stars-flex" :class="!hasNftOptions ? 'stars-flex-extend' : ''">
@@ -77,10 +74,6 @@
 
 <script>
 import { getWeaponArt } from '../weapon-arts-placeholder';
-import * as Three from 'three';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
-import swordspecs from '../assets/swordspecs.json';
-import maskChroma from '../shaders/maskchroma_frag.glsl.js';
 import '@/mixins/general';
 import { Stat1PercentForChar,
   Stat2PercentForChar,
@@ -90,26 +83,6 @@ import Events from '@/events';
 
 import { mapGetters, mapState } from 'vuex';
 import { getCleanName } from '../rename-censor';
-
-const bladeCount = 24;
-const crossGuardCount = 24;
-const gripCount = 24;
-const pommelCount = 24;
-const modelScale = 1/100;
-const modelRotationX = -Math.PI / 2;
-const modelRotationY = 0;
-const modelRotationZ = 0;
-
-const rColor = new Three.Color(0x7A7A7A);
-const gColor = new Three.Color(0x413F41);
-const bColor = new Three.Color(0xAF5822);
-const white = new Three.Color(0xFFFFFF);
-
-function transformModel(model, y) {
-  model.scale.set( modelScale,modelScale,modelScale );
-  model.rotation.set(modelRotationX, modelRotationY, modelRotationZ);
-  model.position.y = y;
-}
 
 export default {
   props: ['weapon', 'favorite', 'selected', 'hasNftOptions'],
@@ -213,202 +186,12 @@ export default {
   data() {
     return {
       hover: false,
-      allLoaded: false,
-      allLoadStarted: false,
-      camera: null,
-      scene: null,
-      renderer: null,
-      baseMaterial: null,
-      loadCount: 0,
-      loadCountTotal: 0,
-      pommel: null,
-      grip: null,
-      crossGuard: null,
-      blade: null,
-      group: null,
-      bladeMaskTexture: null,
-      bladeNormalTexture: null,
-      bladeAOTexture: null,
-      crossGuardNormalTexture: null,
-      crossGuardAOTexture: null,
-      gripMaskTexture: null,
-      gripNormalTexture: null,
-      gripAOTexture: null,
-      pommelNormalTexture: null,
-      pommelAOTexture: null,
-      showPlaceholder: false,
       showCosmetics: true,
     };
   },
 
   methods: {
     getWeaponArt,
-    init() {
-      const container = this.$refs.el;
-
-      this.camera = new Three.PerspectiveCamera(70, container.clientWidth/container.clientHeight, 0.01, 1000);
-      this.camera.position.z = 0.6;//1.15625;
-      this.camera.rotation.z = Math.PI / 4;
-
-      this.scene = new Three.Scene();
-
-      const directionalLight = new Three.DirectionalLight( 0xffffff, 0.75 );
-      directionalLight.position.x = -0.375;
-      directionalLight.position.y = 1.375;
-      directionalLight.position.z = 2.0;
-      this.scene.add( directionalLight );
-
-      const directionalLight2 = new Three.DirectionalLight( 0xffffff, 0.375 );
-      directionalLight2.position.x = -0.075;
-      directionalLight2.position.y = -1.375;
-      directionalLight2.position.z = 2.0;
-      this.scene.add( directionalLight2 );
-
-      this.renderer = new Three.WebGLRenderer({antialias: true, alpha:true});
-      this.renderer.setPixelRatio( window.devicePixelRatio );
-      this.renderer.setClearColor( 0x000000, 0 );
-      this.renderer.setSize(container.clientWidth, container.clientHeight);
-      this.renderer.getContext().canvas.addEventListener('webglcontextlost', (event) => {
-        event.preventDefault();
-        this.setupModel();
-      }, false);
-
-      container.appendChild(this.renderer.domElement);
-
-      if(this.baseMaterial === undefined || this.baseMaterial === null) {
-        this.baseMaterial = new Three.MeshPhysicalMaterial();
-        this.baseMaterial.aoMapIntensity = 0.375;
-        this.baseMaterial.envMapIntensity = 1.0;
-        this.baseMaterial.metalness = 1.0; // non-1 allows ambient lights in
-        this.baseMaterial.roughness = 0.5;
-
-        const cmLoader = new Three.CubeTextureLoader();
-        cmLoader.load( [
-          'textures/cubemap/001_studioHDRI.hdr_Rig.png', 'textures/cubemap/001_studioHDRI.hdr_Lef.png',
-          'textures/cubemap/001_studioHDRI.hdr_Top.png', 'textures/cubemap/001_studioHDRI.hdr_Bot.png',
-          'textures/cubemap/001_studioHDRI.hdr_Fro.png', 'textures/cubemap/001_studioHDRI.hdr_Bak.png'
-        ], (cube) => {
-          this.baseMaterial.envMap = cube;
-          this.loadingProgress();
-        });
-      }
-
-      this.setupModel();
-    },
-    setupModel() {
-      this.allLoaded = false;
-      this.allLoadStarted = false;
-      this.loadCount = 0;
-      this.loadCountTotal = 15;
-
-      const blade = (this.weapon.blade % bladeCount)+1;
-      const crossGuard = (this.weapon.crossguard % crossGuardCount)+1;
-      const grip = (this.weapon.grip % gripCount)+1;
-      const pommel = (this.weapon.pommel % pommelCount)+1;
-
-      // i fucked up, their height is on Z axis (due to their original -90x rotation)
-      const totalHeight = swordspecs['BLADE_'+blade].sizeZ
-        + swordspecs['CROSSGUARD_'+crossGuard].sizeZ
-        + swordspecs['GRIP_'+crossGuard].sizeZ
-        + swordspecs['POMMEL_'+crossGuard].sizeZ;
-
-      this.camera.position.y = ((totalHeight / 2)
-        - swordspecs['POMMEL_'+pommel].sizeZ
-        + swordspecs['GRIP_'+grip].bottom) * (1.0/totalHeight);
-
-      this.group = new Three.Group();
-      this.group.scale.set(1.0/totalHeight,1.0/totalHeight,1.0/totalHeight);
-      this.scene.add(this.group);
-
-      const modelLoader = new FBXLoader();
-      const textureLoader = new Three.TextureLoader();
-
-      this.bladeMaskTexture = textureLoader.load( 'textures/swords/blades/Txt_Blade_' + blade + '_Mask.png' , this.loadingProgress());
-      this.bladeNormalTexture = textureLoader.load( 'textures/swords/blades/Txt_Blade_' + blade + '_Normal.png' , this.loadingProgress());
-      this.bladeAOTexture = textureLoader.load( 'textures/swords/blades/Txt_Blade_' + blade + '_AO.png' , this.loadingProgress());
-
-      this.crossGuardNormalTexture = textureLoader.load( 'textures/swords/crossguards/Txt_CrossGuard_' + crossGuard + '_Normal.png', this.loadingProgress());
-      this.crossGuardAOTexture = textureLoader.load( 'textures/swords/crossguards/Txt_CrossGuard_' + crossGuard + '_AO.png', this.loadingProgress());
-
-      this.gripMaskTexture = textureLoader.load( 'textures/swords/grips/Txt_Grip_' + grip + '_Mask.png', this.loadingProgress());
-      this.gripNormalTexture = textureLoader.load( 'textures/swords/grips/Txt_Grip_' + grip + '_Normal.png', this.loadingProgress());
-      this.gripAOTexture = textureLoader.load( 'textures/swords/grips/Txt_Grip_' + grip + '_AO.png', this.loadingProgress());
-
-      this.pommelNormalTexture = textureLoader.load( 'textures/swords/pommels/Txt_Pommel_' + pommel + '_Normal.png', this.loadingProgress());
-      this.pommelAOTexture = textureLoader.load( 'textures/swords/pommels/Txt_Pommel_' + pommel + '_AO.png', this.loadingProgress());
-
-      modelLoader.load('models/blades/Blade_' + blade + '.FBX', model => {
-
-        transformModel(model, swordspecs['GRIP_'+grip].top
-          + (swordspecs['CROSSGUARD_'+crossGuard].top - swordspecs['CROSSGUARD_'+crossGuard].bottom));
-        this.blade = model;
-        this.group.add(model);
-        this.loadingProgress();
-
-      }, undefined, function ( error ) {
-        console.error(error);
-      } );
-
-      modelLoader.load('models/crossguards/CrossGuard_' + crossGuard + '.FBX', model => {
-
-        transformModel(model, swordspecs['GRIP_'+grip].top);
-        this.crossGuard = model;
-        this.group.add(model);
-        this.loadingProgress();
-
-      }, undefined, function ( error ) {
-        console.error(error);
-      } );
-
-      modelLoader.load('models/grips/Grip_' + grip + '.FBX', model => {
-
-        transformModel(model, 0);// grip stays at origin 0,0
-        this.grip = model;
-        this.group.add(model);
-        this.loadingProgress();
-
-      }, undefined, function ( error ) {
-        console.error(error);
-      } );
-
-      modelLoader.load('models/pommels/Pommel_' + pommel + '.FBX', model => {
-
-        transformModel(model, swordspecs['GRIP_'+grip].bottom);
-        this.pommel = model;
-        this.group.add(model);
-        this.loadingProgress();
-
-      }, undefined, function ( error ) {
-        console.error(error);
-      } );
-
-      this.allLoadStarted = true;
-    },
-
-    patchShader(material, rc, gc, bc) {
-      material.userData.maskR = { value: rc };
-      material.userData.maskG = { value: gc };
-      material.userData.maskB = { value: bc };
-      material.onBeforeCompile = shader => {
-        shader.uniforms.maskR = material.userData.maskR;
-        shader.uniforms.maskG = material.userData.maskG;
-        shader.uniforms.maskB = material.userData.maskB;
-        shader.fragmentShader = 'uniform vec3 maskR;\nuniform vec3 maskG;\nuniform vec3 maskB;\n' + shader.fragmentShader;
-        shader.fragmentShader =
-          shader.fragmentShader.replace(
-            '#include <map_fragment>',
-            maskChroma
-          );
-      };
-      if(this.allLoaded) // fallback, doesn't always work
-        this.renderer.render(this.scene, this.camera);
-    },
-    loadingProgress() {
-      if(++this.loadCount >= this.loadCountTotal && this.allLoadStarted) {
-        this.loadingFinished();
-      }
-    },
-
     setRarity(rarity){
       if(rarity === 0) return 'Normal';
       if(rarity === 1) return 'Rare';
@@ -416,52 +199,6 @@ export default {
       if(rarity === 3) return 'Legendary';
       if(rarity === 4) return 'Mythical';
     },
-    loadingFinished() {
-
-      const bladeMaterial = this.baseMaterial.clone();
-      const crossGuardMaterial = this.baseMaterial.clone();
-      const gripMaterial = this.baseMaterial.clone();
-      const pommelMaterial = this.baseMaterial.clone();
-      this.patchShader(bladeMaterial, rColor, gColor, bColor);
-      this.patchShader(crossGuardMaterial, rColor, white, white);
-      this.patchShader(gripMaterial, rColor, gColor, bColor);
-      this.patchShader(pommelMaterial, rColor, white, white);
-
-      bladeMaterial.map = this.bladeMaskTexture;
-      bladeMaterial.normalMap = this.bladeNormalTexture;
-      bladeMaterial.aoMap = this.bladeAOTexture;
-      this.blade.traverse(child => { if(child.isMesh) { child.material = bladeMaterial; } });
-
-      crossGuardMaterial.normalMap = this.crossGuardNormalTexture;
-      crossGuardMaterial.aoMap = this.crossGuardAOTexture;
-      this.crossGuard.traverse(child => { if(child.isMesh) { child.material = crossGuardMaterial; } });
-
-      gripMaterial.map = this.gripMaskTexture;
-      gripMaterial.normalMap = this.gripNormalTexture;
-      gripMaterial.aoMap = this.gripAOTexture;
-      this.grip.traverse(child => { if(child.isMesh) { child.material = gripMaterial; } });
-
-      pommelMaterial.normalMap = this.pommelNormalTexture;
-      pommelMaterial.aoMap = this.pommelAOTexture;
-      this.pommel.traverse(child => { if(child.isMesh) { child.material = pommelMaterial; } });
-
-      this.renderer.render(this.scene, this.camera);
-      this.allLoaded = true;
-    },
-    animate() {
-      requestAnimationFrame(this.animate);
-      if(this.hover) {
-        this.group.rotation.y += 0.02;
-        this.renderer.render(this.scene, this.camera);
-      }
-      else {
-        if(this.group.rotation.y !== 0) {
-          this.group.rotation.y = 0;
-          this.renderer.render(this.scene, this.camera);
-        }
-      }
-    },
-
     getCleanWeaponName(id, stars) {
       return getCleanName(this.getWeaponName(id, stars));
     },
@@ -473,14 +210,6 @@ export default {
   mounted() {
     this.checkStorage();
     Events.$on('setting:showCosmetics', () => this.checkStorage());
-    if(localStorage.getItem('useGraphics') === 'false') {
-      this.allLoaded = true;
-      this.showPlaceholder = true;
-      return;
-    }
-
-    this.init();
-    this.animate();
   }
 };
 
