@@ -47,9 +47,9 @@
   "scripts": {
     "postinstall": "npm run contract:prepare && lerna exec -- npm install",
     "lint": "lerna exec -- npm run lint",
-    "build:frontend": "cd frontend && npm run build",
+    "build:frontend": "cd frontend && npm run build || { cat /opt/buildhome/.npm/_logs/* ; sleep 30 ; false; }",
     "start:frontend": "cd frontend && npm start",
-    "contract:prepare": "npm run build -- --all",
+    "contract:prepare": "npm run build -- --all ",
     "contract:deploy": "npm run deploy",
     "build": "truffle compile",
     "postbuild": "npm --prefix frontend/ run setup-app-config && node scripts/generate-ts-from-abis.js && npm run restore-all-networks",
