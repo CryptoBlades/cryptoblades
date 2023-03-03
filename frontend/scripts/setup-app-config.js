@@ -5,12 +5,15 @@ const APP_CONFIG = 'app-config';
 
 const setupAppConfigTask = async () => {
   fs.ensureDirSync('./');
+  let appConfig;
 
-  const appConfig = await fetch(`${APP_CONFIG_URL}/${APP_CONFIG}.json`)
-    .then((res) => res.text())
-    .catch((error) => {
-      console.error(error);
-    });
+  try {
+    appConfig = await fetch(`${APP_CONFIG_URL}/${APP_CONFIG}.json`);
+    appConfig = await appConfig.text();
+  } catch(error) {
+    console.error(error);
+  }
+
 
   await fs.writeFile('./app-config.json', appConfig);
 };
