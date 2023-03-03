@@ -2,27 +2,15 @@ import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import config from '../../app-config.json';
-import {router} from '@/main';
 import {getConfigValue, Networks} from '@/contracts';
 import {networks as pvpNetworks} from '../../../build/contracts/PvpArena.json';
 import {networks as simpleQuestsNetworks} from '../../../build/contracts/SimpleQuests.json';
 import {networks as dexNetworks} from '../../../build/contracts/Dex.json';
 import { QuestItemType } from '@/enums/Quest';
 import {abi as erc20Abi} from '../../../build/contracts/ERC20.json';
-import store from '@/store/store';
 
 BigNumber.config({ROUNDING_MODE: BigNumber.ROUND_DOWN});
 BigNumber.config({EXPONENTIAL_AT: 100});
-
-export function addChainToRouter(chain: string) {
-  router.replace(
-    {
-      query: Object.assign({...router.currentRoute.query}, {chain}),
-    },
-    () => {
-    }
-  );
-}
 
 interface Config {
   environments: Record<string, Chain>;
@@ -41,18 +29,9 @@ interface Chain {
   for (const [chainName, values] of Object.entries(chains)) {
     if (+values.VUE_APP_NETWORK_ID === chainId) {
       localStorage.setItem('currentChain', chainName);
-      addChainToRouter(chainName);
     }
   }
   window.location.reload();
-});
-
-// executes when account is changed in wallet
-(window as any).ethereum?.on('accountsChanged', async () => {
-  const accounts = await store.state.web3.eth.getAccounts();
-  store.commit('setAccounts', { accounts });
-  store.dispatch('setUpContractEvents');
-  store.dispatch('fetchUserDetails');
 });
 
 export const apiUrl = (url: string) => `${process.env.VUE_APP_API_URL || 'https://api.cryptoblades.io'}/${url}`;

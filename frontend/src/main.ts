@@ -8,11 +8,7 @@ import Vuex from 'vuex';
 import VueRouter from 'vue-router';
 import VTooltip from 'v-tooltip';
 
-import store from './store/store';
-import createRouter from './router';
-
 import App from './App.vue';
-import CBButton from '@/components/CBButton.vue';
 
 import {
   raid as featureFlagRaid,
@@ -35,17 +31,14 @@ Vue.use(VueRouter);
 Vue.use(VTooltip);
 Vue.use(BootstrapVue);
 Vue.use(BootstrapVueDialog);
-Vue.component('cb-button', CBButton);
 
 Vue.use(BootstrapVueIcons);
 
 Vue.use(require('vue-script2'));
 
-export const router = createRouter();
-
 new Vue({
   render: h => h(App),
-  router, store, i18n,
+  i18n,
   provide: {
     // maybe feature flags should just reference the feature-flags.ts module directly?
     featureFlagRaid, featureFlagReforging,
