@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "setup-app-config": "node scripts/setup-app-config.js",
-    "build": "vue-cli-service build",
+    "build": "npm run setup-app-config && vue-cli-service build && npm run crush-images && npm run copy:abi && npm run copy:abiinterface && npm run copy:appconfig",
     "lint": "vue-cli-service lint",
     "start": "npm run serve",
     "crush-images": "node scripts/crush-images",
@@ -45,6 +45,7 @@
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-plugin-typescript": "^4.5.12",
+    "@vue/cli-service": "~4.5.0",
     "vue-multiselect": "^2.1.6",
     "vue-template-compiler": "^2.6.11"
   },
