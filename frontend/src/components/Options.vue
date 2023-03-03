@@ -385,7 +385,6 @@ export default Vue.extend({
   },
 
   methods: {
-
     BazaarLink() {
       return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
     },
@@ -396,15 +395,6 @@ export default Vue.extend({
       }
       return process.env.VUE_APP_DRAWBRIDGE_URL || 'https://drawbridge.cryptoblades.io/';
     },
-
-    toggleGraphics() {
-      this.showGraphics = !this.showGraphics;
-      if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
-      else localStorage.setItem('useGraphics', 'false');
-
-      Events.$emit('setting:useGraphics', {value: this.showGraphics});
-    },
-
     openMenu() {
       this.isMenuOpen = true;
     },

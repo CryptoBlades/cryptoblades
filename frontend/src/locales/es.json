@@ -473,7 +473,6 @@
   },
   "options": {
     "title": "Options",
-    "graphic": "3D Graphics",
     "rewardBar": "Hide Rewards Bar",
     "walletWarning": "Hide Wallet Warning",
     "showSkillValues": "Show SKILL values in USD",
