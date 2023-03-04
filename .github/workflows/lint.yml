@@ -23,7 +23,7 @@ jobs:
       - name: Use Node.js 16
         uses: actions/setup-node@v1
         with:
-          node-version: "16"
+          node-version: "16.14.0"
 
       - run: npm ci
 
