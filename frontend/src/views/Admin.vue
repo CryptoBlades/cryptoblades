@@ -30,7 +30,7 @@ export default Vue.extend({
     ...mapState(['defaultAccount']),
 
     hasAccessToAnyTab(): boolean {
-      return true;//this.getHasAdminAccess || this.getHasMinterAccess;
+      return this.getHasAdminAccess || this.getHasMinterAccess;
     },
   },
 
