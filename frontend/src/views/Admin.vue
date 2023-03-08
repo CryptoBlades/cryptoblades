@@ -1,6 +1,6 @@
 <template>
   <b-tabs v-if="hasAccessToAnyTab" justified content-class="mt-3"> <!-- note, use "vertical" if too many tabs -->
-    <AdminTab v-for="tab in tabs" :key="tab.title" :title="tab.title" :contract="tab.contract"
+    <AdminTab v-for="tab in tabs" :key="tab.title" :title="tab.title" :contract="tab.contract" :permissionContract="tab.permissionContract"
               :component="tab.component"/>
   </b-tabs>
 </template>
@@ -14,6 +14,7 @@ import AdminTab from '@/components/smart/AdminTab.vue';
 interface Tab {
   title: string;
   contract: Contract<any>;
+  permissionContract?: Contract<any>;
   component: string;
 }
 
@@ -29,7 +30,7 @@ export default Vue.extend({
     ...mapState(['defaultAccount']),
 
     hasAccessToAnyTab(): boolean {
-      return this.getHasAdminAccess || this.getHasMinterAccess;
+      return true;//this.getHasAdminAccess || this.getHasMinterAccess;
     },
   },
 
@@ -40,6 +41,12 @@ export default Vue.extend({
   },
 
   async mounted() {
+    this.tabs.push({
+      title: 'skill',
+      contract: this.contracts.SkillToken,
+      permissionContract: this.contracts.Treasury,
+      component: 'SkillAdmin'
+    });
     this.tabs.push({
       title: 'quests',
       contract: this.contracts.SimpleQuests,

@@ -940,7 +940,17 @@
       "blacksmith": "Blacksmith",
       "raid": "Raid",
       "specialWeaponsManager": "Special Weapons",
-      "dex": "Dex"
+      "dex": "Dex",
+      "skill": "Skill"
+    },
+    "skill": {
+      "transferSkill":  "Transfer Skill",
+      "sourceWalletAddress": "Source Wallet Address",
+      "receiverWalletAddress": "Receiver Wallet Address",
+      "amount": "Amount",
+      "transfer": "Transfer",
+      "skillAllowance": "Skill Allowance",
+      "loading": "Loading..."
     },
     "cbkLand": {
       "minter": "Minter",
