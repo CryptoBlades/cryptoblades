@@ -1080,7 +1080,7 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchKeyLootboxes', ownedKeyLootboxIds);
     },
 
-    async updateCharacterWeapons({ state }) {
+    async updateCharacterWeapons({ state, dispatch }) {
       if(!state.defaultAccount) return;
 
       const equipment = state.contracts().EquipmentManager!;
@@ -1098,6 +1098,8 @@ export default new Vuex.Store<IState>({
           Vue.set(state.characterWeapons, charId, undefined);
         }
       }
+
+      await dispatch('fetchPowerData', charId);
     },
 
     async fetchCharacterWeapon({ state }, characterId: string | number) {
