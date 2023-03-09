@@ -15,12 +15,6 @@
         <div class="col">
           <b-list-group class="dark-bg">
             <b-list-group-item class="d-flex justify-content-between align-items-center">
-              <h4>{{$t("options.graphic")}}</h4>
-              <b-form-checkbox size="lg" :checked="showGraphics" @change="toggleGraphics()" switch>
-                <b class="float-left">{{ showGraphics ? $t("on") : $t("off") }}</b>
-              </b-form-checkbox>
-            </b-list-group-item>
-            <b-list-group-item class="d-flex justify-content-between align-items-center">
               <h4>{{$t("options.rewardBar")}}</h4>
               <b-form-checkbox size="lg" :checked="hideRewards" @change="toggleRewards()" switch>
                 <b class="float-left">{{ hideRewards ? $t("on") : $t("off")  }}</b>
@@ -271,13 +265,6 @@ export default Vue.extend({
     ...mapMutations('treasury', [
       'updatePayoutCurrencyId',
     ]),
-    toggleGraphics() {
-      this.showGraphics = !this.showGraphics;
-      if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
-      else localStorage.setItem('useGraphics', 'false');
-
-      Events.$emit('setting:useGraphics', { value: this.showGraphics });
-    },
     toggleRewards() {
       this.hideRewards = !this.hideRewards;
       if (this.hideRewards) localStorage.setItem('hideRewards', 'true');
