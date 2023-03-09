@@ -11,6 +11,7 @@ import "./items/RaidTrinket.sol";
 import "./items/KeyLootbox.sol";
 import "./items/Junk.sol";
 import "./common.sol";
+import "./EquipmentManager.sol";
 
 
 contract Raid1 is Initializable, AccessControlUpgradeable {
@@ -42,6 +43,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
     uint256 public constant LINK_TRINKET = 1;
     uint256 public constant LINK_KEYBOX = 2;
     uint256 public constant LINK_JUNK = 3;
+    uint256 public constant LINK_EQUIPMENT_MANAGER = 4;
 
     uint256 public constant NUMBERPARAMETER_AUTO_DURATION = 1;
     uint256 public constant NUMBERPARAMETER_AUTO_BOSSPOWER_PERCENT = uint256(keccak256("BOSSPOWER_PERCENT"));
@@ -170,10 +172,12 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         emit RaidStarted(raidIndex, bossTrait, bossPower, endTime);
     }
 
-    function joinRaid(uint256 characterID, uint256 weaponID) public {
+    function joinRaid(uint256 characterID) public {
         // owner and stamina/durability checks in the fightdata functions
         require(raidStatus[raidIndex] == STATUS_STARTED, "Cannot join raid right now!");
         require(raidEndTime[raidIndex] > now, "It is too late to join this raid!");
+
+        uint256 weaponID = EquipmentManager(links[LINK_EQUIPMENT_MANAGER]).equippedSlotID(address(characters), characterID, 1);
 
         uint256[] memory raiderIndices = raidParticipantIndices[raidIndex][msg.sender];
         for(uint i = 0; i < raiderIndices.length; i++) {
@@ -183,25 +187,10 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
                 "This character is already participating");
         }
 
-        (uint16 charTraitAndVersion, uint24 basePowerLevel, /*uint64 timestamp*/) =
-            unpackFightData(characters.getFightDataAndDrainStamina(msg.sender,
-                                    characterID,
-                                    uint8(staminaCost),
-                                    true,
-                                    0) // no busy flag for raids for now
-                                );
-
-        (/*int128 weaponMultTarget*/,
-            int128 weaponMultFight,
-            uint24 weaponBonusPower,
-            /*uint8 weaponTrait*/) = weapons.getFightDataAndDrainDurability(msg.sender,
-                weaponID, uint8(charTraitAndVersion & 0xFF), uint8(durabilityCost), true, 0); // no busy flag for raids for now
-
-        uint24 power = getPlayerFinalPower(
-            Common.getPlayerPower(basePowerLevel, weaponMultFight, weaponBonusPower),
-            uint8(charTraitAndVersion & 0xFF),
-            raidBossTrait[raidIndex]
-        );
+        (/*uint72 miscData*/, uint256 powerData) = characters.getFightDataAndDrainStamina(msg.sender,
+            characterID, uint8(staminaCost), true, 0);
+        
+        uint24 power = uint24(powerData >> raidBossTrait[raidIndex]);
         raidPlayerPower[raidIndex] += power;
 
         //uint8 wepStatPattern = weapons.getStatPattern(weaponID);
@@ -281,7 +270,7 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function unpackFightData(uint104 playerData)
+    function unpackFightData(uint192 playerData)
         public pure returns (uint16 charTraitAndVersion, uint24 basePowerLevel, uint64 timestamp) {
 
         charTraitAndVersion = uint16(playerData & 0xFFFF);
@@ -567,15 +556,16 @@ contract Raid1 is Initializable, AccessControlUpgradeable {
         return totalAccountPower;
     }
 
-    function canJoinRaid(uint256 characterID, uint256 weaponID) public view returns(bool) {
+    function canJoinRaid(uint256 characterID) public view returns(bool) {
+        uint256 weaponID = EquipmentManager(links[LINK_EQUIPMENT_MANAGER]).equippedSlotID(address(characters), characterID, 1);
         return isRaidStarted()
-            && haveEnoughEnergy(characterID, weaponID)
+            && haveEnoughEnergy(characterID)
             && !isCharacterRaiding(characterID)
             && !isWeaponRaiding(weaponID);
     }
 
-    function haveEnoughEnergy(uint256 characterID, uint256 weaponID) public view returns(bool) {
-        return characters.getStaminaPoints(characterID) > 0 && weapons.getDurabilityPoints(weaponID) > 0;
+    function haveEnoughEnergy(uint256 characterID) public view returns(bool) {
+        return characters.getStaminaPoints(characterID) > 0;
     }
 
     function isRaidStarted() public view returns(bool) {

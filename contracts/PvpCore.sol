@@ -12,6 +12,7 @@ import "./weapons.sol";
 import "./shields.sol";
 import "./common.sol";
 import "./PvpRankings.sol";
+import "./EquipmentManager.sol";
 
 contract PvpCore is Initializable, AccessControlUpgradeable {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -107,6 +108,11 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     mapping(uint256 => uint256) public specialWeaponRerollTimestamp;
     /// @dev owner's address by character ID
     mapping(uint256 => address) private _ownerByCharacter;
+
+    
+    uint256 public constant LINK_EQUIPMENT_MANAGER = 1;
+
+    mapping(uint256 => address) private links;
     
     event DuelFinished(
         uint256 indexed attacker,
@@ -204,24 +210,16 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     }
 
     /// @dev enter the arena with a character, a weapon and optionally a shield
-    function enterArena(
-        uint256 characterID,
-        uint256 weaponID,
-        uint256 shieldID,
-        bool useShield,
-        bool tierless
-    ) external {
-        require(
-            characters.ownerOf(characterID) == msg.sender &&
-                weapons.ownerOf(weaponID) == msg.sender
-        );
+    function enterArena(uint256 characterID, bool tierless) external {
 
-        require(characters.getNftVar(characterID, 1) == 0 && weapons.getNftVar(weaponID, 1) == 0, "B");
+        EquipmentManager equipment = EquipmentManager(links[LINK_EQUIPMENT_MANAGER]);
+        uint256 weaponID = equipment.equippedSlotID(address(characters), characterID, 1);
+        uint256 shieldID = equipment.equippedSlotID(address(characters), characterID, 2);
+        bool useShield = equipment.hasSlotEquipped(address(characters), characterID, 2);
 
-        if (useShield) {
-            require(shields.ownerOf(shieldID) == msg.sender);
-            require(shields.getNftVar(shieldID, 1) == 0, "S");
-        }
+        require(characters.ownerOf(characterID) == msg.sender
+            && characters.getNftVar(characterID, 1) == 0);
+        require(characters.isEquipmentReady(characterID));
 
         require((arenaAccess & 1) == 1, "L");
 
@@ -246,14 +244,6 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
         isCharacterInArena[characterID] = true;
         characters.setNftVar(characterID, 1, 1);
-
-        isWeaponInArena[weaponID] = true;
-        weapons.setNftVar(weaponID, 1, 1);
-
-        if (useShield) {
-            isShieldInArena[shieldID] = true;
-            shields.setNftVar(shieldID, 1, 1);
-        }
 
         uint256 characterWager;
 
@@ -901,6 +891,10 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
 
     function setPvpBotAddress(address payable botAddress) external restricted {
         pvpBotAddress = botAddress;
+    }
+
+    function setLink(uint256 linkId, address linkAddress) external restricted {
+        links[linkId] = linkAddress;
     }
 
     // Note: The following are debugging functions, they can be muted to save contract size

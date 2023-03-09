@@ -699,7 +699,7 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
     ) public restricted returns (int128, int128, uint24, uint8) {
         require(fighter == ownerOf(id)/* && nftVars[id][NFTVAR_BUSY] == 0*/);
         //nftVars[id][NFTVAR_BUSY] |= busyFlag;
-        drainDurability(id, drainAmount, allowNegativeDurability);
+        _drainDurability(id, drainAmount, allowNegativeDurability);
         Weapon storage wep = tokens[id];
         return (
             oneFrac.add(powerMultPerPointBasic.mul(
@@ -713,7 +713,11 @@ contract Weapons is Initializable, ERC721Upgradeable, AccessControlUpgradeable {
         );
     }
 
-    function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) internal {
+    function drainDurability(uint256 id, uint8 amount, bool allowNegativeDurabilty) external restricted {
+        _drainDurability(id, amount, allowNegativeDurabilty);
+    }
+
+    function _drainDurability(uint256 id, uint8 amount, bool allowNegativeDurability) internal {
         uint8 durabilityPoints = getDurabilityPointsFromTimestamp(durabilityTimestamp[id]);
         require((durabilityPoints >= amount
         || (allowNegativeDurability && durabilityPoints > 0)) // we allow going into negative, but not starting negative

@@ -11,7 +11,7 @@ import { getFeeInSkillFromUsd } from '@/contract-call-utils';
 
 export interface ICombatState {
   isInCombat: boolean;
-  targetsByCharacterIdAndWeaponId: Record<number, Record<number, ITarget>>;
+  targetsByCharacterId: Record<number, ITarget>;
   fightBaseline: string;
   fightGasOffset: string;
 }
@@ -22,17 +22,17 @@ const combat = {
   namespaced: true,
   state: {
     isInCombat: false,
-    targetsByCharacterIdAndWeaponId: {},
+    targetsByCharacterId: {},
     fightBaseline: '0',
     fightGasOffset: '0',
   } as ICombatState,
   getters: {
-    getTargetsByCharacterIdAndWeaponId(state: ICombatState) {
-      return (characterId: number, weaponId: number) => {
-        const targetsByWeaponId = state.targetsByCharacterIdAndWeaponId[characterId];
-        if (!targetsByWeaponId) return [];
+    getTargetsByCharacterId(state: ICombatState) {
+      return (characterId: number) => {
+        const targets = state.targetsByCharacterId[characterId];
+        if (!targets) return [];
 
-        return targetsByWeaponId[weaponId] ?? [];
+        return targets;
       };
     },
     getIsInCombat(state: ICombatState) {
@@ -50,12 +50,12 @@ const combat = {
     setIsInCombat(state: ICombatState, isInCombat: boolean) {
       state.isInCombat = isInCombat;
     },
-    updateTargets(state: ICombatState, { characterId, weaponId, targets }: {characterId: number, weaponId: number, targets: ITarget[]}) {
-      if (!state.targetsByCharacterIdAndWeaponId[characterId]) {
-        Vue.set(state.targetsByCharacterIdAndWeaponId, characterId, {});
+    updateTargets(state: ICombatState, { characterId, targets }: {characterId: number, targets: ITarget[]}) {
+      if (!state.targetsByCharacterId[characterId]) {
+        Vue.set(state.targetsByCharacterId, characterId, {});
       }
 
-      Vue.set(state.targetsByCharacterIdAndWeaponId[characterId], weaponId, targets);
+      Vue.set(state.targetsByCharacterId, characterId, targets);
     },
     updateFightBaseline(state: ICombatState, { fightBaseline }: { fightBaseline: string }) {
       state.fightBaseline = fightBaseline;
@@ -101,17 +101,17 @@ const combat = {
       return await CryptoBlades.methods.vars(18).call(defaultCallOptions(rootState));
     },
 
-    async fetchTargets({rootState, commit}: {rootState: IState, commit: Commit}, { characterId, weaponId }: {characterId: number, weaponId: number}) {
-      if(isUndefined(characterId) || isUndefined(weaponId)) {
-        commit('updateTargets', { characterId, weaponId, targets: [] });
+    async fetchTargets({rootState, commit}: {rootState: IState, commit: Commit}, { characterId }: {characterId: number }) {
+      if(isUndefined(characterId)) {
+        commit('updateTargets', { characterId, targets: [] });
         return;
       }
 
       const targets = await rootState.contracts().CryptoBlades!.methods
-        .getTargets(characterId, weaponId)
+        .getTargets(characterId)
         .call(defaultCallOptions(rootState));
 
-      commit('updateTargets', { characterId, weaponId, targets: targets.map(targetFromContract) });
+      commit('updateTargets', { characterId, targets: targets.map(targetFromContract) });
     },
 
     async getCharacterPower({rootState}: {rootState: IState}, characterId: number) {
@@ -144,15 +144,14 @@ const combat = {
 
     async doEncounterPayNative(
       { rootState, dispatch }: {rootState: IState, dispatch: Dispatch},
-      { characterId, weaponId, targetString, fightMultiplier, offsetCost }:
-      { characterId: number, weaponId: number, targetString: number, fightMultiplier: number, offsetCost: BigNumber }) {
+      { characterId, targetString, fightMultiplier, offsetCost }:
+      { characterId: number, targetString: number, fightMultiplier: number, offsetCost: BigNumber }) {
       const { TokensManager, CryptoBlades } = rootState.contracts();
       if (!TokensManager || !CryptoBlades || !rootState.defaultAccount) return;
 
       const res = await TokensManager.methods
         .fight(
           characterId,
-          weaponId,
           targetString,
           fightMultiplier
         )
@@ -180,8 +179,7 @@ const combat = {
 
       const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
       await Promise.all([
-        dispatch('combat/fetchTargets', {characterId, weaponId}),
-        dispatch('fetchWeaponDurability', weaponId),
+        dispatch('combat/fetchTargets', {characterId}),
       ]);
 
       return {

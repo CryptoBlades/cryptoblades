@@ -31,7 +31,11 @@ contract Dex is Initializable, AccessControlUpgradeable {
 
     event TokenPairSwapped(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
     event TokenPairAdded(uint id, address indexed token1, address indexed token2);
+    event TokenPairRemoved(uint id, address indexed token1, address indexed token2);
     event LiquidityAdded(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
+    event LiquiditySet(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
+    event LiquidityTaken(address indexed token1, uint token1Amount, address indexed token2, uint token2Amount);
+    event ERC20Withdrawal(address indexed token, uint amount);
 
     function initialize() virtual public initializer {
         __AccessControl_init_unchained();
@@ -63,6 +67,7 @@ contract Dex is Initializable, AccessControlUpgradeable {
         uint id = getTokenPairId(tokenA, tokenB);
         TokenPair memory pair = tokenPairs[id];
         require((pair.token1 == tokenA && pair.token2 == tokenB) || (pair.token2 == tokenA && pair.token1 == tokenB), "Invalid pair");
+        amountA = transferWithAdditionalAmountCheck(tokenA, msg.sender, address(this), amountA);
         uint amountB = getAmountOut(tokenA, tokenB, amountA);
         require(amountB > 0, "Invalid amount");
         if (tokenA == pair.token1) {
@@ -73,7 +78,6 @@ contract Dex is Initializable, AccessControlUpgradeable {
             pair.token2Amount += amountA;
         }
         tokenPairs[id] = pair;
-        IERC20(tokenA).transferFrom(msg.sender, address(this), Common.adjustDecimals(amountA, ERC20(tokenA).decimals()));
         uint fee = amountB.mul(vars[VAR_FEE]).div(FEE_DENOMINATOR);
         collectedFees[tokenB] = collectedFees[tokenB].add(fee);
         IERC20(tokenB).transfer(msg.sender, Common.adjustDecimals(amountB - fee, ERC20(tokenB).decimals()));
@@ -116,12 +120,27 @@ contract Dex is Initializable, AccessControlUpgradeable {
         (address token1, uint amount1, address token2, uint amount2) = tokenA < tokenB ? (tokenA, amountA, tokenB, amountB) : (tokenB, amountB, tokenA, amountA);
         uint id = getTokenPairId(token1, token2);
         require(tokenPairs[id].token1 == address(0) && tokenPairs[id].token2 == address(0), "Pair already exists");
+        amount1 = transferWithAdditionalAmountCheck(token1, msg.sender, address(this), amount1);
+        amount2 = transferWithAdditionalAmountCheck(token2, msg.sender, address(this), amount2);
         tokenPairs[id] = TokenPair(token1, amount1, token2, amount2);
-        IERC20(token1).transferFrom(msg.sender, address(this), Common.adjustDecimals(amount1, ERC20(token1).decimals()));
-        IERC20(token2).transferFrom(msg.sender, address(this), Common.adjustDecimals(amount2, ERC20(token2).decimals()));
         emit TokenPairAdded(id, token1, token2);
     }
 
+    function addPairWithoutLiquidity(address tokenA, address tokenB) external restricted {
+        (address token1, address token2) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+        uint id = getTokenPairId(token1, token2);
+        require(tokenPairs[id].token1 == address(0) && tokenPairs[id].token2 == address(0), "Pair already exists");
+        tokenPairs[id] = TokenPair(token1, 0, token2, 0);
+        emit TokenPairAdded(id, token1, token2);
+    }
+
+    function deletePair(address tokenA, address tokenB) external restricted {
+        (address token1, address token2) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+        uint id = getTokenPairId(token1, token2);
+        require(tokenPairs[id].token1 != address(0) && tokenPairs[id].token2 != address(0), "Pair doesn't exist");
+        delete tokenPairs[id];
+        emit TokenPairRemoved(id, token1, token2);
+    }
 
     function addLiquidity(address tokenA, uint amountA, address tokenB, uint amountB) external restricted {
         (address token1, uint amount1, address token2, uint amount2) = tokenA < tokenB ? (tokenA, amountA, tokenB, amountB) : (tokenB, amountB, tokenA, amountA);
@@ -129,18 +148,56 @@ contract Dex is Initializable, AccessControlUpgradeable {
         TokenPair memory pair = tokenPairs[id];
         require(pair.token1 == token1 && pair.token2 == token2, "Invalid pair");
         require(amount1 > 0 && amount2 > 0, "Invalid amount");
+        amount1 = transferWithAdditionalAmountCheck(token1, msg.sender, address(this), amount1);
+        amount2 = transferWithAdditionalAmountCheck(token2, msg.sender, address(this), amount2);
         pair.token1Amount += amount1;
         pair.token2Amount += amount2;
         tokenPairs[id] = pair;
-        IERC20(token1).transferFrom(msg.sender, address(this), Common.adjustDecimals(amount1, ERC20(token1).decimals()));
-        IERC20(token2).transferFrom(msg.sender, address(this), Common.adjustDecimals(amount2, ERC20(token2).decimals()));
         emit LiquidityAdded(token1, amount1, token2, amount2);
+    }
+
+    function setLiquidityInWei(address tokenA, uint amountA, address tokenB, uint amountB) external restricted {
+        (address token1, uint amount1, address token2, uint amount2) = tokenA < tokenB ? (tokenA, amountA, tokenB, amountB) : (tokenB, amountB, tokenA, amountA);
+        uint id = getTokenPairId(token1, token2);
+        TokenPair memory pair = tokenPairs[id];
+        require(pair.token1 == token1 && pair.token2 == token2, "Invalid pair");
+        pair.token1Amount = amount1;
+        pair.token2Amount = amount2;
+        tokenPairs[id] = pair;
+        emit LiquiditySet(token1, amount1, token2, amount2);
+    }
+
+    function takeLiquidityInWei(address tokenA, uint amountA, address tokenB, uint amountB) external restricted {
+        (address token1, uint amount1, address token2, uint amount2) = tokenA < tokenB ? (tokenA, amountA, tokenB, amountB) : (tokenB, amountB, tokenA, amountA);
+        uint id = getTokenPairId(token1, token2);
+        TokenPair memory pair = tokenPairs[id];
+        require(pair.token1 == token1 && pair.token2 == token2, "Invalid pair");
+        IERC20(token1).transfer(msg.sender, amount1);
+        IERC20(token2).transfer(msg.sender, amount2);
+        pair.token1Amount = pair.token1Amount.sub(amount1);
+        pair.token2Amount = pair.token2Amount.sub(amount2);
+        tokenPairs[id] = pair;
+        emit LiquidityTaken(token1, amount1, token2, amount2);
+    }
+
+    function withdrawERC20Wei(address token, uint256 amount) external restricted {
+        IERC20(token).transfer(msg.sender, amount);
+        emit ERC20Withdrawal(token, amount);
     }
 
     function collectFees(address token) external restricted {
         uint fee = collectedFees[token];
         IERC20(token).transfer(msg.sender, Common.adjustDecimals(fee, ERC20(token).decimals()));
         collectedFees[token] = 0;
+    }
+
+    // PRIVATE
+
+    function transferWithAdditionalAmountCheck(address token, address from, address to, uint amount) private returns (uint) {
+        uint amountBefore = IERC20(token).balanceOf(address(this));
+        IERC20(token).transferFrom(from, to, Common.adjustDecimals(amount, ERC20(token).decimals()));
+        uint amountAfter = IERC20(token).balanceOf(address(this));
+        return amountAfter.sub(amountBefore);
     }
 
 }

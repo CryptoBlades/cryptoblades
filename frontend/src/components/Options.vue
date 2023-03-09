@@ -158,11 +158,20 @@
 
             <a
               class="menu-icon"
-              href="https://cryptoblades.gitbook.io/wiki/"
+              href="https://cryptoblades.zendesk.com/hc/en-us"
               target="_blank"
             >
               <img src="../assets/navbar-icons/wiki-icon.png" alt="Wiki"/>
               <span>{{ $t("viewLink.wiki") }}</span>
+            </a>
+
+            <a
+              class="menu-icon"
+              href="https://tavern.cryptoblades.io/"
+              target="_blank"
+            >
+              <img src="../assets/navbar-icons/tavern-icon.png" alt="Tavern"/>
+              <span>{{ $t("viewLink.tavern") }}</span>
             </a>
 
             <router-link class="menu-icon" :to="{ name: 'options' }" exact>
@@ -376,7 +385,6 @@ export default Vue.extend({
   },
 
   methods: {
-
     BazaarLink() {
       return process.env.VUE_APP_BAZAAR_URL || 'https://bazaar.market/';
     },
@@ -387,15 +395,6 @@ export default Vue.extend({
       }
       return process.env.VUE_APP_DRAWBRIDGE_URL || 'https://drawbridge.cryptoblades.io/';
     },
-
-    toggleGraphics() {
-      this.showGraphics = !this.showGraphics;
-      if (this.showGraphics) localStorage.setItem('useGraphics', 'true');
-      else localStorage.setItem('useGraphics', 'false');
-
-      Events.$emit('setting:useGraphics', {value: this.showGraphics});
-    },
-
     openMenu() {
       this.isMenuOpen = true;
     },

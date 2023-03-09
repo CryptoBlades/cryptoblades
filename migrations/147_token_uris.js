@@ -78,6 +78,9 @@ module.exports = async function (deployer, network, accounts) {
     else if(network === 'coinextestnet' || network === 'coinexmainnet') {
       networkName = 'coinex';
     }
+    else if(network === 'metertestnet' || network === 'metermainnet') {
+      networkName = 'meter';
+    }
 
     await weapons.grantRole(weapons_GA, altChainsDeployerAddress);
     await characters.grantRole(characters_GA, altChainsDeployerAddress);

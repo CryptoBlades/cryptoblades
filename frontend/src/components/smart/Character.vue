@@ -38,8 +38,37 @@
         <div class="w-100 d-block d-md-none"></div>
         <div class="col cell">
           <div class="table-bg"></div>
-          <span class="main-font cell-title text-white">{{$t(`Character.power`)}}</span>
-          <span class="alt-text cell-value">{{ totalCharacterPower }}</span>
+            <span class="main-font cell-title text-white">
+              {{$t(`Character.power`)}}
+              <div class="d-inline" v-if="!isCharacterEquipmentVersionMatch || hasCharacterPowerDataChanged">
+                <b-icon
+                  id="recalculate-character-popover"
+                  icon="exclamation-circle-fill"
+                  variant="danger">
+                </b-icon>
+
+                <b-popover ref="popover" target="recalculate-character-popover" triggers="hover" placement="bottom">
+                  <div v-if="characterEquipmentVersion > 0">
+                    <b-button
+                      :disabled='isRecalculateEquipmentLoading'
+                      @click="onClickRecalculate"
+                      variant="primary"
+                    >
+                      {{ $t(`Character.recalculate`) }}: {{ updatedEquippedCharacterPower }}
+                    </b-button>
+                  </div>
+                  <div class="text-dark" v-if="characterEquipmentVersion === 0">
+                      {{ $t(`Character.invalidEquipment`) }}
+                  </div>
+                </b-popover>
+              </div>
+            </span>
+          <span class="alt-text cell-value" v-if="characterEquipmentVersion > 0">
+            {{ totalCharacterEquippedPower }}
+          </span>
+          <span class="alt-text cell-value" v-if="characterEquipmentVersion === 0">
+            0
+          </span>
         </div>
         <div class="w-100 d-block d-md-none"></div>
         <div class="col cell" v-if="reputationLevelRequirements">
@@ -91,11 +120,11 @@
       <!-- Character Tabs -->
       <div>
         <b-tabs pills fill nav-wrapper-class="mt-5 mb-4" >
+          <equipment-tab :soulBalance="isGenesisCharacter ? genesisSoulBalance : nonGenesisSoulBalance" @fetchSoulBalance="refreshData"/>
           <upgrade-tab :soulBalance="isGenesisCharacter ? genesisSoulBalance : nonGenesisSoulBalance" @fetchSoulBalance="refreshData" />
           <skins-tab :availableSkins="availableSkins" @loadCosmeticsCount="loadCosmeticsCount" />
           <options-tab @openTransferModal="openTransferModal" @onSendToGarrison="onSendToGarrison" @openChangeTrait="openChangeTrait"
           @openTransferSoulModal="openTransferSoulModal" />
-          <b-tab  disabled title-item-class="character-wrapper" title-link-class="character-tab">{{" "}}</b-tab>
         </b-tabs>
       </div>
     </div>
@@ -247,16 +276,18 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapState, mapGetters, mapActions } from 'vuex';
+import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 import { BModal } from 'bootstrap-vue';
+import Events from '@/events';
 
 import SkinsTab from '@/components/smart/CharacterTabs/SkinsTab.vue';
 import OptionsTab from '@/components/smart/CharacterTabs/OptionsTab.vue';
 import UpgradeTab from '@/components/smart/CharacterTabs/UpgradeTab.vue';
+import EquipmentTab from '@/components/smart/CharacterTabs/EquipmentTab.vue';
 import { getCharacterArt } from '@/character-arts-placeholder';
 import { Quest, ReputationLevelRequirements } from '@/interfaces';
 import { ReputationTier } from '@/enums/Quest';
-import { CharacterTrait, ICharacter, RequiredXp } from '@/interfaces';
+import { CharacterTrait, ICharacter, RequiredXp, IStoredPowerData } from '@/interfaces';
 import { isValidWeb3Address } from '@/utils/common';
 
 
@@ -287,6 +318,11 @@ interface Data {
   newName: string;
   isTransferringNonGenesis: boolean;
   soulAmountToTransfer: number;
+  hasCharacterPowerDataChanged: boolean;
+  characterEquipmentVersion: number,
+  isCharacterEquipmentVersionMatch: boolean,
+  isRecalculateEquipmentLoading: boolean,
+  updatedEquippedCharacterPower: number
 }
 
 interface StoreMappedActions {
@@ -314,10 +350,16 @@ interface StoreMappedActions {
   sendToGarrison(id: string): Promise<void>;
   transferSoul(payload: {targetAddress: string, soulAmount: number}): Promise<void>;
   transferNonGenesisSoul(payload: {targetAddress: string, soulAmount: number}): Promise<void>;
+  getEquippedCharacterPower(payload: { characterId: string | number }): Promise<number>,
+  getEquippedCharacterPowerStoredPowerData(payload: { characterId: string | number }): Promise<number>,
+  getEquippedCharacterPowerStoredData(payload: { characterId: string | number }): Promise<IStoredPowerData>,
+  recalculateCharacterEquipmentPower(payload: { characterId: string | number }): Promise<void>,
+  getCharacterEquipmentCurrentVersion(payload: { characterId: string | number }): Promise<number>,
+  getEquipmentCurrentVersion(): Promise<number>
 }
 
 export default Vue.extend({
-  components: { UpgradeTab, OptionsTab, SkinsTab },
+  components: {EquipmentTab, UpgradeTab, OptionsTab, SkinsTab },
   data(): Data{
     return {   ReputationTier,
       reputationLevelRequirements: undefined,
@@ -342,6 +384,11 @@ export default Vue.extend({
       newName: '',
       isTransferringNonGenesis: false,
       soulAmountToTransfer: 0,
+      hasCharacterPowerDataChanged: false,
+      characterEquipmentVersion: -1,
+      isCharacterEquipmentVersionMatch: true,
+      isRecalculateEquipmentLoading: false,
+      updatedEquippedCharacterPower: 0
     };
   },
   computed: {
@@ -351,11 +398,13 @@ export default Vue.extend({
       'characters',
       'characterStaminas',
       'ownedGarrisonCharacterIds',
+      'ownedShieldIds',
     ]),
     ...mapGetters([
       'getCharacterName',
       'getCharacterStamina',
       'getCharacterPower',
+      'getCharacterEquippedPower'
     ]),
     availableTraits(): string[] {
       const availableTraits = [];
@@ -428,6 +477,9 @@ export default Vue.extend({
     totalCharacterPower(): number {
       return this.getCharacterPower(this.currentCharacterId);
     },
+    totalCharacterEquippedPower(): number {
+      return this.getCharacterEquippedPower(this.currentCharacterId);
+    },
     isGenesisCharacter(): boolean {
       return this.characters[this.currentCharacterId]?.version === 0;
     }
@@ -452,8 +504,18 @@ export default Vue.extend({
       'fetchOwnedCharacterCosmetics',
       'fetchTotalRenameTags',
       'transferSoul',
-      'transferNonGenesisSoul'
+      'transferNonGenesisSoul',
+      'getEquippedCharacterPower',
+      'getEquippedCharacterPowerStoredPowerData',
+      'getEquippedCharacterPowerStoredData',
+      'recalculateCharacterEquipmentPower',
+      'getCharacterEquipmentCurrentVersion',
+      'getEquipmentCurrentVersion'
     ]) as StoreMappedActions,
+    ...mapMutations([
+      'updateCharacterPower',
+      'updateCharacterEquippedPower'
+    ]),
     getCharacterArt,
     RequiredXp,
     removeErrors(){
@@ -528,6 +590,26 @@ export default Vue.extend({
       if(timestamp > Math.floor(Date.now()/1000)) return 0;
       return +Math.min((Math.floor(Date.now()/1000) - timestamp) / 300, 200).toFixed(0);
     },
+    async checkCharacterEquipmentVersion() {
+      const equipmentVersion = await this.getEquipmentCurrentVersion();
+      const characterEquipmentVersion = await this.getCharacterEquipmentCurrentVersion(this.currentCharacterId);
+
+      this.characterEquipmentVersion = +characterEquipmentVersion;
+      this.isCharacterEquipmentVersionMatch = +equipmentVersion === +characterEquipmentVersion;
+    },
+    async reCheckEquippedCharacterPowerData() {
+      const powerData = await this.getEquippedCharacterPower(this.currentCharacterId);
+      const powerStoredData = await this.getEquippedCharacterPowerStoredPowerData(this.currentCharacterId);
+      const powerStored = await this.getEquippedCharacterPowerStoredData(this.currentCharacterId);
+
+      this.updateCharacterEquippedPower({
+        characterId: this.currentCharacterId,
+        power: +powerStored[0][4]
+      });
+
+      this.updatedEquippedCharacterPower = +powerData;
+      this.hasCharacterPowerDataChanged = +powerData !== +powerStoredData;
+    },
     async refreshData(){
       this.reputationLevelRequirements =  await this.getReputationLevelRequirements();
       this.genesisSoulBalance = +(await this.fetchGenesisSoulBalance());
@@ -536,7 +618,6 @@ export default Vue.extend({
     async fetchCharacterQuestData(){
       this.quest = await this.getCharacterQuestData({characterId: this.currentCharacterId});
     },
-
     async loadConsumablesCount() {
       this.haveChangeTraitFire = await this.fetchTotalCharacterFireTraitChanges();
       this.haveChangeTraitEarth = await this.fetchTotalCharacterEarthTraitChanges();
@@ -620,12 +701,29 @@ export default Vue.extend({
     async onSendToGarrison() {
       await this.sendToGarrison(this.currentCharacterId);
     },
+    async onClickRecalculate() {
+      if(!this.isRecalculateEquipmentLoading) {
+        this.isRecalculateEquipmentLoading = true;
+        await this.recalculateCharacterEquipmentPower(this.currentCharacterId);
+        this.updateCharacterEquippedPower({
+          characterId: this.currentCharacterId,
+          power: +this.updatedEquippedCharacterPower
+        });
+
+        this.isRecalculateEquipmentLoading = false;
+      }
+    },
+    async refreshCharacterEquipmentData() {
+      await this.reCheckEquippedCharacterPowerData();
+      await this.checkCharacterEquipmentVersion();
+    }
   },
   watch: {
     async selectedCharacter(newValue){
       if (newValue) {
         await this.fetchCharacterQuestData();
         await this.refreshData();
+        await this.refreshCharacterEquipmentData();
       }
     },
   },
@@ -633,6 +731,12 @@ export default Vue.extend({
     await this.refreshData();
     await this.fetchCharacterQuestData();
     await this.loadConsumablesCount();
+    await this.refreshCharacterEquipmentData();
+
+    Events.$on('weaponChanged', async () => {
+      console.log('weaponChanged');
+      await this.refreshCharacterEquipmentData();
+    });
   },
 });
 </script>
@@ -710,6 +814,94 @@ export default Vue.extend({
   transform: none;
 }
 
+.weapon-icon-wrapper {
+  background: rgba(255, 255, 255, 0.1);
+  width: 12em;
+  height: 12em;
+  margin: 0 auto;
+}
+
+.weapon-info{
+  display: flex;
+  justify-content: space-between;
+}
+
+.weapon-info > div > p{
+  color: #fff;
+  margin: 0px;
+}
+
+.weapon-info > div > span{
+  /* color: #fff; */
+}
+
+.weapon-info > div > img{
+  width: 30px;
+  cursor: pointer;
+}
+
+.drops {
+  margin-top: 1em;
+}
+
+.drops-icons {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 0;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  /* border: 0.5px solid #1f1f1f; */
+  /* height: 161px; */
+}
+
+.drops-icons >>> ul {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.outline-box{
+  display: flex;
+  align-items: center;
+  opacity: 0.5;
+}
+
+.outline-box > div:nth-child(1){
+  height: 70px;
+  width: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: #ccae4f dashed 2px;
+  border-radius: 5px;
+}
+
+.outline-box > div:nth-child(2) {
+  padding-left: 20px;
+}
+
+.outline-box > div > p{
+  margin: 0px;
+  font-size: 15px;
+  font-family: Roboto;
+}
+
+.outline-box > div > span{
+  margin: 0px;
+  font-size: 13px;
+  font-family: Roboto;
+}
+
+.outline-box > div > div {
+  cursor: pointer;
+}
+
+
+.outline-box > div > div > img{
+  width: 30px;
+}
 
 .title {
   text-transform: uppercase;
@@ -832,7 +1024,6 @@ export default Vue.extend({
     margin: 0 auto;
   }
 }
-
 
 .input img {
   width: 40px;

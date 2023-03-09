@@ -133,6 +133,10 @@
         <b-icon icon="exclamation-circle" variant="warning" />
         {{ $t('plaza.noRefunds')}}
       </div>
+      <div class="text-center burn-content">
+        <b-icon icon="exclamation-circle" variant="warning" />
+        {{ $t('plaza.cannotBurnedEquippedCharacters')}}
+      </div>
        <div class="footer-btn">
         <button class="close-btn" :disabled="burnCharacterIds.length === 0" @click="onBurnConfirm">
           {{isBurnInProgress ? 'Burning..' : $t('blacksmith.confirm')}}</button>

@@ -22,6 +22,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     // Copied from promos.sol, to avoid paying 5k gas to query a constant.
     uint256 private constant BIT_FIRST_CHARACTER = 1;
 
+    uint256 public constant VAR_EQUIPMENT_VERSION = 1; // assert nftvar of same name is equal
+
     function initialize () public initializer {
         __ERC721_init("CryptoBlades character", "CBC");
         __AccessControl_init_unchained();
@@ -114,8 +116,20 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     uint256 public constant NFTVAR_BONUS_POWER = 2;
     uint256 public constant NFTVAR_NON_GENESIS_VERSION = 3; // 0 = genesis, 1 = v2
+    uint256 public constant NFTVAR_EQUIPMENT_VERSION = 4; // 0 = no equipment/fresh
+    /* POWER DATA:
+        pve power 24b each: vs Fire, vs Earth, vs Lightning, vs Water, base
+        pvp power 14b each tiered: vs Fire, vs Earth, vs Lightning, vs Water
+        pvp power 14b each FFA: vs Fire, vs Earth, vs Lightning, vs Water
+        level 8b
+        traits 2b each: character, weapon, shield
+        //246 bits so far
+    */
+    uint256 public constant NFTVAR_POWER_DATA = 5;
 
     uint256 public secondsPerStamina;
+
+    mapping(uint256 => uint256) public vars;
 
     event NewCharacter(uint256 indexed character, address indexed minter);
     event LevelUp(address indexed owner, uint256 indexed character, uint16 level);
@@ -307,6 +321,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function setTrait(uint256 id, uint8 trait) public restricted {
         tokens[id].trait = trait;
+        // require a recalculation on equipment
+        nftVars[id][NFTVAR_EQUIPMENT_VERSION] = 0;
     }
 
     function getXp(uint256 id) public view returns (uint32) {
@@ -318,6 +334,7 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function _gainXp(uint256 id, uint256 xp) internal {
+        // NOTE: Levelups invalidate power data, but recalculating is optional
         Character storage char = tokens[id];
         if (char.level < 255) {
             uint newXp = char.xp.add(xp);
@@ -371,8 +388,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
     }
 
     function getFightDataAndDrainStamina(address fighter,
-        uint256 id, uint8 amount, bool allowNegativeStamina, uint256 busyFlag) public restricted returns(uint104) {
-        require(fighter == ownerOf(id)/* && nftVars[id][NFTVAR_BUSY] == 0*/);
+        uint256 id, uint8 amount, bool allowNegativeStamina, uint256 busyFlag) public restricted returns(uint72, uint256) {
+        require(fighter == ownerOf(id)/* && nftVars[id][NFTVAR_BUSY] == 0*/ && isEquipmentReady(id));
         //nftVars[id][NFTVAR_BUSY] |= busyFlag;
 
         Character storage char = tokens[id];
@@ -389,7 +406,8 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             char.staminaTimestamp = uint64(char.staminaTimestamp + drainTime);
         }
         // bitwise magic to avoid stacking limitations later on
-        return uint104(char.trait | (nftVars[id][NFTVAR_NON_GENESIS_VERSION] << 8) | (getTotalPower(id) << 16) | (uint104(preTimestamp) << 40));
+        return (uint72(preTimestamp | (nftVars[id][NFTVAR_NON_GENESIS_VERSION] << 64)),
+            nftVars[id][NFTVAR_POWER_DATA]);//contains traits at bits 240,242,244 for char,wep,shield
     }
 
     function processRaidParticipation(uint256 id, bool won, uint16 xp) public restricted {
@@ -402,6 +420,11 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
             uint currentProgress = getNftVar(id, NFTVAR_SIMPLEQUEST_PROGRESS);
             setNftVar(id, NFTVAR_SIMPLEQUEST_PROGRESS, ++currentProgress);
         }
+    }
+
+    function isEquipmentReady(uint256 id) public view returns (bool) {
+        uint ev = vars[VAR_EQUIPMENT_VERSION];
+        return nftVars[id][NFTVAR_EQUIPMENT_VERSION] == ev && ev != 0;
     }
 
     function getCharactersOwnedBy(address wallet) public view returns(uint256[] memory chars) {
@@ -458,6 +481,16 @@ contract Characters is Initializable, ERC721Upgradeable, AccessControlUpgradeabl
 
     function setCharacterLimit(uint256 max) public restricted {
         characterLimit = max;
+    }
+
+    function setVar(uint256 varField, uint256 value) external restricted {
+        vars[varField] = value;
+    }
+
+    function setVars(uint256[] calldata varFields, uint256[] calldata values) external restricted {
+        for(uint i = 0; i < varFields.length; i++) {
+            vars[varFields[i]] = values[i];
+        }
     }
 
     function getNftVar(uint256 characterID, uint256 nftVar) public view returns(uint256) {
