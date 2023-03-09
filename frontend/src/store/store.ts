@@ -1092,14 +1092,14 @@ export default new Vuex.Store<IState>({
           const equippedWeapon = await equipment.methods.equippedSlotID(characters.options.address, charId, 1).call(defaultCallOptions(state));
           Vue.set(state.characterWeapons, charId, equippedWeapon);
           console.log('got weapon: '+equippedWeapon);
+
+          await dispatch('fetchPowerData', charId);
         }
         else {
           console.log('no weapon');
           Vue.set(state.characterWeapons, charId, undefined);
         }
       }
-
-      await dispatch('fetchPowerData', charId);
     },
 
     async fetchCharacterWeapon({ state }, characterId: string | number) {
