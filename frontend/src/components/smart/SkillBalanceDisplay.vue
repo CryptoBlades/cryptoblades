@@ -121,8 +121,10 @@
     >
       <div class="text-center">
         <div class="mb-2">
-          <div class="spinner-grow text-center" style="width: 3rem; height: 3rem;" role="status">
-            <span class="sr-only">Loading...</span>
+          <div class="spinner-grow text-center" role="status">
+            <span class="sr-only">
+              {{  $t('loading') }}
+            </span>
           </div>
         </div>
         <h3 class="text-white mb-1">
