@@ -1080,7 +1080,7 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchKeyLootboxes', ownedKeyLootboxIds);
     },
 
-    async updateCharacterWeapons({ state }) {
+    async updateCharacterWeapons({ state, dispatch }) {
       if(!state.defaultAccount) return;
 
       const equipment = state.contracts().EquipmentManager!;
@@ -1092,6 +1092,8 @@ export default new Vuex.Store<IState>({
           const equippedWeapon = await equipment.methods.equippedSlotID(characters.options.address, charId, 1).call(defaultCallOptions(state));
           Vue.set(state.characterWeapons, charId, equippedWeapon);
           console.log('got weapon: '+equippedWeapon);
+
+          await dispatch('fetchPowerData', charId);
         }
         else {
           console.log('no weapon');
