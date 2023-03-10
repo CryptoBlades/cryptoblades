@@ -15,8 +15,9 @@
             <b-button
                   :disabled="transferDisabled || loading"
                   @click="onTransfer"
-                      variant="info"
-                      class="text-nowrap">
+                  variant="info"
+                  class="text-nowrap"
+            >
                 {{ $t('admin.skill.transfer') }}
             </b-button>
           </div>
@@ -63,7 +64,7 @@ export default Vue.extend({
       return (!isValidWeb3Address(this.transferModel.receiverAddress || '')
         || !isValidWeb3Address(this.transferModel.sourceWallet || ''))
         || this.skillAllowance < this.transferModel.amount
-        ||  this.transferModel.amount <= 0;
+        || this.transferModel.amount <= 0;
     }
   },
   methods: {
@@ -84,9 +85,9 @@ export default Vue.extend({
         this.resetFormFields();
       } catch(e) {
         console.error(e);
+      } finally {
+        this.loading = false;
       }
-
-      this.loading = false;
     },
     resetFormFields() {
       this.transferModel = {
