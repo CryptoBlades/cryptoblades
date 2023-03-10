@@ -16,7 +16,7 @@ module.exports = async function (deployer, network, accounts) {
   || network === 'avaxtestnet-fork'
   || network === 'auroratestnet'
   || network === 'kavatestnet'
-  || network === 'skaletestnet' || network === 'coinextestnet' || network === 'metertestnet') {
+  || network === 'skaletestnet' || network === 'coinextestnet' || network === 'metertestnet' || network === 'cronostestnet') {
     const game = await CryptoBlades.deployed();
     const launchpad = await deployProxy(Launchpad, [game.address], { deployer });
     const GAME_ADMIN = await game.GAME_ADMIN();

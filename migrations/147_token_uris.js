@@ -81,6 +81,9 @@ module.exports = async function (deployer, network, accounts) {
     else if(network === 'metertestnet' || network === 'metermainnet') {
       networkName = 'meter';
     }
+    else if(network === 'cronostestnet') {
+      networkName = 'cronos';
+    }
 
     await weapons.grantRole(weapons_GA, altChainsDeployerAddress);
     await characters.grantRole(characters_GA, altChainsDeployerAddress);
