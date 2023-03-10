@@ -73,11 +73,7 @@ export default function createRouter() {
   router.beforeEach((to, from, next) => {
     //preserve chain query params
     if (from.query.chain && !to.query.chain) {
-      if (to.path === from.path) {
-        return;
-      }
-
-      next({path: to.path, query: {...to.query,chain: from.query.chain}});
+      next({path: to.path, query: {...to.query, chain: from.query.chain}});
     }
 
     next();
