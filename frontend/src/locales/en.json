@@ -1270,6 +1270,7 @@
     }
   },
   "skillBalanceDisplay": {
+    "mintSFuel": "Mint Sfuel",
     "buySkillTooltip": "Buy SKILL",
     "buySkillTitle": "BUY SKILL",
     "buyWithCrypto": "Buy with Crypto",
@@ -1278,7 +1279,9 @@
     "reachedPortalLimit": "You have reached your limit for withdrawing BNB from the portal for this period, please wait about {durationUntilLimitPeriodOver}({formattedTotalAvailableBnb} left)",
     "withdrawablePortal": "{formattedBnbThatCanBeWithdrawn} of {formattedTotalAvailableBnb} withdrawable from the portal",
     "withdrawable": "<br>+ WITHDRAWABLE ",
-    "igo": "<br>+ IN GAME ONLY "
+    "igo": "<br>+ IN GAME ONLY ",
+    "miningSFuel": "Mining sFUEL",
+    "generatingSfuel": "Please wait while your sFUEL is generated."
   },
   "leaderboard": {
   },

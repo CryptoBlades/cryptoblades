@@ -3,7 +3,7 @@
     <div class="skill-balance-display-wrapper d-flex justify-content-end align-items-center pr-2 pb-1">
       <div v-if="getBalanceUrl"
         size="sm" class="my-2 my-sm-0 skill-tooltip" variant="primary"
-        v-tooltip="$t('skillBalanceDisplay.buyBalanceTooltip')"
+        v-tooltip="$t('skillBalanceDisplay.mintSFuel')"
         @click="onClickBalance"
       >
         <img src="../../assets/add-skill-icon.svg" class="add-button gtag-link-others mr-1" :style="isMobile() ? 'width: 20px':''"  tagname="buy_balance">
@@ -109,6 +109,31 @@
         </div>
       </div>
     </div>
+    <b-modal
+      class="centered-modal"
+      ref="minting-sfuel-modal"
+      hide-footer
+      hide-header
+      hide-header-close
+      no-close-on-backdrop
+      no-close-on-esc
+      centered
+    >
+      <div class="text-center">
+        <div class="mb-2">
+          <div class="spinner-grow text-center" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+        <h3 class="text-white mb-1">
+          {{  $t('skillBalanceDisplay.miningSFuel') }}
+        </h3>
+        <h5 class="text-white">
+          {{  $t('skillBalanceDisplay.generatingSfuel') }}
+        </h5>
+      </div>
+    </b-modal>
+
     <b-modal class="centered-modal" ref="claim-summary-modal" :title="$t('ClaimRewardsBar.claimRewards')"
       :ok-title="$t('ClaimRewardsBar.claim')" @ok="onClaimTokens()"
       :ok-disabled="(selectedPartneredProject && !canClaimSelectedProject)
@@ -174,6 +199,7 @@ import ElementTrait from '@/components/smart/ElementTrait.vue';
 import { SupportedProject } from '@/views/Treasury.vue';
 import PartneredProject from '../PartneredProject.vue';
 import UpdatePopup from '../UpdatePopup.vue';
+import { userProofOfWork } from '@/utils/pow';
 
 interface StoreMappedState {
   skillRewards: string;
@@ -251,6 +277,7 @@ export default Vue.extend({
     };
   },
   computed: {
+    ...mapState(['defaultAccount']),
     ...(mapState(['skillRewards', 'valorRewards', 'skillBalance', 'inGameOnlyFunds', 'waxBridgeWithdrawableBnb',
       'waxBridgeTimeUntilLimitExpires', 'ownedCharacterIds', 'xpRewards', 'balance']) as Accessors<StoreMappedState>),
     ...(mapState('treasury',
@@ -405,6 +432,7 @@ export default Vue.extend({
   },
 
   methods: {
+    ...mapActions(['fetchSkillBalance']),
     ...(mapActions(['addMoreSkill', 'withdrawBnbFromWaxBridge',
       'claimXpRewards']) as StoreMappedActions),
     ...(mapActions('treasury', ['fetchPartnerProjects',
@@ -491,11 +519,22 @@ export default Vue.extend({
     showModal() {
       (this.$refs['transak-buy'] as BModal).show();
     },
-    onClickBalance(){
-      window.open(this.getBalanceUrl, '_blank');
-    },
+    async onClickBalance() {
+      if(this.getCurrencySymbol === 'SFUEL') {
+        (this.$refs['minting-sfuel-modal'] as any).show();
+        try {
+          await userProofOfWork({account: this.defaultAccount, network: 'mainnet'});
+          await this.fetchSkillBalance();
+        } catch(e) {
+          console.error(e);
+        } finally {
+          (this.$refs['minting-sfuel-modal'] as any).hide();
+        }
+      } else {
+        window.open(this.getBalanceUrl, '_blank');
+      }
+    }
   },
-
   components: {
     BModal,
     ElementTrait,
