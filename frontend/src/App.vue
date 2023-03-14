@@ -509,6 +509,10 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   overflow: auto;
 }
 
+.coinzilla {
+  max-width: 100% !important;
+}
+
 .app .content.bg-dark{
   flex: 1;
 }
