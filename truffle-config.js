@@ -343,9 +343,19 @@ module.exports = {
       )),
       network_id: 338,
       timeoutBlocks: 200,
-      skipDryRun: true,
-	  gasPrice: 200000000000,
-	  gas: 40000000
+      skipDryRun: true
+    },
+    cronosmainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.CRONOS_MAINET_PRIVATE_KEY,
+        process.env.CRONOS_MAINET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.CRONOS_MAINNET_RPC_URL || 'https://evm.cronos.org'
+        }
+      )),
+      network_id: 25,
+      timeoutBlocks: 200,
+      skipDryRun: true
     }
     // Another network with more advanced options...
     // advanced: {

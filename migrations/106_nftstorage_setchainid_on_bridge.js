@@ -34,7 +34,7 @@ module.exports = async function (deployer, network, accounts) {
 	else if(network === 'metertestnet' || network === 'metermainnet') {
 		await storage.setLocalChainPrefix('METER');
 	}
-	else if(network === 'cronostestnet') {
+	else if(network === 'cronostestnet' || network === 'cronosmainnet') {
 		await storage.setLocalChainPrefix('CRONOS');
 	}
 	else {

@@ -4,7 +4,7 @@ const Shields = artifacts.require("Shields");
 const CryptoBlades = artifacts.require("CryptoBlades");
 
 module.exports = async function (deployer, network, accounts) {
-  if(network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet' || network === 'avaxmainnet' || network === 'auroramainnet' || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet' || network === 'kavamainnet') {
+  if(network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet' || network === 'avaxmainnet' || network === 'auroramainnet' || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet'  || network === 'cronosmainnet' || network === 'kavamainnet') {
     const blacksmith = await Blacksmith.deployed();
     const shields = await Shields.deployed();
     const basicPriceOracle = await BasicPriceOracle.deployed();

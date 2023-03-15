@@ -81,7 +81,7 @@ module.exports = async function (deployer, network, accounts) {
     else if(network === 'metertestnet' || network === 'metermainnet') {
       networkName = 'meter';
     }
-    else if(network === 'cronostestnet') {
+    else if(network === 'cronostestnet'  || network === 'cronosmainnet') {
       networkName = 'cronos';
     }
 
