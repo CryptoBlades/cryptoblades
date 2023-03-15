@@ -12,7 +12,7 @@ module.exports = async function (deployer, network, accounts) {
       skillTokenAddress = '0x154A9F9cbd3449AD22FDaE23044319D6eF2a1Fab';
       lpTokenAddress = '0x0dEB588c1EC6f1D9f348126D401f05c4c7B7a80c';
     }
-    else if(network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet' || network === 'avaxmainnet' || network === 'auroramainnet' || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet' || network === 'kavamainnet') {
+    else if(network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet' || network === 'avaxmainnet' || network === 'auroramainnet' || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet' || network === 'kavamainnet'  || network === 'cronosmainnet') {
       const skillToken = await SkillToken.deployed();
       skillTokenAddress = skillToken.address;
       const lpToken = await ExperimentToken.deployed();

@@ -9,7 +9,7 @@ module.exports = async function (deployer, network) {
       keyHash = '0xc251acd21ec4fb7f31bb8868288bfdbaeb4fbfec2df3735ddbd4f7dc8d60103c';
       fee = web3.utils.toWei('0.2', 'ether');
     }
-    else if(network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet' || network === 'avaxmainnet' || network === 'auroramainnet' || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet' || network === 'kavamainnet') {
+    else if(network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet' || network === 'avaxmainnet' || network === 'auroramainnet' || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet'  || network === 'cronosmainnet' || network === 'kavamainnet') {
       linkToken = '0x0000000000000000000000000000000000000000';
       vrfCoordinator = '0x0000000000000000000000000000000000000000';
       keyHash = '0x0000000000000000000000000000000000000000';
