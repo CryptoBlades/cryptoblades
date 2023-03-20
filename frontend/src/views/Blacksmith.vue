@@ -372,11 +372,11 @@
                   </div>
                 </div>
                 <div>
-                  <input v-model="lesserDust" type="range" min="0" :max="getLesserDust()" value="0" steps="1">
+                  <input v-model="lesserDust" type="range" min="0" :max="100" value="0" steps="1">
                 </div>
                 <div>
                   <span>{{lesserDust}}/{{getLesserDust()}}</span>
-                  <span class="cursor-p" @click="lesserDust = getLesserDust()">{{$t('blacksmith.max')}}</span>
+                  <span class="cursor-p" @click="lesserDust = 100">{{$t('blacksmith.max')}}</span>
                 </div>
               </div>
 
@@ -392,11 +392,11 @@
                   </div>
                 </div>
                 <div>
-                  <input v-model="greaterDust" type="range" min="0" :max="getGreaterDust()" value="0" steps="1">
+                  <input v-model="greaterDust" type="range" min="0" :max="25" value="0" steps="1">
                 </div>
                 <div>
                   <span>{{greaterDust}}/{{getGreaterDust()}}</span>
-                  <span class="cursor-p" @click="greaterDust = getGreaterDust()">{{$t('blacksmith.max')}}</span>
+                  <span class="cursor-p" @click="greaterDust = 25">{{$t('blacksmith.max')}}</span>
                 </div>
               </div>
 
@@ -412,11 +412,11 @@
                   </div>
                 </div>
                 <div>
-                  <input v-model="powerfulDust" type="range" min="0" :max="getPowerfulDust()" value="0" steps="1">
+                  <input v-model="powerfulDust" type="range" min="0" :max="10" value="0" steps="1">
                 </div>
                 <div>
                   <span>{{powerfulDust}}/{{getPowerfulDust()}}</span>
-                  <span class="cursor-p" @click="powerfulDust = getPowerfulDust()">{{$t('blacksmith.max')}}</span>
+                  <span class="cursor-p" @click="powerfulDust = 10">{{$t('blacksmith.max')}}</span>
                 </div>
               </div>
               <div class="btn-forge">
