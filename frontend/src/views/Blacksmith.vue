@@ -372,11 +372,11 @@
                   </div>
                 </div>
                 <div>
-                  <input v-model="lesserDust" type="range" min="0" :max="100" value="0" steps="1">
+                  <input v-model="lesserDust" type="range" min="0" :max="lesserDustReforgeCap" value="0" steps="1">
                 </div>
                 <div>
                   <span>{{lesserDust}}/{{getLesserDust()}}</span>
-                  <span class="cursor-p" @click="lesserDust = 100">{{$t('blacksmith.max')}}</span>
+                  <span class="cursor-p" @click="lesserDust = lesserDustReforgeCap">{{$t('blacksmith.max')}}</span>
                 </div>
               </div>
 
@@ -392,11 +392,11 @@
                   </div>
                 </div>
                 <div>
-                  <input v-model="greaterDust" type="range" min="0" :max="25" value="0" steps="1">
+                  <input v-model="greaterDust" type="range" min="0" :max="greaterDustReforgeCap" value="0" steps="1">
                 </div>
                 <div>
                   <span>{{greaterDust}}/{{getGreaterDust()}}</span>
-                  <span class="cursor-p" @click="greaterDust = 25">{{$t('blacksmith.max')}}</span>
+                  <span class="cursor-p" @click="greaterDust = greaterDustReforgeCap">{{$t('blacksmith.max')}}</span>
                 </div>
               </div>
 
@@ -412,11 +412,11 @@
                   </div>
                 </div>
                 <div>
-                  <input v-model="powerfulDust" type="range" min="0" :max="10" value="0" steps="1">
+                  <input v-model="powerfulDust" type="range" min="0" :max="powerfulDustReforgeCap" value="0" steps="1">
                 </div>
                 <div>
                   <span>{{powerfulDust}}/{{getPowerfulDust()}}</span>
-                  <span class="cursor-p" @click="powerfulDust = 10">{{$t('blacksmith.max')}}</span>
+                  <span class="cursor-p" @click="powerfulDust = powerfulDustReforgeCap">{{$t('blacksmith.max')}}</span>
                 </div>
               </div>
               <div class="btn-forge">
@@ -686,6 +686,9 @@ interface Data {
   lesser: number;
   greater: number;
   powerful: number;
+  lesserDustReforgeCap: number,
+  greaterDustReforgeCap: number,
+  powerfulDustReforgeCap: number,
   activeTab: string;
   ctr: number;
   mintSlippageApproved: boolean;
@@ -743,6 +746,9 @@ export default Vue.extend({
       lesser: 0,
       greater: 0,
       powerful: 0,
+      lesserDustReforgeCap: 100,
+      greaterDustReforgeCap: 25,
+      powerfulDustReforgeCap: 10,
       activeTab: 'forge',
       ctr: 0,
       mintSlippageApproved: false,
