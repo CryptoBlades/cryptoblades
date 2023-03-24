@@ -1,7 +1,7 @@
 const ChainlinkRandoms = artifacts.require("ChainlinkRandoms");
 
 module.exports = async function (deployer, network) {
-  if (network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet' || network === 'avaxmainnet' || network === 'auroramainnet' || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet' || network === 'kavamainnet') {
+  if (network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet' || network === 'avaxmainnet' || network === 'auroramainnet' || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet' || network === 'kavamainnet' || network === 'cronosmainnet') {
     let linkToken, vrfCoordinator, keyHash, fee;
     if (network === 'bscmainnet' || network === 'bscmainnet-fork') {
       linkToken = '0x404460C6A5EdE2D891e8297795264fDe62ADBB75';

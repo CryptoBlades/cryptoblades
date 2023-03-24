@@ -5,7 +5,7 @@ const SkillToken = artifacts.require("SkillToken");
 const ExperimentToken = artifacts.require("ExperimentToken");
 
 module.exports = async function (deployer, network, accounts) {
-  if (network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet' || network === 'avaxmainnet' || network === 'auroramainnet' || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet' || network === 'kavamainnet') {
+  if (network === 'bscmainnet' || network === 'bscmainnet-fork' || network === 'hecomainnet' || network === 'okexmainnet' || network === 'polygonmainnet' || network === 'avaxmainnet' || network === 'auroramainnet' || network === 'skalemainnet' || network === 'coinexmainnet' || network === 'metermainnet' || network === 'kavamainnet' || network === 'cronosmainnet') {
     const rewardDistributorAddress = '0xC2573A26297a0c952C92bb48Fdcb6929524F7F48';
     let skillTokenAddress, lpTokenAddress;
     if (network === 'bscmainnet' || network === 'bscmainnet-fork') {
