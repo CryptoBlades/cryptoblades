@@ -350,7 +350,7 @@ module.exports = {
         process.env.CRONOS_MAINET_PRIVATE_KEY,
         process.env.CRONOS_MAINET_WALLET_MNEMONIC,
         {
-          providerOrUrl: process.env.CRONOS_MAINNET_RPC_URL || 'https://evm.cronos.org'
+          providerOrUrl: process.env.CRONOS_MAINNET_RPC_URL || 'https://cronos-evm.publicnode.com'
         }
       )),
       network_id: 25,
