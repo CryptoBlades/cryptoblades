@@ -619,7 +619,7 @@ export default Vue.extend({
         await this.getHourlyAllowance();
         (this.$refs["no-skill-warning-modal"] as any).show();
       } else {
-        this.fightTarget(targetToFight, targetIndex);
+        this.fightTargets(targetToFight, targetIndex);
       }
     },
 
