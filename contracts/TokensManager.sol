@@ -75,6 +75,12 @@ contract TokensManager is Initializable, AccessControlUpgradeable {
 
     function setCombatTokenChargePercent(uint256 percent) external restricted {
         combatTokenChargePercent = percent;
+        if(percent == 0) {
+            game.setVar(29, 1); //29 = game.VAR_FIGHT_UNTAXED()
+        }
+        else {
+            game.setVar(29, 0);
+        }
     }
 
     function setOffsetSlippage(uint8 slippage) external restricted {
