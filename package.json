@@ -14,7 +14,8 @@
     "abdk-libraries-solidity": "2.4.0",
     "dayjs": "^1.10.7",
     "dotenv": "^8.2.0",
-    "gsap": "^3.9.1"
+    "gsap": "^3.9.1",
+    "npm-run-all": "^4.1.5"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
@@ -33,7 +34,6 @@
     "imagemin": "^8.0.0",
     "imagemin-pngquant": "^9.0.2",
     "lerna": "^4.0.0",
-    "npm-run-all": "^4.1.5",
     "ohm-js": "^15.5.0",
     "sass": "^1.44.0",
     "shelljs": "^0.8.4",

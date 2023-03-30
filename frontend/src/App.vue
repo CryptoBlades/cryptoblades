@@ -396,7 +396,6 @@ export default Vue.extend({
 
   async mounted() {
     Events.$on('setting:hideRewards', () => this.checkStorage());
-    Events.$on('setting:useGraphics', () => this.checkStorage());
     Events.$on('setting:hideWalletWarning', () => this.checkStorage());
     // Events.$on('garrison:characterReceived', (e) => {
     //   this.$dialog.notify.warning(`${i18n.t('app.warning.message.newCharacter')} ID: ${e.id} ${i18n.t('app.warning.message.inGarrison')}!`,
@@ -508,6 +507,10 @@ button.btn.button.main-font.dark-bg-text.encounter-button.btn-styled.btn-primary
   flex-flow: column;
   height: 100%;
   overflow: auto;
+}
+
+.coinzilla {
+  max-width: 100% !important;
 }
 
 .app .content.bg-dark{

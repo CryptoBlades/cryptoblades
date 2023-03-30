@@ -40,6 +40,7 @@ import BlacksmithAdmin from './AdminTabs/BlacksmithAdmin.vue';
 import RaidAdmin from './AdminTabs/RaidAdmin.vue';
 import SpecialWeaponsManagerAdmin from './AdminTabs/SpecialWeaponsManagerAdmin.vue';
 import DexAdmin from './AdminTabs/DexAdmin.vue';
+import SkillAdmin from './AdminTabs/SkillAdmin.vue';
 
 interface StoreMappedActions {
   userHasDefaultAdminAccess(payload: { contract: Contract<any> }): Promise<boolean>;
@@ -71,6 +72,7 @@ export default Vue.extend({
     RaidAdmin,
     SpecialWeaponsManagerAdmin,
     DexAdmin,
+    SkillAdmin
   },
   props: {
     title: {
@@ -80,6 +82,10 @@ export default Vue.extend({
     contract: {
       type: Object as PropType<Contract<any>>,
       required: true,
+    },
+    permissionContract: {
+      type: Object as PropType<Contract<any>>,
+      required: false,
     },
     component: {
       type: String as PropType<string>,
@@ -102,12 +108,11 @@ export default Vue.extend({
     ...mapActions(['userHasDefaultAdminAccess', 'userHasGameAdminAccess', 'userHasMinterAccess']) as StoreMappedActions,
 
     async fetchData() {
-      this.hasTabAccess = await this.userHasDefaultAdminAccess({contract: this.contract})
-        || await this.userHasGameAdminAccess({contract: this.contract})
-        || await this.userHasMinterAccess({contract: this.contract});
+      this.hasTabAccess = await this.userHasDefaultAdminAccess({contract: this.permissionContract || this.contract})
+       || await this.userHasGameAdminAccess({contract: this.permissionContract || this.contract})
+       || await this.userHasMinterAccess({contract: this.permissionContract || this.contract});
     },
   },
-
   async mounted() {
     await this.fetchData();
     this.initialized = true;

@@ -1080,7 +1080,7 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchKeyLootboxes', ownedKeyLootboxIds);
     },
 
-    async updateCharacterWeapons({ state }) {
+    async updateCharacterWeapons({ state, dispatch }) {
       if(!state.defaultAccount) return;
 
       const equipment = state.contracts().EquipmentManager!;
@@ -1092,6 +1092,8 @@ export default new Vuex.Store<IState>({
           const equippedWeapon = await equipment.methods.equippedSlotID(characters.options.address, charId, 1).call(defaultCallOptions(state));
           Vue.set(state.characterWeapons, charId, equippedWeapon);
           console.log('got weapon: '+equippedWeapon);
+
+          await dispatch('fetchPowerData', charId);
         }
         else {
           console.log('no weapon');
@@ -2200,7 +2202,9 @@ export default new Vuex.Store<IState>({
       ];
 
       for (const promise of promises) {
-        if (await promise) return commit('updateHasAdminAccess', true);
+        if (await promise) {
+          return commit('updateHasAdminAccess', true);
+        }
       }
       return commit('updateHasAdminAccess', false);
     },
@@ -3160,5 +3164,18 @@ export default new Vuex.Store<IState>({
 
       return CryptoBlades.methods.getMintCharacterFee().call(defaultCallOptions(state));
     },
+    async transferSkill({state}, {sourceAddress ,receiverAddress, amount}) {
+      const { SkillToken } = state.contracts();
+      if(!SkillToken) return;
+
+      return await SkillToken.methods.transferFrom(sourceAddress,
+        receiverAddress, Web3.utils.toWei(new BigNumber(amount).toString(), 'ether')).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
+    },
+    async getSkillAllowance({state}, {sourceAddress, receiverAddress}) {
+      const { SkillToken } = state.contracts();
+      if(!SkillToken) return;
+
+      return await SkillToken.methods.allowance(sourceAddress, receiverAddress).call(defaultCallOptions(state));
+    }
   }
 });
