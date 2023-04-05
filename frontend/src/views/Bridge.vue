@@ -482,7 +482,7 @@ export default Vue.extend({
     this.chainsToSendTo = this.supportedChains.filter(item => item !== this.currentChain);
 
     //check current net by checking url
-    const env = window.location.href.startsWith('https://test') ? 'test' : 'production'; //const env = 'test';
+    const env = 'production'; //const env = 'test';
     const conf = config as any;
     for(let i = 0; i < this.supportedChains.length; i++){
       this.supportedChainIds.push(+conf.environments[env].chains[this.supportedChains[i]].VUE_APP_NETWORK_ID);
