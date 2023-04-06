@@ -332,6 +332,30 @@ module.exports = {
       network_id: 82,
       timeoutBlocks: 200,
       skipDryRun: true
+    },
+    cronostestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.CRONOS_TESTNET_PRIVATE_KEY,
+        process.env.CRONOS_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.CRONOS_TESTNET_RPC_URL || 'https://evm-t3.cronos.org/'
+        }
+      )),
+      network_id: 338,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    cronosmainnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.CRONOS_MAINET_PRIVATE_KEY,
+        process.env.CRONOS_MAINET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: process.env.CRONOS_MAINNET_RPC_URL || 'https://cronos-evm.publicnode.com'
+        }
+      )),
+      network_id: 25,
+      timeoutBlocks: 200,
+      skipDryRun: true
     }
     // Another network with more advanced options...
     // advanced: {
