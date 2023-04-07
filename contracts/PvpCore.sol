@@ -105,7 +105,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     /// @dev IDs of characters available for matchmaking by tier
     mapping(uint8 => EnumerableSet.UintSet) private _matchableCharactersByTier;
     /// @dev special weapon reroll timestamp
-    mapping(uint256 => uint256) public specialWeaponRerollTimestamp;    
+    mapping(uint256 => uint256) public specialWeaponRerollTimestamp;
     /// @dev owner's address by character ID
     mapping(uint256 => address) private _ownerByCharacter;
 
