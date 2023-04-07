@@ -105,7 +105,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
     /// @dev IDs of characters available for matchmaking by tier
     mapping(uint8 => EnumerableSet.UintSet) private _matchableCharactersByTier;
     /// @dev special weapon reroll timestamp
-    mapping(uint256 => uint256) public specialWeaponRerollTimestamp;
+    mapping(uint256 => uint256) public specialWeaponRerollTimestamp;    
     /// @dev owner's address by character ID
     mapping(uint256 => address) private _ownerByCharacter;
 
@@ -129,6 +129,14 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         uint256 kickedBy,
         uint256 timestamp
     );
+
+    modifier removeCharacterFromExpiredDuel(uint256 characterID) {
+        if (isCharacterInDuel(characterID) && !isCharacterWithinDecisionTime(characterID)) {
+            isDefending[characterID] = true;
+            _duelQueue.remove(characterID);
+        }
+        _;
+    }
 
     modifier characterInArena(uint256 characterID) {
         _characterInArena(characterID);
@@ -273,6 +281,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         external
         isOwnedCharacter(characterID)
         characterInArena(characterID)
+        removeCharacterFromExpiredDuel(characterID)
         characterNotUnderAttack(characterID)
         characterNotInDuel(characterID)
     {
