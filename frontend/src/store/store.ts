@@ -1088,6 +1088,8 @@ export default new Vuex.Store<IState>({
       for(let i = 0; i < state.ownedCharacterIds.length; i++) {
         const charId = state.ownedCharacterIds[i];
         const addr = await equipment.methods.equippedSlotAddress(characters.options.address, charId, 1).call(defaultCallOptions(state));
+        console.log('adress addr', addr);
+        console.log('characters.options.address', characters.options.address);
         if(addr && addr !== '0x0000000000000000000000000000000000000000') {
           const equippedWeapon = await equipment.methods.equippedSlotID(characters.options.address, charId, 1).call(defaultCallOptions(state));
           Vue.set(state.characterWeapons, charId, equippedWeapon);
