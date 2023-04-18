@@ -35,7 +35,7 @@
         </b-row>
         <b-row>
           <b-col class="earned">
-            <p class="h5 text-white">
+            <div class="h5 text-white">
               <div v-if="!isValor">
                 <div>
                   <b>{{ formattedSkill }}</b>
@@ -66,7 +66,7 @@
                   offset: formattedSkillGasOffsetRewards,
                   inUSD: isValor ? '' : formattedInUsd(calculateSkillPriceInUsd(formattedSkillGasOffsetRewards).toFixed(4))
                 })"></span>
-            </p>
+            </div>
             <h5>+ {{formattedXpGain}}</h5>
           </b-col>
         </b-row>
