@@ -136,8 +136,10 @@
     "gasFee": "You spent {bnbGasUsed} {gasToken} on gas fees ",
     "youRolled": "You rolled:",
     "enemyRolled": "Enemy rolled:",
-    "earnedSkill": "<b>{noIGO}</b> <small>UNCLAIMED SKILL</small> <b>{inUSD}</b> ",
-    "earnedValor": "<b>{noIGO}</b> <small>UNCLAIMED VALOR</small> ",
+    "earnedSkill": "UNCLAIMED SKILL",
+    "earnedValor": "UNCLAIMED VALOR",
+    "earnedValorHint": "Fight earnings: (Valor Price * Fight Rewards * Highest Treasury Multiplier)",
+    "earnedSkillHint": "Fight earnings: (Skill Price * Fight Rewards * Highest Treasury Multiplier)",
     "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> ",
     "gasOffset": "<br/> <small>INCLUDING</small> <b>{offset}</b> <small>GAS OFFSET</small> <b>{inUSD}</b> "
   },

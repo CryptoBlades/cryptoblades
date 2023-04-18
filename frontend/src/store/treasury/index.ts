@@ -28,6 +28,9 @@ const treasury = {
   getters: {
     getPartnerProjects(state: ITreasuryState): IPartnerProject[] {
       return values(state.partnerProjects);
+    },
+    getProjectMultipliers(state: ITreasuryState) {
+      return state.partnerProjectMultipliers;
     }
   },
   mutations: {
