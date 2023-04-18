@@ -39,7 +39,7 @@
               <div v-if="!isValor">
                 <div>
                   <b>{{ formattedSkill }}</b>
-                  <span v-if="currentChain === 'BNB'">
+                  <span>
                     <small class="mr-2">(<b>${{ fightRewardsAmountInUSD }}</b>)</small>
                     <Hint :text="$t('combatResults.earnedSkillHint')" />
                   </span>
@@ -52,7 +52,7 @@
               <div v-else>
                 <div>
                   <b>{{ formattedSkill }}</b>
-                  <span v-if="currentChain === 'BNB'">
+                  <span>
                     <small class="mr-2">(<b>${{ fightRewardsAmountInUSD }}</b>)</small>
                     <Hint :text="$t('combatResults.earnedValorHint')" />
                   </span>
@@ -166,7 +166,6 @@ export default Vue.extend({
       skillPrice: 0,
       valorPrice: 0,
       gasToken: '',
-      currentChain: 'BNB',
       showAds: false,
       gasOffsetPerFight: 0,
       highestMultiplier: 0,
@@ -264,7 +263,6 @@ export default Vue.extend({
   async mounted() {
     await this.fetchPartnerProjects();
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
-    this.currentChain = getConfigValue('currencySymbol') || 'BNB';
 
     await this.fetchValorPrice();
     await this.fetchPrices();
