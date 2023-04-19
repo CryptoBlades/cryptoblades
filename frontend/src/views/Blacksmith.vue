@@ -272,8 +272,8 @@
                     window.coinzilla_display = window.coinzilla_display || [];
                     var c_display_preferences = {};
                     c_display_preferences.zone = "541621de2f7bb717603";
-                    c_display_preferences.width = "300";
-                    c_display_preferences.height = "150";
+                    c_display_preferences.width = "320";
+                    c_display_preferences.height = "100";
                     coinzilla_display.push(c_display_preferences);
               </script2>
         </div>
