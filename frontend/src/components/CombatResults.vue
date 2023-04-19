@@ -80,18 +80,18 @@
       </h6>
     </div>
   </div>
-    <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
-      <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
-        <div class="coinzilla" data-zone="C-316621de2f7b8b25140"></div>
-          <script2>
-                window.coinzilla_display = window.coinzilla_display || [];
-                var c_display_preferences = {};
-                c_display_preferences.zone = "316621de2f7b8b25140";
-                c_display_preferences.width = "300";
-                c_display_preferences.height = "250";
-                coinzilla_display.push(c_display_preferences);
-          </script2>
-    </div>
+  <div v-if="showAds && !isMobile()" class="ad-container align-items-center mt-5">
+    <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
+      <div class="coinzilla" data-zone="C-316621de2f7b8b25140"></div>
+        <script2>
+              window.coinzilla_display = window.coinzilla_display || [];
+              var c_display_preferences = {};
+              c_display_preferences.zone = "316621de2f7b8b25140";
+              c_display_preferences.width = "300";
+              c_display_preferences.height = "250";
+              coinzilla_display.push(c_display_preferences);
+        </script2>
+  </div>
   </div>
 </template>
 

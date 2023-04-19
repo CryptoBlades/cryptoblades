@@ -265,6 +265,18 @@
             class="ml-4 centered-icon" v-tooltip.bottom="$t('blacksmith.dynamicPricesDetails',
               { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
         </div>
+        <div v-if="showAds && !isMobile()" class="row justify-content-center margin-top ad-container">
+          <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
+            <div class="coinzilla" data-zone="C-541621de2f7bb717603"></div>
+              <script2>
+                    window.coinzilla_display = window.coinzilla_display || [];
+                    var c_display_preferences = {};
+                    c_display_preferences.zone = "541621de2f7bb717603";
+                    c_display_preferences.width = "300";
+                    c_display_preferences.height = "150";
+                    coinzilla_display.push(c_display_preferences);
+              </script2>
+        </div>
         <div class="footer-close" @click="$refs['forge-element-selector-modal'].hide()">
           <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
@@ -759,7 +771,8 @@ export default Vue.extend({
       currentFilteredWeapons: [],
       isLoading: true,
       canClaim: false,
-      Element
+      Element,
+      showAds: false,
     } as Data;
   },
 
@@ -826,6 +839,7 @@ export default Vue.extend({
   },
 
   async mounted(){
+    this.checkStorage();
     Events.$on('forge-weapon', (id: number) =>{
       if(id === 0){
         this.onClickForge(id);
@@ -1206,6 +1220,10 @@ export default Vue.extend({
 
       await this.fetchSpecialWeaponEvents();
       this.selectedSpecialWeaponEventId = +this.specialWeaponEventId;
+    },
+    checkStorage() {
+      if (process.env.NODE_ENV === 'development') this.showAds = false;
+      else this.showAds = localStorage.getItem('show-ads') === 'true';
     }
   },
 
