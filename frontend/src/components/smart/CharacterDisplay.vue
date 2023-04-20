@@ -109,6 +109,7 @@ interface RaidMappedActions {
 interface StoreMappedGetters {
   charactersWithIds(ids: (string | number)[]): Nft[];
   getCharacterPower(characterId: number): Promise<string>;
+  getCharacterSecondsPerStamina(): number
 }
 
 interface StoreMappedCombatGetters {
@@ -145,7 +146,8 @@ export default Vue.extend({
       'timeUntilCharacterHasMaxStamina',
       'getIsCharacterViewExpanded',
       'getCharacterIsInArena',
-      'getCharacterPower'
+      'getCharacterPower',
+      'getCharacterSecondsPerStamina'
     ]),
     ...(mapGetters('combat', [
       'getIsInCombat',
@@ -278,7 +280,7 @@ export default Vue.extend({
       });
     },
     toolTipHtml(time: string): string {
-      return i18n.t('blacksmith.regenerate') + time;
+      return i18n.t('blacksmith.regenerate', {minutes: (this.getCharacterSecondsPerStamina / 60).toFixed(4),time}).toString();
     },
     setSelectedCharacter(id: any) {
       for (const a of this.filteredCharactersForList) {
