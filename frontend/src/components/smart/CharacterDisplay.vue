@@ -280,7 +280,12 @@ export default Vue.extend({
       });
     },
     toolTipHtml(time: string): string {
-      return i18n.t('blacksmith.regenerate', {minutes: (this.getCharacterSecondsPerStamina / 60),time}).toString();
+      const minutes = this.getCharacterSecondsPerStamina / 60;
+      if(minutes % 1 !== 0) {
+        return i18n.t('blacksmith.regenerate', {minutes: minutes.toFixed(4),time}).toString();
+      } else {
+        return i18n.t('blacksmith.regenerate', {minutes,time}).toString();
+      }
     },
     setSelectedCharacter(id: any) {
       for (const a of this.filteredCharactersForList) {
