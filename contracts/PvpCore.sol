@@ -130,6 +130,14 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         uint256 timestamp
     );
 
+    modifier removeCharacterFromExpiredDuel(uint256 characterID) {
+        if (isCharacterInDuel(characterID) && !isCharacterWithinDecisionTime(characterID)) {
+            isDefending[characterID] = true;
+            _duelQueue.remove(characterID);
+        }
+        _;
+    }
+
     modifier characterInArena(uint256 characterID) {
         _characterInArena(characterID);
         _;
@@ -273,6 +281,7 @@ contract PvpCore is Initializable, AccessControlUpgradeable {
         external
         isOwnedCharacter(characterID)
         characterInArena(characterID)
+        removeCharacterFromExpiredDuel(characterID)
         characterNotUnderAttack(characterID)
         characterNotInDuel(characterID)
     {

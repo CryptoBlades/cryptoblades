@@ -35,7 +35,7 @@ interface Chain {
 // executes when network is changed in wallet
 (window as any).ethereum?.on('chainChanged', (chainIdHex: string) => {
   const chainId = parseInt(chainIdHex, 16);
-  const env = window.location.href.startsWith('https://test') ? 'test' : 'production';
+  const env = 'production';
   const chains = (config as Config).environments[env].chains;
 
   for (const [chainName, values] of Object.entries(chains)) {
