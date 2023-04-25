@@ -65,6 +65,7 @@ interface Data {
   quests: Quest[];
   isLoading: boolean;
   isQuestActionLoading: boolean;
+  showAds: boolean;
 }
 
 export default Vue.extend({
