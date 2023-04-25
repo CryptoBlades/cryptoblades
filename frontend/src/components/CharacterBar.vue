@@ -3,14 +3,14 @@
     <div class="character-bar">
       <character-display :toggled="isToggled" :currentPath="currentPath" :key="componentKey"/>
       <div v-if="showAds && !isMobile()" class="ad-container">
-        <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
+          <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
           <div class="coinzilla" data-zone="C-541621de2f7bb717603"></div>
             <script2>
                   window.coinzilla_display = window.coinzilla_display || [];
                   var c_display_preferences = {};
                   c_display_preferences.zone = "541621de2f7bb717603";
-                  c_display_preferences.width = "728";
-                  c_display_preferences.height = "90";
+                  c_display_preferences.width = "300";
+                  c_display_preferences.height = "250";
                   coinzilla_display.push(c_display_preferences);
             </script2>
       </div>
@@ -74,6 +74,9 @@ export default Vue.extend({
 </script>
 
 <style>
+.coinzilla {
+  margin: 0 auto;
+}
 .animates{
   padding-top: 30px;
   transition: 1s all ease-in-out;
