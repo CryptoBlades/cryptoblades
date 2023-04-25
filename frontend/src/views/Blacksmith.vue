@@ -711,6 +711,7 @@ interface Data {
   currentFilteredWeapons: any[];
   isLoading: boolean;
   canClaim: boolean;
+  showAds: boolean;
 }
 
 export default Vue.extend({
