@@ -456,7 +456,7 @@
     "dustStorageDesc": "Forge your weapons with dust",
     "land": "Land",
     "landDesc": "Own land and conquer",
-    "regenerate": "Regenerates 1 point every 5 minutes, stamina bar will be full at: ",
+    "regenerate": "Regenerates 1 point every {minutes} minutes, stamina bar will be full at: {time}",
     "salvage": "Salvage",
     "dustConfirm": "Dust Reforge Confirmation",
     "lb": "Low Star Burn",

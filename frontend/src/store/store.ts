@@ -119,6 +119,7 @@ export default new Vuex.Store<IState>({
     characterCosmetics: {},
     characterWeapons: {},
     characterShields: {},
+    characterSecondsPerStamina: 0,
     weapons: {},
     currentWeaponId: null,
     currentNftType: null,
@@ -194,6 +195,10 @@ export default new Vuex.Store<IState>({
       return (characterId: number) => {
         return state.characterRenames[characterId];
       };
+    },
+
+    getCharacterSecondsPerStamina(state: IState) {
+      return state.characterSecondsPerStamina;
     },
 
     getCharacterCosmetic(state: IState) {
@@ -537,6 +542,10 @@ export default new Vuex.Store<IState>({
       }
     },
 
+    updateCharacterSecondsPerStamina(state: IState, secondsPerStamina: number) {
+      state.characterSecondsPerStamina = secondsPerStamina;
+    },
+
     updateInGameOnlyFunds(state, { inGameOnlyFunds }: Pick<IState, 'inGameOnlyFunds'>) {
       state.inGameOnlyFunds = inGameOnlyFunds;
     },
@@ -733,6 +742,7 @@ export default new Vuex.Store<IState>({
       await dispatch('setupCharacterStaminas');
       await dispatch('setupCharacterRenames');
       await dispatch('setupCharacterCosmetics');
+      await dispatch('fetchCharacterSecondsPerStamina');
 
       await dispatch('setupWeaponDurabilities');
       await dispatch('setupWeaponRenames');
@@ -1041,7 +1051,6 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchCharacters', ownedCharacterIds);
       await dispatch('fetchGarrisonCharacters', ownedGarrisonCharacterIds);
     },
-
     async updateShieldIds({ state, dispatch, commit }) {
       const ownedShieldIds = await state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state));
       commit('updateUserDetails', {
@@ -1049,7 +1058,12 @@ export default new Vuex.Store<IState>({
       });
       await dispatch('fetchShields', ownedShieldIds);
     },
+    async fetchCharacterSecondsPerStamina({ state, commit }) {
+      if(!state.defaultAccount) return;
 
+      const secondsPerStamina = await state.contracts().Characters!.methods.secondsPerStamina().call(defaultCallOptions(state));
+      commit('updateCharacterSecondsPerStamina', secondsPerStamina);
+    },
     async updateTrinketIds({ state, dispatch, commit }) {
       if(!state.defaultAccount) return;
 
