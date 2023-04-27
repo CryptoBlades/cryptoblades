@@ -621,10 +621,10 @@ export default Vue.extend({
         || ((this.questTemplate.requirementType === RequirementType.EXTERNAL
             || this.questTemplate.requirementType === RequirementType.EXTERNAL_HOLD)
           && this.questTemplate.requirementExternalAddress
-          && !isValidWeb3Address(this.questTemplate.requirementExternalAddress))
+          && !isValidWeb3Address(this.questTemplate.requirementExternalAddress.toLowerCase()))
         || (this.questTemplate.rewardType === RewardType.EXTERNAL
           && this.questTemplate.rewardExternalAddress
-          && !isValidWeb3Address(this.questTemplate.rewardExternalAddress))
+          && !isValidWeb3Address(this.questTemplate.rewardExternalAddress.toLowerCase()))
         || this.showTemplateConfirmationModal || this.isLoading;
     },
 
