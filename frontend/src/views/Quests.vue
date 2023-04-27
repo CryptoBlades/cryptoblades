@@ -156,6 +156,18 @@
           {{ $t('quests.loading') }}
         </div>
         <div v-else class="d-flex flex-wrap">
+          <div v-if="showAds && !isMobile()" class="ad-container my-4 mr-3">
+            <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
+              <div class="coinzilla" data-zone="C-541621de2f7bb717603"></div>
+                <script2>
+                      window.coinzilla_display = window.coinzilla_display || [];
+                      var c_display_preferences = {};
+                      c_display_preferences.zone = "541621de2f7bb717603";
+                      c_display_preferences.width = "630";
+                      c_display_preferences.height = "90";
+                      coinzilla_display.push(c_display_preferences);
+                </script2>
+          </div>
           <div v-for="quest in walletQuests" :key="quest.id" class="wallet-quest-row d-flex my-3 mr-3">
             <QuestRow :quest="quest" :questTemplateType="QuestTemplateType.WALLET"
                       :reputationLevelRequirements="reputationLevelRequirements"
@@ -166,7 +178,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -247,6 +258,7 @@ interface Data {
   quests: Quest[];
   pickable: boolean;
   pickedQuestId: number;
+  showAds: boolean
 }
 
 export default Vue.extend({
@@ -296,6 +308,7 @@ export default Vue.extend({
       quests: [],
       pickable: false,
       pickedQuestId: 0,
+      showAds: false,
     } as Data;
   },
 
@@ -434,9 +447,14 @@ export default Vue.extend({
     async onRefreshQuestData() {
       await this.refreshQuestData();
     },
+    checkStorage() {
+      if (process.env.NODE_ENV === 'development') this.showAds = false;
+      else this.showAds = localStorage.getItem('show-ads') === 'true';
+    }
   },
 
   async mounted() {
+    this.checkStorage();
     await this.refreshQuestData();
   },
 

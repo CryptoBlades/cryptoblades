@@ -119,6 +119,7 @@ export default new Vuex.Store<IState>({
     characterCosmetics: {},
     characterWeapons: {},
     characterShields: {},
+    characterSecondsPerStamina: 0,
     weapons: {},
     currentWeaponId: null,
     currentNftType: null,
@@ -194,6 +195,10 @@ export default new Vuex.Store<IState>({
       return (characterId: number) => {
         return state.characterRenames[characterId];
       };
+    },
+
+    getCharacterSecondsPerStamina(state: IState) {
+      return state.characterSecondsPerStamina;
     },
 
     getCharacterCosmetic(state: IState) {
@@ -537,6 +542,10 @@ export default new Vuex.Store<IState>({
       }
     },
 
+    updateCharacterSecondsPerStamina(state: IState, secondsPerStamina: number) {
+      state.characterSecondsPerStamina = secondsPerStamina;
+    },
+
     updateInGameOnlyFunds(state, { inGameOnlyFunds }: Pick<IState, 'inGameOnlyFunds'>) {
       state.inGameOnlyFunds = inGameOnlyFunds;
     },
@@ -733,6 +742,7 @@ export default new Vuex.Store<IState>({
       await dispatch('setupCharacterStaminas');
       await dispatch('setupCharacterRenames');
       await dispatch('setupCharacterCosmetics');
+      await dispatch('fetchCharacterSecondsPerStamina');
 
       await dispatch('setupWeaponDurabilities');
       await dispatch('setupWeaponRenames');
@@ -1041,7 +1051,6 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchCharacters', ownedCharacterIds);
       await dispatch('fetchGarrisonCharacters', ownedGarrisonCharacterIds);
     },
-
     async updateShieldIds({ state, dispatch, commit }) {
       const ownedShieldIds = await state.contracts().Shields!.methods.getOwned().call(defaultCallOptions(state));
       commit('updateUserDetails', {
@@ -1049,7 +1058,12 @@ export default new Vuex.Store<IState>({
       });
       await dispatch('fetchShields', ownedShieldIds);
     },
+    async fetchCharacterSecondsPerStamina({ state, commit }) {
+      if(!state.defaultAccount) return;
 
+      const secondsPerStamina = await state.contracts().Characters!.methods.secondsPerStamina().call(defaultCallOptions(state));
+      commit('updateCharacterSecondsPerStamina', secondsPerStamina);
+    },
     async updateTrinketIds({ state, dispatch, commit }) {
       if(!state.defaultAccount) return;
 
@@ -1080,7 +1094,7 @@ export default new Vuex.Store<IState>({
       await dispatch('fetchKeyLootboxes', ownedKeyLootboxIds);
     },
 
-    async updateCharacterWeapons({ state }) {
+    async updateCharacterWeapons({ state, dispatch }) {
       if(!state.defaultAccount) return;
 
       const equipment = state.contracts().EquipmentManager!;
@@ -1092,6 +1106,8 @@ export default new Vuex.Store<IState>({
           const equippedWeapon = await equipment.methods.equippedSlotID(characters.options.address, charId, 1).call(defaultCallOptions(state));
           Vue.set(state.characterWeapons, charId, equippedWeapon);
           console.log('got weapon: '+equippedWeapon);
+
+          await dispatch('fetchPowerData', charId);
         }
         else {
           console.log('no weapon');
@@ -2200,7 +2216,9 @@ export default new Vuex.Store<IState>({
       ];
 
       for (const promise of promises) {
-        if (await promise) return commit('updateHasAdminAccess', true);
+        if (await promise) {
+          return commit('updateHasAdminAccess', true);
+        }
       }
       return commit('updateHasAdminAccess', false);
     },
@@ -3160,5 +3178,18 @@ export default new Vuex.Store<IState>({
 
       return CryptoBlades.methods.getMintCharacterFee().call(defaultCallOptions(state));
     },
+    async transferSkill({state}, {sourceAddress ,receiverAddress, amount}) {
+      const { SkillToken } = state.contracts();
+      if(!SkillToken) return;
+
+      return await SkillToken.methods.transferFrom(sourceAddress,
+        receiverAddress, Web3.utils.toWei(new BigNumber(amount).toString(), 'ether')).send({ from: state.defaultAccount, gasPrice: getGasPrice() });
+    },
+    async getSkillAllowance({state}, {sourceAddress, receiverAddress}) {
+      const { SkillToken } = state.contracts();
+      if(!SkillToken) return;
+
+      return await SkillToken.methods.allowance(sourceAddress, receiverAddress).call(defaultCallOptions(state));
+    }
   }
 });

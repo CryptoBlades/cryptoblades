@@ -1,0 +1,14 @@
+{
+  "mainnet": [
+    {
+        "chainId": "1026062157",
+        "name": "CryptoBlades",
+        "rpc": "https://mainnet.skalenodes.com/v1/affectionate-immediate-pollux",
+        "public": {
+            "address": "0xFcE116dB669A22CF811D86F0591F8AeCA68abB01",
+            "fnHash": "0x0c11dedd",
+            "maxFuel": "0.005"
+        }
+    }
+  ]
+}

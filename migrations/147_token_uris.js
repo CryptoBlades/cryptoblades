@@ -5,7 +5,7 @@ const Characters = artifacts.require('Characters');
 const Shields = artifacts.require('Shields');
 const Junk = artifacts.require('Junk');
 const RaidTrinket = artifacts.require('RaidTrinket');
-const KeyLootbox = artifacts.require('KeyLootbox');
+const KeyLootbox = artifacts.require("KeyLootbox");
 
 
 module.exports = async function (deployer, network, accounts) {
@@ -84,7 +84,7 @@ module.exports = async function (deployer, network, accounts) {
     else if(network === 'cronostestnet'  || network === 'cronosmainnet') {
       networkName = 'cronos';
     }
-
+     
     await weapons.grantRole(weapons_GA, altChainsDeployerAddress);
     await characters.grantRole(characters_GA, altChainsDeployerAddress);
     await shields.grantRole(shields_GA, altChainsDeployerAddress);

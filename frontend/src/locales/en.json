@@ -136,8 +136,10 @@
     "gasFee": "You spent {bnbGasUsed} {gasToken} on gas fees ",
     "youRolled": "You rolled:",
     "enemyRolled": "Enemy rolled:",
-    "earnedSkill": "<b>{noIGO}</b> <small>UNCLAIMED SKILL</small> <b>{inUSD}</b> ",
-    "earnedValor": "<b>{noIGO}</b> <small>UNCLAIMED VALOR</small> ",
+    "earnedSkill": "UNCLAIMED SKILL",
+    "earnedValor": "UNCLAIMED VALOR",
+    "earnedValorHint": "Fight earnings: (Valor Price * Fight Rewards * Highest Treasury Multiplier)",
+    "earnedSkillHint": "Fight earnings: (Skill Price * Fight Rewards * Highest Treasury Multiplier)",
     "earnedIGOSkill": "<br/> <small>AND</small> <br/> <b>{IGO}</b> <small>IGO SKILL</small> <b>{inUSD}</b> ",
     "gasOffset": "<br/> <small>INCLUDING</small> <b>{offset}</b> <small>GAS OFFSET</small> <b>{inUSD}</b> "
   },
@@ -454,7 +456,7 @@
     "dustStorageDesc": "Forge your weapons with dust",
     "land": "Land",
     "landDesc": "Own land and conquer",
-    "regenerate": "Regenerates 1 point every 5 minutes, stamina bar will be full at: ",
+    "regenerate": "Regenerates 1 point every {minutes} minutes, stamina bar will be full at: {time}",
     "salvage": "Salvage",
     "dustConfirm": "Dust Reforge Confirmation",
     "lb": "Low Star Burn",
@@ -940,7 +942,17 @@
       "blacksmith": "Blacksmith",
       "raid": "Raid",
       "specialWeaponsManager": "Special Weapons",
-      "dex": "Dex"
+      "dex": "Dex",
+      "skill": "Skill"
+    },
+    "skill": {
+      "transferSkill":  "Transfer Skill",
+      "sourceWalletAddress": "Source Wallet Address",
+      "receiverWalletAddress": "Receiver Wallet Address",
+      "amount": "Amount",
+      "transfer": "Transfer",
+      "skillAllowance": "Skill Allowance",
+      "loading": "Loading..."
     },
     "cbkLand": {
       "minter": "Minter",
@@ -1223,7 +1235,6 @@
   },
   "options": {
     "title": "Options",
-    "graphic": "3D Graphics",
     "rewardBar": "Hide Rewards Bar",
     "walletWarning": "Hide Wallet Warning",
     "showSkillValues": "Show SKILL values in USD",
@@ -1271,6 +1282,7 @@
     }
   },
   "skillBalanceDisplay": {
+    "mintSFuel": "Mint Sfuel",
     "buySkillTooltip": "Buy SKILL",
     "buySkillTitle": "BUY SKILL",
     "buyWithCrypto": "Buy with Crypto",
@@ -1279,7 +1291,9 @@
     "reachedPortalLimit": "You have reached your limit for withdrawing BNB from the portal for this period, please wait about {durationUntilLimitPeriodOver}({formattedTotalAvailableBnb} left)",
     "withdrawablePortal": "{formattedBnbThatCanBeWithdrawn} of {formattedTotalAvailableBnb} withdrawable from the portal",
     "withdrawable": "<br>+ WITHDRAWABLE ",
-    "igo": "<br>+ IN GAME ONLY "
+    "igo": "<br>+ IN GAME ONLY ",
+    "miningSFuel": "Mining sFUEL",
+    "generatingSfuel": "Please wait while your sFUEL is generated."
   },
   "leaderboard": {
   },

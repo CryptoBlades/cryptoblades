@@ -5,10 +5,12 @@ const CharactersBridgeProxyContract = artifacts.require("CharactersBridgeProxyCo
 const Characters = artifacts.require("Characters");
 
 
-module.exports = async function (deployer, network) {
+module.exports = async function (deployer, network, accounts) {
   await upgradeProxy(CharactersBridgeProxyContract.address, CharactersBridgeProxyContract, { deployer }); 
   await upgradeProxy(NFTStorage.address, NFTStorage, { deployer });
   let characters = await upgradeProxy(Characters.address, Characters, { deployer });
+  let charactersGA = await characters.GAME_ADMIN();
+  await characters.grantRole(charactersGA, accounts[0]);
   await characters.setSecondsPerStamina(300);
-  await characters.grantRole(await characters.GAME_ADMIN(), NFTStorage.address);
+  await characters.grantRole(charactersGA, NFTStorage.address);
 };

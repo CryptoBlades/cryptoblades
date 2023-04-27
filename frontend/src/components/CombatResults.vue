@@ -35,24 +35,38 @@
         </b-row>
         <b-row>
           <b-col class="earned">
-            <p class="h5 text-white">
-              <span v-if="!isValor" v-html="$t('combatResults.earnedSkill', {
-                  noIGO: +igoDefaultReward ? formattedSkillNoIGO : formattedSkill,
-                  inUSD: formattedInUsd(calculateSkillPriceInUsd(+igoDefaultReward ? formattedSkillNoIGO : formattedSkill).toFixed(4))
-                })"> </span>
-              <span v-else v-html="$t('combatResults.earnedValor', {
-                  noIGO: formattedSkill
-                })"> </span>
-              <Hint :text="$t('combatResults.hint')" />
+            <div class="h5 text-white">
+              <div v-if="!isValor">
+                <div>
+                  <b>{{ formattedSkill }}</b>
+                  <span>
+                    <small class="mr-2">(<b>${{ fightRewardsAmountInUSD }}</b>)</small>
+                    <Hint :text="$t('combatResults.earnedSkillHint')" />
+                  </span>
+                </div>
+                <div>
+                  <span class="mr-2" v-html="$t('combatResults.earnedSkill')"> </span>
+                  <Hint :text="$t('combatResults.hint')" />
+                </div>
+              </div>
+              <div v-else>
+                <div>
+                  <b>{{ formattedSkill }}</b>
+                  <span>
+                    <small class="mr-2">(<b>${{ fightRewardsAmountInUSD }}</b>)</small>
+                    <Hint :text="$t('combatResults.earnedValorHint')" />
+                  </span>
+                </div>
+                <div>
+                  <span class="mr-2" v-html="$t('combatResults.earnedValor')"> </span>
+                  <Hint :text="$t('combatResults.hint')" />
+                </div>
+              </div>
               <span v-if="+gasOffsetPerFight" v-html="$t('combatResults.gasOffset', {
                   offset: formattedSkillGasOffsetRewards,
                   inUSD: isValor ? '' : formattedInUsd(calculateSkillPriceInUsd(formattedSkillGasOffsetRewards).toFixed(4))
                 })"></span>
-              <span v-if="+igoDefaultReward" v-html="$t('combatResults.earnedIGOSkill', {
-                  IGO: formattedSkillIGOReward,
-                  inUSD: formattedInUsd(calculateSkillPriceInUsd(formattedSkillIGOReward).toFixed(4))
-                })"></span>
-            </p>
+            </div>
             <h5>+ {{formattedXpGain}}</h5>
           </b-col>
         </b-row>
@@ -66,18 +80,18 @@
       </h6>
     </div>
   </div>
-    <div v-if="showAds && !isMobile()" class="ad-container align-items-center">
-      <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
-        <div class="coinzilla" data-zone="C-316621de2f7b8b25140"></div>
-          <script2>
-                window.coinzilla_display = window.coinzilla_display || [];
-                var c_display_preferences = {};
-                c_display_preferences.zone = "316621de2f7b8b25140";
-                c_display_preferences.width = "300";
-                c_display_preferences.height = "250";
-                coinzilla_display.push(c_display_preferences);
-          </script2>
-    </div>
+  <div v-if="showAds && !isMobile()" class="ad-container align-items-center mt-5">
+    <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
+      <div class="coinzilla" data-zone="C-316621de2f7b8b25140"></div>
+        <script2>
+              window.coinzilla_display = window.coinzilla_display || [];
+              var c_display_preferences = {};
+              c_display_preferences.zone = "316621de2f7b8b25140";
+              c_display_preferences.width = "300";
+              c_display_preferences.height = "250";
+              coinzilla_display.push(c_display_preferences);
+        </script2>
+  </div>
   </div>
 </template>
 
@@ -91,7 +105,15 @@ import i18n from '@/i18n';
 import {TranslateResult} from 'vue-i18n';
 import '@/mixins/general';
 import Hint from '@/components/Hint.vue';
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
+import { SupportedProject } from '@/views/Treasury.vue';
+import { Accessors } from 'vue/types/options';
+
+
+interface StoreMappedTreasuryGetters {
+  getPartnerProjects: SupportedProject[];
+  getProjectMultipliers: Record<number, string>
+}
 
 interface CombatResult {
   isVictory: boolean;
@@ -100,6 +122,17 @@ interface CombatResult {
   xpGain: string;
   skillGain: string;
   bnbGasUsed: string;
+}
+
+interface StoreMappedTreasuryState {
+  payoutCurrencyId: string;
+  partnerProjectMultipliers: Record<number, string>;
+  partnerProjectRatios: Record<number, string>;
+  defaultSlippage: string;
+}
+interface StoreMappedTreasuryActions{
+  getPartnerProjectMultiplier(id: number): Promise<string>;
+  fetchPartnerProjects(): Promise<void>;
 }
 
 interface StoreMappedCombatActions {
@@ -131,14 +164,25 @@ export default Vue.extend({
   data() {
     return {
       skillPrice: 0,
+      valorPrice: 0,
       gasToken: '',
       showAds: false,
-      igoDefaultReward: 0,
-      gasOffsetPerFight: 0
+      gasOffsetPerFight: 0,
+      highestMultiplier: 0,
+      highestMultiplierProject: {} as SupportedProject,
+      partnerProjects: [] as SupportedProject[],
     };
   },
-
+  watch: {
+    getPartnerProjects(newval) {
+      this.partnerProjects = newval;
+      this.getProjectMultiplier();
+    }
+  },
   computed: {
+    ...(mapGetters('treasury', ['getPartnerProjects', 'getProjectMultipliers']) as Accessors<StoreMappedTreasuryGetters>),
+    ...(mapState('treasury',
+      ['payoutCurrencyId','partnerProjectRatios','defaultSlippage'])as Accessors<StoreMappedTreasuryState>),
     formattedOutcome(): TranslateResult {
       if(this.fightResults.isVictory) return i18n.t('combatResults.won');
       else return i18n.t('combatResults.lost');
@@ -149,9 +193,6 @@ export default Vue.extend({
     formattedSkillNoIGO(): string {
       return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10)).toString())).toFixed(6);
     },
-    formattedSkillIGOReward(): string {
-      return toBN(fromWeiEther((this.igoDefaultReward * this.formattedStaminaUsed).toString())).toFixed(6);
-    },
     formattedSkillGasOffsetRewards(): string {
       return toBN(fromWeiEther((this.gasOffsetPerFight * this.formattedStaminaUsed).toString())).toFixed(6);
     },
@@ -160,13 +201,45 @@ export default Vue.extend({
     },
     formattedXpGain(): string {
       return this.fightResults.xpGain + ' xp';
+    },
+    highestProjectMultiplier(): number {
+      return +(toBN(+this.getProjectMultipliers[+this.highestMultiplierProject.id]).div(toBN(10).pow(18)).toFixed(4) || 0);
+    },
+    fightRewardsAmountInUSD(): string {
+      if(this.isValor) {
+        return ((this.valorPrice * +this.formattedSkill * this.highestProjectMultiplier) || 0).toFixed(4);
+      } else {
+        return ((this.skillPrice * +this.formattedSkill * this.highestProjectMultiplier) || 0).toFixed(4);
+      }
     }
   },
   methods: {
+    ...(mapActions('treasury', ['getPartnerProjectMultiplier', 'fetchPartnerProjects']) as StoreMappedTreasuryActions),
     ...(mapActions('combat', ['fetchIgoRewardsPerFight', 'fetchGasOffsetPerFight']) as StoreMappedCombatActions),
     async fetchPrices(): Promise<void> {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
       this.skillPrice = response.data?.cryptoblades.usd;
+    },
+    async fetchValorPrice(): Promise<void> {
+      const response = await axios.get('https://api.dexscreener.com/latest/dex/search/?q=0x8730c8dedc59e3baffb67bf1fa63d4f0e2d9ecc9');
+      this.valorPrice = response.data?.pairs[0].priceUsd;
+    },
+    async getProjectMultiplier() {
+      const tokenSymbol = this.isValor ? 'VALOR' : 'SKILL';
+      this.partnerProjects = this.partnerProjects && this.partnerProjects.filter(partnerProject => partnerProject.tokenSymbol.includes(tokenSymbol));
+      if(this.partnerProjects.length > 0) {
+        this.partnerProjects.map(async (project) => {
+          await this.getPartnerProjectMultiplier(project.id);
+        });
+        const projectMultipliers = await this.getProjectMultipliers;
+
+        this.highestMultiplierProject = this.partnerProjects.sort((a, b) => {
+          const highestMultiplierA = +(toBN(+projectMultipliers[a.id]).div(toBN(10).pow(18)).toFixed(4));
+          const highestMultiplierB = +(toBN(+projectMultipliers[b.id]).div(toBN(10).pow(18)).toFixed(4));
+
+          return highestMultiplierA - highestMultiplierB;
+        })[0];
+      }
     },
     formattedInUsd(value: string): string {
       if(!value) return '';
@@ -179,26 +252,20 @@ export default Vue.extend({
     calculatedSkillReward(): string {
       return toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6);
     },
-    calculateSkillRewardNoIGO(): string{
-      return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10) - this.igoDefaultReward).toString())).toFixed(6);
-    },
-    calculateSkillIGOReward(): string{
-      if(!this.igoDefaultReward) return '';
-      return toBN(fromWeiEther((this.igoDefaultReward * this.formattedStaminaUsed).toString())).toFixed(6);
-    },
     checkStorage() {
       if (process.env.NODE_ENV === 'development') this.showAds = false;
       else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
   },
   async beforeMount(){
-    this.igoDefaultReward = parseInt(await this.fetchIgoRewardsPerFight(), 10);
     this.gasOffsetPerFight = parseInt(await this.fetchGasOffsetPerFight(), 10);
   },
   async mounted() {
+    await this.fetchPartnerProjects();
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
+
+    await this.fetchValorPrice();
     await this.fetchPrices();
-    this.igoDefaultReward = parseInt(await this.fetchIgoRewardsPerFight(), 10);
     await new Promise(f => setTimeout(f, 1000));
     this.checkStorage();
   },

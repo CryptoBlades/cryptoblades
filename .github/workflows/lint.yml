@@ -20,10 +20,10 @@ jobs:
           test -f frontend/package-lock.json
           test "$(jq '.lockfileVersion' frontend/package-lock.json)" -eq 2
 
-      - name: Use Node.js 14
+      - name: Use Node.js 16
         uses: actions/setup-node@v1
         with:
-          node-version: "14"
+          node-version: "16.14.0"
 
       - run: npm ci
 
@@ -63,12 +63,3 @@ jobs:
         env:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_MAINNET_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-
-      - name: Ping Discord
-        uses: tsickert/discord-webhook@v4.0.0
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/production' }}
-        with:
-          args: deploy --dir=frontend/dist --prod
-        env:
-          webhook-url: ${{ secrets.DISCORD_CHANNEL_WEBHOOK_URL }}
-          content: Prod deployed!

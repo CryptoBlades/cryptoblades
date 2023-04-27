@@ -265,6 +265,18 @@
             class="ml-4 centered-icon" v-tooltip.bottom="$t('blacksmith.dynamicPricesDetails',
               { increaseAmount: mintWeaponPriceIncrease, decreaseAmount: mintPriceDecreasePerHour, minimumPrice: mintWeaponMinPrice })"/>
         </div>
+        <div v-if="showAds && !isMobile()" class="row justify-content-center margin-top ad-container">
+          <script2 async src="https://coinzillatag.com/lib/display.js"></script2>
+            <div class="coinzilla" data-zone="C-541621de2f7bb717603"></div>
+              <script2>
+                    window.coinzilla_display = window.coinzilla_display || [];
+                    var c_display_preferences = {};
+                    c_display_preferences.zone = "541621de2f7bb717603";
+                    c_display_preferences.width = "320";
+                    c_display_preferences.height = "100";
+                    coinzilla_display.push(c_display_preferences);
+              </script2>
+        </div>
         <div class="footer-close" @click="$refs['forge-element-selector-modal'].hide()">
           <p class="tapAny mt-4">{{$t('tapAnyWhere')}}</p>
           <p class="close-icon"></p>
@@ -372,11 +384,11 @@
                   </div>
                 </div>
                 <div>
-                  <input v-model="lesserDust" type="range" min="0" :max="getLesserDust()" value="0" steps="1">
+                  <input v-model="lesserDust" type="range" min="0" :max="lesserDustReforgeCap" value="0" steps="1">
                 </div>
                 <div>
                   <span>{{lesserDust}}/{{getLesserDust()}}</span>
-                  <span class="cursor-p" @click="lesserDust = getLesserDust()">{{$t('blacksmith.max')}}</span>
+                  <span class="cursor-p" @click="lesserDust = lesserDustReforgeCap">{{$t('blacksmith.max')}}</span>
                 </div>
               </div>
 
@@ -392,11 +404,11 @@
                   </div>
                 </div>
                 <div>
-                  <input v-model="greaterDust" type="range" min="0" :max="getGreaterDust()" value="0" steps="1">
+                  <input v-model="greaterDust" type="range" min="0" :max="greaterDustReforgeCap" value="0" steps="1">
                 </div>
                 <div>
                   <span>{{greaterDust}}/{{getGreaterDust()}}</span>
-                  <span class="cursor-p" @click="greaterDust = getGreaterDust()">{{$t('blacksmith.max')}}</span>
+                  <span class="cursor-p" @click="greaterDust = greaterDustReforgeCap">{{$t('blacksmith.max')}}</span>
                 </div>
               </div>
 
@@ -412,11 +424,11 @@
                   </div>
                 </div>
                 <div>
-                  <input v-model="powerfulDust" type="range" min="0" :max="getPowerfulDust()" value="0" steps="1">
+                  <input v-model="powerfulDust" type="range" min="0" :max="powerfulDustReforgeCap" value="0" steps="1">
                 </div>
                 <div>
                   <span>{{powerfulDust}}/{{getPowerfulDust()}}</span>
-                  <span class="cursor-p" @click="powerfulDust = getPowerfulDust()">{{$t('blacksmith.max')}}</span>
+                  <span class="cursor-p" @click="powerfulDust = powerfulDustReforgeCap">{{$t('blacksmith.max')}}</span>
                 </div>
               </div>
               <div class="btn-forge">
@@ -686,6 +698,9 @@ interface Data {
   lesser: number;
   greater: number;
   powerful: number;
+  lesserDustReforgeCap: number,
+  greaterDustReforgeCap: number,
+  powerfulDustReforgeCap: number,
   activeTab: string;
   ctr: number;
   mintSlippageApproved: boolean;
@@ -696,6 +711,7 @@ interface Data {
   currentFilteredWeapons: any[];
   isLoading: boolean;
   canClaim: boolean;
+  showAds: boolean;
 }
 
 export default Vue.extend({
@@ -743,6 +759,9 @@ export default Vue.extend({
       lesser: 0,
       greater: 0,
       powerful: 0,
+      lesserDustReforgeCap: 100,
+      greaterDustReforgeCap: 25,
+      powerfulDustReforgeCap: 10,
       activeTab: 'forge',
       ctr: 0,
       mintSlippageApproved: false,
@@ -753,7 +772,8 @@ export default Vue.extend({
       currentFilteredWeapons: [],
       isLoading: true,
       canClaim: false,
-      Element
+      Element,
+      showAds: false,
     } as Data;
   },
 
@@ -820,6 +840,7 @@ export default Vue.extend({
   },
 
   async mounted(){
+    this.checkStorage();
     Events.$on('forge-weapon', (id: number) =>{
       if(id === 0){
         this.onClickForge(id);
@@ -1200,6 +1221,10 @@ export default Vue.extend({
 
       await this.fetchSpecialWeaponEvents();
       this.selectedSpecialWeaponEventId = +this.specialWeaponEventId;
+    },
+    checkStorage() {
+      if (process.env.NODE_ENV === 'development') this.showAds = false;
+      else this.showAds = localStorage.getItem('show-ads') === 'true';
     }
   },
 
