@@ -107,6 +107,12 @@
       "description": "CryptoBlades Characters (CBC) are the titular heroes & utility NFTs of the longest standing sustainable play-to-earn game, CryptoBlades. These NFTs, along with the swords they wield, are the core component of earning in CB.",
       "image": "character.png",
       "website": "https://www.cryptoblades.io/"
+    },
+    "0x5F6E97612482095C0c2C02BC495C0171e61017d7": {
+      "name": "SKILL",
+      "description": "SKILL is the native token of the CryptoBlades ecosystem, used for crafting character and weapon NFTs, trading on our NFT marketplace, utilizing our Bridge, or even purchasing merchandise. As CryptoBlades continues to grow in product offerings, SKILL token will grow with it!",
+      "image": "SKILL.png",
+      "website": "https://www.cryptoblades.io/"
     }
   }
 }
