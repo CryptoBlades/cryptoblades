@@ -3,6 +3,7 @@
     <div v-if="ownCharacters.length > 0" :class="equippedWeaponId ? '' : 'combat-disabled'">
       <div v-if="error !== null">
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
+        <div class="col error" v-if="errorCode === CHANGE_RPC_ERROR_CODE">{{$t('combat.32005Error')}}</div>
       </div>
 
       <modal-container
@@ -235,9 +236,12 @@ type stringOrNull = string | null;
 type numberOrNull = number | null;
 type stringOrNumber = string | number;
 
+const CHANGE_RPC_ERROR_CODE = -32005;
+
 interface ICombatData {
   powerData: IPowerData;
   error: stringOrNull;
+  errorCode: numberOrNull;
   waitingResults: boolean;
   resultsAvailable: boolean;
   fightResults: any;
@@ -262,6 +266,7 @@ interface ICombatData {
   gridStyling: string;
   counterInterval: any;
   equippedWeaponId: string | number;
+  CHANGE_RPC_ERROR_CODE: number
 }
 
 export default Vue.extend({
@@ -293,6 +298,8 @@ export default Vue.extend({
       gridStyling:'justify-content:flex-start; gap:2.5vw',
       counterInterval: null,
       equippedWeaponId: '',
+      errorCode: null,
+      CHANGE_RPC_ERROR_CODE
     } as ICombatData;
   },
   async mounted() {
@@ -348,7 +355,7 @@ export default Vue.extend({
     },
 
     updateResults(): any[] {
-      return [this.fightResults, this.error];
+      return [this.fightResults, this.error, this.errorCode];
     },
 
     isGenesisCharacter(): boolean {
@@ -541,9 +548,13 @@ export default Vue.extend({
         await this.fetchCharacterStamina(this.currentCharacterId);
 
         this.error = null;
+        this.errorCode = null;
       } catch (error: any) {
         console.error(error);
         this.error = error.message;
+        if (this.error?.includes(this.CHANGE_RPC_ERROR_CODE.toString())) {
+          this.errorCode = this.CHANGE_RPC_ERROR_CODE;
+        }
       }
     },
 
