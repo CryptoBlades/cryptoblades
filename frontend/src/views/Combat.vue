@@ -3,7 +3,6 @@
     <div v-if="ownCharacters.length > 0" :class="equippedWeaponId ? '' : 'combat-disabled'">
       <div v-if="error !== null">
         <div class="col error">{{$t('combat.error')}} {{ error }}</div>
-        <div class="col error" v-if="errorCode === CHANGE_RPC_ERROR_CODE">{{$t('combat.32005Error')}}</div>
       </div>
 
       <modal-container
