@@ -40,9 +40,9 @@ contract TokensManager is Initializable, AccessControlUpgradeable {
     receive() external payable restricted {}
 
     function fight(
-        uint256 char,
-        uint32 target,
-        uint8 fightMultiplier
+        uint256[] char,
+        uint32[] target,
+        uint8[] fightMultiplier
     ) external payable {
         uint256 totalTokens;
         uint256 totalExpectedTokens;
