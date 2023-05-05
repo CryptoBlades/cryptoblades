@@ -523,6 +523,7 @@
     "error": "Error:",
     "close": "Close",
     "back": "Back",
+    "32005Error":"Oops! Looks like you've encountered an internal JSON-RPC error with the code -32005. This error can be resolved by changing your RPC in MetaMask.",
     "errors": {
       "needToSelectChar": "You need to select a character to do battle.",
       "notEnoughDurability": "This weapon does not have enough durability.",
