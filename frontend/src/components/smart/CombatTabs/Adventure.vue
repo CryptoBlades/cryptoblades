@@ -1169,7 +1169,7 @@ export default Vue.extend({
       font-size: 25px;
       position: absolute;
       text-align: center;
-      bottom: 40vh;
+      bottom: 70vh;
       background: linear-gradient(to right, rgba(255,0,0,0), rgb(0 0 0),rgb(6 0 0 / 0%));
       z-index: 99;
       padding: 20px;
