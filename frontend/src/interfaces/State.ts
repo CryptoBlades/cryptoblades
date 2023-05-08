@@ -117,7 +117,7 @@ export interface IState {
   characterCosmetics: Record<number, string>;
   characterWeapons: Record<number, number>;
   characterShields: Record<number, number>;
-
+  characterSecondsPerStamina: number,
   currentWeaponId: number | null;
   weapons: Record<number, IWeapon>;
   weaponDurabilities: Record<number, number>;
