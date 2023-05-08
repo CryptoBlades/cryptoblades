@@ -634,7 +634,7 @@ export default Vue.extend({
             this.fightMultiplier,
           ],
           //multiply offset by 4 because we are fighting 4 targets?? Not entirely sure about the math you want here, but if I understood correctly should be something like this
-          offsetCost: offsetToPayInNativeToken * 4,
+          offsetCost: offsetToPayInNativeToken.multipliedBy(4),
         });
         await this.fetchFightRewardSkill();
         await this.fetchFightRewardValor();
