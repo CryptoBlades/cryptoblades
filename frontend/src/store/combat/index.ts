@@ -154,7 +154,7 @@ const combat = {
         .send({
           from: rootState.defaultAccount,
           gasPrice: getGasPrice(),
-          gas: "300000",
+          gas: '300000',
           value: +offsetCost * fightMultiplier,
         });
 
@@ -187,7 +187,7 @@ const combat = {
       );
 
       const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
-      await Promise.all([dispatch("combat/fetchTargets", { characterId })]);
+      await Promise.all([dispatch('combat/fetchTargets', { characterId })]);
 
       return {
         isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
@@ -215,11 +215,11 @@ const combat = {
     ) {
       const { TokensManager, CryptoBlades } = rootState.contracts();
       if (!TokensManager || !CryptoBlades || !rootState.defaultAccount) return;
-      let multiplier: string[] = [];
-      let characters: string[] = [];
-      let targets: string[] = [];
+      const multiplier: string[] = [];
+      const characters: string[] = [];
+      const targets: string[] = [];
       let totalOffset: BigNumber = offsetCost;
-      for (var i = 0; i < targetsString.length; i++) {
+      for (let i = 0; i < targetsString.length; i++) {
         characters.push(charactersId[i].toString());
         targets.push(targetsString[i].toString());
         multiplier.push(fightMultiplier[i].toString());
@@ -231,19 +231,19 @@ const combat = {
         .send({
           from: rootState.defaultAccount,
           gasPrice: getGasPrice(),
-          gas: "800000",
+          gas: '800000',
           //TODO this should have all the fightMultipliers
           value: +offsetCost * fightMultiplier[0],
         });
 
-      let playerRoll = "";
-      let enemyRoll = "";
+      let playerRoll = '';
+      let enemyRoll = '';
       let xpGain = 0;
       let skillGain = 0;
 
-      for (var i = 0; i < characters.length; i++) {
+      for (let i = 0; i < characters.length; i++) {
         const fightOutcomeEvents = await CryptoBlades.getPastEvents(
-          "FightOutcome",
+          'FightOutcome',
           {
             filter: {
               owner: rootState.defaultAccount!,
@@ -263,18 +263,18 @@ const combat = {
 
           xpGain += parseInt(
             fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues
-              .xpGain
+              .xpGain, 10
           );
 
           skillGain += parseInt(
             fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues
-              .skillGain
+              .skillGain, 10
           );
         }
 
         if (i < charactersId.length - 1) {
-          playerRoll += ", ";
-          enemyRoll += ", ";
+          playerRoll += ', ';
+          enemyRoll += ', ';
         }
       }
 
@@ -284,8 +284,8 @@ const combat = {
 
       const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
 
-      for (var i = 0; i < charactersId.length; i++) {
-        await dispatch("combat/fetchTargets", { characterId: charactersId[i] });
+      for (let i = 0; i < charactersId.length; i++) {
+        await dispatch('combat/fetchTargets', { characterId: charactersId[i] });
       }
 
       return {

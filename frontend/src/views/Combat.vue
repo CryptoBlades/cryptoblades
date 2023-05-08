@@ -175,7 +175,7 @@ interface StoreMappedCombatActions {
   fetchTargets(
     { characterId }:
     { characterId: number }): Promise<void>;
-      doEncounterPayNative({
+  doEncounterPayNative({
     characterId,
     targetString,
     fightMultiplier,
