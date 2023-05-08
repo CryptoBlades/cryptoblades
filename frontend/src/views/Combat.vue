@@ -643,6 +643,15 @@ export default Vue.extend({
           await this.fetchCharacterStamina(this.ownCharacters[i].id);
         }
         this.error = null;
+        this.errorCode = null;
+      } catch (error: any) {
+        console.error(error);
+        this.error = error.message;
+        if (this.error?.includes(this.CHANGE_RPC_ERROR_CODE.toString())) {
+          this.errorCode = this.CHANGE_RPC_ERROR_CODE;
+        }
+      }
+    },
 
     formattedSkill(skill: stringOrNumber) {
       const skillBalance = fromWeiEther(skill.toString());
