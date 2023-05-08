@@ -6,9 +6,8 @@
           :key="c.id">
         <li
           class="character"
-          :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(c.id) : '']"
+          :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(c.id) : '', !charactersWeapon[c.id] ? 'character-disabled' : '']"
           :id="c.traitName.toLowerCase()"
-          @click="$emit('input', c.id)"
         >
           <div class="backdrop-bg"></div>
             <div class="art" >
@@ -18,7 +17,7 @@
             </div>
         </li>
         <div class="text-center mt-4">
-          <div class="selected-enemy-container" @click="onClickSelectTarget(c.id)">
+          <div class="selected-enemy-container" @click="onClickSelectTarget(c.id)" v-if="charactersWeapon[c.id]">
             <div v-if="selectedTargetByCharacter[c.id]">
               <div>
                 <div class="selected-encounter-element">
@@ -49,6 +48,13 @@
                 </div>
               </div>
             </div>
+          </div>
+          <div
+            class="selected-enemy-container"
+            :class="{'disabled': !charactersWeapon[c.id]}"
+            v-if="!charactersWeapon[c.id]"
+          >
+            {{$t('combat.errors.youNeedToHaveWeaponEquippedToCombatYouCanEquipInPlaza')}}
           </div>
         </div>
       </div>
@@ -147,7 +153,8 @@ interface ITeamAdventureData {
   selectedCharacterID: number,
   selectedCharacterTargets: any[] | ITarget,
   selectedTargetByCharacter: Record<number, ITarget>
-  selectedTargetByPayout: Record<number, stringOrNumber>
+  selectedTargetByPayout: Record<number, stringOrNumber>,
+  charactersWeapon: Record<number, number>,
   // eslint-disable-next-line no-undef
   intervalSecondsFn: NodeJS.Timeout | null;
   // eslint-disable-next-line no-undef
@@ -156,7 +163,7 @@ interface ITeamAdventureData {
   timeMinutes: number;
   activeCard: number;
   fightXpGain: number;
-  targetExpectedPayouts: string[];
+  targetExpectedPayouts: Record<number, stringOrNumber>
   isLoadingTargets: boolean,
 }
 
@@ -164,6 +171,10 @@ interface StoreMappedGetters {
   ownCharacters: Array<ICharacter>,
   allStaminas: Record<number, number>;
   getPowerData(characterId: number): IPowerData;
+}
+
+interface StoreMappedActions{
+  fetchCharacterWeapon(characterId: string | number): Promise<number>;
 }
 
 export default Vue.extend({
@@ -183,13 +194,14 @@ export default Vue.extend({
       selectedCharacterPowerData: {} as IPowerData,
       selectedCharacterID: -1,
       selectedCharacterTargets: [],
+      charactersWeapon: {},
       intervalMinutesFn: null,
       intervalSecondsFn: null,
       timeMinutes: 0,
       timeSeconds: 0,
       activeCard: -1,
       fightXpGain: 32,
-      targetExpectedPayouts: new Array(4),
+      targetExpectedPayouts: {},
       isLoadingTargets: false,
       selectedTargetByCharacter: {},
       selectedTargetByPayout: {}
@@ -208,7 +220,7 @@ export default Vue.extend({
     isGenesisCharacter(): boolean {
       const currentCharacter = this.ownCharacters[this.selectedCharacterID];
 
-      return currentCharacter.version === 0;
+      return currentCharacter?.version === 0;
     }
   },
   components: {
@@ -221,6 +233,7 @@ export default Vue.extend({
         'getFightXpGain',
         'fetchExpectedPayoutForMonsterPower'
       ]) as StoreMappedCombatActions),
+    ...mapActions(['fetchCharacterWeapon']) as StoreMappedActions,
     getEnemyArt,
     checkStorage() {
       this.showCosmetics = localStorage.getItem('showCosmetics') !== 'false';
@@ -240,6 +253,7 @@ export default Vue.extend({
       this.selectedCharacterTargets = await this.getTargetsByCharacterId(+this.selectedCharacterID);
 
       this.selectedCharacterPowerData = this.getPowerData(+this.selectedCharacterID);
+      await this.getExpectedPayouts();
       this.isLoadingTargets = false;
     },
     async onSelectTargetEnemy(target: ITarget) {
@@ -254,15 +268,15 @@ export default Vue.extend({
       for(let i = 0; i < targets.length; i++) {
         const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: targets[i].power });
         expectedPayouts[i] = expectedPayout;
+        Vue.set(this.targetExpectedPayouts, i, expectedPayouts[i]);
       }
-      this.targetExpectedPayouts = expectedPayouts;
     },
     async getExpectedPayoutsByCharacterTarget(characterID: number) {
       const target = this.selectedTargetByCharacter[characterID];
 
       const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: target.power });
-
-      Vue.set(this.selectedTargetByPayout, characterID, expectedPayout)
+      console.log(expectedPayout);
+      Vue.set(this.selectedTargetByPayout, characterID, expectedPayout);
     },
     enter(el: HTMLElement, done: any) {
       gasp.to(el, {
@@ -334,6 +348,13 @@ export default Vue.extend({
       const totalPower = this.selectedCharacterPowerData.pvePower[4]; // using base power
       //Formula taken from getXpGainForFight funtion of cryptoblades.sol
       return Math.floor((targetToFight.power / totalPower) * this.fightXpGain) * this.fightMultiplier;
+    },
+    async getCharactersWeapon() {
+      for (let i = 0; i < this.ownCharacters.length; i++) {
+        const character = this.ownCharacters[i];
+        const weapon = await this.fetchCharacterWeapon(character.id);
+        Vue.set(this.charactersWeapon, character.id, weapon);
+      }
     }
   },
   created() {
@@ -343,6 +364,7 @@ export default Vue.extend({
   },
   async mounted() {
     this.fightXpGain = await this.getFightXpGain();
+    await this.getCharactersWeapon();
   },
   beforeDestroy() {
     if(this.intervalSecondsFn)
@@ -355,6 +377,14 @@ export default Vue.extend({
 
 <style scoped>
 @import '../../../styles/character-cosmetics.css';
+
+.selected-enemy-container.disabled {
+  cursor: not-allowed;
+}
+
+.character-disabled {
+  opacity: 0.5;
+}
 
 .selected-encounter-element {
   top: 10px;

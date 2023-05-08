@@ -7,10 +7,28 @@
       </div>
 
       <div>
-        <div class="adventure">
-          <h5 class="m-2">{{$t('combat.adventure')}}</h5>
-          <img src="../assets/hint.png" alt="" @click="hideBottomMenu(true)">
+        <div class="adventure" v-if="COMBAT_TAB.Adventure === currentCombatTab">
+          <h5 class="m-2 d-inline combat-tab active-tab">
+              {{$t('combat.adventure')}}
+          </h5>
+          <h4
+            class="m-2 d-inline combat-tab"
+            @click="onChangeCombatTab(COMBAT_TAB.TeamAdventure)">
+              Team Adventure
+          </h4>
         </div>
+        <div class="adventure" v-if="COMBAT_TAB.TeamAdventure === currentCombatTab">
+          <h4 class="m-2 d-inline combat-tab"
+              @click="onChangeCombatTab(COMBAT_TAB.Adventure)"
+              :class="{'active-tab': COMBAT_TAB.Adventure === currentCombatTab}">
+                {{$t('combat.adventure')}}
+          </h4>
+          <h5
+            class="m-2 d-inline combat-tab active-tab">
+              Team Adventure
+          </h5>
+        </div>
+
         <div class="col-lg-12 col-md-12 col-xl-12 col-sm-12 text-right combat-hint" :style="isToggled ? 'display:inline' : 'none'"
           @click="hideBottomMenu(false)">
           <div class="combat-hints">
@@ -47,11 +65,13 @@
       </div>
 
       <div>
-        <!-- <TeamAdventure
+        <TeamAdventure
+          v-if="COMBAT_TAB.TeamAdventure === currentCombatTab"
           :fightMultiplier="fightMultiplier"
           :staminaPerFight="staminaPerFight">
-        </TeamAdventure> -->
+        </TeamAdventure>
         <Adventure
+        v-if="COMBAT_TAB.Adventure === currentCombatTab"
           :fightMultiplier="fightMultiplier"
           :staminaPerFight="staminaPerFight"
           @error="onErrorChanged"
@@ -77,6 +97,11 @@ import { Accessors } from 'vue/types/options';
 import { mapGetters } from 'vuex';
 import { ICharacter } from '@/interfaces';
 
+export enum COMBAT_TAB {
+  Adventure=0,
+  TeamAdventure=1
+}
+
 type numberOrNull = number | null;
 type stringOrNull = string | null;
 
@@ -88,6 +113,7 @@ interface ICombatData {
   isToggled: boolean;
   error: stringOrNull;
   errorCode: numberOrNull;
+  currentCombatTab: COMBAT_TAB
 }
 
 interface StoreMappedGetters {
@@ -102,7 +128,9 @@ export default Vue.extend({
       isToggled: false,
       error: null,
       errorCode: -1,
-      CHANGE_RPC_ERROR_CODE
+      CHANGE_RPC_ERROR_CODE,
+      COMBAT_TAB,
+      currentCombatTab: COMBAT_TAB.Adventure
     } as ICombatData;
   },
   methods: {
@@ -136,6 +164,12 @@ export default Vue.extend({
     },
     onErrorCodeChanged(errorCode: numberOrNull) {
       this.errorCode = errorCode;
+    },
+    onChangeCombatTab(tab: COMBAT_TAB) {
+      if(this.currentCombatTab === tab) return;
+
+      this.currentCombatTab = tab;
+      (this as any).$router.push({ path: '/combat', query: { tab: COMBAT_TAB[this.currentCombatTab] } });
     }
   },
   computed: {
@@ -148,11 +182,28 @@ export default Vue.extend({
     Adventure,
     Hint
   },
+  mounted() {
+    const queryTab = (this as any).$route.query.tab;
+    if(queryTab) {
+      if(queryTab === COMBAT_TAB.Adventure || queryTab === COMBAT_TAB.TeamAdventure)
+        this.currentCombatTab = (this as any).$route.query.tab;
+    }
+  }
 });
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
+
+.combat-tab {
+  cursor: default;
+}
+.combat-tab:not(.active-tab) {
+  cursor: pointer;
+}
+.active-tab {
+  color: #EDCD90;
+}
 .custom-select{
   background-color:#010D22;
   color:#fff
