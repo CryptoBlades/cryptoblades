@@ -1,12 +1,22 @@
 <template>
   <div>
+    <div>
+      <div class="link-text team-fight-btn mb-5 mt-5">
+        Team Fight
+
+        <div>
+          <b>{{ availableCharacters }}</b>/{{ ownCharacters.length  }}
+        </div>
+      </div>
+    </div>
+
     <div class="d-flex justify-content-around">
       <div class="d-flex flex-column"
           v-for="c in ownCharacters"
           :key="c.id">
         <li
           class="character"
-          :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(c.id) : '', !charactersWeapon[c.id] ? 'character-disabled' : '']"
+           :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(c.id) : '', !charactersWeapon[c.id] || !charHasStamina(c.id) ? 'character-disabled' : '']"
           :id="c.traitName.toLowerCase()"
         >
           <div class="backdrop-bg"></div>
@@ -17,7 +27,17 @@
             </div>
         </li>
         <div class="text-center mt-4">
-          <div class="selected-enemy-container" @click="onClickSelectTarget(c.id)" v-if="charactersWeapon[c.id]">
+          <div
+            class="change-enemy-button mt-4 mb-3"
+          >
+            <img
+                v-if="selectedTargetByCharacter[c.id]"
+                @click="onClickSelectTarget(c.id)"
+                class="select-enemy-icon"
+                src="./../../../assets/combat/team-adventure/switch.png"
+                width="120" alt="">
+          </div>
+          <div class="selected-enemy-container" @click="onClickSelectTarget(c.id)" v-if="charactersWeapon[c.id] && charHasStamina(c.id)">
             <div v-if="selectedTargetByCharacter[c.id]">
               <div>
                 <div class="selected-encounter-element">
@@ -48,13 +68,19 @@
                 </div>
               </div>
             </div>
+            <div v-else class="text-center">
+              <img class="select-enemy-icon" src="./../../../assets/combat/team-adventure/enemy.png" width="200" alt="">
+            </div>
           </div>
           <div
             class="selected-enemy-container"
             :class="{'disabled': !charactersWeapon[c.id]}"
-            v-if="!charactersWeapon[c.id]"
+            v-if="!charactersWeapon[c.id] && charHasStamina(c.id)"
           >
             {{$t('combat.errors.youNeedToHaveWeaponEquippedToCombatYouCanEquipInPlaza')}}
+          </div>
+          <div class="disabled selected-enemy-container" v-if="!charHasStamina(c.id)">
+            {{$t('combat.needStamina', {staminaPerFight })}}
           </div>
         </div>
       </div>
@@ -75,9 +101,8 @@
               <div  class="enemy-character"
                     @mouseover="activeCard = i"
                     @click="onSelectTargetEnemy(e)"
-                    :disabled="(timeMinutes === 59 && timeSeconds >= 30) ||!charHasStamina()"
+                    :disabled="(timeMinutes === 59 && timeSeconds >= 30)"
                   >
-
                   <div class="frame-line" v-if="activeCard === i">
                     <img style="width: 20rem; height: 35rem;" src="../../../assets/frame-line-3.png" alt="">
                   </div>
@@ -221,6 +246,17 @@ export default Vue.extend({
       const currentCharacter = this.ownCharacters[this.selectedCharacterID];
 
       return currentCharacter?.version === 0;
+    },
+    availableCharacters() {
+      let availableCharactersCounter = 0;
+
+      for (let i = 0; i < this.ownCharacters.length; i++) {
+        const character = this.ownCharacters[i];
+        const canDoBattle = this.charHasStamina(character.id) && this.charactersWeapon[character.id];
+        if(canDoBattle) availableCharactersCounter+=1;
+      }
+
+      return availableCharactersCounter;
     }
   },
   components: {
@@ -275,7 +311,6 @@ export default Vue.extend({
       const target = this.selectedTargetByCharacter[characterID];
 
       const expectedPayout = await this.fetchExpectedPayoutForMonsterPower({ power: target.power });
-      console.log(expectedPayout);
       Vue.set(this.selectedTargetByPayout, characterID, expectedPayout);
     },
     enter(el: HTMLElement, done: any) {
@@ -291,8 +326,8 @@ export default Vue.extend({
       el.style.opacity = '0';
       el.style.transform = 'translateY(100px)';
     },
-    charHasStamina(){
-      return this.allStaminas[+this.selectedCharacterID] >= this.staminaPerFight;
+    charHasStamina(characterID: number){
+      return this.allStaminas[+characterID] >= this.staminaPerFight;
     },
     changeColorChange(stat: string){
       let bgColor;
@@ -378,6 +413,40 @@ export default Vue.extend({
 <style scoped>
 @import '../../../styles/character-cosmetics.css';
 
+.team-fight-btn {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin-right: 15px;
+  align-items: center;
+  vertical-align: middle;
+  justify-content: center;
+  background-image: url('../../../assets/btn-long.svg');
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  object-fit: fill;
+  padding: 10px 40px 10px 40px;
+  border: none;
+  font-family: Oswald;
+  color: #fff;
+  font-size: 17px;
+  margin: auto;
+  margin-right: -40px;
+}
+
+.change-enemy-button {
+  min-height: 67.56px;
+}
+
+.change-enemy-button img {
+  cursor: pointer;
+}
+
+.selected-enemy-container .select-enemy-icon {
+  opacity: 0.3;
+}
 .selected-enemy-container.disabled {
   cursor: not-allowed;
 }
