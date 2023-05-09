@@ -12,9 +12,9 @@
               {{$t('combat.adventure')}}
           </h5>
           <h4
-            class="m-2 d-inline combat-tab"
+            class="m-2 d-inline combat-tab text-uppercase"
             @click="onChangeCombatTab(COMBAT_TAB.TeamAdventure)">
-              Team Adventure
+              {{$t('combat.teamAdventure')}}
           </h4>
         </div>
         <div class="adventure" v-if="COMBAT_TAB.TeamAdventure === currentCombatTab">

@@ -523,6 +523,8 @@
     "error": "Error:",
     "close": "Close",
     "back": "Back",
+    "teamFight": "Team Fight",
+    "teamAdventure": "Team Adventure",
     "errors": {
       "needToSelectChar": "You need to select a character to do battle.",
       "notEnoughDurability": "This weapon does not have enough durability.",

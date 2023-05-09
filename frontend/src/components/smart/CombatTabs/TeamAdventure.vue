@@ -6,7 +6,7 @@
           (timeMinutes === 59 && timeSeconds >= 30) ||
           availableCharactersToFight <= 0}"
       >
-        Team Fight
+        {{$t('combat.teamFight')}}
         <div>
           <b>{{ availableCharactersToFight }}</b>/{{ ownCharacters.length  }}
         </div>
