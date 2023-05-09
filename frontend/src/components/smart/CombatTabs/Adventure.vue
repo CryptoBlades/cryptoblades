@@ -110,7 +110,6 @@
 import Vue from 'vue';
 import {getEnemyArt} from '../../../enemy-art';
 import {CharacterTrait, ICharacter, IPowerData, ITarget} from '../../../interfaces';
-import Hint from '../../Hint.vue';
 import {fromWeiEther, toBN} from '../../../utils/common';
 import BigNumber from 'bignumber.js';
 import ModalContainer from '../../modals/ModalContainer.vue';
@@ -557,7 +556,6 @@ export default Vue.extend({
   },
 
   components: {
-    Hint,
     ModalContainer
   },
 });
