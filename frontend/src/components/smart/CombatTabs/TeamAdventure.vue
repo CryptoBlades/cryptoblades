@@ -91,16 +91,16 @@
     </div>
 
     <b-modal
-    size="xl"
-    class="centered-modal"
+    size="huge"
     ref="select-target-modal"
-    :title="$t('needGasModal.title')"
+    :title="$t('combat.pickEnemy')"
+    hide-footer
     >
       <transition-group
           appear @before-enter="beforeEnter" @enter="enter"
           :key="2"
-          class="row mb-3 enemy-container" v-if="selectedCharacterTargets.length > 0">
-        <div class="col-12 col-md-6 col-lg-6 col-sm-6 col-xl-3 encounter" v-for="(e, i) in selectedCharacterTargets" :key="e.original" :data-index="i">
+          class="row mb-3 enemy-container justify-content-around" v-if="selectedCharacterTargets.length > 0">
+        <div class="encounter" v-for="(e, i) in selectedCharacterTargets" :key="e.original" :data-index="i">
           <div class="encounter-container">
               <div  class="enemy-character"
                     @mouseover="activeCard = i"
@@ -600,8 +600,8 @@ export default Vue.extend({
   position: absolute;
   display: flex;
   justify-content: center;
+  flex-basis: 320px;
 }
-
 
 .frame-line:hover{
   max-width: 112%;
