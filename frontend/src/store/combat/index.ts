@@ -150,7 +150,7 @@ const combat = {
       if (!TokensManager || !CryptoBlades || !rootState.defaultAccount) return;
 
       const res = await TokensManager.methods
-        .singleFight(characterId, targetString, fightMultiplier)
+        .fight(characterId, targetString, fightMultiplier)
         .send({
           from: rootState.defaultAccount,
           gasPrice: getGasPrice(),
@@ -227,7 +227,7 @@ const combat = {
       }
 
       const res = await TokensManager.methods
-        .fight(characters, targets, multiplier)
+        .teamFight(characters, targets, multiplier)
         .send({
           from: rootState.defaultAccount,
           gasPrice: getGasPrice(),

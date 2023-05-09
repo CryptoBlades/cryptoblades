@@ -39,7 +39,7 @@ contract TokensManager is Initializable, AccessControlUpgradeable {
 
     receive() external payable restricted {}
 
-    function fight(
+    function teamFight(
         uint256[] calldata char,
         uint32[] calldata target,
         uint8[] calldata fightMultiplier
@@ -72,7 +72,7 @@ contract TokensManager is Initializable, AccessControlUpgradeable {
         }
     }
 
-    function singleFight(
+    function fight(
         uint256 char,
         uint32 target,
         uint8 fightMultiplier
