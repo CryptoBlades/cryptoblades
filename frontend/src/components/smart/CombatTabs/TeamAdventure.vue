@@ -64,7 +64,7 @@
                 </div>
 
                 <div class="xp-gain">
-                  +{{getPotentialXp(selectedTargetByCharacter[c.id])}} {{$t('combat.xp')}}
+                  +{{getPotentialXp(selectedTargetByCharacter[c.id], c.id)}} {{$t('combat.xp')}}
                 </div>
 
                 <div class="skill-gain mb-1">
@@ -134,7 +134,7 @@
                   </div>
 
                   <div class="xp-gain">
-                    +{{getPotentialXp(e)}} {{$t('combat.xp')}}
+                    +{{getPotentialXp(e, selectedCharacterID)}} {{$t('combat.xp')}}
                   </div>
 
                   <div class="skill-gain mb-1">
@@ -196,6 +196,7 @@ interface ITeamAdventureData {
   selectedCharacterTargets: any[] | ITarget,
   selectedTargetByCharacter: Record<number, ITarget>
   selectedTargetByPayout: Record<number, stringOrNumber>,
+  charactersPowerData: Record<number, IPowerData>,
   charactersWeapon: Record<number, number>,
   // eslint-disable-next-line no-undef
   intervalSecondsFn: NodeJS.Timeout | null;
@@ -237,6 +238,7 @@ export default Vue.extend({
       selectedCharacterID: -1,
       selectedCharacterTargets: [],
       charactersWeapon: {},
+      charactersPowerData: {},
       intervalMinutesFn: null,
       intervalSecondsFn: null,
       timeMinutes: 0,
@@ -275,6 +277,11 @@ export default Vue.extend({
       return availableCharactersCounter;
     }
   },
+  watch: {
+    selectedTargetByPayout(val) {
+      console.log('selectedTargetByPayout -> ',val);
+    }
+  },
   components: {
     CharacterArt
   },
@@ -304,7 +311,8 @@ export default Vue.extend({
       await this.fetchTargets({characterId: this.selectedCharacterID});
       this.selectedCharacterTargets = await this.getTargetsByCharacterId(+this.selectedCharacterID);
 
-      this.selectedCharacterPowerData = this.getPowerData(+this.selectedCharacterID);
+      this.selectedCharacterPowerData = this.charactersPowerData[+this.selectedCharacterID];
+
       await this.getExpectedPayouts();
       this.isLoadingTargets = false;
     },
@@ -395,8 +403,9 @@ export default Vue.extend({
       if (rollingTotal <= 0.7) return i18n.t('combat.winChances.likely');
       return i18n.t('combat.winChances.veryLikely');
     },
-    getPotentialXp(targetToFight: ITarget) {
-      const totalPower = this.selectedCharacterPowerData.pvePower[4]; // using base power
+    getPotentialXp(targetToFight: ITarget, characterID: number) {
+      console.log(this.charactersPowerData);
+      const totalPower = this.charactersPowerData[characterID]?.pvePower[4]; // using base power
       //Formula taken from getXpGainForFight funtion of cryptoblades.sol
       return Math.floor((targetToFight.power / totalPower) * this.fightXpGain) * this.fightMultiplier;
     },
@@ -410,6 +419,13 @@ export default Vue.extend({
     showLastMinuteErrorModal() {
       if(this.timeMinutes === 59 && this.timeSeconds >= 30) {
         (this.$refs['last-minute-error-modal'] as any).show();
+      }
+    },
+    getCharactersPowerData() {
+      for (let i = 0; i < this.ownCharacters.length; i++) {
+        const character = this.ownCharacters[i];
+        const powerData = this.getPowerData(+character.id);
+        Vue.set(this.charactersPowerData, character.id, powerData);
       }
     }
   },
@@ -428,6 +444,7 @@ export default Vue.extend({
   async mounted() {
     this.fightXpGain = await this.getFightXpGain();
     await this.getCharactersWeapon();
+    this.getCharactersPowerData();
   },
   beforeDestroy() {
     if(this.intervalSecondsFn)
