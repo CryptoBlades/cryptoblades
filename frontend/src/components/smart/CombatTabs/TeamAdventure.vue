@@ -1,22 +1,26 @@
 <template>
   <div>
     <div>
-      <div class="link-text team-fight-btn mb-5 mt-5">
+      <div class="link-text team-fight-btn mb-5 mt-5"
+        :class="{'team-fight-button-disabled':
+          (timeMinutes === 59 && timeSeconds >= 30) ||
+          availableCharactersToFight <= 0}"
+      >
         Team Fight
-
         <div>
-          <b>{{ availableCharacters }}</b>/{{ ownCharacters.length  }}
+          <b>{{ availableCharactersToFight }}</b>/{{ ownCharacters.length  }}
         </div>
       </div>
     </div>
 
-    <div class="d-flex justify-content-around">
+    <div class="d-flex justify-content-around flex-wrap">
       <div class="d-flex flex-column"
           v-for="c in ownCharacters"
           :key="c.id">
         <li
           class="character"
-           :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(c.id) : '', !charactersWeapon[c.id] || !charHasStamina(c.id) ? 'character-disabled' : '']"
+           :class="[showCosmetics ? 'character-animation-applied-' + getCharacterCosmetic(c.id) : '',
+            !charactersWeapon[c.id] || !charHasStamina(c.id) ? 'character-disabled' : '']"
           :id="c.traitName.toLowerCase()"
         >
           <div class="backdrop-bg"></div>
@@ -37,7 +41,7 @@
                 src="./../../../assets/combat/team-adventure/switch.png"
                 width="120" alt="">
           </div>
-          <div class="selected-enemy-container" @click="onClickSelectTarget(c.id)" v-if="charactersWeapon[c.id] && charHasStamina(c.id)">
+          <div class="selected-enemy-container mb-5" @click="onClickSelectTarget(c.id)" v-if="charactersWeapon[c.id] && charHasStamina(c.id)">
             <div v-if="selectedTargetByCharacter[c.id]">
               <div>
                 <div class="selected-encounter-element">
@@ -73,13 +77,13 @@
             </div>
           </div>
           <div
-            class="selected-enemy-container"
+            class="selected-enemy-container  mb-5"
             :class="{'disabled': !charactersWeapon[c.id]}"
             v-if="!charactersWeapon[c.id] && charHasStamina(c.id)"
           >
             {{$t('combat.errors.youNeedToHaveWeaponEquippedToCombatYouCanEquipInPlaza')}}
           </div>
-          <div class="disabled selected-enemy-container" v-if="!charHasStamina(c.id)">
+          <div class="disabled selected-enemy-container mb-5"  v-if="!charHasStamina(c.id)">
             {{$t('combat.needStamina', {staminaPerFight })}}
           </div>
         </div>
@@ -141,6 +145,19 @@
           </div>
         </div>
       </transition-group>
+    </b-modal>
+
+    <b-modal
+      class="centered-modal"
+      ref="last-minute-error-modal"
+      ok-only
+    >
+      <template #modal-title>
+        <b-icon icon="exclamation-circle" variant="danger"/> {{$t('combat.warning')}}
+      </template>
+      <span>
+        {{$t('combat.errors.lastSeconds')}}
+      </span>
     </b-modal>
   </div>
 </template>
@@ -247,13 +264,12 @@ export default Vue.extend({
 
       return currentCharacter?.version === 0;
     },
-    availableCharacters() {
+    availableCharactersToFight() {
       let availableCharactersCounter = 0;
+      for (const key in this.selectedTargetByCharacter) {
+        const element = this.selectedTargetByCharacter[key];
 
-      for (let i = 0; i < this.ownCharacters.length; i++) {
-        const character = this.ownCharacters[i];
-        const canDoBattle = this.charHasStamina(character.id) && this.charactersWeapon[character.id];
-        if(canDoBattle) availableCharactersCounter+=1;
+        if(element) availableCharactersCounter+=1;
       }
 
       return availableCharactersCounter;
@@ -390,11 +406,23 @@ export default Vue.extend({
         const weapon = await this.fetchCharacterWeapon(character.id);
         Vue.set(this.charactersWeapon, character.id, weapon);
       }
+    },
+    showLastMinuteErrorModal() {
+      if(this.timeMinutes === 59 && this.timeSeconds >= 30) {
+        (this.$refs['last-minute-error-modal'] as any).show();
+      }
     }
   },
   created() {
-    this.intervalSecondsFn = setInterval(() => (this.timeSeconds = new Date().getSeconds()), 5000);
-    this.intervalMinutesFn = setInterval(() => (this.timeMinutes = new Date().getMinutes()), 20000);
+    (this.$refs['last-minute-error-modal'] as any).show();
+    this.intervalSecondsFn = setInterval(() => {
+      this.timeSeconds = new Date().getSeconds();
+      this.showLastMinuteErrorModal();
+    }, 5000);
+    this.intervalMinutesFn = setInterval(() => {
+      this.timeMinutes = new Date().getMinutes();
+      this.showLastMinuteErrorModal();
+    }, 20000);
     this.checkStorage();
   },
   async mounted() {
@@ -453,6 +481,11 @@ export default Vue.extend({
 
 .character-disabled {
   opacity: 0.5;
+}
+
+.team-fight-button-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .selected-encounter-element {
@@ -1349,7 +1382,7 @@ h1 {
 }
 
 .waitingForResult{
-  height: 90vh;
+  height: 60vh;
   position: absolute;
   width: 99%;
   z-index: 98;

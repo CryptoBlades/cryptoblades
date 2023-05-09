@@ -1,82 +1,81 @@
 <template>
   <div>
     <div :class="equippedWeaponId ? '' : 'combat-disabled'">
+      <modal-container
+        :noBack="true"
+        :modalType="'combat-result'"
+        :componentProps="{
+          fightResults:fightResults,
+          staminaUsed:staminaPerFight,
+          isValor: !isGenesisCharacter
+        }"/>
 
-    <modal-container
-      :noBack="true"
-      :modalType="'combat-result'"
-      :componentProps="{
-        fightResults:fightResults,
-        staminaUsed:staminaPerFight,
-        isValor: !isGenesisCharacter
-      }"/>
-
-    <div class="waitingForResult" v-if="waitingResults">
-      <div class="col wa">
-          <i class="fas fa-spinner fa-spin fa-1x mr-3"></i>
-          {{$t('combat.waiting').toUpperCase()}}
+      <div class="waitingForResult" v-if="waitingResults">
+        <div class="col wa">
+            <i class="fas fa-spinner fa-spin fa-1x mr-3"></i>
+            {{$t('combat.waiting').toUpperCase()}}
+        </div>
       </div>
-    </div>
 
-    <div>
-      <div class="d-flex justify-content-around combat-enemy-container" v-if="currentCharacterStamina >= staminaPerFight && equippedWeaponId">
-        <!-- ------------------------------------------- -->
-        <transition-group
-            appear @before-enter="beforeEnter" @enter="enter"
-            :key="2"
-            class="row mb-3 enemy-container" v-if="targets.length > 0">
-        <div class="col-12 col-md-6 col-lg-6 col-sm-6 col-xl-3 encounter" v-for="(e, i) in targets" :key="e.original" :data-index="i">
-          <div class="encounter-container">
-              <div class="enemy-character" @mouseover="activeCard = i" :disabled="(timeMinutes === 59 && timeSeconds >= 30) ||
-                    waitingResults || !charHasStamina()"
-                    @click="onClickEncounter(e,i)">
+      <div>
+        <div class="d-flex justify-content-around combat-enemy-container" v-if="currentCharacterStamina >= staminaPerFight && equippedWeaponId">
+          <!-- ------------------------------------------- -->
+          <transition-group
+              appear @before-enter="beforeEnter" @enter="enter"
+              :key="2"
+              class="row mb-3 enemy-container" v-if="targets.length > 0">
+          <div class="col-12 col-md-6 col-lg-6 col-sm-6 col-xl-3 encounter" v-for="(e, i) in targets" :key="e.original" :data-index="i">
+            <div class="encounter-container">
+                <div class="enemy-character" @mouseover="activeCard = i" :disabled="(timeMinutes === 59 && timeSeconds >= 30) ||
+                      waitingResults || !charHasStamina()"
+                      @click="onClickEncounter(e,i)">
 
-                  <!-- frame -->
-                  <div class="frame-line" v-if="activeCard === i">
-                    <img style="width: 20rem; height: 35rem;" src="../../../assets/frame-line-3.png" alt="">
-                  </div>
-
-                  <!-- winning chance -->
-                  <div class="fight-btn" v-if="activeCard === i">
-                    <img src="../../../assets/fight.png" alt="">
-                  </div>
+                    <!-- frame -->
+                    <div class="frame-line" v-if="activeCard === i">
+                      <img style="width: 20rem; height: 35rem;" src="../../../assets/frame-line-3.png" alt="">
+                    </div>
 
                     <!-- winning chance -->
-                  <div class="chance-winning" :style="changeColorChange(getWinChance(e.power, e.trait))">
-                    {{ getWinChance(e.power, e.trait).toUpperCase() }}
-                    {{$t('combat.victory').toUpperCase()}}
-                  </div>
+                    <div class="fight-btn" v-if="activeCard === i">
+                      <img src="../../../assets/fight.png" alt="">
+                    </div>
 
-                  <!-- image -->
-                  <div class="text-center">
-                    <img class="mx-auto enemy-img" :src="getEnemyArt(e.power)" :alt="$t('combat.enemy')" />
-                  </div>
+                      <!-- winning chance -->
+                    <div class="chance-winning" :style="changeColorChange(getWinChance(e.power, e.trait))">
+                      {{ getWinChance(e.power, e.trait).toUpperCase() }}
+                      {{$t('combat.victory').toUpperCase()}}
+                    </div>
 
-                  <!-- trait -->
-                  <div class="encounter-element">
-                    <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
-                    <span class="icon-border" style="margin-left: -31.5px" :style="activeCard === i ? 'border:2px solid #9e8a57': ''">.</span>
-                  </div>
+                    <!-- image -->
+                    <div class="text-center">
+                      <img class="mx-auto enemy-img" :src="getEnemyArt(e.power)" :alt="$t('combat.enemy')" />
+                    </div>
 
-                  <!-- power -->
-                  <div class="encounter-power pt-2">
-                      {{$t('combat.power').toUpperCase()}} : {{ e.power.toLocaleString() }}
-                  </div>
+                    <!-- trait -->
+                    <div class="encounter-element">
+                      <span :class="getCharacterTrait(e.trait).toLowerCase() + '-icon'" />
+                      <span class="icon-border" style="margin-left: -31.5px" :style="activeCard === i ? 'border:2px solid #9e8a57': ''">.</span>
+                    </div>
 
-                  <div class="xp-gain">
-                    +{{getPotentialXp(e)}} {{$t('combat.xp')}}
-                  </div>
+                    <!-- power -->
+                    <div class="encounter-power pt-2">
+                        {{$t('combat.power').toUpperCase()}} : {{ e.power.toLocaleString() }}
+                    </div>
 
-                  <div class="skill-gain mb-1">
-                    + ~{{formattedSkill(targetExpectedPayouts[i] * fightMultiplier)}}
-                  </div>
-              </div>
-          <p v-if="isLoadingTargets">{{$t('loading')}}</p>
+                    <div class="xp-gain">
+                      +{{getPotentialXp(e)}} {{$t('combat.xp')}}
+                    </div>
+
+                    <div class="skill-gain mb-1">
+                      + ~{{formattedSkill(targetExpectedPayouts[i] * fightMultiplier)}}
+                    </div>
+                </div>
+            <p v-if="isLoadingTargets">{{$t('loading')}}</p>
+            </div>
           </div>
+          </transition-group>
         </div>
-        </transition-group>
       </div>
-    </div>
     <!-- // error message boxes -->
     <div>
       <div class="col">
