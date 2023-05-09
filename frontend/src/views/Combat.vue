@@ -24,8 +24,8 @@
                 {{$t('combat.adventure')}}
           </h4>
           <h5
-            class="m-2 d-inline combat-tab active-tab">
-              Team Adventure
+            class="m-2 d-inline combat-tab active-tab text-uppercase">
+            {{$t('combat.teamAdventure')}}
           </h5>
         </div>
 
@@ -34,7 +34,7 @@
           <div class="combat-hints">
             <Hint class="mr-3" :text="$t('combat.elementHint')"/>
             <div>
-              <span class="fire-icon"/> 
+              <span class="fire-icon"/>
               <span class="icon-border">.</span>
             </div> &nbsp;»&nbsp;
             <div>
@@ -227,60 +227,6 @@ h5{
   font-size: 20px;
 }
 
-
-.enemy-character {
-  position: relative;
-  width: inherit;
-  cursor: pointer;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: clamp(100%, 100%, 100%) auto;
-  background-image: url('../assets/enemy-bg-transparent.png');
-  background-color: linear-gradient(45deg, rgba(20, 20, 20, 1) 100%, #242720 100%);
-  border: 1px solid #a28d54;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 10px;
-  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.705), 0px 12px 7px rgba(0, 0, 0, 0.5), 0px 9px 12px rgba(0, 0, 0, 0.1);
-}
-
-.enemy-character:hover{
-  transition: all 0.2s ease-in-out;
-  border: 1px solid #a28d54;
-  box-shadow: inset 0px 0px 0px 0px rgba(0,0,0,0.6);
-}
-
-.encounter img {
-  width: 13rem;
-  transition: 1s all;
-}
-
-.payout-info {
-  margin: auto;
-  text-align: center;
-  padding-top: 1em;
-  font-size: 1.5em;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.frame-line{
-  position: absolute;
-  display: flex;
-  justify-content: center;
-}
-
-
-.frame-line:hover{
-  max-width: 112%;
-  opacity: 1;
-}
-
-
 @keyframes resizeUp {
   0%   {
     width: 80%;
@@ -291,7 +237,6 @@ h5{
     opacity: 1;
   }
 }
-
 
 .combat-hints {
   margin: auto;
@@ -323,92 +268,6 @@ h5{
   width: 30px;
 }
 
-.waiting {
-  font-size: 2em;
-  margin: auto;
-  text-align: center;
-}
-
-.header-row {
-  display: flex;
-  align-items: center;
-}
-
-.header-row h1 {
-  margin-left: 10px;
-  margin-bottom: 5px;
-}
-
-.header-row .hint {
-  font-size: 2em;
-}
-
-.message-box {
-  font-family: Trajan;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  font-size: 2em;
-  height: calc(80vh - 150px);
-}
-
-div.encounter.text-center {
-  flex-basis: auto !important;
-}
-
-.encounter-container {
-  position: relative;
-}
-
-.encounter {
-  display: flex;
-  justify-content: center;
-}
-
-.xp-gain,
-.skill-gain {
-  color: rgb(158, 138, 87) !important;
-  font-family: Roboto;
-  font-size: 12px;
-}
-
-.encounter-power{
-  color: #fff;
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin-top: 1.5rem;
-  font-family: Oswald;
-}
-
-.chance-winning{
-    z-index: 1;
-    color: #fff;
-    padding: 1px 15px;
-    border-radius: 2px;
-    font-size: 13px;
-    font-family: Oswald;
-    text-transform: capitalize;
-    position: absolute;
-    top: 15px;
-    right: 15px;
-}
-
-.fight-btn> img{
-  width: 22px !important;
-}
-
-.fight-btn{
-  position:absolute;
-  top: 15px;
-  left: 15px;
-  animation-name: moveUpFade;
-  animation-duration: 1s;
-}
-
-.modal-body{
-  background-image: url('../assets/enemy-bg.png') !important;
-}
-
 @keyframes moveUpFade {
   0%   {
     margin-top: 20px;
@@ -420,147 +279,14 @@ div.encounter.text-center {
   }
 }
 
-
-
-.encounter-element {
-  top: 25px;
-  font-size: 30px;
-}
-
-.encounter-element > .icon-border{
-  width: 33px;
-  height: 33px;
-  margin-top: 1px
-}
-
-.encounter-power {
-  bottom: 60px;
-}
-
-.xp-gain {
-  bottom: 40px;
-  font-size: 1rem;
-}
-
-.skill-gain {
-  bottom: 20px;
-  font-size: 1rem;
-}
-
-.victory-chance {
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 1.5em;
-  text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
-}
-
-/* Mobile Support Classes*/
-.mobile-divider-wrapper {
-  width: 100%;
-  display: flex;
-}
-
-.mobile-divider {
-  margin: auto;
-}
-
-.combat-enemy-container {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 50px;
-}
-
-.enemy-container {
-  flex: 3;
-}
-
-.enemy-list {
-  display: flex;
-  flex-wrap: wrap;
-  padding-left: 30px;
-  padding-right: 30px;
-}
-
-.enemy-energy {
-  top: -30px;
-  position: relative;
-}
-
-
-.hideMobile{
-  display: none;
-}
-
-h1 {
-  font-weight: 900 !important;
-  text-align: center;
-  font-size: 3vw;
-  padding-top: 0px;
-}
-
-.encounter-button {
-  display: block;
-  margin: 0 auto;
-  height: 5em;
-  width: 13em;
-  position: relative;
-  top: 3vw;
-  margin-top: 2em;
-}
-
-.enemy-img {
-  position: relative;
-  top: -30px;
-}
-
 .adventure{
-    text-align: left;
-    margin-top: 30px;
-  }
-
-.btn-trigger{
-  display: none;
-}
-
-@media (max-width: 1334px) {
-  .enemy-list {
-    flex-flow: row wrap;
-    align-items: center;
-  }
-  .enemy-list > .enemy-list-child{
-     flex-basis: 50%;
-  }
-  .encounter-button {
-    margin-top: 1.35em;
-  }
-
-}
-
-.message-box  .ct-btn > img{
-  width: 30px;
-  margin-left: 20px;
-}
-
-
-.message-box  .ct-btn{
-  margin-left: 20px;
-  background-color: rgba(255, 255, 255, 0);
-}
-
-.message-box  .ct-btn:hover{
-  margin-top: -10px;
-  transition: 0.3s all ease-in-out;
-}
-
-.showInMobile{
-  display: none;
+  text-align: left;
+  margin-top: 30px;
 }
 
 .adventure > img{
   display: none;
 }
-
 
 @media all and (max-width: 600px) {
   .combat-hints > div > .fire-icon,
@@ -571,10 +297,6 @@ h1 {
     max-width: 20px !important;
     width: auto;
     height: auto;
-  }
-
-  .hideMobile{
-    display: inline;
   }
 
   .body  > div{
@@ -588,12 +310,6 @@ h1 {
   .combat-hints > div > .icon-border{
     height: 21px !important;
     width: 21px !important;
-  }
-
-  .showInMobile{
-    display: inline;
-    font-family: Roboto;
-    font-size: 11px;
   }
 
   .adventure{
@@ -620,147 +336,10 @@ h1 {
     transition: all 1s ease-in-out;
   }
 
-  .enemy-container {
-    flex: none;
-    overflow-x: hidden;
-    height: 60vh;
-  }
-  .header-row {
-    justify-content: center !important;
-  }
-
-  .enemy-character {
-    width: 20rem;
-  }
-
-  .hideMenu{
-    margin-bottom: -120px;
-    transition: all 1s ease-in-out;
-  }
-
-  .showMenu{
-    margin-bottom: 0px;
-    transition: all 1s ease-in-out;
-  }
-
-  .btn-trigger{
-    right: 30px;
-    position: absolute;
-    width: 20px;
-    z-index: 100;
-  }
-
-  .btn-trigger{
-    display: inline;
-  }
-
-  .btn-trigger > img{
-    width: 30px;
-    margin-left: 0px;
-    margin-top: -20px;
-    margin-top: -70px;
-  }
-
-  .rotateUp{
-    transform: rotate(270deg);
-    transition: all 1s ease-in-out;
-  }
-
-  .rotateDown{
-    transform: rotate(90deg);
-    transition: all 1s ease-in-out;
-  }
-
-  .waitingForResult .col{
-    font-family: Trajan;
-    font-size: 15px !important;
-  }
-
   .combat-hint{
     position: absolute;
   }
-
 }
-
-/* Needed to asjust image size, not just image column-size and other classes to accommodate that */
-@media all and (max-width: 767.98px) {
-  .encounter img {
-    max-width: 140px;
-  }
-
-  .frame-line {
-    display: none;
-  }
-
-  .enemy-list{
-    flex-direction:column;
-    align-items:center;
-  }
-  .combat-enemy-container {
-    flex-direction: column;
-    align-items: center;
-  }
-  .results-panel {
-    width: 100%;
-  }
-}
-.hint.has-tooltip {
-  font-size: 1.8rem;
-  display: inline-block;
-  margin-left: 10px;
-}
-.dark-bg-text {
-  width: 100% !important;
-}
-.content {
-  padding: 0 !important;
-}
-
-.encounter-container {
-  margin-bottom: 50px;
-}
-
-#gtag-link-others {
-  margin: 0 auto;
-  display: block;
-  position: relative;
-  margin-top: 20px;
-  width: 100%;
-}
-.ml-3 {
-  margin-left: 0px !important;
-}
-.header-row {
-  display: block;
-  text-align: center;
-}
-#expectedSkillHint{
-  margin:0;
-  font-size: 1em;
-}
-
-.cw-content h4{
-    font-family: 'Trajan', serif;
-    text-transform: capitalize;
-}
-
-
-.cw-content{
-  padding: 40px;
-  border: 1px solid #ffffff52;
-}
-/* --------------------------------- */
-.ct-btn{
-  padding: 0px;
-  height: fit-content;
-  border: none !important;
-}
-
-.ct-btn:hover{
-  border: none !important;
-}
-
-
 .icon-border{
     border: 1px solid #9e8a57;
     height: 27px;
@@ -770,81 +349,5 @@ h1 {
     transform: rotate(45deg);
     margin-left: -1px;
     margin-top: -1px;
-}
-
-
-/* enemy card animaton */
-.slide-fade-enter-active {
-  transition: all 3s ease-in-out;
-}
-
-.slide-fade-leave-active {
-  transition: all 3s ease-in-out;
-  /* transition: all 0.4s cubic-bezier(1, 0.5, 0.8, 1); */
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateY(50px);
-  opacity: 0;
-}
-
-.enemy-name{
-  margin-top: 10px;
-  font-family: 'Trajan', 'serif';
-  font-weight: 600;
-}
-
-.waitingForResult{
-  height: 90vh;
-  position: absolute;
-  width: 99%;
-  z-index: 98;
-}
-
-.waitingForResult .col{
-  font-family: Trajan;
-    font-size: 25px;
-    position: absolute;
-    text-align: center;
-    bottom: 40vh;
-    background: linear-gradient(to right, rgba(255,0,0,0), rgb(0 0 0),rgb(6 0 0 / 0%));
-    z-index: 99;
-    padding: 20px;
-}
-
-.footer-close{
-  margin: auto;
-}
-
-.footer-close > span{
-  cursor: pointer;
-}
-
-.footer-close > .tap{
-  font-size: 15px;
-  color: #fff;
-  margin-top: 40px;
-  text-align: center;
-  margin-left: auto;
-  margin-bottom: 20px;
-  font-family: Roboto;
-}
-
-.vertical-decoration.bottom{
-  transform: rotate(0deg) !important;
-}
-
-.combat-disabled {
-  pointer-events: none;
-  opacity: 0.5;
-}
-
-@media (max-width: 575.98px) {
-  .show-reforged {
-    width: 100%;
-    justify-content: center;
-    display: block;
-  }
 }
 </style>

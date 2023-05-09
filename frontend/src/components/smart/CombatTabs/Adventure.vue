@@ -562,32 +562,8 @@ export default Vue.extend({
   },
 });
 </script>
-
-  <style scoped>
+<style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
-  .custom-select{
-    background-color:#010D22;
-    color:#fff
-  }
-  .body{
-    background: linear-gradient(0deg, rgba(0, 14, 41, 0.68), rgba(0, 14, 41, 0.68)), url('../../../assets/combat-bg.png');
-    background-size: clamp(100%, 100%, 100%) auto;
-    background-repeat: no-repeat;
-    min-height: 100%;
-  }
-  h5{
-    font-family: 'Trajan', serif;
-    font-size: 25px;
-    font-weight: 400;
-  }
-
-  .label-title{
-    font-family: Oswald;
-    color: #fff;
-    text-transform: uppercase;
-    font-size: 20px;
-  }
-
 
   .enemy-character {
     position: relative;
@@ -619,28 +595,16 @@ export default Vue.extend({
     transition: 1s all;
   }
 
-  .payout-info {
-    margin: auto;
-    text-align: center;
-    padding-top: 1em;
-    font-size: 1.5em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
   .frame-line{
     position: absolute;
     display: flex;
     justify-content: center;
   }
 
-
   .frame-line:hover{
     max-width: 112%;
     opacity: 1;
   }
-
 
   @keyframes resizeUp {
     0%   {
@@ -651,57 +615,6 @@ export default Vue.extend({
       width: 115%;
       opacity: 1;
     }
-  }
-
-
-  .combat-hints {
-    margin: auto;
-    text-align: center;
-    font-size: 2em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .combat-hints > div{
-    display: flex;
-    padding-right: 12px;
-    padding-left: 12px;
-  }
-
-  .combat-hints > div > .fire-icon,
-  .combat-hints > div > .earth-icon,
-  .combat-hints > div > .lightning-icon,
-  .combat-hints > div > .water-icon{
-    max-height: 25px !important;
-    max-width: 25px !important;
-    width: auto;
-    height: auto;
-  }
-
-  .combat-hints .hint {
-    margin-left: 50px;
-    width: 30px;
-  }
-
-  .waiting {
-    font-size: 2em;
-    margin: auto;
-    text-align: center;
-  }
-
-  .header-row {
-    display: flex;
-    align-items: center;
-  }
-
-  .header-row h1 {
-    margin-left: 10px;
-    margin-bottom: 5px;
-  }
-
-  .header-row .hint {
-    font-size: 2em;
   }
 
   .message-box {
@@ -766,10 +679,6 @@ export default Vue.extend({
     animation-duration: 1s;
   }
 
-  .modal-body{
-    background-image: url('../../../assets/enemy-bg.png') !important;
-  }
-
   @keyframes moveUpFade {
     0%   {
       margin-top: 20px;
@@ -780,7 +689,6 @@ export default Vue.extend({
       opacity: 1;
     }
   }
-
 
 
   .encounter-element {
@@ -808,24 +716,6 @@ export default Vue.extend({
     font-size: 1rem;
   }
 
-  .victory-chance {
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 1.5em;
-    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
-  }
-
-  /* Mobile Support Classes*/
-  .mobile-divider-wrapper {
-    width: 100%;
-    display: flex;
-  }
-
-  .mobile-divider {
-    margin: auto;
-  }
-
   .combat-enemy-container {
     display: flex;
     flex-direction: column;
@@ -836,66 +726,9 @@ export default Vue.extend({
     flex: 3;
   }
 
-  .enemy-list {
-    display: flex;
-    flex-wrap: wrap;
-    padding-left: 30px;
-    padding-right: 30px;
-  }
-
-  .enemy-energy {
-    top: -30px;
-    position: relative;
-  }
-
-
-  .hideMobile{
-    display: none;
-  }
-
-  h1 {
-    font-weight: 900 !important;
-    text-align: center;
-    font-size: 3vw;
-    padding-top: 0px;
-  }
-
-  .encounter-button {
-    display: block;
-    margin: 0 auto;
-    height: 5em;
-    width: 13em;
-    position: relative;
-    top: 3vw;
-    margin-top: 2em;
-  }
-
   .enemy-img {
     position: relative;
     top: -30px;
-  }
-
-  .adventure{
-      text-align: left;
-      margin-top: 30px;
-    }
-
-  .btn-trigger{
-    display: none;
-  }
-
-  @media (max-width: 1334px) {
-    .enemy-list {
-      flex-flow: row wrap;
-      align-items: center;
-    }
-    .enemy-list > .enemy-list-child{
-       flex-basis: 50%;
-    }
-    .encounter-button {
-      margin-top: 1.35em;
-    }
-
   }
 
   .message-box  .ct-btn > img{
@@ -914,133 +747,21 @@ export default Vue.extend({
     transition: 0.3s all ease-in-out;
   }
 
-  .showInMobile{
-    display: none;
-  }
-
-  .adventure > img{
-    display: none;
-  }
-
-
   @media all and (max-width: 600px) {
-    .combat-hints > div > .fire-icon,
-    .combat-hints > div > .earth-icon,
-    .combat-hints > div > .lightning-icon,
-    .combat-hints > div > .water-icon {
-      max-height: 20px !important;
-      max-width: 20px !important;
-      width: auto;
-      height: auto;
-    }
-
-    .hideMobile{
-      display: inline;
-    }
-
-    .body  > div{
-      padding-left: 0px;
-    }
-
-    .isMobile{
-      display: none;
-    }
-
-    .combat-hints > div > .icon-border{
-      height: 21px !important;
-      width: 21px !important;
-    }
-
-    .showInMobile{
-      display: inline;
-      font-family: Roboto;
-      font-size: 11px;
-    }
-
-    .adventure{
-      display: flex;
-      margin-right: 10px;
-      justify-content: space-between;
-      margin-top: 10px;
-    }
-
-    .adventure > h5{
-      margin-left: 10px;
-    }
-
-    .adventure > img{
-      display: inline;
-      width: 35px;
-      height: 35px;
-    }
-
-    .combat-hint{
-      display: none;
-      z-index: 99;
-      background-color:rgba(1, 13, 34,1);
-      transition: all 1s ease-in-out;
-    }
-
     .enemy-container {
       flex: none;
       overflow-x: hidden;
       height: 60vh;
-    }
-    .header-row {
-      justify-content: center !important;
     }
 
     .enemy-character {
       width: 20rem;
     }
 
-    .hideMenu{
-      margin-bottom: -120px;
-      transition: all 1s ease-in-out;
-    }
-
-    .showMenu{
-      margin-bottom: 0px;
-      transition: all 1s ease-in-out;
-    }
-
-    .btn-trigger{
-      right: 30px;
-      position: absolute;
-      width: 20px;
-      z-index: 100;
-    }
-
-    .btn-trigger{
-      display: inline;
-    }
-
-    .btn-trigger > img{
-      width: 30px;
-      margin-left: 0px;
-      margin-top: -20px;
-      margin-top: -70px;
-    }
-
-    .rotateUp{
-      transform: rotate(270deg);
-      transition: all 1s ease-in-out;
-    }
-
-    .rotateDown{
-      transform: rotate(90deg);
-      transition: all 1s ease-in-out;
-    }
-
     .waitingForResult .col{
       font-family: Trajan;
       font-size: 15px !important;
     }
-
-    .combat-hint{
-      position: absolute;
-    }
-
   }
 
   /* Needed to asjust image size, not just image column-size and other classes to accommodate that */
@@ -1048,79 +769,17 @@ export default Vue.extend({
     .encounter img {
       max-width: 140px;
     }
-
     .frame-line {
       display: none;
-    }
-
-    .enemy-list{
-      flex-direction:column;
-      align-items:center;
     }
     .combat-enemy-container {
       flex-direction: column;
       align-items: center;
     }
-    .results-panel {
-      width: 100%;
-    }
   }
-  .hint.has-tooltip {
-    font-size: 1.8rem;
-    display: inline-block;
-    margin-left: 10px;
-  }
-  .dark-bg-text {
-    width: 100% !important;
-  }
-  .content {
-    padding: 0 !important;
-  }
-
   .encounter-container {
     margin-bottom: 50px;
   }
-
-  #gtag-link-others {
-    margin: 0 auto;
-    display: block;
-    position: relative;
-    margin-top: 20px;
-    width: 100%;
-  }
-  .ml-3 {
-    margin-left: 0px !important;
-  }
-  .header-row {
-    display: block;
-    text-align: center;
-  }
-  #expectedSkillHint{
-    margin:0;
-    font-size: 1em;
-  }
-
-  .cw-content h4{
-      font-family: 'Trajan', serif;
-      text-transform: capitalize;
-  }
-
-
-  .cw-content{
-    padding: 40px;
-    border: 1px solid #ffffff52;
-  }
-  /* --------------------------------- */
-  .ct-btn{
-    padding: 0px;
-    height: fit-content;
-    border: none !important;
-  }
-
-  .ct-btn:hover{
-    border: none !important;
-  }
-
 
   .icon-border{
       border: 1px solid #9e8a57;
@@ -1131,29 +790,6 @@ export default Vue.extend({
       transform: rotate(45deg);
       margin-left: -1px;
       margin-top: -1px;
-  }
-
-
-  /* enemy card animaton */
-  .slide-fade-enter-active {
-    transition: all 3s ease-in-out;
-  }
-
-  .slide-fade-leave-active {
-    transition: all 3s ease-in-out;
-    /* transition: all 0.4s cubic-bezier(1, 0.5, 0.8, 1); */
-  }
-
-  .slide-fade-enter-from,
-  .slide-fade-leave-to {
-    transform: translateY(50px);
-    opacity: 0;
-  }
-
-  .enemy-name{
-    margin-top: 10px;
-    font-family: 'Trajan', 'serif';
-    font-weight: 600;
   }
 
   .waitingForResult{
@@ -1172,40 +808,5 @@ export default Vue.extend({
       background: linear-gradient(to right, rgba(255,0,0,0), rgb(0 0 0),rgb(6 0 0 / 0%));
       z-index: 99;
       padding: 20px;
-  }
-
-  .footer-close{
-    margin: auto;
-  }
-
-  .footer-close > span{
-    cursor: pointer;
-  }
-
-  .footer-close > .tap{
-    font-size: 15px;
-    color: #fff;
-    margin-top: 40px;
-    text-align: center;
-    margin-left: auto;
-    margin-bottom: 20px;
-    font-family: Roboto;
-  }
-
-  .vertical-decoration.bottom{
-    transform: rotate(0deg) !important;
-  }
-
-  .combat-disabled {
-    pointer-events: none;
-    opacity: 0.5;
-  }
-
-  @media (max-width: 575.98px) {
-    .show-reforged {
-      width: 100%;
-      justify-content: center;
-      display: block;
-    }
   }
   </style>
