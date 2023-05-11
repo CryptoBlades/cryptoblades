@@ -140,6 +140,7 @@
       </div>
       <!-- --------------------------------------- -->
     </div>
+    <!-- To be switched to fightTargets with proper targets and indexes -->
     <b-modal class="centered-modal" ref="no-skill-warning-modal" @ok="fightTarget(targetToFight,targetToFightIndex)">
       <template #modal-title>
         <b-icon icon="exclamation-circle" variant="danger"/> {{$t('combat.warning')}}
@@ -174,22 +175,41 @@ interface StoreMappedCombatActions {
   fetchTargets(
     { characterId }:
     { characterId: number }): Promise<void>;
-  doEncounterPayNative(
-    { characterId,
-      targetString,
-      fightMultiplier,
-      offsetCost }:
-    { characterId: number,
-      targetString: number,
-      fightMultiplier: number,
-      offsetCost: BigNumber
-    }): Promise<{
-    isVictory: boolean,
-    playerRoll: string,
-    enemyRoll: string,
-    xpGain: any,
-    skillGain: any,
-    bnbGasUsed: string,
+  doEncounterPayNative({
+    characterId,
+    targetString,
+    fightMultiplier,
+    offsetCost,
+  }: {
+    characterId: number;
+    targetString: number;
+    fightMultiplier: number;
+    offsetCost: BigNumber;
+  }): Promise<{
+    isVictory: boolean;
+    playerRoll: string;
+    enemyRoll: string;
+    xpGain: any;
+    skillGain: any;
+    bnbGasUsed: string;
+  }>;
+  doEncountersPayNative({
+    charactersId,
+    targetsString,
+    fightMultiplier,
+    offsetCost,
+  }: {
+    charactersId: number[];
+    targetsString: number[];
+    fightMultiplier: number[];
+    offsetCost: BigNumber;
+  }): Promise<{
+    isVictory: boolean;
+    playerRoll: string;
+    enemyRoll: string;
+    xpGain: any;
+    skillGain: any;
+    bnbGasUsed: string;
   }>;
   fetchFightRewardSkill(): Promise<string>;
   fetchFightRewardValor(): Promise<string>;
@@ -398,6 +418,7 @@ export default Vue.extend({
       [
         'fetchTargets',
         'doEncounterPayNative',
+        'doEncountersPayNative',
         'fetchFightRewardSkill',
         'fetchFightRewardValor',
         'fetchFightRewardXp',
@@ -547,6 +568,80 @@ export default Vue.extend({
 
         await this.fetchCharacterStamina(this.currentCharacterId);
 
+        this.error = null;
+        this.errorCode = null;
+      } catch (error: any) {
+        console.error(error);
+        this.error = error.message;
+        if (this.error?.includes(this.CHANGE_RPC_ERROR_CODE.toString())) {
+          this.errorCode = this.CHANGE_RPC_ERROR_CODE;
+        }
+      }
+    },
+
+    //This should take in input the targets to fight for each character, chosen by the user
+    //async fightTargets(targetsToFight: ITarget[], targetsIndex: number[])
+    async fightTargets(targetToFight: ITarget, targetIndex: number) {
+      if (this.currentCharacterId === null) {
+        return;
+      }
+      this.waitingResults = true;
+      // Force a quick refresh of targets
+      for (let i = 0; i < this.ownCharacters.length; i++) {
+        await this.fetchTargets({ characterId: this.ownCharacters[i].id });
+      }
+      // If the targets list no longer contains the chosen target, return so a new target can be chosen
+      const targets = this.targets as any[];
+      if (targets[targetIndex].original !== targetToFight.original) {
+        this.waitingResults = false;
+        return;
+      }
+      this.fightResults = null;
+      this.error = null;
+      this.setIsInCombat(this.waitingResults);
+      try {
+        const targetPower = targetToFight.power;
+        const expectedPayoutWei = new BigNumber(
+          await this.fetchExpectedPayoutForMonsterPower({ power: targetPower })
+        );
+        const nativeTokenPriceUsd = new BigNumber(
+          await this.getNativeTokenPriceInUsd()
+        );
+        const skillPriceUsd = new BigNumber(await this.getCurrentSkillPrice());
+        const tokenChargePercentage = await this.getCombatTokenChargePercent();
+        const offsetToPayInNativeToken = expectedPayoutWei
+          .multipliedBy(tokenChargePercentage)
+          .div(100)
+          .multipliedBy(skillPriceUsd.gt(0) ? skillPriceUsd : 1)
+          .div(nativeTokenPriceUsd.gt(0) ? nativeTokenPriceUsd : 1)
+          .integerValue(BigNumber.ROUND_DOWN);
+        this.fightResults = await this.doEncountersPayNative({
+          //This takes the 4 characters that are not in the garrison
+          charactersId: [
+            this.ownCharacters[0].id,
+            this.ownCharacters[1].id,
+            this.ownCharacters[2].id,
+            this.ownCharacters[3].id,
+          ],
+          //TODO: This should be the targets chosen by the user: targetsIndex
+          targetsString: [0, 1, 2, 3],
+          //TODO: This array should contain the various fightMultiplier for each character
+          //This was just for testing
+          fightMultiplier: [
+            this.fightMultiplier,
+            this.fightMultiplier,
+            this.fightMultiplier,
+            this.fightMultiplier,
+          ],
+          //multiply offset by 4 because we are fighting 4 targets?? Not entirely sure about the math you want here, but if I understood correctly should be something like this
+          offsetCost: offsetToPayInNativeToken.multipliedBy(4),
+        });
+        await this.fetchFightRewardSkill();
+        await this.fetchFightRewardValor();
+        await this.fetchFightRewardXp();
+        for (let i = 0; i < this.ownCharacters.length; i++) {
+          await this.fetchCharacterStamina(this.ownCharacters[i].id);
+        }
         this.error = null;
         this.errorCode = null;
       } catch (error: any) {

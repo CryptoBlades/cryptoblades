@@ -150,12 +150,13 @@ const combat = {
       if (!TokensManager || !CryptoBlades || !rootState.defaultAccount) return;
 
       const res = await TokensManager.methods
-        .fight(
-          characterId,
-          targetString,
-          fightMultiplier
-        )
-        .send({ from: rootState.defaultAccount, gasPrice: getGasPrice(), gas: '300000', value: +offsetCost * fightMultiplier });
+        .fight(characterId, targetString, fightMultiplier)
+        .send({
+          from: rootState.defaultAccount,
+          gasPrice: getGasPrice(),
+          gas: '300000',
+          value: +offsetCost * fightMultiplier,
+        });
 
       let playerRoll = '';
       let enemyRoll = '';
@@ -167,20 +168,26 @@ const combat = {
         toBlock: res.blockNumber,
         fromBlock: res.blockNumber
       });
-
       if (fightOutcomeEvents.length) {
-        playerRoll = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.playerRoll;
-        enemyRoll = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.enemyRoll;
-        xpGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.xpGain;
-        skillGain = fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.skillGain;
+        playerRoll =
+          fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues
+            .playerRoll;
+        enemyRoll =
+          fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues
+            .enemyRoll;
+        xpGain =
+          fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.xpGain;
+        skillGain =
+          fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues
+            .skillGain;
       }
 
-      const {gasPrice} = await rootState.web3.eth.getTransaction(res.transactionHash);
+      const { gasPrice } = await rootState.web3.eth.getTransaction(
+        res.transactionHash
+      );
 
       const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
-      await Promise.all([
-        dispatch('combat/fetchTargets', {characterId}),
-      ]);
+      await Promise.all([dispatch('combat/fetchTargets', { characterId })]);
 
       return {
         isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
@@ -188,7 +195,106 @@ const combat = {
         enemyRoll,
         xpGain,
         skillGain,
-        bnbGasUsed
+        bnbGasUsed,
+      };
+    },
+
+    async doEncountersPayNative(
+      { rootState, dispatch }: { rootState: IState; dispatch: Dispatch },
+      {
+        charactersId,
+        targetsString,
+        fightMultiplier,
+        offsetCost,
+      }: {
+        charactersId: number[];
+        targetsString: number[];
+        fightMultiplier: number[];
+        offsetCost: BigNumber;
+      }
+    ) {
+      const { TokensManager, CryptoBlades } = rootState.contracts();
+      if (!TokensManager || !CryptoBlades || !rootState.defaultAccount) return;
+      const multiplier: string[] = [];
+      const characters: string[] = [];
+      const targets: string[] = [];
+      let totalOffset: BigNumber = offsetCost;
+      for (let i = 0; i < targetsString.length; i++) {
+        characters.push(charactersId[i].toString());
+        targets.push(targetsString[i].toString());
+        multiplier.push(fightMultiplier[i].toString());
+        totalOffset = totalOffset.multipliedBy(fightMultiplier[i]);
+      }
+
+      const res = await TokensManager.methods
+        .teamFight(characters, targets, multiplier)
+        .send({
+          from: rootState.defaultAccount,
+          gasPrice: getGasPrice(),
+          gas: '800000',
+          //TODO this should have all the fightMultipliers
+          value: +offsetCost * fightMultiplier[0],
+        });
+
+      let playerRoll = '';
+      let enemyRoll = '';
+      let xpGain = 0;
+      let skillGain = 0;
+
+      for (let i = 0; i < characters.length; i++) {
+        const fightOutcomeEvents = await CryptoBlades.getPastEvents(
+          'FightOutcome',
+          {
+            filter: {
+              owner: rootState.defaultAccount!,
+              character: charactersId[i],
+            },
+            toBlock: res.blockNumber,
+            fromBlock: res.blockNumber,
+          }
+        );
+        if (fightOutcomeEvents.length) {
+          playerRoll +=
+            fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues
+              .playerRoll;
+          enemyRoll +=
+            fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues
+              .enemyRoll;
+
+          xpGain += parseInt(
+            fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues
+              .xpGain, 10
+          );
+
+          skillGain += parseInt(
+            fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues
+              .skillGain, 10
+          );
+        }
+
+        if (i < charactersId.length - 1) {
+          playerRoll += ', ';
+          enemyRoll += ', ';
+        }
+      }
+
+      const { gasPrice } = await rootState.web3.eth.getTransaction(
+        res.transactionHash
+      );
+
+      const bnbGasUsed = gasUsedToBnb(res.gasUsed, gasPrice);
+
+      for (let i = 0; i < charactersId.length; i++) {
+        await dispatch('combat/fetchTargets', { characterId: charactersId[i] });
+      }
+
+      return {
+        isVictory: parseInt(playerRoll, 10) >= parseInt(enemyRoll, 10),
+        playerRoll,
+        enemyRoll,
+        xpGain,
+        skillGain,
+        bnbGasUsed,
       };
     },
 

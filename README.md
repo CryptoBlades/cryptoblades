@@ -7,12 +7,12 @@ This code is open, but not open source. It is not licensed, which means you cann
 ## Currency Setup
 
 1. Install [Ganache](https://www.trufflesuite.com/ganache).
-1. For Ganache, choose Quickstart Ethereum.
-1. Increase the gas limit in the workspace to `99999999` (or some other high number so you can deploy).
-1. Install [MetaMask](https://metamask.io/).
-1. Create a new connection to connect to Ganache with these settings: http://localhost:7545, any name, any chain id
-1. In Ganache, click the key icon on the right side of any address and grab the private key.
-1. In MetaMask, create a new account, import from private key, and paste the key in there.
+2. For Ganache, choose Quickstart Ethereum.
+3. Increase the gas limit in the workspace to `99999999` (or some other high number so you can deploy).
+4. Install [MetaMask](https://metamask.io/).
+5. Create a new connection to connect to Ganache with these settings: http://localhost:7545, any name, any chain id
+6. In Ganache, click the key icon on the right side of any address and grab the private key. Make sure that chainID is 5777.
+7. In MetaMask, create a new account, import from private key, and paste the key in there.
 
 You should now have 100 fake eth! You're now fake rich.
 
@@ -117,7 +117,6 @@ If you get any issues during deployment, run:
   [Use the 2-Letter ISO code of your language](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
 - Language is loaded on startup and added to the language drop-down of the Options page.
 - The value for the drop-down is "name" at the root of the json map.
-
 
 ### i18n Manager App
 
