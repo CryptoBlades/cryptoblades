@@ -432,12 +432,14 @@ export default Vue.extend({
     getCharacterTrait(trait: CharacterTrait) {
       return CharacterTrait[trait];
     },
-    hasSameTarget(latestTargets: Record<number, ITarget>) {
+    hasSameTarget(latestTargets: Record<number, Record<number, ITarget>>) {
       for (const key in this.selectedTargetByCharacter) {
-        const element = this.selectedTargetByCharacter[key];
-        const latestTarget = latestTargets[key];
-
-        if(element.original === latestTarget.original) return true;
+        const element = this.selectedTargetByCharacter[+key];
+        const latestTarget2 = latestTargets[+key];
+        console.log(latestTargets, element, +key);
+        if(element && element.targetIndex !== undefined &&
+          element.original === latestTarget2[element?.targetIndex].original)
+          return true;
       }
 
       return false;
@@ -500,17 +502,20 @@ export default Vue.extend({
       }
 
       this.waitingResults = true;
-      const latestTarget: Record<number, ITarget> = {};
+      const latestTarget:  Record<number, Record<number, ITarget>> = {};
       // Force a quick refresh of targets
       for (let i = 0; i < this.ownCharacters.length; i++) {
         const character = this.ownCharacters[i];
         await this.fetchTargets({ characterId: character.id });
-        latestTarget[character.id] = this.getTargetsByCharacterId(+this.selectedCharacterID) as ITarget;
+        latestTarget[character.id] = this.getTargetsByCharacterId(+this.selectedCharacterID) as any[];
       }
+
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
       if(!this.hasSameTarget(latestTarget)) {
         this.waitingResults = false;
         this.selectedTargetByCharacter = {};
+
+        return;
       }
       this.fightResults = null;
       //this.error = null;

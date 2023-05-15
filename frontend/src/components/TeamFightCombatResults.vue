@@ -17,6 +17,11 @@
           class="mx-5 my-5"
         >
           <h5 class="text-center fight-result">{{ formattedOutcome(value).toUpperCase() }}</h5>
+          <h5 class="text-center mb-0" v-if="!value.isVictory">
+            <b>
+              {{ getCleanCharacterName(key.toString()) }}
+            </b>
+          </h5>
           <div class="d-flex align-items-center">
             <div class="win-details">
               <h5>{{$t('combatResults.youRolled')}}</h5>
@@ -39,7 +44,7 @@
               <h5>{{value.enemyRoll}}</h5>
             </div>
           </div>
-          <div class="you-earned">
+          <div class="you-earned" v-if="value.isVictory">
             <h5 class="text-center mb-0">
               <b>
                 {{ getCleanCharacterName(key.toString()) }}
@@ -75,7 +80,7 @@
               </div>
             </div>
           </div>
-          <div class="xp-gain">
+          <div class="xp-gain" v-if="value.isVictory">
             + {{  formattedXpGain(value)  }}
           </div>
         </div>
