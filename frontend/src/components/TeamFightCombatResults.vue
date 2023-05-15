@@ -240,7 +240,6 @@ export default Vue.extend({
       else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
     formattedOutcome(fightResults: any): TranslateResult {
-      console.log(fightResults.isVictory);
       if(fightResults.isVictory) return i18n.t('combatResults.won');
       else return i18n.t('combatResults.lost');
     },

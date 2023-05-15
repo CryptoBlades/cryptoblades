@@ -266,7 +266,7 @@ interface ITeamAdventureData {
   minutesToNextAllowance: any,
   lastAllowanceSkill: any,
   fightResults: any;
-  CHANGE_RPC_ERROR_CODE: number,
+  CHANGE_RPC_ERROR_CODE: number
 }
 
 interface StoreMappedGetters {
@@ -508,8 +508,9 @@ export default Vue.extend({
         latestTarget[character.id] = this.getTargetsByCharacterId(+this.selectedCharacterID) as ITarget;
       }
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
-      if(this.hasSameTarget(latestTarget)) {
+      if(!this.hasSameTarget(latestTarget)) {
         this.waitingResults = false;
+        this.selectedTargetByCharacter = {};
       }
       this.fightResults = null;
       //this.error = null;
@@ -528,8 +529,6 @@ export default Vue.extend({
         for (let i = 0; i < this.ownCharacters.length; i++) {
           await this.fetchCharacterStamina(this.ownCharacters[i].id);
         }
-        console.log(this.fightResults);
-        console.log(JSON.stringify(this.fightResults));
         this.selectedTargetByCharacter = {};
         this.error = null;
         this.errorCode = null;
