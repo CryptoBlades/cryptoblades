@@ -435,10 +435,10 @@ export default Vue.extend({
     hasSameTarget(latestTargets: Record<number, Record<number, ITarget>>) {
       for (const key in this.selectedTargetByCharacter) {
         const element = this.selectedTargetByCharacter[+key];
-        const latestTarget2 = latestTargets[+key];
-        console.log(latestTargets, element, +key);
+        const latestTarget = latestTargets[+key];
+
         if(element && element.targetIndex !== undefined &&
-          element.original === latestTarget2[element?.targetIndex].original)
+          element.original === latestTarget[element?.targetIndex].original)
           return true;
       }
 

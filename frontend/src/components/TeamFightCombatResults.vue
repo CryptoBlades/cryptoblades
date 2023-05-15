@@ -179,14 +179,15 @@ export default Vue.extend({
       showAds: false,
       gasOffsetPerFight: 0,
       highestMultiplier: 0,
-      highestMultiplierProject: {} as SupportedProject,
+      highestMultiplierProject: {} as Record<string, SupportedProject>,
       partnerProjects: [] as SupportedProject[],
     };
   },
   watch: {
     getPartnerProjects(newval) {
       this.partnerProjects = newval;
-      this.getProjectMultiplier();
+      this.getProjectMultiplier('SKILL');
+      this.getProjectMultiplier('VALOR');
     }
   },
   computed: {
@@ -196,10 +197,7 @@ export default Vue.extend({
     ]),
     ...(mapGetters('treasury', ['getPartnerProjects', 'getProjectMultipliers']) as Accessors<StoreMappedTreasuryGetters>),
     ...(mapState('treasury',
-      ['payoutCurrencyId','partnerProjectRatios','defaultSlippage'])as Accessors<StoreMappedTreasuryState>),
-    highestProjectMultiplier(): number {
-      return +(toBN(+this.getProjectMultipliers[+this.highestMultiplierProject.id]).div(toBN(10).pow(18)).toFixed(4) || 0);
-    }
+      ['payoutCurrencyId','partnerProjectRatios','defaultSlippage'])as Accessors<StoreMappedTreasuryState>)
   },
   methods: {
     ...(mapActions('treasury', ['getPartnerProjectMultiplier', 'fetchPartnerProjects']) as StoreMappedTreasuryActions),
@@ -210,10 +208,9 @@ export default Vue.extend({
     },
     async fetchValorPrice(): Promise<void> {
       const response = await axios.get('https://api.dexscreener.com/latest/dex/search/?q=0x8730c8dedc59e3baffb67bf1fa63d4f0e2d9ecc9');
-      this.valorPrice = response.data?.pairs[0].priceUsd;
+      this.valorPrice = response.data?.pairs[0]?.priceUsd;
     },
-    async getProjectMultiplier() {
-      const tokenSymbol = 'SKILL';
+    async getProjectMultiplier(tokenSymbol: 'SKILL' | 'VALOR') {
       this.partnerProjects = this.partnerProjects && this.partnerProjects.filter(partnerProject => partnerProject.tokenSymbol.includes(tokenSymbol));
       if(this.partnerProjects.length > 0) {
         this.partnerProjects.map(async (project) => {
@@ -221,7 +218,7 @@ export default Vue.extend({
         });
         const projectMultipliers = await this.getProjectMultipliers;
 
-        this.highestMultiplierProject = this.partnerProjects.sort((a, b) => {
+        this.highestMultiplierProject[tokenSymbol] = this.partnerProjects.sort((a, b) => {
           const highestMultiplierA = +(toBN(+projectMultipliers[a.id]).div(toBN(10).pow(18)).toFixed(4));
           const highestMultiplierB = +(toBN(+projectMultipliers[b.id]).div(toBN(10).pow(18)).toFixed(4));
 
@@ -261,9 +258,9 @@ export default Vue.extend({
     },
     fightRewardsAmountInUSD(fightResults: any, characterID: number): string {
       if(!this.isGenesisCharacter(characterID)) {
-        return ((this.valorPrice * +this.formattedSkill(fightResults) * this.highestProjectMultiplier) || 0).toFixed(4);
+        return ((this.valorPrice * +this.formattedSkill(fightResults) * this.highestProjectMultiplier(characterID)) || 0).toFixed(4);
       } else {
-        return ((this.skillPrice * +this.formattedSkill(fightResults) * this.highestProjectMultiplier) || 0).toFixed(4);
+        return ((this.skillPrice * +this.formattedSkill(fightResults) * this.highestProjectMultiplier(characterID)) || 0).toFixed(4);
       }
     },
     getAggregatedCharacterEarnings() {
@@ -272,9 +269,9 @@ export default Vue.extend({
         const fightResult = this.fightResults.fightResultsMap[key];
 
         if(!this.isGenesisCharacter(+key)) {
-          totalEarnings += ((this.valorPrice * +this.formattedSkill(fightResult) * this.highestProjectMultiplier) || 0);
+          totalEarnings += ((this.valorPrice * +this.formattedSkill(fightResult) * this.highestProjectMultiplier(+key)) || 0);
         } else {
-          totalEarnings += ((this.skillPrice * +this.formattedSkill(fightResult) * this.highestProjectMultiplier) || 0);
+          totalEarnings += ((this.skillPrice * +this.formattedSkill(fightResult) * this.highestProjectMultiplier(+key)) || 0);
         }
       }
 
@@ -291,6 +288,10 @@ export default Vue.extend({
       }
 
       return winner;
+    },
+    highestProjectMultiplier(characterID: number): number {
+      return +(toBN(+this.getProjectMultipliers[+this.highestMultiplierProject[!this.isGenesisCharacter(characterID) ? 'VALOR' : 'SKILL']?.id || 0])
+        .div(toBN(10).pow(18)).toFixed(4) || 0);
     }
   },
   async beforeMount(){
