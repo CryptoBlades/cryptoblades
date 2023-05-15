@@ -129,9 +129,12 @@
     "powerTooltip": "BASE: {basePower} PWR<br>BONUS: {bonusPower}/{maxPower} PWR<br>Bonus power cap (3x base power) scales with level"
   },
   "combatResults": {
+    "teamFightResult": "Team Fight Results",
+    "totalEarnings": "Total Earnings",
     "won": "You won the fight!",
     "lost": "You lost the fight!",
     "earned": "You earned:",
+    "characterEarned": "earned:",
     "hint": "SKILL/VALOR earned is based on gas costs of the network plus a factor of your power",
     "gasFee": "You spent {bnbGasUsed} {gasToken} on gas fees ",
     "youRolled": "You rolled:",

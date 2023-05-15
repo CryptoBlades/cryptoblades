@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="modal-info" ref="modal-info" class="md" hide-footer hide-header>
+  <b-modal id="modal-info" ref="modal-info" :size="modalSize" class="modal-lg" hide-footer hide-header>
     <div class="to-back" v-if="!noBack">
       <span class="arrow-icon"></span>
       <span>{{$t('tapAnyWhere')}}</span>
@@ -37,10 +37,12 @@
 <script>
 import Vue from 'vue';
 import CombatResult from '../CombatResults.vue';
+import TeamFightCombatResults from '../TeamFightCombatResults.vue';
 
 export default Vue.extend({
   components: {
     'combat-result' : CombatResult,
+    'team-fight-combat-result':TeamFightCombatResults
   },
   props: ['headerContent','modalData', 'footerContent', 'modalSize', 'modalType', 'componentProps', 'noBack'],
   data() {
