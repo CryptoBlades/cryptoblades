@@ -149,11 +149,6 @@ interface StoreMappedTreasuryActions{
   fetchPartnerProjects(): Promise<void>;
 }
 
-interface StoreMappedCombatActions {
-  fetchIgoRewardsPerFight(): Promise<string>;
-  fetchGasOffsetPerFight(): Promise<string>;
-}
-
 interface IFightResults {
   fightResultsMap: Record<number, CombatResult>,
   bnbGasUsed: string
@@ -177,7 +172,6 @@ export default Vue.extend({
       valorPrice: 0,
       gasToken: '',
       showAds: false,
-      gasOffsetPerFight: 0,
       highestMultiplier: 0,
       highestMultiplierProject: {} as Record<string, SupportedProject>,
       partnerProjects: [] as SupportedProject[],
@@ -201,7 +195,6 @@ export default Vue.extend({
   },
   methods: {
     ...(mapActions('treasury', ['getPartnerProjectMultiplier', 'fetchPartnerProjects']) as StoreMappedTreasuryActions),
-    ...(mapActions('combat', ['fetchIgoRewardsPerFight', 'fetchGasOffsetPerFight']) as StoreMappedCombatActions),
     async fetchPrices(): Promise<void> {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
       this.skillPrice = response.data?.cryptoblades.usd;
@@ -241,11 +234,11 @@ export default Vue.extend({
       if (process.env.NODE_ENV === 'development') this.showAds = false;
       else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
-    formattedOutcome(fightResults: any): TranslateResult {
+    formattedOutcome(fightResults: CombatResult): TranslateResult {
       if(fightResults.isVictory) return i18n.t('combatResults.won');
       else return i18n.t('combatResults.lost');
     },
-    formattedXpGain(fightResults: any): string {
+    formattedXpGain(fightResults: CombatResult): string {
       return fightResults.xpGain + ' xp';
     },
     isGenesisCharacter(characterID: number): boolean {
@@ -253,10 +246,10 @@ export default Vue.extend({
 
       return currentCharacter?.version === 0;
     },
-    formattedSkill(fightResults: any): string {
+    formattedSkill(fightResults: CombatResult): string {
       return toBN(fromWeiEther(fightResults.skillGain)).toFixed(6);
     },
-    fightRewardsAmountInUSD(fightResults: any, characterID: number): string {
+    fightRewardsAmountInUSD(fightResults: CombatResult, characterID: number): string {
       if(!this.isGenesisCharacter(characterID)) {
         return ((this.valorPrice * +this.formattedSkill(fightResults) * this.highestProjectMultiplier(characterID)) || 0).toFixed(4);
       } else {
@@ -294,16 +287,12 @@ export default Vue.extend({
         .div(toBN(10).pow(18)).toFixed(4) || 0);
     }
   },
-  async beforeMount(){
-    this.gasOffsetPerFight = parseInt(await this.fetchGasOffsetPerFight(), 10);
-  },
   async mounted() {
     await this.fetchPartnerProjects();
     this.gasToken = getConfigValue('currencySymbol') || 'BNB';
 
     await this.fetchValorPrice();
     await this.fetchPrices();
-    await new Promise(f => setTimeout(f, 1000));
     this.checkStorage();
   },
 });

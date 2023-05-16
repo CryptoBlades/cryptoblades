@@ -513,7 +513,7 @@ export default Vue.extend({
       // If the targets list no longer contains the chosen target, return so a new target can be chosen
       if(!this.hasSameTarget(latestTarget)) {
         this.waitingResults = false;
-        this.selectedTargetByCharacter = {};
+        this.clearSelectedTargetByCharacter();
 
         return;
       }
@@ -528,13 +528,13 @@ export default Vue.extend({
           fightMultiplier: this.getCharactersFightMultiplier,
           offsetCost: offsetToPayInNativeToken
         });
+        this.clearSelectedTargetByCharacter();
         await this.fetchFightRewardSkill();
         await this.fetchFightRewardValor();
         await this.fetchFightRewardXp();
         for (let i = 0; i < this.ownCharacters.length; i++) {
           await this.fetchCharacterStamina(this.ownCharacters[i].id);
         }
-        this.selectedTargetByCharacter = {};
         this.error = null;
         this.errorCode = null;
       } catch (error: any) {
@@ -565,6 +565,11 @@ export default Vue.extend({
       Vue.set(this.selectedTargetByCharacter, this.selectedCharacterID, {...target, targetIndex });
       (this.$refs['select-target-modal'] as any).hide();
       await this.getExpectedPayoutsByCharacterTarget(this.selectedCharacterID);
+    },
+    clearSelectedTargetByCharacter() {
+      for(const key in this.selectedTargetByCharacter) {
+        Vue.delete(this.selectedTargetByCharacter, +key);
+      }
     },
     async getExpectedPayouts() {
       if(!this.selectedCharacterTargets) return;
