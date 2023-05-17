@@ -226,12 +226,12 @@ export default Vue.extend({
     setListClassForSelChar(id: string, currentCharId: string): any {
       const isCombatPage = (this as any).$router.currentRoute.path === '/combat';
       const isTeamAdventureTab = (this as any).$route.query?.tab === COMBAT_TAB[COMBAT_TAB.TeamAdventure];
-      const fightMultiplier = Number(localStorage.getItem('fightMultiplier')) | 1;
+      const fightMultiplier = Number(localStorage.getItem('fightMultiplier')) || 1;
 
       if(isTeamAdventureTab && isCombatPage) {
         const characterStamina = this.getCharacterStamina(id);
 
-        return characterStamina >= (fightMultiplier * 40) ?'character-highlight' : 'character';
+        return characterStamina >= (fightMultiplier * 40) ? 'character-highlight' : 'character';
       } else {
         if (id === currentCharId) {
           this.setSelectedCharacter(id);
