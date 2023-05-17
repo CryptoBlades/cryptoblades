@@ -62,11 +62,6 @@
                   <Hint :text="$t('combatResults.hint')" />
                 </div>
               </div>
-              <!-- <span v-if="+gasOffsetPerFight" v-html="$t('combatResults.gasOffset', {
-                  offset: formattedSkillGasOffsetRewards,
-                  inUSD: isValor ? '' : formattedInUsd(calculateSkillPriceInUsd(formattedSkillGasOffsetRewards).toFixed(4))
-                })">
-              </span> -->
             </div>
             <h5>+ {{formattedXpGain}}</h5>
           </b-col>
