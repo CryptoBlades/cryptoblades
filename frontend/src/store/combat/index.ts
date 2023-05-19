@@ -241,21 +241,21 @@ const combat = {
         const characterID = charactersId[i];
 
         const fightOutcomeEvents = await CryptoBlades.getPastEvents('FightOutcome', {
-          filter: { owner: rootState.defaultAccount!, character: characterID  },
+          filter: { owner: rootState.defaultAccount!, character: characterID },
           toBlock: res.blockNumber,
           fromBlock: res.blockNumber
         });
         if (fightOutcomeEvents.length) {
           playerRoll =
-            fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues
+            fightOutcomeEvents[0].returnValues
               .playerRoll;
           enemyRoll =
-            fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues
+            fightOutcomeEvents[0].returnValues
               .enemyRoll;
           xpGain =
-            fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues.xpGain;
+            fightOutcomeEvents[0].returnValues.xpGain;
           skillGain =
-            fightOutcomeEvents[fightOutcomeEvents.length - 1].returnValues
+            fightOutcomeEvents[0].returnValues
               .skillGain;
         }
 
@@ -266,7 +266,9 @@ const combat = {
           xpGain,
           skillGain
         };
+
       }
+      console.log('fightResultsMap -> ',JSON.stringify(fightResultsMap));
 
       return {
         fightResultsMap,
