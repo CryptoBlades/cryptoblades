@@ -217,8 +217,8 @@ export default Vue.extend({
       this.skillPrice = response.data?.cryptoblades.usd;
     },
     async fetchValorPrice(): Promise<void> {
-      const response = await axios.get('https://api.dexscreener.com/latest/dex/search/?q=0x8730c8dedc59e3baffb67bf1fa63d4f0e2d9ecc9');
-      this.valorPrice = response.data?.pairs[0].priceUsd;
+      const response = await axios.get('https://api.dexscreener.com/latest/dex/pairs/bsc/0x8730c8dedc59e3baffb67bf1fa63d4f0e2d9ecc9');
+      this.valorPrice = +response.data?.pair?.priceUsd || 0;
     },
     async getProjectMultiplier() {
       const tokenSymbol = this.isValor ? 'VALOR' : 'SKILL';

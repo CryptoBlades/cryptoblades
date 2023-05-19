@@ -68,7 +68,10 @@
         <TeamAdventure
           v-if="COMBAT_TAB.TeamAdventure === currentCombatTab"
           :fightMultiplier="fightMultiplier"
-          :staminaPerFight="staminaPerFight">
+          :staminaPerFight="staminaPerFight"
+          @error="onErrorChanged"
+          @errorCode="onErrorCodeChanged"
+        >
         </TeamAdventure>
         <Adventure
         v-if="COMBAT_TAB.Adventure === currentCombatTab"
