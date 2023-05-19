@@ -9,7 +9,7 @@
                 v-for="filteredCharacter in filteredCharactersForList"
                 :key="filteredCharacter.id"
                 @click="(!getIfCharacterIsInRaid(filteredCharacter.id) || !filteredCharacter.pvpStatus === 'IN_ARENA'
-                || !getIsInCombat) && setCurrentCharacter(filteredCharacter.id) && alert(filteredCharacter.id)">
+                || !getIsInCombat) && changeCurrentCharacter(filteredCharacter.id) && alert(filteredCharacter.id)">
               <div class="character-element">
                 <div class="element-frame">
                     <div>
@@ -99,7 +99,9 @@ interface Data {
   isLoading: boolean;
   character?: Nft;
   charOnRaid: string[],
-  sideBarBlacksmith: string[]
+  sideBarBlacksmith: string[],
+  isCombatPage: boolean,
+  isTeamAdventureTab: boolean,
 }
 
 interface RaidMappedActions {
@@ -123,6 +125,7 @@ interface StoreMappedActions {
 }
 import i18n from '@/i18n';
 import EarningsCalculator from './EarningsCalculator.vue';
+import { COMBAT_TAB } from '@/views/Combat.vue';
 
 export default Vue.extend({
   props: ['toggled', 'currentPath'],
@@ -131,6 +134,10 @@ export default Vue.extend({
       if(newVal === '/blacksmith'){
         this.setActiveTab(this.sideBarBlacksmith[0]);
       }
+    },
+    '$route' () {
+      this.isCombatPage = (this as any).$router.currentRoute.path === '/combat';
+      this.isTeamAdventureTab = (this as any).$route.query?.tab === COMBAT_TAB[COMBAT_TAB.TeamAdventure];
     }
   },
   computed: {
@@ -207,6 +214,8 @@ export default Vue.extend({
       charOnRaid: [],
       charOnPvp: [],
       character: undefined,
+      isCombatPage: false,
+      isTeamAdventureTab: false,
       NftStatus
     } as unknown as Data;
   },
@@ -222,13 +231,26 @@ export default Vue.extend({
     async isCharacterAlreadyRaiding(characterID: string) {
       return await this.fetchIsCharacterRaiding({ characterID });
     },
+    changeCurrentCharacter(characterID: number) {
+      if((this.isCombatPage && this.isTeamAdventureTab)) return;
+
+      this.setCurrentCharacter(characterID);
+    },
     setListClassForSelChar(id: string, currentCharId: string): any {
-      if (id === currentCharId) {
-        this.setSelectedCharacter(id);
-        return 'character-highlight';
+      const fightMultiplier = Number(localStorage.getItem('fightMultiplier')) || 1;
+
+      if(this.isTeamAdventureTab && this.isCombatPage) {
+        const characterStamina = this.getCharacterStamina(id);
+
+        return characterStamina >= (fightMultiplier * 40) ? 'character-highlight' : 'character';
+      } else {
+        if (id === currentCharId) {
+          this.setSelectedCharacter(id);
+          return 'character-highlight';
+        }
+        else
+          return 'character';
       }
-      else
-        return 'character';
     },
     getNftStatus(activeCharacter: any) {
       this.composeCharacterData(activeCharacter.id).then(data => {
@@ -273,8 +295,9 @@ export default Vue.extend({
     setActiveTab(tab: any) {
       (this as any).$router.push({ path: 'blacksmith', query: { tab: tab.route } }).catch(() => {});
       this.sideBarBlacksmith.forEach((sidebarTab: any) => {
-        if (sidebarTab.id === tab.id)
+        if (sidebarTab.id === tab.id) {
           sidebarTab.status = 'active';
+        }
         else
           sidebarTab.status = '';
       });
@@ -288,11 +311,12 @@ export default Vue.extend({
       }
     },
     setSelectedCharacter(id: any) {
+      if((this.isCombatPage && this.isTeamAdventureTab)) return;
+
       for (const a of this.filteredCharactersForList) {
         if (a.id === id) {
           a.isSelected = true;
-        }
-        else {
+        } else {
           a.isSelected = false;
         }
       }
@@ -310,7 +334,7 @@ export default Vue.extend({
     },
     setIdForElement(traits: any, isSelected: boolean) {
       if (traits === '0') {
-        if (isSelected) {
+        if (isSelected || (this.isCombatPage && this.isTeamAdventureTab)) {
           return 'fire-element';
         }
         else {
@@ -318,7 +342,7 @@ export default Vue.extend({
         }
       }
       else if (traits === '1') {
-        if (isSelected) {
+        if (isSelected || (this.isCombatPage && this.isTeamAdventureTab)) {
           return 'earth-element';
         }
         else {
@@ -326,7 +350,7 @@ export default Vue.extend({
         }
       }
       else if (traits === '2') {
-        if (isSelected) {
+        if (isSelected || (this.isCombatPage && this.isTeamAdventureTab)) {
           return 'lightning-element';
         }
         else {
@@ -334,7 +358,7 @@ export default Vue.extend({
         }
       }
       else if (traits === '3') {
-        if (isSelected) {
+        if (isSelected || (this.isCombatPage && this.isTeamAdventureTab)) {
           return 'water-element';
         }
         else {
@@ -344,6 +368,10 @@ export default Vue.extend({
       else
         return '';
     },
+  },
+  created() {
+    this.isCombatPage = (this as any).$router.currentRoute.path === '/combat';
+    this.isTeamAdventureTab = (this as any).$route.query?.tab === COMBAT_TAB[COMBAT_TAB.TeamAdventure];
   },
   components: { EarningsCalculator }
 });

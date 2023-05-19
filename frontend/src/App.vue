@@ -783,6 +783,10 @@ button.close {
   max-width: 700px;
 }
 
+.modal-huge {
+  max-width: 80%;
+}
+
 .character-modal header.modal-header{
   background: #05112600!important;
   border: none;
