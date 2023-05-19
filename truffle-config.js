@@ -262,10 +262,10 @@ module.exports = {
         process.env.SKALE_TESTNET_PRIVATE_KEY,
         process.env.SKALE_TESTNET_WALLET_MNEMONIC,
         {
-          providerOrUrl: process.env.SKALE_TESTNET_RPC_URL || 'https://staging-v2.skalenodes.com/v1/glamorous-grumium'
+          providerOrUrl: process.env.SKALE_TESTNET_RPC_URL || 'https://staging-v3.skalenodes.com/v1/staging-lost-likely-aludra'
         }
       )),
-      network_id: 2433657680876851,
+      network_id: 876757986,
       gasPrice: 0,
       timeoutBlocks: 200,
       skipDryRun: true
