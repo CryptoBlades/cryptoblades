@@ -3268,12 +3268,12 @@
       }
     },
     "links": {},
-    "address": "0x7c6bD957bCE2cC00996BD9bAd7f21244e61E0517"
+    "address": "0xCc9e3FDB84a12D8105434D9a6d7b197C8dFc0Ff4"
   },
   "build/contracts/ERC20Bridge.json": {
     "events": {},
     "links": {},
-    "address": "0x8eD3387796b98dF32E5886cF31F60311B551CE94",
+    "address": "0x0b1B5E9ECa9166b00f9067AfBe217e67b500F5e7",
     "transactionHash": "0x9514075b55c543ea60cae32a0aa50662c3e6b233679316939b126b6a5278e0c9"
   },
   "build/contracts/ExperimentToken.json": {
@@ -3330,8 +3330,8 @@
       }
     },
     "links": {},
-    "address": "0x61F5197b43493a332A0E7D55B7ACa7c277e0BC4b",
-    "transactionHash": "0x2f6f9f057be89efd685bbf5578be3be1ec2431e0c913d8346072620456de49cc"
+    "address": "0xB3198099EEaDd2a35C005D940942BF1356832AA5",
+    "transactionHash": "0x20037f5b2cbff6c1a4feddce31232b24f711a4630d9886c609a782260f69daa2"
   },
   "build/contracts/ExperimentToken2.json": {
     "events": {
@@ -3387,8 +3387,8 @@
       }
     },
     "links": {},
-    "address": "0x97D9221be5dE1B2504B05c015864Fc9106adE0eE",
-    "transactionHash": "0xf916ab06882b040e9146789f7c3813bba26f94401158cdbeea824a4ba971bce5"
+    "address": "0xaE22428C01dC5A7632d9E06bbE0D939C2b23538E",
+    "transactionHash": "0x18ff0549dc5e953e38cacecb65dbe2b256891593f9697eb8075a7262f4f9053c"
   },
   "build/contracts/Garrison.json": {
     "events": {
@@ -4318,7 +4318,7 @@
   "build/contracts/Launchpad.json": {
     "events": {},
     "links": {},
-    "address": "0x830408Dd2e08150B209d1FC9A841a2705Ba79e91",
+    "address": "0xbdfd18ED236b0AEfb5a4796A582EA997D4630A5C",
     "transactionHash": "0xbead651d60b871f61bd2aeff0f7e1035aedb6f6a99a041caf9da3abcdd213a9a"
   },
   "build/contracts/LP2StakingRewardsUpgradeable.json": {
@@ -4533,8 +4533,8 @@
   "build/contracts/Migrations.json": {
     "events": {},
     "links": {},
-    "address": "0xe7d6ee7a2BCa70D23EFdA2c2cB7779B7ee245A17",
-    "transactionHash": "0x3ac290015e26bd09ed13cbe757fc82cd9a8c05fe100c19126a66b46a67abb48c"
+    "address": "0x1e951182DA471783fB3eB702457A324f251D2A17",
+    "transactionHash": "0x5edb0533b457116e46a9518a318490b9b6917b1d49afab63a011537130a6ad30"
   },
   "build/contracts/NFTMarket.json": {
     "events": {
@@ -5429,7 +5429,7 @@
     },
     "links": {},
     "address": "0xAf8f6eD3860B6f0fD97Bd50e2109E520C2Fc2328",
-    "transactionHash": "0x96db40e43b8bcfe0f82c78f4b537f26e72eb299ef26cf0fc5420cf7190f82078"
+    "transactionHash": "0xb85dedbe993baf107dd17c0f8771739c75de31b93c36200fb0c2742587f240e0"
   },
   "build/contracts/PvpCore.json": {
     "events": {
@@ -6979,12 +6979,12 @@
     },
     "links": {},
     "address": "0x7e9cA26c52045ef81B80f3bf0BD3041E0AED3f48",
-    "transactionHash": "0x326fa291e223306690d4e6eb80b3c526c9a851120eb44190d6728a832002d0f1"
+    "transactionHash": "0xc60aa209fae1ccb2ada8279ef1a78d42a44b888441a7783e25da4c6dcdc3cc69"
   },
   "build/contracts/SkillERC20BridgeProxyContract.json": {
     "events": {},
     "links": {},
-    "address": "0x81C311f974dE7Bfb59dACc67aB51C72230F43407",
+    "address": "0xe3Fcf80e35ABf40bB7f4E67c82eaB2062ba05382",
     "transactionHash": "0xaf50027a24d0edf36bc922cd6cf074c5d37896a72af29b837380b5dd80d067f3"
   },
   "build/contracts/SkillStakingRewardsUpgradeable.json": {
@@ -7422,8 +7422,8 @@
       }
     },
     "links": {},
-    "address": "0xcAF53066e36EeF55eD0663419ADfF6E503bd134F",
-    "transactionHash": "0x75879a9f3bab513a04a59b19cee5a452947b6c8026d04e194f030c0d6d05d1e3"
+    "address": "0x3C43e61657B87c4Fcd96B5A1CA2C649Ebfc2f6d5",
+    "transactionHash": "0x99c842c0f5a3baea343d3979298bba868eb1598ae2de02ab572b116bc2dc3543"
   },
   "build/contracts/SpecialWeaponsManager.json": {
     "events": {
@@ -7586,8 +7586,8 @@
       }
     },
     "links": {},
-    "address": "0x4eD213d2F40380bBB0C8b4231aCFA7dEFA5CCc25",
-    "transactionHash": "0x776296f1fe8c18611eb4375ce90b3c06234a3ad9a83c9d88d72aea81831f2107"
+    "address": "0x0FdDbf260aeBAF7896F22C6a44289B2d17D2A856",
+    "transactionHash": "0x5cf328462398a15a8a789d22a39039fe3f36a5ff0afad62167074f1f427c61e1"
   },
   "build/contracts/Treasury.json": {
     "events": {},
