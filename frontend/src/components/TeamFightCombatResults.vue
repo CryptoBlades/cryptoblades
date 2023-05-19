@@ -2,71 +2,89 @@
   <div>
   <div class="results-panel">
     <div class="float-center">
-      <h1 class="text-center outcome result-title">{{ formattedOutcome.toUpperCase() }}</h1>
-      <b-container>
-        <b-row class="power-rolled">
-          <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
-            <h5>{{$t('combatResults.youRolled')}}</h5>
-          </b-col>
-          <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
-            <img src="../assets/arrow-right.png" alt="">
-          </b-col>
-          <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
-            <h5>{{fightResults.playerRoll}}</h5>
-          </b-col>
-        </b-row>
-        <b-row class="power-rolled">
-          <b-col cols="4"  lg="5" sm="4" md="4" class="win-details">
-            <h5>{{$t('combatResults.enemyRolled')}}</h5>
-          </b-col>
-          <b-col cols="4" lg="2" sm="4" md="4" class="win-details">
-            <img src="../assets/arrow-right.png" alt="">
-          </b-col>
-          <b-col cols="4" lg="5" sm="4" md="4" class="win-details">
-            <h5>{{fightResults.enemyRoll}}</h5>
-          </b-col>
-        </b-row>
-      </b-container>
-      <b-container v-if="fightResults.isVictory">
-        <b-row>
-          <b-col class="you-earned">
-            <h4>{{$t('combatResults.earned')}}</h4>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col class="earned">
-            <div class="h5 text-white">
-              <div v-if="!isValor">
-                <div>
-                  <b>{{ formattedSkill }}</b>
-                  <span>
-                    <small class="mr-2">(<b>${{ fightRewardsAmountInUSD }}</b>)</small>
-                    <Hint :text="$t('combatResults.earnedSkillHint')" />
-                  </span>
-                </div>
-                <div>
-                  <span class="mr-2" v-html="$t('combatResults.earnedSkill')"> </span>
-                  <Hint :text="$t('combatResults.hint')" />
-                </div>
+      <h1 class="text-center outcome result-title text-uppercase">
+        {{ $t('combatResults.teamFightResult') }}
+      </h1>
+      <div class="mb-0" v-if="getCharactersWonAFight() > 0">
+        <h5>
+          {{ $t('combatResults.totalEarnings') }}: ${{ getAggregatedCharacterEarnings() }}
+        </h5>
+      </div>
+      <div class="d-flex flex-wrap justify-content-center">
+        <div
+          v-for="(value, key) in fightResults.fightResultsMap"
+          :key="key"
+          class="mx-5 my-5"
+        >
+          <h5 class="text-center fight-result">{{ formattedOutcome(value).toUpperCase() }}</h5>
+          <h5 class="text-center mb-0" v-if="!value.isVictory">
+            <b>
+              {{ getCleanCharacterName(key.toString()) }}
+            </b>
+          </h5>
+          <div class="d-flex align-items-center">
+            <div class="win-details">
+              <h5>{{$t('combatResults.youRolled')}}</h5>
+            </div>
+            <div class="win-details mx-3">
+              <img src="../assets/arrow-right.png" alt="">
+            </div>
+            <div class="win-details">
+              <h5>{{value.playerRoll}}</h5>
+            </div>
+          </div>
+          <div class="d-flex align-items-center">
+            <div class="win-details">
+              <h5>{{$t('combatResults.enemyRolled')}}</h5>
+            </div>
+            <div class="win-details mx-3">
+              <img src="../assets/arrow-right.png" alt="">
+            </div>
+            <div class="win-details">
+              <h5>{{value.enemyRoll}}</h5>
+            </div>
+          </div>
+          <div class="you-earned" v-if="value.isVictory">
+            <h5 class="text-center mb-0">
+              <b>
+                {{ getCleanCharacterName(key.toString()) }}
+              </b>
+            </h5>
+            <h5>{{$t('combatResults.characterEarned')}}</h5>
+          </div>
+          <div v-if="value.isVictory" class="earned">
+            <div v-if="!isGenesisCharacter(key)">
+              <div>
+                <b>{{ formattedSkill(value) }}</b>
+                <span>
+                  <small class="mr-2">(<b>${{ fightRewardsAmountInUSD(value, key) }}</b>)</small>
+                  <Hint :text="$t('combatResults.earnedSkillHint')" />
+                </span>
               </div>
-              <div v-else>
-                <div>
-                  <b>{{ formattedSkill }}</b>
-                  <span>
-                    <small class="mr-2">(<b>${{ fightRewardsAmountInUSD }}</b>)</small>
-                    <Hint :text="$t('combatResults.earnedValorHint')" />
-                  </span>
-                </div>
-                <div>
-                  <span class="mr-2" v-html="$t('combatResults.earnedValor')"> </span>
-                  <Hint :text="$t('combatResults.hint')" />
-                </div>
+              <div>
+                <span class="mr-2" v-html="$t('combatResults.earnedSkill')"> </span>
+                <Hint :text="$t('combatResults.hint')" />
               </div>
             </div>
-            <h5>+ {{formattedXpGain}}</h5>
-          </b-col>
-        </b-row>
-      </b-container>
+            <div v-else>
+              <div>
+                <b>{{ formattedSkill(value) }}</b>
+                <span>
+                  <small class="mr-2">(<b>${{ fightRewardsAmountInUSD(value, key) }}</b>)</small>
+                  <Hint :text="$t('combatResults.earnedValorHint')" />
+                </span>
+              </div>
+              <div>
+                <span class="mr-2" v-html="$t('combatResults.earnedValor')"> </span>
+                <Hint :text="$t('combatResults.hint')" />
+              </div>
+            </div>
+          </div>
+          <div class="xp-gain" v-if="value.isVictory">
+            + {{  formattedXpGain(value)  }}
+          </div>
+        </div>
+      </div>
       <h6 class="text-center gas-spent">
         {{$t('combatResults.gasFee', {
           bnbGasUsed : fightResults.bnbGasUsed,
@@ -104,6 +122,7 @@ import Hint from '@/components/Hint.vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { SupportedProject } from '@/views/Treasury.vue';
 import { Accessors } from 'vue/types/options';
+import { getCleanName } from '@/rename-censor';
 
 
 interface StoreMappedTreasuryGetters {
@@ -117,7 +136,6 @@ interface CombatResult {
   enemyRoll: string;
   xpGain: string;
   skillGain: string;
-  bnbGasUsed: string;
 }
 
 interface StoreMappedTreasuryState {
@@ -131,9 +149,9 @@ interface StoreMappedTreasuryActions{
   fetchPartnerProjects(): Promise<void>;
 }
 
-interface StoreMappedCombatActions {
-  fetchIgoRewardsPerFight(): Promise<string>;
-  fetchGasOffsetPerFight(): Promise<string>;
+interface IFightResults {
+  fightResultsMap: Record<number, CombatResult>,
+  bnbGasUsed: string
 }
 
 export default Vue.extend({
@@ -142,86 +160,50 @@ export default Vue.extend({
   },
   props: {
     fightResults: {
-      type: Object as PropType<CombatResult>,
+      type: Object as PropType<IFightResults>,
       default() {
-        return {} as CombatResult;
+        return {} as IFightResults;
       },
-    },
-    staminaUsed: {
-      type: Number,
-      default: 0,
-    },
-    isValor: {
-      type: Boolean,
-      default: false
     }
   },
-
   data() {
     return {
       skillPrice: 0,
       valorPrice: 0,
       gasToken: '',
       showAds: false,
-      gasOffsetPerFight: 0,
       highestMultiplier: 0,
-      highestMultiplierProject: {} as SupportedProject,
+      highestMultiplierProject: {} as Record<string, SupportedProject>,
       partnerProjects: [] as SupportedProject[],
     };
   },
   watch: {
     getPartnerProjects(newval) {
       this.partnerProjects = newval;
-      this.getProjectMultiplier();
+      this.getProjectMultiplier('SKILL');
+      this.getProjectMultiplier('VALOR');
     }
   },
   computed: {
+    ...mapGetters([
+      'getCharacterName',
+      'ownCharacters'
+    ]),
     ...(mapGetters('treasury', ['getPartnerProjects', 'getProjectMultipliers']) as Accessors<StoreMappedTreasuryGetters>),
     ...(mapState('treasury',
-      ['payoutCurrencyId','partnerProjectRatios','defaultSlippage'])as Accessors<StoreMappedTreasuryState>),
-    formattedOutcome(): TranslateResult {
-      if(this.fightResults.isVictory) return i18n.t('combatResults.won');
-      else return i18n.t('combatResults.lost');
-    },
-    formattedSkill(): string {
-      return toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6);
-    },
-    formattedSkillNoIGO(): string {
-      return toBN(fromWeiEther((parseInt(this.fightResults.skillGain, 10)).toString())).toFixed(6);
-    },
-    formattedSkillGasOffsetRewards(): string {
-      return toBN(fromWeiEther((this.gasOffsetPerFight * this.formattedStaminaUsed).toString())).toFixed(6);
-    },
-    formattedStaminaUsed(): number {
-      return this.staminaUsed / 40;
-    },
-    formattedXpGain(): string {
-      return this.fightResults.xpGain + ' xp';
-    },
-    highestProjectMultiplier(): number {
-      return +(toBN(+this.getProjectMultipliers[+this.highestMultiplierProject.id]).div(toBN(10).pow(18)).toFixed(4) || 0);
-    },
-    fightRewardsAmountInUSD(): string {
-      if(this.isValor) {
-        return ((this.valorPrice * +this.formattedSkill * this.highestProjectMultiplier) || 0).toFixed(4);
-      } else {
-        return ((this.skillPrice * +this.formattedSkill * this.highestProjectMultiplier) || 0).toFixed(4);
-      }
-    }
+      ['payoutCurrencyId','partnerProjectRatios','defaultSlippage'])as Accessors<StoreMappedTreasuryState>)
   },
   methods: {
     ...(mapActions('treasury', ['getPartnerProjectMultiplier', 'fetchPartnerProjects']) as StoreMappedTreasuryActions),
-    ...(mapActions('combat', ['fetchIgoRewardsPerFight', 'fetchGasOffsetPerFight']) as StoreMappedCombatActions),
     async fetchPrices(): Promise<void> {
       const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=cryptoblades,binancecoin&vs_currencies=usd');
       this.skillPrice = response.data?.cryptoblades.usd;
     },
     async fetchValorPrice(): Promise<void> {
       const response = await axios.get('https://api.dexscreener.com/latest/dex/search/?q=0x8730c8dedc59e3baffb67bf1fa63d4f0e2d9ecc9');
-      this.valorPrice = response.data?.pairs[0].priceUsd;
+      this.valorPrice = response.data?.pairs[0]?.priceUsd;
     },
-    async getProjectMultiplier() {
-      const tokenSymbol = this.isValor ? 'VALOR' : 'SKILL';
+    async getProjectMultiplier(tokenSymbol: 'SKILL' | 'VALOR') {
       this.partnerProjects = this.partnerProjects && this.partnerProjects.filter(partnerProject => partnerProject.tokenSymbol.includes(tokenSymbol));
       if(this.partnerProjects.length > 0) {
         this.partnerProjects.map(async (project) => {
@@ -229,13 +211,16 @@ export default Vue.extend({
         });
         const projectMultipliers = await this.getProjectMultipliers;
 
-        this.highestMultiplierProject = this.partnerProjects.sort((a, b) => {
+        this.highestMultiplierProject[tokenSymbol] = this.partnerProjects.sort((a, b) => {
           const highestMultiplierA = +(toBN(+projectMultipliers[a.id]).div(toBN(10).pow(18)).toFixed(4));
           const highestMultiplierB = +(toBN(+projectMultipliers[b.id]).div(toBN(10).pow(18)).toFixed(4));
 
           return highestMultiplierA - highestMultiplierB;
         })[0];
       }
+    },
+    getCleanCharacterName(id: string): string {
+      return getCleanName(this.getCharacterName(id));
     },
     formattedInUsd(value: string): string {
       if(!value) return '';
@@ -245,16 +230,62 @@ export default Vue.extend({
       if(!skill) return 0;
       return (skill as unknown as number * this.skillPrice as unknown as number);
     },
-    calculatedSkillReward(): string {
-      return toBN(fromWeiEther(this.fightResults.skillGain)).toFixed(6);
-    },
     checkStorage() {
       if (process.env.NODE_ENV === 'development') this.showAds = false;
       else this.showAds = localStorage.getItem('show-ads') === 'true';
     },
-  },
-  async beforeMount(){
-    this.gasOffsetPerFight = parseInt(await this.fetchGasOffsetPerFight(), 10);
+    formattedOutcome(fightResults: CombatResult): TranslateResult {
+      if(fightResults.isVictory) return i18n.t('combatResults.won');
+      else return i18n.t('combatResults.lost');
+    },
+    formattedXpGain(fightResults: CombatResult): string {
+      return fightResults.xpGain + ' xp';
+    },
+    isGenesisCharacter(characterID: number): boolean {
+      const currentCharacter = this.ownCharacters[characterID];
+
+      return currentCharacter?.version === 0;
+    },
+    formattedSkill(fightResults: CombatResult): string {
+      return toBN(fromWeiEther(fightResults.skillGain)).toFixed(6);
+    },
+    fightRewardsAmountInUSD(fightResults: CombatResult, characterID: number): string {
+      if(!this.isGenesisCharacter(characterID)) {
+        return ((this.valorPrice * +this.formattedSkill(fightResults) * this.highestProjectMultiplier(characterID)) || 0).toFixed(4);
+      } else {
+        return ((this.skillPrice * +this.formattedSkill(fightResults) * this.highestProjectMultiplier(characterID)) || 0).toFixed(4);
+      }
+    },
+    getAggregatedCharacterEarnings() {
+      let totalEarnings = 0;
+      for(const key in this.fightResults.fightResultsMap) {
+        const fightResult = this.fightResults.fightResultsMap[key];
+
+        if(!this.isGenesisCharacter(+key)) {
+          totalEarnings += ((this.valorPrice * +this.formattedSkill(fightResult) * this.highestProjectMultiplier(+key)) || 0);
+        } else {
+          totalEarnings += ((this.skillPrice * +this.formattedSkill(fightResult) * this.highestProjectMultiplier(+key)) || 0);
+        }
+      }
+
+      return totalEarnings.toFixed(4);
+    },
+    getCharactersWonAFight() {
+      let winner = 0;
+      for(const key in this.fightResults.fightResultsMap) {
+        const fightResult = this.fightResults.fightResultsMap[key];
+
+        if(fightResult.isVictory) {
+          winner += 1;
+        }
+      }
+
+      return winner;
+    },
+    highestProjectMultiplier(characterID: number): number {
+      return +(toBN(+this.getProjectMultipliers[+this.highestMultiplierProject[!this.isGenesisCharacter(characterID) ? 'VALOR' : 'SKILL']?.id || 0])
+        .div(toBN(10).pow(18)).toFixed(4) || 0);
+    }
   },
   async mounted() {
     await this.fetchPartnerProjects();
@@ -262,7 +293,6 @@ export default Vue.extend({
 
     await this.fetchValorPrice();
     await this.fetchPrices();
-    await new Promise(f => setTimeout(f, 1000));
     this.checkStorage();
   },
 });
@@ -278,8 +308,19 @@ export default Vue.extend({
   text-align: center;
 }
 
-.result-title{
+.xp-gain,
+.skill-gain {
+  color: rgb(158, 138, 87) !important;
+  font-family: Roboto;
+  font-size: 14px;
+}
+
+.result-title {
   margin-bottom: 3em;
+  color: #EDCD90;
+}
+
+.fight-result {
   color: #EDCD90;
 }
 
@@ -290,28 +331,10 @@ export default Vue.extend({
   margin-top: 0.25em;
   margin-bottom: 1em;
 }
-.expander-divider {
-  width: 100%;
-  position: relative;
-  height: 0.2em;
-}
-.formatted-skill {
-  margin-top: -10px;
-  margin-bottom: 0;
-  font-size: 0.8em;
-}
+
 .gas-spent {
   font-size: 1em;
   margin-bottom: 0;
-}
-.no-padding {
-  padding: 0 !important;
-}
-.no-margin {
-  margin: 0;
-}
-.crypto-warrior-image {
-  max-width: 13em;
 }
 
 .results-panel > div > div{
@@ -322,7 +345,6 @@ export default Vue.extend({
   text-align: center;
   padding: 0px;
 }
-
 
 .power-rolled{
   border-bottom: 1px solid rgba(255, 255, 255, 0.282);
@@ -342,8 +364,6 @@ export default Vue.extend({
   text-align: left;
   flex-wrap:nowrap;
 }
-
-
 
 .win-details{
   padding: 0px;
