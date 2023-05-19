@@ -200,18 +200,17 @@ export default Vue.extend({
       this.skillPrice = response.data?.cryptoblades.usd;
     },
     async fetchValorPrice(): Promise<void> {
-      const response = await axios.get('https://api.dexscreener.com/latest/dex/search/?q=0x8730c8dedc59e3baffb67bf1fa63d4f0e2d9ecc9');
-      this.valorPrice = response.data?.pairs[0]?.priceUsd;
+      const response = await axios.get('https://api.dexscreener.com/latest/dex/pairs/bsc/0x8730c8dedc59e3baffb67bf1fa63d4f0e2d9ecc9');
+      this.valorPrice = +response.data?.pair?.priceUsd || 0;
     },
     async getProjectMultiplier(tokenSymbol: 'SKILL' | 'VALOR') {
-      this.partnerProjects = this.partnerProjects && this.partnerProjects.filter(partnerProject => partnerProject.tokenSymbol.includes(tokenSymbol));
-      if(this.partnerProjects.length > 0) {
-        this.partnerProjects.map(async (project) => {
+      const filteredPartnerProjects = this.partnerProjects && this.partnerProjects.filter(partnerProject => partnerProject.tokenSymbol.includes(tokenSymbol));
+      if(filteredPartnerProjects.length > 0) {
+        filteredPartnerProjects.map(async (project) => {
           await this.getPartnerProjectMultiplier(project.id);
         });
         const projectMultipliers = await this.getProjectMultipliers;
-
-        this.highestMultiplierProject[tokenSymbol] = this.partnerProjects.sort((a, b) => {
+        this.highestMultiplierProject[tokenSymbol] = filteredPartnerProjects.sort((a, b) => {
           const highestMultiplierA = +(toBN(+projectMultipliers[a.id]).div(toBN(10).pow(18)).toFixed(4));
           const highestMultiplierB = +(toBN(+projectMultipliers[b.id]).div(toBN(10).pow(18)).toFixed(4));
 
