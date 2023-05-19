@@ -268,7 +268,6 @@ const combat = {
         };
 
       }
-      console.log('fightResultsMap -> ',JSON.stringify(fightResultsMap));
 
       return {
         fightResultsMap,
