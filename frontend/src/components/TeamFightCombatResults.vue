@@ -53,7 +53,7 @@
             <h5>{{$t('combatResults.characterEarned')}}</h5>
           </div>
           <div v-if="value.isVictory" class="earned">
-            <div v-if="!isGenesisCharacter(key)">
+            <div v-if="isGenesisCharacter(key)">
               <div>
                 <b>{{ formattedSkill(value) }}</b>
                 <span>
