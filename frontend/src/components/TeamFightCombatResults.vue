@@ -187,7 +187,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters([
       'getCharacterName',
-      'ownCharacters'
+      'ownCharacters',
+      'charactersWithIds'
     ]),
     ...(mapGetters('treasury', ['getPartnerProjects', 'getProjectMultipliers']) as Accessors<StoreMappedTreasuryGetters>),
     ...(mapState('treasury',
@@ -241,7 +242,7 @@ export default Vue.extend({
       return fightResults.xpGain + ' xp';
     },
     isGenesisCharacter(characterID: number): boolean {
-      const currentCharacter = this.ownCharacters[characterID];
+      const currentCharacter = this.charactersWithIds([characterID])[0];
 
       return currentCharacter?.version === 0;
     },

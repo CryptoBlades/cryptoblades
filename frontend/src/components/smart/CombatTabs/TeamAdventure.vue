@@ -273,6 +273,7 @@ interface StoreMappedGetters {
   ownCharacters: Array<ICharacter>,
   allStaminas: Record<number, number>;
   getPowerData(characterId: number): IPowerData;
+  charactersWithIds(characterID: any): Array<ICharacter>
 }
 
 interface StoreMappedCombatMutations {
@@ -329,13 +330,14 @@ export default Vue.extend({
       'ownCharacters',
       'getCharacterCosmetic',
       'allStaminas',
-      'getPowerData'
+      'getPowerData',
+      'charactersWithIds'
     ]) as Accessors<StoreMappedGetters>),
     ...(mapGetters('combat', [
       'getTargetsByCharacterId'
     ]) as Accessors<StoreMappedCombatGetters>),
     isGenesisCharacter(): boolean {
-      const currentCharacter = this.ownCharacters[this.selectedCharacterID];
+      const currentCharacter = this.charactersWithIds([this.selectedCharacterID])[0];
 
       return currentCharacter?.version === 0;
     },
