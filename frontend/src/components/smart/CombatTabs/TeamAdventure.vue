@@ -770,7 +770,8 @@ export default Vue.extend({
 
 
 .selected-enemy-container {
-  height: 300px;
+  height: 360px;
+  padding-top: 40px;
   width: 270px;
   display: flex;
   justify-content: center;
@@ -989,7 +990,6 @@ div.encounter.text-center {
 .enemy-img {
   position: relative;
   top: -30px;
-  z-index: 10;
 }
 
 @media all and (max-width: 600px) {
