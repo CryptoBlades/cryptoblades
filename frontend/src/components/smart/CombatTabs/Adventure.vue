@@ -564,7 +564,7 @@ export default Vue.extend({
   @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
 
   .enemy-img-container {
-    height: 320px;
+    height: 340px;
     display: flex;
     align-items: center;
   }

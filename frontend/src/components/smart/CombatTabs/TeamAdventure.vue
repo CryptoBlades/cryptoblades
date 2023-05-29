@@ -709,7 +709,7 @@ export default Vue.extend({
 @import '../../../styles/character-cosmetics.css';
 
 .enemy-img-container {
-  height: 320px;
+  height: 340px;
   display: flex;
   align-items: center;
 }
