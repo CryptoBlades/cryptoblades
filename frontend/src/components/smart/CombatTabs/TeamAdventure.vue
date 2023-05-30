@@ -70,8 +70,8 @@
                   {{$t('combat.victory').toUpperCase()}}
                 </div>
               </div>
-              <div class="text-center" v-if="selectedTargetByCharacter[c.id]">
-                <img class="mx-auto enemy-img" :src="getEnemyArt(selectedTargetByCharacter[c.id].power)" width="125" :alt="$t('combat.enemy')" />
+              <div class="text-center enemy-img-container" v-if="selectedTargetByCharacter[c.id]">
+                <img class="mx-auto enemy-img" :src="getEnemyArt(selectedTargetByCharacter[c.id].power)" width="200" :alt="$t('combat.enemy')" />
               </div>
               <div>
                 <div class="selected-enemy-power">
@@ -135,7 +135,7 @@
                     {{$t('combat.victory').toUpperCase()}}
                   </div>
 
-                  <div class="text-center">
+                  <div class="text-center enemy-img-container">
                     <img class="mx-auto enemy-img" :src="getEnemyArt(e.power)" :alt="$t('combat.enemy')" />
                   </div>
 
@@ -708,6 +708,11 @@ export default Vue.extend({
 <style scoped>
 @import '../../../styles/character-cosmetics.css';
 
+.enemy-img-container {
+  height: 340px;
+  display: flex;
+  align-items: center;
+}
 .team-fight-btn {
   cursor: pointer;
   display: flex;
