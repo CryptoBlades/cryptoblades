@@ -363,7 +363,7 @@ export default Vue.extend({
 
 .overlay-bg {
   position: absolute;
-  background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/dashboard-bg.png");
+  background: linear-gradient(rgba(24, 24, 24, 0), rgba(34, 33, 33, 0)), url("../assets/second-anniversary/dashboard-bg.png");
   background-size: cover;
   background-repeat: no-repeat;
   background-position-x: right;
@@ -424,7 +424,7 @@ export default Vue.extend({
 .raid-container {
   display: flex;
   flex-direction: row;
-  background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/raid-bg.png");
+  background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/second-anniversary/raid-bg.png");
   background-repeat: no-repeat;
   background-size: 110%;
   width: 65%;
@@ -438,7 +438,7 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   align-items: left;
-  background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/arena-bg.png");
+  background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/second-anniversary/arena-bg.png");
   background-repeat: no-repeat;
   background-size: 110%;
   width: 100%;
@@ -451,7 +451,7 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   align-items: left;
-  background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/background/adventure-bg.png");
+  background: linear-gradient(rgba(24, 24, 24, 0.5), rgba(34, 33, 33, 0.5)), url("../assets/second-anniversary/adventure-bg.png");
   background-repeat: no-repeat;
   background-size: 110%;
   width: 100%;
@@ -833,7 +833,7 @@ export default Vue.extend({
     animation: none;
   }
   .overlay-bg {
-    background-color: rgba(0, 0, 0, 0.425);
+    background-color: rgba(0, 0, 0, 0);
   }
   .lower-body-container {
     display: flex;
