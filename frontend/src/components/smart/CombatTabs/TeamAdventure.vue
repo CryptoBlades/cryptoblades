@@ -70,8 +70,8 @@
                   {{$t('combat.victory').toUpperCase()}}
                 </div>
               </div>
-              <div class="text-center" v-if="selectedTargetByCharacter[c.id]">
-                <img class="mx-auto enemy-img" :src="getEnemyArt(selectedTargetByCharacter[c.id].power)" width="125" :alt="$t('combat.enemy')" />
+              <div class="text-center enemy-img-container" v-if="selectedTargetByCharacter[c.id]">
+                <img class="mx-auto enemy-img" :src="getEnemyArt(selectedTargetByCharacter[c.id].power)" width="200" :alt="$t('combat.enemy')" />
               </div>
               <div>
                 <div class="selected-enemy-power">
@@ -135,7 +135,7 @@
                     {{$t('combat.victory').toUpperCase()}}
                   </div>
 
-                  <div class="text-center">
+                  <div class="text-center enemy-img-container">
                     <img class="mx-auto enemy-img" :src="getEnemyArt(e.power)" :alt="$t('combat.enemy')" />
                   </div>
 
@@ -708,6 +708,11 @@ export default Vue.extend({
 <style scoped>
 @import '../../../styles/character-cosmetics.css';
 
+.enemy-img-container {
+  height: 340px;
+  display: flex;
+  align-items: center;
+}
 .team-fight-btn {
   cursor: pointer;
   display: flex;
@@ -770,7 +775,8 @@ export default Vue.extend({
 
 
 .selected-enemy-container {
-  height: 300px;
+  height: 360px;
+  padding-top: 40px;
   width: 270px;
   display: flex;
   justify-content: center;
@@ -989,7 +995,6 @@ div.encounter.text-center {
 .enemy-img {
   position: relative;
   top: -30px;
-  z-index: 10;
 }
 
 @media all and (max-width: 600px) {

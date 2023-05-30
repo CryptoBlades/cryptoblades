@@ -47,7 +47,7 @@
                     </div>
 
                     <!-- image -->
-                    <div class="text-center">
+                    <div class="text-center enemy-img-container">
                       <img class="mx-auto enemy-img" :src="getEnemyArt(e.power)" :alt="$t('combat.enemy')" />
                     </div>
 
@@ -562,6 +562,12 @@ export default Vue.extend({
 </script>
 <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&display=swap');
+
+  .enemy-img-container {
+    height: 340px;
+    display: flex;
+    align-items: center;
+  }
 
   .enemy-character {
     position: relative;
