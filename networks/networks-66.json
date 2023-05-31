@@ -2424,7 +2424,7 @@
     "events": {},
     "links": {},
     "address": "0xde96b8723F3673F1A16A9E830fdac0ddD7c3626b",
-    "transactionHash": "0x95eed0e638c4de04b0bbdd926037b62efb37afefcbc207947d6d7691b9cc1784"
+    "transactionHash": "0x5a9431cf5371bb22e08849b9a115c03ac46c0f02f255b92604905418f524daf3"
   },
   "build/contracts/EquipmentManager.json": {
     "events": {
@@ -3971,7 +3971,7 @@
     },
     "links": {},
     "address": "0xA3637832a813d0bA6B528133dfa06Ab46Db2722a",
-    "transactionHash": "0x83d2ea905157faed71395d984f9220984a27c4bec14bfd4da6b82e2d42e82081"
+    "transactionHash": "0x5ba4d78435f6136955a147b57de1ea1ca00680159b94ce4f13e2dc6a2546386b"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -5123,13 +5123,13 @@
     },
     "links": {},
     "address": "0x9259036aAa3dE32FD74D05058eaE139ccda1A48b",
-    "transactionHash": "0xd2bfd71af7094aaa25f107bab8658cd59518092af261a19ef0f4b4f0921d36a6"
+    "transactionHash": "0x41546dd022f009230507a7ea18b11aee6611d5a4f19b1ff424c8b632157e3ea8"
   },
   "build/contracts/Treasury.json": {
     "events": {},
     "links": {},
     "address": "0xcBEfF02841370997054AdfF624dC490C8cB20406",
-    "transactionHash": "0xfb795b9395b4a4cbf2356802f4a95ce7d5198b296235667a5bbe4dc13127ad46"
+    "transactionHash": "0x27e2e2d313527e16c6c4aa42840f4baa64ed035cfab30b168c396c106b4ae829"
   },
   "build/contracts/ValorERC20BridgeProxyContract.json": {
     "events": {},

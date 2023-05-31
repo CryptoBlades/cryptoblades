@@ -2731,11 +2731,117 @@
         ],
         "name": "TokenPairSwapped",
         "type": "event"
+      },
+      "0x5e73bf7947b51fc5124c72cbb62669be4669fa7ad3b4f5880c6a87a893c8fad4": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "ERC20Withdrawal",
+        "type": "event"
+      },
+      "0x56144805ada1018caa92a6d9cc78f1711ccbe538d9d5b409c6abbbe15f822888": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token1",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "token1Amount",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token2",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "token2Amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "LiquiditySet",
+        "type": "event"
+      },
+      "0x7ae54f59125b2b0847935c01fa669bc96386165365bdb035b844b95f7eba3634": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token1",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "token1Amount",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token2",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "token2Amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "LiquidityTaken",
+        "type": "event"
+      },
+      "0xe9f5ad42356e378a25f22de0f2af1164d36cc4ebcfdf3711031d6c40c090b64a": {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token1",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token2",
+            "type": "address"
+          }
+        ],
+        "name": "TokenPairRemoved",
+        "type": "event"
       }
     },
     "links": {},
     "address": "0x089fFbb8B1e8233433b304d13ed190cD5E71Ee50",
-    "transactionHash": "0x96a3c89e5b877b010061094c05cbc4b92db669ea9ebb8e6b2dfbc6e4335300af"
+    "transactionHash": "0x218fe2fe97354de233e76f7fb88c85b354b16439737970ba763e9915205720e9"
   },
   "build/contracts/EquipmentManager.json": {
     "events": {
@@ -5423,7 +5529,7 @@
     },
     "links": {},
     "address": "0xf7c3D4e17aE07D88F47F1DAE5743701C2F207Bb3",
-    "transactionHash": "0xcaa641bb224a24b2f2889ef25ba749d7d04ae99079818529d5cfd222eef8599c"
+    "transactionHash": "0xee6b94dd8a20eb77cc438fdefa6be66139ee752d6408bbab99157ec296ad846e"
   },
   "build/contracts/PvpRankings.json": {
     "events": {
@@ -7248,7 +7354,7 @@
     },
     "links": {},
     "address": "0xB8E65dd86e5BCEde186d0a11f1646B348EcB514B",
-    "transactionHash": "0x383f9c985dafded8ad262b505d37e2ac1e431731ef64f91a7b4cb03ae82a8886"
+    "transactionHash": "0xb57a4233beae50d59fc2778025f1f568850794f7f67b6a5d16c2a8b1ab4fc941"
   },
   "build/contracts/Treasury.json": {
     "events": {
@@ -7361,7 +7467,7 @@
     },
     "links": {},
     "address": "0x216AC39765D920D7f86162Daf9BE1f045f321A8D",
-    "transactionHash": "0xd19c807757267f4b14b10c270119338340cf4214e0674a9f629def19d3c1597a"
+    "transactionHash": "0x5c59882bf0c5ea65fe0889f2ed239fef727a45c37abb5c50bf4b950f5901ed77"
   },
   "build/contracts/ValorERC20BridgeProxyContract.json": {
     "events": {},
