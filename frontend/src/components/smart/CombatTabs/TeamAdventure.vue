@@ -70,7 +70,7 @@
                   {{$t('combat.victory').toUpperCase()}}
                 </div>
               </div>
-              <div class="text-center enemy-img-container" v-if="selectedTargetByCharacter[c.id]">
+              <div class="text-center selected-enemy-img-container" v-if="selectedTargetByCharacter[c.id]">
                 <img class="mx-auto enemy-img" :src="getEnemyArt(selectedTargetByCharacter[c.id].power)" width="200" :alt="$t('combat.enemy')" />
               </div>
               <div>
@@ -713,6 +713,13 @@ export default Vue.extend({
   display: flex;
   align-items: center;
 }
+
+.selected-enemy-img-container {
+  height: 200px;
+  display: flex;
+  align-items: center;
+}
+
 .team-fight-btn {
   cursor: pointer;
   display: flex;
