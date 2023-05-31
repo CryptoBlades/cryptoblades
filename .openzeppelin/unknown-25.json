@@ -12726,6 +12726,538 @@
           }
         }
       }
+    },
+    "94840fc3e04ca9b01128c022f0287ca397f2f92c24fe5638a0897d2d20ea7d46": {
+      "address": "0x756039113ad5CEefB6d2C3576Ec946bfdE4Af39d",
+      "txHash": "0xf40d802cb3ab06e3a912277d4a1ce95d45685987561142192b2c478db7744619",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)62636_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "game",
+            "type": "t_contract(CryptoBlades)47866",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:58"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "characters",
+            "type": "t_contract(Characters)44242",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:59"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "weapons",
+            "type": "t_contract(Weapons)62189",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:60"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "shields",
+            "type": "t_contract(Shields)54482",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:61"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "skillToken",
+            "type": "t_contract(IERC20)68445",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:62"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "randoms",
+            "type": "t_contract(IRandoms)47974",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:63"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "pvprankings",
+            "type": "t_contract(PvpRankings)32772",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:64"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "_baseWagerUSD",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:67"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "_tierWagerUSD",
+            "type": "t_int128",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:69"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "wageringFactor",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:71"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "reRollFeePercent",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:73"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "withdrawFeePercent",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:75"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "decisionSeconds",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:77"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "arenaAccess",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:79"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "duelOffsetCost",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:81"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "pvpBotAddress",
+            "type": "t_address_payable",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:83"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "_duelQueue",
+            "type": "t_struct(UintSet)69490_storage",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:85"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "fighterByCharacter",
+            "type": "t_mapping(t_uint256,t_struct(Fighter)28651_storage)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:88"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "matchByFinder",
+            "type": "t_mapping(t_uint256,t_struct(Match)28658_storage)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:90"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "isCharacterInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:92"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "isWeaponInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:94"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "isShieldInArena",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:96"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "isDefending",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:98"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "finderByOpponent",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:100"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "previousTierByCharacter",
+            "type": "t_mapping(t_uint256,t_uint8)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:102"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "excessWagerByCharacter",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:104"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "_matchableCharactersByTier",
+            "type": "t_mapping(t_uint8,t_struct(UintSet)69490_storage)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:106"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "specialWeaponRerollTimestamp",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:108"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "_ownerByCharacter",
+            "type": "t_mapping(t_uint256,t_address)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:110"
+          },
+          {
+            "contract": "PvpCore",
+            "label": "links",
+            "type": "t_mapping(t_uint256,t_address)",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\PvpCore.sol:115"
+          }
+        ],
+        "types": {
+          "t_contract(CryptoBlades)47866": {
+            "label": "contract CryptoBlades"
+          },
+          "t_contract(Characters)44242": {
+            "label": "contract Characters"
+          },
+          "t_contract(Weapons)62189": {
+            "label": "contract Weapons"
+          },
+          "t_contract(Shields)54482": {
+            "label": "contract Shields"
+          },
+          "t_contract(IERC20)68445": {
+            "label": "contract IERC20"
+          },
+          "t_contract(IRandoms)47974": {
+            "label": "contract IRandoms"
+          },
+          "t_contract(PvpRankings)32772": {
+            "label": "contract PvpRankings"
+          },
+          "t_int128": {
+            "label": "int128"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_struct(UintSet)69490_storage": {
+            "label": "struct EnumerableSet.UintSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)69104_storage"
+              }
+            ]
+          },
+          "t_struct(Set)69104_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_mapping(t_uint256,t_struct(Fighter)28651_storage)": {
+            "label": "mapping(uint256 => struct PvpCore.Fighter)"
+          },
+          "t_struct(Fighter)28651_storage": {
+            "label": "struct PvpCore.Fighter",
+            "members": [
+              {
+                "label": "characterID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "weaponID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "shieldID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "wager",
+                "type": "t_uint256"
+              },
+              {
+                "label": "useShield",
+                "type": "t_bool"
+              }
+            ]
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_uint256,t_struct(Match)28658_storage)": {
+            "label": "mapping(uint256 => struct PvpCore.Match)"
+          },
+          "t_struct(Match)28658_storage": {
+            "label": "struct PvpCore.Match",
+            "members": [
+              {
+                "label": "attackerID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "defenderID",
+                "type": "t_uint256"
+              },
+              {
+                "label": "createdAt",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_mapping(t_uint256,t_uint8)": {
+            "label": "mapping(uint256 => uint8)"
+          },
+          "t_mapping(t_uint8,t_struct(UintSet)69490_storage)": {
+            "label": "mapping(uint8 => struct EnumerableSet.UintSet)"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)62636_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_struct(RoleData)62636_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)66439_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)66439_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)66174_storage"
+              }
+            ]
+          },
+          "t_struct(Set)66174_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "d2d37f329829438c8f3733df0695ca9d9e9fd0086d95dfb449fab13a72001653": {
+      "address": "0xa25aEbFC263290f70a2538a63E0C41978348A24f",
+      "txHash": "0x817afddee5ee8563b2a47c84fe45ad37e3e301d1d84ef8ad7a0f0f465aca0486",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:25"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\proxy\\Initializable.sol:30"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "_roles",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)62636_storage)",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:61"
+          },
+          {
+            "contract": "AccessControlUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "..\\@openzeppelin\\contracts-upgradeable\\access\\AccessControlUpgradeable.sol:225"
+          },
+          {
+            "contract": "TokensManager",
+            "label": "game",
+            "type": "t_contract(CryptoBlades)47866",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\TokensManager.sol:14"
+          },
+          {
+            "contract": "TokensManager",
+            "label": "combatTokenChargePercent",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\TokensManager.sol:16"
+          },
+          {
+            "contract": "TokensManager",
+            "label": "tokenPrice",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\TokensManager.sol:18"
+          },
+          {
+            "contract": "TokensManager",
+            "label": "skillTokenPrice",
+            "type": "t_uint256",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\TokensManager.sol:19"
+          },
+          {
+            "contract": "TokensManager",
+            "label": "offsetSlippage",
+            "type": "t_uint8",
+            "src": "..\\..\\..\\..\\E\\Project\\Riveted Technologies\\cryptoblades\\contracts\\TokensManager.sol:20"
+          }
+        ],
+        "types": {
+          "t_contract(CryptoBlades)47866": {
+            "label": "contract CryptoBlades"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)62636_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)"
+          },
+          "t_bytes32": {
+            "label": "bytes32"
+          },
+          "t_struct(RoleData)62636_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_struct(AddressSet)66439_storage"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32"
+              }
+            ]
+          },
+          "t_struct(AddressSet)66439_storage": {
+            "label": "struct EnumerableSetUpgradeable.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)66174_storage"
+              }
+            ]
+          },
+          "t_struct(Set)66174_storage": {
+            "label": "struct EnumerableSetUpgradeable.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)"
+              }
+            ]
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
     }
   }
 }
