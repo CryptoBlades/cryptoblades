@@ -179,19 +179,19 @@ h5{
 
 
 .play-to-earn .adventures{
-  background-image: url('../assets/bg-orc.png');
+  background-image: url('../assets/second-anniversary/bg-orc.gif');
   background-position:center ;
   background-size: cover;
 }
 
 .play-to-earn .raid{
-  background-image: url('../assets/bg-demon.png');
+  background-image: url('../assets/second-anniversary/bg-demon.gif');
   background-position:center ;
   background-size: cover;
 }
 
 .play-to-earn .arena{
-  background-image: url('../assets/bg-arena.png');
+  background-image: url('../assets/second-anniversary/bg-arena.gif');
   background-position:center ;
   background-size: cover;
 }
