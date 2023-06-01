@@ -53,6 +53,9 @@ module.exports = async function (deployer, network, accounts) {
       }
       else if(network === 'metermainnet') {
         await tokensManager.setTokenPrice(66);
+      } 
+      else if(network === 'cronosmainnet') {
+        await tokensManager.setTokenPrice(skillTokenPrice);
       }
 
       await tokensManager.setSkillTokenPrice(skillTokenPrice);
