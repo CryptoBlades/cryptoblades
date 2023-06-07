@@ -154,7 +154,7 @@ import {mapActions} from 'vuex';
 import {isValidWeb3Address} from '../../../utils/common';
 
 interface StoreMappedActions {
-  startNewEvent(payload: { event: SpecialWeaponsEvent }): Promise<void>;
+  startNewEvent(payload: SpecialWeaponsEvent): Promise<void>;
 
   getActiveSpecialWeaponsEvents(): Promise<SpecialWeaponsEvent[]>;
 
@@ -352,7 +352,7 @@ export default Vue.extend({
   },
 
   methods: {
-    ...mapActions([
+    ...mapActions('specialWeaponsManager', [
       'startNewEvent',
       'getActiveSpecialWeaponsEvents',
       'setSpecialWeaponArt',
@@ -378,7 +378,7 @@ export default Vue.extend({
     async startNewSpecialWeaponsEvent() {
       this.isLoading = true;
       try {
-        await this.startNewEvent({event: this.newEvent});
+        await this.startNewEvent(this.newEvent);
         this.newEvent = {
           name: '',
           element: undefined,
