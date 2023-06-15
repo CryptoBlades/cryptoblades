@@ -24,7 +24,7 @@ module.exports = async function (deployer, network) {
   || network === 'avaxtestnet-fork'
   || network === 'auroratestnet'
   || network === 'kavatestnet'
-  || network === 'skaletestnet' || network === 'coinextestnet' || network === 'metertestnet' || network === 'opsidetestnet') {
+  || network === 'skaletestnet' || network === 'coinextestnet' || network === 'metertestnet') {
     let weapons = await upgradeProxy(Weapons.address, Weapons, { deployer });
     let promos = await upgradeProxy(Promos.address, Promos, { deployer });
     let safeRandoms = await SafeRandoms.deployed();

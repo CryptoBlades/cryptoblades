@@ -21,7 +21,7 @@ module.exports = async function (deployer, network, accounts) {
   || network === 'avaxtestnet-fork'
   || network === 'auroratestnet'
   || network === 'kavatestnet'
-  || network === 'skaletestnet' || network === 'coinextestnet' || network === 'metertestnet' || network === 'opsidetestnet') {
+  || network === 'skaletestnet' || network === 'coinextestnet' || network === 'metertestnet') {
     const pickableTier = 20;
     const walletTier = 30;
 
