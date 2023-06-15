@@ -422,8 +422,4 @@ export default Vue.extend({
 ::v-deep .modal-footer-margin {
   margin-bottom: 3rem;
 }
-
-.single-dust-display {
-    width: 100%;
-  }
 </style>

@@ -307,7 +307,7 @@ module.exports = {
       network_id: 52,
       gasPrice: 0,
       timeoutBlocks: 200,
-      skipDryRun: true
+      skipDryRun: true,
     },
     metertestnet: {
       provider: () => new HDWalletProvider(hdWalletProviderOptions(
@@ -354,6 +354,18 @@ module.exports = {
         }
       )),
       network_id: 25,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
+    opsidetestnet: {
+      provider: () => new HDWalletProvider(hdWalletProviderOptions(
+        process.env.OPSIDE_TESTNET_PRIVATE_KEY,
+        process.env.OPSIDE_TESTNET_WALLET_MNEMONIC,
+        {
+          providerOrUrl: 'https://pre-alpha-zkrollup-rpc.opside.network/cb-zkevm'
+        }
+      )),
+      network_id: 12010,
       timeoutBlocks: 200,
       skipDryRun: true
     }
