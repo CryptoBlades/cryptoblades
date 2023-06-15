@@ -33,6 +33,9 @@ module.exports = async function (deployer, network, accounts) {
 	}
 	else if(network === 'metertestnet' || network === 'metermainnet') {
 		await storage.setLocalChainPrefix('METER');
+	} 
+	else if(network === 'opsidetestnet') {
+		await storage.setLocalChainPrefix("OPSIDE");
 	}
 	else {
 		throw 'cant find prefix to set'; // we can't have the prefix empty; break the migration

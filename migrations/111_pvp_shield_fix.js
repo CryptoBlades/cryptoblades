@@ -20,7 +20,7 @@ module.exports = async function (deployer, network, accounts) {
     || network === 'avaxtestnet-fork'
     || network === 'auroratestnet'
     || network === 'kavatestnet'
-    || network === 'skaletestnet' || network === 'coinextestnet' || network === 'metertestnet') {
+    || network === 'skaletestnet' || network === 'coinextestnet' || network === 'metertestnet' || network === 'opsidetestnet') {
         await upgradeProxy(PvpArena.address, PvpArena, { deployer });
     }
     await upgradeProxy(Shields.address, Shields, { deployer });
