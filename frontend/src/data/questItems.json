@@ -119,6 +119,12 @@
       "description": "SKILL is the native token of the CryptoBlades ecosystem, used for crafting character and weapon NFTs, trading on our NFT marketplace, utilizing our Bridge, or even purchasing merchandise. As CryptoBlades continues to grow in product offerings, SKILL token will grow with it!",
       "image": "SKILL.png",
       "website": "https://www.cryptoblades.io/"
+    },
+    "0x5C7F8A570d578ED84E63fdFA7b1eE72dEae1AE23": {
+      "name": "WCRO (Wrapped CRO)",
+      "description": "This is the Wrapped version of $CRO. Cronos (CRO) is the native cryptocurrency token of Cronos Chain — a decentralized, open-source blockchain developed by the Crypto.com payment, trading and financial services company. Cronos Chain is one of the products in Crypto.com’s lineup of solutions designed to accelerate the global adoption of cryptocurrencies as a means of increasing personal control over money, safeguarding user data and protecting users’ identities. The CRO blockchain serves primarily as a vehicle that powers the Crypto.com Pay mobile payments app.",
+      "image": "WCRO.png",
+      "website": "https://cronos.org/"
     }
   }
 }
