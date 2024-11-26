@@ -354,6 +354,9 @@ contract CryptoBlades is Initializable, AccessControlUpgradeable {
             tokens = 0;
             xp = 0;
         }
+        else if (vars[VAR_FIGHT_FLAT_IGO_BONUS] > 0) {
+            _giveInGameOnlyFundsFromContractBalance(fighter, vars[VAR_FIGHT_FLAT_IGO_BONUS] * fightMultiplier);
+        }
 
         if(characterVersion > 0) {
             userVars[fighter][USERVAR_GEN2_UNCLAIMED] += tokens;
